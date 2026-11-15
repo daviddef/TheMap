@@ -1375,22 +1375,34 @@ select.lk-input{width:auto;padding:4px 8px}
     const places = [], pidx = new Map(), occs = [], oidx = new Map();
     const P = s => { if (!s) return -1; if (!pidx.has(s)) { pidx.set(s, places.length); places.push(s); } return pidx.get(s); };
     const O = s => { if (!s) return -1; if (!oidx.has(s)) { oidx.set(s, occs.length); occs.push(s); } return oidx.get(s); };
-    const src = (tree && tree.people) || [];
+    const drawn = (tree && tree.people) || [];
+    /* People the Roots & Routes maps cannot draw (no place, or no year) still have names, dates and relatives, and the canvas needs no place: they are searchable and
+       draw as cards here (fl bit 64 says so). Only people the page handed over with their details (not a hidden living person, who carries nothing). */
+    const und = ((tree && tree.undrawn) || []).filter(u => u && (u.given !== undefined || u.sur !== undefined)).map(u => ({
+      id: u.id, sex: u.sex || 'u', given: u.given || '', sur: u.sur || '', by: u.by == null ? null : u.by, bp: u.place || null, dy: u.dy == null ? null : u.dy, dp: null,
+      father: u.father, mother: u.mother, spouse: u.spouse || [], kids: u.kids || [], occ: u.occ || null, bye: !!u.bye, dye: !!u.dye, bpe: false, unplaced: 1, hid: 0 }));
+    const src = drawn.concat(und);
+    /* a drawn person's own father, mother and spouse fields stop at the people the page could draw: put back the ones that point to a person only this canvas draws */
+    const extraF = new Map(), extraM = new Map(), extraS = new Map();
+    und.forEach(u => {
+      (u.kids || []).forEach(k => { if (u.sex === 'm') extraF.set(k, u.id); else if (u.sex === 'f') extraM.set(k, u.id); });
+      (u.spouse || []).forEach(sp => { if (!extraS.has(sp)) extraS.set(sp, []); extraS.get(sp).push(u.id); });
+    });
     const gidx = new Map(); src.forEach((p, i) => gidx.set(p.id, i));
     const g = ref => (ref != null && gidx.has(ref)) ? gidx.get(ref) : -1;
     const rows = src.map(p => {
       const hid = !!p.hid;
-      const fl = (p.bye ? 1 : 0) | (p.dye ? 2 : 0) | (p.bpe ? 4 : 0) | (hid ? 8 : 0) | (p.mye ? 16 : 0) | (hid ? 1 : 0);
+      const fl = (p.bye ? 1 : 0) | (p.dye ? 2 : 0) | (p.bpe ? 4 : 0) | (hid ? 8 : 0) | (p.mye ? 16 : 0) | (hid ? 1 : 0) | (p.unplaced ? 64 : 0);
       return [
         0, p.id, p.sex || 'u', hid ? '' : (p.given || ''), p.sur || '',
         p.by == null ? null : p.by, P(hid ? null : p.bp), hid ? null : (p.dy == null ? null : p.dy), P(hid ? null : p.dp),
-        g(p.father), g(p.mother), -1, -1,
-        (p.spouse || []).map(g).filter(x => x >= 0), (p.kids || []).map(g).filter(x => x >= 0),
+        g(p.father != null ? p.father : (p.unplaced ? null : extraF.get(p.id))), g(p.mother != null ? p.mother : (p.unplaced ? null : extraM.get(p.id))), -1, -1,
+        [...new Set([...(p.spouse || []), ...(p.unplaced ? [] : (extraS.get(p.id) || []))])].map(g).filter(x => x >= 0), (p.kids || []).map(g).filter(x => x >= 0),
         '', O(hid ? null : p.occ), fl, 0, 0, hid ? 0 : (p.my || 0),
       ];
     });
     /* the Atlas's own place records the page already carries: id, country, and the flag each era flew. Only the places this tree uses. */
-    const used = new Set(); src.forEach(p => { if (p.bp && !p.hid) used.add(p.bp); if (!p.hid && p.dp) used.add(p.dp); });
+    const used = new Set(); src.forEach(p => { if (p.unplaced) return; if (p.bp && !p.hid) used.add(p.bp); if (!p.hid && p.dp) used.add(p.dp); });
     const flags = [], fidx = new Map();
     const A = atlas || {};
     const F = li => {
@@ -2562,6 +2574,7 @@ function personPanel() {
       <p class="plines lvn">No parents or children are drawn for a name like this: the archive joins people to each other only from a record of their own.</p>` : ''}
     ${p.living ? `<p class="plines lvn">This person is living, so their archive records them by <strong>name and family only</strong> — no dates, no places, no records. Nothing is missing from the research.</p>` : ''}
     <p class="plines"${p.living || p.ghost ? ' hidden' : ''}>${p.bp ? (() => { const pl = TC.placeAt(M, p, p.bp, p.by); return 'Born: ' + flagHTML(pl, p.by, flagTip(pl, p.by, 'Born at'), true) + placeLinkHTML(pl) + eraNote(pl) + (p.fl & 4 ? ' <small>(place taken from a relative)</small>' : ''); })() : 'Birthplace not recorded.'}${p.dp && p.dp !== p.bp ? (() => { const pl = TC.placeAt(M, p, p.dp, p.dy); return '<br>Died: ' + flagHTML(pl, p.dy, flagTip(pl, p.dy, 'Died at'), true) + placeLinkHTML(pl) + eraNote(pl); })() : (p.dy != null ? '<br>Death place: same as birth, or not recorded.' : '')}</p>
+    ${(p.fl & 64) ? `<p class="plines"><small>Not on the Roots &amp; Routes maps: ${p.bp ? 'the Atlas could not place “' + esc(p.bp) + '”, and no relative has a place it could use' : 'the file gives no birth place, and no relative has one'}${p.by == null ? ', and there is no year to place them in' : ''}. They are here because the canvas does not need a place.</small></p>` : ''}
     ${(p.fl & 3) ? `<p style="color:var(--lk-mute)"><small>~ marks a year the archive itself estimates.</small></p>` : ''}
     <div class="row">
       ${p.living || p.ghost ? '' : `<button class="lk-btn is-small is-primary" data-do="next">Where to from here</button>`}

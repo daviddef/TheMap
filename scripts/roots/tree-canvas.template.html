@@ -456,6 +456,12 @@ a.pill.ac{text-decoration:none;cursor:pointer}a.pill.ac:hover,a.pill.ac:focus-vi
 .lk-input{width:100%;box-sizing:border-box;font:inherit;font-size:12.5px;padding:7px 10px;border:2px solid var(--lk-ink);border-radius:10px;background:var(--lk-card);color:var(--lk-ink)}
 select.lk-input{width:auto;padding:4px 8px}
 #info a.lk-btn{text-decoration:none;display:inline-flex;align-items:center}
+/* the whole fix list when nobody is selected */
+#info .fxk{margin:8px 0;border-top:1px solid var(--lk-line,rgba(0,0,0,.12));padding-top:6px}
+#info .fxk summary{cursor:pointer;display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:2px 0}
+#info .fxk summary span{font-weight:800;color:var(--lk-soft)}
+#info .fxp{font-size:12.5px;margin:10px 0 3px;color:var(--lk-soft)}
+#info .fxp a{color:var(--lk-ink);font-weight:700}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -2229,6 +2235,33 @@ function fixIssueHTML(it) {
     <div class="fxh">${esc(it.head)}</div>${it.why ? `<div class="fxw">${esc(it.why)}</div>` : ''}
     <div class="fxn"><b>How to fix it</b> ${esc(it.next || it.how || 'Check this against your sources, then correct it in your own tree.')}</div>${info ? `<ul class="fxl">${info}</ul>` : ''}</div>`;
 }
+/* the whole list, for when nobody is selected: the same issues the cards' "!" marks come from, grouped by kind, each with the people it touches (a click drops them on the canvas) */
+const FIX_SHOW = 25;
+function fixGroups(F) {
+  if (F._g) return F._g;
+  const kinds = new Map();
+  for (const id of Object.keys(F.byId || {})) {
+    for (const it of F.byId[id]) {
+      let K = kinds.get(it.k); if (!K) kinds.set(it.k, K = { t: it.t, items: new Map(), n: 0 });
+      const key = it.head + '|' + (it.ev || '') + '|' + (it.date || ''); let I = K.items.get(key);
+      if (!I) { K.items.set(key, I = { it, ids: [] }); K.n++; }
+      I.ids.push(id);
+    }
+  }
+  return F._g = [...kinds.values()].sort((a, b) => b.n - a.n);
+}
+function fixAllHTML(F) {
+  const nm = id => { const q = M.byKey.get('you:' + id); return q ? q : null; };
+  return fixGroups(F).map((K, gi) => {
+    const items = [...K.items.values()].slice(0, FIX_SHOW).map(I => {
+      const ppl = I.ids.map(nm).filter(Boolean);
+      const chips = ppl.slice(0, 6).map(q => `<a href="#" data-focus="${esc(q.key)}">${esc(q.name || 'Living person')}</a>`).join(', ');
+      return (ppl.length ? `<div class="fxp">${chips}${ppl.length > 6 ? ' and ' + (ppl.length - 6) + ' more' : ''}</div>` : '') + fixIssueHTML(I.it);
+    }).join('');
+    const more = K.n > FIX_SHOW ? `<p class="plines fxs">${(K.n - FIX_SHOW).toLocaleString()} more of this kind: the Roots &amp; Routes page lists every one.</p>` : '';
+    return `<details class="fxk"${gi === 0 ? ' open' : ''}><summary><b>${esc(K.t)}</b> <span>${K.n.toLocaleString()}</span></summary>${items}${more}</details>`;
+  }).join('');
+}
 function fixPanel() {
   const F = fixList();
   if (!F) return `<h3>Fix list</h3><p class="plines">The fix list is still being made from your file. It will appear here in a moment.</p>`;
@@ -2242,9 +2275,10 @@ function fixPanel() {
   const here = [...S.cards.values()].map(c => ({ c, p: personOf(c), l: fixOf(personOf(c)) })).filter(x => x.l);
   const by = new Map(); here.forEach(x => x.l.forEach(i => by.set(i.t, (by.get(i.t) || 0) + 1)));
   const sec = [...by].sort((a, b) => b[1] - a[1]).map(([t, n]) => `<li>${esc(t)} <b>${n}</b></li>`).join('');
-  return `<h3>Fix list</h3><p class="plines">Your file has <b>${F.total.toLocaleString()}</b> things to fix, touching <b>${F.people.toLocaleString()}</b> people.${S.cards.size ? ` On this canvas: <b>${here.length}</b> of ${S.cards.size} ${S.cards.size === 1 ? 'person' : 'people'}.` : ' Drop someone on the canvas to see theirs.'}</p>
+  return `<h3>Fix list</h3><p class="plines">Your file has <b>${F.total.toLocaleString()}</b> things to fix, touching <b>${F.people.toLocaleString()}</b> people.${S.cards.size ? ` On this canvas: <b>${here.length}</b> of ${S.cards.size} ${S.cards.size === 1 ? 'person' : 'people'}.` : ' Click a name below to put them on the canvas.'}</p>
     ${here.length ? `<ul class="fxl people">${here.map(x => `<li data-focus="${esc(x.p.key)}"><b>${esc(x.p.name)}</b> <span>${x.l.length} to fix &middot; ${esc([...new Set(x.l.map(i => i.t))].join(', '))}</span></li>`).join('')}</ul>` : ''}
-    ${sec ? `<h4>On this canvas, by kind</h4><ul class="fxl">${sec}</ul>` : ''}${note}`;
+    ${sec ? `<h4>On this canvas, by kind</h4><ul class="fxl">${sec}</ul>` : ''}
+    <h4>Everything on the list</h4>${fixAllHTML(F)}${note}`;
 }
 
 /* ui.js — the shelf and search, pan / zoom / drag, the side panel, pathways, themes, phone mode, start-up. */

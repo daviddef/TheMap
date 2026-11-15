@@ -1832,9 +1832,42 @@ function layoutCluster(root) {
   targets.forEach((p, c) => { if (c === root) targets.set(c, { x: root.x, y: root.y }); });
   return targets;
 }
+/* A last safety pass over EVERY card on the canvas (not only the cluster that was just laid out): two clusters laid out one after the other, or a spouse's parents
+   added after the person's own, can leave cards on top of each other. A card that overlaps a neighbour in its row moves away along the row, taking the free cards beyond it
+   along so nothing lands on the next one; a card the owner placed by hand (pinned) never moves, so the free one gives way. Rows nearly level (a card a few pixels off its
+   neighbour's row) are snapped level first. `targets` (card -> {x, y}) is edited in place and also gains the cards this pass moves. */
+function spreadOverlaps(targets) {
+  const pos = new Map(); S.cards.forEach(c => { const t = targets.get(c); pos.set(c, { x: t ? t.x : c.x, y: t ? t.y : c.y }); });
+  const cards = [...S.cards.values()], movable = c => !c.pinned && !(S.relateFrom === c.key);
+  const hit = (a, b) => { const pa = pos.get(a), pb = pos.get(b); return Math.abs(pa.x - pb.x) < W + 10 && Math.abs(pa.y - pb.y) < H - 6; };
+  for (let pass = 0; pass < 40; pass++) {
+    let moved = false;
+    for (let i = 0; i < cards.length && !moved; i++) for (let j = i + 1; j < cards.length && !moved; j++) {
+      const a = cards[i], b = cards[j]; if (!hit(a, b)) continue;
+      let L = pos.get(a).x <= pos.get(b).x ? a : b, R = L === a ? b : a;
+      const pl = pos.get(L), pr = pos.get(R);
+      if (Math.abs(pl.y - pr.y) < H * 0.35 && (movable(L) || movable(R))) { const stay = movable(R) ? L : R, mv = stay === L ? R : L; pos.get(mv).y = pos.get(stay).y; }   // level the row
+      const need = pl.x + W + GX - pr.x;
+      if (need <= 0.5) continue;
+      if (movable(R)) {
+        const row = pos.get(R).y;
+        cards.forEach(c => { if (movable(c) && Math.abs(pos.get(c).y - row) < H * 0.6 && pos.get(c).x >= pr.x - 0.5) pos.get(c).x += need; });
+        moved = true;
+      } else if (movable(L)) {
+        const row = pos.get(L).y;
+        cards.forEach(c => { if (movable(c) && Math.abs(pos.get(c).y - row) < H * 0.6 && pos.get(c).x <= pl.x + 0.5) pos.get(c).x -= need; });
+        moved = true;
+      }
+    }
+    if (!moved) break;
+  }
+  pos.forEach((p, c) => { if (Math.abs(p.x - c.x) > 0.5 || Math.abs(p.y - c.y) > 0.5 || targets.has(c)) targets.set(c, { x: p.x, y: p.y }); });
+  return targets;
+}
 async function relayout(c, ms) {
   const r = rootOf(c) || c;
   const t = layoutCluster(r);
+  spreadOverlaps(t);
   return tweenTo(t, ms);
 }
 

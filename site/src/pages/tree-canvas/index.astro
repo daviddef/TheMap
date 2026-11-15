@@ -1,0 +1,27 @@
+---
+/* The Tree Canvas on its own: recordatlas.org/tree-canvas/. The same canvas that is the first tab of Roots & Routes, with "brought to you by Record
+   Atlas" in its title and an "Open GEDCOM" button on the right. It is not the Base layout (which carries a counter, an ad slot and Google Fonts) for
+   the same reason /roots/ is not: the file never leaves the device, and the meta CSP below is the browser enforcing that. The page around the
+   canvas (public/tree-canvas/app.js) reads the file with the roots page's own reader (public/roots/js/worker.js) and hands the tree to the canvas
+   in memory, as /roots/ does; nothing is stored. */
+---
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; frame-src 'self'; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<title>Tree Canvas · Record Atlas</title>
+<meta name="description" content="Draw your family tree from a GEDCOM file on one canvas, with the Record Atlas's places, rulers and record collections for each person. Read in your browser, never uploaded.">
+<link rel="icon" href="/favicon.svg">
+<link rel="stylesheet" href="/tree-canvas/page.css">
+</head>
+<body>
+<iframe id="cv" title="Tree Canvas, drawn from your GEDCOM"></iframe>
+<p id="msg" role="status" aria-live="polite">Starting…</p>
+<noscript><p class="nojs">The Tree Canvas needs JavaScript to read your file in this browser. Nothing is uploaded. <a href="/">Back to Record Atlas</a></p></noscript>
+<script is:inline src="/tree-canvas/app.js" type="module"></script>
+</body>
+</html>

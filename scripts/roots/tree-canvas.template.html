@@ -1433,7 +1433,9 @@ function sealShape(lv, col) {
 /* the flag in force at a place in a year, from the Record Atlas's flag drawings (drawn once in a hidden sprite, used by reference) */
 function flagHTML(pl, year, tip, link) {
   if (!pl || pl.fi < 0) return '';
-  const f = M.flags[pl.fi], vb = (f[1] || '0 0 3 2').split(/\s+/).map(Number), w = Math.round(11 * (vb[2] / vb[3]) * 10) / 10;
+  const f = M.flags[pl.fi];
+  if (!f || !f[2]) return '';   // the drawing did not load (offline, or a missing file): no empty box
+  const vb = (f[1] || '0 0 3 2').split(/\s+/).map(Number), w = Math.round(11 * (vb[2] / vb[3]) * 10) / 10;
   const svg = `<svg class="fl" viewBox="${f[1]}" style="width:${w}px" role="img" aria-label="${esc(tip)}"><title>${esc(tip)}</title><use href="#fl${pl.fi}"/></svg>`;
   if (!link) return svg;
   const parts = String(f[0]).split('--');   /* the Flag Atlas page for this flag, at the era shown (the same address the Roots & Routes viewer uses) */

@@ -385,6 +385,15 @@ button{font-family:inherit}
 .nx-layer{margin:8px 0 12px}
 .nx-lh{margin:0}
 .acc{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;padding:1px 6px;border-radius:9px;color:var(--c);border:1px solid var(--c);margin-right:4px;vertical-align:1px;white-space:nowrap}
+/* standalone (recordatlas.org/tree-canvas/): the credit in the title is a link, and the two extra buttons wrap rather than run off a phone */
+.logo small a{pointer-events:auto;color:inherit;text-decoration:underline;text-underline-offset:2px}
+.top .lk-btn{align-self:center;white-space:nowrap}
+#bLiv[aria-pressed="true"]{background:var(--lk-accent);border-color:var(--lk-accent);color:#fff}
+.ph .top{flex-wrap:wrap;justify-content:flex-end;max-width:calc(100vw - 16px);row-gap:10px}
+.ph .top::after{content:"";order:4;flex:0 0 100%;height:0}   /* a line break before the extras */
+.ph .top .lk-btn{order:5}   /* the two extra buttons take their own row under the icons */
+.ph.sa #rz{top:106px}
+.ph .logo small.by{display:block;margin:4px 0 0;width:max-content}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -1271,6 +1280,9 @@ const TC = window.TC;
 /* EMBED: the page lives inside the Atlas's Roots & Routes page and draws the visitor's own tree, handed over in memory (window.parent.RR). Nothing is
    stored: the roots page promises the file is kept only if its owner ticks the box, so the canvas does not write its layout to localStorage. */
 const EMBED = !!window.TC_EMBED;
+/* Standalone: the same canvas, opened on its own at recordatlas.org/tree-canvas/ (the page around it reads the GEDCOM and hands the tree in).
+   Only the title and two buttons differ; ?sa=1 turns it on, &liv=1 says living people are hidden, &ex=1 says the tree is the invented example. */
+const QS = new URLSearchParams(location.search), SA = EMBED && QS.has('sa');
 const CORPUS = EMBED ? window.TCF.corpus(window.parent.RR.tree, window.parent.RR.atlas) : JSON.parse(document.getElementById('corpus').textContent);
 const M = TC.build(CORPUS);
 const NA = M.archives.length;
@@ -2453,7 +2465,29 @@ function wireToolbar() {
   $('#zOut').onclick = () => zoomAt(0.8, innerWidth / 2, innerHeight / 2);
   $('#mini').onclick = e => { const m = $('#mini')._m; if (!m) return; const r = $('#mini').getBoundingClientRect(); const wx = (e.clientX - r.left - m.ox) / m.s, wy = (e.clientY - r.top - m.oy) / m.s; animateView({ x: innerWidth / 2 - wx * S.view.k, y: innerHeight / 2 - wy * S.view.k, k: S.view.k }, 400); };
   $('#exDemo').onclick = demo; if (EMBED) $('#exDemo').parentElement.style.display = 'none';
+  if (SA) {
+    /* left title: who made it; right: open a file. Both talk to the page around the canvas, which owns the file reader. */
+    document.documentElement.classList.add('sa');
+    const by = document.querySelector('.logo small'); by.className = 'by';
+    by.innerHTML = 'brought to you by <a href="/" target="_top" rel="noopener">Record Atlas</a>';
+    $('.top').insertAdjacentHTML('afterbegin',
+      '<button class="lk-btn is-small" id="bLiv" type="button" title="Hide the names of people who may be alive" aria-pressed="' + (QS.get('liv') === '1') + '">Hide living people</button>' +
+      '<button class="lk-btn is-primary" id="bOpen" type="button" title="Open a GEDCOM file from this device. It is read in this browser and not uploaded.">Open GEDCOM</button>' +
+      '<input type="file" id="gedIn" accept=".ged,.gedcom,.txt,text/plain" hidden>');
+    const send = async f => {
+      if (!f) return;
+      if (f.size > 400e6) return toast('That file is over 400 MB, more than this page can hold in memory.', 4000);
+      const bytes = await f.arrayBuffer();
+      parent.postMessage({ tcOpen: { bytes, name: f.name } }, location.origin, [bytes]);
+    };
+    $('#bOpen').onclick = () => $('#gedIn').click();
+    $('#gedIn').onchange = e => { send(e.target.files[0]); e.target.value = ''; };
+    $('#bLiv').onclick = () => parent.postMessage({ tcLiving: $('#bLiv').getAttribute('aria-pressed') !== 'true' }, location.origin);
+    for (const ev of ['dragenter', 'dragover']) document.addEventListener(ev, e => e.preventDefault());
+    document.addEventListener('drop', e => { e.preventDefault(); send(e.dataTransfer && e.dataTransfer.files[0]); });
+  }
   if (EMBED) { const h = $('#hint'); h.firstChild.textContent = 'Search anyone in your tree, and drop them here '; const sm = h.querySelector('small'); if (sm) sm.innerHTML = 'Pull up their parents, all the way back, one generation at a time.<br>Click anyone, then "Where to from here" for the order to look for their records.'; }   // the example people are in the eight archives, not in a visitor's own file
+  if (SA && QS.get('ex') === '1') { const h = $('#hint'); h.firstChild.textContent = 'This is an invented example family. '; const sm = h.querySelector('small'); if (sm) sm.innerHTML = 'Press "Open GEDCOM" (top right) to draw your own tree: it is read in this browser and never uploaded.<br>Search anyone, drop them here, then click them and choose "Where to from here".'; }
   addEventListener('keydown', e => {
     const typing = /INPUT|TEXTAREA/.test(document.activeElement.tagName);
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z' && !typing) { e.preventDefault(); undo(); }

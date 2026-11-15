@@ -3,6 +3,7 @@
    people". The tree goes to the canvas in memory (window.RR, which canvas.html reads from its parent); nothing is stored and nothing is sent anywhere
    but the static Atlas files the reader fetches for the places the tree names (the same files, and the same note about the server log, as /roots/). */
 import { makeSample } from '/roots/js/sample.js';
+import { issuesByPerson } from '/roots/js/checklist.js';
 
 const $ = s => document.querySelector(s);
 const base = new URL('/roots/', location.href).href;   // the reader fetches its place files relative to this, as it does on /roots/
@@ -25,11 +26,17 @@ function start(bytes) {
   worker.onmessage = e => {
     const m = e.data;
     if (m.type === 'progress') say(m.msg + '…');
+    else if (m.type === 'checklist') {
+      if (!window.RR) return;
+      try { window.RR.fix = issuesByPerson(m); } catch (e) { window.RR.fix = null; }
+      const f = $('#cv'); if (f && f.contentWindow) f.contentWindow.postMessage({ tcFix: 1 }, location.origin);
+    }
     else if (m.type === 'error') say('Sorry, that file could not be read: ' + m.msg, true);
     else if (m.type === 'done') {
       if (m.first && hide) { say('Hiding living people…'); worker.postMessage({ cmd: 'living', hide: true }); return; }   // keep the choice for the next file
       window.RR = { tree: m.tree, atlas: m.atlas };
       say(''); mount();
+      worker.postMessage({ cmd: 'checklist', living: !hide, ancestry: 'com' });   // the fix list, for the "!" marks; it follows a moment after the canvas is drawn
     }
   };
   worker.onerror = e => say('The reader crashed: ' + (e.message || 'unknown error'), true);

@@ -233,3 +233,23 @@ export function checklistCsv(c) {
   }
   return rows.map(r => r.map(cell).join(',')).join('\r\n') + '\r\n';
 }
+
+/* The fix list turned round: who is in it. { byId: { personId: [issue] }, total, people }. An issue is one row of the list as plain parts (describe() above),
+   with the section's title, the group it sits in and, where the row names the person's own event, which one. This is for the Tree Canvas, which draws a
+   "!" on a card and lists these in a tab. The long place rows only name a sample of their people (see SAMPLE), so a person past the sample is not marked;
+   the list itself, and the spreadsheet, hold every one. */
+export function issuesByPerson(c) {
+  const byId = Object.create(null); let total = 0;
+  for (const s of (c && c.sections) || []) {
+    const g = (c.groups || GROUPS).find(x => x.sections.includes(s.key));
+    for (const i of s.items) {
+      const d = describe(s, i); total++;
+      const base = { k: s.key, t: s.title, g: g ? g.key : 'other', gt: g ? g.title : '', how: s.how || (g && g.how) || '', head: d.head, why: d.why, next: d.next, info: d.info, more: d.people };
+      const add = (id, ev, date) => { if (id == null) return; const k = String(id); (byId[k] = byId[k] || []).push({ ...base, ev: ev || '', date: date || '' }); };
+      if (s.key === 'dupes') { add(i.a); add(i.b); }
+      else if (Array.isArray(i.people)) { const seen = new Set(); for (const x of i.people) if (!seen.has(x.id)) { seen.add(x.id); add(x.id, x.ev, x.date); } }
+      else add(i.id);
+    }
+  }
+  return { byId, total, people: Object.keys(byId).length };
+}

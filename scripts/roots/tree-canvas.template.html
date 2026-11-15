@@ -396,6 +396,21 @@ button{font-family:inherit}
 .ph .top::after{content:"";order:4;flex:0 0 100%;height:0}   /* a line break before the extras */
 .ph .top .lk-btn{order:5}   /* the two extra buttons take their own row under the icons */
 .ph.sa #rz{top:106px}
+/* a spouse the archive names but holds no record for: a dashed, quieter card (the marriage mark joins it to the person who names her or him) */
+.card.ghost .cb{border-style:dashed;opacity:.9}
+.card.ghost .cb .yr{font-style:italic}
+
+/* the fix list: a "!" on a card, and the tab */
+.card .fxb{position:absolute;left:-9px;top:-10px;z-index:3;width:21px;height:21px;border-radius:50%;border:2px solid var(--lk-card);background:#d24b1f;color:#fff;font:900 13px/1 Nunito,system-ui;padding:0;cursor:pointer;display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.card .fxb:hover,.card .fxb:focus-visible{transform:scale(1.15)}
+b.fxb.on{display:inline-grid;width:17px;height:17px;border-radius:50%;background:#d24b1f;color:#fff;font:900 11px/1 Nunito,system-ui;place-items:center;vertical-align:-3px}
+.fxi{margin:8px 0;padding:8px 10px;border-radius:10px;background:var(--lk-accent-soft);border-left:4px solid #d24b1f}
+.fxt{font:900 10.5px/1.3 Nunito,system-ui;text-transform:uppercase;letter-spacing:.05em;color:var(--lk-soft)}.fxt span{text-transform:none;letter-spacing:0}
+.fxh{font-weight:800;margin:2px 0;overflow-wrap:anywhere}.fxw{color:var(--lk-soft);font-weight:700}
+.fxn{margin-top:4px}.fxn b{color:#d24b1f}
+.fxl{margin:6px 0 0;padding-left:16px}.fxl.people{padding-left:0;list-style:none}.fxl.people li{cursor:pointer;padding:5px 4px;border-bottom:1px dashed var(--lk-faint)}.fxl.people li span{display:block;color:var(--lk-soft);font-weight:700;font-size:11.5px}
+.fxs{font-size:11.5px;color:var(--lk-soft)}
+#info .ih{overflow-x:auto;scrollbar-width:none}#info .ih .lk-tab{flex:none;white-space:nowrap}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -574,7 +589,7 @@ button{font-family:inherit}
         i, a: r[0], id: r[1], key: a.k + ':' + r[1], sex: r[2], given: r[3], sur: r[4], by: r[5],
         bp: r[6] >= 0 ? corpus.places[r[6]] : '', dy: r[7], dp: r[8] >= 0 ? corpus.places[r[8]] : '',
         f: r[9], m: r[10], fg: r[11], mg: r[12], sp: r[13].slice(), kids: r[14], page: r[15],
-        occ: r[16] >= 0 ? (corpus.occs || [])[r[16]] : '', fl: r[17], living: !!(r[17] & 8), surAlso: Array.isArray(r[18]) ? r[18] : [], ch: [],
+        occ: r[16] >= 0 ? (corpus.occs || [])[r[16]] : '', fl: r[17], living: !!(r[17] & 8), ghost: !!(r[17] & 32), how: typeof r[21] === 'string' ? r[21] : '', surAlso: Array.isArray(r[18]) ? r[18] : [], ch: [],
         /* 19: the stops an archive records between birth and death [[place idx, year|null, estimated]]; 20: marriage year (fl bit 16 = estimated). Absent in an older corpus. */
         route: Array.isArray(r[19]) ? r[19].map(x => ({ name: corpus.places[x[0]], year: x[1], est: !!x[2] })) : [], my: r[20] || null,
       };
@@ -929,6 +944,7 @@ button{font-family:inherit}
   /* A LIVING PERSON CARRIES NO YEARS AT ALL (fl bit 8), by the estate's living-people standard: their archive publishes them
      by name and family only. So the year line says that in words rather than drawing "?–?", which reads as a gap in research. */
   function years(p) {
+    if (p.ghost) return 'named only · no dates';
     if (p.living) return 'living · no dates';
     const b = p.by == null ? '?' : (p.fl & 1 ? '~' : '') + p.by, d = p.dy == null ? '' : (p.fl & 2 ? '~' : '') + p.dy;
     return b + (d ? '–' + d : '–?');
@@ -1407,6 +1423,10 @@ function buildFlagSprite() {
   el.innerHTML = '<svg width="0" height="0" style="position:absolute" aria-hidden="true">' + M.flags.map((f, i) => `<symbol id="fl${i}" viewBox="${f[1]}">${f[2]}</symbol>`).join('') + '</svg>';
 }
 
+/* The visitor's own fix list (EMBED only): the Roots & Routes page, or the standalone page, builds it from their file and hands it over in memory as
+   window.parent.RR.fix = { byId: { personId: [issue] }, total, people }. Nothing here is stored or sent. */
+function fixList() { if (!EMBED) return null; try { const F = window.parent.RR && window.parent.RR.fix; return F && F.byId ? F : null; } catch (e) { return null; } }
+function fixOf(p) { const F = fixList(); const l = F && p && !p.ghost ? F.byId[p.id] : null; return l && l.length ? l : null; }
 function cardInner(c) {
   const p = personOf(c), a = M.archives[p.a];
   const bpl = p.bp ? TC.placeAt(M, p, p.bp, p.by) : null, dpl = p.dp && p.dp !== p.bp ? TC.placeAt(M, p, p.dp, p.dy) : null;
@@ -1421,6 +1441,7 @@ function cardInner(c) {
   }).join('') + (brs.length > 1 ? `<button class="brc more" style="--bc:var(--lk-accent)" data-act="brs" title="${brs.length - 1} more possible matches: open the Person panel">+${brs.length - 1}</button>` : '');
   let h = `<div class="cb" title="${esc(p.name)} · ${esc(a.name)} archive${p.occ ? ' · ' + esc(p.occ) : ''} · ${esc(TC.evidenceSummary(M, p))}"><div class="nm">${esc(p.name)}</div><div class="yr">${TC.years(p)}${place}</div>
     <div class="meta"><span class="ar">${esc(a.name)}</span>${chips}<span class="seals">${seals.join('')}</span></div></div>`;
+  { const fx = fixOf(p); if (fx) h += `<button class="fxb" data-act="fixes" title="${fx.length} ${fx.length === 1 ? 'thing' : 'things'} on your fix list for ${esc(p.name)}: click to see what and how to fix it" aria-label="${fx.length} on the fix list">!</button>` ;  }
   /* ancestors */
   const parentCards = [p.f, p.m].filter(q => q >= 0 && !cardOfPerson(q));
   if (parentCards.length) {
@@ -1457,6 +1478,7 @@ function refreshCard(c) {
   const cls = ['card'];
   if (S.sel.has(c.key)) cls.push('sel');
   if (c._pop) cls.push('pop');
+  if (personOf(c).ghost) cls.push('ghost');
   if (S.path) { cls.push(S.path.nodeKeys.has(c.key) ? 'onpath' : 'dim'); if (c.key === S.path.a || c.key === S.path.b) cls.push('endpt'); }
   if (S.relateFrom === c.key) cls.push('pulse');
   c.el.className = cls.join(' ');
@@ -1944,7 +1966,7 @@ function planFor(p) {
   S.plans = S.plans || new Map();
   let st = S.plans.get(p.key); if (st) return st;
   const F = TCR.factsOf(M, p, TC.placeAt);
-  st = { state: (AT.base == null || p.living) ? 'offline' : 'loading', F, plan: null, err: '' };
+  st = { state: (AT.base == null || p.living || p.ghost) ? 'offline' : 'loading', F, plan: null, err: '' };
   S.plans.set(p.key, st);
   if (st.state === 'loading') {
     loadPlanData(F).then(data => { st.plan = TCR.plan(F, data); st.state = 'ready'; })
@@ -2009,6 +2031,7 @@ function nextPanel() {
   const keys = [...S.sel];
   if (keys.length !== 1) return `<h3>Where to from here</h3><p style="color:var(--lk-soft);font-weight:700">Select one person and this shows where to look for them next, from the Record Atlas.</p>`;
   const p = M.byKey.get(keys[0]);
+  if (p.ghost) return `<h3>Where to from here</h3><p class="plines lvn">${esc(p.name)} is named in the archive but has no record of their own yet, so there are no dates or places to plan from. Select their spouse for the order to look in.</p>`;
   if (p.living) return `<h3>Where to from here</h3><p class="plines lvn">This person is living, so their archive records them by <strong>name and family only</strong>. There are no dates or places to plan from.</p>`;
   const st = planFor(p), F = st.F, plan = st.plan;
   const head = `<h3>Where to from here</h3><p class="nx-lead"><b>${esc(p.name)}</b> <small>${TC.years(p)}</small>. The order I would work in: the most recent record first, because each one names the people for the next.</p>`;
@@ -2049,6 +2072,34 @@ async function copyPlan() {
   try { await navigator.clipboard.writeText(planText(p, st)); toast('Copied: paste it into a note or print it for the reading room'); } catch (e) { toast('Could not copy here'); }
 }
 
+/* ---------- the Fix list tab (the visitor's own file only: window.parent.RR.fix, see fixList() in core.js) ----------
+   A "!" on a card means this person is on the fix list the Roots & Routes page makes from the same file. The tab says what is wrong and how to fix it,
+   in the visitor's own tree program: the canvas never changes the file. */
+const fixUrl = u => /^https?:\/\//i.test(u) ? u : (/^\/[^/]/.test(u) ? 'https://recordatlas.org' + u : '');
+function fixIssueHTML(it) {
+  const info = (it.info || []).map(x => `<li><b>${esc(x.k)}:</b> ${esc(x.t)}${(x.l || []).map(l => { const u = fixUrl(l.u); return u ? ` <a href="${esc(u)}" target="_blank" rel="noopener">${esc(l.t)}</a>` : ''; }).join('')}</li>`).join('');
+  return `<div class="fxi"><div class="fxt">${esc(it.t)}${it.ev ? ` &middot; <span>${esc(it.ev)}${it.date ? ' ' + esc(it.date) : ''}</span>` : ''}</div>
+    <div class="fxh">${esc(it.head)}</div>${it.why ? `<div class="fxw">${esc(it.why)}</div>` : ''}
+    <div class="fxn"><b>How to fix it</b> ${esc(it.next || it.how || 'Check this against your sources, then correct it in your own tree.')}</div>${info ? `<ul class="fxl">${info}</ul>` : ''}</div>`;
+}
+function fixPanel() {
+  const F = fixList();
+  if (!F) return `<h3>Fix list</h3><p class="plines">The fix list is still being made from your file. It will appear here in a moment.</p>`;
+  const note = `<p class="plines fxs">A <b class="fxb on">!</b> on a card means that person is on the fix list the Roots &amp; Routes page makes from your file. This canvas only shows it: fix things in your own tree program, then load the file again. Long place rows name only a sample of their people here; the list and its spreadsheet hold every one.</p>`;
+  const keys = [...S.sel];
+  if (keys.length === 1) {
+    const p = M.byKey.get(keys[0]), l = fixOf(p);
+    if (!l) return `<h3>${esc(p.name)}</h3><p class="plines">${p.ghost ? 'Named in the archive only, so there is nothing to check.' : 'Nothing on the fix list for this person.'}</p>${note}`;
+    return `<h3>${esc(p.name)}</h3><p class="plines"><b>${l.length}</b> ${l.length === 1 ? 'thing' : 'things'} on the fix list for this person.</p>${l.map(fixIssueHTML).join('')}${note}`;
+  }
+  const here = [...S.cards.values()].map(c => ({ c, p: personOf(c), l: fixOf(personOf(c)) })).filter(x => x.l);
+  const by = new Map(); here.forEach(x => x.l.forEach(i => by.set(i.t, (by.get(i.t) || 0) + 1)));
+  const sec = [...by].sort((a, b) => b[1] - a[1]).map(([t, n]) => `<li>${esc(t)} <b>${n}</b></li>`).join('');
+  return `<h3>Fix list</h3><p class="plines">Your file has <b>${F.total.toLocaleString()}</b> things to fix, touching <b>${F.people.toLocaleString()}</b> people.${S.cards.size ? ` On this canvas: <b>${here.length}</b> of ${S.cards.size} ${S.cards.size === 1 ? 'person' : 'people'}.` : ' Drop someone on the canvas to see theirs.'}</p>
+    ${here.length ? `<ul class="fxl people">${here.map(x => `<li data-focus="${esc(x.p.key)}"><b>${esc(x.p.name)}</b> <span>${x.l.length} to fix &middot; ${esc([...new Set(x.l.map(i => i.t))].join(', '))}</span></li>`).join('')}</ul>` : ''}
+    ${sec ? `<h4>On this canvas, by kind</h4><ul class="fxl">${sec}</ul>` : ''}${note}`;
+}
+
 /* ui.js — the shelf and search, pan / zoom / drag, the side panel, pathways, themes, phone mode, start-up. */
 
 /* ---------------- selection ---------------- */
@@ -2056,7 +2107,7 @@ function select(keys, add) {
   if (!add) S.sel.clear();
   keys.forEach(k => S.sel.has(k) && add ? S.sel.delete(k) : S.sel.add(k));
   S.cards.forEach(c => c.el.classList.toggle('sel', S.sel.has(c.key)));
-  if (S.sel.size && S.tab !== 'path' && S.tab !== 'legend' && S.tab !== 'options' && S.tab !== 'next') S.tab = 'person';
+  if (S.sel.size && S.tab !== 'path' && S.tab !== 'legend' && S.tab !== 'options' && S.tab !== 'next' && S.tab !== 'fix') S.tab = 'person';
   if (S.sel.size && S.tab === 'path' && !S.path) S.tab = 'person';
   renderInfo(); syncButtons();
 }
@@ -2106,15 +2157,24 @@ function runSearchMarks() { document.querySelectorAll('#shelf .res').forEach(el 
   const sh = $('#shelf'); let d = null;
   sh.addEventListener('pointerdown', e => {
     const el = e.target.closest('.res'); if (!el) return;
-    d = { el, id: e.pointerId, x: e.clientX, y: e.clientY, ghost: null, touch: e.pointerType === 'touch' };
+    d = { el, id: e.pointerId, x: e.clientX, y: e.clientY, ghost: null, touch: e.pointerType === 'touch', pan: false, sl: sh.scrollLeft };
   });
+  /* the strip scrolls sideways: the wheel (a mouse's up/down turns it), and a mostly-sideways drag with a mouse; pulling a card UP or out still drops it on the canvas */
+  sh.addEventListener('wheel', e => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { sh.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false });
+  let bg = null;
+  sh.addEventListener('pointerdown', e => { if (e.pointerType === 'touch' || e.target.closest('.res')) return; bg = { id: e.pointerId, x: e.clientX, sl: sh.scrollLeft }; sh.setPointerCapture(e.pointerId); });
+  sh.addEventListener('pointermove', e => { if (bg && e.pointerId === bg.id) sh.scrollLeft = bg.sl - (e.clientX - bg.x); });
+  sh.addEventListener('pointerup', () => { bg = null; });
   window.addEventListener('pointermove', e => {
     if (!d || e.pointerId !== d.id || d.touch) return;
+    if (!d.ghost && !d.pan && Math.abs(e.clientX - d.x) > 7 && Math.abs(e.clientX - d.x) > 2 * Math.abs(e.clientY - d.y)) d.pan = true;
+    if (d.pan) { sh.scrollLeft = d.sl - (e.clientX - d.x); return; }
     if (!d.ghost && Math.hypot(e.clientX - d.x, e.clientY - d.y) > 7) { d.ghost = d.el.cloneNode(true); d.ghost.className = 'res ghost'; d.ghost.style.setProperty('--ac', d.el.style.getPropertyValue('--ac')); document.body.appendChild(d.ghost); }
     if (d.ghost) { d.ghost.style.left = e.clientX + 'px'; d.ghost.style.top = e.clientY + 'px'; const zo = rzOver(e.clientX, e.clientY); $('#rz').classList.toggle('over', zo); const over = !zo && !e.target.closest('.dock'); $('#stage').classList.toggle('dropok', over); }
   });
   window.addEventListener('pointerup', e => {
     if (!d || e.pointerId !== d.id) return;
+    if (d.pan) { d = null; return; }
     const el = d.el, ghost = d.ghost; d = null;
     $('#stage').classList.remove('dropok');
     const i = +el.dataset.i;
@@ -2202,6 +2262,7 @@ function runSearchMarks() { document.querySelectorAll('#shelf .res').forEach(el 
     else if (act === 'dn') doDown(c, false); else if (act === 'dnall') doDown(c, true);
     else if (act === 'sp') doSpouse(c);
     else if (act === 'br') doBridge(c, b.dataset.b);
+    else if (act === 'fixes') { select([c.key]); S.tab = 'fix'; S.infoOpen = true; renderInfo(); syncButtons(); }
     else if (act === 'brs') { select([c.key]); S.tab = 'person'; renderInfo(); }
     else if (act === 'rm') { snapshot(); removeCard(c); if (S.path && (S.path.nodeKeys.has(c.key))) { S.path = null; clearPathUi(); } refreshAll(); drawEdges(); hideHint(); save(); runSearchMarks(); renderInfo(); }
     else if (act === 'rel') startRelate(c.key);
@@ -2312,11 +2373,12 @@ function personPanel() {
   const brs = (M.bridgesOf.get(p.i) || []);
   return `<h3>${esc(p.name)}</h3>
     <div><span class="pill ac" style="--ac:${a.color}">${esc(a.name)} archive</span><span class="pill">${TC.years(p)}</span>${p.occ ? `<span class="pill">${esc(p.occ)}</span>` : ''}</div>
+    ${p.ghost ? `<p class="plines lvn">Named in the archive, but there is no record of their own yet: no dates, no places, no sources. ${p.how ? 'How the name is known: ' + esc(p.how) + '.' : ''}</p>` : ''}
     ${p.living ? `<p class="plines lvn">This person is living, so their archive records them by <strong>name and family only</strong> — no dates, no places, no records. Nothing is missing from the research.</p>` : ''}
-    <p class="plines"${p.living ? ' hidden' : ''}>${p.bp ? (() => { const pl = TC.placeAt(M, p, p.bp, p.by); return 'Born: ' + flagHTML(pl, p.by, flagTip(pl, p.by, 'Born at'), true) + placeLinkHTML(pl) + (pl.cn ? ' <small>' + esc(pl.cn) + '</small>' : '') + (p.fl & 4 ? ' <small>(place taken from a relative)</small>' : ''); })() : 'Birthplace not recorded.'}${p.dp && p.dp !== p.bp ? (() => { const pl = TC.placeAt(M, p, p.dp, p.dy); return '<br>Died: ' + flagHTML(pl, p.dy, flagTip(pl, p.dy, 'Died at'), true) + placeLinkHTML(pl) + (pl.cn ? ' <small>' + esc(pl.cn) + '</small>' : ''); })() : (p.dy != null ? '<br>Death place: same as birth, or not recorded.' : '')}</p>
+    <p class="plines"${p.living || p.ghost ? ' hidden' : ''}>${p.bp ? (() => { const pl = TC.placeAt(M, p, p.bp, p.by); return 'Born: ' + flagHTML(pl, p.by, flagTip(pl, p.by, 'Born at'), true) + placeLinkHTML(pl) + (pl.cn ? ' <small>' + esc(pl.cn) + '</small>' : '') + (p.fl & 4 ? ' <small>(place taken from a relative)</small>' : ''); })() : 'Birthplace not recorded.'}${p.dp && p.dp !== p.bp ? (() => { const pl = TC.placeAt(M, p, p.dp, p.dy); return '<br>Died: ' + flagHTML(pl, p.dy, flagTip(pl, p.dy, 'Died at'), true) + placeLinkHTML(pl) + (pl.cn ? ' <small>' + esc(pl.cn) + '</small>' : ''); })() : (p.dy != null ? '<br>Death place: same as birth, or not recorded.' : '')}</p>
     ${(p.fl & 3) ? `<p style="color:var(--lk-mute)"><small>~ marks a year the archive itself estimates.</small></p>` : ''}
     <div class="row">${link ? `<a class="lk-btn is-small" href="${esc(link)}" target="_blank" rel="noopener">Open in ${esc(a.name)} &nearr;</a>` : ''}
-      ${p.living ? '' : `<button class="lk-btn is-small is-primary" data-do="next">Where to from here</button>`}
+      ${p.living || p.ghost ? '' : `<button class="lk-btn is-small is-primary" data-do="next">Where to from here</button>`}
       ${c ? `<button class="lk-btn is-small" data-do="rel">${icon('relate', 'lk-icon')} How related to…</button>` : ''}</div>
     <h4>Parents and the evidence for each link</h4>
     ${(p.f >= 0 || p.m >= 0) ? `<ul class="steps">${parentRow(p.f, 'Father', p.fg)}${parentRow(p.m, 'Mother', p.mg)}</ul>` : `<p>No parent recorded in ${esc(a.name)}.</p>`}
@@ -2365,8 +2427,8 @@ function optionsPanel() {
     <div class="row"><button class="lk-btn is-small is-danger" data-do="clear">Clear the canvas</button></div>`;
 }
 function renderInfo() {
-  const el = $('#info'), tabs = [['person', 'Person'], ['next', 'Where next'], ['path', 'Path'], ['legend', 'Legend'], ['options', 'Options']];
-  const body = S.tab === 'person' ? personPanel() : S.tab === 'next' ? nextPanel() : S.tab === 'path' ? pathPanel() : S.tab === 'legend' ? legendHTML() : optionsPanel();
+  const el = $('#info'), tabs = [['person', 'Person'], ['next', 'Where next'], ...(fixList() ? [['fix', 'Fix list' + (fixList().people ? ' (' + fixList().people.toLocaleString() + ')' : '')]] : []), ['path', 'Path'], ['legend', 'Legend'], ['options', 'Options']];
+  const body = S.tab === 'person' ? personPanel() : S.tab === 'next' ? nextPanel() : S.tab === 'fix' ? fixPanel() : S.tab === 'path' ? pathPanel() : S.tab === 'legend' ? legendHTML() : optionsPanel();
   el.innerHTML = `<div class="ih">${tabs.map(([k, n]) => `<button class="lk-tab${S.tab === k ? ' on' : ''}" data-tab="${k}">${n}${k === 'path' && S.path ? ' &bull;' : ''}</button>`).join('')}<span style="flex:1"></span><button class="lk-tab" data-tab="close" title="Close panel" aria-label="Close panel">&times;</button></div><div class="ib">${body}</div>`;
   if (S.infoOpen !== false) el.classList.add('on');
 }
@@ -2455,6 +2517,7 @@ function wireToolbar() {
   const set = (id, name) => { const b = $(id); if (b) b.innerHTML = icon(name); };
   set('#bShelf', 'search'); $('#si').innerHTML = icon('search', ''); set('#bUndo', 'undo'); set('#bFit', 'fit'); set('#bRel', 'relate'); set('#bInfo', 'info'); set('#bTheme', 'theme'); set('#bClear', 'clear'); set('#bMore', 'gear');
   set('#zIn', 'plus'); set('#zOut', 'minus');
+  if (EMBED) addEventListener('message', e => { if (e.origin !== location.origin || !e.data || !e.data.tcFix) return; refreshAll(); renderInfo(); syncButtons(); });
   $('#bShelf').onclick = () => { document.documentElement.classList.toggle('shelfoff'); dockH(); };
   $('#bUndo').onclick = undo;
   $('#bFit').onclick = () => fit();

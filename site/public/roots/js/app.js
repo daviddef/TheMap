@@ -55,9 +55,9 @@ $('#hideliving').onchange = () => { $('#fliving').checked = !hideLiv(); worker &
 function done(m) {
   const stale = !m.build || m.build.pipeline !== BUILD || m.build.model !== BUILD; $('#stale').hidden = !stale;
   last = m; window.RR = { tree: m.tree, atlas: m.atlas }; anc = m.anc || null; ancStatus(); mhFile = m.mh || null; applyTreeLink();
-  const keepTab = $('.tabs [aria-selected=true]')?.dataset.tab || 'tree';
+  const keepTab = $('.tabs [aria-selected=true]')?.dataset.tab || 'canvas';
   show('work'); chips(m); mountViewer(); report(m); review(m); workbench(m.wb); worker.postMessage({ cmd: 'offer' }); askFix();
-  tab(openTo || (m.first ? 'tree' : keepTab)); openTo = null;
+  tab(openTo || (m.first ? 'canvas' : keepTab)); openTo = null;
 }
 
 function chips(m) {
@@ -335,15 +335,24 @@ function exported(m) {
 }
 
 /* ---------- tabs and the file ---------- */
+/* The Tree Canvas (canvas.html) is mounted the first time its tab is shown for a given file, and again for a new file: it reads the tree from
+   window.RR when it starts, and it needs a visible frame to measure. It stores nothing (the file's owner decides what is kept, on the start screen). */
+let canvasFor = null;
+function mountCanvas() {
+  if (!window.RR || canvasFor === window.RR) return;
+  const old = $('#canvasv'), f = document.createElement('iframe');
+  f.id = 'canvasv'; f.title = old.title; f.src = 'canvas.html?v=' + STAMP; old.replaceWith(f); canvasFor = window.RR;
+}
 function tab(name) {
-  document.body.classList.toggle('wide', name === 'tree');   // the tree uses the whole window; the lists keep a readable width
+  document.body.classList.toggle('wide', name === 'tree' || name === 'canvas');   // the tree uses the whole window; the lists keep a readable width
   for (const b of $$('.tabs button')) b.setAttribute('aria-selected', String(b.dataset.tab === name));
   for (const p of $$('.panel')) p.hidden = p.id !== 'p-' + name;
+  if (name === 'canvas') mountCanvas();
   if (name === 'fix' && worker) askFix();
 }
 $$('.tabs button').forEach(b => b.onclick = () => tab(b.dataset.tab));
 $('#rfilter').oninput = e => last && drawReview(last.review, e.target.value);
-$('#again').onclick = () => { document.body.classList.remove('wide'); if (worker) worker.terminate(); worker = null; last = null; curBytes = null; window.RR = null; show('start'); refreshRecent(); };
+$('#again').onclick = () => { document.body.classList.remove('wide'); if (worker) worker.terminate(); worker = null; last = null; curBytes = null; window.RR = null; canvasFor = null; show('start'); refreshRecent(); };
 
 async function take(file) {
   if (!file) return;

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build the data the Roots & Routes GEDCOM page loads: site/public/roots/data/.
 
-    python3 scripts/build-roots-data.py [--only shards|admin|atlas|viewer|contact]
+    python3 scripts/build-roots-data.py [--only shards|admin|atlas|viewer|canvas|contact]
 
 Reads, read-only: data/gazetteer.json.gz, data/admin-divisions.json, data/admin-names.json, data/countries.json,
 data/regions.json, data/places.json, data/providers.json, site/public/{mortality,flag-map}.json, site/public/fl/,
@@ -13,6 +13,8 @@ site/public/{styles,atlas-tokens}.css. Writes only under site/public/roots/.
   data/atlas.json    land outlines, regimes, regions with eras and rings, flag timelines per country, mortality events, the
                      providers regions name, and the Atlas's own surveyed places with their collections
   data/countries.json  ISO table (name -> code) for reading a country off the end of a place string
+  canvas.html        the Tree Canvas (scripts/roots/tree-canvas.template.html, a vendored build of the Tree Canvas source, corpus-less): the visitor's own tree
+                     drawn on a free canvas with a "Where next" research panel. Reads window.parent.RR like viewer.html; its CSP allows reads of this site only
   viewer.html        the Roots & Routes template (scripts/roots/tree-views.template.html, a vendored copy) with its data
                      placeholders pointed at the parent page and its network references removed
 
@@ -193,6 +195,21 @@ def viewer():
     open(os.path.join(OUT, 'viewer.html'), 'w', encoding='utf-8').write(csp + t + '\n</body>\n</html>\n')
     print('viewer.html: %.0f KB' % (os.path.getsize(os.path.join(OUT, 'viewer.html')) / 1024))
 
+def canvas():
+    # The Tree Canvas, vendored as one built file (scripts/roots/tree-canvas.template.html; rebuild it with `python3 build.py --embed` in the Tree Canvas
+    # folder). It carries no data: the visitor's tree arrives in memory from the parent page (window.parent.RR), and nothing is stored. Its "Where next"
+    # panel asks THIS SITE for place records (/p/<id>.json, /regions.json, /providers.json, /index.json, /pi/<cell>.json) and nothing else, so connect-src is
+    # 'self' (viewer.html has 'none'). No name, date or relationship is in any request: only place ids.
+    t = open(os.path.join(ROOT, 'scripts', 'roots', 'tree-canvas.template.html'), encoding='utf-8').read()
+    assert 'window.TC_EMBED=true' in t, 'the template is not an --embed build'
+    assert 'id="corpus">null<' in t, 'the template carries data: it must be corpus-less'
+    csp = ("<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data: blob:; "
+           "font-src data:; connect-src 'self'; form-action 'none'; base-uri 'none'\">")
+    assert '<head>' in t
+    t = t.replace('<head>', '<head>' + csp, 1)
+    open(os.path.join(OUT, 'canvas.html'), 'w', encoding='utf-8').write(t)
+    print('canvas.html: %.0f KB' % (os.path.getsize(os.path.join(OUT, 'canvas.html')) / 1024))
+
 def surnames():
     """The spellings the Atlas surname catalogue treats as one name (status same / attested), one list per family, for the page's surname check."""
     cat = json.load(open(D('surname-families.json'), encoding='utf-8'))
@@ -229,9 +246,9 @@ def contact():
     print('contact.json:', 'email set' if c else 'no email')
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument('--only', choices=['shards', 'admin', 'atlas', 'viewer', 'contact', 'surnames', 'catalogues', 'pages'])
+    ap = argparse.ArgumentParser(); ap.add_argument('--only', choices=['shards', 'admin', 'atlas', 'viewer', 'canvas', 'contact', 'surnames', 'catalogues', 'pages'])
     a = ap.parse_args()
-    for name, fn in (('shards', shards), ('admin', admin), ('atlas', atlas), ('viewer', viewer), ('contact', contact), ('surnames', surnames), ('catalogues', catalogues), ('pages', pages)):
+    for name, fn in (('shards', shards), ('admin', admin), ('atlas', atlas), ('viewer', viewer), ('canvas', canvas), ('contact', contact), ('surnames', surnames), ('catalogues', catalogues), ('pages', pages)):
         if a.only in (None, name): fn()
 
 if __name__ == '__main__': main()

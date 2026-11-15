@@ -1563,8 +1563,8 @@ function cardInner(c) {
   const bpl = p.bp ? TC.placeAt(M, p, p.bp, p.by) : null, dpl = p.dp && p.dp !== p.bp ? TC.placeAt(M, p, p.dp, p.dy) : null;
   const place = p.bp ? ` &middot; ${flagHTML(bpl, p.by, flagTip(bpl, p.by, 'Born at'))}${esc(p.bp)}` + (dpl && dpl.fi >= 0 ? ` &rarr; ${flagHTML(dpl, p.dy, flagTip(dpl, p.dy, 'Died at'))}` : '') : '';
   const seals = [];
-  if (p.f >= 0) seals.push(`<span title="Father link: ${TC.LEVELS[TC.levelOfGrade(p.fg)].short}">${sealMini(TC.levelOfGrade(p.fg), colour(p.a))}</span>`);
-  if (p.m >= 0) seals.push(`<span title="Mother link: ${TC.LEVELS[TC.levelOfGrade(p.mg)].short}">${sealMini(TC.levelOfGrade(p.mg), colour(p.a))}</span>`);
+  if (p.f >= 0 && TC.levelOfGrade(p.fg) !== 'ungraded') seals.push(`<span title="Father link: ${TC.LEVELS[TC.levelOfGrade(p.fg)].short}">${sealMini(TC.levelOfGrade(p.fg), colour(p.a))}</span>`);
+  if (p.m >= 0 && TC.levelOfGrade(p.mg) !== 'ungraded') seals.push(`<span title="Mother link: ${TC.LEVELS[TC.levelOfGrade(p.mg)].short}">${sealMini(TC.levelOfGrade(p.mg), colour(p.a))}</span>`);
   const brs = (M.bridgesOf.get(c.i) || []).filter(b => TC.bridgeState(M, b) !== 'rejected' && !cardOfPerson(TC.bridgeOther(b, c.i)));
   const chips = brs.slice(0, 1).map(b => {
     const o = M.P[TC.bridgeOther(b, c.i)], st = TC.bridgeState(M, b);
@@ -1941,6 +1941,7 @@ function pathD(x0, y0, x1, y1) { /* a soft S curve from (x0,y0) to (x1,y1), leav
   return `M${f1(x0)} ${f1(y0)}C${f1(x0)} ${f1(my)} ${f1(x1)} ${f1(my)} ${f1(x1)} ${f1(y1)}`;
 }
 function sealG(x, y, lv, col, title) {
+  if (lv === 'ungraded') return '';   /* a not-graded link carries no seal: the dotted line already says it, and the seal read as a warning */
   return `<g class="seal" transform="translate(${f1(x)} ${f1(y)})" style="pointer-events:all;cursor:help"><circle r="9.5" fill="var(--lk-board)" opacity=".92"/>${sealShape(lv, col)}<title>${esc(title)}</title></g>`;
 }
 /* mother or father: a small round mark beside the evidence seal on each parent line, so which parent a line comes from can be read without hovering */
@@ -1982,8 +1983,8 @@ function drawEdges() {
       out.push(`<g class="badge${dimOf(fid)}" transform="translate(${f1(tx)} ${f1(by2)})" data-join="${p.f},${p.m}" data-child="${c.i}"><circle class="bg" r="11"/><text y="4.3" style="font-size:${married ? 12 : 15}px">${married ? '&#9901;' : '+'}</text><title>${married ? 'Recorded spouses' : 'Two recorded parents of the child below (not a claim that they married)'} Click to bring both parents into view.</title></g>`);
       out.push(sealG(cx(F), (F.y + H + by) / 2, lvF, col, linkTitle(c.i, p.f, 'f', lvF)).replace('class="seal"', 'class="seal' + dimOf(fid) + '"'));
       out.push(sealG(cx(Mo), (Mo.y + H + by) / 2, lvM, col, linkTitle(c.i, p.m, 'm', lvM)).replace('class="seal"', 'class="seal' + dimOf(mid) + '"'));
-      out.push(roleG(cx(F) + 19, (F.y + H + by) / 2, 'f', p.f, c.i).replace('class="role', 'class="role' + dimOf(fid)));
-      out.push(roleG(cx(Mo) + 19, (Mo.y + H + by) / 2, 'm', p.m, c.i).replace('class="role', 'class="role' + dimOf(mid)));
+      out.push(roleG(cx(F) + (lvF === 'ungraded' ? 0 : 19), (F.y + H + by) / 2, 'f', p.f, c.i).replace('class="role', 'class="role' + dimOf(fid)));
+      out.push(roleG(cx(Mo) + (lvM === 'ungraded' ? 0 : 19), (Mo.y + H + by) / 2, 'm', p.m, c.i).replace('class="role', 'class="role' + dimOf(mid)));
     } else {
       [[F, fid, lvF, 'f', p.f], [Mo, mid, lvM, 'm', p.m]].forEach(([P, id, lv, via, q]) => {
         if (!P) return;
@@ -1992,7 +1993,7 @@ function drawEdges() {
         add(id, d, EVCLS[lv], col);
         const mx = (x0 + x1) / 2, my = P.y + H < c.y - 4 ? (y0 + y1) / 2 : (P.y + c.y) / 2 + H / 2;
         out.push(sealG(mx, my, lv, col, linkTitle(c.i, q, via, lv)).replace('class="seal"', 'class="seal' + dimOf(id) + '"'));
-        out.push(roleG(mx + 19, my, via, q, c.i).replace('class="role', 'class="role' + dimOf(id)));
+        out.push(roleG(mx + (lv === 'ungraded' ? 0 : 19), my, via, q, c.i).replace('class="role', 'class="role' + dimOf(id)));
       });
     }
   });
@@ -2493,12 +2494,12 @@ function swatch(lv, col) {
 function legendHTML() {
   const col = colour(0);
   const rows = [['definite', 'Definite', 'Read from a register (grade 2). Solid, strong line, filled seal.'], ['supported', 'Supported', 'Household or tree evidence (grade 1). Solid, thinner line, half-filled seal.'],
-    ['notproven', 'Not proven', 'Seen in an index entry only (grade 0). Dashed line, hollow seal.'], ['ungraded', 'Not graded', 'The archive records no grade. Dotted, neutral: this is NOT proof, and NOT doubt. Five of the eight archives grade nothing; no archive grades a marriage.'],
+    ['notproven', 'Not proven', 'Seen in an index entry only (grade 0). Dashed line, hollow seal.'], ['ungraded', 'Not graded', 'The archive records no grade. Dotted line, no seal: this is NOT proof, and NOT doubt. Five of the eight archives grade nothing; no archive grades a marriage.'],
     ['suggested', 'Suggested same person', 'A name + birth-year match across archives. Dashed double rail and double ring. Never merged on its own: you confirm or unlink it.'], ['confirmed', 'Confirmed by you', 'A suggested match you confirmed: solid double rail. Still a decision, not a register.']];
   return `<h3>How to read the lines</h3><p style="margin:2px 0 8px;color:var(--lk-soft);font-weight:700">Line colour is the archive that holds the link. Line pattern and seal are how sure it is. A pathway is only as strong as its weakest step.</p>
     <div class="legend">${rows.map(r => `${swatch(r[0], col)}<div><b>${r[1]}</b><small>${r[2]}</small></div>`).join('')}</div>
     <h4>Cards</h4><p>The coloured edge and chip say which archive. <b>&uarr; n</b> shows the parents (“how is this made”), <b>&uarr;&uarr; all</b> goes all the way back one generation at a time, <b>&darr;</b> shows the children (“what this made”), <b>&#9901;</b> the spouses, <b>&asymp; Archive</b> pulls in the suggested same person from another archive. Drag any card; a dragged card stays where you put it.</p>
-    <p>The small seals at the bottom of a card are its father and mother links.</p>`;
+    <p>The small seals at the bottom of a card are its father and mother links (a link with no grade shows none).</p>`;
 }
 function personPanel() {
   const keys = [...S.sel];

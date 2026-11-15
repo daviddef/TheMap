@@ -40,9 +40,6 @@ function start(bytes, name) {
     else if (m.type === 'checklist') fixlist(m);
     else if (m.type === 'checklist-failed') { if (window.console) console.error('fix list', m.msg, m.stack); if (!document.getElementById('p-fix').hidden) $('#fsecs').textContent = 'The fix list could not be made for this file: ' + m.msg; }
     else if (m.type === 'suggested') suggested(m);
-    else if (m.type === 'found') found(m);
-    else if (m.type === 'person') person(m.info);
-    else if (m.type === 'edit-error') { const e = $('#werr'); e.textContent = m.msg; e.hidden = false; }
   };
   worker.onerror = e => fail('The reader crashed: ' + (e.message || 'unknown error'));
   worker.postMessage({ cmd: 'load', bytes, base }, [bytes]);
@@ -54,7 +51,7 @@ function done(m) {
   const stale = !m.build || m.build.pipeline !== BUILD || m.build.model !== BUILD; $('#stale').hidden = !stale;
   last = m; window.RR = { tree: m.tree, atlas: m.atlas, loadNames, links: rrLinks }; anc = m.anc || null; ancStatus(); mhFile = m.mh || null; applyTreeLink();
   const keepTab = $('.tabs [aria-selected=true]')?.dataset.tab || 'canvas';
-  show('work'); chips(m); mountViewer(); report(m); review(m); workbench(m.wb); askFix();
+  show('work'); chips(m); mountViewer(); report(m); review(m); askFix();
   tab(openTo || (m.first ? 'canvas' : keepTab)); openTo = null;
 }
 
@@ -213,74 +210,6 @@ function rowEl(it) {
 
 function pick(raw, cand) { $('#busymsg').textContent = 'Redrawing…'; worker.postMessage({ cmd: 'pick', raw, cand }); show('busy'); }
 
-/* ---------- workbench ---------- */
-let who = null;
-let flashT = 0;
-const FLASH = { date: 'Dates saved', note: 'Note added', source: 'Source added', merge: 'Marked as maybe the same', notsame: 'Marked as not the same: it will not be suggested again', undo: 'Undone' };
-function flash(op) {   // a visible answer to a click: the list a button sits in often scrolls past the place its result lands
-  const f = $('#wflash'); if (!f || !FLASH[op]) return;
-  f.textContent = FLASH[op] + (op === 'merge' || op === 'date' || op === 'note' || op === 'source' ? '. It is listed under "Your edits", where you can undo it.' : '.'); f.hidden = false;
-  clearTimeout(flashT); flashT = setTimeout(() => { f.hidden = true; }, 6000);
-}
-let focusEdit = false;
-const send = edit => { $('#werr').hidden = true; worker.postMessage({ cmd: 'edit', edit }); flash(edit.op); };
-let undrawnAll = [], undrawnTotal = 0, undrawnShown = 30;
-function drawUndrawn(u) {
-  u.textContent = '';
-  for (const r of undrawnAll.slice(0, undrawnShown)) {
-    const row = el('div', 'wrow'), t = el('div', 'wwho', r.name); t.append(el('small', null, r.id + (r.place ? ' · ' + r.place : '')));
-    const b = el('button', 'link', 'Add a year'); b.onclick = () => { who = r.id; focusEdit = true; worker.postMessage({ cmd: 'person', id: r.id }); };
-    row.append(t, b); u.append(row);
-  }
-  const more = undrawnTotal - Math.min(undrawnShown, undrawnAll.length);
-  if (undrawnAll.length > undrawnShown) { const b = el('button', 'link wmore', 'Show ' + Math.min(60, undrawnAll.length - undrawnShown) + ' more'); b.onclick = () => { undrawnShown += 60; drawUndrawn(u); }; u.append(b); }
-  else if (undrawnTotal > undrawnAll.length) u.append(el('p', 'small wmore', 'and ' + n0(undrawnTotal - undrawnAll.length) + ' more'));
-}
-function workbench(w) {
-  if (!w) return;
-  $('#wcount').textContent = String(w.edits.length || ''); $('#wcount').hidden = !w.edits.length;
-  $('#wundn').textContent = n0(w.undrawnTotal); $('#wmgn').textContent = n0(w.merges.length); $('#wedn').textContent = n0(w.edits.length);
-  undrawnAll = w.undrawn; undrawnTotal = w.undrawnTotal; drawUndrawn($('#wundrawn'));
-  const m = $('#wmerge'); m.textContent = '';
-  for (const r of w.merges) {
-    const row = el('div', 'wrow'), t = el('div', null, r.an + ' and ' + r.bn);
-    t.append(el('small', null, (r.ay === r.by ? 'both born ' + r.ay : 'born ' + r.ay + ' and ' + r.by) + (r.ap && r.ap === r.bp ? ' · both in ' + r.ap : (r.ap || r.bp) ? ' · ' + (r.ap || '—') + ' / ' + (r.bp || '—') : '') + ' · ' + r.a + ' and ' + r.b));
-    const y = el('button', 'link', 'Maybe the same'), n = el('button', 'link', 'Not the same');
-    y.onclick = () => send({ op: 'merge', who: r.a, other: r.b }); n.onclick = () => send({ op: 'notsame', who: r.a, other: r.b });
-    const bx = el('div'); bx.append(y, ' · ', n); row.append(t, bx); m.append(row);
-  }
-  const e = $('#wedits'); e.textContent = '';
-  if (!w.edits.length) e.append(el('p', 'small', 'None yet.'));
-  for (const x of w.edits) {
-    const row = el('div', 'wrow'), t = el('div', null, x.name + ' · ' + ({ date: x.field + ' ' + x.value, note: 'note: ' + (x.text || '').slice(0, 60), source: 'source: ' + x.title, merge: 'maybe the same as ' + x.other }[x.op] || x.op));
-    const b = el('button', 'link', 'Undo'); b.onclick = () => send({ op: 'undo', n: x.n }); row.append(t, b); e.append(row);
-  }
-  if (who) worker.postMessage({ cmd: 'person', id: who });
-}
-function found(m) {
-  const box = $('#wres'); box.textContent = ''; if (!m.rows.length && !(m.q && m.q.trim())) return;
-  if (!m.rows.length && m.q && m.q.trim()) box.append(el('p', 'small', 'No one in this file matches “' + m.q.trim() + '”. Try just the surname, or a record number such as I123.'));
-  for (const r of m.rows) { const row = el('div', 'wrow'), t = el('div', null, r.name); t.append(el('small', null, r.id + (r.living ? ' · living' : '') + (r.by ? ' · born ' + (r.est ? 'about ' : '') + r.by : ' · no year') + (r.bp ? ' · ' + r.bp : ''))); const b = el('button', 'link', 'Edit'); b.onclick = () => { who = r.id; focusEdit = true; worker.postMessage({ cmd: 'person', id: r.id }); }; row.append(t, b); box.append(row); }
-}
-function person(i) {
-  if (!i) return; lastInfo = i;
-  $('#wedit').hidden = false; if (focusEdit) { focusEdit = false; $('#wedit').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } const wn = $('#wname'); wn.textContent = ''; wn.append(...nameNodes(i.name, i.nl), ' · ' + i.id);
-  const wh = $('#whelp'); wh.textContent = ''; if (i.help && i.help.length) { wh.append(el('h4', null, 'What the file and the Atlas hold'), infoList(i.help)); }
-  $('#winfo').textContent = 'In your file: born ' + (i.birth || 'no date') + ', died ' + (i.death || 'no date') + (i.living ? '. Treated as living (no death recorded, born within 110 years)' + (hideLiv() ? ', so hidden while "Hide living people" is on, and left out of a shareable file.' : '. Left out of a shareable export.') : '.');
-  const wm = $('#wmh'); wm.textContent = ''; const ml = mhA(i.id, i.name); if (ml.length) wm.append(...ml);
-  const l = i.look, ul = $('#wlinks'); ul.textContent = '';
-  const ls = searchLinks(l); $('#wlook').hidden = !ls.length;
-  $('#wsends').textContent = ls.length ? 'Nothing is sent until you click a link. A click opens that site in a new tab and gives it: ' + sends(l) + (l.bp || l.dp ? ', and the places in your file' : '') + '.'
-    + (l.living ? ' This person is treated as living: clicking sends their name to that site.' : '') : '';
-  for (const x of ls) { const li = el('li'), a = el('a', null, x.site); a.href = x.url; a.target = '_blank'; a.rel = 'noopener noreferrer'; li.append(a, el('small', null, ' · ' + x.note)); ul.append(li); }
-  const f = $('#wdate'); f.birth.placeholder = i.birth || 'e.g. ABT 1850'; f.death.placeholder = i.death || 'e.g. 12 MAR 1910';
-}
-$('#wclose').onclick = () => { who = null; lastInfo = null; $('#wedit').hidden = true; $('#wres').textContent = ''; $('#wfind').value = ''; $('#wfind').focus(); };
-let fto = 0;
-$('#wfind').oninput = e => { clearTimeout(fto); fto = setTimeout(() => worker && worker.postMessage({ cmd: 'find', q: e.target.value }), 200); };
-$('#wdate').onsubmit = e => { e.preventDefault(); const f = e.target; for (const k of ['birth', 'death']) if (f[k].value.trim()) send({ op: 'date', who, field: k, value: f[k].value }); f.reset(); };
-$('#wnote').onsubmit = e => { e.preventDefault(); send({ op: 'note', who, text: e.target.text.value }); e.target.reset(); };
-$('#wsrc').onsubmit = e => { e.preventDefault(); const f = e.target; send({ op: 'source', who, title: f.title.value, url: f.url.value, page: f.page.value }); f.reset(); };
 document.addEventListener('click', e => { const g = e.target.closest && e.target.closest('[data-goto]'); if (g) tab(g.dataset.goto); });
 
 /* ---------- export ---------- */
@@ -414,7 +343,6 @@ function plist(list, total) {
   if (total > list.length) { const w = el('div'); w.append(ul, el('small', 'muted', 'and ' + (total - list.length) + ' more, all in the spreadsheet')); return w; }
   return ul;
 }
-let lastInfo = null;
 function mhStatus(extra) { $('#mhsum').textContent = mhc ? 'on · tree ' + mhc.tree : 'off'; $('#mhsum').classList.toggle('on', !!mhc); $('#mhstat').textContent = mhc ? (extra || (mhRemembered ? 'Remembered from last time. Clear the box to forget it.' : 'Open one or two people to check they are the right ones. The link is remembered for this tree, so you only paste it once: it stays on this device and goes into your research file and, if you turn on online sync, your encrypted copy. Clear the box to forget it.')) : ''; }
 function mhWho(m) { mhStatus(m.name ? 'That link is ' + m.id + ' in your file: ' + m.name + '. If that is not who you pasted, the numbering differs and these links are wrong.' : 'No person ' + m.id + ' in this file, so check the link.'); }
 $('#mhin').onchange = e => {                                   // leaving the box with text that is not a link: put back the last good link rather than keep the stray text
@@ -452,7 +380,7 @@ const rrLinks = {
   setSite: v => setSite(v),
 };
 function tellCanvas() { try { const f = document.getElementById('canvasv'); if (f && f.contentWindow) f.contentWindow.postMessage({ tcLinks: 1 }, location.origin); } catch (e) { /* not loaded yet */ } }
-function refreshMh() { pushMh(); drawFix(); if (lastInfo) person(lastInfo); tellCanvas(); }
+function refreshMh() { pushMh(); drawFix(); tellCanvas(); }
 if (mhc) mhStatus();
 
 function fixRow(s, i) {
@@ -635,7 +563,7 @@ function saveAs(name, text, type) {
 }
 $('#ftext').onclick = () => fix && saveAs('fix-list.txt', checklistText(fix, new Date().toISOString().slice(0, 10)), 'text/plain;charset=utf-8');
 $('#fcollapse').onchange = () => drawFix();
-function setSite(v) { ancSite = v; saveSite(v); $('#fanc').value = v; $('#mhanc').value = v; askFix(); drawFix(); if (lastInfo) person(lastInfo); ancStatus(); tellCanvas(); }
+function setSite(v) { ancSite = v; saveSite(v); $('#fanc').value = v; $('#mhanc').value = v; askFix(); drawFix(); ancStatus(); tellCanvas(); }
 $('#fanc').value = $('#mhanc').value = ancSite; $('#fanc').onchange = () => setSite($('#fanc').value); $('#mhanc').onchange = () => setSite($('#mhanc').value);
 /* The PDF is the browser's own "Save as PDF" over a print-ready copy of the list, built here on the device from the same rows. Nothing is uploaded and
    no library or font is fetched. The copy is added to the page for the moment of printing and removed after. */

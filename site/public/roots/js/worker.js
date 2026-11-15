@@ -20,9 +20,6 @@ self.onmessage = async e => {
     } else if (m.cmd === 'export' && session) {
       const r = session.export(m.mode);
       self.postMessage({ type: 'exported', mode: m.mode, text: r.text, logText: r.logText, changed: r.changed, stats: r.stats, lines: r.lines, from: r.from });
-    } else if (m.cmd === 'edit' && session) {
-      const err = session.edit(m.edit);
-      if (err) self.postMessage({ type: 'edit-error', msg: err }); else self.postMessage({ type: 'done', first: false, ...(await session.draw()) });
     } else if (m.cmd === 'who' && session) {
       const info = session.personInfo(m.id); self.postMessage({ type: 'who', id: m.id, name: info ? info.name : null });
     } else if (m.cmd === 'living' && session) {
@@ -34,10 +31,6 @@ self.onmessage = async e => {
       catch (err) { self.postMessage({ type: 'checklist-failed', msg: String(err && err.message || err), stack: String(err && err.stack || '') }); }
     } else if (m.cmd === 'suggest' && session) {
       self.postMessage({ type: 'suggested', raw: m.raw, rows: session.suggest(m.raw) });
-    } else if (m.cmd === 'find' && session) {
-      self.postMessage({ type: 'found', q: m.q, rows: session.find(m.q) });
-    } else if (m.cmd === 'person' && session) {
-      self.postMessage({ type: 'person', info: session.personInfo(m.id) });
     } else if (m.cmd === 'pick' && session) {
       session.pick(m.raw, m.cand);
       self.postMessage({ type: 'done', first: false, ...(await session.draw()) });

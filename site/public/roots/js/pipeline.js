@@ -62,7 +62,7 @@ export class Session {
     t0 = now(); this.progress('Drawing flags and regimes');
     const atlas = await buildAtlas(keep, this.core, id => this.io.flag(id)); T.atlas = Math.round(now() - t0);
     this.tree = tree; this.atlas = atlas;
-    return { tree, atlas, anc: this.anc, mh: this.mh, report: this.report(report), review: this.review(), wb: this.workbench(), timings: { ...T }, build: { pipeline: BUILD, model: model.MODEL_BUILD } };
+    return { tree, atlas, anc: this.anc, mh: this.mh, report: this.report(report), review: this.review(), timings: { ...T }, build: { pipeline: BUILD, model: model.MODEL_BUILD } };
   }
 
   /* spellings near the place part of a text, in the country the text names (or, with none, the countries the tree uses most) */

@@ -108,7 +108,6 @@ const here = Astro.url.pathname;
       <button role="tab" data-tab="tree" aria-selected="false">Tree views</button>
       <button role="tab" data-tab="report">Import report</button>
       <button role="tab" data-tab="review">Places to review <span id="rcount" class="count"></span></button>
-      <button role="tab" data-tab="work">Workbench <span id="wcount" class="count"></span></button>
       <button role="tab" data-tab="fix">Fix list <span id="fxcount" class="count"></span></button>
       <button role="tab" data-tab="export">Export</button>
     </nav>
@@ -125,45 +124,6 @@ const here = Astro.url.pathname;
       <span id="rnote" class="small"></span>
     </div>
     <div id="rlist"></div>
-  </div>
-  <div id="p-work" class="panel" hidden>
-    <h2>Workbench</h2>
-    <p>Fix and add to your tree here. Nothing changes in your original: your edits are listed below, drawn on the tree straight away, and written into the new file only when you
-    <button class="link" data-goto="export">export</button>. They live in this page only, so export before you close it.</p>
-    <p id="wflash" class="flash" role="status" aria-live="polite" hidden></p>
-    <div class="wbar">
-      <input id="wfind" type="search" placeholder="Find a person: a name, or a record number (I123)" aria-label="Find a person">
-      <span class="small whint" id="whint">Matches open right here. Or press <b>Add a year</b> beside anyone below.</span>
-    </div>
-    <div id="wres"></div>
-    <div id="wedit" class="wpanel" hidden>
-      <div class="wphead"><h4 id="wname"></h4><button type="button" class="link" id="wclose">Close</button></div>
-      <div class="wpbody">
-        <div class="wpinfo">
-          <p id="winfo" class="small"></p><p id="wmh" class="small"></p>
-          <div id="whelp"></div>
-          <div id="wlook"><h4>Look this person up elsewhere</h4><p id="wsends" class="small"></p><ul id="wlinks" class="llist"></ul></div>
-        </div>
-        <div class="wforms">
-          <form id="wdate" class="wform"><label>Birth <input name="birth" placeholder="e.g. ABT 1850"></label><label>Death <input name="death" placeholder="e.g. 12 MAR 1910"></label><button class="btn">Save dates</button></form>
-          <form id="wnote" class="wform"><label>Add a note <textarea name="text" rows="3"></textarea></label><button class="btn">Add the note</button></form>
-          <form id="wsrc" class="wform"><label>Add a source <input name="title" placeholder="Title, e.g. Parish register of St Mary, 1850"></label><label>Link <input name="url" placeholder="https://… (optional)"></label><label>Page or entry <input name="page" placeholder="(optional)"></label><button class="btn">Add the source</button></form>
-          <p id="werr" class="err" role="alert" hidden></p>
-        </div>
-      </div>
-    </div>
-    <details class="wlist" id="wd-undrawn" open>
-      <summary><b>Not drawn yet</b> <span id="wundn" class="count"></span> <span class="small">People with no year, so no place on the tree. A year puts them on it.</span></summary>
-      <div id="wundrawn" class="wcols"></div>
-    </details>
-    <details class="wlist" id="wd-merge">
-      <summary><b>Maybe the same person</b> <span id="wmgn" class="count"></span> <span class="small">Same name and sex, born within two years, not related. Marking a pair merges nothing: it writes a link between the two records.</span></summary>
-      <div id="wmerge"></div>
-    </details>
-    <details class="wlist" id="wd-edits" open>
-      <summary><b>Your edits</b> <span id="wedn" class="count"></span></summary>
-      <div id="wedits"></div>
-    </details>
   </div>
   <div id="p-fix" class="panel" hidden>
     <h2>Fix list</h2>

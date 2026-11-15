@@ -2549,7 +2549,7 @@ function swatch(lv, col) {
   const cls = EVCLS[lv] || 'ev-sup';
   if (lv === 'suggested' || lv === 'confirmed') {
     const dash = lv === 'suggested' ? 'stroke-dasharray:9 6;' : '';
-    return `<svg viewBox="0 0 54 24"><defs><linearGradient id="gs${lv}"><stop offset="0" stop-color="${colour(0)}"/><stop offset="1" stop-color="${colour(3)}"/></linearGradient></defs><path d="M2 12H52" style="stroke:url(#gs${lv});stroke-width:9;${dash}fill:none"/><path d="M2 12H52" style="stroke:var(--lk-card);stroke-width:3.4;${dash}fill:none"/><g transform="translate(27 12)"><circle r="9" fill="var(--lk-card)"/>${sealShape(lv)}</g></svg>`;
+    return `<svg viewBox="0 0 54 24"><defs><linearGradient id="gs${lv}"><stop offset="0" stop-color="${colour(0)}"/><stop offset="1" stop-color="${colour(Math.min(3, M.archives.length - 1))}"/></linearGradient></defs><path d="M2 12H52" style="stroke:url(#gs${lv});stroke-width:9;${dash}fill:none"/><path d="M2 12H52" style="stroke:var(--lk-card);stroke-width:3.4;${dash}fill:none"/><g transform="translate(27 12)"><circle r="9" fill="var(--lk-card)"/>${sealShape(lv)}</g></svg>`;
   }
   return `<svg viewBox="0 0 54 24" style="--c:${col}"><path d="M2 12H52" class="${cls}" stroke="${col}" style="fill:none"/><g transform="translate(27 12)"><circle r="9.5" fill="var(--lk-card)"/>${sealShape(lv, col)}</g></svg>`;
 }

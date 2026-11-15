@@ -32,8 +32,6 @@ self.onmessage = async e => {
       /* asked for in the background as soon as a file loads, so a problem in it must not take the whole page down */
       try { self.postMessage({ type: 'checklist', ...session.checklist({ living: m.living, ancestry: m.ancestry }) }); }
       catch (err) { self.postMessage({ type: 'checklist-failed', msg: String(err && err.message || err), stack: String(err && err.stack || '') }); }
-    } else if (m.cmd === 'offer' && session) {
-      self.postMessage({ type: 'offer', ...session.contributions() });
     } else if (m.cmd === 'suggest' && session) {
       self.postMessage({ type: 'suggested', raw: m.raw, rows: session.suggest(m.raw) });
     } else if (m.cmd === 'find' && session) {

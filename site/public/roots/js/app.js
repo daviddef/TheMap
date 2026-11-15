@@ -1,6 +1,5 @@
 /* The page: drop a file, hand it to the worker, show the tree, the import report and the places to review.
    Everything from the GEDCOM reaches the DOM through textContent, never innerHTML: it is untrusted text. */
-import { buildPacket } from './contribute.js';
 import { makeSample } from './sample.js';
 import { searchLinks, sends } from './lookup.js';
 import { checklistText, checklistCsv } from './checklist.js';
@@ -37,7 +36,6 @@ function start(bytes, name) {
     else if (m.type === 'error') fail('Sorry, that file could not be read: ' + m.msg);
     else if (m.type === 'done') done(m);
     else if (m.type === 'exported') exported(m);
-    else if (m.type === 'offer') offer(m);
     else if (m.type === 'who') mhWho(m);
     else if (m.type === 'checklist') fixlist(m);
     else if (m.type === 'checklist-failed') { if (window.console) console.error('fix list', m.msg, m.stack); if (!document.getElementById('p-fix').hidden) $('#fsecs').textContent = 'The fix list could not be made for this file: ' + m.msg; }
@@ -56,7 +54,7 @@ function done(m) {
   const stale = !m.build || m.build.pipeline !== BUILD || m.build.model !== BUILD; $('#stale').hidden = !stale;
   last = m; window.RR = { tree: m.tree, atlas: m.atlas, loadNames, links: rrLinks }; anc = m.anc || null; ancStatus(); mhFile = m.mh || null; applyTreeLink();
   const keepTab = $('.tabs [aria-selected=true]')?.dataset.tab || 'canvas';
-  show('work'); chips(m); mountViewer(); report(m); review(m); workbench(m.wb); worker.postMessage({ cmd: 'offer' }); askFix();
+  show('work'); chips(m); mountViewer(); report(m); review(m); workbench(m.wb); askFix();
   tab(openTo || (m.first ? 'canvas' : keepTab)); openTo = null;
 }
 
@@ -214,36 +212,6 @@ function rowEl(it) {
 }
 
 function pick(raw, cand) { $('#busymsg').textContent = 'Redrawing…'; worker.postMessage({ cmd: 'pick', raw, cand }); show('busy'); }
-
-/* ---------- offer places back (opt-in, per item; nothing is sent from here) ---------- */
-let offered = [], contact = null;
-function offer(m) {
-  offered = m.items.map(i => ({ ...i, on: false, text: i.raw }));
-  $('#oheld').textContent = (m.held.livingOnly ? n0(m.held.livingOnly) + ' place texts are used only by living people' : '') + (m.held.livingName ? (m.held.livingOnly ? ' and ' : '') + n0(m.held.livingName) + ' contain the name of a living person' : '') + (m.held.livingOnly || m.held.livingName ? ', and are not listed.' : '');
-  const box = $('#olist'); box.textContent = '';
-  if (!offered.length) box.append(el('p', 'small', 'There is nothing to offer: every place was read, or only living people use the ones that were not.'));
-  offered.forEach(it => {
-    const row = el('div', 'orow'), cb = el('input'), t = el('input'), d = el('div');
-    cb.type = 'checkbox'; cb.setAttribute('aria-label', 'Offer ' + it.raw); t.type = 'text'; t.value = it.text; t.setAttribute('aria-label', 'Place text to offer');
-    cb.onchange = () => { it.on = cb.checked; compose(); }; t.oninput = () => { it.text = t.value; compose(); };
-    d.append(t, el('small', null, it.kind === 'picked' ? 'You chose ' + it.pick.n + (it.pick.region ? ', ' + it.pick.region : '') + ', ' + it.pick.k : (it.iso ? 'country read as ' + it.iso + ' · ' : '') + 'not read' + (it.address ? ' · has a number in it' : '') + (it.named ? ' · has a person\'s name in it' : '') + (it.address || it.named ? ', so it is left out unless you trim it and tick it' : '')));
-    row.append(cb, d); box.append(row); it.cb = cb;
-  });
-  compose();
-}
-$('#onone').onclick = () => { offered.forEach(i => { i.on = false; i.cb.checked = false; }); compose(); };
-$('#oall').onclick = () => { offered.forEach(i => { i.on = !i.address && !i.named; i.cb.checked = i.on; }); compose(); };
-function compose() {
-  const on = offered.filter(i => i.on && i.text.trim()), msg = on.length ? buildPacket(on.map(i => ({ ...i, text: i.text.trim() })), new Date().toISOString().slice(0, 10)) : '';
-  $('#ocount').textContent = on.length + ' ticked'; $('#opreview').value = msg || 'Tick the places you want to offer and the message appears here.';
-  const mail = $('#omail'), ok = !!msg && !!(contact && contact.email) && msg.length <= 1800;
-  mail.setAttribute('aria-disabled', String(!ok));
-  mail.href = ok ? 'mailto:' + contact.email + '?subject=' + encodeURIComponent('Record Atlas: places from Roots & Routes') + '&body=' + encodeURIComponent(msg) : '#';
-  const f = $('#ofile'); if (f.href.startsWith('blob:')) URL.revokeObjectURL(f.href); f.href = msg ? URL.createObjectURL(new Blob([msg], { type: 'text/plain;charset=utf-8' })) : '#';
-  $('#osaid').textContent = msg && msg.length > 1800 ? 'Too long for an email link: copy it or download it.' : (msg && !(contact && contact.email) ? 'No address known here: copy it or download it.' : '');
-}
-$('#ocopy').onclick = async () => { const v = $('#opreview').value; try { await navigator.clipboard.writeText(v); $('#osaid').textContent = 'Copied.'; } catch (e) { $('#opreview').select(); $('#osaid').textContent = 'Select and copy the message above.'; } };
-document.querySelector('[data-tab=offer]').addEventListener('click', async () => { if (contact) return; try { contact = await (await fetch('data/contact.json')).json(); } catch (e) { contact = { email: null }; } compose(); });
 
 /* ---------- workbench ---------- */
 let who = null;

@@ -452,6 +452,10 @@ a.pill.ac{text-decoration:none;cursor:pointer}a.pill.ac:hover,a.pill.ac:focus-vi
 .card .sx{font:900 13px/1 system-ui,sans-serif;margin-left:4px}.card .sx.mo{color:var(--lk-mo)}.card .sx.fa{color:var(--lk-fa)}
 #infoTab.nudge{animation:nudge 1.1s ease-out 1}@keyframes nudge{0%{box-shadow:-2px 2px 0 var(--lk-line),0 0 0 0 var(--lk-accent)}60%{box-shadow:-2px 2px 0 var(--lk-line),0 0 0 12px transparent;background:var(--lk-accent-soft)}100%{box-shadow:-2px 2px 0 var(--lk-line),0 0 0 0 transparent}}
 @media (prefers-reduced-motion:reduce){#infoTab.nudge{animation:none}}
+/* the link box and Ancestry site picker in Options */
+.lk-input{width:100%;box-sizing:border-box;font:inherit;font-size:12.5px;padding:7px 10px;border:2px solid var(--lk-ink);border-radius:10px;background:var(--lk-card);color:var(--lk-ink)}
+select.lk-input{width:auto;padding:4px 8px}
+#info a.lk-btn{text-decoration:none;display:inline-flex;align-items:center}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -1047,7 +1051,7 @@ a.pill.ac{text-decoration:none;cursor:pointer}a.pill.ac:hover,a.pill.ac:focus-vi
   }
 
   function evidenceSummary(M, p) {
-    const g = (x, who) => x === 2 ? `${who} definite` : x === 1 ? `${who} supported` : x === 0 ? `${who} not proven` : `${who} not graded`;
+    const g = (x, who) => x === 2 ? `${who} definite` : x === 1 ? `${who} supported` : x === 0 ? `${who} not proven` : `${who} recorded`;   /* a link with no grade just says it is recorded: "not graded" read as a warning */
     const parts = [];
     if (p.f >= 0) parts.push(g(p.fg, 'father'));
     if (p.m >= 0) parts.push(g(p.mg, 'mother'));
@@ -2513,11 +2517,12 @@ function personPanel() {
   const p = M.byKey.get(keys[0]), c = S.cards.get(keys[0]), a = M.archives[p.a];
   const stats = TC.ancestorStats(M, p.i);
   const link = TC.url(M, p);
-  const parentRow = (q, who, g) => q < 0 ? '' : `<li data-focus="${esc(M.P[q].key)}"><span style="flex:none">${swatch(TC.levelOfGrade(g), colour(p.a)).replace('<svg ', '<svg width="30" height="20" ')}</span><div><b>${who}: ${esc(M.P[q].name)}</b><small>${TC.LEVELS[TC.levelOfGrade(g)].label.toUpperCase()} · ${TC.LEVELS[TC.levelOfGrade(g)].note}</small></div></li>`;
+  const parentRow = (q, who, g) => q < 0 ? '' : `<li data-focus="${esc(M.P[q].key)}"><span style="flex:none">${swatch(TC.levelOfGrade(g), colour(p.a)).replace('<svg ', '<svg width="30" height="20" ')}</span><div><b>${who}: ${esc(M.P[q].name)}</b>${TC.levelOfGrade(g) === 'ungraded' ? '' : `<small>${TC.LEVELS[TC.levelOfGrade(g)].label.toUpperCase()} · ${TC.LEVELS[TC.levelOfGrade(g)].note}</small>`}</div></li>`;
   const kids = p.ch.length, sps = p.sp.map(s => M.P[s].name);
   const brs = (M.bridgesOf.get(p.i) || []);
   return `<h3>${esc(p.name)}</h3>
     <div>${link ? `<a class="pill ac" style="--ac:${a.color}" href="${esc(link)}" target="_blank" rel="noopener" title="Open ${esc(p.name)} in the ${esc(a.name)} archive">${esc(a.name)} archive &nearr;</a>` : `<span class="pill ac" style="--ac:${a.color}">${esc(a.name)}${a.k === 'you' ? '' : ' archive'}</span>`}<span class="pill">${TC.years(p)}</span>${p.occ ? `<span class="pill">${esc(p.occ)}</span>` : ''}</div>
+    ${a.k === 'you' && !p.ghost ? extLinksHTML(p) : ''}
     ${p.ghost ? `<p class="plines lvn">Named in the archive, but there is no record of their own yet: no dates, no places, no sources. ${p.how ? 'How the name is known: ' + esc(p.how) + '.' : ''}</p>
       ${p.sp.length ? `<p class="plines">Named as the spouse of ${p.sp.map(q => `<a href="#" data-focus="${esc(M.P[q].key)}">${esc(M.P[q].name)}</a>`).join(', ')}.</p>` : ''}
       <p class="plines lvn">No parents or children are drawn for a name like this: the archive joins people to each other only from a record of their own.</p>` : ''}
@@ -2531,9 +2536,8 @@ function personPanel() {
     <div${p.ghost ? ' hidden' : ''}>
     <h4>Parents and the evidence for each link</h4>
     ${(p.f >= 0 || p.m >= 0) ? `<ul class="steps">${parentRow(p.f, 'Father', p.fg)}${parentRow(p.m, 'Mother', p.mg)}</ul>` : `<p>No parent recorded in ${esc(a.name)}.</p>`}
-    ${a.graded ? '' : `<p style="color:var(--lk-mute)"><small>${esc(a.name)} records no evidence grades, so its links are shown as NOT GRADED: neither proof nor doubt.</small></p>`}
     <p>${stats.count ? `<b>${stats.count}</b> ancestor${stats.count > 1 ? 's' : ''} on record, up to <b>${stats.depth}</b> generation${stats.depth > 1 ? 's' : ''} back (in ${esc(a.name)} alone).` : 'No ancestors on record in this archive.'}
-      ${kids ? `<br><b>${kids}</b> child${kids > 1 ? 'ren' : ''} on record.` : ''}${sps.length ? `<br>Spouse${sps.length > 1 ? 's' : ''}: ${esc(sps.join(', '))} <small>(not graded)</small>` : ''}</p>
+      ${kids ? `<br><b>${kids}</b> child${kids > 1 ? 'ren' : ''} on record.` : ''}${sps.length ? `<br>Spouse${sps.length > 1 ? 's' : ''}: ${esc(sps.join(', '))}` : ''}</p>
     ${brs.length ? `<h4>Possibly the same person in another archive</h4>${brs.map(b => { const o = M.P[TC.bridgeOther(b, p.i)], st = TC.bridgeState(M, b); return `<div class="warnbox${TC.bridgeDoubtful(b) ? ' bad' : ''}"><b>${esc(o.name)}</b> in ${esc(M.archives[o.a].name)} ${TC.years(o)}${o.bp ? ' · ' + esc(o.bp) : ''}<br><small>${esc(TC.bridgeNotes(b).join(' · '))}</small><div class="row"><button class="lk-btn is-small" data-br="${esc(b.id)}" data-do="show">${S.cards.has(o.key) ? 'Find' : 'Show'}</button>${st === 'rejected' ? `<button class="lk-btn is-small" data-br="${esc(b.id)}" data-do="restore">Unlinked: restore</button>` : `<button class="lk-btn is-small${st === 'confirmed' ? ' on' : ''}" data-br="${esc(b.id)}" data-do="confirm">${st === 'confirmed' ? 'Confirmed' : 'Confirm same person'}</button><button class="lk-btn is-small is-danger" data-br="${esc(b.id)}" data-do="unlink">Unlink</button>`}</div></div>`; }).join('')}` : ''}
     <div class="row one"><button class="lk-btn is-small" data-do="up">${icon('up', 'lk-icon')} Parents</button><button class="lk-btn is-small is-primary" data-do="upall">${icon('upall', 'lk-icon')} All the way back</button><button class="lk-btn is-small" data-do="dn">${icon('dn', 'lk-icon')} Children</button></div></div>`;
 }
@@ -2588,11 +2592,32 @@ function pathPanel() {
     <h4>The chain, step by step</h4><ul class="steps">${stepRows}</ul>
     <div class="row"><button class="lk-btn is-small" data-do="fitpath">Fit to view</button><button class="lk-btn is-small" data-do="clearpath">Clear path</button></div>`;
 }
+/* Links back to the tree the visitor's file came from (EMBED only): the Roots & Routes page, or the standalone page, owns the link and the file's header and hands
+   a small object over in memory (window.parent.RR.links). The canvas asks it for a person's address and, from Options, passes a pasted link back. Nothing is sent. */
+const RL = () => (EMBED && window.parent && window.parent.RR && window.parent.RR.links) || null;
+function extLinksHTML(p) {
+  const L = RL(); if (!L) return '';
+  let u = null; try { u = L.url(p.id, p.living ? '' : p.name); } catch (e) { u = null; }
+  const a = (href, t, tip) => `<a class="lk-btn is-small" href="${esc(href)}" target="_blank" rel="noopener noreferrer" title="${esc(tip)}">${t} &nearr;</a>`;
+  if (u) return `<div class="row one">${u.mh ? a(u.mh, 'MyHeritage', 'Open this profile on MyHeritage') : ''}${u.tree ? a(u.tree, 'In the tree', 'Open this person in the tree on MyHeritage') : ''}${u.anc ? a(u.anc, 'Ancestry', 'Open this person in the Ancestry tree') : ''}</div>`;
+  const g = L.get();
+  return g.mhFile ? `<p class="plines lvn"><small>Add your MyHeritage link in <a href="#" data-tab-go="options">Options</a> and each person here opens on MyHeritage.</small></p>` : '';
+}
+function linksOptionsHTML() {
+  const L = RL(); if (!L) return '';
+  const g = L.get(), sites = ['com.au', 'com', 'co.uk', 'ca'];
+  return `<h4>Links back to your tree</h4>
+    <p class="plines"><small>Paste a profile or tree link for any one person from your MyHeritage tree. Everyone in this file then gets an “Open on MyHeritage” button. Nothing is sent.</small></p>
+    <input type="text" id="lkIn" class="lk-input" value="${esc(g.text)}" placeholder="https://www.myheritage.com/profile-…" autocomplete="off" spellcheck="false" aria-label="MyHeritage profile or tree link">
+    <p class="plines" id="lkSt"><small>${esc(g.note || (g.mh ? 'Links are on.' : 'Off: no link yet.'))}</small></p>
+    ${g.anc ? `<p class="plines"><small>This is an Ancestry export (tree ${esc(String(g.ancTree))}), so every person already links into it. Site: </small><select id="lkAnc" class="lk-input" aria-label="Ancestry site">${sites.map(x => `<option value="${x}"${x === g.ancSite ? ' selected' : ''}>ancestry.${x}</option>`).join('')}</select></p>` : ''}`;
+}
 function optionsPanel() {
   const t = (id, on, b, i) => `<button class="lk-toggle${on ? ' on' : ''}" role="switch" aria-checked="${on}" data-opt="${id}"><span class="stx"><b>${b}</b><i>${i}</i></span><span class="knob"></span></button>`;
   const th = document.documentElement.getAttribute('data-theme');
   return `<h3>Options</h3><div class="opt">${t('suggested', S.opts.suggested, 'Pathways may use suggested matches', 'A suggested same-person bridge costs more than a real link, and is labelled “suggested”.')}</div>
     <div class="opt">${t('stopNP', S.opts.stopAtNotProven, 'All the way back stops at not-proven links', 'Off: it follows grade-0 (index entry only) links too, drawn dashed. On: it stops there and says so.')}</div>
+    ${linksOptionsHTML()}
     <h4>Look</h4><div class="row">${[['sticker', 'Sticker'], ['paper', 'Paper'], ['ground', 'Ground (dark)']].map(([k, n]) => `<button class="lk-btn is-small${th === k ? ' on' : ''}" data-theme="${k}">${n}</button>`).join('')}</div>
     <h4>This build</h4><p style="color:var(--lk-soft);font-weight:700">${M.P.length.toLocaleString()} people from ${NA} archives, corpus built ${esc(M.built)}. ${M.bridgeGroups} candidate same-person groups, ${M.bridges.length} cross-archive pairs, none merged. Living people are not in the data. Stored only in this browser.</p>
     <div class="row"><button class="lk-btn is-small is-danger" data-do="clear">Clear the canvas</button></div>`;
@@ -2602,8 +2627,11 @@ function renderInfo() {
   const body = S.tab === 'person' ? personPanel() : S.tab === 'next' ? nextPanel() : S.tab === 'fix' ? fixPanel() : S.tab === 'path' ? pathPanel() : S.tab === 'legend' ? legendHTML() : optionsPanel();
   el.innerHTML = `<div class="ih">${tabs.map(([k, n]) => `<button class="lk-tab${S.tab === k ? ' on' : ''}" data-tab="${k}">${n}${k === 'path' && S.path ? ' &bull;' : ''}</button>`).join('')}<span style="flex:1"></span><button class="lk-tab" data-tab="close" title="Close panel" aria-label="Close panel">&times;</button></div><div class="ib">${body}</div>`;
   if (S.infoOpen !== false) el.classList.add('on');
+  const li = $('#lkIn'); if (li && RL()) li.oninput = () => { const st = RL().set(li.value); const n = $('#lkSt'); if (n) n.innerHTML = '<small>' + esc(st || (li.value.trim() ? '' : 'Off: no link yet.')) + '</small>'; };
+  const ls = $('#lkAnc'); if (ls && RL()) ls.onchange = () => RL().setSite(ls.value);
 }
 $('#info').addEventListener('click', e => {
+  const go = e.target.closest('[data-tab-go]'); if (go) { e.preventDefault(); S.tab = go.dataset.tabGo; renderInfo(); return; }
   const tab = e.target.closest('[data-tab]');
   if (tab) { if (tab.dataset.tab === 'close') { S.infoOpen = false; $('#info').classList.remove('on'); syncButtons(); return; } S.tab = tab.dataset.tab; renderInfo(); return; }
   const opt = e.target.closest('[data-opt]');
@@ -2688,7 +2716,11 @@ function wireToolbar() {
   const set = (id, name) => { const b = $(id); if (b) b.innerHTML = icon(name); };
   set('#bShelf', 'search'); $('#si').innerHTML = icon('search', ''); set('#bUndo', 'undo'); set('#bFit', 'fit'); set('#bRel', 'relate'); set('#bInfo', 'info'); set('#bTheme', 'theme'); set('#bClear', 'clear'); set('#bMore', 'gear');
   set('#zIn', 'plus'); set('#zOut', 'minus');
-  if (EMBED) addEventListener('message', e => { if (e.origin !== location.origin || !e.data || !e.data.tcFix) return; refreshAll(); renderInfo(); syncButtons(); });
+  if (EMBED) addEventListener('message', e => {
+  if (e.origin !== location.origin || !e.data) return;
+  if (e.data.tcLinks) { if (S.tab !== 'options') renderInfo(); return; }   // not while the Options box is being typed in: a redraw would take the cursor away
+  if (!e.data.tcFix) return; refreshAll(); renderInfo(); syncButtons();
+});
   $('#bShelf').onclick = () => { document.documentElement.classList.toggle('shelfoff'); dockH(); };
   $('#bUndo').onclick = undo;
   $('#bFit').onclick = () => fit();

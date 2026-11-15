@@ -54,7 +54,7 @@ const hideLiv = () => $('#hideliving').checked;
 $('#hideliving').onchange = () => { $('#fliving').checked = !hideLiv(); worker && worker.postMessage({ cmd: 'living', hide: hideLiv() }); };
 function done(m) {
   const stale = !m.build || m.build.pipeline !== BUILD || m.build.model !== BUILD; $('#stale').hidden = !stale;
-  last = m; window.RR = { tree: m.tree, atlas: m.atlas, loadNames }; anc = m.anc || null; ancStatus(); mhFile = m.mh || null; applyTreeLink();
+  last = m; window.RR = { tree: m.tree, atlas: m.atlas, loadNames, links: rrLinks }; anc = m.anc || null; ancStatus(); mhFile = m.mh || null; applyTreeLink();
   const keepTab = $('.tabs [aria-selected=true]')?.dataset.tab || 'canvas';
   show('work'); chips(m); mountViewer(); report(m); review(m); workbench(m.wb); worker.postMessage({ cmd: 'offer' }); askFix();
   tab(openTo || (m.first ? 'canvas' : keepTab)); openTo = null;
@@ -475,7 +475,16 @@ function applyTreeLink() {
   });
 }
 function ancStatus() { $('#ancstat').textContent = anc ? 'This is an Ancestry export (tree ' + anc.tree + '): every person has a link into that tree on ancestry.' + ancSite + ', read from the file itself. Nothing is sent.' : 'Not an Ancestry export (or no tree number in its header), so no Ancestry links are made.'; }
-function refreshMh() { pushMh(); drawFix(); if (lastInfo) person(lastInfo); }
+/* what the Tree canvas needs to open a person on MyHeritage or Ancestry, handed over in memory (window.RR.links): this page owns the link and the file's
+   header, the canvas only asks for a person's address and, from its Options tab, passes a pasted link back through set(). Nothing is sent anywhere. */
+const rrLinks = {
+  get: () => ({ mh: !!mhc, mhFile: !!mhFile, text: $('#mhin').value, note: $('#mhstat').textContent, anc: !!anc, ancTree: anc ? anc.tree : '', ancSite }),
+  url: (id, name) => { const p = profileUrl(mhc, id, name), t = treeUrl(mhc, id), a = personUrl(anc, id, ancSite); return p || a ? { mh: p, tree: t, anc: a } : null; },
+  set: text => { const i = $('#mhin'); i.value = text; i.oninput({ target: i }); return $('#mhstat').textContent; },
+  setSite: v => setSite(v),
+};
+function tellCanvas() { try { const f = document.getElementById('canvasv'); if (f && f.contentWindow) f.contentWindow.postMessage({ tcLinks: 1 }, location.origin); } catch (e) { /* not loaded yet */ } }
+function refreshMh() { pushMh(); drawFix(); if (lastInfo) person(lastInfo); tellCanvas(); }
 if (mhc) mhStatus();
 
 function fixRow(s, i) {
@@ -658,7 +667,7 @@ function saveAs(name, text, type) {
 }
 $('#ftext').onclick = () => fix && saveAs('fix-list.txt', checklistText(fix, new Date().toISOString().slice(0, 10)), 'text/plain;charset=utf-8');
 $('#fcollapse').onchange = () => drawFix();
-function setSite(v) { ancSite = v; saveSite(v); $('#fanc').value = v; $('#mhanc').value = v; askFix(); drawFix(); if (lastInfo) person(lastInfo); ancStatus(); }
+function setSite(v) { ancSite = v; saveSite(v); $('#fanc').value = v; $('#mhanc').value = v; askFix(); drawFix(); if (lastInfo) person(lastInfo); ancStatus(); tellCanvas(); }
 $('#fanc').value = $('#mhanc').value = ancSite; $('#fanc').onchange = () => setSite($('#fanc').value); $('#mhanc').onchange = () => setSite($('#mhanc').value);
 /* The PDF is the browser's own "Save as PDF" over a print-ready copy of the list, built here on the device from the same rows. Nothing is uploaded and
    no library or font is fetched. The copy is added to the page for the moment of printing and removed after. */

@@ -10,6 +10,11 @@ const base = new URL('/roots/', location.href).href;   // the reader fetches its
 const STAMP = Date.now();                              // a fresh canvas each time the page is opened, never an old cached copy
 let worker = null, hide = false, example = true;
 
+/* The Atlas's own name catalogues, for the canvas's search by any form of a name and its panel of name forms: two static files from this site, the same for
+   everyone. Nothing about the tree is sent. Fetched once, when the canvas first asks. */
+let namesP = null;
+const loadNames = () => namesP || (namesP = Promise.all(['/given-names.json', '/surname-families.json'].map(u => fetch(u).then(r => { if (!r.ok) throw new Error(u); return r.json(); }))).then(([gn, sn]) => ({ gn, sn })).catch(e => { namesP = null; throw e; }));
+
 function say(text, isError) { const m = $('#msg'); m.textContent = text; m.hidden = !text; m.classList.toggle('err', !!isError); }
 
 function mount() {
@@ -34,7 +39,7 @@ function start(bytes) {
     else if (m.type === 'error') say('Sorry, that file could not be read: ' + m.msg, true);
     else if (m.type === 'done') {
       if (m.first && hide) { say('Hiding living people…'); worker.postMessage({ cmd: 'living', hide: true }); return; }   // keep the choice for the next file
-      window.RR = { tree: m.tree, atlas: m.atlas };
+      window.RR = { tree: m.tree, atlas: m.atlas, loadNames };
       say(''); mount();
       worker.postMessage({ cmd: 'checklist', living: !hide, ancestry: 'com' });   // the fix list, for the "!" marks; it follows a moment after the canvas is drawn
     }

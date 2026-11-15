@@ -433,6 +433,23 @@ a.pill.ac{text-decoration:none;cursor:pointer}a.pill.ac:hover,a.pill.ac:focus-vi
 
 /* the empty drop zones: centred, and a wrapped line is balanced (the right-hand padding is only needed once a person is in, for the remove button) */
 #rz .rzs.empty{justify-content:center;text-align:center;padding:4px 10px;text-wrap:balance;line-height:1.25}
+
+/* other forms of a name */
+.res .via{font:800 10px Nunito,system-ui;color:var(--lk-accent);margin-top:-1px}
+#info .nfs details{margin:3px 0;border-bottom:1px dashed var(--lk-faint);padding-bottom:3px}
+#info .nfs summary{cursor:pointer;font-weight:700}#info .nfs summary small{color:var(--lk-soft);font-weight:700}
+#info .nfl{display:flex;gap:8px;margin:3px 0;line-height:1.35}#info .nfl i{flex:0 0 74px;font-style:normal;font:800 10.5px Nunito,system-ui;text-transform:uppercase;letter-spacing:.04em;color:var(--lk-soft);padding-top:1px}
+#info .nfl span{min-width:0;overflow-wrap:anywhere}#info .nfl .sm{font-weight:800}#info .nfl .ld{color:var(--lk-soft)}
+#info .nfn{font-size:11px;color:var(--lk-soft);margin:4px 0 0}
+
+/* mother and father: one colour each, on the line and on the card */
+:root{--lk-mo:#9B3F86;--lk-fa:#2A7A8C}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--lk-mo:#D58BC5;--lk-fa:#6FC1D2}}
+:root[data-theme="dark"]{--lk-mo:#D58BC5;--lk-fa:#6FC1D2}
+#edges .role circle{fill:var(--lk-board);stroke:var(--lk-mo);stroke-width:2}#edges .role.fa circle{stroke:var(--lk-fa)}
+#edges .role text{text-anchor:middle;font:900 12px system-ui,sans-serif;fill:var(--lk-mo)}#edges .role.fa text{fill:var(--lk-fa)}
+#edges .role.dimmed{opacity:.25}
+.card .sx{font:900 13px/1 system-ui,sans-serif;margin-left:4px}.card .sx.mo{color:var(--lk-mo)}.card .sx.fa{color:var(--lk-fa)}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -651,13 +668,72 @@ a.pill.ac{text-decoration:none;cursor:pointer}a.pill.ac:hover,a.pill.ac:focus-vi
         const q2 = squash(x); if (q2) t.add(q2);
       }
       const g = squash(p.given); if (g) t.add(g);
+      p.givenToks = new Set(fold(p.given).split(' ').concat(foldSplit(p.given).split(' ')).filter(Boolean));
       p.toks = [...t];
       p.surToks = new Set(fold(p.sur).split(' ').concat(foldSplit(p.sur).split(' '), s ? [s] : []));
       p.full = squash(p.given + p.sur);
       p.nf = a;
     });
   }
-  function scoreOf(p, qs) { /* -1 = no match */
+  /* ---------------- the Atlas's name catalogues ----------------
+   * Every known form of a given name (Josip = Josephus = Giuseppe = Joseph ...) and of a surname (Defranceschi = Defranceski = Defrančeski), read from
+   * the Record Atlas's own catalogues (given-names.json, surname-families.json). This canvas keeps no table of its own: it is handed the catalogue
+   * (filtered to the names it holds, or the whole file for a visitor's own tree) and builds a lookup from it. A family is ONE NAME across languages.
+   * Statuses: s same, a attested, r rule, l lead (plausible, never met on a record: found by search, marked with a degree sign, never a finding).
+   * A "case-by-case" form and anything marked not-the-same is left out. A lead is SHOWN (marked) but never searched by: it is what to try, not what the records say. */
+  const STC = { same: 's', attested: 'a', rule: 'r', lead: 'l' };
+  function buildNames(raw) {
+    const N = { gn: [], sn: [], gnIdx: new Map(), snIdx: new Map(), gnAll: new Map(), snAll: new Map(), langs: new Map() };
+    if (!raw) return N;
+    for (const l of ((raw.gn && raw.gn.languages) || [])) N.langs.set(l.key, { label: l.label || l.key, core: !!l.core });
+    const add = (idx, fam, form) => { const k = fold(form); if (!k) return; const sq = k.replace(/ /g, ''); for (const x of new Set([k, sq])) { if (!idx.has(x)) idx.set(x, new Set()); idx.get(x).add(fam); } };
+    for (const r of ((raw.gn && raw.gn.rows) || [])) {
+      const langs = [];
+      for (const [lk, list] of Object.entries(r.langs || {})) {
+        const seen = new Set(), fs = [];
+        for (const f of list) { const c = STC[f.status]; if (!c || !f.form) continue; const k = fold(f.form); if (seen.has(k)) continue; seen.add(k); fs.push([f.form, c, f.seen || 0]); }
+        if (fs.length) langs.push([lk, fs]);
+      }
+      if (!langs.length) continue;
+      const fam = N.gn.length; N.gn.push({ canon: r.canon, id: r.id, langs });
+      for (const [, fs] of langs) for (const f of fs) { add(N.gnAll, fam, f[0]); if (f[1] !== 'l') add(N.gnIdx, fam, f[0]); }
+    }
+    for (const r of ((raw.sn && raw.sn.rows) || [])) {
+      const fs = (r.forms || []).filter(f => STC[f[1]]).map(f => [f[0], STC[f[1]]]);
+      if (!fs.length) continue;
+      const fam = N.sn.length; N.sn.push({ canon: r.name, id: r.id, forms: fs });
+      for (const f of fs) { add(N.snAll, fam, f[0]); if (f[1] !== 'l') add(N.snIdx, fam, f[0]); }
+    }
+    return N;
+  }
+  /* the other forms of one query word: { given: Set of folded forms, sur: Set }, empty when the catalogue does not know it */
+  function variantsOf(M, tok) {
+    const N = M.N; if (!N) return null;
+    const out = { given: new Set(), sur: new Set() };
+    for (const fam of (N.gnIdx.get(tok) || [])) for (const [, fs] of N.gn[fam].langs) for (const f of fs) { if (f[1] === 'l') continue; const k = fold(f[0]); out.given.add(k); out.given.add(k.replace(/ /g, '')); }
+    for (const fam of (N.snIdx.get(tok) || [])) for (const f of N.sn[fam].forms) { if (f[1] === 'l') continue; const k = fold(f[0]); out.sur.add(k); out.sur.add(k.replace(/ /g, '')); }
+    out.given.delete(tok); out.sur.delete(tok);
+    return out.given.size || out.sur.size ? out : null;
+  }
+  /* for the person panel: the family of their given name and of their surname, every form, by language */
+  function nameForms(M, p) {
+    const N = M.N; if (!N || !p) return null;
+    const pick = (idx, toks, test) => { let best = null, bs = -1; for (const t of toks) for (const fam of (idx.get(t) || [])) { const sc = test(fam); if (sc > bs) { bs = sc; best = fam; } } return best; };
+    const st = [...new Set([squash(p.sur), ...(p.surToks || [])])].filter(Boolean);
+    const gf = p.given && !p.living ? pick(N.gnAll, [fold(p.given).split(' ')[0]], fam => N.gn[fam].langs.reduce((n, l) => n + l[1].length, 0)) : null;
+    const sf = p.sur ? pick(N.snAll, st, fam => N.sn[fam].forms.length) : null;
+    if (gf == null && sf == null) return null;
+    const out = {};
+    if (gf != null) {
+      const f = N.gn[gf], core = l => (N.langs.get(l) || {}).core ? 0 : 1;
+      out.given = { canon: f.canon, langs: f.langs.slice().sort((x, y) => core(x[0]) - core(y[0]) || x[0].localeCompare(y[0])).map(([k, fs]) => ({ key: k, label: (N.langs.get(k) || {}).label || k, forms: fs })) };
+    }
+    if (sf != null) out.sur = { canon: N.sn[sf].canon, forms: N.sn[sf].forms };
+    return out;
+  }
+  function attachNames(M, raw) { M.N = buildNames(raw); return M.N; }
+
+  function scoreOf(p, qs, alts, via) { /* -1 = no match. alts: Map(query word -> variantsOf); via collects the word a person was found by a variant of */
     let score = 0;
     for (const t of qs) {
       if (/^\d{3,4}$/.test(t)) {
@@ -670,6 +746,16 @@ a.pill.ac{text-decoration:none;cursor:pointer}a.pill.ac:hover,a.pill.ac:focus-vi
       for (const pt of p.toks) {
         if (pt === t) { best = Math.max(best, p.surToks.has(pt) ? 11 : 10); if (best >= 11) break; }
         else if (pt.startsWith(t)) best = Math.max(best, p.surToks.has(pt) ? 7 : 6);
+      }
+      /* not found as typed: one of the other known forms of the word (Josephus -> Josip) found by given name or by surname */
+      if (best < 8 && alts) {
+        const v = alts.get(t);
+        if (v) {
+          let hit = false;
+          if (v.sur.size) for (const x of p.surToks) if (v.sur.has(x)) { best = Math.max(best, 9); hit = true; break; }
+          if (!hit && v.given.size) for (const x of p.givenToks) if (v.given.has(x)) { best = Math.max(best, 8); hit = true; break; }
+          if (hit && via) via.push(t);
+        }
       }
       if (!best) return -1;
       score += best;
@@ -687,11 +773,14 @@ a.pill.ac{text-decoration:none;cursor:pointer}a.pill.ac:hover,a.pill.ac:focus-vi
     /* a spaced particle and a joined surname are one name ("de Franceschi" = "Defranceschi"): also try each adjacent pair of query words joined */
     const variants = [qs];
     for (let i = 0; i + 1 < qs.length; i++) if (!/^\d+$/.test(qs[i]) && !/^\d+$/.test(qs[i + 1])) variants.push(qs.slice(0, i).concat(qs[i] + qs[i + 1], qs.slice(i + 2)));
-    const hits = [];
+    const hits = [], viaOf = new Map();
+    const alts = new Map();
+    if (M.N) for (const v of variants) for (const t of v) if (!/^\d+$/.test(t) && !alts.has(t)) { const a2 = variantsOf(M, t); if (a2) alts.set(t, a2); }
     for (const p of M.P) {
-      let top = -1;
-      for (const v of variants) { const s0 = scoreOf(p, v); if (s0 > top) top = s0; }
+      let top = -1, via = [];
+      for (const v of variants) { const vv = []; const s0 = scoreOf(p, v, alts, vv); if (s0 > top) { top = s0; via = vv; } }
       if (top < 0) continue;
+      if (via.length) viaOf.set(p.i, via[0]);
       let score = top;
       if (qs.length > 1 && p.nf.startsWith(qs.join(' '))) score += 6;
       if (qs.length > 1 && p.full.startsWith(joined)) score += 3;
@@ -701,7 +790,7 @@ a.pill.ac{text-decoration:none;cursor:pointer}a.pill.ac:hover,a.pill.ac:focus-vi
       hits.push({ p, score: score + (p.by != null ? 0.5 : 0) + Math.min(2, (p.ch.length + (p.f >= 0) + (p.m >= 0)) * 0.2) });
     }
     hits.sort((x, y) => y.score - x.score || x.p.nf.localeCompare(y.p.nf) || (x.p.by || 0) - (y.p.by || 0));
-    return { list: hits.slice(0, limit).map(h => h.p), total: hits.length, perArchive: per, tokens: qs };
+    return { list: hits.slice(0, limit).map(h => h.p), total: hits.length, perArchive: per, tokens: qs, via: viaOf };
   }
 
   /* ---------------- same-person candidates (bridges) ---------------- */
@@ -986,7 +1075,7 @@ a.pill.ac{text-decoration:none;cursor:pointer}a.pill.ac:hover,a.pill.ac:focus-vi
   }
   function url(M, p) { return p.page ? 'https://' + M.archives[p.a].host + p.page : ''; }
 
-  const API = { fold, foldSplit, squash, build, search, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful,
+  const API = { fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful,
     placeAt, neighbours, edgeCost, parentLinks, ancestorStats, stopReason, otherSideHasParents, evidenceSummary, years, url, levelOfGrade, LEVELS, kinshipOps, opsOf, reverseOps, bloodTerm, siblingKind, archivesOnPath, ord };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TC = API;
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -1480,7 +1569,7 @@ function cardInner(c) {
     return `<button class="brc" style="--bc:${colour(o.a)}" data-act="br" data-b="${esc(b.id)}" title="${st === 'confirmed' ? 'Confirmed' : 'Suggested'} same person in ${esc(M.archives[o.a].name)} (${esc(TC.bridgeNotes(b).join(', '))}). Click to add them to the canvas, bridged, not merged.">&asymp; ${esc(M.archives[o.a].name)}</button>`;
   }).join('') + (brs.length > 1 ? `<button class="brc more" style="--bc:var(--lk-accent)" data-act="brs" title="${brs.length - 1} more possible matches: open the Person panel">+${brs.length - 1}</button>` : '');
   let h = `<div class="cb" title="${esc(p.name)} · ${esc(a.name)} archive${p.occ ? ' · ' + esc(p.occ) : ''} · ${esc(TC.evidenceSummary(M, p))}"><div class="nm">${esc(p.name)}</div><div class="yr">${TC.years(p)}${place}</div>
-    <div class="meta"><span class="ar">${esc(a.name)}</span>${chips}<span class="seals">${seals.join('')}</span></div></div>`;
+    <div class="meta"><span class="ar">${esc(a.name)}</span>${p.sex === 'f' || p.sex === 'm' ? `<span class="sx ${p.sex === 'f' ? 'mo' : 'fa'}" title="${p.sex === 'f' ? 'Female' : 'Male'}">${p.sex === 'f' ? '&#9792;' : '&#9794;'}&#xFE0E;</span>` : ''}${chips}<span class="seals">${seals.join('')}</span></div></div>`;
   { const fx = fixOf(p); if (fx) h += `<button class="fxb" data-act="fixes" title="${fx.length} ${fx.length === 1 ? 'thing' : 'things'} on your fix list for ${esc(p.name)}: click to see what and how to fix it" aria-label="${fx.length} on the fix list">!</button>` ;  }
   /* ancestors */
   const parentCards = [p.f, p.m].filter(q => q >= 0 && !cardOfPerson(q));
@@ -1852,6 +1941,11 @@ function pathD(x0, y0, x1, y1) { /* a soft S curve from (x0,y0) to (x1,y1), leav
 function sealG(x, y, lv, col, title) {
   return `<g class="seal" transform="translate(${f1(x)} ${f1(y)})" style="pointer-events:all;cursor:help"><circle r="9.5" fill="var(--lk-board)" opacity=".92"/>${sealShape(lv, col)}<title>${esc(title)}</title></g>`;
 }
+/* mother or father: a small round mark beside the evidence seal on each parent line, so which parent a line comes from can be read without hovering */
+function roleG(x, y, via, parent, child) {
+  const m = via === 'm';
+  return `<g class="role ${m ? 'mo' : 'fa'}" transform="translate(${f1(x)} ${f1(y)})" style="pointer-events:all;cursor:help"><circle r="8"/><text y="4.6">${m ? '&#9792;' : '&#9794;'}&#xFE0E;</text><title>${esc(M.P[parent].name)} is the ${m ? 'mother' : 'father'} of ${esc(M.P[child].name)}</title></g>`;
+}
 function linkTitle(child, parent, via, lv) {
   return `${M.P[child].name} → ${via === 'f' ? 'father' : via === 'm' ? 'mother' : 'parent'} ${M.P[parent].name}: ${TC.LEVELS[lv].label.toUpperCase()} (${TC.LEVELS[lv].note})`;
 }
@@ -1886,6 +1980,8 @@ function drawEdges() {
       out.push(`<g class="badge${dimOf(fid)}" transform="translate(${f1(tx)} ${f1(by2)})" data-join="${p.f},${p.m}" data-child="${c.i}"><circle class="bg" r="11"/><text y="4.3" style="font-size:${married ? 12 : 15}px">${married ? '&#9901;' : '+'}</text><title>${married ? 'Recorded spouses' : 'Two recorded parents of the child below (not a claim that they married)'} Click to bring both parents into view.</title></g>`);
       out.push(sealG(cx(F), (F.y + H + by) / 2, lvF, col, linkTitle(c.i, p.f, 'f', lvF)).replace('class="seal"', 'class="seal' + dimOf(fid) + '"'));
       out.push(sealG(cx(Mo), (Mo.y + H + by) / 2, lvM, col, linkTitle(c.i, p.m, 'm', lvM)).replace('class="seal"', 'class="seal' + dimOf(mid) + '"'));
+      out.push(roleG(cx(F) + 19, (F.y + H + by) / 2, 'f', p.f, c.i).replace('class="role', 'class="role' + dimOf(fid)));
+      out.push(roleG(cx(Mo) + 19, (Mo.y + H + by) / 2, 'm', p.m, c.i).replace('class="role', 'class="role' + dimOf(mid)));
     } else {
       [[F, fid, lvF, 'f', p.f], [Mo, mid, lvM, 'm', p.m]].forEach(([P, id, lv, via, q]) => {
         if (!P) return;
@@ -1894,6 +1990,7 @@ function drawEdges() {
         add(id, d, EVCLS[lv], col);
         const mx = (x0 + x1) / 2, my = P.y + H < c.y - 4 ? (y0 + y1) / 2 : (P.y + c.y) / 2 + H / 2;
         out.push(sealG(mx, my, lv, col, linkTitle(c.i, q, via, lv)).replace('class="seal"', 'class="seal' + dimOf(id) + '"'));
+        out.push(roleG(mx + 19, my, via, q, c.i).replace('class="role', 'class="role' + dimOf(id)));
       });
     }
   });
@@ -2165,9 +2262,9 @@ function renderTabs() {
 }
 $('#q').addEventListener('input', () => runSearch());
 $('#q').addEventListener('keydown', e => { if (e.key === 'Enter' && lastResults[0]) addFromResult(lastResults[0]); if (e.key === 'Escape') { e.target.value = ''; runSearch(); e.target.blur(); } });
-function resHTML(p) {
+function resHTML(p, via) {
   const on = S.cards.has(p.key), a = M.archives[p.a];
-  return `<div class="res${on ? ' on' : ''}" data-i="${p.i}" style="--ac:${a.color}" title="${esc(p.name)} · ${esc(a.name)} · ${esc(TC.evidenceSummary(M, p))}"><div class="n">${esc(p.name)}</div><div class="y"><span class="ac">${esc(a.name)}</span>${TC.years(p)}${p.bp ? ' · ' + esc(p.bp) : ''}</div><div class="e">${esc(TC.evidenceSummary(M, p))}</div>${on ? '<span class="mk">&#10003;</span>' : ''}</div>`;
+  return `<div class="res${on ? ' on' : ''}" data-i="${p.i}" style="--ac:${a.color}" title="${esc(p.name)} · ${esc(a.name)} · ${esc(TC.evidenceSummary(M, p))}"><div class="n">${esc(p.name)}</div>${via ? `<div class="via" title="Found as another form of this name, from the Record Atlas's name catalogue">as “${esc(via.charAt(0).toUpperCase() + via.slice(1))}”</div>` : ''}<div class="y"><span class="ac">${esc(a.name)}</span>${TC.years(p)}${p.bp ? ' · ' + esc(p.bp) : ''}</div><div class="e">${esc(TC.evidenceSummary(M, p))}</div>${on ? '<span class="mk">&#10003;</span>' : ''}</div>`;
 }
 function runSearch() {
   const q = $('#q').value;
@@ -2179,7 +2276,7 @@ function runSearch() {
       <button class="lk-btn is-small" data-ex="sestan">Šestan</button> <button class="lk-btn is-small" data-ex="catherine tersia">Catherine Tersia</button> <button class="lk-btn is-small" data-ex="de franceschi">de Franceschi</button> <button class="lk-btn is-small" data-ex="brailey">Brailey</button></div>`;
     return;
   }
-  sh.innerHTML = r.list.length ? r.list.map(resHTML).join('') + (r.total > r.list.length ? `<div class="none">+${r.total - r.list.length} more: type more of the name</div>` : '')
+  sh.innerHTML = r.list.length ? r.list.map(p => resHTML(p, r.via && r.via.get(p.i))).join('') + (r.total > r.list.length ? `<div class="none">+${r.total - r.list.length} more: type more of the name</div>` : '')
     : `<div class="none">No one matches “${esc(q)}” in the ${S.filter.size} archive${S.filter.size === 1 ? '' : 's'} being searched${S.filter.size < NA ? '; ' + (r.perArchive.reduce((s, n) => s + n, 0) - r.total) + ' match in archives that are switched off' : ''}. Accents, case, spaces and hyphens do not matter.</div>`;
   sh.scrollLeft = 0;
 }
@@ -2421,6 +2518,7 @@ function personPanel() {
     <div class="row">
       ${p.living || p.ghost ? '' : `<button class="lk-btn is-small is-primary" data-do="next">Where to from here</button>`}
       ${c ? `<button class="lk-btn is-small" data-do="rel">${icon('relate', 'lk-icon')} How related to…</button>` : ''}</div>
+    ${nameFormsHTML(p)}
     <h4>Parents and the evidence for each link</h4>
     ${(p.f >= 0 || p.m >= 0) ? `<ul class="steps">${parentRow(p.f, 'Father', p.fg)}${parentRow(p.m, 'Mother', p.mg)}</ul>` : `<p>No parent recorded in ${esc(a.name)}.</p>`}
     ${a.graded ? '' : `<p style="color:var(--lk-mute)"><small>${esc(a.name)} records no evidence grades, so its links are shown as NOT GRADED: neither proof nor doubt.</small></p>`}
@@ -2428,6 +2526,28 @@ function personPanel() {
       ${kids ? `<br><b>${kids}</b> child${kids > 1 ? 'ren' : ''} on record.` : ''}${sps.length ? `<br>Spouse${sps.length > 1 ? 's' : ''}: ${esc(sps.join(', '))} <small>(not graded)</small>` : ''}</p>
     ${brs.length ? `<h4>Possibly the same person in another archive</h4>${brs.map(b => { const o = M.P[TC.bridgeOther(b, p.i)], st = TC.bridgeState(M, b); return `<div class="warnbox${TC.bridgeDoubtful(b) ? ' bad' : ''}"><b>${esc(o.name)}</b> in ${esc(M.archives[o.a].name)} ${TC.years(o)}${o.bp ? ' · ' + esc(o.bp) : ''}<br><small>${esc(TC.bridgeNotes(b).join(' · '))}</small><div class="row"><button class="lk-btn is-small" data-br="${esc(b.id)}" data-do="show">${S.cards.has(o.key) ? 'Find' : 'Show'}</button>${st === 'rejected' ? `<button class="lk-btn is-small" data-br="${esc(b.id)}" data-do="restore">Unlinked: restore</button>` : `<button class="lk-btn is-small${st === 'confirmed' ? ' on' : ''}" data-br="${esc(b.id)}" data-do="confirm">${st === 'confirmed' ? 'Confirmed' : 'Confirm same person'}</button><button class="lk-btn is-small is-danger" data-br="${esc(b.id)}" data-do="unlink">Unlink</button>`}</div></div>`; }).join('')}` : ''}
     <div class="row one"><button class="lk-btn is-small" data-do="up">${icon('up', 'lk-icon')} Parents</button><button class="lk-btn is-small is-primary" data-do="upall">${icon('upall', 'lk-icon')} All the way back</button><button class="lk-btn is-small" data-do="dn">${icon('dn', 'lk-icon')} Children</button></div>`;
+}
+/* every known form of the person's given name and surname, from the Record Atlas's catalogues (a degree sign marks a lead: plausible, never met on a record) */
+function nameFormsHTML(p) {
+  const nf = TC.nameForms(M, p); if (!nf) return '';
+  const fm = list => list.map(f => `<span class="${f[1] === 'l' ? 'ld' : f[1] === 's' ? 'sm' : ''}">${esc(f[0])}${f[1] === 'l' ? '<sup>&deg;</sup>' : ''}</span>`).join(' / ');
+  let h = '<h4>Other forms of the name</h4><div class="nfs">';
+  if (nf.given) {
+    const top = nf.given.langs.slice(0, 4).map(l => l.forms[0] && l.forms[0][0]).filter(Boolean);
+    const n = nf.given.langs.reduce((k, l) => k + l.forms.length, 0);
+    h += `<details><summary><b>${esc(p.given.split(' ')[0])}</b> &middot; ${n} forms in ${nf.given.langs.length} languages <small>(${esc([...new Set(top)].join(', '))} &hellip;)</small></summary>`
+      + nf.given.langs.map(l => `<div class="nfl"><i>${esc(l.label)}</i><span>${fm(l.forms)}</span></div>`).join('') + '</details>';
+  }
+  if (nf.sur) h += `<details><summary><b>${esc(p.sur)}</b> &middot; ${nf.sur.forms.length} spellings <small>(${esc(nf.sur.forms.slice(0, 4).map(f => f[0]).join(', '))}${nf.sur.forms.length > 4 ? ' &hellip;' : ''})</small></summary><div class="nfl"><span>${fm(nf.sur.forms)}</span></div></details>`;
+  h += '<p class="nfn"><sup>&deg;</sup> a lead: plausible, never seen on a record. Searching any of these finds this person.'
+    + (EMBED || p.living ? '' : ` <a href="https://recordatlas.org/your-name/?q=${encodeURIComponent(p.given.split(' ')[0] + ' ' + p.sur)}" target="_blank" rel="noopener">Say your name &nearr;</a>`) + '</p></div>';
+  return h;
+}
+/* the catalogue: handed over with the corpus (the archives) or by the page around a visitor's own tree */
+function loadNames() {
+  const done = raw => { if (!raw) return; TC.attachNames(M, raw); runSearch(); if (S.sel.size) renderInfo(); };
+  if (CORPUS.names) { done(CORPUS.names); return; }
+  if (EMBED) { try { const f = window.parent.RR && window.parent.RR.loadNames; if (f) f().then(done, () => {}); } catch (e) { /* no names: search by the forms as written */ } }
 }
 function pathPanel() {
   if (S.noPath) {
@@ -2677,6 +2797,7 @@ function boot() {
   const had = restore(d);
   S.cards.forEach(refreshCard);
   applyView(); drawEdges(); hideHint(); syncButtons();
+  loadNames();
   if (had && !(d.view && d.view.k)) fit();
   if (S._restorePath) { const [a, b] = S._restorePath; S._restorePath = null; const pa = M.byKey.get(a), pb = M.byKey.get(b); if (pa && pb) { S.rz = [pa.i, pb.i]; rzRender(); } showPath(a, b, { noPlace: true }); }
   else renderInfo();

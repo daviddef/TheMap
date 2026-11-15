@@ -54,7 +54,7 @@ const hideLiv = () => $('#hideliving').checked;
 $('#hideliving').onchange = () => { $('#fliving').checked = !hideLiv(); worker && worker.postMessage({ cmd: 'living', hide: hideLiv() }); };
 function done(m) {
   const stale = !m.build || m.build.pipeline !== BUILD || m.build.model !== BUILD; $('#stale').hidden = !stale;
-  last = m; window.RR = { tree: m.tree, atlas: m.atlas }; anc = m.anc || null; ancStatus(); mhFile = m.mh || null; applyTreeLink();
+  last = m; window.RR = { tree: m.tree, atlas: m.atlas, loadNames }; anc = m.anc || null; ancStatus(); mhFile = m.mh || null; applyTreeLink();
   const keepTab = $('.tabs [aria-selected=true]')?.dataset.tab || 'canvas';
   show('work'); chips(m); mountViewer(); report(m); review(m); workbench(m.wb); worker.postMessage({ cmd: 'offer' }); askFix();
   tab(openTo || (m.first ? 'canvas' : keepTab)); openTo = null;
@@ -632,6 +632,10 @@ function decStatus(restored) {
       + (dec.isOn() ? (autoKept ? 'Kept from the start; untick to stop. ' : '') + '\u2713 Saved on this device: ' + kept + (kept === 1 ? ' decision' : ' decisions') + ', and the Fix list is summarised in My research.' : kept ? kept + ' loaded from a file are stored on this device; turn this on to keep new ones too.' : 'Not kept: ticks and "left as is" are lost when you close the page.');
 }
 const autoKept = dec.autoOn();   // keeping starts on unless the reader has switched it off (decisions.js)
+/* The Atlas's own name catalogues (every form of a given name, every spelling of a surname), for the Tree canvas's search and name panel. Two static files from this
+   site, the same for everyone: nothing about the tree is sent, and the canvas never asks for a name. Fetched once, when the canvas first needs it. */
+let namesP = null;
+const loadNames = () => namesP || (namesP = Promise.all(['/given-names.json', '/surname-families.json'].map(u => fetch(u).then(r => { if (!r.ok) throw new Error(u); return r.json(); }))).then(([gn, sn]) => ({ gn, sn })).catch(e => { namesP = null; throw e; }));
 /* Hand the fix list to the Tree canvas, which marks a card with a "!" and lists the person's rows in a tab. In memory only: the canvas reads window.RR.fix. */
 function shareFix(m) { if (!window.RR) return; try { window.RR.fix = issuesByPerson(m); } catch (e) { window.RR.fix = null; } const f = document.getElementById('canvasv'); if (f && f.contentWindow) f.contentWindow.postMessage({ tcFix: 1 }, location.origin); }
 function fixlist(m) { fix = m; shareFix(m); opened.clear(); const n = restoreDecisions(m); drawFix(); decStatus(n); fixTab(); }

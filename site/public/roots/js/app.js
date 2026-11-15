@@ -10,7 +10,7 @@ import { BUILD } from './build.js';
 import { parseLink, profileUrl, treeUrl, toHash, fromHash } from './myheritage.js';
 import { loadLink, saveLink, loadSite, saveSite, loadTrees, saveTreeLink } from './remember.js';
 import { personUrl } from './ancestry.js';
-import { GROUPS as FIXGROUPS, describe } from './checklist.js';
+import { GROUPS as FIXGROUPS, describe, issuesByPerson } from './checklist.js';
 
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
@@ -632,7 +632,9 @@ function decStatus(restored) {
       + (dec.isOn() ? (autoKept ? 'Kept from the start; untick to stop. ' : '') + '\u2713 Saved on this device: ' + kept + (kept === 1 ? ' decision' : ' decisions') + ', and the Fix list is summarised in My research.' : kept ? kept + ' loaded from a file are stored on this device; turn this on to keep new ones too.' : 'Not kept: ticks and "left as is" are lost when you close the page.');
 }
 const autoKept = dec.autoOn();   // keeping starts on unless the reader has switched it off (decisions.js)
-function fixlist(m) { fix = m; opened.clear(); const n = restoreDecisions(m); drawFix(); decStatus(n); fixTab(); }
+/* Hand the fix list to the Tree canvas, which marks a card with a "!" and lists the person's rows in a tab. In memory only: the canvas reads window.RR.fix. */
+function shareFix(m) { if (!window.RR) return; try { window.RR.fix = issuesByPerson(m); } catch (e) { window.RR.fix = null; } const f = document.getElementById('canvasv'); if (f && f.contentWindow) f.contentWindow.postMessage({ tcFix: 1 }, location.origin); }
+function fixlist(m) { fix = m; shareFix(m); opened.clear(); const n = restoreDecisions(m); drawFix(); decStatus(n); fixTab(); }
 /* While the switch is on, a readable summary of this fix list is kept for My research (see decisions.js). Debounced: drawFix runs on every tick. */
 let sumTimer = 0;
 function keepSummary() { clearTimeout(sumTimer); sumTimer = setTimeout(() => { if (fix && curName && dec.isOn()) fixes.put(summarise(fix, asIs, ticked, curName)); }, 400); }

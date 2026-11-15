@@ -2315,7 +2315,7 @@ function renderTabs() {
   $('#tabs').innerHTML = M.archives.map((a, i) => `<button class="lk-tab${S.filter.has(i) ? '' : ' off'}" style="--ac:${a.color}" data-a="${i}" title="${S.filter.has(i) ? 'Searching' : 'Not searching'} ${esc(a.name)} (${a.n.toLocaleString()} people${a.graded ? ', graded links' : ', no evidence grades'})"><i></i>${esc(a.name)}</button>`).join('') +
     `<button class="lk-tab" data-a="all" title="Toggle all archives">${on === NA ? 'none' : 'all'}</button>`;
   $('#cnt').textContent = `${on} of ${NA} archives`;
-  const q = $('#q'); q.placeholder = `Search ${M.P.length.toLocaleString()} people: any order, accents optional`;
+  const q = $('#q'); q.placeholder = `Search ${M.P.length.toLocaleString()} ${EMBED ? 'people in your file' : 'people'}: any order, accents optional`;
 }
 $('#q').addEventListener('input', () => runSearch());
 $('#q').addEventListener('keydown', e => { if (e.key === 'Enter' && lastResults[0]) addFromResult(lastResults[0]); if (e.key === 'Escape') { e.target.value = ''; runSearch(); e.target.blur(); } });
@@ -2666,7 +2666,7 @@ function optionsPanel() {
     <div class="opt">${t('stopNP', S.opts.stopAtNotProven, 'All the way back stops at not-proven links', 'Off: it follows grade-0 (index entry only) links too, drawn dashed. On: it stops there and says so.')}</div>
     ${linksOptionsHTML()}
     <h4>Look</h4><div class="row">${[['sticker', 'Sticker'], ['paper', 'Paper'], ['ground', 'Ground (dark)']].map(([k, n]) => `<button class="lk-btn is-small${th === k ? ' on' : ''}" data-theme="${k}">${n}</button>`).join('')}</div>
-    <h4>This build</h4><p style="color:var(--lk-soft);font-weight:700">${M.P.length.toLocaleString()} people from ${NA} archives, corpus built ${esc(M.built)}. ${M.bridgeGroups} candidate same-person groups, ${M.bridges.length} cross-archive pairs, none merged. Living people are not in the data. Stored only in this browser.</p>
+    <h4>${EMBED ? 'Your file' : 'This build'}</h4>${EMBED ? `<p style="color:var(--lk-soft);font-weight:700">${M.P.length.toLocaleString()} people, read in this browser. ${M.P.filter(p => p.fl & 64).length ? M.P.filter(p => p.fl & 64).length.toLocaleString() + (M.P.filter(p => p.fl & 64).length === 1 ? ' is' : ' are') + ' not on the Roots &amp; Routes maps (no place the Atlas could use) but ' + (M.P.filter(p => p.fl & 64).length === 1 ? 'is' : 'are') + ' here. ' : ''}Nothing leaves this browser.</p>` : ''}<p style="color:var(--lk-soft);font-weight:700"${EMBED ? ' hidden' : ''}>${M.P.length.toLocaleString()} people from ${NA} archives, corpus built ${esc(M.built)}. ${M.bridgeGroups} candidate same-person groups, ${M.bridges.length} cross-archive pairs, none merged. Living people are not in the data. Stored only in this browser.</p>
     <div class="row"><button class="lk-btn is-small is-danger" data-do="clear">Clear the canvas</button></div>`;
 }
 function renderInfo() {

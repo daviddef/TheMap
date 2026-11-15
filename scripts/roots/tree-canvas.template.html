@@ -385,15 +385,17 @@ button{font-family:inherit}
 .nx-layer{margin:8px 0 12px}
 .nx-lh{margin:0}
 .acc{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;padding:1px 6px;border-radius:9px;color:var(--c);border:1px solid var(--c);margin-right:4px;vertical-align:1px;white-space:nowrap}
-/* standalone (recordatlas.org/tree-canvas/): the credit in the title is a link, and the two extra buttons wrap rather than run off a phone */
-.logo small a{pointer-events:auto;color:inherit;text-decoration:underline;text-underline-offset:2px}
+/* standalone (recordatlas.org/tree-canvas/): "by Record Atlas" sits under CANVAS in the same fun type, in the accent colour, and is a link; the two extra buttons wrap rather than run off a phone */
+.logo small.by{display:block;margin:3px 0 0 86px;padding:0;background:none;border:0;border-radius:0;font:400 17px/1 "Lilita One",Impact,system-ui;letter-spacing:.5px;text-transform:none;color:var(--lk-accent);transform:rotate(-3deg);transform-origin:left center;text-shadow:0 2px 0 color-mix(in srgb,var(--lk-card) 90%,transparent);width:max-content}
+.logo small.by a{pointer-events:auto;color:inherit;text-decoration:none;border-bottom:2px dotted currentColor}
+.logo small.by a:hover{border-bottom-style:solid}
 .top .lk-btn{align-self:center;white-space:nowrap}
 #bLiv[aria-pressed="true"]{background:var(--lk-accent);border-color:var(--lk-accent);color:#fff}
+.ph .logo small.by{display:block;margin-left:53px;font-size:13px}
 .ph .top{flex-wrap:wrap;justify-content:flex-end;max-width:calc(100vw - 16px);row-gap:10px}
 .ph .top::after{content:"";order:4;flex:0 0 100%;height:0}   /* a line break before the extras */
 .ph .top .lk-btn{order:5}   /* the two extra buttons take their own row under the icons */
 .ph.sa #rz{top:106px}
-.ph .logo small.by{display:block;margin:4px 0 0;width:max-content}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -2469,7 +2471,7 @@ function wireToolbar() {
     /* left title: who made it; right: open a file. Both talk to the page around the canvas, which owns the file reader. */
     document.documentElement.classList.add('sa');
     const by = document.querySelector('.logo small'); by.className = 'by';
-    by.innerHTML = 'brought to you by <a href="/" target="_top" rel="noopener">Record Atlas</a>';
+    by.innerHTML = 'by <a href="/" target="_top" rel="noopener">Record Atlas</a>';
     $('.top').insertAdjacentHTML('afterbegin',
       '<button class="lk-btn is-small" id="bLiv" type="button" title="Hide the names of people who may be alive" aria-pressed="' + (QS.get('liv') === '1') + '">Hide living people</button>' +
       '<button class="lk-btn is-primary" id="bOpen" type="button" title="Open a GEDCOM file from this device. It is read in this browser and not uploaded.">Open GEDCOM</button>' +

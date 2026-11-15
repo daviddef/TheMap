@@ -1396,7 +1396,9 @@ a.pill.ac{text-decoration:none;cursor:pointer}a.pill.ac:hover,a.pill.ac:focus-vi
     }
     const regionEras = {};
     for (const k of Object.keys(A.regions || {})) regionEras[k] = ((A.regions[k] || {}).eras || []).filter(e => e && e.length > 3 && e[3]).map(e => [e[0], e[1], e[3]]);
-    const name = label || (tree && tree.meta && tree.meta.title) || 'Your tree';
+    const metaTitle = tree && tree.meta && tree.meta.title;
+    /* the converter's stock title is the name of the viewer, not of the visitor's tree: call it "Your tree" */
+    const name = label || (metaTitle && !/^roots\s*(&|&amp;|and)\s*routes/i.test(String(metaTitle).trim()) ? metaTitle : 'Your tree');
     return {
       built: new Date().toISOString().slice(0, 10), livingRule: 'as chosen on the roots page',
       archives: [{ k: 'you', name, host: '', color: '#D2493A', graded: false, generated: tree && tree.meta && tree.meta.generated, living: tree && tree.meta && tree.meta.living, n: rows.length, droppedLiving: 0, livingNamed: 0 }],
@@ -2515,7 +2517,7 @@ function personPanel() {
   const kids = p.ch.length, sps = p.sp.map(s => M.P[s].name);
   const brs = (M.bridgesOf.get(p.i) || []);
   return `<h3>${esc(p.name)}</h3>
-    <div>${link ? `<a class="pill ac" style="--ac:${a.color}" href="${esc(link)}" target="_blank" rel="noopener" title="Open ${esc(p.name)} in the ${esc(a.name)} archive">${esc(a.name)} archive &nearr;</a>` : `<span class="pill ac" style="--ac:${a.color}">${esc(a.name)} archive</span>`}<span class="pill">${TC.years(p)}</span>${p.occ ? `<span class="pill">${esc(p.occ)}</span>` : ''}</div>
+    <div>${link ? `<a class="pill ac" style="--ac:${a.color}" href="${esc(link)}" target="_blank" rel="noopener" title="Open ${esc(p.name)} in the ${esc(a.name)} archive">${esc(a.name)} archive &nearr;</a>` : `<span class="pill ac" style="--ac:${a.color}">${esc(a.name)}${a.k === 'you' ? '' : ' archive'}</span>`}<span class="pill">${TC.years(p)}</span>${p.occ ? `<span class="pill">${esc(p.occ)}</span>` : ''}</div>
     ${p.ghost ? `<p class="plines lvn">Named in the archive, but there is no record of their own yet: no dates, no places, no sources. ${p.how ? 'How the name is known: ' + esc(p.how) + '.' : ''}</p>
       ${p.sp.length ? `<p class="plines">Named as the spouse of ${p.sp.map(q => `<a href="#" data-focus="${esc(M.P[q].key)}">${esc(M.P[q].name)}</a>`).join(', ')}.</p>` : ''}
       <p class="plines lvn">No parents or children are drawn for a name like this: the archive joins people to each other only from a record of their own.</p>` : ''}

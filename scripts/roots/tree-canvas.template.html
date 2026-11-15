@@ -462,6 +462,14 @@ select.lk-input{width:auto;padding:4px 8px}
 #info .fxk summary span{font-weight:800;color:var(--lk-soft)}
 #info .fxp{font-size:12.5px;margin:10px 0 3px;color:var(--lk-soft)}
 #info .fxp a{color:var(--lk-ink);font-weight:700}
+/* file and living-people buttons are icons now: the open button is the accent colour */
+#bOpen{background:var(--lk-accent);border-color:var(--lk-accent);color:#fff}
+#bLiv[aria-pressed="true"]{background:var(--lk-accent);border-color:var(--lk-accent);color:#fff}
+/* the tab strip pans: fade where tabs are hidden */
+#info .ih{cursor:grab;touch-action:pan-x}
+#info .ih.mr{-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 26px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 26px),transparent)}
+#info .ih.ml{-webkit-mask-image:linear-gradient(to left,#000 calc(100% - 26px),transparent);mask-image:linear-gradient(to left,#000 calc(100% - 26px),transparent)}
+#info .ih.ml.mr{-webkit-mask-image:linear-gradient(to right,transparent,#000 26px,#000 calc(100% - 26px),transparent);mask-image:linear-gradient(to right,transparent,#000 26px,#000 calc(100% - 26px),transparent)}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -1458,6 +1466,8 @@ const ICON = {
   search: '<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/>', theme: '<circle cx="12" cy="12" r="8"/><path d="M12 4v16"/><path d="M12 4a8 8 0 010 16z" fill="currentColor"/>',
   clear: 'M5 19l9-9 4 4-5 5H5zM13 7l2-2 4 4-2 2', gear: '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>',
   map: 'M4 6l5-2 6 2 5-2v14l-5 2-6-2-5 2zM9 4v14M15 6v14',
+  folder: 'M3 7.5A1.5 1.5 0 014.5 6H9l2 2.2h8.5A1.5 1.5 0 0121 9.7V17.5a1.5 1.5 0 01-1.5 1.5h-15A1.5 1.5 0 013 17.5z',
+  eyeoff: '<path d="M3 12s3.3-6 9-6 9 6 9 6-3.3 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.6"/><path d="M4.5 4.5l15 15"/>',
 };
 const icon = (n, cls) => `<svg class="${cls || 'lk-icon'}" viewBox="0 0 24 24" aria-hidden="true">${ICON[n].startsWith('<') ? ICON[n] : `<path d="${ICON[n]}"/>`}</svg>`;
 
@@ -2674,9 +2684,21 @@ function renderInfo() {
   const body = S.tab === 'person' ? personPanel() : S.tab === 'next' ? nextPanel() : S.tab === 'fix' ? fixPanel() : S.tab === 'path' ? pathPanel() : S.tab === 'legend' ? legendHTML() : optionsPanel();
   el.innerHTML = `<div class="ih">${tabs.map(([k, n]) => `<button class="lk-tab${S.tab === k ? ' on' : ''}" data-tab="${k}">${n}${k === 'path' && S.path ? ' &bull;' : ''}</button>`).join('')}<span style="flex:1"></span><button class="lk-tab" data-tab="close" title="Close panel" aria-label="Close panel">&times;</button></div><div class="ib">${body}</div>`;
   if (S.infoOpen !== false) el.classList.add('on');
+  { const ih = el.querySelector('.ih'), on = ih && ih.querySelector('.lk-tab.on'); if (on) { const l = on.offsetLeft - 8, r = on.offsetLeft + on.offsetWidth + 8; if (l < ih.scrollLeft) ih.scrollLeft = l; else if (r > ih.scrollLeft + ih.clientWidth) ih.scrollLeft = r - ih.clientWidth; } tabEdges(ih); }
   const li = $('#lkIn'); if (li && RL()) li.oninput = () => { const st = RL().set(li.value); const n = $('#lkSt'); if (n) n.innerHTML = '<small>' + esc(st || (li.value.trim() ? '' : 'Off: no link yet.')) + '</small>'; };
   const ls = $('#lkAnc'); if (ls && RL()) ls.onchange = () => RL().setSite(ls.value);
 }
+/* the tab strip is wider than the panel: the wheel and a drag pan it, the edge fades where more tabs are hidden, and the open tab is kept in view */
+function tabEdges(ih) { if (!ih) return; ih.classList.toggle('mr', ih.scrollLeft + ih.clientWidth < ih.scrollWidth - 3); ih.classList.toggle('ml', ih.scrollLeft > 3); }
+(function tabPan() {
+  const info = $('#info'); let d = null, dragged = 0;
+  info.addEventListener('wheel', e => { const ih = e.target.closest('.ih'); if (!ih || ih.scrollWidth <= ih.clientWidth) return; ih.scrollLeft += Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY; tabEdges(ih); e.preventDefault(); }, { passive: false });
+  info.addEventListener('scroll', e => { if (e.target.classList && e.target.classList.contains('ih')) tabEdges(e.target); }, true);
+  info.addEventListener('pointerdown', e => { const ih = e.target.closest('.ih'); if (!ih || ih.scrollWidth <= ih.clientWidth) return; d = { ih, x: e.clientX, sl: ih.scrollLeft, moved: false }; });
+  addEventListener('pointermove', e => { if (!d) return; const dx = e.clientX - d.x; if (!d.moved && Math.abs(dx) > 5) d.moved = true; if (d.moved) { d.ih.scrollLeft = d.sl - dx; tabEdges(d.ih); } });
+  addEventListener('pointerup', () => { if (d && d.moved) dragged = Date.now(); d = null; });
+  info.addEventListener('click', e => { if (Date.now() - dragged < 250 && e.target.closest('.ih')) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
+})();
 $('#info').addEventListener('click', e => {
   const go = e.target.closest('[data-tab-go]'); if (go) { e.preventDefault(); S.tab = go.dataset.tabGo; renderInfo(); return; }
   const tab = e.target.closest('[data-tab]');
@@ -2788,8 +2810,8 @@ function wireToolbar() {
     const by = document.querySelector('.logo small'); by.className = 'by';
     by.innerHTML = 'by <a href="/" target="_top" rel="noopener">Record Atlas</a>';
     $('.top').insertAdjacentHTML('afterbegin',
-      '<button class="lk-btn is-small" id="bLiv" type="button" title="Hide the names of people who may be alive" aria-pressed="' + (QS.get('liv') === '1') + '">Hide living people</button>' +
-      '<button class="lk-btn is-primary" id="bOpen" type="button" title="Open a GEDCOM file from this device. It is read in this browser and not uploaded.">Open GEDCOM</button>' +
+      '<button class="lk-ibtn" id="bLiv" type="button" title="Hide living people (the names of anyone who may be alive)" aria-label="Hide living people" aria-pressed="' + (QS.get('liv') === '1') + '">' + icon('eyeoff') + '</button>' +
+      '<button class="lk-ibtn" id="bOpen" type="button" title="Open a GEDCOM file from this device. It is read in this browser and not uploaded." aria-label="Open a GEDCOM file">' + icon('folder') + '</button>' +
       '<input type="file" id="gedIn" accept=".ged,.gedcom,.txt,text/plain" hidden>');
     const send = async f => {
       if (!f) return;
@@ -2804,7 +2826,7 @@ function wireToolbar() {
     document.addEventListener('drop', e => { e.preventDefault(); send(e.dataTransfer && e.dataTransfer.files[0]); });
   }
   if (EMBED) { const h = $('#hint'); h.firstChild.textContent = 'Search anyone in your tree, and drop them here '; const sm = h.querySelector('small'); if (sm) sm.innerHTML = 'Pull up their parents, all the way back, one generation at a time.<br>Click anyone, then "Where to from here" for the order to look for their records.'; }   // the example people are in the eight archives, not in a visitor's own file
-  if (SA && QS.get('ex') === '1') { const h = $('#hint'); h.firstChild.textContent = 'This is an invented example family. '; const sm = h.querySelector('small'); if (sm) sm.innerHTML = 'Press "Open GEDCOM" (top right) to draw your own tree: it is read in this browser and never uploaded.<br>Search anyone, drop them here, then click them and choose "Where to from here".'; }
+  if (SA && QS.get('ex') === '1') { const h = $('#hint'); h.firstChild.textContent = 'This is an invented example family. '; const sm = h.querySelector('small'); if (sm) sm.innerHTML = 'Press the folder button (top right) to open a GEDCOM and draw your own tree: it is read in this browser and never uploaded.<br>Search anyone, drop them here, then click them and choose "Where to from here".'; }
   addEventListener('keydown', e => {
     const typing = /INPUT|TEXTAREA/.test(document.activeElement.tagName);
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z' && !typing) { e.preventDefault(); undo(); }

@@ -84,9 +84,67 @@ function start(bytes, name) {
   worker.postMessage({ cmd: 'load', bytes, base }, [bytes]);
 }
 
+/* ---- an archive's own tree. Coming from an archive (its header icon, which carries ?archive=<key>, or the page it came from), or choosing one below, the canvas draws
+   THAT archive's published tree directly: the same roots page the archive serves, whose tree and Atlas extract are read in this browser. Nothing is sent but a plain
+   request for that public page; the archive already leaves its living people out, and the canvas applies its own second lock as well. ---- */
+const ARCH = {
+  defranceski: { name: 'Defranceski', host: 'archive.defranceski.com', color: '#D2493A', graded: true },
+  booyzen: { name: 'Booyzen', host: 'booyzen.defranceski.com', color: '#4E9A3E', graded: true },
+  luwinski: { name: 'Luwinski', host: 'luwinski.defranceski.com', color: '#3A74C9', graded: false },
+  lerena: { name: 'Lerena', host: 'lerena.defranceski.com', color: '#8A5CC2', graded: false },
+  falco: { name: 'Falco', host: 'falco.defranceski.com', color: '#D39A12', graded: true },
+  blazevic: { name: 'Blažević', host: 'blazevic.defranceski.com', color: '#1E9C97', graded: false },
+  darcy: { name: "D'Arcy", host: 'darcy.defranceski.com', color: '#C9508F', graded: false },
+  mazza: { name: 'Mazza', host: 'mazza.defranceski.com', color: '#8E7B5E', graded: false },
+};
+/* the JSON value that follows `marker` in the page's script: scan to its matching brace, minding strings */
+function jsonAfter(html, marker) {
+  const i = html.indexOf(marker); if (i < 0) throw new Error('not found');
+  const s = i + marker.length; let depth = 0, str = false, esc = false;
+  for (let j = s; j < html.length; j++) {
+    const c = html[j];
+    if (str) { if (esc) esc = false; else if (c === '\\') esc = true; else if (c === '"') str = false; continue; }
+    if (c === '"') str = true; else if (c === '{' || c === '[') depth++; else if (c === '}' || c === ']') { depth--; if (depth === 0) return JSON.parse(html.slice(s, j + 1)); }
+  }
+  throw new Error('unterminated');
+}
+/* an archive's published roots page: its tree and its Atlas extract, read here (a plain request for a public page; no credentials, no referrer) */
+async function fetchArchive(key) {
+  const a = ARCH[key];
+  const r = await fetch('https://' + a.host + '/roots/', { credentials: 'omit', referrerPolicy: 'no-referrer' });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const html = await r.text();
+  return { tree: jsonAfter(html, 'const TREE='), atlas: jsonAfter(html, 'const ATLAS='), archive: { key, name: a.name, host: a.host, color: a.color, graded: a.graded } };
+}
+async function openArchive(key) {
+  const a = ARCH[key]; if (!a) return;
+  curName = null; curHead = null; example = false;
+  $('#start').hidden = true; say('Opening the ' + a.name + ' archive…');
+  try {
+    const f = await fetchArchive(key);
+    mhFile = null; mhc = null; anc = null;
+    window.RR = { tree: f.tree, atlas: f.atlas, loadNames, links, archive: f.archive };
+    say(''); mount();
+  } catch (err) { say('The ' + a.name + ' archive could not be opened just now (' + (err && err.message || 'error') + '). You can open a GEDCOM instead.', true); showStart(); }
+}
+
+/* Compare: the visitor's file beside an archive's tree. The canvas asks (tcCompare: {key, mark}); the archive is read here and the canvas is drawn again with both, keeping the
+   marked person. key null stops comparing. The file never leaves the browser. */
+async function compareWith(key, mark) {
+  if (!window.RR) return;
+  if (key && !ARCH[key]) return;
+  if (!key) { delete window.RR.compare; window.RR.carryMark = mark || null; window.RR.carryTab = 'compare'; mount(); return; }
+  say('Reading the ' + ARCH[key].name + ' archive…');
+  try {
+    const f = await fetchArchive(key);
+    window.RR.compare = { tree: f.tree, atlas: f.atlas, archive: f.archive }; window.RR.carryMark = mark || null; window.RR.carryTab = 'compare';
+    say(''); mount();
+  } catch (err) { say('The ' + ARCH[key].name + ' archive could not be read just now (' + (err && err.message || 'error') + '). Your canvas is unchanged.', true); setTimeout(() => say(''), 6000); }
+}
 addEventListener('message', e => {
   if (e.origin !== location.origin) return;   // only the canvas, which is this site's own page
   const d = e.data || {};
+  if (d.tcCompare !== undefined && !d.tcOpen) { compareWith(d.tcCompare && d.tcCompare.key, d.tcCompare && d.tcCompare.mark); return; }
   if (d.tcOpen && d.tcOpen.bytes instanceof ArrayBuffer) { example = false; start(d.tcOpen.bytes, d.tcOpen.name); }
   else if (typeof d.tcLiving === 'boolean') {
     hide = d.tcLiving;
@@ -170,7 +228,13 @@ $('#stFile').onchange = async e => {
   try { const bytes = await f.arrayBuffer(); example = false; recentSave(f.name, bytes.slice(0)); start(bytes, f.name); } catch (err) { say('That file could not be read.', true); }
 };
 $('#stDemo').onclick = () => { example = true; start(new TextEncoder().encode(makeSample()).buffer); };   // the invented family is only built when asked for
+document.querySelectorAll('#stArchBtns button').forEach(b => { b.onclick = () => openArchive(b.dataset.k); });
 $('#stForget').onclick = async () => { await recentForget(); showStart(); };
 for (const ev of ['dragenter', 'dragover']) addEventListener(ev, e => { if (!$('#start').hidden) e.preventDefault(); });
 addEventListener('drop', e => { if ($('#start').hidden) return; e.preventDefault(); const f = e.dataTransfer && e.dataTransfer.files[0]; if (f) f.arrayBuffer().then(b => { example = false; recentSave(f.name, b.slice(0)); start(b, f.name); }); });
-showStart();
+{
+  /* from an archive: its icon sends ?archive=<key>; failing that, the page the visitor came from (some browsers send only its origin, which is enough) */
+  let want = new URLSearchParams(location.search).get('archive');
+  if (!ARCH[want]) { want = null; try { const h = new URL(document.referrer).hostname; want = Object.keys(ARCH).find(k => ARCH[k].host === h) || null; } catch (e) { /* no referrer */ } }
+  if (want) openArchive(want); else showStart();
+}

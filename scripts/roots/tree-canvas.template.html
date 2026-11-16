@@ -751,6 +751,7 @@ html:not(.rzopen) #rz{display:none}
 #namesview .nmcouples ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
 #namesview .nmcouples small{color:var(--lk-mute);font-weight:800}
 #namesview .nmand{color:var(--lk-accent)}
+#namesview .nmcouples a.nmp{color:var(--lk-ink);text-decoration:underline;text-decoration-color:var(--lk-line);text-underline-offset:2px;cursor:pointer}#namesview .nmcouples a.nmp:hover{color:var(--lk-accent);text-decoration-color:var(--lk-accent)}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -1611,9 +1612,10 @@ html:not(.rzopen) #rz{display:none}
       e.c.push(ka < kb ? [a.i, b.i, implied ? 1 : 0] : [b.i, a.i, implied ? 1 : 0]);   /* the couple behind the count, a's name first: indices only */
     };
     const couple = (x, y) => { const k = pair(x, y); if (!seen.has(k)) { seen.add(k); link(M.P[x], M.P[y]); } };
-    mem.forEach((g, j) => { const p = M.P[j]; if (p.f >= 0 && p.m >= 0 && M.P[p.f] && M.P[p.m]) couple(p.f, p.m); });
+    /* only a couple that are both in the family drawn: a spouse's parents are in-laws, and their marriage would join a name that has no card */
+    mem.forEach((g, j) => { const p = M.P[j]; if (p.f >= 0 && p.m >= 0 && mem.has(p.f) && mem.has(p.m)) couple(p.f, p.m); });
     /* a mother known without the father: the child carries the father's name, so the mother's name is joined to the child's (an implied marriage) */
-    mem.forEach((g, j) => { const p = M.P[j], mo = p.m >= 0 ? M.P[p.m] : null, fa = p.f >= 0 ? M.P[p.f] : null; if (mo && !fa && mo.sex === 'f' && squash(p.sur)) { const k = 'm' + j; if (!seen.has(k)) { seen.add(k); link(p, mo, true); } } });
+    mem.forEach((g, j) => { const p = M.P[j], mo = p.m >= 0 ? M.P[p.m] : null, fa = p.f >= 0 ? M.P[p.f] : null; if (mo && !fa && mem.has(p.m) && mo.sex === 'f' && squash(p.sur)) { const k = 'm' + j; if (!seen.has(k)) { seen.add(k); link(p, mo, true); } } });
     if (blood) mem.forEach((g, j) => M.P[j].sp.forEach(s => { if (mem.has(s) && s !== j) couple(j, s); }));
     else root.sp.forEach(s => { const o = M.P[s]; if (!o || mem.has(s)) return; mem.set(s, 0); add(s, 0); couple(i, s); });
     const rk = surKey(M, root).k, E = [...edges.values()];
@@ -3630,7 +3632,7 @@ function namesEdge(a, b, tree) {   /* a gentle curve between two names; a marria
 /* the couples behind a marriage pill: who married whom, their years, when and where the archive says. A couple with a living person is counted but not named. */
 function namesCouples(e, by, q) {
   const yr = p => p.by != null ? p.by + (p.dy != null ? '–' + p.dy : '') : '';
-  const who = p => `${esc(p.name)}${yr(p) ? ' <small>' + yr(p) + '</small>' : ''}`;
+  const who = p => `<a href="#" class="nmp" data-nmp="${esc(p.key)}" title="Show ${esc(p.name)}">${esc(p.name)}</a>${yr(p) ? ' <small>' + yr(p) + '</small>' : ''}`;
   const rows = e.c.map(([x, y, imp]) => { const A = M.P[x], B = M.P[y]; return { A, B, imp, yr: (A.my || B.my) || null, est: !!((A.my ? A.fl : B.fl) & 16) }; })
     .sort((r, s) => (r.yr == null) - (s.yr == null) || r.yr - s.yr);
   const li = rows.map(r => (r.A.living || r.B.living)
@@ -3698,6 +3700,12 @@ document.addEventListener('click', e => {
   const sb = e.target.closest && e.target.closest('#namesCap [data-scope]');
   if (sb) { NAMES.scope = sb.dataset.scope; NAMES.open = null; try { if (!EMBED) localStorage.setItem('tcNamesScope', NAMES.scope); } catch (x) { /* ignore */ } drawNames(true); fit(); return; }
   if (e.target.closest && e.target.closest('#namesCap [data-tidy]')) { e.preventDefault(); NAMES.pos = {}; drawNames(true); fit(); return; }
+  const pa = e.target.closest && e.target.closest('#namesview .nmp');
+  if (pa && namesLook()) {   /* a name in a couple's panel: put them on the canvas if they are not there, select them (the Person panel shows them) and centre the names on them */
+    e.preventDefault(); const p = M.byKey.get(pa.dataset.nmp);
+    if (p) { if (!S.cards.has(p.key)) { const v = viewCentre(); dropPerson(p.i, v.x, v.y); } S.tab = 'person'; S.infoOpen = true; NAMES.openEdge = null; select([p.key]); drawNames(true); const c = S.cards.get(p.key); if (c) pulseCard(c); }
+    return;
+  }
   const eb = e.target.closest && e.target.closest('#namesview .nml');
   if (eb && namesLook()) { const k = eb.dataset.ne; NAMES.openEdge = NAMES.openEdge === k ? null : k; namesPaintEdges(); return; }
   if (NAMES.openEdge && namesLook() && !(e.target.closest && e.target.closest('#namesview .nmcouples'))) { NAMES.openEdge = null; namesPaintEdges(); }

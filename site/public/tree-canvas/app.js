@@ -55,7 +55,9 @@ function mount() {
   f.hidden = false; old.replaceWith(f);
 }
 
-function start(bytes) {
+let curName = null, curHead = null;
+function start(bytes, name) {
+  curName = name || null; curHead = name ? headInfo(bytes) : null;
   $('#start').hidden = true; say('Reading your file…');
   if (worker) worker.terminate();
   worker = new Worker('/roots/js/worker.js', { type: 'module' });
@@ -73,6 +75,7 @@ function start(bytes) {
       const prevMh = mhFile; mhFile = m.mh || null; anc = m.anc || null;
       if (!prevMh || !mhFile || prevMh.guid !== mhFile.guid) { mhc = null; mhText = ''; mhNote = ''; applyTreeLink(); }   // a different tree: start from what is remembered or known for it
       window.RR = { tree: m.tree, atlas: m.atlas, loadNames, links };
+      if (curName && m.report && m.report.people) recentMeta(curName, { people: m.report.people.individuals, from: curHead ? curHead.from : '', tree: curHead ? curHead.tree : '' });
       say(''); mount();
       worker.postMessage({ cmd: 'checklist', living: !hide, ancestry: 'com' });   // the fix list, for the "!" marks; it follows a moment after the canvas is drawn
     }
@@ -84,7 +87,7 @@ function start(bytes) {
 addEventListener('message', e => {
   if (e.origin !== location.origin) return;   // only the canvas, which is this site's own page
   const d = e.data || {};
-  if (d.tcOpen && d.tcOpen.bytes instanceof ArrayBuffer) { example = false; start(d.tcOpen.bytes); }
+  if (d.tcOpen && d.tcOpen.bytes instanceof ArrayBuffer) { example = false; start(d.tcOpen.bytes, d.tcOpen.name); }
   else if (typeof d.tcLiving === 'boolean') {
     hide = d.tcLiving;
     if (worker) { say(hide ? 'Hiding living people…' : 'Showing everyone…'); worker.postMessage({ cmd: 'living', hide }); }
@@ -103,10 +106,33 @@ async function recentSave(name, bytes) {
   if (!rememberOn()) return;
   try {
     const db = await rdb(), tx = db.transaction(['m', 'b'], 'readwrite'), mm = tx.objectStore('m'), bb = tx.objectStore('b');
-    mm.put({ name, size: bytes.byteLength, when: Date.now() }); bb.put(bytes, name);
+    const old = await rreq(mm.get(name)); mm.put({ ...(old || {}), name, size: bytes.byteLength, when: Date.now() }); bb.put(bytes, name);
     const all = (await rreq(mm.getAll())).sort((x, y) => y.when - x.when); all.slice(RKEEP).forEach(o => { mm.delete(o.name); bb.delete(o.name); });
     await done(tx); db.close();
   } catch (e) { /* storage full or blocked: the file still opens, it just is not kept */ }
+}
+/* what the page learns about a kept file once it has read it: how many people, where it came from (the header's software and tree name) and the visitor's own note */
+async function recentMeta(name, patch) {
+  if (!name || !rememberOn()) return;
+  try { const db = await rdb(), tx = db.transaction('m', 'readwrite'), mm = tx.objectStore('m'), old = await rreq(mm.get(name)); if (old) mm.put({ ...old, ...patch }); await done(tx); db.close(); } catch (e) { /* ignore */ }
+}
+/* the file's header, read from its first bytes: the program that wrote it (MyHeritage, Ancestry ...) and, where the header names it, the tree */
+function headInfo(bytes) {
+  try {
+    const t = new TextDecoder('utf-8').decode(new Uint8Array(bytes, 0, Math.min(8192, bytes.byteLength))).replace(/^\uFEFF/, '').split(/\r\n|\r|\n/);
+    let inHead = false, from = '', tree = '', lastSour = false;
+    for (const ln of t) {
+      const m = /^(\d+)\s+(\S+)\s*(.*)$/.exec(ln); if (!m) continue;
+      if (m[1] === '0') { if (m[2] === 'HEAD') { inHead = true; continue; } if (inHead) break; }
+      if (!inHead) continue;
+      if (m[1] === '1') lastSour = m[2] === 'SOUR';
+      if (m[1] === '1' && m[2] === 'SOUR') from = m[3].trim();
+      else if (lastSour && m[1] === '2' && m[2] === 'NAME' && m[3].trim()) from = m[3].trim();
+      else if (m[2] === '_TREE' && m[3].trim()) tree = m[3].trim();
+    }
+    from = from.replace(/\b(family tree builder|family trees?|member trees?|online)\b/ig, '').replace(/\s{2,}/g, ' ').replace(/[.\s]+$/, '').trim();
+    return { from: from.slice(0, 40), tree: tree.slice(0, 60) };
+  } catch (e) { return { from: '', tree: '' }; }
 }
 async function recentForget(name) {
   try { const db = await rdb(), tx = db.transaction(['m', 'b'], 'readwrite'); if (name) { tx.objectStore('m').delete(name); tx.objectStore('b').delete(name); } else { tx.objectStore('m').clear(); tx.objectStore('b').clear(); } await done(tx); db.close(); } catch (e) { /* ignore */ }
@@ -120,22 +146,31 @@ async function showStart() {
   for (const r of rec) {
     const li = document.createElement('li'), b = document.createElement('button'), x = document.createElement('button'), n = document.createElement('b'), sm = document.createElement('small');
     b.type = x.type = 'button'; b.className = 'recopen'; x.className = 'recx'; x.textContent = '×'; x.title = 'Forget ' + r.name; x.setAttribute('aria-label', 'Forget ' + r.name);
-    n.textContent = r.name; sm.textContent = fmtBytes(r.size || 0) + ' · ' + fmtWhen(r.when); b.append(n, sm); b.title = 'Open ' + r.name + ' again';
+    n.textContent = r.name; sm.textContent = [r.people ? r.people.toLocaleString('en') + (r.people === 1 ? ' person' : ' people') : '', r.tree || (r.from ? 'from ' + r.from : ''), fmtBytes(r.size || 0), fmtWhen(r.when)].filter(Boolean).join(' · '); b.append(n, sm); b.title = 'Open ' + r.name + ' again';
+    if (r.note) { const nt = document.createElement('em'); nt.className = 'recnote'; nt.textContent = r.note; b.append(nt); }
+    const ed = document.createElement('button'); ed.type = 'button'; ed.className = 'recx recedit'; ed.textContent = '✎'; ed.title = r.note ? 'Edit the note' : 'Add a note'; ed.setAttribute('aria-label', ed.title + ' for ' + r.name);
+    ed.onclick = () => {
+      const inp = document.createElement('input'); inp.type = 'text'; inp.className = 'recin'; inp.maxLength = 80; inp.value = r.note || ''; inp.placeholder = 'A note, e.g. Mum\'s side, from MyHeritage'; inp.setAttribute('aria-label', 'Note for ' + r.name);
+      let fin = false; const save = async keep => { if (fin) return; fin = true; if (keep) await recentMeta(r.name, { note: inp.value.trim() }); showStart(); };
+      inp.onkeydown = e => { if (e.key === 'Enter') save(true); else if (e.key === 'Escape') save(false); };
+      inp.onblur = () => save(true);
+      b.replaceWith(inp); inp.focus(); inp.select();
+    };
     b.onclick = async () => {
-      try { const db = await rdb(), bytes = await rreq(db.transaction('b').objectStore('b').get(r.name)); db.close(); if (!bytes) throw 0; example = false; recentSave(r.name, bytes.slice(0)); start(bytes); }
+      try { const db = await rdb(), bytes = await rreq(db.transaction('b').objectStore('b').get(r.name)); db.close(); if (!bytes) throw 0; example = false; recentSave(r.name, bytes.slice(0)); start(bytes, r.name); }
       catch (e) { say('That file is no longer kept here. Open it again from your device.', true); await recentForget(r.name); showStart(); }
     };
     x.onclick = async () => { await recentForget(r.name); showStart(); };
-    li.append(b, x); ul.append(li);
+    li.append(b, ed, x); ul.append(li);
   }
 }
 $('#stOpen').onclick = () => $('#stFile').click();
 $('#stFile').onchange = async e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
-  try { const bytes = await f.arrayBuffer(); example = false; recentSave(f.name, bytes.slice(0)); start(bytes); } catch (err) { say('That file could not be read.', true); }
+  try { const bytes = await f.arrayBuffer(); example = false; recentSave(f.name, bytes.slice(0)); start(bytes, f.name); } catch (err) { say('That file could not be read.', true); }
 };
 $('#stDemo').onclick = () => { example = true; start(new TextEncoder().encode(makeSample()).buffer); };   // the invented family is only built when asked for
 $('#stForget').onclick = async () => { await recentForget(); showStart(); };
 for (const ev of ['dragenter', 'dragover']) addEventListener(ev, e => { if (!$('#start').hidden) e.preventDefault(); });
-addEventListener('drop', e => { if ($('#start').hidden) return; e.preventDefault(); const f = e.dataTransfer && e.dataTransfer.files[0]; if (f) f.arrayBuffer().then(b => { example = false; recentSave(f.name, b.slice(0)); start(b); }); });
+addEventListener('drop', e => { if ($('#start').hidden) return; e.preventDefault(); const f = e.dataTransfer && e.dataTransfer.files[0]; if (f) f.arrayBuffer().then(b => { example = false; recentSave(f.name, b.slice(0)); start(b, f.name); }); });
 showStart();

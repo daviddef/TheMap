@@ -710,6 +710,7 @@ html:not(.rzopen) #rz{display:none}
 .card .yr b{font-weight:900;color:var(--lk-mute);margin-right:1px}
 .card .nm .sx{font-size:12px;margin-left:5px;vertical-align:1px}
 .card .meta{min-height:14px}
+#mainMenu .mmr small.mmnote{font-style:italic;color:var(--lk-ink);white-space:normal}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -3830,7 +3831,7 @@ async function recentSave(name, bytes) {
   if (!rememberOn()) return;
   try {
     const db = await rdb(), tx = db.transaction(['m', 'b'], 'readwrite'), mm = tx.objectStore('m'), bb = tx.objectStore('b');
-    mm.put({ name, size: bytes.byteLength, when: Date.now() }); bb.put(bytes, name);
+    const old = await rreq(mm.get(name)); mm.put({ ...(old || {}), name, size: bytes.byteLength, when: Date.now() }); bb.put(bytes, name);   /* what the page around the canvas learned (people, source, note) is kept */
     const all = (await rreq(mm.getAll())).sort((x, y) => y.when - x.when); all.slice(RKEEP).forEach(o => { mm.delete(o.name); bb.delete(o.name); });
     await new Promise(ok => { tx.oncomplete = ok; tx.onerror = ok; tx.onabort = ok; }); db.close();
   } catch (e) { /* storage full or blocked: the file still opens, it just is not kept */ }
@@ -3850,7 +3851,7 @@ function recentHTML() {
   const on = rememberOn();
   return `<div class="mmsep"></div>`
     + `<button class="mmi" data-gopen="1">${icon('folder', 'lk-icon')}<span><b>Open a GEDCOM file…</b><small>Read in this browser, never uploaded. A new file replaces this tree.</small></span></button>`
-    + (on && RECENT.length ? `<div class="mmrec"><b class="mmh">Last used</b>${RECENT.map(r => `<span class="mmr"><button type="button" data-recent="${esc(r.name)}" title="Open ${esc(r.name)} again"><b>${esc(r.name)}</b><small>${fmtBytes(r.size)} · ${fmtWhen(r.when)}</small></button><button type="button" class="mmx" data-forget="${esc(r.name)}" aria-label="Forget ${esc(r.name)}" title="Forget this file">${icon('x', 'lk-icon')}</button></span>`).join('')}</div>` : '')
+    + (on && RECENT.length ? `<div class="mmrec"><b class="mmh">Last used</b>${RECENT.map(r => `<span class="mmr"><button type="button" data-recent="${esc(r.name)}" title="Open ${esc(r.name)} again"><b>${esc(r.name)}</b><small>${[r.people ? r.people.toLocaleString('en') + (r.people === 1 ? ' person' : ' people') : '', r.tree || (r.from ? 'from ' + r.from : ''), fmtBytes(r.size), fmtWhen(r.when)].filter(Boolean).map(esc).join(' · ')}</small>${r.note ? `<small class="mmnote">${esc(r.note)}</small>` : ''}</button><button type="button" class="mmx" data-forget="${esc(r.name)}" aria-label="Forget ${esc(r.name)}" title="Forget this file">${icon('x', 'lk-icon')}</button></span>`).join('')}</div>` : '')
     + `<label class="mmrem"><input type="checkbox" id="mmRem"${on ? ' checked' : ''}><span>Keep the last ${RKEEP} files on this device<small>In this browser only, so they open in one click. Untick to forget them all.</small></span></label>`;
 }
 function openMainMenu(on) {

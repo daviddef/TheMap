@@ -587,6 +587,21 @@ html:not(.ph):has(#info.on) #playBar{left:calc((100vw - 340px) / 2);width:min(64
 #legendCard .lgx:hover,#legendCard .lgx:focus-visible{background:var(--lk-hover);outline:none}
 #legendCard .lgx svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round}
 .ph #legendCard{top:auto;bottom:calc(var(--dock-h,130px) + 16px);left:8px;right:8px;width:auto;max-height:60vh}
+
+/* Where next: the flag and country beside a place */
+.nx .fla,.nx-glance .fla{display:inline-flex;vertical-align:-1px}.nx .fl,.nx-glance .fl{height:11px;border-radius:2px;box-shadow:0 0 0 1px var(--lk-line)}
+.nx-cn{color:var(--lk-soft);font-weight:800}
+
+/* Look: Lanes. White and light grey, a swim lane per generation, Roman numerals down the left */
+[data-theme="lanes"]{--lk-paper:#F4F5F7;--lk-card:#FFFFFF;--lk-line:#D3D7DE;--lk-ink:#1F2530;--lk-mute:#6B7280;--lk-soft:#4B5563;--lk-faint:#B6BCC7;--lk-accent:#D9822B;--lk-track:#D3D7DE;--lk-knob:#ffffff;--lk-board:#FFFFFF;--lk-pop-bg:#1F2530;--lk-pop-ink:#F4F5F7;--lk-accent-soft:color-mix(in srgb,#D9822B 16%,#FFFFFF);--lk-hover:color-mix(in srgb,#1F2530 6%,#FFFFFF);--lk-tag-comp-bg:#DCE9F4;--lk-tag-comp-fg:#2b6a94;--lk-tag-parts-bg:#F6E3C4;--lk-tag-parts-fg:#a5601a;--lk-tag-recipe-bg:#E3EFD8;--lk-tag-recipe-fg:#4c7a2e;--lk-tag-rule-bg:#E8EAEE;--lk-tag-rule-fg:#5b6370;color-scheme:light}
+[data-theme="lanes"] #stage{background-image:none}
+#lanes{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+#lanes .lane{position:absolute;left:0;right:0;background:#FFFFFF;border-top:1px solid var(--lk-line)}
+#lanes .lane.b{background:#EEF0F3}
+#lanes .lnl{position:absolute;left:62px;transform:translateY(-50%);width:80px;line-height:1.05;text-align:left}
+#lanes .lnl b{display:block;font:400 32px/1 "Lilita One",Georgia,serif;color:#9AA1AE}
+#lanes .lnl small{display:block;margin-top:3px;font:800 11px Nunito,system-ui;color:var(--lk-mute)}
+.ph #lanes .lnl{left:10px;width:56px}.ph #lanes .lnl b{font-size:24px}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -1581,7 +1596,7 @@ html:not(.ph):has(#info.on) #playBar{left:calc((100vw - 340px) / 2);width:min(64
       o = o || {};
       const s = { kind, title: TITLE[kind], how: HOW[kind], year: ev ? ev.year : null, est: ev ? ev.est : false, where: null, regime: null, sources: [], more: 0, fs: [], neighbours: null, burial: [], parishes: [], names: [], gaps: [], clues: o.clues || [], exact: true };
       const pl = ev && ev.place;
-      if (pl && pl.name) s.where = { name: pl.name, id: pl.id, cn: pl.cn, href: pl.id ? placeHref(pl.id) : ATLAS + '/?q=' + encodeURIComponent(pl.name) };
+      if (pl && pl.name) s.where = { name: pl.name, id: pl.id, cn: pl.cn, fi: pl.fi == null ? -1 : pl.fi, era: pl.era || null, href: pl.id ? placeHref(pl.id) : ATLAS + '/?q=' + encodeURIComponent(pl.name) };
       const x = d(ev);
       if (pl && pl.name && !pl.id) s.gaps.push(pl.name + ' has no Atlas place page linked from the archive, so there is no list of its record collections here. Search the name on the Atlas map (the link above); if the Atlas does not hold it yet, try the nearest town that it does.');
       if (pl && pl.id && !x) s.gaps.push('The Atlas record for ' + pl.name + ' could not be read just now.');
@@ -1948,6 +1963,7 @@ function applyView() {
   $('#world').style.transform = `translate(${v.x}px,${v.y}px) scale(${v.k})`;
   const st = $('#stage'); st.style.backgroundPosition = `${v.x}px ${v.y}px`; st.style.backgroundSize = `${32 * v.k}px ${32 * v.k}px`;
   document.documentElement.style.setProperty('--world-k', v.k);
+  if (typeof drawLanes === 'function') drawLanes();
   miniDraw();
 }
 const toWorld = (px, py) => ({ x: (px - S.view.x) / S.view.k, y: (py - S.view.y) / S.view.k });
@@ -2327,10 +2343,36 @@ function genInfo() {
   const cards = [...S.cards.values()], A = TC.arrange(arrangeItems(cards), { W, H, GX, CGX: COUPLE_GX, ROWH, pos: {} });
   genCache = { sig, v: { gen: A.gen, comp: A.comp } }; return genCache.v;
 }
+/* the Lanes look: one horizontal swim lane per generation row, white and light grey in turn, edge to edge, with the generation's Roman numeral pinned at the left of the screen.
+   Drawn in screen space (not in the world) so a lane always spans the window and the numeral stays put as the canvas is panned or zoomed. */
+function drawLanes() {
+  let host = $('#lanes');
+  if (!host) { host = document.createElement('div'); host.id = 'lanes'; host.setAttribute('aria-hidden', 'true'); const st = $('#stage'); st.insertBefore(host, $('#world')); }
+  if (document.documentElement.getAttribute('data-theme') !== 'lanes' || !S.cards.size) { if (host.innerHTML) host.innerHTML = ''; return; }
+  const gi = genInfo(), cs = [...S.cards.values()].sort((a, b) => a.y - b.y), rows = [];
+  cs.forEach(c => { const r = rows[rows.length - 1]; if (r && c.y - r.last <= H * 0.6) { r.cs.push(c); r.last = c.y; } else rows.push({ cs: [c], last: c.y }); });
+  rows.forEach(r => {
+    r.y0 = Math.min(...r.cs.map(c => c.y)) - 24; r.y1 = Math.max(...r.cs.map(c => c.y)) + H + 46;
+    const cnt = new Map(); r.cs.forEach(c => { const g = gi.gen.get(c.key); if (g != null) cnt.set(g, (cnt.get(g) || 0) + 1); });
+    r.g = cnt.size ? [...cnt.entries()].sort((a, b) => b[1] - a[1] || a[0] - b[0])[0][0] : null;
+    const ps = r.cs.map(c => personOf(c)).filter(p => p.by != null && !p.living);
+    r.lo = ps.length ? Math.min(...ps.map(p => p.by)) : null; r.hi = ps.length ? Math.max(...ps.map(p => p.dy != null ? p.dy : p.by)) : null;
+  });
+  const v = S.view, vh = innerHeight; let h = '';
+  rows.forEach((r, i) => {
+    const a = i ? (rows[i - 1].y1 + r.y0) / 2 : r.y0 - 20, b = i < rows.length - 1 ? (r.y1 + rows[i + 1].y0) / 2 : r.y1 + 20;
+    const top = v.y + a * v.k, hgt = (b - a) * v.k;
+    if (top > vh || top + hgt < 0) return;
+    const vis0 = Math.max(top, 56), vis1 = Math.min(top + hgt, vh - 150), mid = (vis0 + vis1) / 2, show = r.g != null && vis1 - vis0 > 44;
+    h += `<div class="lane${i % 2 ? ' b' : ''}" style="top:${f1(top)}px;height:${f1(hgt)}px">${show ? `<div class="lnl" style="top:${f1(mid - top)}px"><b>${romanOf(r.g + 1)}</b>${r.lo != null ? `<small>${r.lo}${r.hi !== r.lo ? '–' + r.hi : ''}</small>` : ''}</div>` : ''}</div>`;
+  });
+  host.innerHTML = h;
+}
 function drawBands() {
+  drawLanes();
   let host = $('#genbands');
   if (!host) { host = document.createElement('div'); host.id = 'genbands'; host.setAttribute('aria-hidden', 'true'); $('#world').insertBefore(host, $('#edges')); }
-  if (!S.opts.gens || S.cards.size < 2) { if (host.innerHTML) host.innerHTML = ''; return; }
+  if (!S.opts.gens || S.cards.size < 2 || document.documentElement.getAttribute('data-theme') === 'lanes') { if (host.innerHTML) host.innerHTML = ''; return; }
   const gi = genInfo(), rows = new Map();
   S.cards.forEach(c => { const g = gi.gen.get(c.key); if (g == null) return; const k = gi.comp.get(c.key) + '|' + g + '|' + Math.round(c.y / 40); if (!rows.has(k)) rows.set(k, { g, cs: [] }); rows.get(k).cs.push(c); });
   let h = '';
@@ -2563,6 +2605,12 @@ function planFor(p) {
 const A_COL = { free: '#2f9e63', account: '#2f7fb0', index: '#b08a2f', mixed: '#2f9e8f', paid: '#a0564a', catalogue: '#8a6aa8', onsite: '#8a6aa8', unsurveyed: '#8b8b8b' };
 const accChip = (a, say) => `<span class="acc" style="--c:${A_COL[a] || '#888'}" title="${esc(say || '')}">${esc(a === 'catalogue' ? 'a letter' : a === 'onsite' ? 'on paper' : a === 'unsurveyed' ? 'not surveyed' : a)}</span>`;
 const alink = (href, text, title) => href ? `<a href="${esc(href)}" target="_blank" rel="noopener"${title ? ` title="${esc(title)}"` : ''}>${esc(text)}</a>` : esc(text);
+/* a place as the Where-next panel names it: its flag in that year (opens the Flag Atlas), the name as a link to the Atlas, and the country */
+function nxPlace(pl, year, what, href) {
+  if (!pl || !pl.name) return '<i>place not recorded</i>';
+  const fl = typeof flagHTML === 'function' && pl.fi != null && pl.fi >= 0 ? flagHTML(pl, year, flagTip(pl, year, what), true) + ' ' : '';
+  return fl + alink(href, pl.name, 'Open in the Record Atlas') + (pl.cn ? ` <small class="nx-cn">${esc(pl.cn)}</small>` : '');
+}
 const yr = (y, est) => y == null ? 'year not recorded' : (est ? 'about ' : '') + y;
 
 function srcHTML(c) {
@@ -2577,7 +2625,7 @@ function regimeHTML(r) {
 }
 function stepHTML(s) {
   const when = yr(s.year, s.est);
-  const where = s.where ? alink(s.where.href, s.where.name, 'Open in the Record Atlas') + (s.where.cn ? ` <small>${esc(s.where.cn)}</small>` : '') : '<i>place not recorded</i>';
+  const where = s.where ? nxPlace(s.where, s.year, 'At', s.where.href) : '<i>place not recorded</i>';
   const known = s.names && s.names.length ? `<p class="nx-small">Also written: ${s.names.map(esc).join(', ')}. Search each name.</p>` : '';
   const clues = s.clues && s.clues.length ? `<p class="nx-small">Places a marriage leaves clues in: ${s.clues.map(c => `${esc(c.role)} (${esc(c.name)}) ${c.href ? alink(c.href, c.place) : esc(c.place)}`).join(' · ')}</p>` : '';
   const srcs = s.sources.length ? `<ul class="nx-src">${s.sources.map(srcHTML).join('')}</ul>${s.more ? `<p class="nx-small">and ${s.more} more at ${s.where && s.where.id ? alink(s.where.href, 'the Atlas place page') : 'the Atlas'}.</p>` : ''}` : '';
@@ -2606,7 +2654,7 @@ function surnameHTML(p) {
 }
 function glanceHTML(p, F, plan) {
   const reg = k => { const s = plan && plan.steps.find(x => x.kind === k); return s && s.regime ? ` <small>${esc(s.regime.polity.split(';')[0])}</small>` : ''; };
-  const line = (label, e, k) => e && (e.year != null || e.place) ? `<li><b>${label}</b> ${yr(e.year, e.est)}${e.place && e.place.name ? ' · ' + alink(e.place.id ? TCR.placeHref(e.place.id) : 'https://recordatlas.org/?q=' + encodeURIComponent(e.place.name), e.place.name) : ''}${reg(k)}</li>` : '';
+  const line = (label, e, k) => e && (e.year != null || e.place) ? `<li><b>${label}</b> ${yr(e.year, e.est)}${e.place && e.place.name ? ' · ' + nxPlace(e.place, e.year, label + ' at', e.place.id ? TCR.placeHref(e.place.id) : 'https://recordatlas.org/?q=' + encodeURIComponent(e.place.name)) : ''}${reg(k)}</li>` : '';
   const mar = F.married ? `<li><b>Married</b> ${yr(F.married.year, F.married.est)} · <i>place not recorded</i></li>` : '';
   return `<ul class="nx-glance">${line('Born', F.born, 'birth')}${mar}${line('Died', F.died, 'death')}</ul>`;
 }
@@ -2630,7 +2678,7 @@ function nextPanel() {
 function offlineHTML(p, F) {
   const ev = [['death', 'Their death and burial', F.died], ['marriage', 'Their marriage', F.married && { year: F.married.year, est: F.married.est, place: (F.clues.find(c => c.place && c.place.name) || {}).place }], ['birth', 'Their birth or baptism', F.born]]
     .filter(x => x[2] && (x[2].year != null || x[2].place));
-  const li = ev.map(([k, t, e], i) => `<li class="nx-step"><h5><span class="nx-n">${i + 1}</span> ${t}</h5><p class="nx-when"><b>${esc(yr(e.year, e.est))}</b> · ${e.place && e.place.name ? (e.place.id ? alink(TCR.placeHref(e.place.id), e.place.name) : alink('https://recordatlas.org/?q=' + encodeURIComponent(e.place.name), e.place.name)) : '<i>place not recorded</i>'}</p><p class="nx-how">${esc({ death: 'A death or burial entry usually gives the age, the parents and who reported it.', marriage: 'A marriage entry names the fathers and gives ages. The place is not recorded in any tree; the spouse\'s birthplace is a common place for it.', birth: 'A baptism or birth entry names the parents and the godparents.' }[k])}</p></li>`).join('');
+  const li = ev.map(([k, t, e], i) => `<li class="nx-step"><h5><span class="nx-n">${i + 1}</span> ${t}</h5><p class="nx-when"><b>${esc(yr(e.year, e.est))}</b> · ${e.place && e.place.name ? (e.place.id ? nxPlace(e.place, e.year, 'At', TCR.placeHref(e.place.id)) : nxPlace(e.place, e.year, 'At', 'https://recordatlas.org/?q=' + encodeURIComponent(e.place.name))) : '<i>place not recorded</i>'}</p><p class="nx-how">${esc({ death: 'A death or burial entry usually gives the age, the parents and who reported it.', marriage: 'A marriage entry names the fathers and gives ages. The place is not recorded in any tree; the spouse\'s birthplace is a common place for it.', birth: 'A baptism or birth entry names the parents and the godparents.' }[k])}</p></li>`).join('');
   return `<ol class="nx">${li}</ol><div class="warnbox">The full plan (which collections cover each year, who ruled the place then and where its books went, neighbouring parishes, and the sources for the wars) is built from live Record Atlas data, so it is on <b>recordatlas.org</b>. ${alink('https://recordatlas.org/roots/', 'Open Roots & Routes on the Atlas')}.</div>`;
 }
 
@@ -3411,7 +3459,7 @@ function clearCanvas() {
   if (!S.cards.size) return;
   snapshot(); clearAll(); refreshAll(); drawEdges(); hideHint(); renderInfo(); save(); runSearchMarks(); toast('Cleared. Undo brings it back.');
 }
-const THEMES = ['sticker', 'paper', 'ground'];
+const THEMES = ['sticker', 'paper', 'ground', 'lanes'];
 function setTheme(t) {
   if (!THEMES.includes(t)) t = 'sticker';
   document.documentElement.setAttribute('data-theme', t);

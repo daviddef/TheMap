@@ -4600,7 +4600,7 @@ function wireToolbar() {
     by.innerHTML = 'by <a href="/" target="_top" rel="noopener">Record Atlas</a>';
     $('.top').insertAdjacentHTML('afterbegin',
       '<button class="lk-ibtn" id="bLiv" type="button" title="Hide living people (the names of anyone who may be alive)" aria-label="Hide living people" aria-pressed="' + (QS.get('liv') === '1') + '">' + icon('eyeoff') + '</button>' +
-      '<button class="lk-ibtn" id="bOpen" type="button" title="Open a GEDCOM file from this device. It is read in this browser and not uploaded." aria-label="Open a GEDCOM file">' + icon('folder') + '</button>' +
+      '<button class="lk-ibtn" id="bOpen" type="button" title="Back to the opening screen: open a GEDCOM file or one of the family archives. Your canvas is kept." aria-label="Back to the opening screen">' + icon('folder') + '</button>' +
       '<input type="file" id="gedIn" accept=".ged,.gedcom,.txt,text/plain" hidden>');
     const send = async f => {
       if (!f) return;
@@ -4610,7 +4610,7 @@ function wireToolbar() {
       parent.postMessage({ tcOpen: { bytes, name: f.name } }, location.origin, [bytes]);
     };
     SENDGED = send;
-    $('#bOpen').onclick = () => $('#gedIn').click();
+    $('#bOpen').onclick = () => parent.postMessage({ tcHome: true }, location.origin);
     $('#gedIn').onchange = e => { send(e.target.files[0]); e.target.value = ''; };
     $('#bLiv').onclick = () => parent.postMessage({ tcLiving: $('#bLiv').getAttribute('aria-pressed') !== 'true' }, location.origin);
     for (const ev of ['dragenter', 'dragover']) document.addEventListener(ev, e => e.preventDefault());

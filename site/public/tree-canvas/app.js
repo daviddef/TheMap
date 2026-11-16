@@ -144,6 +144,7 @@ async function compareWith(key, mark) {
 addEventListener('message', e => {
   if (e.origin !== location.origin) return;   // only the canvas, which is this site's own page
   const d = e.data || {};
+  if (d.tcHome) { $('#cv').hidden = true; showStart(); return; }   // the canvas's folder button: back to the opening screen (the canvas keeps its own state)
   if (d.tcCompare !== undefined && !d.tcOpen) { compareWith(d.tcCompare && d.tcCompare.key, d.tcCompare && d.tcCompare.mark); return; }
   if (d.tcOpen && d.tcOpen.bytes instanceof ArrayBuffer) { example = false; start(d.tcOpen.bytes, d.tcOpen.name); }
   else if (typeof d.tcLiving === 'boolean') {

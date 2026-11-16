@@ -3769,6 +3769,7 @@ function shelfArm() {
   shelfT = setTimeout(function tick() {
     const h = document.documentElement.classList, dock = $('.dock');
     if (h.contains('shelfoff') || !dock) return;
+    if (!S.cards.size) return;   /* nothing on the canvas: the search is the only way to start, so it stays */
     if (document.activeElement === $('#q') || dock.matches(':hover') || S.rzArm != null) { shelfT = setTimeout(tick, 4000); return; }
     h.add('shelfoff'); $('#bShelf').setAttribute('aria-pressed', 'false'); dockH();
     if (!shelfToldOnce) { shelfToldOnce = true; toast('Search tucked away. The eye button brings it back.', 3200); }
@@ -4459,7 +4460,9 @@ function syncButtons() {
 function syncUi() { hideHint(); syncButtons(); }
 function clearCanvas() {
   if (!S.cards.size) return;
-  snapshot(); clearAll(); refreshAll(); drawEdges(); hideHint(); renderInfo(); save(); runSearchMarks(); toast('Cleared. Undo brings it back.');
+  snapshot(); clearAll(); refreshAll(); drawEdges(); hideHint(); renderInfo(); save(); runSearchMarks();
+  clearTimeout(shelfT); { const h = document.documentElement.classList; h.remove('shelfoff'); $('#bShelf').setAttribute('aria-pressed', 'true'); dockH(); }   /* a cleared canvas starts again: the search box comes back and stays until something is searched and added */
+  toast('Cleared. Undo brings it back.');
 }
 const THEMES = ['sticker', 'paper', 'ground', 'lanes', 'countries', 'names'];
 const THEME_NAME = { countries: 'Countries' };

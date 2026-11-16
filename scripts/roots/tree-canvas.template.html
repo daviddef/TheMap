@@ -671,6 +671,9 @@ html:not(.ph):has(#info.on) #infoTab{top:92px;transform:none}
 #namesCap[hidden]{display:none}#namesCap b{color:var(--lk-ink);font-weight:900;margin-right:4px}#namesCap small{display:block;font-size:11px;color:var(--lk-mute)}
 html:not(.ph):has(#info.on) #namesCap{left:calc((100vw - 340px) / 2)}
 .ph #namesCap{left:8px;right:8px;transform:none;max-width:none}
+#namesCap .nmsc{display:inline-flex;gap:4px;margin:0 0 0 8px;vertical-align:middle}
+#namesCap .nmsc button{border:2px solid var(--lk-line);background:var(--lk-card);color:var(--lk-soft);border-radius:999px;padding:2px 10px;font:800 11.5px Nunito,system-ui;cursor:pointer}
+#namesCap .nmsc button:hover{background:var(--lk-hover)}#namesCap .nmsc button.on{background:var(--lk-accent-soft);border-color:var(--lk-accent);color:var(--lk-ink)}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -1453,10 +1456,16 @@ html:not(.ph):has(#info.on) #namesCap{left:calc((100vw - 340px) / 2)}
     if (nf && nf.sur && nf.sur.canon) return { k: 'f:' + nf.sur.canon, label: nf.sur.canon };
     const s = squash(p.sur); return s ? { k: 's:' + s, label: p.sur } : { k: '?', label: '' };
   }
-  function nameTree(M, i) {
+  function nameTree(M, i, scope) {
     const root = M.P[i]; if (!root) return null;
+    const blood = scope === 'blood';   /* 'blood': every blood relative (ancestors, and everyone descended from any of them) with their spouses; otherwise the ancestors only */
     const gen = new Map([[i, 0]]), q = [i];
     for (let h = 0; h < q.length; h++) { const p = M.P[q[h]], g = gen.get(q[h]); for (const r of [p.f, p.m]) if (r >= 0 && M.P[r] && !gen.has(r)) { gen.set(r, g + 1); q.push(r); } }
+    const mem = new Map();
+    if (blood) {
+      bloodSet(M, i, Infinity).forEach(j => mem.set(j, gen.has(j) ? gen.get(j) : 0));
+      [...mem.keys()].forEach(j => { const p = M.P[j]; p.sp.forEach(s => { if (M.P[s] && !mem.has(s)) mem.set(s, 0); }); [p.f, p.m].forEach(y => { if (y >= 0 && M.P[y] && !mem.has(y)) mem.set(y, 0); }); });
+    } else gen.forEach((g, j) => mem.set(j, g));
     const nodes = new Map();
     const add = (j, g) => {
       const p = M.P[j], k = surKey(M, p); let n = nodes.get(k.k);
@@ -1465,17 +1474,19 @@ html:not(.ph):has(#info.on) #namesCap{left:calc((100vw - 340px) / 2)}
       if (p.by != null) { n.from = n.from == null ? p.by : Math.min(n.from, p.by); const e = p.dy != null ? p.dy : p.by; n.to = n.to == null ? e : Math.max(n.to, e); }
       n.g0 = Math.min(n.g0, g); n.g1 = Math.max(n.g1, g);
     };
-    gen.forEach((g, j) => add(j, g));
-    const edges = new Map(), seen = new Set();
+    mem.forEach((g, j) => add(j, g));
+    const edges = new Map(), seen = new Set(), pair = (a, b) => a < b ? a + '|' + b : b + '|' + a;
     const link = (a, b) => {
       const ka = surKey(M, a).k, kb = surKey(M, b).k;
       if (ka === kb) { nodes.get(ka).self++; return; }
       const key = ka < kb ? ka + '|' + kb : kb + '|' + ka; let e = edges.get(key); if (!e) edges.set(key, e = { a: ka < kb ? ka : kb, b: ka < kb ? kb : ka, n: 0 }); e.n++;
     };
-    gen.forEach((g, j) => { const p = M.P[j]; if (p.f >= 0 && p.m >= 0 && M.P[p.f] && M.P[p.m]) { const k = p.f + '|' + p.m; if (!seen.has(k)) { seen.add(k); link(M.P[p.f], M.P[p.m]); } } });
+    const couple = (x, y) => { const k = pair(x, y); if (!seen.has(k)) { seen.add(k); link(M.P[x], M.P[y]); } };
+    mem.forEach((g, j) => { const p = M.P[j]; if (p.f >= 0 && p.m >= 0 && M.P[p.f] && M.P[p.m]) couple(p.f, p.m); });
     /* a mother known without the father: the child carries the father's name, so the mother's name is joined to the child's (an implied marriage) */
-    gen.forEach((g, j) => { const p = M.P[j], mo = p.m >= 0 ? M.P[p.m] : null, fa = p.f >= 0 ? M.P[p.f] : null; if (mo && !fa && mo.sex === 'f' && squash(p.sur)) { const k = 'm' + j; if (!seen.has(k)) { seen.add(k); link(p, mo); } } });
-    root.sp.forEach(s => { const o = M.P[s]; if (!o || gen.has(s)) return; add(s, 0); link(root, o); });
+    mem.forEach((g, j) => { const p = M.P[j], mo = p.m >= 0 ? M.P[p.m] : null, fa = p.f >= 0 ? M.P[p.f] : null; if (mo && !fa && mo.sex === 'f' && squash(p.sur)) { const k = 'm' + j; if (!seen.has(k)) { seen.add(k); link(p, mo); } } });
+    if (blood) mem.forEach((g, j) => M.P[j].sp.forEach(s => { if (mem.has(s) && s !== j) couple(j, s); }));
+    else root.sp.forEach(s => { const o = M.P[s]; if (!o || mem.has(s)) return; mem.set(s, 0); add(s, 0); couple(i, s); });
     const rk = surKey(M, root).k, E = [...edges.values()];
     /* depth by marriages from the focus person's name; the strongest edge to the row above is each name's parent in the layout */
     const depth = new Map([[rk, 0]]), parent = new Map(), order = [rk];
@@ -1485,7 +1496,7 @@ html:not(.ph):has(#info.on) #namesCap{left:calc((100vw - 340px) / 2)}
     }
     nodes.forEach((n, k) => { if (!depth.has(k)) { depth.set(k, Math.max(...depth.values()) + 1); order.push(k); } });
     const N = [...nodes.values()].map(n => ({ ...n, depth: depth.get(n.key), parent: parent.get(n.key) || null }));
-    return { root: rk, nodes: N, edges: E, people: gen.size + root.sp.filter(s => M.P[s] && !gen.has(s)).length, ancestors: gen.size };
+    return { root: rk, nodes: N, edges: E, people: mem.size, ancestors: gen.size, scope: blood ? 'blood' : 'anc' };
   }
   const API = { nameTree, playSet, family, lifeEvents, eraChanges, lines, arrange, bloodSet, fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful,
     placeAt, neighbours, edgeCost, parentLinks, ancestorStats, stopReason, otherSideHasParents, evidenceSummary, years, url, levelOfGrade, LEVELS, kinshipOps, opsOf, reverseOps, bloodTerm, siblingKind, archivesOnPath, ord };
@@ -3058,7 +3069,8 @@ addEventListener('resize', () => playPlace());
    One card per surname family with how many people bear it and their years; a line between two names for the marriages that join them, counted. The tree runs from the
    focus person's own name at the top; each row is one more marriage away. The counting is TC.nameTree (logic.js); this file lays it out and draws it in the canvas world,
    so pan and zoom work as they always do. The people cards are hidden while this look is on and come back untouched when it is changed. */
-const NAMES = { box: null, sig: '', focus: null, open: null };
+const NAMES = { box: null, sig: '', focus: null, open: null, scope: 'blood' };
+try { if (!EMBED && localStorage.getItem('tcNamesScope') === 'anc') NAMES.scope = 'anc'; } catch (e) { /* ignore */ }
 const namesLook = () => document.documentElement.getAttribute('data-theme') === 'names';
 function namesBox() { return namesLook() ? NAMES.box : null; }
 function namesFocus() {
@@ -3068,7 +3080,7 @@ function namesFocus() {
   if (!p) { const c = [...S.cards.values()][0]; p = c && personOf(c); }
   return p || null;
 }
-const NM_W = 214, NM_H = 104, NM_GX = 34, NM_GY = 88;
+const NM_W = 214, NM_H = 104, NM_GX = 34, NM_GY = 88, NM_CAP = 6;
 function namesLayout(T) {
   const by = new Map(T.nodes.map(n => [n.key, n])), kids = new Map();
   T.nodes.forEach(n => { n._w = null; if (n.parent) { if (!kids.has(n.parent)) kids.set(n.parent, []); kids.get(n.parent).push(n); } });
@@ -3080,7 +3092,15 @@ function namesLayout(T) {
     ks.forEach(c => { place(c, cx); cx += wid(c) + NM_GX; });
   };
   const roots = [by.get(T.root), ...T.nodes.filter(n => !n.parent && n.key !== T.root)];
-  let x = 0; roots.forEach(r => { place(r, x); x += wid(r) + NM_GX * 2; });
+  const rows = new Map(); T.nodes.forEach(n => { if (!rows.has(n.depth)) rows.set(n.depth, []); rows.get(n.depth).push(n); });
+  if (Math.max(...[...rows.values()].map(r => r.length)) <= NM_CAP) { let x = 0; roots.forEach(r => { place(r, x); x += wid(r) + NM_GX * 2; }); return by; }
+  /* a wide tree: each generation of names is wrapped into several short lines, kept in the order of the names they hang from, so it fits a screen at a readable size */
+  const idx = new Map([[T.root, 0]]); let y = 0;
+  [...rows.keys()].sort((a, b) => a - b).forEach(d => {
+    const r = rows.get(d).sort((a, b) => (idx.get(a.parent) || 0) - (idx.get(b.parent) || 0) || b.n - a.n), lines = Math.ceil(r.length / NM_CAP), per = Math.ceil(r.length / lines);
+    r.forEach((n, i) => { const li = Math.floor(i / per), k = i % per, cnt = Math.min(per, r.length - li * per); n.x = (k - (cnt - 1) / 2) * (NM_W + NM_GX) - NM_W / 2; n.y = y + li * (NM_H + 46); idx.set(n.key, i); });
+    y += lines * (NM_H + 46) - 46 + NM_H + NM_GY - NM_H + 40;
+  });
   return by;
 }
 function namesEdge(a, b) {   /* from the higher name down to the lower; two names in one row are joined by an arc over the top */
@@ -3100,9 +3120,9 @@ function drawNames(force) {
   if (!namesLook()) { if (host.innerHTML) host.innerHTML = ''; cap.hidden = true; NAMES.sig = ''; NAMES.box = null; NAMES.focus = null; return; }
   const p = namesFocus();
   if (!p) { host.innerHTML = ''; NAMES.box = null; NAMES.sig = ''; cap.hidden = false; cap.innerHTML = '<b>Names</b> Put someone on the canvas, then select or mark them: this shows their ancestry as surnames.'; return; }
-  const sig = p.key + '|' + NAMES.open; if (sig === NAMES.sig && !force) return;
+  const sig = p.key + '|' + NAMES.open + '|' + NAMES.scope; if (sig === NAMES.sig && !force) return;
   const changed = NAMES.focus !== p.key; NAMES.focus = p.key; NAMES.sig = sig;
-  const T = TC.nameTree(M, p.i), by = namesLayout(T), max = Math.max(...T.nodes.map(n => n.n));
+  const T = TC.nameTree(M, p.i, NAMES.scope), by = namesLayout(T), max = Math.max(...T.nodes.map(n => n.n));
   let svg = '', html = '', lab = '', x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9, marriages = 0;
   T.edges.forEach(e => {
     const a = by.get(e.a), b = by.get(e.b), q = namesEdge(a, b), tree = a.parent === b.key || b.parent === a.key; marriages += e.n;
@@ -3119,13 +3139,18 @@ function drawNames(force) {
       <small>${yrs}${yrs && span > 1 ? ' · ' : ''}${span > 1 ? span + ' generations' : ''}${n.self ? ' · married within the name' + (n.self > 1 ? ' ×' + n.self : '') : ''}</small>
       ${n.key === T.root ? '<span class="nmhere">starts here</span>' : ''}${NAMES.open === n.key ? namesPeople(n) : ''}</div>`;
   });
-  NAMES.box = { x0, y0, x1, y1 };
+  NAMES.box = { x0, y0, x1, y1: y1 + 84 };   /* room under the last row for the caption */
   host.innerHTML = `<svg class="nmsvg" width="1" height="1" aria-hidden="true">${svg}</svg>${lab}${html}`;
   cap.hidden = false;
-  cap.innerHTML = `<b>Names behind ${esc(p.name)}</b> ${T.ancestors.toLocaleString()} ${T.ancestors === 1 ? 'person' : 'people'} in ${T.nodes.length} ${T.nodes.length === 1 ? 'name' : 'names'}, ${marriages} ${marriages === 1 ? 'marriage' : 'marriages'}. <small>Select or mark someone else to change it; click a name to see who.</small>`;
+  const sc = NAMES.scope;
+  cap.innerHTML = `<b>${sc === 'blood' ? 'Names in the bloodline of' : 'Names behind'} ${esc(p.name)}</b> ${T.people.toLocaleString()} ${T.people === 1 ? 'person' : 'people'} in ${T.nodes.length} ${T.nodes.length === 1 ? 'name' : 'names'}, ${marriages} ${marriages === 1 ? 'marriage' : 'marriages'}.
+    <span class="nmsc" role="group" aria-label="What to count"><button type="button" data-scope="blood" class="${sc === 'blood' ? 'on' : ''}">Whole bloodline</button><button type="button" data-scope="anc" class="${sc === 'anc' ? 'on' : ''}">Ancestors only</button></span>
+    <small>Select or mark someone else to change it; click a name to see who.</small>`;
   if (changed) fit();
 }
 document.addEventListener('click', e => {
+  const sb = e.target.closest && e.target.closest('#namesCap [data-scope]');
+  if (sb) { NAMES.scope = sb.dataset.scope; NAMES.open = null; try { if (!EMBED) localStorage.setItem('tcNamesScope', NAMES.scope); } catch (x) { /* ignore */ } drawNames(true); fit(); return; }
   const n = e.target.closest && e.target.closest('#namesview .nm'); if (!n || !namesLook()) return;
   const k = n.dataset.nm; NAMES.open = NAMES.open === k ? null : k; drawNames(true);
 });

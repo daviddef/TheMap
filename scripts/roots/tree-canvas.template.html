@@ -203,6 +203,7 @@ button{font-family:inherit}
 .card .nm{font:400 17px/1.15 "Lilita One",Impact,system-ui;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--lk-ink)}
 .card .yr{font:800 11.5px/1.3 Nunito,system-ui;color:var(--lk-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
 .card .meta{display:flex;align-items:center;gap:5px;margin-top:3px;font:800 10px Nunito,system-ui;color:var(--lk-mute)}
+.card .ar.ln{background:var(--lc)}
 .card .ar{background:var(--ac);color:#fff;border-radius:99px;padding:1px 7px;letter-spacing:.3px;text-transform:uppercase;font-size:9.5px}
 .card .seals{display:flex;gap:3px;align-items:center;margin-left:auto}
 .card .seals svg{width:14px;height:14px;display:block}
@@ -505,6 +506,10 @@ select.lk-input{width:auto;padding:4px 8px}
 .mkrel{background:#fff6dc;border:1.5px solid #f0b429;border-radius:12px;padding:6px 10px;color:#4a3300}
 html:not(.ph):has(#info.on) #markBar{left:calc((100vw - 340px) / 2);max-width:min(720px,calc(100vw - 340px - 100px))}
 .ph #markBar{left:8px;right:8px;transform:none;max-width:none;top:58px;flex-wrap:wrap}
+#markBar{flex-wrap:wrap}
+#markBar .mkc{flex:1 1 100%;order:5;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font:800 10.5px Nunito,system-ui;color:var(--lk-soft)}
+#markBar .mkc::before{content:"Lines from the grandparents:";margin-right:2px}
+#markBar .mkch{background:var(--lc);color:#fff;border-radius:99px;padding:1px 8px;text-transform:uppercase;letter-spacing:.3px}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -1148,6 +1153,21 @@ html:not(.ph):has(#info.on) #markBar{left:calc((100vw - 340px) / 2);max-width:mi
   }
 
 
+  /* lines: from a marked person, each grandparent heads a line (a parent with no parents of their own heads one themselves) and every ancestor of that head
+     belongs to it, all the way up. Returns { heads:[{i,ci,name}], of: Map person index -> [line numbers] }. The line is named by the head's surname. */
+  function lines(M, i) {
+    const out = { heads: [], of: new Map() }, p = M.P[i]; if (!p) return out;
+    const heads = [];
+    [p.f, p.m].forEach(q => { if (q < 0) return; const g = [M.P[q].f, M.P[q].m].filter(x => x >= 0); (g.length ? g : [q]).forEach(h => { if (h !== i && !heads.includes(h)) heads.push(h); }); });
+    const names = heads.map(h => M.P[h].sur || M.P[h].name);
+    heads.forEach((h, k) => { const dup = names.filter(n => n === names[k]).length > 1; out.heads.push({ i: h, ci: k, name: dup ? names[k] + ' (' + (M.P[h].given || '?') + ')' : names[k] }); });
+    out.heads.forEach(H => {
+      const seen = new Set([H.i]), q = [H.i];
+      while (q.length) { const x = q.shift(); if (!out.of.has(x)) out.of.set(x, []); if (!out.of.get(x).includes(H.ci)) out.of.get(x).push(H.ci); [M.P[x].f, M.P[x].m].forEach(y => { if (y >= 0 && y !== i && !seen.has(y)) { seen.add(y); q.push(y); } }); }
+    });
+    return out;
+  }
+
   /* arrange: a tidy family-tree layout for a set of cards. items = [{k, par:[k], mate:[k]}] (par = the parents that are in the set, mate = spouses and same-person
      partners). Couples stay side by side as one "blob"; each blob sits on a generation row (below its lowest parent, level with its spouse); rows are ordered to
      cut crossings (barycentre sweeps) and spaced so children sit under their parents and parents over their children, with no two cards touching.
@@ -1215,7 +1235,7 @@ html:not(.ph):has(#info.on) #markBar{left:calc((100vw - 340px) / 2);max-width:mi
     return out;
   }
 
-  const API = { arrange, bloodSet, fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful,
+  const API = { lines, arrange, bloodSet, fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful,
     placeAt, neighbours, edgeCost, parentLinks, ancestorStats, stopReason, otherSideHasParents, evidenceSummary, years, url, levelOfGrade, LEVELS, kinshipOps, opsOf, reverseOps, bloodTerm, siblingKind, archivesOnPath, ord };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TC = API;
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -1607,6 +1627,17 @@ const S = {
   undo: [], busy: 0,
 };
 const colour = a => M.archives[a].color;
+/* the lines of the marked person: each grandparent's ancestors share a name and a colour (only for a tree with no archives of its own, where the archive name is no use) */
+const LINE_COLS = ['#2f8f5b', '#3b6fb6', '#8a5cc2', '#d9822b', '#c2417a', '#1f8a8a'];
+function markLines() {
+  if (!S.mark || !M.byKey.has(S.mark)) return null;
+  if (!S._lines || S._lines.k !== S.mark || S._lines.M !== M) S._lines = { k: S.mark, M, v: TC.lines(M, M.byKey.get(S.mark).i) };
+  return S._lines.v;
+}
+function lineOf(i) { /* { names, col } for a person in one of the marked person's lines, else null */
+  const L = M.P[i] && M.archives[M.P[i].a].k === 'you' ? markLines() : null, cs = L && L.of.get(i); if (!cs || !cs.length) return null;
+  return { names: cs.map(k => L.heads[k].name).join(' / '), col: LINE_COLS[cs[0] % LINE_COLS.length], cs };
+}
 const personOf = c => M.P[c.i];
 const cardOfPerson = i => S.cards.get(M.P[i].key);
 const cx = c => c.x + W / 2;
@@ -1727,8 +1758,9 @@ function cardInner(c) {
     const o = M.P[TC.bridgeOther(b, c.i)], st = TC.bridgeState(M, b);
     return `<button class="brc" style="--bc:${colour(o.a)}" data-act="br" data-b="${esc(b.id)}" title="${st === 'confirmed' ? 'Confirmed' : 'Suggested'} same person in ${esc(M.archives[o.a].name)} (${esc(TC.bridgeNotes(b).join(', '))}). Click to add them to the canvas, bridged, not merged.">&asymp; ${esc(M.archives[o.a].name)}</button>`;
   }).join('') + (brs.length > 1 ? `<button class="brc more" style="--bc:var(--lk-accent)" data-act="brs" title="${brs.length - 1} more possible matches: open the Person panel">+${brs.length - 1}</button>` : '');
-  let h = `<div class="cb" title="${esc(p.name)} · ${esc(a.name)} archive${p.occ ? ' · ' + esc(p.occ) : ''} · ${esc(TC.evidenceSummary(M, p))}"><div class="nm">${esc(p.name)}</div><div class="yr">${TC.years(p)}${place}</div>
-    <div class="meta"><span class="ar">${esc(a.name)}</span>${p.sex === 'f' || p.sex === 'm' ? `<span class="sx ${p.sex === 'f' ? 'mo' : 'fa'}" title="${p.sex === 'f' ? 'Female' : 'Male'}">${p.sex === 'f' ? '&#9792;' : '&#9794;'}&#xFE0E;</span>` : ''}${chips}<span class="seals">${seals.join('')}</span></div></div>`;
+  const ln = lineOf(c.i);
+  let h = `<div class="cb" title="${esc(p.name)}${a.k === 'you' ? '' : ' · ' + esc(a.name) + ' archive'}${p.occ ? ' · ' + esc(p.occ) : ''} · ${esc(TC.evidenceSummary(M, p))}"><div class="nm">${esc(p.name)}</div><div class="yr">${TC.years(p)}${place}</div>
+    <div class="meta">${a.k === 'you' ? (ln ? `<span class="ar ln" style="--lc:${ln.col}" title="On the ${esc(ln.names)} line from the marked person's grandparents">${esc(ln.names)}</span>` : '') : `<span class="ar">${esc(a.name)}</span>`}${p.sex === 'f' || p.sex === 'm' ? `<span class="sx ${p.sex === 'f' ? 'mo' : 'fa'}" title="${p.sex === 'f' ? 'Female' : 'Male'}">${p.sex === 'f' ? '&#9792;' : '&#9794;'}&#xFE0E;</span>` : ''}${chips}<span class="seals">${seals.join('')}</span></div></div>`;
   if (c.key === S.mark) h += `<span class="mkb" title="The marked person: the canvas shows how everyone you select is related to them">&#9733;</span>`;
   { const fx = fixOf(p); if (fx) h += `<button class="fxb" data-act="fixes" title="${fx.length} ${fx.length === 1 ? 'thing' : 'things'} on your fix list for ${esc(p.name)}: click to see what and how to fix it" aria-label="${fx.length} on the fix list">!</button>` ;  }
   /* ancestors */
@@ -1774,6 +1806,7 @@ function refreshCard(c) {
   if (S.relateFrom === c.key) cls.push('pulse');
   if (c.key === S.mark) cls.push('marked');
   c.el.className = cls.join(' ');
+  { const ln = lineOf(c.i); c.el.style.setProperty('--ac', ln ? ln.col : colour(personOf(c).a)); }
   c.el.innerHTML = cardInner(c);
 }
 function refreshAll() { S.cards.forEach(refreshCard); syncUi(); }
@@ -2210,7 +2243,7 @@ function drawEdges() {
   };
   const dimOf = id => (pathIds && !pathIds.has(id)) ? ' dimmed' : '';
   S.cards.forEach(c => {
-    const p = personOf(c), col = colour(p.a);
+    const p = personOf(c), ln = lineOf(c.i), col = ln ? ln.col : colour(p.a);
     const F = p.f >= 0 ? cardOfPerson(p.f) : null, Mo = p.m >= 0 ? cardOfPerson(p.m) : null;
     const fid = 'p:' + p.f + '>' + c.i, mid = 'p:' + p.m + '>' + c.i;
     if (F) seen.add(fid); if (Mo) seen.add(mid);
@@ -2544,7 +2577,7 @@ $('#q').addEventListener('input', () => runSearch());
 $('#q').addEventListener('keydown', e => { if (e.key === 'Enter' && lastResults[0]) addFromResult(lastResults[0]); if (e.key === 'Escape') { e.target.value = ''; runSearch(); e.target.blur(); } });
 function resHTML(p, via) {
   const on = S.cards.has(p.key), a = M.archives[p.a];
-  return `<div class="res${on ? ' on' : ''}" data-i="${p.i}" style="--ac:${a.color}" title="${esc(p.name)} · ${esc(a.name)} · ${esc(TC.evidenceSummary(M, p))}"><div class="n">${esc(p.name)}</div>${via ? `<div class="via" title="Found as another form of this name, from the Record Atlas's name catalogue">as “${esc(via.charAt(0).toUpperCase() + via.slice(1))}”</div>` : ''}<div class="y"><span class="ac">${esc(a.name)}</span>${TC.years(p)}${p.bp ? ' · ' + esc(p.bp) : ''}</div><div class="e">${esc(TC.evidenceSummary(M, p))}</div>${on ? '<span class="mk">&#10003;</span>' : ''}</div>`;
+  return `<div class="res${on ? ' on' : ''}" data-i="${p.i}" style="--ac:${a.color}" title="${esc(p.name)} · ${esc(a.name)} · ${esc(TC.evidenceSummary(M, p))}"><div class="n">${esc(p.name)}</div>${via ? `<div class="via" title="Found as another form of this name, from the Record Atlas's name catalogue">as “${esc(via.charAt(0).toUpperCase() + via.slice(1))}”</div>` : ''}<div class="y">${a.k === 'you' ? '' : `<span class="ac">${esc(a.name)}</span>`}${TC.years(p)}${p.bp ? ' · ' + esc(p.bp) : ''}</div><div class="e">${esc(TC.evidenceSummary(M, p))}</div>${on ? '<span class="mk">&#10003;</span>' : ''}</div>`;
 }
 function runSearch() {
   const q = $('#q').value;
@@ -2791,7 +2824,7 @@ function personPanel() {
   const kids = p.ch.length, sps = p.sp.map(s => M.P[s].name);
   const brs = (M.bridgesOf.get(p.i) || []);
   return `<h3>${esc(p.name)}</h3>
-    <div>${link ? `<a class="pill ac" style="--ac:${a.color}" href="${esc(link)}" target="_blank" rel="noopener" title="Open ${esc(p.name)} in the ${esc(a.name)} archive">${esc(a.name)} archive &nearr;</a>` : `<span class="pill ac" style="--ac:${a.color}">${esc(a.name)}${a.k === 'you' ? '' : ' archive'}</span>`}<span class="pill">${TC.years(p)}</span>${p.occ ? `<span class="pill">${esc(p.occ)}</span>` : ''}</div>
+    <div>${link ? `<a class="pill ac" style="--ac:${a.color}" href="${esc(link)}" target="_blank" rel="noopener" title="Open ${esc(p.name)} in the ${esc(a.name)} archive">${esc(a.name)} archive &nearr;</a>` : a.k === 'you' ? (() => { const ln = lineOf(p.i); return ln ? `<span class="pill ac" style="--ac:${ln.col}" title="On the ${esc(ln.names)} line from the marked person's grandparents">${esc(ln.names)} line</span>` : ''; })() : `<span class="pill ac" style="--ac:${a.color}">${esc(a.name)} archive</span>`}<span class="pill">${TC.years(p)}</span>${p.occ ? `<span class="pill">${esc(p.occ)}</span>` : ''}</div>
     ${a.k === 'you' && !p.ghost ? extLinksHTML(p) : ''}
     ${p.ghost ? `<p class="plines lvn">Named in the archive, but there is no record of their own yet: no dates, no places, no sources. ${p.how ? 'How the name is known: ' + esc(p.how) + '.' : ''}</p>
       ${p.sp.length ? `<p class="plines">Named as the spouse of ${p.sp.map(q => `<a href="#" data-focus="${esc(M.P[q].key)}">${esc(M.P[q].name)}</a>`).join(', ')}.</p>` : ''}
@@ -2856,7 +2889,7 @@ function pathPanel() {
     <div class="big">${esc(A.name)} <i>&harr;</i> ${esc(B.name)}</div>
     <div class="warnbox" style="background:var(--lk-accent-soft);font-size:13.5px;color:var(--lk-ink)">${desc.exact ? `<b>${esc(B.name)}</b> is ${desc.kind === 'spouseOf' ? `the spouse of <b>${esc(A.name)}</b>'s <b>${esc(desc.term)}</b>` : `<b>${esc(A.name)}</b>'s <b>${esc(desc.words)}</b>`}${desc.reverse ? `;<br><b>${esc(A.name)}</b> is ${desc.rkind === 'spouseOf' ? `the spouse of <b>${esc(B.name)}</b>'s <b>${esc(desc.rterm)}</b>` : `<b>${esc(B.name)}</b>'s <b>${esc(desc.reverse)}</b>`}.` : '.'}` : esc(desc.sentence)}</div>
     <div><span class="pill">${desc.steps} step${desc.steps === 1 ? '' : 's'}${desc.bridges ? ` + ${desc.bridges} archive bridge${desc.bridges > 1 ? 's' : ''}` : ''}</span>${desc.marriage ? '<span class="pill">by marriage</span>' : ''}
-      ${desc.archives.map(a => `<span class="pill ac" style="--ac:${colour(a)}">${esc(M.archives[a].name)}</span>`).join('')}</div>
+      ${desc.archives.filter(a => M.archives[a].k !== 'you').map(a => `<span class="pill ac" style="--ac:${colour(a)}">${esc(M.archives[a].name)}</span>`).join('')}</div>
     <h4>Evidence strength: only as strong as the weakest step</h4>
     <div>${lvBadge(lv, 'currentColor')}</div>
     <p style="margin-top:6px">${esc(TC.strengthSentence(M, res, desc))}</p>
@@ -3211,10 +3244,11 @@ function markBar() {
   const p = markedPerson(); bar.hidden = !p; if (!p) return;
   markPlace();
   const tk = markTarget(), r = tk && markRel(tk);
+  const L = markLines(), chips = L && L.heads.length && M.archives[p.a].k === 'you' ? `<span class="mkc">${L.heads.map(h => `<span class="mkch" style="--lc:${LINE_COLS[h.ci % LINE_COLS.length]}">${esc(h.name)}</span>`).join('')}</span>` : '';
   bar.innerHTML = `<button class="mkn" data-mk="go" title="Find ${esc(p.name)} on the canvas">&#9733; ${esc(p.name)}</button>`
     + `<span class="mkt">${r ? markText(r, false) : 'Select anyone to see how they are related to ' + esc(p.name)}</span>`
     + (r && !r.self && !r.none && !(S.path && S.path.a === S.mark && S.path.b === tk) ? `<button class="lk-btn is-small" data-mk="path" data-t="${esc(tk)}">Show path</button>` : '')
-    + `<button class="mkx" data-mk="off" title="Unmark ${esc(p.name)}" aria-label="Unmark">${icon('x', '')}</button>`;
+    + chips + `<button class="mkx" data-mk="off" title="Unmark ${esc(p.name)}" aria-label="Unmark">${icon('x', '')}</button>`;
 }
 addEventListener('resize', () => markPlace());
 /* sits just under the "how related" bar, wherever that is */

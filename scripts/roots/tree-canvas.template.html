@@ -656,11 +656,13 @@ html:not(.ph):has(#info.on) #infoTab{top:92px;transform:none}
 #namesview .nmt{stroke:var(--lk-accent);opacity:.8}
 #namesview .nmx{stroke:var(--lk-faint);stroke-dasharray:3 8}
 #namesview .nml{position:absolute;transform:translate(-50%,-50%);padding:2px 9px;border-radius:999px;background:var(--lk-card);border:2px solid var(--lk-line);font:800 11px Nunito,system-ui;color:var(--lk-soft);white-space:nowrap}
-#namesview .nm{position:absolute;box-sizing:border-box;padding:11px 14px 9px;background:var(--lk-card);border:2px solid var(--lk-line);border-radius:18px;box-shadow:0 4px 0 var(--lk-line);cursor:pointer;display:flex;flex-direction:column;gap:3px}
+#namesview .nm{position:absolute;box-sizing:border-box;padding:11px 14px 9px;background:var(--lk-card);border:2px solid var(--lk-line);border-radius:18px;box-shadow:0 4px 0 var(--lk-line);cursor:grab;touch-action:none;user-select:none;display:flex;flex-direction:column;gap:3px}
+#namesview .nm.dragging{cursor:grabbing;z-index:6;box-shadow:0 10px 0 var(--lk-line);border-color:var(--lk-accent)}
+#namesview .nmlabs{position:absolute;left:0;top:0;pointer-events:none}
 #namesview .nm:hover,#namesview .nm:focus-visible{border-color:var(--lk-accent);outline:none}
 #namesview .nm.root{border-color:var(--lk-accent);background:var(--lk-accent-soft);box-shadow:0 4px 0 var(--lk-accent)}
 #namesview .nm.open{z-index:3}
-#namesview .nmn{font:400 25px/1.05 "Lilita One",system-ui,sans-serif;letter-spacing:.01em;color:var(--lk-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#namesview .nmn{font:400 22px/1.05 "Lilita One",system-ui,sans-serif;letter-spacing:.01em;color:var(--lk-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #namesview .nmc{font:800 12.5px Nunito,system-ui;color:var(--lk-soft)}#namesview .nmc em{font:400 18px "Lilita One",system-ui;font-style:normal;color:var(--lk-accent);margin-right:2px}
 #namesview .nmbar{display:block;height:6px;border-radius:4px;background:var(--lk-line);overflow:hidden}#namesview .nmbar u{display:block;height:100%;background:var(--lk-accent);border-radius:4px;text-decoration:none}
 #namesview .nm small{font:800 10.5px Nunito,system-ui;color:var(--lk-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -671,6 +673,7 @@ html:not(.ph):has(#info.on) #infoTab{top:92px;transform:none}
 #namesCap[hidden]{display:none}#namesCap b{color:var(--lk-ink);font-weight:900;margin-right:4px}#namesCap small{display:block;font-size:11px;color:var(--lk-mute)}
 html:not(.ph):has(#info.on) #namesCap{left:calc((100vw - 340px) / 2)}
 .ph #namesCap{left:8px;right:8px;transform:none;max-width:none}
+#namesCap a{color:var(--lk-accent);font-weight:900}
 #namesCap .nmsc{display:inline-flex;gap:4px;margin:0 0 0 8px;vertical-align:middle}
 #namesCap .nmsc button{border:2px solid var(--lk-line);background:var(--lk-card);color:var(--lk-soft);border-radius:999px;padding:2px 10px;font:800 11.5px Nunito,system-ui;cursor:pointer}
 #namesCap .nmsc button:hover{background:var(--lk-hover)}#namesCap .nmsc button.on{background:var(--lk-accent-soft);border-color:var(--lk-accent);color:var(--lk-ink)}
@@ -3065,11 +3068,11 @@ function stopPlay(keep) {
 function playGuard() { if (PLAY.on && !S.cards.size) stopPlay(); }
 addEventListener('resize', () => playPlace());
 
-/* names.js — the Names look: the selected (or marked) person's ancestry written as SURNAMES, not people.
-   One card per surname family with how many people bear it and their years; a line between two names for the marriages that join them, counted. The tree runs from the
-   focus person's own name at the top; each row is one more marriage away. The counting is TC.nameTree (logic.js); this file lays it out and draws it in the canvas world,
+/* names.js — the Names look: the selected (or marked) person's family written as SURNAMES, not people.
+   One card per surname family with how many people bear it and their years; a line between two names for the marriages that join them, counted. The names are laid out in rings around the
+   focus person's own name; each ring is one more marriage away, and any name can be dragged. The counting is TC.nameTree (logic.js); this file lays it out and draws it in the canvas world,
    so pan and zoom work as they always do. The people cards are hidden while this look is on and come back untouched when it is changed. */
-const NAMES = { box: null, sig: '', focus: null, open: null, scope: 'blood' };
+const NAMES = { box: null, sig: '', focus: null, open: null, scope: 'blood', pos: {}, psig: '', T: null, by: null, drag: null, dragEnd: 0 };
 try { if (!EMBED && localStorage.getItem('tcNamesScope') === 'anc') NAMES.scope = 'anc'; } catch (e) { /* ignore */ }
 const namesLook = () => document.documentElement.getAttribute('data-theme') === 'names';
 function namesBox() { return namesLook() ? NAMES.box : null; }
@@ -3080,33 +3083,52 @@ function namesFocus() {
   if (!p) { const c = [...S.cards.values()][0]; p = c && personOf(c); }
   return p || null;
 }
-const NM_W = 214, NM_H = 104, NM_GX = 34, NM_GY = 88, NM_CAP = 6;
+const NM_W = 190, NM_H = 92;
+/* Radial layout: the focus name in the middle, each marriage away one ring further out. A name's children share the wedge of the circle its own name was given, in proportion to how many
+   names hang below it, so a family stays together; a ring is pushed outward only as far as its cards need to stand clear of one another. */
 function namesLayout(T) {
   const by = new Map(T.nodes.map(n => [n.key, n])), kids = new Map();
-  T.nodes.forEach(n => { n._w = null; if (n.parent) { if (!kids.has(n.parent)) kids.set(n.parent, []); kids.get(n.parent).push(n); } });
+  T.nodes.forEach(n => { n._w = null; n._p = n.key === T.root ? null : (n.parent && by.has(n.parent) ? n.parent : T.root); if (n._p) { if (!kids.has(n._p)) kids.set(n._p, []); kids.get(n._p).push(n); } });
   kids.forEach(a => a.sort((x, y) => y.n - x.n));
-  const wid = n => n._w != null ? n._w : (n._w = Math.max(NM_W, (kids.get(n.key) || []).reduce((s, c) => s + wid(c) + NM_GX, -NM_GX)));
-  const place = (n, x0) => {
-    n.x = x0 + wid(n) / 2 - NM_W / 2; n.y = n.depth * (NM_H + NM_GY);
-    const ks = kids.get(n.key) || [], total = ks.reduce((s, c) => s + wid(c) + NM_GX, -NM_GX); let cx = x0 + (wid(n) - total) / 2;
-    ks.forEach(c => { place(c, cx); cx += wid(c) + NM_GX; });
+  const wt = n => n._w != null ? n._w : (n._w = Math.max(1, (kids.get(n.key) || []).reduce((s, c) => s + wt(c), 0)));
+  const rows = new Map(), mid = new Map();
+  const spread = (n, a0, a1, d) => {
+    n._d = d; n._a = (a0 + a1) / 2; if (!rows.has(d)) rows.set(d, []); rows.get(d).push(n);
+    const ks = kids.get(n.key) || [], tot = ks.reduce((s, c) => s + wt(c), 0); let a = a0;
+    ks.forEach(c => { const w = (a1 - a0) * wt(c) / tot; spread(c, a, a + w, d + 1); a += w; });
   };
-  const roots = [by.get(T.root), ...T.nodes.filter(n => !n.parent && n.key !== T.root)];
-  const rows = new Map(); T.nodes.forEach(n => { if (!rows.has(n.depth)) rows.set(n.depth, []); rows.get(n.depth).push(n); });
-  if (Math.max(...[...rows.values()].map(r => r.length)) <= NM_CAP) { let x = 0; roots.forEach(r => { place(r, x); x += wid(r) + NM_GX * 2; }); return by; }
-  /* a wide tree: each generation of names is wrapped into several short lines, kept in the order of the names they hang from, so it fits a screen at a readable size */
-  const idx = new Map([[T.root, 0]]); let y = 0;
-  [...rows.keys()].sort((a, b) => a - b).forEach(d => {
-    const r = rows.get(d).sort((a, b) => (idx.get(a.parent) || 0) - (idx.get(b.parent) || 0) || b.n - a.n), lines = Math.ceil(r.length / NM_CAP), per = Math.ceil(r.length / lines);
-    r.forEach((n, i) => { const li = Math.floor(i / per), k = i % per, cnt = Math.min(per, r.length - li * per); n.x = (k - (cnt - 1) / 2) * (NM_W + NM_GX) - NM_W / 2; n.y = y + li * (NM_H + 46); idx.set(n.key, i); });
-    y += lines * (NM_H + 46) - 46 + NM_H + NM_GY - NM_H + 40;
+  const root = by.get(T.root); spread(root, -Math.PI / 2, Math.PI * 1.5, 0);
+  root.x = -NM_W / 2; root.y = -NM_H / 2;
+  const clear = (a, b) => Math.abs(a.x - b.x) >= NM_W + 16 || Math.abs(a.y - b.y) >= NM_H + 14;
+  let R = 0;
+  [...rows.keys()].filter(d => d > 0).sort((x, y) => x - y).forEach(d => {
+    const r = rows.get(d).sort((x, y) => x._a - y._a); let rad = Math.max(R + 215, d === 1 ? 250 : 0);
+    const put = q => r.forEach(n => { n.x = Math.cos(n._a) * q - NM_W / 2; n.y = Math.sin(n._a) * q - NM_H / 2; });
+    put(rad); let guard = 0;
+    while (guard++ < 200 && r.length > 1 && r.some((n, i) => (i + 1 < r.length || r.length > 2) && !clear(n, r[(i + 1) % r.length]))) { rad += 18; put(rad); }
+    R = rad;
   });
   return by;
 }
-function namesEdge(a, b) {   /* from the higher name down to the lower; two names in one row are joined by an arc over the top */
-  if (a.depth === b.depth) { const x0 = a.x + NM_W / 2, x1 = b.x + NM_W / 2, y = a.y, up = 64 + Math.min(80, Math.abs(x1 - x0) * 0.12); return { d: `M${f1(x0)} ${f1(y)}C${f1(x0)} ${f1(y - up)} ${f1(x1)} ${f1(y - up)} ${f1(x1)} ${f1(y)}`, mx: (x0 + x1) / 2, my: y - up * 0.75 }; }
-  const [t, u] = a.depth < b.depth ? [a, b] : [b, a], x0 = t.x + NM_W / 2, y0 = t.y + NM_H, x1 = u.x + NM_W / 2, y1 = u.y, m = (y0 + y1) / 2;
-  return { d: `M${f1(x0)} ${f1(y0)}C${f1(x0)} ${f1(m)} ${f1(x1)} ${f1(m)} ${f1(x1)} ${f1(y1)}`, mx: (x0 + x1) / 2, my: m };
+function namesEdge(a, b, tree) {   /* a gentle curve between two names; a marriage that is not a branch of the tree bows in toward the centre, so it reads as a link across */
+  const x0 = a.x + NM_W / 2, y0 = a.y + NM_H / 2, x1 = b.x + NM_W / 2, y1 = b.y + NM_H / 2, k = tree ? 0.92 : 0.5, cx = (x0 + x1) / 2 * k, cy = (y0 + y1) / 2 * k;
+  return { d: `M${f1(x0)} ${f1(y0)}Q${f1(cx)} ${f1(cy)} ${f1(x1)} ${f1(y1)}`, mx: 0.25 * x0 + 0.5 * cx + 0.25 * x1, my: 0.25 * y0 + 0.5 * cy + 0.25 * y1 };
+}
+function namesPaintEdges() {
+  const host = $('#namesview'), T = NAMES.T, by = NAMES.by; if (!host || !T) return 0;
+  let svg = '', lab = '', marriages = 0;
+  T.edges.forEach(e => {
+    const a = by.get(e.a), b = by.get(e.b), tree = a._p === b.key || b._p === a.key, q = namesEdge(a, b, tree); marriages += e.n;
+    svg += `<path d="${q.d}" class="${tree ? 'nmt' : 'nmx'}" style="stroke-width:${f1(Math.min(11, 2.5 + e.n * 1.6))}px"/>`;
+    lab += `<span class="nml" style="left:${f1(q.mx)}px;top:${f1(q.my)}px">${e.n} ${e.n === 1 ? 'marriage' : 'marriages'}</span>`;
+  });
+  const sv = host.querySelector('.nmsvg'), lb = host.querySelector('.nmlabs'); if (sv) sv.innerHTML = svg; if (lb) lb.innerHTML = lab;
+  return marriages;
+}
+function namesBoxOf(T) {
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  T.nodes.forEach(n => { x0 = Math.min(x0, n.x); y0 = Math.min(y0, n.y - 14); x1 = Math.max(x1, n.x + NM_W); y1 = Math.max(y1, n.y + NM_H); });
+  return { x0, y0, x1, y1: y1 + 84 };   /* room under the lowest name for the caption */
 }
 function namesPeople(n) {
   const rows = n.people.map(j => M.P[j]).filter(p => !p.living).sort((a, b) => (a.by == null) - (b.by == null) || a.by - b.by);
@@ -3123,14 +3145,11 @@ function drawNames(force) {
   const sig = p.key + '|' + NAMES.open + '|' + NAMES.scope; if (sig === NAMES.sig && !force) return;
   const changed = NAMES.focus !== p.key; NAMES.focus = p.key; NAMES.sig = sig;
   const T = TC.nameTree(M, p.i, NAMES.scope), by = namesLayout(T), max = Math.max(...T.nodes.map(n => n.n));
-  let svg = '', html = '', lab = '', x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9, marriages = 0;
-  T.edges.forEach(e => {
-    const a = by.get(e.a), b = by.get(e.b), q = namesEdge(a, b), tree = a.parent === b.key || b.parent === a.key; marriages += e.n;
-    svg += `<path d="${q.d}" class="${tree ? 'nmt' : 'nmx'}" style="stroke-width:${f1(Math.min(11, 2.5 + e.n * 1.6))}px"/>`;
-    lab += `<span class="nml" style="left:${f1(q.mx)}px;top:${f1(q.my)}px">${e.n} ${e.n === 1 ? 'marriage' : 'marriages'}</span>`;
-  });
+  const ps = p.key + '|' + NAMES.scope; if (ps !== NAMES.psig) { NAMES.psig = ps; NAMES.pos = {}; }
+  T.nodes.forEach(n => { const o = NAMES.pos[n.key]; if (o) { n.x = o.x; n.y = o.y; } });
+  NAMES.T = T; NAMES.by = by;
+  let html = '';
   T.nodes.forEach(n => {
-    x0 = Math.min(x0, n.x); y0 = Math.min(y0, n.y - 90); x1 = Math.max(x1, n.x + NM_W); y1 = Math.max(y1, n.y + NM_H);
     const span = n.g1 - n.g0 + 1, yrs = n.from != null ? `${n.from}–${n.to != null ? n.to : '?'}` : '';
     html += `<div class="nm${n.key === T.root ? ' root' : ''}${NAMES.open === n.key ? ' open' : ''}" data-nm="${esc(n.key)}" style="left:${f1(n.x)}px;top:${f1(n.y)}px;width:${NM_W}px;height:${NM_H}px" tabindex="0" role="button" aria-label="${esc(n.label || 'No surname')}: ${n.n} people">
       <b class="nmn">${esc(n.label || 'Surname not recorded')}</b>
@@ -3139,21 +3158,41 @@ function drawNames(force) {
       <small>${yrs}${yrs && span > 1 ? ' · ' : ''}${span > 1 ? span + ' generations' : ''}${n.self ? ' · married within the name' + (n.self > 1 ? ' ×' + n.self : '') : ''}</small>
       ${n.key === T.root ? '<span class="nmhere">starts here</span>' : ''}${NAMES.open === n.key ? namesPeople(n) : ''}</div>`;
   });
-  NAMES.box = { x0, y0, x1, y1: y1 + 84 };   /* room under the last row for the caption */
-  host.innerHTML = `<svg class="nmsvg" width="1" height="1" aria-hidden="true">${svg}</svg>${lab}${html}`;
+  NAMES.box = namesBoxOf(T);
+  host.innerHTML = `<svg class="nmsvg" width="1" height="1" aria-hidden="true"></svg><div class="nmlabs"></div>${html}`;
+  const marriages = namesPaintEdges(), moved = Object.keys(NAMES.pos).length > 0;
   cap.hidden = false;
   const sc = NAMES.scope;
   cap.innerHTML = `<b>${sc === 'blood' ? 'Names in the bloodline of' : 'Names behind'} ${esc(p.name)}</b> ${T.people.toLocaleString()} ${T.people === 1 ? 'person' : 'people'} in ${T.nodes.length} ${T.nodes.length === 1 ? 'name' : 'names'}, ${marriages} ${marriages === 1 ? 'marriage' : 'marriages'}.
     <span class="nmsc" role="group" aria-label="What to count"><button type="button" data-scope="blood" class="${sc === 'blood' ? 'on' : ''}">Whole bloodline</button><button type="button" data-scope="anc" class="${sc === 'anc' ? 'on' : ''}">Ancestors only</button></span>
-    <small>Select or mark someone else to change it; click a name to see who.</small>`;
+    <small>Drag a name to move it${moved ? ' · <a href="#" data-tidy="1">Tidy up</a>' : ''} · click one to see who · select or mark someone else to change the centre.</small>`;
   if (changed) fit();
 }
 document.addEventListener('click', e => {
   const sb = e.target.closest && e.target.closest('#namesCap [data-scope]');
   if (sb) { NAMES.scope = sb.dataset.scope; NAMES.open = null; try { if (!EMBED) localStorage.setItem('tcNamesScope', NAMES.scope); } catch (x) { /* ignore */ } drawNames(true); fit(); return; }
+  if (e.target.closest && e.target.closest('#namesCap [data-tidy]')) { e.preventDefault(); NAMES.pos = {}; drawNames(true); fit(); return; }
   const n = e.target.closest && e.target.closest('#namesview .nm'); if (!n || !namesLook()) return;
+  if (Date.now() - NAMES.dragEnd < 350) return;   /* the click that ends a drag is not a click on the name */
   const k = n.dataset.nm; NAMES.open = NAMES.open === k ? null : k; drawNames(true);
 });
+/* Names can be dragged anywhere; the lines follow. A moved name keeps its place until the centre or the scope changes, or "Tidy up". */
+document.addEventListener('pointerdown', e => {
+  const el = e.target.closest && e.target.closest('#namesview .nm'); if (!el || !namesLook() || e.button > 0 || !NAMES.by) return;
+  const n = NAMES.by.get(el.dataset.nm); if (!n) return;
+  NAMES.drag = { el, n, id: e.pointerId, sx: e.clientX, sy: e.clientY, x: n.x, y: n.y, moved: false };
+});
+document.addEventListener('pointermove', e => {
+  const d = NAMES.drag; if (!d || e.pointerId !== d.id) return;
+  const dx = e.clientX - d.sx, dy = e.clientY - d.sy;
+  if (!d.moved) { if (Math.hypot(dx, dy) < 5) return; d.moved = true; d.el.classList.add('dragging'); try { d.el.setPointerCapture(d.id); } catch (x) { /* ignore */ } }
+  d.n.x = d.x + dx / S.view.k; d.n.y = d.y + dy / S.view.k; d.el.style.left = f1(d.n.x) + 'px'; d.el.style.top = f1(d.n.y) + 'px'; namesPaintEdges();
+});
+const namesDragEnd = e => {
+  const d = NAMES.drag; if (!d || e.pointerId !== d.id) return; NAMES.drag = null; d.el.classList.remove('dragging');
+  if (!d.moved) return; NAMES.dragEnd = Date.now(); NAMES.pos[d.n.key] = { x: d.n.x, y: d.n.y }; NAMES.box = namesBoxOf(NAMES.T); NAMES.sig = ''; drawNames(true);
+};
+document.addEventListener('pointerup', namesDragEnd); document.addEventListener('pointercancel', namesDragEnd);
 
 /* ui.js — the shelf and search, pan / zoom / drag, the side panel, pathways, themes, phone mode, start-up. */
 

@@ -1,0 +1,90 @@
+---
+import Base from "../layouts/Base.astro";
+import { u } from "../lib/url.js";
+import { atlas as idx } from "../lib/atlas.js";
+import provs from "../../public/providers.json";
+import site from "../data/site.json";
+import full from "../data/places-full.json";
+import "../styles/kit.css";
+/* EVERY NUMBER ON THIS PAGE IS COUNTED, as on /about/. The one typed fact is the start month. The donation link lives in
+   src/data/site.json (support.url): it is a hosted Stripe Payment Link, so the payment happens on Stripe's page and this page
+   never sees a card. check-data.py refuses the sandbox link (/test_), so the page cannot ship with it. */
+const dots = idx.places.length;
+const countries = new Set(full.places.map((p) => p.country).filter(Boolean)).size;
+const sources = provs.providers.length;
+const url = site.support?.url || "";
+---
+<Base
+  title="Support Record Atlas"
+  eyebrow="Free to use, and free to keep"
+  dek="What this project is, what it takes to keep it going, and what a gift does. Nothing on the atlas is locked, whether or not you give.">
+
+  <div class="k-hi">
+    <p>Record Atlas is free. It has no paywall, no account and no subscription, and that will not change.</p>
+    <p>It is kept going by one person. If it has saved you an evening, a gift of any size helps keep it going.</p>
+  </div>
+
+  <p class="sp-cta"><a class="sp-btn" href={url} rel="noopener">Give a gift</a>
+  <span>You choose the amount. Paid on Stripe's own page; this site never sees your card.</span></p>
+
+  <h2 class="k-h">How much work it is</h2>
+  <div class="k-stats" aria-label="The atlas in numbers">
+    <span><b>{dots.toLocaleString()}</b> places</span>
+    <span><b>{countries}</b> countries</span>
+    <span><b>{sources.toLocaleString()}</b> sources</span>
+    <span class="k-tag">started September 2026</span>
+  </div>
+  <div class="k-hi is-plain">
+    <p>Each source is read, placed on the map, checked against the place's name in the year of the record, and marked with what it costs to look.
+    Every figure on the atlas is counted from its data, never typed, and a build that finds a gap stops rather than publishing it.</p>
+    <p>Most of it is slow, careful reading: which archive holds a register, whether the images are free, what a place was called in 1890.</p>
+  </div>
+
+  <h2 class="k-h">About me</h2>
+  <div class="k-hi is-plain">
+    <p>[David, in your own words: who you are, where you are, and how family history got you here. A few lines.]</p>
+  </div>
+
+  <h2 class="k-h">Why I built it</h2>
+  <div class="k-hi is-plain">
+    <p>[David: the moment you needed a map like this and it was not there. One short story is better than a statement.]</p>
+  </div>
+
+  <h2 class="k-h">Why it is free</h2>
+  <div class="k-hi is-plain">
+    <p>[David: why you will not charge for it. Say what a paywall would have broken.]</p>
+  </div>
+
+  <h2 class="k-h">What it costs to run</h2>
+  <ul class="k-tiles sp-tiles">
+    <li><b>Hosting</b><span>US$5 a month for Cloudflare's paid plan, which serves every page. It is billed per request once the site passes 10 million a month, so it grows as more people use it.</span></li>
+    <li><b>Other costs</b><span>[David: the domain, the tools, anything else you pay for, each with its real figure. Leave out what you do not want to say.]</span></li>
+    <li><b>Time</b><span>[David: roughly how many hours a week, in a sentence. Optional.]</span></li>
+  </ul>
+
+  <h2 class="k-h">What a gift does</h2>
+  <div class="k-hi is-plain">
+    <p>[David: one honest sentence per amount, for example what US$5, US$20 and US$50 each cover. Only claims you can stand behind.]</p>
+    <p>A gift does not buy a feature, early access or a place in the queue. It keeps the atlas running and lets the work go on.</p>
+  </div>
+
+  <p class="sp-cta"><a class="sp-btn" href={url} rel="noopener">Give a gift</a>
+  <span>You choose the amount. Stripe handles the payment.</span></p>
+
+  <div class="k-foot">
+    <p>Good to know</p>
+    <p>A gift is a personal gift to the person who runs this atlas, not a tax-deductible donation to a charity.
+    <a href={u("/privacy/")}>Privacy</a> · <a href={u("/about/")}>About the atlas</a></p>
+  </div>
+</Base>
+
+<style>
+  .sp-cta { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 4px 0 26px; }
+  .sp-cta span { font-size: 13px; color: var(--ink-3); }
+  .sp-btn { display: inline-block; background: var(--accent); color: #fff; font-weight: 600; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-size: 16px; }
+  .sp-btn:hover, .sp-btn:focus-visible { background: var(--accent-2); }
+  .sp-tiles { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); max-width: 980px; }
+  .sp-tiles li > span { display: block; }
+  .sp-tiles li b { font-family: var(--serif); font-size: 17px; font-weight: 500; color: var(--ink); }
+  .k-stats > span { white-space: nowrap; }
+</style>

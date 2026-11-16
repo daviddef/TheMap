@@ -1300,7 +1300,31 @@ def whats_new_gate():
                 err(f"{where}: spot {spot!r} is not an id or data-spot anywhere in site/src, so the link would ring nothing")
 
 
+def support_link_gate():
+    """The Support page's donation link must be a LIVE Stripe Payment Link. The sandbox link (buy.stripe.com/test_...) opens
+    a page that cannot take money, so a build that carries it is refused rather than shipped."""
+    try:
+        sup = json.load(open("site/src/data/site.json", encoding="utf-8")).get("support") or {}
+    except Exception as e:
+        err(f"cannot read site/src/data/site.json: {e}")
+        return
+    url = sup.get("url", "")
+    if not re.match(r"^https://buy\.stripe\.com/[A-Za-z0-9_]+$", url):
+        err(f"site.json support.url is not a https://buy.stripe.com/ Payment Link: {url!r}")
+    elif url.split("/")[-1].startswith("test_"):
+        err("site.json support.url is the Stripe SANDBOX link (test_...): swap in the live Payment Link before this ships")
+    # the page is drafted with [David: ...] slots for what only he can write; a build that still has one is refused
+    try:
+        page = open("site/src/pages/support.astro", encoding="utf-8").read()
+    except OSError:
+        return
+    n = len(re.findall(r"\[David[:,]", page))
+    if n:
+        err(f"site/src/pages/support.astro still has {n} [David: ...] placeholder(s): write them in his words before this ships")
+
+
 def main():
+    support_link_gate()
     mortality_gate()
     history_audit()
     flag_era_drift()

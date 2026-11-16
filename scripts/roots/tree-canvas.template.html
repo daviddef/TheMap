@@ -734,6 +734,12 @@ html:not(.rzopen) #rz{display:none}
 .ibtn[data-do="play"] .lk-icon,.ibtn[data-do="mark"] .lk-icon,.ibtn[data-do="unmark"] .lk-icon{fill:currentColor}
 .ibtn.on{background:#8F4C0E;border-color:#8F4C0E;box-shadow:0 0 0 3px var(--lk-accent-soft)}
 .stt small{white-space:nowrap}
+
+/* the search-elsewhere icons: small, round, quiet; the words are hover text */
+.slrow{align-items:center;gap:7px;flex-wrap:nowrap}
+.slcap{font:800 9.5px Nunito,system-ui;letter-spacing:.06em;text-transform:uppercase;color:var(--lk-soft);margin-right:2px}
+.sbtn{flex:none;width:28px;height:28px;border-radius:50%;border:2px solid var(--lk-line);background:var(--lk-card);color:var(--lk-ink);display:inline-flex;align-items:center;justify-content:center;font:400 11px/1 "Lilita One",system-ui;text-decoration:none;box-shadow:0 2px 0 var(--lk-line)}
+.sbtn:hover,.sbtn:focus-visible{border-color:#D9822B;color:#C4721F}.sbtn:focus-visible{outline:3px solid var(--lk-ink);outline-offset:2px}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -1385,6 +1391,20 @@ html:not(.rzopen) #rz{display:none}
     if (!p || p.living || p.ghost || !p.sur || !(p.dy != null || (p.by != null && p.by < 1900))) return '';
     return 'https://www.wikitree.com/genealogy/' + encodeURIComponent(String(p.sur).trim().toUpperCase().replace(/\s+/g, '_'));
   }
+  /* "Search for them elsewhere": one link each to WikiTree, Ancestry, MyHeritage and Geni, built from the name (and a birth year for MyHeritage). They open only when
+     clicked, and only for someone long dead: the same rule as wikitreeUrl (never a living or name-only row, nor anyone who may be living). The first given name is used,
+     since the sites match on it. Nothing here is a finding; it is a way to look. */
+  function searchLinks(p) {
+    const wt = wikitreeUrl(p); if (!wt) return [];
+    const given = String(p.given || '').trim().split(/\s+/)[0] || '', sur = String(p.sur).trim(), e = encodeURIComponent;
+    const plus = x => x.split(/\s+/).map(e).join('+');
+    const who = (given ? given + ' ' : '') + sur;
+    const out = [{ k: 'wikitree', label: 'WikiTree', url: wt, tip: 'Search WikiTree: its page for the surname ' + sur + (given ? ', where you can look for ' + given : '') }];
+    out.push({ k: 'ancestry', label: 'Ancestry', url: 'https://www.ancestry.com.au/search?name=' + [given, sur].filter(Boolean).map(x => x.toLowerCase().split(/\s+/).map(e).join('+')).join('_'), tip: 'Search Ancestry for ' + who });
+    out.push({ k: 'myheritage', label: 'MyHeritage', url: 'https://www.myheritage.com/research?action=query&formId=master&formMode=1&qname=Name+' + (given ? 'fn.' + e(given) + '+fnmo.2+fnmsvos.1+fnmsmi.1+' : '') + 'ln.' + e(sur) + '+lnmo.4+lnmsdm.1+lnmsmf3.1+lnmsrs.1&qevents-birth0=Event+et.birth+ey.' + (p.by != null ? p.by : '') + '+epmo.similar&qevents-any1=Event+et.any+ep.+epmo.similar&qevents=List&useTranslation=1&exactSearch=0', tip: 'Search MyHeritage for ' + who + (p.by != null ? ', born about ' + p.by : '') });
+    out.push({ k: 'geni', label: 'Geni', url: 'https://www.geni.com/search?search_type=people&names=' + plus(who), tip: 'Search Geni for ' + who });
+    return out;
+  }
   /* where to read what the archive has recorded about this person: their own page there (it prints the same count), else the archive's corrections page */
   function corrUrl(M, p) { const a = M.archives[p.a]; if (!(p.cx > 0 && a && a.host) || p.living || p.ghost) return ''; return p.page ? 'https://' + a.host + p.page : 'https://' + a.host + '/corrections/'; }
 
@@ -1586,7 +1606,7 @@ html:not(.rzopen) #rz{display:none}
     return { root: rk, nodes: N, edges: E, people: mem.size, ancestors: gen.size, scope: blood ? 'blood' : 'anc' };
   }
   const API = { nameTree, playSet, family, lifeEvents, eraChanges, lines, arrange, bloodSet, fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful,
-    placeAt, dateText, neighbours, edgeCost, parentLinks, ancestorStats, stopReason, otherSideHasParents, evidenceSummary, years, url, corrUrl, wikitreeUrl, levelOfGrade, LEVELS, kinshipOps, opsOf, reverseOps, bloodTerm, siblingKind, archivesOnPath, ord };
+    placeAt, dateText, neighbours, edgeCost, parentLinks, ancestorStats, stopReason, otherSideHasParents, evidenceSummary, years, url, corrUrl, wikitreeUrl, searchLinks, levelOfGrade, LEVELS, kinshipOps, opsOf, reverseOps, bloodTerm, siblingKind, archivesOnPath, ord };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TC = API;
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -3971,7 +3991,7 @@ function personPanel() {
   return `<h3>${esc(p.name)}</h3>
     <div>${link ? `<a class="pill ac" style="--ac:${a.color}" href="${esc(link)}" target="_blank" rel="noopener" title="Open ${esc(p.name)} in the ${esc(a.name)} archive">${esc(a.name)} archive &nearr;</a>` : a.k === 'you' ? (() => { const ln = lineOf(p.i); return ln ? `<span class="pill ac" style="--ac:${ln.col}" title="On the ${esc(ln.names)} line from the marked person's grandparents">${esc(ln.names)} line</span>` : ''; })() : `<span class="pill ac" style="--ac:${a.color}">${esc(a.name)} archive</span>`}<span class="pill">${TC.years(p)}</span>${p.occ ? `<span class="pill">${esc(p.occ)}</span>` : ''}</div>
     ${a.k === 'you' && !p.ghost ? extLinksHTML(p) : ''}
-    ${TC.wikitreeUrl(p) ? `<div class="row one"><a class="lk-btn is-small" href="${esc(TC.wikitreeUrl(p))}" target="_blank" rel="noopener noreferrer" title="WikiTree's page for the surname ${esc(p.sur)}. Its search cannot be filled from a link, so look for ${esc(p.given || 'them')} there.">Find on WikiTree &nearr;</a></div>` : ''}
+    ${searchLinksHTML(p)}
     ${TC.corrUrl(M, p) ? `<p class="plines"><a href="${esc(TC.corrUrl(M, p))}" target="_blank" rel="noopener">${p.cx} ${p.cx === 1 ? 'correction or note' : 'corrections and notes'} recorded about ${esc(p.name)} in the ${esc(a.name)} archive &nearr;</a><br><small>Only entries that name this person are counted, so no mark does not mean nothing was corrected.</small></p>` : ''}
     ${p.ghost ? `<p class="plines lvn">Named in the archive, but there is no record of their own yet: no dates, no places, no sources. ${p.how ? 'How the name is known: ' + esc(p.how) + '.' : ''}</p>
       ${p.sp.length ? `<p class="plines">Named as the spouse of ${p.sp.map(q => `<a href="#" data-focus="${esc(M.P[q].key)}">${esc(M.P[q].name)}</a>`).join(', ')}.</p>` : ''}
@@ -4222,6 +4242,12 @@ addEventListener('keydown', e => { if (e.key === 'Escape' && $('#bloodMenu') && 
 /* Links back to the tree the visitor's file came from (EMBED only): the Roots & Routes page, or the standalone page, owns the link and the file's header and hands
    a small object over in memory (window.parent.RR.links). The canvas asks it for a person's address and, from Options, passes a pasted link back. Nothing is sent. */
 const RL = () => (EMBED && window.parent && window.parent.RR && window.parent.RR.links) || null;
+/* four small round icons, each a search on another site for this person; the words are the hover text */
+function searchLinksHTML(p) {
+  const L = TC.searchLinks(p); if (!L.length) return '';
+  const mono = { wikitree: 'W', ancestry: 'A', myheritage: 'MH', geni: 'G' };
+  return `<div class="row slrow" role="group" aria-label="Search for ${esc(p.name)} on other sites"><span class="slcap">Search</span>${L.map(x => `<a class="sbtn sb-${x.k}" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" title="${esc(x.tip)}" aria-label="${esc(x.tip)}">${mono[x.k]}</a>`).join('')}</div>`;
+}
 function extLinksHTML(p) {
   const L = RL(); if (!L) return '';
   let u = null; try { u = L.url(p.id, p.living ? '' : p.name); } catch (e) { u = null; }

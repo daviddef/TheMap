@@ -2416,7 +2416,7 @@ function drawLanes() {
   if (!grid && head.innerHTML) head.innerHTML = '';
   if ((th !== 'lanes' && !grid) || !S.cards.size) { if (host.innerHTML) host.innerHTML = ''; if (head.innerHTML) head.innerHTML = ''; return; }
   const gi = genInfo(), cs = [...S.cards.values()].sort((a, b) => a.y - b.y), rows = [];
-  cs.forEach(c => { const r = rows[rows.length - 1]; if (r && c.y - r.last <= H * 0.6) { r.cs.push(c); r.last = c.y; } else rows.push({ cs: [c], last: c.y }); });
+  cs.forEach(c => { const r = rows[rows.length - 1]; if (r && c.y - r.last <= H * 0.85) { r.cs.push(c); r.last = c.y; } else rows.push({ cs: [c], last: c.y }); });
   rows.forEach(r => {
     r.y0 = Math.min(...r.cs.map(c => c.y)) - 24; r.y1 = Math.max(...r.cs.map(c => c.y)) + H + 46;
     const cnt = new Map(); r.cs.forEach(c => { const g = gi.gen.get(c.key); if (g != null) cnt.set(g, (cnt.get(g) || 0) + 1); });
@@ -2425,6 +2425,8 @@ function drawLanes() {
     r.lo = ps.length ? Math.min(...ps.map(p => p.by)) : null; r.hi = ps.length ? Math.max(...ps.map(p => p.dy != null ? p.dy : p.by)) : null;
   });
   const v = S.view, vh = innerHeight, vw = innerWidth; let h = '', hh = '';
+  /* the labels keep close to the content when zoomed out: the numerals sit just left of the leftmost card, the country names just above the first row (never above the toolbar, never off the bottom) */
+  const lx = S.phone ? 10 : Math.max(62, Math.min(vw * 0.6, v.x + Math.min(...cs.map(c => c.x)) * v.k - 96)), hy = Math.max(68, Math.min(vh - 220, v.y + rows[0].y0 * v.k - 84));
   let tl = '', ti = '';
   if (grid) {   /* the vertical lanes: one column per country of birth, from the cards' own positions, each its own colour, headed by the country's flag and name.
                    A country where people died but nobody in the picture was born gets a column of its own after the last one (the same place Arrange leaves for it). */
@@ -2449,7 +2451,7 @@ function drawLanes() {
       /* the name is set in the header's own type, centred over the part of its column that is on screen; it shrinks to fit a narrow column */
       const v0 = Math.max(left, 0), v1 = Math.min(left + wid, vw), mid = (v0 + v1) / 2, nm = col.cn || 'Birthplace not recorded';
       const fs = Math.max(12, Math.min(28, (wid - 16) / (nm.length * 0.62)));
-      hh += `<div class="cnh" style="left:${f1(mid)}px;max-width:${f1(Math.max(40, v1 - v0 - 10))}px;--h:${col.hue};--fs:${f1(fs)}px">${fl}<b>${esc(nm)}</b><small>${col.cs.length ? col.cs.length + (col.cs.length === 1 ? ' person' : ' people') : col.deaths + ' died here'}</small></div>`;
+      hh += `<div class="cnh" style="left:${f1(mid)}px;top:${f1(hy)}px;max-width:${f1(Math.max(40, v1 - v0 - 10))}px;--h:${col.hue};--fs:${f1(fs)}px">${fl}<b>${esc(nm)}</b><small>${col.cs.length ? col.cs.length + (col.cs.length === 1 ? ' person' : ' people') : col.deaths + ' died here'}</small></div>`;
     });
     /* a line from the person into the country they died in, ending at a tombstone in that column's near edge; several in one row stack up */
     const stack = new Map(), sz = Math.max(15, Math.min(26, 24 * v.k));
@@ -2470,7 +2472,7 @@ function drawLanes() {
     if ((top > vh && i) || (top + hgt < 0 && i < rows.length - 1)) return;
     const vis0 = Math.max(top, 56), vis1 = Math.min(top + hgt, vh - 150), mid = (vis0 + vis1) / 2, fs = Math.max(11, Math.min(32, hgt * 0.5)), show = r.g != null && vis1 - vis0 > fs * 1.4;   /* the numeral shrinks with the lane when zoomed out */
     const ft = i === 0 ? Math.min(top, 0) : top, fb = i === rows.length - 1 ? Math.max(top + hgt, vh) : top + hgt;   /* the first lane runs up to the top of the screen and the last down to the bottom */
-    h += `<div class="lane${i % 2 ? ' b' : ''}" style="top:${f1(ft)}px;height:${f1(fb - ft)}px">${show ? `<div class="lnl" style="top:${f1(mid - ft)}px;--fs:${f1(fs)}px"><b>${romanOf(r.g + 1)}</b>${r.lo != null && hgt >= 52 ? `<small>${r.lo}${r.hi !== r.lo ? '–' + r.hi : ''}</small>` : ''}</div>` : ''}</div>`;
+    h += `<div class="lane${i % 2 ? ' b' : ''}" style="top:${f1(ft)}px;height:${f1(fb - ft)}px">${show ? `<div class="lnl" style="left:${f1(lx)}px;top:${f1(mid - ft)}px;--fs:${f1(fs)}px"><b>${romanOf(r.g + 1)}</b>${r.lo != null && hgt >= 52 ? `<small>${r.lo}${r.hi !== r.lo ? '–' + r.hi : ''}</small>` : ''}</div>` : ''}</div>`;
   });
   if (grid) { h += `<svg class="tl" width="${vw}" height="${vh}" aria-hidden="true">${tl}</svg>`; hh += `<svg class="tt" width="${vw}" height="${vh}" aria-hidden="true">${ti}</svg>`; }
   host.innerHTML = h; if (grid) head.innerHTML = hh;

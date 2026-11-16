@@ -470,6 +470,21 @@ select.lk-input{width:auto;padding:4px 8px}
 #info .ih.mr{-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 26px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 26px),transparent)}
 #info .ih.ml{-webkit-mask-image:linear-gradient(to left,#000 calc(100% - 26px),transparent);mask-image:linear-gradient(to left,#000 calc(100% - 26px),transparent)}
 #info .ih.ml.mr{-webkit-mask-image:linear-gradient(to right,transparent,#000 26px,#000 calc(100% - 26px),transparent);mask-image:linear-gradient(to right,transparent,#000 26px,#000 calc(100% - 26px),transparent)}
+/* the Bloodline button's menu */
+#bloodMenu{display:none;position:fixed;top:64px;right:12px;z-index:40;width:290px;max-width:calc(100vw - 24px);box-sizing:border-box;background:var(--lk-card);border:2px solid var(--lk-ink);border-radius:16px;box-shadow:0 5px 0 var(--lk-line),0 14px 30px rgba(0,0,0,.18);padding:12px 14px 14px}
+#bloodMenu.on{display:block}
+#bloodMenu h4{margin:0 0 4px}
+#bloodMenu .bmlab{display:block;font-size:12.5px;font-weight:800;margin:10px 0 4px}
+#bloodMenu select{display:block;width:100%;box-sizing:border-box;margin-top:4px;font:inherit;font-size:12.5px;padding:6px 8px;border:2px solid var(--lk-ink);border-radius:10px;background:var(--lk-card);color:var(--lk-ink)}
+#bloodMenu .bmrow{margin:8px 0}
+#bloodMenu .bmrow .lk-btn{width:100%;justify-content:center}
+#bloodMenu .lk-toggle{margin-top:10px}
+.ph #bloodMenu{top:auto;bottom:calc(var(--dock-h,130px) + 16px);left:8px;right:8px;width:auto}
+/* a card that is not a blood relative of the person colouring starts from */
+.card.nb .cb{border-style:dashed;border-color:#8a78b8;background:color-mix(in srgb,var(--lk-card) 78%,#9b86d4)}
+.card.nb .cb::before{background:repeating-linear-gradient(135deg,var(--ac) 0 4px,#9b86d4 4px 8px)}
+/* the Bloodline button is a drop of blood: filled red inside the outline */
+#bBlood .lk-icon path{fill:#d2493a;stroke:currentColor}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -478,6 +493,7 @@ select.lk-input{width:auto;padding:4px 8px}
 <div class="top">
   <button class="lk-ibtn" id="bShelf" title="Show or hide the search shelf" aria-label="Search shelf"></button>
   <button class="lk-ibtn" id="bRel" title="How are they related? Select a person, then another" aria-label="How are they related"></button>
+  <button class="lk-ibtn" id="bBlood" title="Bloodline: add blood relatives, remove the rest, or colour them differently" aria-label="Bloodline" aria-haspopup="true" aria-expanded="false"></button>
   <button class="lk-ibtn" id="bUndo" title="Undo (Ctrl/Cmd Z)" aria-label="Undo"></button>
   <button class="lk-ibtn" id="bInfo" title="Panel: person, path, legend, options" aria-label="Panel"></button>
   <button class="lk-ibtn xtra" id="bTheme" title="Look: Sticker, Paper or Ground" aria-label="Look"></button>
@@ -1095,7 +1111,22 @@ select.lk-input{width:auto;padding:4px 8px}
   }
   function url(M, p) { return p.page ? 'https://' + M.archives[p.a].host + p.page : ''; }
 
-  const API = { fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful,
+  /* BLOOD RELATIVES of person i: everyone who shares an ancestor with them, reached only through parent and child links (never through a marriage). That is the
+     person, their ancestors back to `back` generations (Infinity = every one), and every descendant of any of those. A spouse is blood only if they are
+     also a descendant or an ancestor (cousins who married). back 0 = the person and their own descendants; 1 = also parents, siblings and half-siblings, nieces and
+     nephews; 2 = also grandparents, aunts and uncles and first cousins; and so on. A named-only spouse (ghost) has no parent or child links, so is never blood. */
+  function bloodSet(M, i, back) {
+    const lim = back == null ? Infinity : back, anc = new Map([[i, 0]]), q = [i];
+    while (q.length) {
+      const x = q.shift(), d = anc.get(x); if (d >= lim) continue;
+      const p = M.P[x]; [p.f, p.m].forEach(y => { if (y >= 0 && !anc.has(y)) { anc.set(y, d + 1); q.push(y); } });
+    }
+    const set = new Set(), st = [...anc.keys()];
+    while (st.length) { const x = st.pop(); if (set.has(x)) continue; set.add(x); M.P[x].ch.forEach(e => { if (!set.has(e.c)) st.push(e.c); }); }
+    return set;
+  }
+
+  const API = { bloodSet, fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful,
     placeAt, neighbours, edgeCost, parentLinks, ancestorStats, stopReason, otherSideHasParents, evidenceSummary, years, url, levelOfGrade, LEVELS, kinshipOps, opsOf, reverseOps, bloodTerm, siblingKind, archivesOnPath, ord };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TC = API;
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -1466,6 +1497,7 @@ const ICON = {
   search: '<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/>', theme: '<circle cx="12" cy="12" r="8"/><path d="M12 4v16"/><path d="M12 4a8 8 0 010 16z" fill="currentColor"/>',
   clear: 'M5 19l9-9 4 4-5 5H5zM13 7l2-2 4 4-2 2', gear: '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>',
   map: 'M4 6l5-2 6 2 5-2v14l-5 2-6-2-5 2zM9 4v14M15 6v14',
+  blood: 'M12 3.5c3.2 4.2 6 7.2 6 10.6a6 6 0 01-12 0c0-3.4 2.8-6.4 6-10.6z',
   folder: 'M3 7.5A1.5 1.5 0 014.5 6H9l2 2.2h8.5A1.5 1.5 0 0121 9.7V17.5a1.5 1.5 0 01-1.5 1.5h-15A1.5 1.5 0 013 17.5z',
   eyeoff: '<path d="M3 12s3.3-6 9-6 9 6 9 6-3.3 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.6"/><path d="M4.5 4.5l15 15"/>',
 };
@@ -1476,6 +1508,7 @@ const S = {
   cards: new Map(),                 /* key -> card {key,i,x,y,pinned,up,down,sp,stopG,from,el} */
   view: { x: 0, y: 0, k: 1 },
   sel: new Set(),
+  blood: { tint: false, ref: null, set: null },   /* colour the people who are NOT blood relatives of `ref` (a person index); `set` is their blood relatives, all of them */
   relateFrom: null,                 /* key while "how are they related?" waits for the second person */
   path: null,                       /* {a,b,nodes,edges,desc} */
   filter: new Set(M.archives.map((_, i) => i)),
@@ -1645,6 +1678,7 @@ function refreshCard(c) {
   if (S.sel.has(c.key)) cls.push('sel');
   if (c._pop) cls.push('pop');
   if (personOf(c).ghost) cls.push('ghost');
+  if (S.blood.tint && S.blood.set && !S.blood.set.has(c.i) && !personOf(c).ghost) cls.push('nb');
   if (S.path) { cls.push(S.path.nodeKeys.has(c.key) ? 'onpath' : 'dim'); if (c.key === S.path.a || c.key === S.path.b) cls.push('endpt'); }
   if (S.relateFrom === c.key) cls.push('pulse');
   c.el.className = cls.join(' ');
@@ -1965,6 +1999,37 @@ async function doDown(c, all) {
       if (S.cards.size > 400) { toast('Stopped at 400 cards'); break; }
     }
   }
+}
+/* BLOODLINE: add every blood relative of the card's person (back = how many generations of ancestors to start from), or take away everyone who is not one.
+   New cards are born next to a parent or child already on the canvas, so the usual layout (and the overlap pass) places them. */
+const BLOOD_CAP = 450;
+async function doBlood(c, back) {
+  const set = TC.bloodSet(M, c.i, back), missing = [...set].filter(i => !S.cards.has(M.P[i].key));
+  if (!missing.length) { toast('Every one of those blood relatives is already on the canvas'); return; }
+  if (S.cards.size + missing.length > BLOOD_CAP) { toast('That would make ' + (S.cards.size + missing.length).toLocaleString() + ' cards. Choose a nearer scope (parents, grandparents…)', 4200); return; }
+  snapshot();
+  const made = [], pending = new Set(missing); let guard = 0;
+  while (pending.size && guard++ < 80) {
+    let progressed = false;
+    for (const i of [...pending]) {
+      const p = M.P[i]; let from = null, up = false;
+      [p.f, p.m].forEach(q => { if (!from && q >= 0 && cardOfPerson(q)) from = cardOfPerson(q); });
+      if (!from) for (const e of p.ch) { const o = cardOfPerson(e.c); if (o) { from = o; up = true; break; } }
+      if (!from) continue;
+      made.push(spawn(i, from, (made.length % 5 - 2) * 36, up ? -ROWH * .6 : ROWH * .6)); pending.delete(i); progressed = true;
+    }
+    if (!progressed) break;
+  }
+  S.cards.forEach(x => { const p = personOf(x); if ((p.f >= 0 || p.m >= 0) && (p.f < 0 || cardOfPerson(p.f)) && (p.m < 0 || cardOfPerson(p.m))) x.up = 1; if (p.ch.length && p.ch.every(e => cardOfPerson(e.c))) x.down = 1; });
+  await settle(c, made, made.length + ' blood relative' + (made.length === 1 ? '' : 's') + ' added' + (pending.size ? ' (' + pending.size + ' not reachable from the cards here)' : ''));
+}
+function doStripBlood(c) {
+  const set = TC.bloodSet(M, c.i, Infinity), drop = [...S.cards.values()].filter(x => !set.has(x.i));
+  if (!drop.length) { toast('Everyone on the canvas is already a blood relative'); return; }
+  snapshot(); drop.forEach(removeCard);
+  if (S.path && S.path.nodeKeys && [...S.path.nodeKeys].some(k => !S.cards.has(k))) { S.path = null; clearPathUi(); }
+  refreshAll(); drawEdges(); save(); runSearchMarks(); renderInfo();
+  toast(drop.length + ' not of the bloodline removed (Undo brings them back)', 3200);
 }
 async function doSpouse(c) { snapshot(); await settle(c, addSpouses(c)); }
 async function doBridge(c, brId) {
@@ -2594,7 +2659,8 @@ function legendHTML() {
   return `<h3>How to read the lines</h3><p style="margin:2px 0 8px;color:var(--lk-soft);font-weight:700">Line colour is the archive that holds the link. Line pattern and seal are how sure it is. A pathway is only as strong as its weakest step.</p>
     <div class="legend">${rows.map(r => `${swatch(r[0], col)}<div><b>${r[1]}</b><small>${r[2]}</small></div>`).join('')}</div>
     <h4>Cards</h4><p>The coloured edge and chip say which archive. <b>&uarr; n</b> shows the parents (“how is this made”), <b>&uarr;&uarr; all</b> goes all the way back one generation at a time, <b>&darr;</b> shows the children (“what this made”), <b>&#9901;</b> the spouses, <b>&asymp; Archive</b> pulls in the suggested same person from another archive. Drag any card; a dragged card stays where you put it.</p>
-    <p>The small seals at the bottom of a card are its father and mother links (a link with no grade shows none).</p>`;
+    <p>The small seals at the bottom of a card are its father and mother links (a link with no grade shows none).</p>
+    <h4>Bloodline</h4><p>The <b>drop</b> button in the top row works from the selected person. A <b>dashed lilac</b> card is not a blood relative of the person you are colouring from: a spouse, in-law or someone from another family.</p>`;
 }
 function personPanel() {
   const keys = [...S.sel];
@@ -2682,6 +2748,56 @@ function pathPanel() {
     <h4>The chain, step by step</h4><ul class="steps">${stepRows}</ul>
     <div class="row"><button class="lk-btn is-small" data-do="fitpath">Fit to view</button><button class="lk-btn is-small" data-do="clearpath">Clear path</button></div>`;
 }
+/* ---------- the Bloodline menu: add blood relatives / take away the rest / colour the rest ---------- */
+const BL_SCOPES = [[1, 'parents'], [2, 'grandparents'], [3, 'great-grandparents'], [Infinity, 'everyone']];
+let blScope = Infinity;
+function bloodMenu() {
+  const m = $('#bloodMenu'), key = [...S.sel][0], c = key && S.cards.get(key), p = c && personOf(c);
+  const ref = S.blood.ref != null ? M.P[S.blood.ref] : null;
+  if (!c || p.ghost) {
+    m.innerHTML = `<h4>Bloodline</h4><p class="plines">Click a card first: the bloodline is worked out from that person. Blood relatives are the people they share an ancestor with, reached through parents and children only, never through a marriage.</p>`
+      + (S.blood.tint && ref ? `<div class="bmrow"><button class="lk-btn is-small is-primary" data-bm="tint-off">Stop colouring (was relative to ${esc(ref.name)})</button></div>` : '');
+    return;
+  }
+  const opts = BL_SCOPES.map(([b, n]) => { const set = TC.bloodSet(M, c.i, b), add = [...set].filter(i => !S.cards.has(M.P[i].key)).length, over = S.cards.size + add > BLOOD_CAP;
+    return `<option value="${b === Infinity ? 'all' : b}"${b === blScope ? ' selected' : ''}${over ? ' disabled' : ''}>${b === Infinity ? 'All' : 'Back to ' + n}: +${add.toLocaleString()}${over ? ' (too many)' : ''}</option>`; }).join('');
+  const all = TC.bloodSet(M, c.i, Infinity), nonBlood = [...S.cards.values()].filter(x => !all.has(x.i)).length;
+  const tintOn = S.blood.tint && S.blood.ref === c.i, other = S.blood.tint && ref && S.blood.ref !== c.i;
+  m.innerHTML = `<h4>Bloodline of ${esc(p.name)}</h4>
+    <p class="plines"><small>Blood relatives share an ancestor with ${esc(p.name)}, through parents and children only. Spouses and in-laws are not blood unless they are also descended from the same people.</small></p>
+    <label class="bmlab">Add blood relatives<select id="bmScope" aria-label="How far back to start">${opts}</select></label>
+    <div class="bmrow"><button class="lk-btn is-small is-primary" data-bm="add">Add them to the canvas</button></div>
+    <div class="bmrow"><button class="lk-btn is-small is-danger" data-bm="strip"${nonBlood ? '' : ' disabled'}>Remove ${nonBlood ? nonBlood.toLocaleString() + ' ' : ''}non-bloodline card${nonBlood === 1 ? '' : 's'}</button></div>
+    <button class="lk-toggle${tintOn ? ' on' : ''}" role="switch" aria-checked="${tintOn}" data-bm="tint"><span class="stx"><b>Colour non-blood relatives</b><i>Cards of people who are not blood relatives of ${esc(p.name)} turn dashed and lilac.</i></span><span class="knob"></span></button>
+    ${other ? `<p class="plines"><small>Colouring is relative to ${esc(ref.name)}.</small></p>` : ''}`;
+  const sel = $('#bmScope'); if (sel) sel.onchange = () => { blScope = sel.value === 'all' ? Infinity : +sel.value; };
+}
+function openBloodMenu(on) {
+  const m = $('#bloodMenu'), b = $('#bBlood'); if (!m) return;
+  if (on == null) on = !m.classList.contains('on');
+  if (on) bloodMenu();
+  m.classList.toggle('on', on); b.setAttribute('aria-expanded', String(on)); b.classList.toggle('on', on || S.blood.tint);
+}
+function setTint(on, ref) {
+  S.blood.tint = on; S.blood.ref = on ? ref : null; S.blood.set = on ? TC.bloodSet(M, ref, Infinity) : null;
+  refreshAll(); $('#bBlood').classList.toggle('on', on);
+}
+document.addEventListener('click', async e => {
+  const m = $('#bloodMenu'); if (!m) return;
+  const t = e.target.closest('[data-bm]');
+  if (t && m.contains(t)) {
+    const key = [...S.sel][0], c = key && S.cards.get(key), act = t.dataset.bm;
+    if (act === 'tint-off') { setTint(false); bloodMenu(); return; }
+    if (!c) return;
+    if (act === 'add') { openBloodMenu(false); await doBlood(c, blScope); }
+    else if (act === 'strip') { openBloodMenu(false); doStripBlood(c); }
+    else if (act === 'tint') { if (S.blood.tint && S.blood.ref === c.i) setTint(false); else setTint(true, c.i); bloodMenu(); }
+    return;
+  }
+  if (m.classList.contains('on') && !m.contains(e.target) && !e.target.closest('#bBlood')) openBloodMenu(false);
+});
+addEventListener('keydown', e => { if (e.key === 'Escape' && $('#bloodMenu') && $('#bloodMenu').classList.contains('on')) openBloodMenu(false); });
+
 /* Links back to the tree the visitor's file came from (EMBED only): the Roots & Routes page, or the standalone page, owns the link and the file's header and hands
    a small object over in memory (window.parent.RR.links). The canvas asks it for a person's address and, from Options, passes a pasted link back. Nothing is sent. */
 const RL = () => (EMBED && window.parent && window.parent.RR && window.parent.RR.links) || null;
@@ -2816,6 +2932,7 @@ function setPhone() {
 }
 function wireToolbar() {
   const set = (id, name) => { const b = $(id); if (b) b.innerHTML = icon(name); };
+  set('#bBlood', 'blood'); { const mm = document.createElement('div'); mm.id = 'bloodMenu'; mm.setAttribute('role', 'dialog'); mm.setAttribute('aria-label', 'Bloodline'); document.body.appendChild(mm); $('#bBlood').onclick = () => openBloodMenu(); }
   set('#bShelf', 'search'); $('#si').innerHTML = icon('search', ''); set('#bUndo', 'undo'); set('#bFit', 'fit'); set('#bRel', 'relate'); set('#bInfo', 'info'); set('#bTheme', 'theme'); set('#bClear', 'clear'); set('#bMore', 'gear');
   set('#zIn', 'plus'); set('#zOut', 'minus');
   if (EMBED) addEventListener('message', e => {

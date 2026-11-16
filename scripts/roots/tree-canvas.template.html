@@ -876,6 +876,7 @@ html:not(.ph):has(#info.on) #namesCap{left:calc((100vw - 340px) / 2)}
         f: r[9], m: r[10], fg: r[11], mg: r[12], sp: r[13].slice(), kids: r[14], page: r[15],
         occ: r[16] >= 0 ? (corpus.occs || [])[r[16]] : '', fl: r[17], living: !!(r[17] & 8), ghost: !!(r[17] & 32), how: typeof r[21] === 'string' ? r[21] : '', surAlso: Array.isArray(r[18]) ? r[18] : [], ch: [],
         /* 19: the stops an archive records between birth and death [[place idx, year|null, estimated]]; 20: marriage year (fl bit 16 = estimated). Absent in an older corpus. */
+        bd: typeof r[22] === 'string' ? r[22] : '', dd: typeof r[23] === 'string' ? r[23] : '',
         route: Array.isArray(r[19]) ? r[19].map(x => ({ name: corpus.places[x[0]], year: x[1], est: !!x[2] })) : [], my: r[20] || null,
       };
       p.name = (p.given + ' ' + p.sur).trim() || '(no name recorded)';
@@ -1300,6 +1301,12 @@ html:not(.ph):has(#info.on) #namesCap{left:calc((100vw - 340px) / 2)}
   }
   /* A LIVING PERSON CARRIES NO YEARS AT ALL (fl bit 8), by the estate's living-people standard: their archive publishes them
      by name and family only. So the year line says that in words rather than drawing "?–?", which reads as a gap in research. */
+  /* a full date as the archive wrote it ("1814-08-23", "1814-08", "c. 1814", "23 Aug 1814") said plainly: "23 Aug 1814", "Aug 1814". Anything else is returned as it came. */
+  function dateText(t) {
+    t = String(t || '').trim(); const m = /^(~|c\.?\s*)?(\d{4})-(\d{2})(?:-(\d{2}))?$/.exec(t); if (!m) return t;
+    const mo = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][+m[3] - 1]; if (!mo) return t;
+    return (m[1] ? 'about ' : '') + (m[4] ? (+m[4]) + ' ' : '') + mo + ' ' + m[2];
+  }
   function years(p) {
     if (p.ghost) return 'named only · no dates';
     if (p.living) return 'living · no dates';
@@ -1519,7 +1526,7 @@ html:not(.ph):has(#info.on) #namesCap{left:calc((100vw - 340px) / 2)}
     return { root: rk, nodes: N, edges: E, people: mem.size, ancestors: gen.size, scope: blood ? 'blood' : 'anc' };
   }
   const API = { nameTree, playSet, family, lifeEvents, eraChanges, lines, arrange, bloodSet, fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful,
-    placeAt, neighbours, edgeCost, parentLinks, ancestorStats, stopReason, otherSideHasParents, evidenceSummary, years, url, levelOfGrade, LEVELS, kinshipOps, opsOf, reverseOps, bloodTerm, siblingKind, archivesOnPath, ord };
+    placeAt, dateText, neighbours, edgeCost, parentLinks, ancestorStats, stopReason, otherSideHasParents, evidenceSummary, years, url, levelOfGrade, LEVELS, kinshipOps, opsOf, reverseOps, bloodTerm, siblingKind, archivesOnPath, ord };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TC = API;
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -1830,6 +1837,7 @@ html:not(.ph):has(#info.on) #namesCap{left:calc((100vw - 340px) / 2)}
         g(p.father != null ? p.father : (p.unplaced ? null : extraF.get(p.id))), g(p.mother != null ? p.mother : (p.unplaced ? null : extraM.get(p.id))), -1, -1,
         [...new Set([...(p.spouse || []), ...(p.unplaced ? [] : (extraS.get(p.id) || []))])].map(g).filter(x => x >= 0), (p.kids || []).map(g).filter(x => x >= 0),
         '', O(hid ? null : p.occ), fl, 0, 0, hid ? 0 : (p.my || 0),
+        '', hid || typeof p.bd !== 'string' ? '' : p.bd, hid || typeof p.dd !== 'string' ? '' : p.dd,   /* 22, 23: the full dates, when the tree carries them */
       ];
     });
     /* the Atlas's own place records the page already carries: id, country, and the flag each era flew. Only the places this tree uses. */
@@ -3004,9 +3012,11 @@ const AIP_TASKS = [
 const aipYr = (y, est) => y == null ? 'year not recorded' : (est ? 'about ' : '') + y;
 function aipMissing(p) {
   const m = [];
-  if (p.by == null) m.push(['birth year', 'birth']); else m.push(['the full birth date (day and month; only the year is held)', 'birth']);
+  if (p.by == null) m.push(['birth year', 'birth']);
+  else if (!p.bd) m.push(['the exact birth date, if the archive page does not already give it (this view holds the year only)', 'birth']);
   if (!p.bp) m.push(['birth place', 'birth']);
-  if (p.dy == null) m.push(['death year (or whether they were living at the end of the records)', 'death']); else m.push(['the full death date (only the year is held)', 'death']);
+  if (p.dy == null) m.push(['death year (or whether they were living at the end of the records)', 'death']);
+  else if (!p.dd) m.push(['the exact death date, if the archive page does not already give it (this view holds the year only)', 'death']);
   if (!p.dp) m.push(['death or burial place', 'death']);
   if ((p.sp || []).length && !p.my) m.push(['marriage year and place', 'marriage']);
   if (!(p.sp || []).length && p.by != null && (p.dy == null || p.dy - p.by >= 18)) m.push(['whether they married (no spouse is recorded)', 'marriage']);
@@ -3047,14 +3057,15 @@ function buildPrompt(p, st, o) {
   /* 2: what the tree holds */
   L.push('## 2. What the tree already says');
   L.push(`- Person: ${p.name}${p.sex === 'f' ? ' (female)' : p.sex === 'm' ? ' (male)' : ''}. Years: ${TC.years(p)}${(p.fl & 1 || p.fl & 2) ? ' (a "~" means the year is estimated, not read from a record)' : ''}.`);
-  L.push(`- Born: ${aipYr(p.by, p.fl & 1)}; ${aipPlace(F.born && F.born.place)}.`);
-  L.push(`- Died: ${aipYr(p.dy, p.fl & 2)}; ${aipPlace(F.died && F.died.place)}.`);
+  L.push(`- Born: ${p.bd ? TC.dateText(p.bd) + ' (full date, as the archive gives it)' : aipYr(p.by, p.fl & 1) + ' (a year only in this view)'}; ${aipPlace(F.born && F.born.place)}.`);
+  L.push(`- Died: ${p.dd ? TC.dateText(p.dd) + ' (full date, as the archive gives it)' : aipYr(p.dy, p.fl & 2) + (p.dy != null ? ' (a year only in this view)' : '')}; ${aipPlace(F.died && F.died.place)}.`);
   if (p.my) L.push(`- Married: ${aipYr(p.my, p.fl & 16)}; place not recorded.`);
   F.stops.filter(s => s.place && s.place.name).forEach(s => L.push(`- Lived at: ${aipPlace(s.place)}${s.year != null ? ' from ' + (s.est ? 'about ' : '') + s.year : ''}.`));
   const fa = p.f >= 0 ? M.P[p.f] : null, mo = p.m >= 0 ? M.P[p.m] : null, sp = (p.sp || []).map(i => M.P[i]).filter(Boolean), ch = (p.ch || []).map(e => M.P[e.c]).filter(Boolean);
   L.push(`- Father: ${fa ? aipRel(fa) : 'not known'}. Mother: ${mo ? aipRel(mo) : 'not known'}.`);
   if (sp.length) L.push(`- Spouse${sp.length > 1 ? 's' : ''}: ${sp.map(aipRel).join('; ')}.`);
   if (ch.length) L.push(`- Children (${ch.length}): ${ch.slice(0, 8).map(aipRel).join('; ')}${ch.length > 8 ? '; and ' + (ch.length - 8) + ' more' : ''}.`);
+  const pg = TC.url(M, p); if (pg) L.push(`- The archive's own page for this person: ${pg} — READ IT FIRST. It is written by whoever holds the research and may carry the full dates, occupation, sources, notes and what has already been searched, none of which this summary has. Treat what it says as the research so far, and say where your findings differ.`);
   const srcs = (M.srcs && M.srcs[p.id]) || []; if (srcs.length) L.push('- Sources the tree cites: ' + srcs.slice(0, 8).map(x => x.t + (x.u ? ' <' + x.u + '>' : '')).join('; ') + '.');
   L.push('- MISSING: ' + (miss.length ? miss.map(m => m[0]).join('; ') : 'nothing obvious; check what is held.') + '.', '');
   const nm = aipNames(p); if (nm) L.push('### Name forms to search', nm);
@@ -3695,7 +3706,7 @@ function personPanel() {
       ${p.sp.length ? `<p class="plines">Named as the spouse of ${p.sp.map(q => `<a href="#" data-focus="${esc(M.P[q].key)}">${esc(M.P[q].name)}</a>`).join(', ')}.</p>` : ''}
       <p class="plines lvn">No parents or children are drawn for a name like this: the archive joins people to each other only from a record of their own.</p>` : ''}
     ${p.living ? `<p class="plines lvn">This person is living, so their archive records them by <strong>name and family only</strong> — no dates, no places, no records. Nothing is missing from the research.</p>` : ''}
-    <p class="plines"${p.living || p.ghost ? ' hidden' : ''}>${p.bp ? (() => { const pl = TC.placeAt(M, p, p.bp, p.by); return 'Born: ' + flagHTML(pl, p.by, flagTip(pl, p.by, 'Born at'), true) + placeLinkHTML(pl) + eraNote(pl) + (p.fl & 4 ? ' <small>(place taken from a relative)</small>' : ''); })() : 'Birthplace not recorded.'}${p.dp && p.dp !== p.bp ? (() => { const pl = TC.placeAt(M, p, p.dp, p.dy); return '<br>Died: ' + flagHTML(pl, p.dy, flagTip(pl, p.dy, 'Died at'), true) + placeLinkHTML(pl) + eraNote(pl); })() : (p.dy != null ? '<br>Death place: same as birth, or not recorded.' : '')}</p>
+    <p class="plines"${p.living || p.ghost ? ' hidden' : ''}>${p.bp ? (() => { const pl = TC.placeAt(M, p, p.bp, p.by); return 'Born' + (p.bd ? ' <b>' + esc(TC.dateText(p.bd)) + '</b>' : '') + ': ' + flagHTML(pl, p.by, flagTip(pl, p.by, 'Born at'), true) + placeLinkHTML(pl) + eraNote(pl) + (p.fl & 4 ? ' <small>(place taken from a relative)</small>' : ''); })() : (p.bd ? 'Born <b>' + esc(TC.dateText(p.bd)) + '</b>. ' : '') + 'Birthplace not recorded.'}${p.dp && p.dp !== p.bp ? (() => { const pl = TC.placeAt(M, p, p.dp, p.dy); return '<br>Died' + (p.dd ? ' <b>' + esc(TC.dateText(p.dd)) + '</b>' : '') + ': ' + flagHTML(pl, p.dy, flagTip(pl, p.dy, 'Died at'), true) + placeLinkHTML(pl) + eraNote(pl); })() : (p.dy != null ? '<br>' + (p.dd ? 'Died <b>' + esc(TC.dateText(p.dd)) + '</b>. ' : '') + 'Death place: same as birth, or not recorded.' : '')}</p>
     ${(p.fl & 64) ? `<p class="plines"><small>Not on the Roots &amp; Routes maps: ${p.bp ? 'the Atlas could not place “' + esc(p.bp) + '”, and no relative has a place it could use' : 'the file gives no birth place, and no relative has one'}${p.by == null ? ', and there is no year to place them in' : ''}. They are here because the canvas does not need a place.</small></p>` : ''}
     ${(p.fl & 3) ? `<p style="color:var(--lk-mute)"><small>~ marks a year the archive itself estimates.</small></p>` : ''}
     <div class="row">

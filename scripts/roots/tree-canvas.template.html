@@ -203,6 +203,7 @@ button{font-family:inherit}
 .card .nm{font:400 17px/1.15 "Lilita One",Impact,system-ui;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--lk-ink)}
 .card .yr{font:800 11.5px/1.3 Nunito,system-ui;color:var(--lk-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
 .card .meta{display:flex;align-items:center;gap:5px;margin-top:3px;font:800 10px Nunito,system-ui;color:var(--lk-mute)}
+.card .ar.ln{background:var(--lc)}
 .card .ar{background:var(--ac);color:#fff;border-radius:99px;padding:1px 7px;letter-spacing:.3px;text-transform:uppercase;font-size:9.5px}
 .card .seals{display:flex;gap:3px;align-items:center;margin-left:auto}
 .card .seals svg{width:14px;height:14px;display:block}
@@ -395,7 +396,6 @@ button{font-family:inherit}
 .ph .top{flex-wrap:wrap;justify-content:flex-end;max-width:calc(100vw - 16px);row-gap:10px}
 .ph .top::after{content:"";order:4;flex:0 0 100%;height:0}   /* a line break before the extras */
 .ph .top .lk-btn{order:5}   /* the two extra buttons take their own row under the icons */
-.ph.sa #rz{top:106px}
 /* a spouse the archive names but holds no record for: a dashed, quieter card (the marriage mark joins it to the person who names her or him) */
 .card.ghost .cb{border-style:dashed;opacity:.9}
 .card.ghost .cb .yr{font-style:italic}
@@ -416,7 +416,6 @@ b.fxb.on{display:inline-grid;width:17px;height:17px;border-radius:50%;background
 html:not(.ph) #info{right:0;top:64px;bottom:0;width:340px;max-height:none;border-radius:18px 0 0 0;border-width:2px 0 0 2px;box-shadow:-3px 0 0 var(--lk-line)}
 html:not(.ph) #info .ib{flex:1;min-height:0}
 html:not(.ph):has(#info.on) .dock{left:calc((100vw - 340px) / 2);width:min(calc(100vw - 340px - 100px),900px)}
-html:not(.ph):has(#info.on) #rz{left:calc((100vw - 340px) / 2);max-width:calc(100vw - 340px - 150px)}
 #infoTab{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:8;width:22px;height:72px;padding:0;border:2px solid var(--lk-line);border-right:0;border-radius:12px 0 0 12px;background:var(--lk-card);color:var(--lk-ink);cursor:pointer;font:900 18px/1 Nunito,system-ui;box-shadow:-2px 2px 0 var(--lk-line);transition:right .2s}
 #infoTab::before{content:"\2039"}
 html:has(#info.on) #infoTab{right:340px}html:has(#info.on) #infoTab::before{content:"\203A"}
@@ -485,22 +484,241 @@ select.lk-input{width:auto;padding:4px 8px}
 .card.nb .cb::before{background:repeating-linear-gradient(135deg,var(--ac) 0 4px,#9b86d4 4px 8px)}
 /* the Bloodline button is a drop of blood: filled red inside the outline */
 #bBlood .lk-icon path{fill:#d2493a;stroke:currentColor}
+
+/* lines between cards were too faint: heavier strokes, tighter dashes, full opacity */
+.ev-def{stroke-width:5}.ev-sup{stroke-width:4}.ev-np{stroke-width:4;stroke-dasharray:10 6}.ev-ug{stroke-width:4.5;stroke-dasharray:.5 6.5}
+#edges path.ev-def,#edges path.ev-sup,#edges path.ev-np,#edges path.ev-ug{opacity:1}
+#edges path.ev-def.dimmed,#edges path.ev-sup.dimmed,#edges path.ev-np.dimmed,#edges path.ev-ug.dimmed{opacity:.4}
+
+/* the marked person: a star on the card, and a bar that says how the selected person is related to them */
+.card .mkb{position:absolute;left:-9px;bottom:-9px;z-index:3;width:23px;height:23px;border-radius:50%;border:2px solid var(--lk-card);background:#f0b429;color:#5a3b00;font:900 13px/19px Nunito,system-ui;text-align:center;box-shadow:0 2px 0 rgba(0,0,0,.18);pointer-events:none}
+.card.marked .cb{box-shadow:0 3px 0 var(--lk-line),0 0 0 3px #f0b429}
+#markBar{position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:5;display:flex;flex-direction:column;align-items:stretch;gap:6px;max-width:min(720px,calc(100vw - 440px));padding:6px 8px 6px 6px;background:var(--lk-card);border:2px solid #f0b429;border-radius:18px;box-shadow:0 3px 0 var(--lk-line);font:800 12.5px/1.3 Nunito,system-ui;color:var(--lk-ink)}
+#markBar[hidden]{display:none}
+#markBar .mkn{flex:none;border:0;border-radius:12px;padding:5px 10px;background:#f0b429;color:#5a3b00;font:900 12.5px Nunito,system-ui;cursor:pointer;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#markBar .mkt{flex:1 1 auto;min-width:0}
+#markBar .mkl{background:var(--lk-accent-soft);border-radius:8px;padding:1px 6px;margin-left:4px;font-weight:800}
+#markBar .mkx{flex:none;width:26px;height:26px;border:0;border-radius:50%;background:transparent;color:var(--lk-mute);cursor:pointer;display:grid;place-items:center}
+#markBar .mkx:hover{background:var(--lk-line);color:var(--lk-ink)}
+#markBar .mkx svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round}
+.mkrel{background:#fff6dc;border:1.5px solid #f0b429;border-radius:12px;padding:6px 10px;color:#4a3300}
+html:not(.ph):has(#info.on) #markBar{left:calc((100vw - 340px) / 2);max-width:min(720px,calc(100vw - 340px - 100px))}
+.ph #markBar{left:8px;right:8px;transform:none;max-width:none;top:58px;flex-wrap:wrap}
+#markBar{flex-wrap:wrap}
+#markBar .mkc{flex:1 1 100%;order:5;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font:800 10.5px Nunito,system-ui;color:var(--lk-soft)}
+#markBar .mkc::before{content:"Lines from the grandparents:";margin-right:2px}
+#markBar .mkch{background:var(--lc);color:#fff;border-radius:99px;padding:1px 8px;text-transform:uppercase;letter-spacing:.3px}
+#markBar{flex-wrap:nowrap}
+#markBar .mkrow{display:flex;align-items:center;gap:10px}
+#markBar .mkc{flex:none;order:0}
+
+/* Person panel: counts you can open, the line bar, people lists, life events, sources (the same sections the Roots & Routes page has) */
+.stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 4px}
+.stt{border:2px solid var(--lk-line);border-radius:14px;background:var(--lk-card);color:var(--lk-ink);padding:7px 6px;font:400 22px/1.1 "Lilita One",system-ui;cursor:pointer;text-align:center;box-shadow:0 2px 0 var(--lk-line)}
+.stt small{display:block;font:800 9.5px Nunito,system-ui;letter-spacing:.06em;text-transform:uppercase;color:var(--lk-soft);margin-top:3px}
+.stt.on{border-color:var(--lk-accent);background:var(--lk-accent-soft)}.stt[disabled]{opacity:.45;cursor:default;box-shadow:none}
+.openlist h5{margin:10px 0 2px;font:900 10.5px Nunito,system-ui;letter-spacing:.06em;text-transform:uppercase;color:var(--lk-soft)}
+.plist{list-style:none;margin:2px 0 6px;padding:0}
+.plk{display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:1px dashed var(--lk-line);cursor:pointer;border-radius:8px;font-weight:800}
+.plk:hover{background:var(--lk-hover)}.plk i{flex:none;width:8px;height:18px;border-radius:4px}
+.plk .pn{flex:1 1 auto;min-width:0}.plk .pn small{color:var(--lk-mute);font-weight:800;margin-left:4px}
+.plk .py{flex:none;color:var(--lk-soft);font:800 11.5px Nunito,system-ui}
+.stack{display:flex;height:12px;border-radius:99px;overflow:hidden;margin:6px 0 4px;background:var(--lk-line)}.stack span{min-width:3px}
+.stackk{display:flex;flex-wrap:wrap;gap:4px 12px;font:800 11px Nunito,system-ui;color:var(--lk-soft)}.stackk i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}
+.life,.srcs{list-style:none;margin:4px 0 8px;padding:0}
+.life li{padding:5px 0;border-bottom:1px dashed var(--lk-line);font-weight:800}.life li small{display:block;color:var(--lk-soft);font-weight:700;font-size:11.5px;line-height:1.35;margin-top:1px}
+.life li.more{border:0}.srcs li{padding:4px 0;font-weight:700;font-size:12.5px;line-height:1.35}
+details.more summary,.life li.more summary{cursor:pointer;color:var(--lk-soft);font:800 11.5px Nunito,system-ui;margin:4px 0}
+
+/* generation bands: a numbered strip behind each row, like the Roots & Routes Generations view */
+#genbands{position:absolute;left:0;top:0;pointer-events:none}
+.gband{position:absolute;border-radius:16px;background:color-mix(in srgb,var(--lk-ink) 4%,transparent);transition:left .3s,top .3s,width .3s,height .3s}
+.gband.odd{background:color-mix(in srgb,var(--lk-ink) 8%,transparent)}
+.gband .gl{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:96px;line-height:1.05}
+.gband .gl b{display:block;font:400 34px/1 "Lilita One",Georgia,serif;color:color-mix(in srgb,var(--lk-ink) 38%,transparent)}
+.gband .gl small{display:block;margin-top:3px;font:800 11px Nunito,system-ui;color:var(--lk-mute)}
+#bGen.on{background:var(--lk-accent-soft);border-color:var(--lk-accent)}
+/* play */
+.res .rplay{position:absolute;right:7px;bottom:7px;width:24px;height:24px;border-radius:50%;border:2px solid var(--lk-line);background:var(--lk-card);color:var(--lk-accent);display:grid;place-items:center;cursor:pointer;padding:0;box-shadow:0 1.5px 0 var(--lk-line)}
+.res .rplay:hover{background:var(--lk-accent);color:#fff;border-color:var(--lk-accent)}.res .rplay svg{width:12px;height:12px;fill:currentColor;stroke:none}
+#playBar{position:fixed;left:50%;transform:translateX(-50%);bottom:230px;z-index:7;display:none;align-items:center;gap:12px;width:min(640px,calc(100vw - 32px));padding:8px 10px;background:var(--lk-card);border:2px solid var(--lk-accent);border-radius:20px;box-shadow:0 4px 0 var(--lk-line),0 14px 30px rgba(0,0,0,.14)}
+#playBar.on{display:flex}
+html:not(.ph):has(#info.on) #playBar{left:calc((100vw - 340px) / 2);width:min(640px,calc(100vw - 340px - 40px))}
+#playBar .pbt{flex:none;width:38px;height:38px;border-radius:50%;border:0;background:var(--lk-accent);color:#fff;display:grid;place-items:center;cursor:pointer;padding:0}
+#playBar .pbt svg{width:16px;height:16px;fill:currentColor;stroke:currentColor;stroke-width:2.6;stroke-linecap:round}
+#playBar input[type=range]{flex:1 1 120px;min-width:80px;accent-color:var(--lk-accent)}
+#playBar .pbl{flex:none;line-height:1.15;min-width:96px}#playBar .pbl b{display:block;font:400 19px "Lilita One",system-ui}#playBar .pbl small{display:block;font:800 10.5px Nunito,system-ui;color:var(--lk-soft)}
+#playBar .pbs{flex:none;display:flex;border:1.5px solid var(--lk-line);border-radius:10px;overflow:hidden}
+#playBar .pbs button{border:0;background:transparent;color:var(--lk-soft);font:800 11px Nunito,system-ui;padding:5px 8px;cursor:pointer}#playBar .pbs button.on{background:var(--lk-ink);color:var(--lk-card)}
+#playBar .pbx{flex:none;width:26px;height:26px;border:0;border-radius:50%;background:transparent;color:var(--lk-mute);cursor:pointer;display:grid;place-items:center;padding:0}#playBar .pbx:hover{background:var(--lk-line)}#playBar .pbx svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round}
+@media (max-width:640px){#playBar{flex-wrap:wrap}#playBar .pbs{order:5}}
+/* the marked person's card breathes: a slow gold glow */
+@keyframes markglow{0%,100%{box-shadow:0 3px 0 var(--lk-line),0 0 0 3px #f0b429,0 0 0 3px rgba(240,180,41,.0)}50%{box-shadow:0 3px 0 var(--lk-line),0 0 0 4px #f0b429,0 0 22px 9px rgba(240,180,41,.55)}}
+.card.marked .cb{animation:markglow 2.6s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.card.marked .cb{animation:none}}
+
+/* the menu (burger) in the top row: Legend and Options live here, not in the side panel's tab strip */
+#mainMenu{display:none;position:fixed;top:64px;right:12px;z-index:40;width:300px;max-width:calc(100vw - 24px);box-sizing:border-box;background:var(--lk-card);border:2px solid var(--lk-ink);border-radius:16px;box-shadow:0 5px 0 var(--lk-line),0 14px 30px rgba(0,0,0,.18);padding:6px}
+#mainMenu.on{display:block}
+#mainMenu .mmi{display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;text-align:left;border:0;background:transparent;color:var(--lk-ink);border-radius:12px;padding:10px 10px;cursor:pointer;font:inherit}
+#mainMenu .mmi:hover,#mainMenu .mmi:focus-visible{background:var(--lk-hover);outline:none}#mainMenu .mmi.on{background:var(--lk-accent-soft)}
+#mainMenu .mmi svg{flex:none;width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#mainMenu .mmi b{display:block;font:900 14px Nunito,system-ui}#mainMenu .mmi small{display:block;font:700 11.5px/1.3 Nunito,system-ui;color:var(--lk-soft);margin-top:1px}
+#bMenu.on{background:var(--lk-accent-soft);border-color:var(--lk-accent)}
+.ph #mainMenu{top:auto;bottom:calc(var(--dock-h,130px) + 16px);left:8px;right:8px;width:auto}
+
+/* Look (theme) inside the menu */
+#mainMenu .mmlook{display:flex;align-items:center;gap:12px;padding:10px 10px 8px}
+#mainMenu .mmlook>svg{flex:none;width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#mainMenu .mmlook b{display:block;font:900 14px Nunito,system-ui;margin-bottom:5px}
+#mainMenu .mmchips{display:flex;gap:6px;flex-wrap:wrap}
+#mainMenu .mmchip{border:2px solid var(--lk-line);background:var(--lk-card);color:var(--lk-ink);border-radius:999px;padding:3px 11px;font:800 12px Nunito,system-ui;cursor:pointer}
+#mainMenu .mmchip:hover{background:var(--lk-hover)}#mainMenu .mmchip.on{background:var(--lk-accent-soft);border-color:var(--lk-accent)}
+/* the line key: an overlay in the menu's corner */
+#legendCard{display:none;position:fixed;top:64px;right:12px;z-index:41;width:380px;max-width:calc(100vw - 24px);max-height:calc(100vh - 84px);overflow:auto;box-sizing:border-box;background:var(--lk-card);color:var(--lk-ink);border:2px solid var(--lk-ink);border-radius:16px;box-shadow:0 5px 0 var(--lk-line),0 14px 30px rgba(0,0,0,.18);padding:14px 16px 16px}
+#legendCard.on{display:block}
+#legendCard h3{margin:0 34px 2px 0;font:400 21px/1.15 "Lilita One",system-ui}
+#legendCard h4{margin:12px 0 4px;font:800 10.5px Nunito;letter-spacing:.6px;text-transform:uppercase;color:var(--lk-mute)}
+#legendCard p{margin:4px 0}
+#legendCard .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+#legendCard .lgx{position:absolute;top:8px;right:8px;width:30px;height:30px;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;color:var(--lk-ink);cursor:pointer}
+#legendCard .lgx:hover,#legendCard .lgx:focus-visible{background:var(--lk-hover);outline:none}
+#legendCard .lgx svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round}
+.ph #legendCard{top:auto;bottom:calc(var(--dock-h,130px) + 16px);left:8px;right:8px;width:auto;max-height:60vh}
+
+/* Where next: the flag and country beside a place */
+.nx .fla,.nx-glance .fla{display:inline-flex;vertical-align:-1px}.nx .fl,.nx-glance .fl{height:11px;border-radius:2px;box-shadow:0 0 0 1px var(--lk-line)}
+.nx-cn{color:var(--lk-soft);font-weight:800}
+
+/* Look: Lanes. White and light grey, a swim lane per generation, Roman numerals down the left */
+[data-theme="lanes"],[data-theme="countries"]{--lk-paper:#F4F5F7;--lk-card:#FFFFFF;--lk-line:#D3D7DE;--lk-ink:#1F2530;--lk-mute:#6B7280;--lk-soft:#4B5563;--lk-faint:#B6BCC7;--lk-accent:#D9822B;--lk-track:#D3D7DE;--lk-knob:#ffffff;--lk-board:#FFFFFF;--lk-pop-bg:#1F2530;--lk-pop-ink:#F4F5F7;--lk-accent-soft:color-mix(in srgb,#D9822B 16%,#FFFFFF);--lk-hover:color-mix(in srgb,#1F2530 6%,#FFFFFF);--lk-tag-comp-bg:#DCE9F4;--lk-tag-comp-fg:#2b6a94;--lk-tag-parts-bg:#F6E3C4;--lk-tag-parts-fg:#a5601a;--lk-tag-recipe-bg:#E3EFD8;--lk-tag-recipe-fg:#4c7a2e;--lk-tag-rule-bg:#E8EAEE;--lk-tag-rule-fg:#5b6370;color-scheme:light}
+[data-theme="lanes"] #stage,[data-theme="countries"] #stage{background-image:none}
+#lanes{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+#lanes .lane{position:absolute;left:0;right:0;background:#FFFFFF;border-top:1px solid var(--lk-line)}
+#lanes .lane.b{background:#EEF0F3}
+#lanes .lnl{position:absolute;left:62px;transform:translateY(-50%);width:80px;line-height:1.05;text-align:left}
+#lanes .lnl b{display:block;font:400 32px/1 "Lilita One",Georgia,serif;color:#9AA1AE}
+#lanes .lnl small{display:block;margin-top:3px;font:800 11px Nunito,system-ui;color:var(--lk-mute)}
+.ph #lanes .lnl{left:10px;width:56px}.ph #lanes .lnl b{font-size:min(24px,var(--fs,24px))}
+
+/* Look: Countries. The Lanes rows, plus a coloured column for each country of birth */
+#lanes .lcol{position:absolute;top:0;bottom:0;background:var(--lc,#FCE6CA);border-left:2px solid rgba(217,130,43,.3)}
+#lanes .lcol.none{background:#E9EAEE;border-left-color:#D3D7DE}
+#lanehead{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+#lanes.cols .lane{background:rgba(255,255,255,.55);border-top:1px solid rgba(31,37,48,.14)}
+#lanes.cols .lane.b{background:rgba(255,255,255,0)}
+#lanes.cols .lnl b{color:rgba(31,37,48,.42)}
+#lanes .tl{position:absolute;left:0;top:0;pointer-events:none}#lanes .tl path{fill:none;stroke-width:2.4;stroke-dasharray:7 5;stroke-linecap:round;opacity:.85}
+#lanehead .tt{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
+#lanehead .tt .tomb{fill:#fff;stroke:var(--tc);stroke-width:1.8;stroke-linejoin:round}#lanehead .tt .cross{fill:none;stroke:var(--tc);stroke-width:1.8;stroke-linecap:round}
+#lanehead .tt text{font:900 9.5px Nunito,system-ui;fill:var(--tc);paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}
+
+/* How related lives in the search dock now: a compact row of two slots between the search box and the archive filters, so a result can be dragged (or tapped) straight into it */
+@media (max-width:1450px){#markBar{top:64px}}
+.dock #rz{position:static;left:auto;top:auto;transform:none;z-index:auto;max-width:none;padding:0 0 6px;background:transparent;border:0;border-radius:0;box-shadow:none;gap:8px;flex-wrap:nowrap}
+.dock #rz .rzs{height:40px;min-width:0;padding:2px 26px 2px 12px;border-radius:12px}
+.dock #rz .rzs.empty{padding:2px 8px;font-size:12px}
+.dock #rz .rzs.full{padding-left:16px}
+.dock #rz .rzs.full::before{top:6px;bottom:6px}
+.dock #rz .rzp b{font-size:13.5px}
+.dock #rz .rzm{flex:none}.dock #rz .rzm small{display:none}
+.dock #rz .rzx{flex:none;flex-direction:row;align-items:center;min-width:0;gap:8px}
+.dock #rz #rzmsg{max-width:150px;overflow:hidden;text-overflow:ellipsis}
+.dock #rz.over .rzs.empty{border-color:var(--lk-accent);background:var(--lk-accent-soft)}
+.ph .dock #rz{left:auto;right:auto;top:auto;max-width:none;padding:0 0 4px;gap:6px;flex-wrap:nowrap}
+.ph .dock #rz .rzs{min-width:0;height:36px;padding:2px 22px 2px 8px}.ph .dock #rz .rzs.empty{font-size:11px;line-height:1.15}
+.ph .dock #rz .rzx{flex-direction:row}.ph .dock #rz #rzClr{padding:3px 8px}
+#lanes .lnl b{font-size:var(--fs,32px)}
+
+/* country names over the columns: the logo's type (Lilita One, capitals), centred, in the column's own deep colour */
+#lanehead .cnh{position:absolute;top:68px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:1px;text-align:center;color:hsl(var(--h) 58% 26%)}
+#lanehead .cnh b{display:block;max-width:100%;font:400 var(--fs,26px)/1.05 "Lilita One",system-ui,sans-serif;letter-spacing:.02em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 2px 0 rgba(255,255,255,.7)}
+#lanehead .cnh small{font:800 11px Nunito,system-ui;color:hsl(var(--h) 35% 36%);letter-spacing:.02em}
+#lanehead .cnh .fl{width:24px!important;height:auto;margin:0 0 3px;display:block;border-radius:2px}
+#lanehead .cnh{color:#6B3410}
+#lanehead .cnh small{color:#9A5A1E}
+#lanehead .cnh b{text-shadow:0 2px 0 rgba(255,255,255,.55)}
+
+/* the side pane's tabs hang off its left edge, in the same style as the collapse handle: small vertical tabs stacked under it, no column of their own (the phone keeps its row of tabs along the top of the sheet) */
+html:not(.ph) #info{overflow:visible}
+html:not(.ph) #info .ih{position:absolute;left:-26px;top:108px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;width:auto;padding:0;border:0;background:transparent;overflow:visible;cursor:auto;touch-action:auto;-webkit-mask-image:none!important;mask-image:none!important}
+html:not(.ph) #info .ih .lk-tab{writing-mode:vertical-rl;text-orientation:mixed;width:24px;padding:12px 0;border:2px solid var(--lk-line);border-right:0;border-radius:12px 0 0 12px;background:var(--lk-paper);color:var(--lk-mute);font:800 12px/1 Nunito,system-ui;white-space:nowrap;text-align:center;box-shadow:-2px 2px 0 var(--lk-line);flex:none}
+html:not(.ph) #info .ih .lk-tab:hover{background:var(--lk-accent-soft);color:var(--lk-accent)}
+html:not(.ph) #info .ih .lk-tab.on{width:28px;background:var(--lk-card);color:var(--lk-ink);margin-right:-2px;padding-right:2px;box-shadow:-2px 2px 0 var(--lk-line)}
+html:not(.ph) #info .ih span,html:not(.ph) #info .ih .lk-tab[data-tab="close"]{display:none}
+html:not(.ph):has(#info.on) #infoTab{top:92px;transform:none}
+
+/* Look: Names. The ancestry as surnames: a card per name, a line per set of marriages. The people cards step aside. */
+[data-theme="names"] #cards,[data-theme="names"] #edges,[data-theme="names"] #genbands,[data-theme="names"] #mini{display:none}
+#namesview{position:absolute;left:0;top:0;width:1px;height:1px;overflow:visible}
+#namesview .nmsvg{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+#namesview .nmt,#namesview .nmx{fill:none;stroke-linecap:round}
+#namesview .nmt{stroke:var(--lk-accent);opacity:.8}
+#namesview .nmx{stroke:var(--lk-faint);stroke-dasharray:3 8}
+#namesview .nml{position:absolute;transform:translate(-50%,-50%);padding:2px 9px;border-radius:999px;background:var(--lk-card);border:2px solid var(--lk-line);font:800 11px Nunito,system-ui;color:var(--lk-soft);white-space:nowrap}
+#namesview .nm{position:absolute;box-sizing:border-box;padding:11px 14px 9px;background:var(--lk-card);border:2px solid var(--lk-line);border-radius:18px;box-shadow:0 4px 0 var(--lk-line);cursor:grab;touch-action:none;user-select:none;display:flex;flex-direction:column;gap:3px}
+#namesview .nm.dragging{cursor:grabbing;z-index:6;box-shadow:0 10px 0 var(--lk-line);border-color:var(--lk-accent)}
+#namesview .nmlabs{position:absolute;left:0;top:0;pointer-events:none}
+#namesview .nm:hover,#namesview .nm:focus-visible{border-color:var(--lk-accent);outline:none}
+#namesview .nm.root{border-color:var(--lk-accent);background:var(--lk-accent-soft);box-shadow:0 4px 0 var(--lk-accent)}
+#namesview .nm.open{z-index:3}
+#namesview .nmn{font:400 22px/1.05 "Lilita One",system-ui,sans-serif;letter-spacing:.01em;color:var(--lk-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#namesview .nmc{font:800 12.5px Nunito,system-ui;color:var(--lk-soft)}#namesview .nmc em{font:400 18px "Lilita One",system-ui;font-style:normal;color:var(--lk-accent);margin-right:2px}
+#namesview .nmbar{display:block;height:6px;border-radius:4px;background:var(--lk-line);overflow:hidden}#namesview .nmbar u{display:block;height:100%;background:var(--lk-accent);border-radius:4px;text-decoration:none}
+#namesview .nm small{font:800 10.5px Nunito,system-ui;color:var(--lk-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#namesview .nmhere{position:absolute;top:-11px;right:12px;padding:1px 9px;border-radius:999px;background:var(--lk-accent);color:#fff;font:900 10.5px Nunito,system-ui;letter-spacing:.03em;text-transform:uppercase}
+#namesview .nmpeek{position:absolute;left:-2px;right:-2px;top:calc(100% + 8px);margin:0;padding:8px 12px;list-style:none;max-height:260px;overflow:auto;background:var(--lk-card);border:2px solid var(--lk-accent);border-radius:14px;box-shadow:0 6px 0 var(--lk-line);font:700 12px/1.45 Nunito,system-ui;cursor:default}
+#namesview .nmpeek small{display:inline;color:var(--lk-mute)}
+#namesCap{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--dock-h,190px) + 22px);z-index:5;max-width:min(640px,calc(100vw - 420px));padding:8px 14px;background:var(--lk-card);border:2px solid var(--lk-line);border-radius:16px;box-shadow:0 3px 0 var(--lk-line);font:700 12.5px/1.4 Nunito,system-ui;color:var(--lk-soft);text-align:center}
+#namesCap[hidden]{display:none}#namesCap b{color:var(--lk-ink);font-weight:900;margin-right:4px}#namesCap small{display:block;font-size:11px;color:var(--lk-mute)}
+html:not(.ph):has(#info.on) #namesCap{left:calc((100vw - 340px) / 2)}
+.ph #namesCap{left:8px;right:8px;transform:none;max-width:none}
+#namesCap a{color:var(--lk-accent);font-weight:900}
+#namesCap .nmsc{display:inline-flex;gap:4px;margin:0 0 0 8px;vertical-align:middle}
+#namesCap .nmsc button{border:2px solid var(--lk-line);background:var(--lk-card);color:var(--lk-soft);border-radius:999px;padding:2px 10px;font:800 11.5px Nunito,system-ui;cursor:pointer}
+#namesCap .nmsc button:hover{background:var(--lk-hover)}#namesCap .nmsc button.on{background:var(--lk-accent-soft);border-color:var(--lk-accent);color:var(--lk-ink)}
+
+#mainMenu .mmsep{height:2px;background:var(--lk-line);margin:6px 8px;border-radius:2px}
+#mainMenu .mmrec{padding:2px 6px 4px 44px}#mainMenu .mmh{display:block;font:900 11px Nunito,system-ui;text-transform:uppercase;letter-spacing:.05em;color:var(--lk-mute);margin:2px 0 4px}
+#mainMenu .mmr{display:flex;align-items:center;gap:4px}
+#mainMenu .mmr>button:first-child{flex:1;min-width:0;text-align:left;border:0;background:transparent;border-radius:10px;padding:5px 8px;cursor:pointer;color:var(--lk-ink)}
+#mainMenu .mmr>button:first-child:hover,#mainMenu .mmr>button:first-child:focus-visible{background:var(--lk-hover);outline:none}
+#mainMenu .mmr b{display:block;font:900 13px Nunito,system-ui;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#mainMenu .mmr small{display:block;font:700 11px Nunito,system-ui;color:var(--lk-soft)}
+#mainMenu .mmx{flex:none;width:26px;height:26px;border:0;background:transparent;border-radius:8px;color:var(--lk-mute);cursor:pointer;display:grid;place-items:center}
+#mainMenu .mmx:hover{background:var(--lk-hover);color:var(--lk-ink)}#mainMenu .mmx svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round}
+#mainMenu .mmrem{display:flex;gap:10px;align-items:flex-start;padding:8px 10px 6px;font:800 12px Nunito,system-ui;color:var(--lk-soft);cursor:pointer}
+#mainMenu .mmrem input{margin:2px 0 0 2px;accent-color:var(--lk-accent);flex:none}#mainMenu .mmrem small{display:block;font:700 11px/1.3 Nunito,system-ui;color:var(--lk-mute);margin-top:1px}
+
+.aip-opts{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center;margin:8px 0 4px;font:800 12px Nunito,system-ui;color:var(--lk-soft)}
+.aip-opts select{font:800 13px Nunito,system-ui;padding:5px 8px;border:2px solid var(--lk-line);border-radius:10px;background:var(--lk-card);color:var(--lk-ink)}
+.aip-opts .aip-ck{grid-column:1/-1;display:flex;gap:8px;align-items:center;cursor:pointer}.aip-opts input[type=checkbox]{accent-color:var(--lk-accent)}
+.aip-text{width:100%;box-sizing:border-box;min-height:260px;resize:vertical;margin:6px 0;padding:10px 12px;border:2px solid var(--lk-line);border-radius:12px;background:var(--lk-card);color:var(--lk-ink);font:600 11.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
+.aip-n{margin-left:10px;color:var(--lk-mute);font-weight:800}
+
+#lanehead .tt .tg{pointer-events:all;cursor:pointer}#lanehead .tt .tg:hover .tomb,#lanehead .tt .tg:focus-visible .tomb{fill:#FFF3E0;stroke-width:2.6}#lanehead .tt .tg:focus-visible{outline:none}
+
+/* the search button floats at the bottom right, see-through until it is pointed at; it follows the side panel's edge and, on a phone, sits above the search shelf */
+#bShelf{position:fixed;right:16px;bottom:16px;z-index:9;background:rgba(255,255,255,.38);border-color:rgba(31,37,48,.14);box-shadow:none;color:var(--lk-ink);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);opacity:.8;transition:background .15s,opacity .15s,right .2s}
+#bShelf:hover,#bShelf:focus-visible{background:var(--lk-card);opacity:1;border-color:var(--lk-accent)}
+html:not(.ph):has(#info.on) #bShelf{right:356px}
+.ph #bShelf{right:10px;bottom:calc(var(--dock-h,130px) + 12px)}.ph.shelfoff #bShelf{bottom:calc(14px + env(safe-area-inset-bottom))}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
 <div class="logo">TREE<b> CANVAS</b><small>prototype</small></div>
 <div class="zoombar"><button class="lk-ibtn" id="zIn" title="Zoom in" aria-label="Zoom in"></button><button class="lk-ibtn" id="zOut" title="Zoom out" aria-label="Zoom out"></button><button class="lk-ibtn" id="bFit" title="Fit everything in view (F)" aria-label="Fit to view"></button></div>
+<button class="lk-ibtn" id="bShelf" title="Show or hide the search shelf" aria-label="Search shelf" aria-pressed="true"></button>
 <div class="top">
-  <button class="lk-ibtn" id="bShelf" title="Show or hide the search shelf" aria-label="Search shelf"></button>
   <button class="lk-ibtn" id="bRel" title="How are they related? Select a person, then another" aria-label="How are they related"></button>
   <button class="lk-ibtn" id="bBlood" title="Bloodline: add blood relatives, remove the rest, or colour them differently" aria-label="Bloodline" aria-haspopup="true" aria-expanded="false"></button>
+  <button class="lk-ibtn" id="bGen" title="Generations: numbered bands behind each row (I is the oldest)" aria-label="Generations" aria-pressed="false"></button>
+  <button class="lk-ibtn" id="bArrange" title="Arrange: tidy every card on the canvas into one neat family tree" aria-label="Arrange"></button>
   <button class="lk-ibtn" id="bUndo" title="Undo (Ctrl/Cmd Z)" aria-label="Undo"></button>
-  <button class="lk-ibtn" id="bInfo" title="Panel: person, path, legend, options" aria-label="Panel"></button>
-  <button class="lk-ibtn xtra" id="bTheme" title="Look: Sticker, Paper or Ground" aria-label="Look"></button>
+  <button class="lk-ibtn" id="bInfo" title="Side panel: person, where next, path" aria-label="Panel"></button>
+  <button class="lk-ibtn" id="bMenu" title="Menu: how to read the lines, options" aria-label="Menu" aria-haspopup="true" aria-expanded="false"></button>
   <button class="lk-ibtn xtra" id="bClear" title="Clear the canvas (Undo brings it back)" aria-label="Clear"></button>
   <button class="lk-ibtn" id="bMore" title="More" aria-label="More" style="display:none"></button>
 </div>
-<div id="rz" aria-label="Relate two people"><div class="rzs" data-s="0" tabindex="0" role="button"></div><div class="rzm" title="Drop two people here and the whole path between them is drawn">&#8644;<small>how related</small></div><div class="rzs" data-s="1" tabindex="0" role="button"></div><div class="rzx"><span id="rzmsg"></span><button class="lk-btn is-small" id="rzClr" type="button">Clear</button></div></div>
 <div id="flagsprite" aria-hidden="true"></div>
 <div id="hint">Search anyone, from any archive, and drop them here
   <small>Pull up their parents, all the way back, one generation at a time.<br>Drop someone from another archive and ask how the two are related.<br>Solid means read from a register; dashed means not proven; dotted means the archive records no grade.</small>
@@ -509,7 +727,7 @@ select.lk-input{width:auto;padding:4px 8px}
 <div id="pop"></div>
 <div id="mini" title="Click to move there"><canvas></canvas></div>
 <div id="toast" class="lk-toast"></div>
-<div class="dock"><div class="srow"><span class="si" id="si"></span><input id="q" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Search people"><span class="cnt" id="cnt"></span></div><div class="tabs" id="tabs"></div><div class="shelf" id="shelf"></div></div>
+<div class="dock"><div class="srow"><span class="si" id="si"></span><input id="q" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Search people"><span class="cnt" id="cnt"></span></div><div id="rz" aria-label="Relate two people"><div class="rzs" data-s="0" tabindex="0" role="button"></div><div class="rzm" title="Drop two people here and the whole path between them is drawn">&#8644;<small>how related</small></div><div class="rzs" data-s="1" tabindex="0" role="button"></div><div class="rzx"><span id="rzmsg"></span><button class="lk-btn is-small" id="rzClr" type="button">Clear</button></div></div><div class="tabs" id="tabs"></div><div class="shelf" id="shelf"></div></div>
 <script type="application/json" id="corpus">null</script>
 <script type="application/json" id="period">{
  "v": 1,
@@ -657,7 +875,7 @@ select.lk-input{width:auto;padding:4px 8px}
      [arch, id, sex, given, sur, by, bpIdx, dy, dpIdx, father, mother, fg, mg, spouses[], kids[], page, occIdx, flags, surAlso, route, my] */
   function build(corpus) {
     const M = { archives: corpus.archives, places: corpus.places, occs: corpus.occs || [], built: corpus.built };
-    M.flags = corpus.flags || []; M.geo = corpus.geo || {}; M.regionEras = corpus.eras || {}; M.placeIdx = new Map((corpus.places || []).map((n, i) => [n, i]));
+    M.flags = corpus.flags || []; M.geo = corpus.geo || {}; M.regionEras = corpus.eras || {}; M.events = corpus.events || {}; M.srcs = corpus.srcs || {}; M.placeIdx = new Map((corpus.places || []).map((n, i) => [n, i]));
     const P = corpus.people.map((r, i) => {
       const a = corpus.archives[r[0]];
       const p = {
@@ -666,6 +884,7 @@ select.lk-input{width:auto;padding:4px 8px}
         f: r[9], m: r[10], fg: r[11], mg: r[12], sp: r[13].slice(), kids: r[14], page: r[15],
         occ: r[16] >= 0 ? (corpus.occs || [])[r[16]] : '', fl: r[17], living: !!(r[17] & 8), ghost: !!(r[17] & 32), how: typeof r[21] === 'string' ? r[21] : '', surAlso: Array.isArray(r[18]) ? r[18] : [], ch: [],
         /* 19: the stops an archive records between birth and death [[place idx, year|null, estimated]]; 20: marriage year (fl bit 16 = estimated). Absent in an older corpus. */
+        bd: typeof r[22] === 'string' ? r[22] : '', dd: typeof r[23] === 'string' ? r[23] : '',
         route: Array.isArray(r[19]) ? r[19].map(x => ({ name: corpus.places[x[0]], year: x[1], est: !!x[2] })) : [], my: r[20] || null,
       };
       p.name = (p.given + ' ' + p.sur).trim() || '(no name recorded)';
@@ -1090,6 +1309,12 @@ select.lk-input{width:auto;padding:4px 8px}
   }
   /* A LIVING PERSON CARRIES NO YEARS AT ALL (fl bit 8), by the estate's living-people standard: their archive publishes them
      by name and family only. So the year line says that in words rather than drawing "?–?", which reads as a gap in research. */
+  /* a full date as the archive wrote it ("1814-08-23", "1814-08", "c. 1814", "23 Aug 1814") said plainly: "23 Aug 1814", "Aug 1814". Anything else is returned as it came. */
+  function dateText(t) {
+    t = String(t || '').trim(); const m = /^(~|c\.?\s*)?(\d{4})-(\d{2})(?:-(\d{2}))?$/.exec(t); if (!m) return t;
+    const mo = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][+m[3] - 1]; if (!mo) return t;
+    return (m[1] ? 'about ' : '') + (m[4] ? (+m[4]) + ' ' : '') + mo + ' ' + m[2];
+  }
   function years(p) {
     if (p.ghost) return 'named only · no dates';
     if (p.living) return 'living · no dates';
@@ -1126,8 +1351,190 @@ select.lk-input{width:auto;padding:4px 8px}
     return set;
   }
 
-  const API = { bloodSet, fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful,
-    placeAt, neighbours, edgeCost, parentLinks, ancestorStats, stopReason, otherSideHasParents, evidenceSummary, years, url, levelOfGrade, LEVELS, kinshipOps, opsOf, reverseOps, bloodTerm, siblingKind, archivesOnPath, ord };
+
+  /* everyone above, below and beside a person, for the Person panel: ancestors and descendants by generation, and siblings (anyone who shares a parent) */
+  function family(M, i) {
+    const anc = new Map(), desc = new Map(), sibs = new Set(), p = M.P[i];
+    let cur = [i], g = 0, seen = new Set([i]);
+    while (cur.length && g < 60) { g++; const nx = []; cur.forEach(x => [M.P[x].f, M.P[x].m].forEach(y => { if (y >= 0 && !seen.has(y)) { seen.add(y); anc.set(y, g); nx.push(y); } })); cur = nx; }
+    cur = [i]; g = 0; seen = new Set([i]);
+    while (cur.length && g < 60) { g++; const nx = []; cur.forEach(x => M.P[x].ch.forEach(e => { if (!seen.has(e.c)) { seen.add(e.c); desc.set(e.c, g); nx.push(e.c); } })); cur = nx; }
+    [p.f, p.m].forEach(q => { if (q >= 0) M.P[q].ch.forEach(e => { if (e.c !== i) sibs.add(e.c); }); });
+    return { anc, desc, sibs };
+  }
+  /* "Around their lifetime": the Atlas's events (wars, epidemics, a change of rule) that overlapped the years they were at a place, longest overlap first */
+  function lifeEvents(M, p) {
+    if (!M.events || !p || p.living || p.ghost || p.by == null) return [];
+    const end = p.dy == null ? new Date().getFullYear() : p.dy, my = p.my || null, m = new Map();
+    const stays = [{ n: p.bp, a: p.by, b: my || end }]; if (p.dp && p.dp !== p.bp) stays.push({ n: p.dp, a: my || p.by, b: end });
+    stays.forEach(s => {
+      if (!s.n) return; const pi = M.placeIdx.get(s.n), g = pi != null && M.geo[p.a] ? M.geo[p.a][String(pi)] : null; if (!g || !g[4]) return;
+      g[4].forEach(id => {
+        const e = M.events[id]; if (!e || e[2] > s.b || e[3] < s.a) return;
+        const ov = Math.min(e[3], s.b) - Math.max(e[2], s.a) + 1, o = m.get(id);
+        if (!o || ov > o.ov) m.set(id, { id, n: e[0], f: e[2], t: e[3], toll: e[5] || e[4] || '', at: s.n, ov });
+      });
+    });
+    return [...m.values()].sort((x, y) => y.ov - x.ov || x.f - y.f);
+  }
+  /* the birthplace's rule changing hands during their life */
+  function eraChanges(M, p) {
+    if (!p || p.living || p.ghost || p.by == null || !p.bp) return [];
+    const pi = M.placeIdx.get(p.bp), g = pi != null && M.geo[p.a] ? M.geo[p.a][String(pi)] : null, es = g && g[3] ? M.regionEras[g[3]] : null; if (!es) return [];
+    const end = p.dy == null ? new Date().getFullYear() : p.dy;
+    return es.filter(e => e[0] > p.by && e[0] <= end).map(e => ({ from: e[0], polity: e[2], note: e[3] || '' }));
+  }
+
+  /* lines: from a marked person, each grandparent heads a line (a parent with no parents of their own heads one themselves) and every ancestor of that head
+     belongs to it, all the way up. Returns { heads:[{i,ci,name}], of: Map person index -> [line numbers] }. The line is named by the head's surname. */
+  function lines(M, i) {
+    const out = { heads: [], of: new Map() }, p = M.P[i]; if (!p) return out;
+    const heads = [];
+    [p.f, p.m].forEach(q => { if (q < 0) return; const g = [M.P[q].f, M.P[q].m].filter(x => x >= 0); (g.length ? g : [q]).forEach(h => { if (h !== i && !heads.includes(h)) heads.push(h); }); });
+    const names = heads.map(h => M.P[h].sur || M.P[h].name);
+    heads.forEach((h, k) => { const dup = names.filter(n => n === names[k]).length > 1; out.heads.push({ i: h, ci: k, name: dup ? names[k] + ' (' + (M.P[h].given || '?') + ')' : names[k] }); });
+    out.heads.forEach(H => {
+      const seen = new Set([H.i]), q = [H.i];
+      while (q.length) { const x = q.shift(); if (!out.of.has(x)) out.of.set(x, []); if (!out.of.get(x).includes(H.ci)) out.of.get(x).push(H.ci); [M.P[x].f, M.P[x].m].forEach(y => { if (y >= 0 && y !== i && !seen.has(y)) { seen.add(y); q.push(y); } }); }
+    });
+    return out;
+  }
+
+  /* arrange: a tidy family-tree layout for a set of cards. items = [{k, par:[k], mate:[k]}] (par = the parents that are in the set, mate = spouses and same-person
+     partners). Couples stay side by side as one "blob"; each blob sits on a generation row (below its lowest parent, level with its spouse); rows are ordered to
+     cut crossings (barycentre sweeps) and spaced so children sit under their parents and parents over their children, with no two cards touching.
+     o = {W,H,GX,CGX,ROWH,pos:{k:{x,y}}} (pos = where the cards are now, used only to keep the reader's left-to-right order). Returns Map k -> {x,y} (top-left), origin 0,0. */
+  function arrange(items, o) {
+    const W = o.W, H = o.H, GX = o.GX, CG = o.CGX, RH = o.ROWH, pos0 = o.pos || {}, n = items.length;
+    const idx = new Map(items.map((it, i) => [it.k, i]));
+    const par = items.map(it => it.par.map(k => idx.get(k)).filter(i => i !== undefined));
+    const mate = items.map(it => it.mate.map(k => idx.get(k)).filter(i => i !== undefined));
+    /* blobs: couples (and same-person pairs) that must stay together */
+    const uf = items.map((_, i) => i), find = i => { while (uf[i] !== i) { uf[i] = uf[uf[i]]; i = uf[i]; } return i; };
+    mate.forEach((ms, i) => ms.forEach(m => { const a = find(i), b = find(m); if (a !== b) uf[a] = b; }));
+    const bid = new Map(), blobs = [];
+    for (let i = 0; i < n; i++) { const r = find(i); if (!bid.has(r)) { bid.set(r, blobs.length); blobs.push({ mem: [], par: new Set(), kid: new Set(), gen: 0 }); } blobs[bid.get(r)].mem.push(i); }
+    const B = items.map((_, i) => bid.get(find(i)));
+    blobs.forEach((b, bi) => b.mem.sort((a, c) => ((pos0[items[a].k] || {}).x || 0) - ((pos0[items[c].k] || {}).x || 0) || a - c));
+    par.forEach((ps, i) => ps.forEach(p => { if (B[p] !== B[i]) { blobs[B[i]].par.add(B[p]); blobs[B[p]].kid.add(B[i]); } }));
+    /* connected components of blobs */
+    const comp = new Array(blobs.length).fill(-1), comps = [];
+    blobs.forEach((_, s) => { if (comp[s] >= 0) return; const L = [s]; comp[s] = comps.length; for (let q = 0; q < L.length; q++) [...blobs[L[q]].par, ...blobs[L[q]].kid].forEach(t => { if (comp[t] < 0) { comp[t] = comps.length; L.push(t); } }); comps.push(L); });
+    const out = new Map(), laid = [], genOut = new Map(), compOut = new Map();
+    comps.forEach((L, ci) => {
+      /* generations: below the lowest parent; then a parentless blob is drawn just above its first child instead of at the very top */
+      for (let r = 0; r <= L.length + 1; r++) { let ch = false; L.forEach(b => blobs[b].par.forEach(p => { if (blobs[b].gen < blobs[p].gen + 1 && blobs[p].gen < L.length) { blobs[b].gen = blobs[p].gen + 1; ch = true; } })); if (!ch) break; }
+      L.forEach(b => { if (!blobs[b].par.size && blobs[b].kid.size) { const g = Math.min(...[...blobs[b].kid].map(k => blobs[k].gen)) - 1; if (g > blobs[b].gen) blobs[b].gen = g; } });
+      const rows = []; L.forEach(b => { (rows[blobs[b].gen] = rows[blobs[b].gen] || []).push(b); });
+      for (let g = 0; g < rows.length; g++) if (!rows[g]) rows[g] = [];
+      const bw = b => blobs[b].mem.length * W + (blobs[b].mem.length - 1) * CG;
+      const gap = (a, b) => { for (const p of blobs[a].par) if (blobs[b].par.has(p)) return GX; return GX * 2; };
+      const cx = new Map();
+      const rowX = (row, want) => {       /* left to right, never closer than the gap, then re-centred so the row is not dragged sideways */
+        let prev = null, c = [];
+        row.forEach((b, j) => { let x = want[j]; if (prev !== null) x = Math.max(x, c[j - 1] + (bw(row[j - 1]) + bw(b)) / 2 + gap(row[j - 1], b)); c.push(x); prev = x; });
+        const shift = row.length ? row.reduce((a, _, j) => a + (want[j] - c[j]), 0) / row.length : 0;
+        row.forEach((b, j) => cx.set(b, c[j] + shift));
+      };
+      const mean = a => a.reduce((x, y) => x + y, 0) / a.length;
+      /* start: each row packed in the order the cards are in now */
+      rows.forEach(row => { row.sort((a, b) => mean(blobs[a].mem.map(i => (pos0[items[i].k] || {}).x || 0)) - mean(blobs[b].mem.map(i => (pos0[items[i].k] || {}).x || 0))); rowX(row, row.map((_, j) => j * (W + GX * 2))); });
+      /* order: sweep down on the parents' places, up on the children's, a few times */
+      const reorder = (g, nb) => { const row = rows[g], key = new Map(); row.forEach((b, j) => { const ns = [...blobs[b][nb]].filter(t => cx.has(t)); key.set(b, ns.length ? mean(ns.map(t => cx.get(t))) : cx.get(b)); }); row.sort((a, b) => key.get(a) - key.get(b) || cx.get(a) - cx.get(b)); rowX(row, row.map(b => Math.max(key.get(b), -1e9))); };
+      for (let it = 0; it < 4; it++) { for (let g = 1; g < rows.length; g++) reorder(g, 'par'); for (let g = rows.length - 2; g >= 0; g--) reorder(g, 'kid'); }
+      /* positions: children under their parents, parentless parents over their children */
+      for (let it = 0; it < 8; it++) {
+        for (let g = rows.length - 2; g >= 0; g--) { const row = rows[g]; rowX(row, row.map(b => { const ks = [...blobs[b].kid].filter(k => blobs[k].gen > g); return !blobs[b].par.size && ks.length ? mean(ks.map(k => cx.get(k))) : cx.get(b); })); }
+        for (let g = 1; g < rows.length; g++) { const row = rows[g]; rowX(row, row.map(b => blobs[b].par.size ? mean([...blobs[b].par].map(p => cx.get(p))) : cx.get(b))); }
+      }
+      /* inside a couple: the one whose parents are further left goes left */
+      let x0 = Infinity, x1 = -Infinity;
+      L.forEach(b => {
+        const mem = blobs[b].mem.slice(), key = i => { const ps = par[i].filter(p => cx.has(B[p])); return ps.length ? mean(ps.map(p => cx.get(B[p]))) : cx.get(b); };
+        const ks = new Map(mem.map(i => [i, key(i)])); if (mem.length > 1) mem.sort((a, c) => ks.get(a) - ks.get(c));
+        const left = cx.get(b) - bw(b) / 2; mem.forEach((i, j) => { out.set(items[i].k, { x: left + j * (W + CG), y: blobs[b].gen * RH }); genOut.set(items[i].k, blobs[b].gen); compOut.set(items[i].k, ci); });
+        x0 = Math.min(x0, left); x1 = Math.max(x1, left + bw(b));
+      });
+      const w = x1 - x0, h = (rows.length - 1) * RH + H, ks = [];
+      L.forEach(b => blobs[b].mem.forEach(i => { const q = out.get(items[i].k); q.x -= x0; ks.push(items[i].k); }));
+      laid.push({ ks, w, h });
+    });
+    /* components side by side, wrapping onto shelves so the whole thing stays about as wide as it is tall */
+    laid.sort((a, b) => b.ks.length - a.ks.length);
+    const area = laid.reduce((a, c) => a + (c.w + 120) * (c.h + 120), 0), maxW = Math.max(2400, Math.sqrt(area) * 1.8);
+    let sx = 0, sy = 0, rowH = 0;
+    laid.forEach(c => { if (sx > 0 && sx + c.w > maxW) { sx = 0; sy += rowH + 140; rowH = 0; } c.ks.forEach(k => { const q = out.get(k); q.x += sx; q.y += sy; }); sx += c.w + 120; rowH = Math.max(rowH, c.h); });
+    out.gen = genOut; out.comp = compOut;   /* the generation (0 = oldest in its family) and the family number of each card */
+    return out;
+  }
+
+  /* Play: the people to build up for one person, oldest generation first. Their ancestors, their spouses, and everyone who descends from them.
+     Returns { gens: [[person index]...] (oldest first, each by birth year), gen: Map index -> generation number (0 = the person, negative = above) }. */
+  function playSet(M, i) {
+    const g = new Map([[i, 0]]), p = M.P[i];
+    let cur = [i], lv = 0, seen = new Set([i]);
+    while (cur.length && lv < 60) { lv++; const nx = []; cur.forEach(x => [M.P[x].f, M.P[x].m].forEach(y => { if (y >= 0 && !seen.has(y)) { seen.add(y); g.set(y, -lv); nx.push(y); } })); cur = nx; }
+    cur = [i]; lv = 0; seen = new Set([i]);
+    while (cur.length && lv < 60) { lv++; const nx = []; cur.forEach(x => M.P[x].ch.forEach(e => { if (!seen.has(e.c)) { seen.add(e.c); if (!g.has(e.c)) g.set(e.c, lv); nx.push(e.c); } })); cur = nx; }
+    p.sp.forEach(s => { if (!g.has(s)) g.set(s, 0); });
+    const by = {}; g.forEach((n, x) => (by[n] = by[n] || []).push(x));
+    const gens = Object.keys(by).map(Number).sort((a, b) => a - b).map(n => by[n].sort((a, b) => (M.P[a].by == null ? 9999 : M.P[a].by) - (M.P[b].by == null ? 9999 : M.P[b].by)));
+    return { gens, gen: g };
+  }
+
+  /* THE NAMES: a person's ancestry written as surnames, not people. One node per surname family (the Record Atlas catalogue's canonical name when it knows the spelling, else the
+     name as written), with how many ancestors bear it and their years; one edge between two names for each couple among the ancestors, counted. So a Defranceski who married a
+     Kovacina and another, five generations back, who married a Lerena are one Defranceski node joined to two names, however far apart the marriages. The focus person's own
+     spouses are included. A name's depth is its distance from the focus person's name through those marriages. Nothing about any one person is carried except an index. */
+  function surKey(M, p) {
+    const nf = nameForms(M, p);
+    if (nf && nf.sur && nf.sur.canon) return { k: 'f:' + nf.sur.canon, label: nf.sur.canon };
+    const s = squash(p.sur); return s ? { k: 's:' + s, label: p.sur } : { k: '?', label: '' };
+  }
+  function nameTree(M, i, scope) {
+    const root = M.P[i]; if (!root) return null;
+    const blood = scope === 'blood';   /* 'blood': every blood relative (ancestors, and everyone descended from any of them) with their spouses; otherwise the ancestors only */
+    const gen = new Map([[i, 0]]), q = [i];
+    for (let h = 0; h < q.length; h++) { const p = M.P[q[h]], g = gen.get(q[h]); for (const r of [p.f, p.m]) if (r >= 0 && M.P[r] && !gen.has(r)) { gen.set(r, g + 1); q.push(r); } }
+    const mem = new Map();
+    if (blood) {
+      bloodSet(M, i, Infinity).forEach(j => mem.set(j, gen.has(j) ? gen.get(j) : 0));
+      [...mem.keys()].forEach(j => { const p = M.P[j]; p.sp.forEach(s => { if (M.P[s] && !mem.has(s)) mem.set(s, 0); }); [p.f, p.m].forEach(y => { if (y >= 0 && M.P[y] && !mem.has(y)) mem.set(y, 0); }); });
+    } else gen.forEach((g, j) => mem.set(j, g));
+    const nodes = new Map();
+    const add = (j, g) => {
+      const p = M.P[j], k = surKey(M, p); let n = nodes.get(k.k);
+      if (!n) nodes.set(k.k, n = { key: k.k, label: k.label, n: 0, living: 0, people: [], from: null, to: null, g0: Infinity, g1: -1, self: 0 });
+      n.n++; n.people.push(j); if (p.living) n.living++;
+      if (p.by != null) { n.from = n.from == null ? p.by : Math.min(n.from, p.by); const e = p.dy != null ? p.dy : p.by; n.to = n.to == null ? e : Math.max(n.to, e); }
+      n.g0 = Math.min(n.g0, g); n.g1 = Math.max(n.g1, g);
+    };
+    mem.forEach((g, j) => add(j, g));
+    const edges = new Map(), seen = new Set(), pair = (a, b) => a < b ? a + '|' + b : b + '|' + a;
+    const link = (a, b) => {
+      const ka = surKey(M, a).k, kb = surKey(M, b).k;
+      if (ka === kb) { nodes.get(ka).self++; return; }
+      const key = ka < kb ? ka + '|' + kb : kb + '|' + ka; let e = edges.get(key); if (!e) edges.set(key, e = { a: ka < kb ? ka : kb, b: ka < kb ? kb : ka, n: 0 }); e.n++;
+    };
+    const couple = (x, y) => { const k = pair(x, y); if (!seen.has(k)) { seen.add(k); link(M.P[x], M.P[y]); } };
+    mem.forEach((g, j) => { const p = M.P[j]; if (p.f >= 0 && p.m >= 0 && M.P[p.f] && M.P[p.m]) couple(p.f, p.m); });
+    /* a mother known without the father: the child carries the father's name, so the mother's name is joined to the child's (an implied marriage) */
+    mem.forEach((g, j) => { const p = M.P[j], mo = p.m >= 0 ? M.P[p.m] : null, fa = p.f >= 0 ? M.P[p.f] : null; if (mo && !fa && mo.sex === 'f' && squash(p.sur)) { const k = 'm' + j; if (!seen.has(k)) { seen.add(k); link(p, mo); } } });
+    if (blood) mem.forEach((g, j) => M.P[j].sp.forEach(s => { if (mem.has(s) && s !== j) couple(j, s); }));
+    else root.sp.forEach(s => { const o = M.P[s]; if (!o || mem.has(s)) return; mem.set(s, 0); add(s, 0); couple(i, s); });
+    const rk = surKey(M, root).k, E = [...edges.values()];
+    /* depth by marriages from the focus person's name; the strongest edge to the row above is each name's parent in the layout */
+    const depth = new Map([[rk, 0]]), parent = new Map(), order = [rk];
+    for (let h = 0; h < order.length; h++) {
+      const a = order[h];
+      E.filter(e => e.a === a || e.b === a).sort((x, y) => y.n - x.n).forEach(e => { const o = e.a === a ? e.b : e.a; if (!depth.has(o)) { depth.set(o, depth.get(a) + 1); parent.set(o, a); order.push(o); } });
+    }
+    nodes.forEach((n, k) => { if (!depth.has(k)) { depth.set(k, Math.max(...depth.values()) + 1); order.push(k); } });
+    const N = [...nodes.values()].map(n => ({ ...n, depth: depth.get(n.key), parent: parent.get(n.key) || null }));
+    return { root: rk, nodes: N, edges: E, people: mem.size, ancestors: gen.size, scope: blood ? 'blood' : 'anc' };
+  }
+  const API = { nameTree, playSet, family, lifeEvents, eraChanges, lines, arrange, bloodSet, fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful,
+    placeAt, dateText, neighbours, edgeCost, parentLinks, ancestorStats, stopReason, otherSideHasParents, evidenceSummary, years, url, levelOfGrade, LEVELS, kinshipOps, opsOf, reverseOps, bloodTerm, siblingKind, archivesOnPath, ord };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TC = API;
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -1346,7 +1753,7 @@ select.lk-input{width:auto;padding:4px 8px}
       o = o || {};
       const s = { kind, title: TITLE[kind], how: HOW[kind], year: ev ? ev.year : null, est: ev ? ev.est : false, where: null, regime: null, sources: [], more: 0, fs: [], neighbours: null, burial: [], parishes: [], names: [], gaps: [], clues: o.clues || [], exact: true };
       const pl = ev && ev.place;
-      if (pl && pl.name) s.where = { name: pl.name, id: pl.id, cn: pl.cn, href: pl.id ? placeHref(pl.id) : ATLAS + '/?q=' + encodeURIComponent(pl.name) };
+      if (pl && pl.name) s.where = { name: pl.name, id: pl.id, cn: pl.cn, fi: pl.fi == null ? -1 : pl.fi, era: pl.era || null, href: pl.id ? placeHref(pl.id) : ATLAS + '/?q=' + encodeURIComponent(pl.name) };
       const x = d(ev);
       if (pl && pl.name && !pl.id) s.gaps.push(pl.name + ' has no Atlas place page linked from the archive, so there is no list of its record collections here. Search the name on the Atlas map (the link above); if the Atlas does not hold it yet, try the nearest town that it does.');
       if (pl && pl.id && !x) s.gaps.push('The Atlas record for ' + pl.name + ' could not be read just now.');
@@ -1438,6 +1845,7 @@ select.lk-input{width:auto;padding:4px 8px}
         g(p.father != null ? p.father : (p.unplaced ? null : extraF.get(p.id))), g(p.mother != null ? p.mother : (p.unplaced ? null : extraM.get(p.id))), -1, -1,
         [...new Set([...(p.spouse || []), ...(p.unplaced ? [] : (extraS.get(p.id) || []))])].map(g).filter(x => x >= 0), (p.kids || []).map(g).filter(x => x >= 0),
         '', O(hid ? null : p.occ), fl, 0, 0, hid ? 0 : (p.my || 0),
+        '', hid || typeof p.bd !== 'string' ? '' : p.bd, hid || typeof p.dd !== 'string' ? '' : p.dd,   /* 22, 23: the full dates, when the tree carries them */
       ];
     });
     /* the Atlas's own place records the page already carries: id, country, and the flag each era flew. Only the places this tree uses. */
@@ -1453,17 +1861,20 @@ select.lk-input{width:auto;padding:4px 8px}
     for (const pl of (A.places || [])) {
       if (!used.has(pl.n)) continue;
       const eras = (pl.fl || []).map(f => [parseInt(f[0], 10), F(f[1])]).sort((a, b) => a[0] - b[0]);
-      geo[String(P(pl.n))] = [pl.id || null, pl.cn || '', eras, pl.reg || null];
+      geo[String(P(pl.n))] = [pl.id || null, pl.cn || '', eras, pl.reg || null, pl.ev || []];
     }
     const regionEras = {};
-    for (const k of Object.keys(A.regions || {})) regionEras[k] = ((A.regions[k] || {}).eras || []).filter(e => e && e.length > 3 && e[3]).map(e => [e[0], e[1], e[3]]);
+    for (const k of Object.keys(A.regions || {})) regionEras[k] = ((A.regions[k] || {}).eras || []).filter(e => e && e.length > 3 && e[3]).map(e => [e[0], e[1], e[3], e[4] || '']);
+    /* what the Atlas knows happened where they lived (wars, epidemics, a change of rule): only the events the used places point to, and each person's sources */
+    const evUsed = {}; Object.keys(geo).forEach(k => (geo[k][4] || []).forEach(id => { if (A.events && A.events[id]) evUsed[id] = A.events[id]; }));
+    const srcs = {}; drawn.forEach(p => { if (!p.hid && p.srcs && p.srcs.length) srcs[p.id] = p.srcs.map(x => ({ t: String(x.t || '').slice(0, 140), u: /^https?:\/\//i.test(x.u || '') ? x.u : '' })); });
     const metaTitle = tree && tree.meta && tree.meta.title;
     /* the converter's stock title is the name of the viewer, not of the visitor's tree: call it "Your tree" */
     const name = label || (metaTitle && !/^roots\s*(&|&amp;|and)\s*routes/i.test(String(metaTitle).trim()) ? metaTitle : 'Your tree');
     return {
       built: new Date().toISOString().slice(0, 10), livingRule: 'as chosen on the roots page',
       archives: [{ k: 'you', name, host: '', color: '#D2493A', graded: false, generated: tree && tree.meta && tree.meta.generated, living: tree && tree.meta && tree.meta.living, n: rows.length, droppedLiving: 0, livingNamed: 0 }],
-      places, occs, people: rows, flags, geo: { '0': geo }, eras: regionEras,
+      places, occs, people: rows, flags, geo: { '0': geo }, eras: regionEras, events: evUsed, srcs,
     };
   }
   const API = { corpus };
@@ -1492,7 +1903,9 @@ const STORE = 'treecanvas.v1';
 const ICON = {
   up: 'M12 19V6M6 11l6-6 6 6', upall: 'M6 11l6-6 6 6M6 18l6-6 6 6', dn: 'M12 5v13M6 13l6 6 6-6', dnall: 'M6 6l6 6 6-6M6 13l6 6 6-6',
   sp: '<circle cx="9" cy="12" r="4.5"/><circle cx="15.5" cy="12" r="4.5"/>', x: 'M7 7l10 10M17 7L7 17', open: 'M14 4h6v6M20 4l-9 9M18 14v5H5V6h5',
-  relate: 'M4 8h14l-3-3.5M20 16H6l3 3.5', undo: 'M9 14L4 9l5-5M4 9h10a6 6 0 010 12h-4', fit: 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5',
+  menu: 'M4 7h16M4 12h16M4 17h16',
+  layers: 'M12 3.5l9 4.8-9 4.8-9-4.8 9-4.8zM3 12.6l9 4.8 9-4.8M3 17l9 4.8 9-4.8', play: 'M8 5.5v13l11-6.5z', pause: 'M8 5v14M16 5v14',
+  arrange: 'M9 3.5h6v5H9zM12 8.5V12M6 12h12M6 12v3M18 12v3M3 15.5h6v5H3zM15 15.5h6v5h-6z', relate: 'M4 8h14l-3-3.5M20 16H6l3 3.5', undo: 'M9 14L4 9l5-5M4 9h10a6 6 0 010 12h-4', fit: 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5',
   plus: 'M12 5v14M5 12h14', minus: 'M5 12h14', info: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.6v.2"/>',
   search: '<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/>', theme: '<circle cx="12" cy="12" r="8"/><path d="M12 4v16"/><path d="M12 4a8 8 0 010 16z" fill="currentColor"/>',
   clear: 'M5 19l9-9 4 4-5 5H5zM13 7l2-2 4 4-2 2', gear: '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>',
@@ -1508,15 +1921,27 @@ const S = {
   cards: new Map(),                 /* key -> card {key,i,x,y,pinned,up,down,sp,stopG,from,el} */
   view: { x: 0, y: 0, k: 1 },
   sel: new Set(),
+  mark: null,                       /* the one marked person (a person key): the canvas shows how the selected person is related to them */
   blood: { tint: false, ref: null, set: null },   /* colour the people who are NOT blood relatives of `ref` (a person index); `set` is their blood relatives, all of them */
   relateFrom: null,                 /* key while "how are they related?" waits for the second person */
   path: null,                       /* {a,b,nodes,edges,desc} */
   filter: new Set(M.archives.map((_, i) => i)),
-  opts: { stopAtNotProven: false, suggested: true },
+  opts: { stopAtNotProven: false, suggested: true, gens: false },
   tab: 'person', phone: false,
   undo: [], busy: 0,
 };
 const colour = a => M.archives[a].color;
+/* the lines of the marked person: each grandparent's ancestors share a name and a colour (only for a tree with no archives of its own, where the archive name is no use) */
+const LINE_COLS = ['#2f8f5b', '#3b6fb6', '#8a5cc2', '#d9822b', '#c2417a', '#1f8a8a'];
+function markLines() {
+  if (!S.mark || !M.byKey.has(S.mark)) return null;
+  if (!S._lines || S._lines.k !== S.mark || S._lines.M !== M) S._lines = { k: S.mark, M, v: TC.lines(M, M.byKey.get(S.mark).i) };
+  return S._lines.v;
+}
+function lineOf(i) { /* { names, col } for a person in one of the marked person's lines, else null */
+  const L = M.P[i] && M.archives[M.P[i].a].k === 'you' ? markLines() : null, cs = L && L.of.get(i); if (!cs || !cs.length) return null;
+  return { names: cs.map(k => L.heads[k].name).join(' / '), col: LINE_COLS[cs[0] % LINE_COLS.length], cs };
+}
 const personOf = c => M.P[c.i];
 const cardOfPerson = i => S.cards.get(M.P[i].key);
 const cx = c => c.x + W / 2;
@@ -1637,8 +2062,10 @@ function cardInner(c) {
     const o = M.P[TC.bridgeOther(b, c.i)], st = TC.bridgeState(M, b);
     return `<button class="brc" style="--bc:${colour(o.a)}" data-act="br" data-b="${esc(b.id)}" title="${st === 'confirmed' ? 'Confirmed' : 'Suggested'} same person in ${esc(M.archives[o.a].name)} (${esc(TC.bridgeNotes(b).join(', '))}). Click to add them to the canvas, bridged, not merged.">&asymp; ${esc(M.archives[o.a].name)}</button>`;
   }).join('') + (brs.length > 1 ? `<button class="brc more" style="--bc:var(--lk-accent)" data-act="brs" title="${brs.length - 1} more possible matches: open the Person panel">+${brs.length - 1}</button>` : '');
-  let h = `<div class="cb" title="${esc(p.name)} · ${esc(a.name)} archive${p.occ ? ' · ' + esc(p.occ) : ''} · ${esc(TC.evidenceSummary(M, p))}"><div class="nm">${esc(p.name)}</div><div class="yr">${TC.years(p)}${place}</div>
-    <div class="meta"><span class="ar">${esc(a.name)}</span>${p.sex === 'f' || p.sex === 'm' ? `<span class="sx ${p.sex === 'f' ? 'mo' : 'fa'}" title="${p.sex === 'f' ? 'Female' : 'Male'}">${p.sex === 'f' ? '&#9792;' : '&#9794;'}&#xFE0E;</span>` : ''}${chips}<span class="seals">${seals.join('')}</span></div></div>`;
+  const ln = lineOf(c.i);
+  let h = `<div class="cb" title="${esc(p.name)}${a.k === 'you' ? '' : ' · ' + esc(a.name) + ' archive'}${p.occ ? ' · ' + esc(p.occ) : ''} · ${esc(TC.evidenceSummary(M, p))}"><div class="nm">${esc(p.name)}</div><div class="yr">${TC.years(p)}${place}</div>
+    <div class="meta">${a.k === 'you' ? (ln ? `<span class="ar ln" style="--lc:${ln.col}" title="On the ${esc(ln.names)} line from the marked person's grandparents">${esc(ln.names)}</span>` : '') : `<span class="ar">${esc(a.name)}</span>`}${p.sex === 'f' || p.sex === 'm' ? `<span class="sx ${p.sex === 'f' ? 'mo' : 'fa'}" title="${p.sex === 'f' ? 'Female' : 'Male'}">${p.sex === 'f' ? '&#9792;' : '&#9794;'}&#xFE0E;</span>` : ''}${chips}<span class="seals">${seals.join('')}</span></div></div>`;
+  if (c.key === S.mark) h += `<span class="mkb" title="The marked person: the canvas shows how everyone you select is related to them">&#9733;</span>`;
   { const fx = fixOf(p); if (fx) h += `<button class="fxb" data-act="fixes" title="${fx.length} ${fx.length === 1 ? 'thing' : 'things'} on your fix list for ${esc(p.name)}: click to see what and how to fix it" aria-label="${fx.length} on the fix list">!</button>` ;  }
   /* ancestors */
   const parentCards = [p.f, p.m].filter(q => q >= 0 && !cardOfPerson(q));
@@ -1681,7 +2108,9 @@ function refreshCard(c) {
   if (S.blood.tint && S.blood.set && !S.blood.set.has(c.i) && !personOf(c).ghost) cls.push('nb');
   if (S.path) { cls.push(S.path.nodeKeys.has(c.key) ? 'onpath' : 'dim'); if (c.key === S.path.a || c.key === S.path.b) cls.push('endpt'); }
   if (S.relateFrom === c.key) cls.push('pulse');
+  if (c.key === S.mark) cls.push('marked');
   c.el.className = cls.join(' ');
+  { const ln = lineOf(c.i); c.el.style.setProperty('--ac', ln ? ln.col : colour(personOf(c).a)); }
   c.el.innerHTML = cardInner(c);
 }
 function refreshAll() { S.cards.forEach(refreshCard); syncUi(); }
@@ -1692,11 +2121,20 @@ function applyView() {
   $('#world').style.transform = `translate(${v.x}px,${v.y}px) scale(${v.k})`;
   const st = $('#stage'); st.style.backgroundPosition = `${v.x}px ${v.y}px`; st.style.backgroundSize = `${32 * v.k}px ${32 * v.k}px`;
   document.documentElement.style.setProperty('--world-k', v.k);
+  if (typeof drawLanes === 'function') drawLanes();
   miniDraw();
 }
 const toWorld = (px, py) => ({ x: (px - S.view.x) / S.view.k, y: (py - S.view.y) / S.view.k });
+/* Zoom about a point, but never about a point outside the cards: the pointer (or, for the buttons, the middle of the cards) is held inside the cards' own outline, so zooming out
+   shrinks the tree where it stands instead of sending it off toward a pointer parked over the search box or the middle of an empty window. */
 function zoomAt(f, px, py) {
-  const v = S.view, nk = Math.min(2.5, Math.max(0.12, v.k * f)), r = nk / v.k;
+  const v = S.view;
+  const nb = typeof namesBox === 'function' ? namesBox() : null;
+  if (nb || S.cards.size) {
+    const b = nb || bbox([...S.cards.values()]), sx0 = b.x0 * v.k + v.x, sx1 = b.x1 * v.k + v.x, sy0 = b.y0 * v.k + v.y, sy1 = b.y1 * v.k + v.y;
+    px = px == null ? (sx0 + sx1) / 2 : Math.min(sx1, Math.max(sx0, px)); py = py == null ? (sy0 + sy1) / 2 : Math.min(sy1, Math.max(sy0, py));
+  } else { if (px == null) px = innerWidth / 2; if (py == null) py = innerHeight / 2; }
+  const nk = Math.min(2.5, Math.max(0.12, v.k * f)), r = nk / v.k;
   v.x = px - (px - v.x) * r; v.y = py - (py - v.y) * r; v.k = nk; applyView(); save();
 }
 function usable() { /* the part of the screen not covered by the dock and the info panel */
@@ -1722,9 +2160,10 @@ function bbox(cards) {
 }
 function fit(cards, opt) {
   cards = cards && cards.length ? cards : [...S.cards.values()];
-  if (!cards.length) return;
+  const nb = typeof namesBox === 'function' ? namesBox() : null;   /* in the Names look the picture is the name cards, not the people cards */
+  if (!cards.length && !nb) return;
   opt = opt || {};
-  const b = bbox(cards), u = usable(), pad = 40;
+  const b = nb || bbox(cards), u = usable(), pad = 40;
   const aw = u.r - u.l - pad * 2, ah = u.b - u.t - pad * 2;
   let k = Math.min(aw / (b.x1 - b.x0), ah / (b.y1 - b.y0));
   k = Math.max(0.12, Math.min(opt.maxK || 1.05, k));
@@ -1899,6 +2338,7 @@ function spreadOverlaps(targets) {
   return targets;
 }
 async function relayout(c, ms) {
+  if (typeof isGridLook === 'function' && isGridLook() && S.cards.size > 1) return tweenTo(arrangeTargets([...S.cards.values()]), ms);
   const r = rootOf(c) || c;
   const t = layoutCluster(r);
   spreadOverlaps(t);
@@ -2031,6 +2471,165 @@ function doStripBlood(c) {
   refreshAll(); drawEdges(); save(); runSearchMarks(); renderInfo();
   toast(drop.length + ' not of the bloodline removed (Undo brings them back)', 3200);
 }
+/* Arrange: every card on the canvas, laid out as one neat family tree. Couples side by side, a row for each generation, children under their parents,
+   separate families side by side. Nothing is added or removed, and Undo puts every card back where it was. */
+/* the cards on the canvas as the layout function wants them: who their parents are and who is joined to them (a spouse, or the same person in another archive) */
+function arrangeItems(cards) {
+  const key = new Map(cards.map(c => [c.i, c.key]));
+  const mate = new Map(cards.map(c => [c.key, new Set()]));
+  const link = (a, b) => { if (a && b && a !== b && mate.has(a) && mate.has(b)) { mate.get(a).add(b); mate.get(b).add(a); } };
+  cards.forEach(c => personOf(c).sp.forEach(s => link(c.key, key.get(s))));
+  M.bridges.forEach(br => { if (TC.bridgeState(M, br) !== 'rejected') link(key.get(br.a), key.get(br.b)); });
+  return cards.map(c => { const p = personOf(c); return { k: c.key, par: [p.f, p.m].filter(q => q >= 0 && key.has(q)).map(q => key.get(q)), mate: [...mate.get(c.key)] }; });
+}
+/* where every card would go, kept around the middle of where the cards are now */
+/* the Countries look: a column for each country of birth (the country today, from the Atlas's place record) and a row for each generation.
+   Columns run left to right by the year of the earliest birth in each, so the family's moves read across the page; a person with no birthplace stands in the last column. */
+/* the Countries columns are shades of the logo's orange, light to deeper */
+const LANE_SHADES = ['#FEF3E3', '#FCE6CA', '#FAD9AF', '#F8CC95', '#F5BF7C'];
+const isGridLook = () => document.documentElement.getAttribute('data-theme') === 'countries';
+function deathCountry(c) { const p = personOf(c); if (!p || p.living || p.ghost || !p.dp) return ''; const pl = TC.placeAt(M, p, p.dp, p.dy); return (pl && pl.cn) || ''; }
+function birthCountry(c) { const p = personOf(c); if (!p || !p.bp) return ''; const pl = TC.placeAt(M, p, p.bp, p.by); return (pl && pl.cn) || ''; }
+function gridPositions(cards) {
+  const gi = genInfo(), CAP = 3, PX = W + GX, cells = new Map(), cols = new Map();
+  cards.forEach(c => {
+    const cn = birthCountry(c), g = gi.gen.get(c.key) || 0, p = personOf(c);
+    if (!cols.has(cn)) cols.set(cn, { cn, first: Infinity, maxN: 1 });
+    if (p.by != null && !p.living) cols.get(cn).first = Math.min(cols.get(cn).first, p.by);
+    const k = cn + '|' + g; if (!cells.has(k)) cells.set(k, []); cells.get(k).push(c);
+  });
+  const order = [...cols.values()].sort((a, b) => (a.cn === '') - (b.cn === '') || a.first - b.first || a.cn.localeCompare(b.cn));
+  let maxG = 0; cells.forEach((cs, k) => { maxG = Math.max(maxG, +k.split('|').pop()); });
+  const subRows = new Array(maxG + 1).fill(1);
+  cells.forEach((cs, k) => { const [cn, g] = [k.slice(0, k.lastIndexOf('|')), +k.slice(k.lastIndexOf('|') + 1)]; cols.get(cn).maxN = Math.max(cols.get(cn).maxN, Math.min(cs.length, CAP)); subRows[g] = Math.max(subRows[g], Math.ceil(cs.length / CAP)); });
+  const rowY = []; let y = 0; for (let g = 0; g <= maxG; g++) { rowY[g] = y; y += subRows[g] * ROWH + 26; }
+  const A = new Map(); let x = 0;
+  order.forEach(col => {
+    const width = col.maxN * PX;
+    for (let g = 0; g <= maxG; g++) {
+      const cs = (cells.get(col.cn + '|' + g) || []).slice().sort((a, b) => (gi.comp.get(a.key) - gi.comp.get(b.key)) || (a.x - b.x));
+      cs.forEach((c, i) => { const r = Math.floor(i / CAP), n = Math.min(CAP, cs.length - r * CAP), j = i % CAP; A.set(c.key, { x: x + (col.maxN - n) * PX / 2 + j * PX, y: rowY[g] + r * ROWH }); });
+    }
+    x += width + 70;
+  });
+  return A;
+}
+function arrangeTargets(cards) {
+  const pos = {}; cards.forEach(c => { pos[c.key] = { x: c.x, y: c.y }; });
+  const A = isGridLook() ? gridPositions(cards) : TC.arrange(arrangeItems(cards), { W, H, GX, CGX: COUPLE_GX, ROWH, pos });
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity, a0 = Infinity, a1 = -Infinity, b0 = Infinity, b1 = -Infinity;
+  cards.forEach(c => { x0 = Math.min(x0, c.x); x1 = Math.max(x1, c.x + W); y0 = Math.min(y0, c.y); y1 = Math.max(y1, c.y + H); const q = A.get(c.key); a0 = Math.min(a0, q.x); a1 = Math.max(a1, q.x + W); b0 = Math.min(b0, q.y); b1 = Math.max(b1, q.y + H); });
+  const dx = (x0 + x1) / 2 - (a0 + a1) / 2, dy = (y0 + y1) / 2 - (b0 + b1) / 2, targets = new Map();
+  cards.forEach(c => { const q = A.get(c.key); targets.set(c, { x: q.x + dx, y: q.y + dy }); });
+  return targets;
+}
+/* Arrange: every card on the canvas, laid out as one neat family tree. Couples side by side, a row for each generation, children under their parents,
+   separate families side by side. Nothing is added or removed, and Undo puts every card back where it was. */
+async function doArrange() {
+  const cards = [...S.cards.values()];
+  if (cards.length < 2) { toast('Put a few people on the canvas first, then Arrange tidies them'); return; }
+  snapshot();
+  await tweenTo(arrangeTargets(cards), 800);
+  refreshAll(); drawEdges(); fit(); save(); miniDraw();
+  toast('Arranged ' + cards.length.toLocaleString() + ' cards (Undo brings them back)', 3200);
+}
+
+/* ---- generation numbers: a band behind each row of a family, I at the top (the oldest), with the years that row covers ---- */
+const romanOf = n => { const t = [[10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']]; let s = ''; t.forEach(([v, r]) => { while (n >= v) { s += r; n -= v; } }); return s || 'I'; };
+let genCache = { sig: '', v: null };
+function genInfo() {
+  const sig = [...S.cards.keys()].join('|'); if (genCache.sig === sig) return genCache.v;
+  const cards = [...S.cards.values()], A = TC.arrange(arrangeItems(cards), { W, H, GX, CGX: COUPLE_GX, ROWH, pos: {} });
+  genCache = { sig, v: { gen: A.gen, comp: A.comp } }; return genCache.v;
+}
+/* the Lanes look: one horizontal swim lane per generation row, white and light grey in turn, edge to edge, with the generation's Roman numeral pinned at the left of the screen.
+   Drawn in screen space (not in the world) so a lane always spans the window and the numeral stays put as the canvas is panned or zoomed. */
+function drawLanes() {
+  let host = $('#lanes');
+  if (!host) { host = document.createElement('div'); host.id = 'lanes'; host.setAttribute('aria-hidden', 'true'); const st = $('#stage'); st.insertBefore(host, $('#world')); }
+  const th = document.documentElement.getAttribute('data-theme'), grid = th === 'countries';
+  host.classList.toggle('cols', grid);
+  let head = $('#lanehead'); if (!head) { head = document.createElement('div'); head.id = 'lanehead'; head.setAttribute('aria-hidden', 'true'); $('#stage').appendChild(head); }
+  if (!grid && head.innerHTML) head.innerHTML = '';
+  if ((th !== 'lanes' && !grid) || !S.cards.size) { if (host.innerHTML) host.innerHTML = ''; if (head.innerHTML) head.innerHTML = ''; return; }
+  const gi = genInfo(), cs = [...S.cards.values()].sort((a, b) => a.y - b.y), rows = [];
+  cs.forEach(c => { const r = rows[rows.length - 1]; if (r && c.y - r.last <= H * 0.85) { r.cs.push(c); r.last = c.y; } else rows.push({ cs: [c], last: c.y }); });
+  rows.forEach(r => {
+    r.y0 = Math.min(...r.cs.map(c => c.y)) - 24; r.y1 = Math.max(...r.cs.map(c => c.y)) + H + 46;
+    const cnt = new Map(); r.cs.forEach(c => { const g = gi.gen.get(c.key); if (g != null) cnt.set(g, (cnt.get(g) || 0) + 1); });
+    r.g = cnt.size ? [...cnt.entries()].sort((a, b) => b[1] - a[1] || a[0] - b[0])[0][0] : null;
+    const ps = r.cs.map(c => personOf(c)).filter(p => p.by != null && !p.living);
+    r.lo = ps.length ? Math.min(...ps.map(p => p.by)) : null; r.hi = ps.length ? Math.max(...ps.map(p => p.dy != null ? p.dy : p.by)) : null;
+  });
+  const v = S.view, vh = innerHeight, vw = innerWidth; let h = '', hh = '';
+  /* the labels keep close to the content when zoomed out: the numerals sit just left of the leftmost card, the country names just above the first row (never above the toolbar, never off the bottom) */
+  const lx = S.phone ? 10 : Math.max(62, Math.min(vw * 0.6, v.x + Math.min(...cs.map(c => c.x)) * v.k - 96)), hy = Math.max(68, Math.min(vh - 220, v.y + rows[0].y0 * v.k - 84));
+  let tl = '', ti = '';
+  if (grid) {   /* the vertical lanes: one column per country of birth, from the cards' own positions, each its own colour, headed by the country's flag and name.
+                   A country where people died but nobody in the picture was born gets a column of its own after the last one (the same place Arrange leaves for it). */
+    const by = new Map(); S.cards.forEach(c => { const k = birthCountry(c); if (!by.has(k)) by.set(k, []); by.get(k).push(c); });
+    const cols = [...by.entries()].map(([cn, cs]) => ({ cn, cs, x0: Math.min(...cs.map(c => c.x)), x1: Math.max(...cs.map(c => c.x)) + W, deaths: 0 })).sort((a, b) => (a.x0 + a.x1) - (b.x0 + b.x1));
+    const dth = [];   /* people who died in a different country from the one they were born in: card, where, when */
+    S.cards.forEach(c => { const d = deathCountry(c); if (d && d !== birthCountry(c)) dth.push({ c, cn: d, y: personOf(c).dy }); });
+    const ghosts = new Map(); dth.forEach(t => { if (!by.has(t.cn)) { if (!ghosts.has(t.cn)) ghosts.set(t.cn, { cn: t.cn, cs: [], first: Infinity, deaths: 0 }); const g = ghosts.get(t.cn); if (t.y != null) g.first = Math.min(g.first, t.y); } });
+    let edge = cols.length ? cols[cols.length - 1].x1 : 0;
+    [...ghosts.values()].sort((p, q) => p.first - q.first || p.cn.localeCompare(q.cn)).forEach(g => { g.x0 = edge + GX + 70; g.x1 = g.x0 + W; edge = g.x1; cols.push(g); });
+    const geo = new Map();
+    cols.forEach((col, i) => {
+      col.a = i ? (cols[i - 1].x1 + col.x0) / 2 : col.x0 - 40; col.b = i < cols.length - 1 ? (col.x1 + cols[i + 1].x0) / 2 : col.x1 + 40; col.i = i;
+      col.shade = LANE_SHADES[(i * 2) % LANE_SHADES.length]; geo.set(col.cn, col);   /* neighbouring columns always differ: steps of two through five shades */
+    });
+    dth.forEach(t => { geo.get(t.cn).deaths++; });
+    cols.forEach(col => {
+      const left = v.x + col.a * v.k, wid = (col.b - col.a) * v.k; if (left > vw || left + wid < 0) return;
+      let fl = ''; const src = col.cs.length ? col.cs.map(c => personOf(c).bp) : dth.filter(t => t.cn === col.cn).map(t => personOf(t.c).dp);
+      for (const nm of src) { if (!nm) continue; const p = col.cs.length ? personOf(col.cs[0]) : personOf(dth.find(t => t.cn === col.cn).c); const pl = TC.placeAt(M, p, nm, 2100); if (pl && pl.fi >= 0) { fl = flagHTML(pl, 2100, 'The flag of ' + col.cn + ' today (Record Atlas)', false) + ' '; break; } }
+      h += `<div class="lcol${col.cn ? '' : ' none'}" style="left:${f1(left)}px;width:${f1(wid)}px;--lc:${col.shade}"></div>`;
+      /* the name is set in the header's own type, centred over the part of its column that is on screen; it shrinks to fit a narrow column */
+      const v0 = Math.max(left, 0), v1 = Math.min(left + wid, vw), mid = (v0 + v1) / 2, nm = col.cn || 'Birthplace not recorded';
+      const fs = Math.max(12, Math.min(28, (wid - 16) / (nm.length * 0.62)));
+      hh += `<div class="cnh" style="left:${f1(mid)}px;top:${f1(hy)}px;max-width:${f1(Math.max(40, v1 - v0 - 10))}px;--fs:${f1(fs)}px">${fl}<b>${esc(nm)}</b><small>${col.cs.length ? col.cs.length + (col.cs.length === 1 ? ' person' : ' people') : col.deaths + ' died here'}</small></div>`;
+    });
+    /* a line from the person into the country they died in, ending at a tombstone in that column's near edge; several in one row stack up */
+    const stack = new Map(), sz = Math.max(15, Math.min(26, 24 * v.k));
+    dth.forEach(t => {
+      const src = geo.get(birthCountry(t.c)), dst = geo.get(t.cn); if (!src || !dst) return;
+      const right = dst.i > src.i, k0 = t.c.y + '|' + t.cn, k = stack.get(k0) || 0; stack.set(k0, k + 1);
+      const sx = v.x + (right ? t.c.x + W : t.c.x) * v.k, sy = v.y + (t.c.y + H / 2) * v.k;
+      const ex = right ? v.x + dst.a * v.k + sz * 0.9 : v.x + dst.b * v.k - sz * 0.9, ey = sy + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * (sz + 4) + (k ? 0 : 0);
+      if (Math.max(sx, ex) < 0 || Math.min(sx, ex) > vw) return;
+      const dx = (ex - sx) * 0.5, col = '#B4631A';
+      tl += `<path d="M${f1(sx)} ${f1(sy)}C${f1(sx + dx)} ${f1(sy)} ${f1(ex - dx)} ${f1(ey)} ${f1(ex)} ${f1(ey)}" stroke="${col}"/><circle cx="${f1(sx)}" cy="${f1(sy)}" r="3.2" fill="${col}"/>`;
+      const who = personOf(t.c), tip = `${who.name}${t.y != null ? ', died ' + t.y : ''} in ${t.cn}. Click to select them.`;
+      ti += `<g class="tg" data-tk="${esc(t.c.key)}" role="button" tabindex="0" aria-label="${esc(tip)}" transform="translate(${f1(ex - sz / 2)} ${f1(ey - sz / 2)})" style="--tc:${col}"><title>${esc(tip)}</title><rect x="-4" y="-4" width="${f1(sz + 8)}" height="${f1(sz + 16)}" fill="transparent"/><svg width="${f1(sz)}" height="${f1(sz)}" viewBox="0 0 24 24"><path d="M5.5 22V10a6.5 6.5 0 0113 0v12z" class="tomb"/><path d="M12 8v7M9.2 10.6h5.6" class="cross"/></svg>${t.y != null && sz > 18 ? `<text x="${f1(sz / 2)}" y="${f1(sz + 9)}" text-anchor="middle">${t.y}</text>` : ''}</g>`;
+    });
+  }
+  rows.forEach((r, i) => {
+    const a = i ? (rows[i - 1].y1 + r.y0) / 2 : r.y0 - 20, b = i < rows.length - 1 ? (r.y1 + rows[i + 1].y0) / 2 : r.y1 + 20;
+    const top = v.y + a * v.k, hgt = (b - a) * v.k;
+    if ((top > vh && i) || (top + hgt < 0 && i < rows.length - 1)) return;
+    const vis0 = Math.max(top, 56), vis1 = Math.min(top + hgt, vh - 150), mid = (vis0 + vis1) / 2, fs = Math.max(11, Math.min(32, hgt * 0.5)), show = r.g != null && vis1 - vis0 > fs * 1.4;   /* the numeral shrinks with the lane when zoomed out */
+    const ft = i === 0 ? Math.min(top, 0) : top, fb = i === rows.length - 1 ? Math.max(top + hgt, vh) : top + hgt;   /* the first lane runs up to the top of the screen and the last down to the bottom */
+    h += `<div class="lane${i % 2 ? ' b' : ''}" style="top:${f1(ft)}px;height:${f1(fb - ft)}px">${show ? `<div class="lnl" style="left:${f1(lx)}px;top:${f1(mid - ft)}px;--fs:${f1(fs)}px"><b>${romanOf(r.g + 1)}</b>${r.lo != null && hgt >= 52 ? `<small>${r.lo}${r.hi !== r.lo ? '–' + r.hi : ''}</small>` : ''}</div>` : ''}</div>`;
+  });
+  if (grid) { h += `<svg class="tl" width="${vw}" height="${vh}" aria-hidden="true">${tl}</svg>`; hh += `<svg class="tt" width="${vw}" height="${vh}" aria-hidden="true">${ti}</svg>`; }
+  host.innerHTML = h; if (grid) head.innerHTML = hh;
+}
+function drawBands() {
+  drawLanes();
+  let host = $('#genbands');
+  if (!host) { host = document.createElement('div'); host.id = 'genbands'; host.setAttribute('aria-hidden', 'true'); $('#world').insertBefore(host, $('#edges')); }
+  if (!S.opts.gens || S.cards.size < 2 || ['lanes', 'countries'].includes(document.documentElement.getAttribute('data-theme'))) { if (host.innerHTML) host.innerHTML = ''; return; }
+  const gi = genInfo(), rows = new Map();
+  S.cards.forEach(c => { const g = gi.gen.get(c.key); if (g == null) return; const k = gi.comp.get(c.key) + '|' + g + '|' + Math.round(c.y / 40); if (!rows.has(k)) rows.set(k, { g, cs: [] }); rows.get(k).cs.push(c); });
+  let h = '';
+  rows.forEach(r => {
+    const x0 = Math.min(...r.cs.map(c => c.x)) - 130, x1 = Math.max(...r.cs.map(c => c.x)) + W + 36, y0 = Math.min(...r.cs.map(c => c.y)) - 24, y1 = Math.max(...r.cs.map(c => c.y)) + H + 46;
+    const ys = r.cs.map(c => personOf(c)).filter(p => p.by != null && !p.living), lo = ys.length ? Math.min(...ys.map(p => p.by)) : null, hi = ys.length ? Math.max(...ys.map(p => p.dy != null ? p.dy : p.by)) : null;
+    h += `<div class="gband${r.g % 2 ? ' odd' : ''}" style="left:${f1(x0)}px;top:${f1(y0)}px;width:${f1(x1 - x0)}px;height:${f1(y1 - y0)}px"><div class="gl"><b>${romanOf(r.g + 1)}</b>${lo != null ? `<small>${lo}${hi !== lo ? '–' + hi : ''}</small>` : ''}</div></div>`;
+  });
+  host.innerHTML = h;
+}
 async function doSpouse(c) { snapshot(); await settle(c, addSpouses(c)); }
 async function doBridge(c, brId) {
   snapshot(); const made = pullBridge(c, brId); await settle(c, made);
@@ -2085,6 +2684,7 @@ function linkTitle(child, parent, via, lv) {
   return `${M.P[child].name} → ${via === 'f' ? 'father' : via === 'm' ? 'mother' : 'parent'} ${M.P[parent].name}: ${TC.LEVELS[lv].label.toUpperCase()} (${TC.LEVELS[lv].note})`;
 }
 function drawEdges() {
+  if (typeof drawBands === 'function') drawBands();
   const out = [], under = [], seen = new Set(), pathIds = S.path ? S.path.edgeIds : null;
   const defs = [];
   const pathLine = d => `<path d="${d}" class="pathline" pathLength="1" style="stroke-dasharray:1 1;${animatePath ? 'stroke-dashoffset:1' : 'animation:none;stroke-dashoffset:0'}"/>`;
@@ -2095,7 +2695,7 @@ function drawEdges() {
   };
   const dimOf = id => (pathIds && !pathIds.has(id)) ? ' dimmed' : '';
   S.cards.forEach(c => {
-    const p = personOf(c), col = colour(p.a);
+    const p = personOf(c), ln = lineOf(c.i), col = ln ? ln.col : colour(p.a);
     const F = p.f >= 0 ? cardOfPerson(p.f) : null, Mo = p.m >= 0 ? cardOfPerson(p.m) : null;
     const fid = 'p:' + p.f + '>' + c.i, mid = 'p:' + p.m + '>' + c.i;
     if (F) seen.add(fid); if (Mo) seen.add(mid);
@@ -2107,7 +2707,7 @@ function drawEdges() {
       add(fid, `M${f1(cx(F))} ${f1(F.y + H)}V${f1(by)}H${f1(jx)}`, EVCLS[lvF], col);
       add(mid, `M${f1(cx(Mo))} ${f1(Mo.y + H)}V${f1(by)}H${f1(jx)}`, EVCLS[lvM], col);
       const jid = 'j:' + p.f + '+' + p.m + '>' + c.i;
-      out.push(`<path d="M${f1(jx)} ${f1(by)}V${f1((by + ty) / 2)}H${f1(tx)}V${f1(ty)}" class="ev-sup${dimOf(fid)}" stroke="${col}" style="stroke-width:2.2"/>`);
+      out.push(`<path d="M${f1(jx)} ${f1(by)}V${f1((by + ty) / 2)}H${f1(tx)}V${f1(ty)}" class="ev-sup${dimOf(fid)}" stroke="${col}"/>`);
       if (pathIds && (pathIds.has(fid) || pathIds.has(mid))) under.push(pathLine(`M${f1(jx)} ${f1(by)}V${f1((by + ty) / 2)}H${f1(tx)}V${f1(ty)}`));
       const married = p.sp.includes(p.m);
       /* the badge sits on the last drop just above the child, never between the parents: when the parents are far apart (or one is off screen) a badge halfway between them floats in empty space */
@@ -2139,11 +2739,11 @@ function drawEdges() {
     if (joined) {
       if (pathIds && pathIds.has(id)) under.push(pathLine(`M${f1(L.x + W / 2)} ${f1(L.y + H / 2)}H${f1(R.x + W / 2)}`));
       /* a couple that shares a child and sits on one row also gets its own marriage line, so the pair reads as a pair */
-      if (Math.abs(L.y - R.y) < H * 0.8 && R.x > L.x + W + 6) add(id, `M${f1(L.x + W)} ${f1(L.y + H / 2)}L${f1(R.x)} ${f1(R.y + H / 2)}`, 'ev-sup', 'var(--lk-mute)');
+      if (Math.abs(L.y - R.y) < H * 0.8 && R.x > L.x + W + 6) add(id, `M${f1(L.x + W)} ${f1(L.y + H / 2)}L${f1(R.x)} ${f1(R.y + H / 2)}`, 'ev-sup', 'var(--lk-soft)');
       return;
     }
     const d = Math.abs(L.y - R.y) < 20 ? `M${f1(L.x + W)} ${f1(L.y + H / 2)}H${f1(R.x)}` : `M${f1(L.x + W)} ${f1(L.y + H / 2)}C${f1(L.x + W + 40)} ${f1(L.y + H / 2)} ${f1(R.x - 40)} ${f1(R.y + H / 2)} ${f1(R.x)} ${f1(R.y + H / 2)}`;
-    add(id, d, 'ev-ug', 'var(--lk-mute)');
+    add(id, d, 'ev-ug', 'var(--lk-soft)');
     const mx = (L.x + W + R.x) / 2, my = (L.y + R.y) / 2 + H / 2;
     out.push(`<g class="badge${dimOf(id)}" transform="translate(${f1(mx)} ${f1(my)})"><circle class="bg" r="11"/><text y="4.5">&#9901;</text><title>Recorded as spouses: NOT GRADED (no archive grades a marriage)</title></g>`);
   }));
@@ -2244,7 +2844,7 @@ function planFor(p) {
   if (st.state === 'loading') {
     loadPlanData(F).then(data => { st.plan = TCR.plan(F, data); st.state = 'ready'; })
       .catch(e => { st.state = 'error'; st.err = String(e && e.message || e); })
-      .then(() => { if (S.tab === 'next' && [...S.sel][0] === p.key) renderInfo(); });
+      .then(() => { if ((S.tab === 'next' || S.tab === 'ai') && [...S.sel][0] === p.key) renderInfo(); });
   }
   return st;
 }
@@ -2252,6 +2852,12 @@ function planFor(p) {
 const A_COL = { free: '#2f9e63', account: '#2f7fb0', index: '#b08a2f', mixed: '#2f9e8f', paid: '#a0564a', catalogue: '#8a6aa8', onsite: '#8a6aa8', unsurveyed: '#8b8b8b' };
 const accChip = (a, say) => `<span class="acc" style="--c:${A_COL[a] || '#888'}" title="${esc(say || '')}">${esc(a === 'catalogue' ? 'a letter' : a === 'onsite' ? 'on paper' : a === 'unsurveyed' ? 'not surveyed' : a)}</span>`;
 const alink = (href, text, title) => href ? `<a href="${esc(href)}" target="_blank" rel="noopener"${title ? ` title="${esc(title)}"` : ''}>${esc(text)}</a>` : esc(text);
+/* a place as the Where-next panel names it: its flag in that year (opens the Flag Atlas), the name as a link to the Atlas, and the country */
+function nxPlace(pl, year, what, href) {
+  if (!pl || !pl.name) return '<i>place not recorded</i>';
+  const fl = typeof flagHTML === 'function' && pl.fi != null && pl.fi >= 0 ? flagHTML(pl, year, flagTip(pl, year, what), true) + ' ' : '';
+  return fl + alink(href, pl.name, 'Open in the Record Atlas') + (pl.cn ? ` <small class="nx-cn">${esc(pl.cn)}</small>` : '');
+}
 const yr = (y, est) => y == null ? 'year not recorded' : (est ? 'about ' : '') + y;
 
 function srcHTML(c) {
@@ -2266,7 +2872,7 @@ function regimeHTML(r) {
 }
 function stepHTML(s) {
   const when = yr(s.year, s.est);
-  const where = s.where ? alink(s.where.href, s.where.name, 'Open in the Record Atlas') + (s.where.cn ? ` <small>${esc(s.where.cn)}</small>` : '') : '<i>place not recorded</i>';
+  const where = s.where ? nxPlace(s.where, s.year, 'At', s.where.href) : '<i>place not recorded</i>';
   const known = s.names && s.names.length ? `<p class="nx-small">Also written: ${s.names.map(esc).join(', ')}. Search each name.</p>` : '';
   const clues = s.clues && s.clues.length ? `<p class="nx-small">Places a marriage leaves clues in: ${s.clues.map(c => `${esc(c.role)} (${esc(c.name)}) ${c.href ? alink(c.href, c.place) : esc(c.place)}`).join(' · ')}</p>` : '';
   const srcs = s.sources.length ? `<ul class="nx-src">${s.sources.map(srcHTML).join('')}</ul>${s.more ? `<p class="nx-small">and ${s.more} more at ${s.where && s.where.id ? alink(s.where.href, 'the Atlas place page') : 'the Atlas'}.</p>` : ''}` : '';
@@ -2295,7 +2901,7 @@ function surnameHTML(p) {
 }
 function glanceHTML(p, F, plan) {
   const reg = k => { const s = plan && plan.steps.find(x => x.kind === k); return s && s.regime ? ` <small>${esc(s.regime.polity.split(';')[0])}</small>` : ''; };
-  const line = (label, e, k) => e && (e.year != null || e.place) ? `<li><b>${label}</b> ${yr(e.year, e.est)}${e.place && e.place.name ? ' · ' + alink(e.place.id ? TCR.placeHref(e.place.id) : 'https://recordatlas.org/?q=' + encodeURIComponent(e.place.name), e.place.name) : ''}${reg(k)}</li>` : '';
+  const line = (label, e, k) => e && (e.year != null || e.place) ? `<li><b>${label}</b> ${yr(e.year, e.est)}${e.place && e.place.name ? ' · ' + nxPlace(e.place, e.year, label + ' at', e.place.id ? TCR.placeHref(e.place.id) : 'https://recordatlas.org/?q=' + encodeURIComponent(e.place.name)) : ''}${reg(k)}</li>` : '';
   const mar = F.married ? `<li><b>Married</b> ${yr(F.married.year, F.married.est)} · <i>place not recorded</i></li>` : '';
   return `<ul class="nx-glance">${line('Born', F.born, 'birth')}${mar}${line('Died', F.died, 'death')}</ul>`;
 }
@@ -2319,7 +2925,7 @@ function nextPanel() {
 function offlineHTML(p, F) {
   const ev = [['death', 'Their death and burial', F.died], ['marriage', 'Their marriage', F.married && { year: F.married.year, est: F.married.est, place: (F.clues.find(c => c.place && c.place.name) || {}).place }], ['birth', 'Their birth or baptism', F.born]]
     .filter(x => x[2] && (x[2].year != null || x[2].place));
-  const li = ev.map(([k, t, e], i) => `<li class="nx-step"><h5><span class="nx-n">${i + 1}</span> ${t}</h5><p class="nx-when"><b>${esc(yr(e.year, e.est))}</b> · ${e.place && e.place.name ? (e.place.id ? alink(TCR.placeHref(e.place.id), e.place.name) : alink('https://recordatlas.org/?q=' + encodeURIComponent(e.place.name), e.place.name)) : '<i>place not recorded</i>'}</p><p class="nx-how">${esc({ death: 'A death or burial entry usually gives the age, the parents and who reported it.', marriage: 'A marriage entry names the fathers and gives ages. The place is not recorded in any tree; the spouse\'s birthplace is a common place for it.', birth: 'A baptism or birth entry names the parents and the godparents.' }[k])}</p></li>`).join('');
+  const li = ev.map(([k, t, e], i) => `<li class="nx-step"><h5><span class="nx-n">${i + 1}</span> ${t}</h5><p class="nx-when"><b>${esc(yr(e.year, e.est))}</b> · ${e.place && e.place.name ? (e.place.id ? nxPlace(e.place, e.year, 'At', TCR.placeHref(e.place.id)) : nxPlace(e.place, e.year, 'At', 'https://recordatlas.org/?q=' + encodeURIComponent(e.place.name))) : '<i>place not recorded</i>'}</p><p class="nx-how">${esc({ death: 'A death or burial entry usually gives the age, the parents and who reported it.', marriage: 'A marriage entry names the fathers and gives ages. The place is not recorded in any tree; the spouse\'s birthplace is a common place for it.', birth: 'A baptism or birth entry names the parents and the godparents.' }[k])}</p></li>`).join('');
   return `<ol class="nx">${li}</ol><div class="warnbox">The full plan (which collections cover each year, who ruled the place then and where its books went, neighbouring parishes, and the sources for the wars) is built from live Record Atlas data, so it is on <b>recordatlas.org</b>. ${alink('https://recordatlas.org/roots/', 'Open Roots & Routes on the Atlas')}.</div>`;
 }
 
@@ -2401,6 +3007,387 @@ function fixPanel() {
     <h4>Everything on the list</h4>${fixAllHTML(F)}${note}`;
 }
 
+/* prompt.js — the "AI prompt" tab: for the selected person, one complete brief to hand to an AI that has never seen the Record Atlas.
+   The brief carries (1) the job, (2) what the tree already says, with the facts that are MISSING named, (3) how the Atlas works and how to read it (its open JSON files and pages,
+   the order to use them in), (4) what the Atlas said for THIS person when the brief was made (the same plan as "Where next": collections by cost, who ruled the place that
+   year and where the books went, neighbouring parishes, the wars), (5) why the records may be hard to find (the place under its name of the day, a change of rule, a mass-mortality
+   event in their lifetime) and (6) the rules and the shape of the answer.
+   Nothing is sent anywhere: the brief is text on this page, copied only when the visitor presses Copy. A living person gets no brief (the archive holds name and family only), and
+   a living relative of a dead person is never named in it. */
+const AIP = { task: 'missing', browse: true, inline: true };
+const AIP_TASKS = [
+  ['missing', 'Whatever is missing'], ['birth', 'Birth or baptism'], ['marriage', 'Marriage'], ['death', 'Death and burial'], ['parents', 'Parents'], ['verify', 'Check everything held, then fill gaps'],
+];
+const aipYr = (y, est) => y == null ? 'year not recorded' : (est ? 'about ' : '') + y;
+function aipMissing(p) {
+  const m = [];
+  if (p.by == null) m.push(['birth year', 'birth']);
+  else if (!p.bd) m.push(['the exact birth date, if the archive page does not already give it (this view holds the year only)', 'birth']);
+  if (!p.bp) m.push(['birth place', 'birth']);
+  if (p.dy == null) m.push(['death year (or whether they were living at the end of the records)', 'death']);
+  else if (!p.dd) m.push(['the exact death date, if the archive page does not already give it (this view holds the year only)', 'death']);
+  if (!p.dp) m.push(['death or burial place', 'death']);
+  if ((p.sp || []).length && !p.my) m.push(['marriage year and place', 'marriage']);
+  if (!(p.sp || []).length && p.by != null && (p.dy == null || p.dy - p.by >= 18)) m.push(['whether they married (no spouse is recorded)', 'marriage']);
+  if (p.f < 0) m.push(['father', 'parents']); if (p.m < 0) m.push(['mother (with her maiden name)', 'parents']);
+  return m;
+}
+function aipRel(q) { return q ? (q.living ? 'a living relative (not named here)' : `${q.name} (${TC.years(q)})`) : ''; }
+function aipPlace(pl) {
+  if (!pl || !pl.name) return 'place not recorded';
+  let s = pl.name; if (pl.cn) s += ', ' + pl.cn;
+  if (pl.era) s += ` — in that year the Atlas has it under ${pl.era.label} (${pl.era.from}–${pl.era.to})`;
+  return s;
+}
+function aipTaskText(task, miss) {
+  const list = miss.map(m => m[0]);
+  switch (task) {
+    case 'birth': return 'Find this person\'s birth or baptism: the exact date, the place, and both parents\' full names (the mother with her maiden name). If there is no civil birth record, the baptism is the record; say which you found.';
+    case 'marriage': return 'Find this person\'s marriage or marriages: the date, the place, the spouse\'s full name and both sets of parents. Marriages were often held in the bride\'s parish, not the groom\'s.';
+    case 'death': return 'Find this person\'s death and burial: the date, the place, the age given, who reported it, and the spouse and parents named in the entry. A death entry is the cheapest way back to the marriage and the birth.';
+    case 'parents': return 'Identify this person\'s parents: full names, the mother\'s maiden name, their places and approximate dates, and the record that names them as the parents of THIS person (not merely a person of the same name).';
+    case 'verify': return 'First check every fact listed below against a record: say for each whether you confirmed it, contradicted it, or could not test it. Then find what is missing' + (list.length ? ' (' + list.join('; ') + ')' : '') + '.';
+    default: return 'Begin the research on this person by finding what the tree is missing' + (list.length ? ': ' + list.join('; ') : '') + '. Work from the most recent event back (death, then marriage, then birth), because each record names the people for the next.';
+  }
+}
+function aipNames(p) {
+  const nf = TC.nameForms(M, p); if (!nf) return '';
+  const fm = a => a.map(f => f[0] + (f[1] === 'l' ? ' (lead: try it, not yet seen on a record)' : '')).join(', ');
+  let s = '';
+  if (nf.given) s += `Given name ${p.given.split(' ')[0]} is also written: ` + nf.given.langs.map(l => `${l.label}: ${fm(l.forms)}`).join('; ') + '.\n';
+  if (nf.sur) s += `Surname ${p.sur} is also written: ${fm(nf.sur.forms)}.\n`;
+  return s ? s + 'These come from the Record Atlas\'s name catalogues. Search the index under EVERY form: a clerk wrote what he heard, in his own language, and the Latin of a church register declines the name (Joannes, Joannem, Joannis).\n' : '';
+}
+function buildPrompt(p, st, o) {
+  const F = st.F, plan = st.plan, L = [], miss = aipMissing(p), today = new Date().toISOString().slice(0, 10);
+  const evs = TC.lifeEvents(M, p), eras = TC.eraChanges(M, p), yrB = y => y < 0 ? (-y) + ' BCE' : String(y);
+  L.push(`# Research brief: ${p.name} (${TC.years(p)})`, `Written ${today} by Tree Canvas, from the Record Atlas (https://recordatlas.org/). You may never have used the Record Atlas; section 3 teaches you how. Read the whole brief before you search.`, '');
+  L.push('## 1. Your job', aipTaskText(o.task, miss), 'Work from evidence: a date, a place or a parent counts as a FINDING only when you can point to a record that says it. Everything else is a lead, and must be called a lead.', '');
+  /* 2: what the tree holds */
+  L.push('## 2. What the tree already says');
+  L.push(`- Person: ${p.name}${p.sex === 'f' ? ' (female)' : p.sex === 'm' ? ' (male)' : ''}. Years: ${TC.years(p)}${(p.fl & 1 || p.fl & 2) ? ' (a "~" means the year is estimated, not read from a record)' : ''}.`);
+  L.push(`- Born: ${p.bd ? TC.dateText(p.bd) + ' (full date, as the archive gives it)' : aipYr(p.by, p.fl & 1) + ' (a year only in this view)'}; ${aipPlace(F.born && F.born.place)}.`);
+  L.push(`- Died: ${p.dd ? TC.dateText(p.dd) + ' (full date, as the archive gives it)' : aipYr(p.dy, p.fl & 2) + (p.dy != null ? ' (a year only in this view)' : '')}; ${aipPlace(F.died && F.died.place)}.`);
+  if (p.my) L.push(`- Married: ${aipYr(p.my, p.fl & 16)}; place not recorded.`);
+  F.stops.filter(s => s.place && s.place.name).forEach(s => L.push(`- Lived at: ${aipPlace(s.place)}${s.year != null ? ' from ' + (s.est ? 'about ' : '') + s.year : ''}.`));
+  const fa = p.f >= 0 ? M.P[p.f] : null, mo = p.m >= 0 ? M.P[p.m] : null, sp = (p.sp || []).map(i => M.P[i]).filter(Boolean), ch = (p.ch || []).map(e => M.P[e.c]).filter(Boolean);
+  L.push(`- Father: ${fa ? aipRel(fa) : 'not known'}. Mother: ${mo ? aipRel(mo) : 'not known'}.`);
+  if (sp.length) L.push(`- Spouse${sp.length > 1 ? 's' : ''}: ${sp.map(aipRel).join('; ')}.`);
+  if (ch.length) L.push(`- Children (${ch.length}): ${ch.slice(0, 8).map(aipRel).join('; ')}${ch.length > 8 ? '; and ' + (ch.length - 8) + ' more' : ''}.`);
+  const pg = TC.url(M, p); if (pg) L.push(`- The archive's own page for this person: ${pg} — READ IT FIRST. It is written by whoever holds the research and may carry the full dates, occupation, sources, notes and what has already been searched, none of which this summary has. Treat what it says as the research so far, and say where your findings differ.`);
+  const srcs = (M.srcs && M.srcs[p.id]) || []; if (srcs.length) L.push('- Sources the tree cites: ' + srcs.slice(0, 8).map(x => x.t + (x.u ? ' <' + x.u + '>' : '')).join('; ') + '.');
+  L.push('- MISSING: ' + (miss.length ? miss.map(m => m[0]).join('; ') : 'nothing obvious; check what is held.') + '.', '');
+  const nm = aipNames(p); if (nm) L.push('### Name forms to search', nm);
+  /* 3: how to use the Atlas */
+  L.push('## 3. The Record Atlas, and how to read it');
+  L.push('The Record Atlas is a free, open, read-only map of where the records of the world are, who held each place in each year, and which archive then holds the books. It needs no key and no account. Its data is plain JSON on public URLs, so you can read it directly. It is a finding aid, not a record: it points to collections, it does not contain the people. Never send it a name; it needs none.', '');
+  if (o.browse) {
+    L.push('Fetch these (GET, no key; keep the number of requests small and reuse what you have read):',
+      '- Place page (HTML, always works): https://recordatlas.org/place/<place-id>/  — every collection covering the place, with years, kinds (b births, m marriages, d deaths) and cost.',
+      '- Place data (JSON): https://recordatlas.org/p/<place-id>.json — { id, name, country, lat, lon, names[] (other names), collections[] { provider, title, kinds, from, to, access, url }, fs[] (FamilySearch collections), volumes[], parishes[], graves[], region }. Some fetch tools refuse /p/ because of robots.txt; if yours does, read the HTML place page instead.',
+      '- Who held the ground, year by year, and where the paper went: https://recordatlas.org/regions.json (regions[] with eras { from, to, polity, filedUnder[], note }) and https://recordatlas.org/context.json (the same, versioned, with evidence and gaps).',
+      '- Every source the Atlas knows (name, link, countries, cost): https://recordatlas.org/providers.json',
+      '- Every place with coordinates: https://recordatlas.org/index.json (and https://recordatlas.org/pi/<cell>.json for a five-degree cell) — use it to find neighbouring parishes and the Atlas id of a place.',
+      '- Name catalogues: https://recordatlas.org/given-names.json and https://recordatlas.org/surname-families.json (every form of a name, by language, with its evidence status); https://recordatlas.org/your-name/?q=<name> shows them.',
+      '- The name of a place on the date of the record: the place page and https://recordatlas.org/place-names/ list the dated names (for example Salisbury until 1982, Harare after; Fiume until 1945, Rijeka after).',
+      '- Wars, occupations and migrations: https://recordatlas.org/history.json.', '- Everything else the Atlas serves, with its licences: https://recordatlas.org/data/', '');
+  } else {
+    L.push('You cannot browse. So do not pretend to have read anything. Use section 4 (already read from the Atlas for you) and what you know, and for each next step tell me the exact Atlas page or record to open (give the URL), in order, with what to look for; I will paste back what I find. Say plainly which parts of your answer come from section 4, which from your own memory, and which are guesses.', '');
+  }
+  L.push('How to work, in this order:',
+    '1. Find each place\'s Atlas id (section 4 gives it, or search the Atlas by name). Read the place page or /p/<id>.json.',
+    '2. For the YEAR of the record, work out who then ruled the place (regions.json, era whose from..to holds the year) and where that rule filed its registers (filedUnder). A parish book may now be in a national archive of a different country from the one the place is in today.',
+    '3. Pick collections that cover that year and kind of record, cheapest first: free images, then a free account, then an index only (proves a record exists, does not show it), then paid, then a catalogue card (a letter), then paper in a building. Open them, search, and read the ENTRY, not just the index line.',
+    '4. Search under every form of the name (section 2) AND the place under its name in the year of the record, and under its neighbours: a hamlet is written into the book of the parish it walked to.',
+    '5. Read the entry for what it names: parents, godparents, witnesses, informant, residence. Each is the next lead.',
+    '6. Before you write "not found", say exactly what you searched: the collection, the years, the name forms and the place names. "Not indexed" is not "not there".', '');
+  /* 4: what the Atlas says now */
+  L.push('## 4. What the Atlas said for this person when this brief was written');
+  if (o.inline && plan && st.state === 'ready') L.push(planText(p, st).split('\n').slice(2).join('\n').trim());
+  else if (st.state === 'loading') L.push('(The Atlas is still being read for this person; press the tab again in a moment to include it.)');
+  else {
+    L.push(st.state === 'error' ? `(The Record Atlas could not be read when this was written: ${st.err}. Read the pages in section 3 yourself.)` : '(This page cannot read the Record Atlas directly, so its answer is not copied in. Use the pages in section 3.)');
+    const seen = new Set();
+    [F.born, F.died, ...F.stops].filter(e => e && e.place && e.place.name).forEach(e => { const k = e.place.name; if (seen.has(k)) return; seen.add(k); L.push(`- ${e.place.name}${e.place.cn ? ', ' + e.place.cn : ''}: ${e.place.id ? 'https://recordatlas.org/place/' + encodeURIComponent(e.place.id) + '/ (Atlas id ' + e.place.id + ')' : 'not linked to an Atlas place yet; search https://recordatlas.org/?q=' + encodeURIComponent(e.place.name)}`); });
+  }
+  L.push('');
+  /* 5: why it may be hard */
+  L.push('## 5. Why the records may be hard to find');
+  const hard = [];
+  eras.forEach(e => hard.push(`- ${e.from}: ${e.polity}. The birthplace changed hands during their life.${e.note ? ' ' + e.note : ''} Records before and after may be in different archives, in a different language, under a different name for the place.`));
+  evs.slice(0, 8).forEach(e => hard.push(`- ${e.f === e.t ? yrB(e.f) : yrB(e.f) + '–' + yrB(e.t)}, ${e.n}, at ${e.at}${e.toll ? ': ' + e.toll : ''}`));
+  if (hard.length) {
+    L.push(...hard);
+    if (evs.length) L.push('Their life crosses a war or mass-mortality event, so: (a) a missing death entry is NOT evidence they lived on, (b) parish books for those years may be destroyed, moved or incomplete, so search the substitutes (war-dead and civilian-loss registers, camp and prison records, relief and displacement lists, civil registers kept elsewhere, newspapers), (c) a record may be filed under the successor state or the occupier\'s name for the place, in the occupier\'s language, and (d) people were moved, so search the places they were sent to, not only where they lived.');
+    else L.push('A change of rule moves the paper: look in the archive of the rule in force in the year of the record (section 4 says which), and in the language and name of that rule.');
+  } else L.push('The Atlas holds no event or change of rule for the places in this tree at the years given. That is not proof there was none: check the place page.');
+  L.push('Always search a place under the name it had in the year of the record, not today\'s name, and under the language of the clerk. Also use what you know yourself about these places and years (wars, epidemics, famines, border changes, fires and floods that destroyed archives), but label it as your own knowledge, not the Atlas\'s, and check it against a source.', '');
+  /* 6: rules */
+  L.push('## 6. Rules',
+    '- Do not invent. If you did not read it in a record, it is a lead. Never fill a gap with a plausible guess and call it a finding.',
+    '- Do not merge two people because the names match. A same-name person in the same parish needs a second, independent fact (a parent, a spouse, an age that fits) before they are this person.',
+    '- Do not research living people. If a record suggests someone alive, stop and tell me; name no living person in anything you write.',
+    '- Never enter a password, work around a sign-in, a paywall, a rate limit or a bot check. If a record needs a free account, tell me which and I will sign in; if a site blocks you, record where you stopped and move to another open source.',
+    '- Quote what the record says in its own words and language, then translate. Give the collection, the volume or film, the page or entry number, the date and the URL so I can open it myself.',
+    '- If the Atlas is missing something (a place it does not hold, a collection that should exist, a dated name you needed), say so at the end, in one line each, so it can be reported back to the Atlas.', '');
+  /* 7: the answer */
+  L.push('## 7. What to give me back',
+    'A. A table: Fact | What you found | Record (collection, volume, page, URL) | Confidence (confirmed by a record / probable / possible) | What would confirm it.',
+    'B. Searches that found nothing: collection, years, name forms, place names tried.',
+    'C. The next three steps, in order, with the exact URLs.',
+    'D. Anything in the Atlas that was missing, wrong or confusing.',
+    'Keep findings and leads in separate lists, and tell me how sure you are of each.');
+  return L.join('\n');
+}
+function aipPanel() {
+  const keys = [...S.sel];
+  if (keys.length !== 1) return `<h3>AI prompt</h3><p style="color:var(--lk-soft);font-weight:700">Select one person and this writes a complete research brief you can give to any AI: what the tree says, what is missing, and how to use the Record Atlas to find the records.</p>`;
+  const p = M.byKey.get(keys[0]);
+  if (p.ghost) return `<h3>AI prompt</h3><p class="plines lvn">${esc(p.name)} is named in the archive but has no record of their own yet, so there is nothing to write a brief from. Select their spouse.</p>`;
+  if (p.living) return `<h3>AI prompt</h3><p class="plines lvn">This person is living, so their archive records them by <strong>name and family only</strong>. No research brief is written for a living person.</p>`;
+  const st = planFor(p), text = buildPrompt(p, st, AIP), words = text.split(/\s+/).length;
+  const status = AT.base == null ? 'This page cannot read the Record Atlas, so the brief teaches your AI to read it.' : st.state === 'ready' ? 'Includes what the Atlas says for this person now.' : st.state === 'loading' ? 'Reading the Atlas for this person…' : 'The Atlas could not be read just now, so the brief teaches your AI to read it.';
+  return `<h3>AI prompt</h3><p class="nx-lead"><b>${esc(p.name)}</b> <small>${TC.years(p)}</small>. A complete brief for an AI that has not met the Record Atlas: it explains how to use it, what is missing, why the records may be hard to find, and how to answer.</p>
+    <div class="aip-opts"><label for="aipTask">Find</label><select id="aipTask">${AIP_TASKS.map(([k, n]) => `<option value="${k}"${AIP.task === k ? ' selected' : ''}>${esc(n)}</option>`).join('')}</select>
+    <label class="aip-ck"><input type="checkbox" id="aipBrowse"${AIP.browse ? ' checked' : ''}> My AI can open web pages</label>
+    <label class="aip-ck"><input type="checkbox" id="aipInline"${AIP.inline ? ' checked' : ''}> Include what the Atlas says now</label></div>
+    <p class="nx-small">${esc(status)}</p>
+    <textarea id="aipText" class="aip-text" readonly rows="16" spellcheck="false" aria-label="The research brief">${esc(text)}</textarea>
+    <div class="row"><button class="lk-btn is-small" data-do="aicopy">Copy the prompt</button><small class="aip-n">about ${words.toLocaleString()} words</small></div>
+    <p class="nx-small">Written here from your tree and the Atlas. Nothing is sent anywhere unless you paste it into an AI yourself. Living relatives are never named in it. Read it before you send it.</p>`;
+}
+async function copyAIPrompt() {
+  const p = M.byKey.get([...S.sel][0]); if (!p || p.living || p.ghost) return;
+  const t = buildPrompt(p, planFor(p), AIP);
+  try { await navigator.clipboard.writeText(t); toast('Copied: paste it into your AI'); } catch (e) { const a = $('#aipText'); if (a) { a.focus(); a.select(); } toast('Select the text and copy it'); }
+}
+document.addEventListener('change', e => {
+  const t = e.target; if (!t || !t.id || t.id.slice(0, 3) !== 'aip') return;
+  if (t.id === 'aipTask') AIP.task = t.value; else if (t.id === 'aipBrowse') AIP.browse = t.checked; else if (t.id === 'aipInline') AIP.inline = t.checked; else return;
+  renderInfo();
+});
+
+/* play.js — Play: build one person's tree up on the canvas a generation at a time (the Roots & Routes "Generations" idea): the oldest generation first,
+   then each one below it, with the numbered bands on. A bar over the shelf plays, pauses and scrubs. Undo puts the canvas back as it was. */
+const PLAY = { on: false, playing: false, k: 0, set: null, focus: -1, speed: 1, timer: 0, token: 0 };
+const PLAY_DELAY = [2600, 1600, 850];   /* slow, normal, fast: the pause between generations */
+function playBar() {
+  let b = $('#playBar');
+  if (b) return b;
+  b = document.createElement('div'); b.id = 'playBar'; b.setAttribute('role', 'group'); b.setAttribute('aria-label', 'Play the tree');
+  b.innerHTML = `<button class="pbt" data-pl="toggle" aria-label="Play"></button><input id="plRange" type="range" min="0" max="0" value="0" aria-label="Generation">`
+    + `<span class="pbl"><b id="plNum">I</b><small id="plYrs"></small></span>`
+    + `<span class="pbs" role="group" aria-label="Speed"><button data-pl="speed" data-s="0">Slow</button><button data-pl="speed" data-s="1">Normal</button><button data-pl="speed" data-s="2">Fast</button></span>`
+    + `<button class="pbx" data-pl="close" title="Close" aria-label="Close">${icon('x', '')}</button>`;
+  document.body.appendChild(b);
+  b.addEventListener('click', e => {
+    const t = e.target.closest('[data-pl]'); if (!t) return;
+    if (t.dataset.pl === 'toggle') { if (PLAY.playing) pausePlay(); else resumePlay(); }
+    else if (t.dataset.pl === 'speed') { PLAY.speed = +t.dataset.s; playSync(); if (PLAY.playing) playSchedule(); }
+    else if (t.dataset.pl === 'close') stopPlay();
+  });
+  $('#plRange', b).addEventListener('input', e => { pausePlay(); playTo(+e.target.value); });
+  return b;
+}
+function playPlace() { const b = $('#playBar'), d = $('.dock'); if (!b || !d) return; const top = document.documentElement.classList.contains('shelfoff') ? innerHeight : d.getBoundingClientRect().top; b.style.bottom = Math.max(12, Math.round(innerHeight - top + 10)) + 'px'; }
+function playSync() {
+  const b = $('#playBar'); if (!b || !PLAY.set) return;
+  const G = PLAY.set.gens.length, k = PLAY.k, g = PLAY.set.gens[k] || [];
+  const ys = g.map(i => M.P[i]).filter(p => p.by != null && !p.living);
+  $('#plRange', b).max = G - 1; $('#plRange', b).value = k;
+  $('#plNum', b).textContent = romanOf(k + 1) + ' of ' + romanOf(G);
+  $('#plYrs', b).textContent = (ys.length ? Math.min(...ys.map(p => p.by)) + '–' + Math.max(...ys.map(p => p.dy != null ? p.dy : p.by)) + ' · ' : '') + g.length + (g.length === 1 ? ' person' : ' people');
+  const t = $('.pbt', b); t.innerHTML = icon(PLAY.playing ? 'pause' : 'play', 'lk-icon'); t.setAttribute('aria-label', PLAY.playing ? 'Pause' : k >= G - 1 ? 'Play again' : 'Play');
+  b.querySelectorAll('[data-pl=speed]').forEach(x => x.classList.toggle('on', +x.dataset.s === PLAY.speed));
+  playPlace();
+}
+async function startPlay(i) {
+  const set = TC.playSet(M, i), total = set.gens.reduce((n, g) => n + g.length, 0);
+  if (total < 2) { toast('No relatives on record to build up from ' + M.P[i].name); return; }
+  stopPlay(true); snapshot();
+  clearAll(true); S.path = null; S.noPath = null; clearPathUi(); S.sel.clear(); S.tab = 'person'; renderInfo();
+  PLAY.set = set; PLAY.focus = i; PLAY.on = true; PLAY.k = 0; S.opts.gens = true; syncGenButton();
+  playBar().classList.add('on'); playSync();
+  await playTo(0);
+  if (PLAY.on) { PLAY.playing = true; playSync(); playSchedule(); }
+}
+async function playTo(k) {
+  if (!PLAY.set) return;
+  const tok = ++PLAY.token, G = PLAY.set.gens.length; k = Math.max(0, Math.min(G - 1, k)); PLAY.k = k;
+  const want = new Set(); for (let g = 0; g <= k; g++) PLAY.set.gens[g].forEach(i => want.add(i));
+  [...S.cards.values()].forEach(c => { if (!want.has(c.i)) removeCard(c); });
+  const mid = viewCentre(), made = [];
+  for (let g = 0; g <= k; g++) PLAY.set.gens[g].forEach(i => {
+    if (S.cards.has(M.P[i].key)) return;
+    const q = M.P[i]; let from = null;
+    [q.f, q.m, ...q.sp, ...q.ch.map(e => e.c)].forEach(r => { if (!from && r >= 0 && cardOfPerson(r)) from = cardOfPerson(r); });
+    const c = from ? spawn(i, from, 0, 0) : newCard(i, mid.x - W / 2 + made.length * 6, mid.y - H / 2);
+    c._pop = true; made.push(c);
+  });
+  made.forEach(refreshCard); refreshAll(); playSync();
+  const cards = [...S.cards.values()]; if (!cards.length) return;
+  await tweenTo(arrangeTargets(cards), 760);
+  if (tok !== PLAY.token) return;
+  made.forEach(c => c.el && c.el.classList.remove('pop'));
+  refreshAll(); drawEdges(); fit(cards, { maxK: 0.95 }); miniDraw(); save();
+}
+function playSchedule() {
+  clearTimeout(PLAY.timer);
+  if (!PLAY.playing) return;
+  PLAY.timer = setTimeout(async () => {
+    if (!PLAY.playing || !PLAY.set) return;
+    if (PLAY.k >= PLAY.set.gens.length - 1) { playDone(); return; }
+    await playTo(PLAY.k + 1);
+    if (PLAY.playing) { if (PLAY.k >= PLAY.set.gens.length - 1) playDone(); else playSchedule(); }
+  }, PLAY_DELAY[PLAY.speed]);
+}
+function playDone() {
+  clearTimeout(PLAY.timer); PLAY.playing = false;
+  const n = S.cards.size, f = M.P[PLAY.focus], c = f && S.cards.get(f.key);
+  playSync(); if (c) select([c.key]);
+  toast('Built ' + n.toLocaleString() + ' people over ' + PLAY.set.gens.length + ' generations (Undo takes it back)', 4200);
+}
+function pausePlay() { PLAY.playing = false; clearTimeout(PLAY.timer); playSync(); }
+function resumePlay() {
+  if (!PLAY.set) return;
+  PLAY.playing = true;
+  const last = PLAY.k >= PLAY.set.gens.length - 1;
+  playSync();
+  if (last) playTo(0).then(() => { if (PLAY.playing) playSchedule(); }); else playSchedule();
+}
+function stopPlay(keep) {
+  clearTimeout(PLAY.timer); PLAY.playing = false; PLAY.token++;
+  if (!keep) { PLAY.on = false; PLAY.set = null; const b = $('#playBar'); if (b) b.classList.remove('on'); }
+}
+function playGuard() { if (PLAY.on && !S.cards.size) stopPlay(); }
+addEventListener('resize', () => playPlace());
+
+/* names.js — the Names look: the selected (or marked) person's family written as SURNAMES, not people.
+   One card per surname family with how many people bear it and their years; a line between two names for the marriages that join them, counted. The names are laid out in rings around the
+   focus person's own name; each ring is one more marriage away, and any name can be dragged. The counting is TC.nameTree (logic.js); this file lays it out and draws it in the canvas world,
+   so pan and zoom work as they always do. The people cards are hidden while this look is on and come back untouched when it is changed. */
+const NAMES = { box: null, sig: '', focus: null, open: null, scope: 'blood', pos: {}, psig: '', T: null, by: null, drag: null, dragEnd: 0 };
+try { if (!EMBED && localStorage.getItem('tcNamesScope') === 'anc') NAMES.scope = 'anc'; } catch (e) { /* ignore */ }
+const namesLook = () => document.documentElement.getAttribute('data-theme') === 'names';
+function namesBox() { return namesLook() ? NAMES.box : null; }
+function namesFocus() {
+  const k = S.sel.size === 1 ? [...S.sel][0] : null; let p = k && M.byKey.get(k);
+  if (!p && NAMES.focus) p = M.byKey.get(NAMES.focus);   /* clicking empty canvas deselects; the names stay on the last person looked at */
+  if (!p) p = markedPerson();
+  if (!p) { const c = [...S.cards.values()][0]; p = c && personOf(c); }
+  return p || null;
+}
+const NM_W = 190, NM_H = 92;
+/* Radial layout: the focus name in the middle, each marriage away one ring further out. A name's children share the wedge of the circle its own name was given, in proportion to how many
+   names hang below it, so a family stays together; a ring is pushed outward only as far as its cards need to stand clear of one another. */
+function namesLayout(T) {
+  const by = new Map(T.nodes.map(n => [n.key, n])), kids = new Map();
+  T.nodes.forEach(n => { n._w = null; n._p = n.key === T.root ? null : (n.parent && by.has(n.parent) ? n.parent : T.root); if (n._p) { if (!kids.has(n._p)) kids.set(n._p, []); kids.get(n._p).push(n); } });
+  kids.forEach(a => a.sort((x, y) => y.n - x.n));
+  const wt = n => n._w != null ? n._w : (n._w = Math.max(1, (kids.get(n.key) || []).reduce((s, c) => s + wt(c), 0)));
+  const rows = new Map(), mid = new Map();
+  const spread = (n, a0, a1, d) => {
+    n._d = d; n._a = (a0 + a1) / 2; if (!rows.has(d)) rows.set(d, []); rows.get(d).push(n);
+    const ks = kids.get(n.key) || [], tot = ks.reduce((s, c) => s + wt(c), 0); let a = a0;
+    ks.forEach(c => { const w = (a1 - a0) * wt(c) / tot; spread(c, a, a + w, d + 1); a += w; });
+  };
+  const root = by.get(T.root); spread(root, -Math.PI / 2, Math.PI * 1.5, 0);
+  root.x = -NM_W / 2; root.y = -NM_H / 2;
+  const clear = (a, b) => Math.abs(a.x - b.x) >= NM_W + 16 || Math.abs(a.y - b.y) >= NM_H + 14;
+  let R = 0;
+  [...rows.keys()].filter(d => d > 0).sort((x, y) => x - y).forEach(d => {
+    const r = rows.get(d).sort((x, y) => x._a - y._a); let rad = Math.max(R + 215, d === 1 ? 250 : 0);
+    const put = q => r.forEach(n => { n.x = Math.cos(n._a) * q - NM_W / 2; n.y = Math.sin(n._a) * q - NM_H / 2; });
+    put(rad); let guard = 0;
+    while (guard++ < 200 && r.length > 1 && r.some((n, i) => (i + 1 < r.length || r.length > 2) && !clear(n, r[(i + 1) % r.length]))) { rad += 18; put(rad); }
+    R = rad;
+  });
+  return by;
+}
+function namesEdge(a, b, tree) {   /* a gentle curve between two names; a marriage that is not a branch of the tree bows in toward the centre, so it reads as a link across */
+  const x0 = a.x + NM_W / 2, y0 = a.y + NM_H / 2, x1 = b.x + NM_W / 2, y1 = b.y + NM_H / 2, k = tree ? 0.92 : 0.5, cx = (x0 + x1) / 2 * k, cy = (y0 + y1) / 2 * k;
+  return { d: `M${f1(x0)} ${f1(y0)}Q${f1(cx)} ${f1(cy)} ${f1(x1)} ${f1(y1)}`, mx: 0.25 * x0 + 0.5 * cx + 0.25 * x1, my: 0.25 * y0 + 0.5 * cy + 0.25 * y1 };
+}
+function namesPaintEdges() {
+  const host = $('#namesview'), T = NAMES.T, by = NAMES.by; if (!host || !T) return 0;
+  let svg = '', lab = '', marriages = 0;
+  T.edges.forEach(e => {
+    const a = by.get(e.a), b = by.get(e.b), tree = a._p === b.key || b._p === a.key, q = namesEdge(a, b, tree); marriages += e.n;
+    svg += `<path d="${q.d}" class="${tree ? 'nmt' : 'nmx'}" style="stroke-width:${f1(Math.min(11, 2.5 + e.n * 1.6))}px"/>`;
+    lab += `<span class="nml" style="left:${f1(q.mx)}px;top:${f1(q.my)}px">${e.n} ${e.n === 1 ? 'marriage' : 'marriages'}</span>`;
+  });
+  const sv = host.querySelector('.nmsvg'), lb = host.querySelector('.nmlabs'); if (sv) sv.innerHTML = svg; if (lb) lb.innerHTML = lab;
+  return marriages;
+}
+function namesBoxOf(T) {
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  T.nodes.forEach(n => { x0 = Math.min(x0, n.x); y0 = Math.min(y0, n.y - 14); x1 = Math.max(x1, n.x + NM_W); y1 = Math.max(y1, n.y + NM_H); });
+  return { x0, y0, x1, y1: y1 + 84 };   /* room under the lowest name for the caption */
+}
+function namesPeople(n) {
+  const rows = n.people.map(j => M.P[j]).filter(p => !p.living).sort((a, b) => (a.by == null) - (b.by == null) || a.by - b.by);
+  const show = rows.slice(0, 12).map(p => `<li>${esc(p.given || '(no given name)')} <small>${TC.years(p)}</small></li>`).join('');
+  return `<ul class="nmpeek">${show}${rows.length > 12 ? `<li><small>and ${rows.length - 12} more</small></li>` : ''}${n.living ? `<li><small>${n.living} living, not listed</small></li>` : ''}</ul>`;
+}
+function drawNames(force) {
+  let host = $('#namesview'), cap = $('#namesCap');
+  if (!host) { host = document.createElement('div'); host.id = 'namesview'; $('#world').appendChild(host); }
+  if (!cap) { cap = document.createElement('div'); cap.id = 'namesCap'; cap.hidden = true; document.body.appendChild(cap); }
+  if (!namesLook()) { if (host.innerHTML) host.innerHTML = ''; cap.hidden = true; NAMES.sig = ''; NAMES.box = null; NAMES.focus = null; return; }
+  const p = namesFocus();
+  if (!p) { host.innerHTML = ''; NAMES.box = null; NAMES.sig = ''; cap.hidden = false; cap.innerHTML = '<b>Names</b> Put someone on the canvas, then select or mark them: this shows their ancestry as surnames.'; return; }
+  const sig = p.key + '|' + NAMES.open + '|' + NAMES.scope; if (sig === NAMES.sig && !force) return;
+  const changed = NAMES.focus !== p.key; NAMES.focus = p.key; NAMES.sig = sig;
+  const T = TC.nameTree(M, p.i, NAMES.scope), by = namesLayout(T), max = Math.max(...T.nodes.map(n => n.n));
+  const ps = p.key + '|' + NAMES.scope; if (ps !== NAMES.psig) { NAMES.psig = ps; NAMES.pos = {}; }
+  T.nodes.forEach(n => { const o = NAMES.pos[n.key]; if (o) { n.x = o.x; n.y = o.y; } });
+  NAMES.T = T; NAMES.by = by;
+  let html = '';
+  T.nodes.forEach(n => {
+    const span = n.g1 - n.g0 + 1, yrs = n.from != null ? `${n.from}–${n.to != null ? n.to : '?'}` : '';
+    html += `<div class="nm${n.key === T.root ? ' root' : ''}${NAMES.open === n.key ? ' open' : ''}" data-nm="${esc(n.key)}" style="left:${f1(n.x)}px;top:${f1(n.y)}px;width:${NM_W}px;height:${NM_H}px" tabindex="0" role="button" aria-label="${esc(n.label || 'No surname')}: ${n.n} people">
+      <b class="nmn">${esc(n.label || 'Surname not recorded')}</b>
+      <span class="nmc"><em>${n.n}</em> ${n.n === 1 ? 'person' : 'people'}</span>
+      <i class="nmbar"><u style="width:${f1(100 * n.n / max)}%"></u></i>
+      <small>${yrs}${yrs && span > 1 ? ' · ' : ''}${span > 1 ? span + ' generations' : ''}${n.self ? ' · married within the name' + (n.self > 1 ? ' ×' + n.self : '') : ''}</small>
+      ${n.key === T.root ? '<span class="nmhere">starts here</span>' : ''}${NAMES.open === n.key ? namesPeople(n) : ''}</div>`;
+  });
+  NAMES.box = namesBoxOf(T);
+  host.innerHTML = `<svg class="nmsvg" width="1" height="1" aria-hidden="true"></svg><div class="nmlabs"></div>${html}`;
+  const marriages = namesPaintEdges(), moved = Object.keys(NAMES.pos).length > 0;
+  cap.hidden = false;
+  const sc = NAMES.scope;
+  cap.innerHTML = `<b>${sc === 'blood' ? 'Names in the bloodline of' : 'Names behind'} ${esc(p.name)}</b> ${T.people.toLocaleString()} ${T.people === 1 ? 'person' : 'people'} in ${T.nodes.length} ${T.nodes.length === 1 ? 'name' : 'names'}, ${marriages} ${marriages === 1 ? 'marriage' : 'marriages'}.
+    <span class="nmsc" role="group" aria-label="What to count"><button type="button" data-scope="blood" class="${sc === 'blood' ? 'on' : ''}">Whole bloodline</button><button type="button" data-scope="anc" class="${sc === 'anc' ? 'on' : ''}">Ancestors only</button></span>
+    <small>Drag a name to move it${moved ? ' · <a href="#" data-tidy="1">Tidy up</a>' : ''} · click one to see who · select or mark someone else to change the centre.</small>`;
+  if (changed) fit();
+}
+document.addEventListener('click', e => {
+  const sb = e.target.closest && e.target.closest('#namesCap [data-scope]');
+  if (sb) { NAMES.scope = sb.dataset.scope; NAMES.open = null; try { if (!EMBED) localStorage.setItem('tcNamesScope', NAMES.scope); } catch (x) { /* ignore */ } drawNames(true); fit(); return; }
+  if (e.target.closest && e.target.closest('#namesCap [data-tidy]')) { e.preventDefault(); NAMES.pos = {}; drawNames(true); fit(); return; }
+  const n = e.target.closest && e.target.closest('#namesview .nm'); if (!n || !namesLook()) return;
+  if (Date.now() - NAMES.dragEnd < 350) return;   /* the click that ends a drag is not a click on the name */
+  const k = n.dataset.nm; NAMES.open = NAMES.open === k ? null : k; drawNames(true);
+});
+/* Names can be dragged anywhere; the lines follow. A moved name keeps its place until the centre or the scope changes, or "Tidy up". */
+document.addEventListener('pointerdown', e => {
+  const el = e.target.closest && e.target.closest('#namesview .nm'); if (!el || !namesLook() || e.button > 0 || !NAMES.by) return;
+  const n = NAMES.by.get(el.dataset.nm); if (!n) return;
+  NAMES.drag = { el, n, id: e.pointerId, sx: e.clientX, sy: e.clientY, x: n.x, y: n.y, moved: false };
+});
+document.addEventListener('pointermove', e => {
+  const d = NAMES.drag; if (!d || e.pointerId !== d.id) return;
+  const dx = e.clientX - d.sx, dy = e.clientY - d.sy;
+  if (!d.moved) { if (Math.hypot(dx, dy) < 5) return; d.moved = true; d.el.classList.add('dragging'); try { d.el.setPointerCapture(d.id); } catch (x) { /* ignore */ } }
+  d.n.x = d.x + dx / S.view.k; d.n.y = d.y + dy / S.view.k; d.el.style.left = f1(d.n.x) + 'px'; d.el.style.top = f1(d.n.y) + 'px'; namesPaintEdges();
+});
+const namesDragEnd = e => {
+  const d = NAMES.drag; if (!d || e.pointerId !== d.id) return; NAMES.drag = null; d.el.classList.remove('dragging');
+  if (!d.moved) return; NAMES.dragEnd = Date.now(); NAMES.pos[d.n.key] = { x: d.n.x, y: d.n.y }; NAMES.box = namesBoxOf(NAMES.T); NAMES.sig = ''; drawNames(true);
+};
+document.addEventListener('pointerup', namesDragEnd); document.addEventListener('pointercancel', namesDragEnd);
+
 /* ui.js — the shelf and search, pan / zoom / drag, the side panel, pathways, themes, phone mode, start-up. */
 
 /* ---------------- selection ---------------- */
@@ -2408,7 +3395,7 @@ function select(keys, add) {
   if (!add) S.sel.clear();
   keys.forEach(k => S.sel.has(k) && add ? S.sel.delete(k) : S.sel.add(k));
   S.cards.forEach(c => c.el.classList.toggle('sel', S.sel.has(c.key)));
-  if (S.sel.size && S.tab !== 'path' && S.tab !== 'legend' && S.tab !== 'options' && S.tab !== 'next' && S.tab !== 'fix') S.tab = 'person';
+  if (S.sel.size && S.tab !== 'path' && S.tab !== 'options' && S.tab !== 'next' && S.tab !== 'ai' && S.tab !== 'fix') S.tab = 'person';
   if (S.sel.size && S.tab === 'path' && !S.path) S.tab = 'person';
   renderInfo(); syncButtons();
   /* the side panel is folded away: say where the person's details are */
@@ -2429,7 +3416,7 @@ $('#q').addEventListener('input', () => runSearch());
 $('#q').addEventListener('keydown', e => { if (e.key === 'Enter' && lastResults[0]) addFromResult(lastResults[0]); if (e.key === 'Escape') { e.target.value = ''; runSearch(); e.target.blur(); } });
 function resHTML(p, via) {
   const on = S.cards.has(p.key), a = M.archives[p.a];
-  return `<div class="res${on ? ' on' : ''}" data-i="${p.i}" style="--ac:${a.color}" title="${esc(p.name)} · ${esc(a.name)} · ${esc(TC.evidenceSummary(M, p))}"><div class="n">${esc(p.name)}</div>${via ? `<div class="via" title="Found as another form of this name, from the Record Atlas's name catalogue">as “${esc(via.charAt(0).toUpperCase() + via.slice(1))}”</div>` : ''}<div class="y"><span class="ac">${esc(a.name)}</span>${TC.years(p)}${p.bp ? ' · ' + esc(p.bp) : ''}</div><div class="e">${esc(TC.evidenceSummary(M, p))}</div>${on ? '<span class="mk">&#10003;</span>' : ''}</div>`;
+  return `<div class="res${on ? ' on' : ''}" data-i="${p.i}" style="--ac:${a.color}" title="${esc(p.name)} · ${esc(a.name)} · ${esc(TC.evidenceSummary(M, p))}"><div class="n">${esc(p.name)}</div>${via ? `<div class="via" title="Found as another form of this name, from the Record Atlas's name catalogue">as “${esc(via.charAt(0).toUpperCase() + via.slice(1))}”</div>` : ''}<div class="y">${a.k === 'you' ? '' : `<span class="ac">${esc(a.name)}</span>`}${TC.years(p)}${p.bp ? ' · ' + esc(p.bp) : ''}</div><div class="e">${esc(TC.evidenceSummary(M, p))}</div><button class="rplay" data-i="${p.i}" title="Play: build ${esc(p.name)}'s tree a generation at a time" aria-label="Play the tree of ${esc(p.name)}">${icon('play', 'lk-icon')}</button>${on ? '<span class="mk">&#10003;</span>' : ''}</div>`;
 }
 function runSearch() {
   const q = $('#q').value;
@@ -2458,7 +3445,9 @@ function runSearchMarks() { document.querySelectorAll('#shelf .res').forEach(el 
 /* drag a result onto the canvas, or tap to drop it */
 (function shelfDrag() {
   const sh = $('#shelf'); let d = null;
+  sh.addEventListener('click', e => { const b = e.target.closest('.rplay'); if (b) { e.stopPropagation(); e.preventDefault(); startPlay(+b.dataset.i); } });
   sh.addEventListener('pointerdown', e => {
+    if (e.target.closest('.rplay')) return;
     const el = e.target.closest('.res'); if (!el) return;
     d = { el, id: e.pointerId, x: e.clientX, y: e.clientY, ghost: null, touch: e.pointerType === 'touch', pan: false, sl: sh.scrollLeft };
   });
@@ -2501,7 +3490,7 @@ function runSearchMarks() { document.querySelectorAll('#shelf .res').forEach(el 
   const st = $('#stage'), ptrs = new Map(); let pan = null, pinch = null, drag = null, raf = 0;
   const redraw = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; drawEdges(); }); };
   st.addEventListener('pointerdown', e => {
-    if (e.target.closest('.card') || e.target.closest('[data-br]')) return;
+    if (e.target.closest('.card') || e.target.closest('[data-br]') || e.target.closest('#namesview .nm') || e.target.closest('.tt .tg')) return;
     ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY }); st.setPointerCapture(e.pointerId);
     if (ptrs.size === 1) { pan = { x: e.clientX, y: e.clientY, vx: S.view.x, vy: S.view.y, moved: false }; closePop(); }
     if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), k: S.view.k, cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2, vx: S.view.x, vy: S.view.y }; pan = null; }
@@ -2662,6 +3651,51 @@ function legendHTML() {
     <p>The small seals at the bottom of a card are its father and mother links (a link with no grade shows none).</p>
     <h4>Bloodline</h4><p>The <b>drop</b> button in the top row works from the selected person. A <b>dashed lilac</b> card is not a blood relative of the person you are colouring from: a spouse, in-law or someone from another family.</p>`;
 }
+
+/* ---- the Person panel's family sections: counts you can open, the line bar, parents / spouse / children, what happened around their life, sources ---- */
+let statOpen = null;
+const ordn = n => n === 1 ? '' : n === 2 ? 'Grand' : n === 3 ? 'Great-grand' : (n - 2) + '× great-grand';
+function plinkHTML(q, extra) {
+  const x = M.P[q], ln = lineOf(q), col = ln ? ln.col : colour(x.a);
+  return `<li class="plk" data-focus="${esc(x.key)}" title="${S.cards.has(x.key) ? 'Find them on the canvas' : 'Put them on the canvas'}"><i style="background:${col}"></i><span class="pn">${esc(x.name)}${extra ? ' <small>' + extra + '</small>' : ''}</span><span class="py">${TC.years(x)}</span></li>`;
+}
+function familyHTML(p, a) {
+  const F = TC.family(M, p.i), graded = a.graded !== false;
+  const tile = (k, n, l) => `<button class="stt${statOpen === k ? ' on' : ''}" data-do="stat" data-k="${k}"${n ? '' : ' disabled'} aria-expanded="${statOpen === k}">${n.toLocaleString()}<small>${l}${n ? (statOpen === k ? ' ▴' : ' ▾') : ''}</small></button>`;
+  let h = `<div class="stats3">${tile('anc', F.anc.size, 'Ancestors')}${tile('desc', F.desc.size, 'Descendants')}${tile('sib', F.sibs.size, 'Siblings')}</div>`;
+  if (statOpen) {
+    const grp = (m, lab) => { const by = {}; m.forEach((g, i) => (by[g] = by[g] || []).push(i)); return Object.keys(by).map(Number).sort((x, y) => x - y).map(g => `<h5>${lab(g)} (${by[g].length})</h5><ul class="plist">${by[g].sort((x, y) => (M.P[x].by || 9999) - (M.P[y].by || 9999)).map(q => plinkHTML(q)).join('')}</ul>`).join(''); };
+    h += `<div class="openlist">${statOpen === 'anc' ? grp(F.anc, g => g === 1 ? 'Parents' : ordn(g) + 'parents') : statOpen === 'desc' ? grp(F.desc, g => g === 1 ? 'Children' : ordn(g) + 'children') : `<h5>Siblings (${F.sibs.size})</h5><ul class="plist">${[...F.sibs].sort((x, y) => (M.P[x].by || 9999) - (M.P[y].by || 9999)).map(q => plinkHTML(q)).join('')}</ul>`}</div>`;
+  }
+  /* ancestry by line: the marked person's grandparent lines when there is a mark, else the ancestors' surnames */
+  if (F.anc.size >= 3) {
+    const by = new Map(), L = M.archives[p.a].k === 'you' ? markLines() : null;
+    F.anc.forEach((g, i) => { const ln = lineOf(i); const k = ln ? ln.names : (M.P[i].sur || 'unknown').trim(); by.set(k, (by.get(k) || 0) + 1); });
+    const top = [...by.entries()].sort((x, y) => y[1] - x[1]), shown = top.slice(0, 6), rest = top.slice(6).reduce((n, x) => n + x[1], 0);
+    const colFor = (k, idx) => { for (const q of F.anc.keys()) { const ln = lineOf(q); if (ln && ln.names === k) return ln.col; } return LINE_COLS[idx % LINE_COLS.length]; };
+    const gens = Math.max(...F.anc.values());
+    h += `<h4>Ancestry by ${L && L.heads.length ? 'line' : 'surname'} · ${gens} generation${gens === 1 ? '' : 's'} back</h4><div class="stack">${shown.map(([k, n], idx) => `<span style="flex:${n};background:${colFor(k, idx)}" title="${esc(k)}: ${n}"></span>`).join('')}${rest ? `<span style="flex:${rest};background:var(--lk-faint)" title="others: ${rest}"></span>` : ''}</div>`
+      + `<div class="stackk">${shown.map(([k, n], idx) => `<span><i style="background:${colFor(k, idx)}"></i>${esc(k)} ${n}</span>`).join('')}${rest ? `<span><i style="background:var(--lk-faint)"></i>others ${rest}</span>` : ''}</div>`;
+  }
+  /* parents (with the evidence for each link when the archive grades them), spouse, children */
+  const gradeRow = (q, who, g) => q < 0 ? '' : `<li data-focus="${esc(M.P[q].key)}"><span style="flex:none">${swatch(TC.levelOfGrade(g), colour(p.a)).replace('<svg ', '<svg width="30" height="20" ')}</span><div><b>${who}: ${esc(M.P[q].name)}</b>${TC.levelOfGrade(g) === 'ungraded' ? '' : `<small>${TC.LEVELS[TC.levelOfGrade(g)].label.toUpperCase()} · ${TC.LEVELS[TC.levelOfGrade(g)].note}</small>`}</div></li>`;
+  if (p.f >= 0 || p.m >= 0) h += graded ? `<h4>Parents and the evidence for each link</h4><ul class="steps">${gradeRow(p.f, 'Father', p.fg)}${gradeRow(p.m, 'Mother', p.mg)}</ul>`
+    : `<h4>Parents</h4><ul class="plist">${[p.f >= 0 ? plinkHTML(p.f, 'father') : '', p.m >= 0 ? plinkHTML(p.m, 'mother') : ''].join('')}</ul>`;
+  else h += `<p class="plines">No parent recorded${graded ? ' in ' + esc(a.name) : ''}.</p>`;
+  if (p.sp.length) h += `<h4>Spouse${p.sp.length > 1 ? 's' : ''}</h4><ul class="plist">${p.sp.map(q => plinkHTML(q)).join('')}</ul>`;
+  const kids = p.ch.map(e => e.c);
+  if (kids.length) h += `<h4>Children (${kids.length})</h4><ul class="plist">${kids.slice(0, 8).map(q => plinkHTML(q)).join('')}</ul>${kids.length > 8 ? `<details class="more"><summary>${kids.length - 8} more</summary><ul class="plist">${kids.slice(8).map(q => plinkHTML(q)).join('')}</ul></details>` : ''}`;
+  return h;
+}
+function lifeHTML(p) {
+  const evs = TC.lifeEvents(M, p), eras = TC.eraChanges(M, p); if (!evs.length && !eras.length) return '';
+  const yrB = y => y < 0 ? (-y) + ' BCE' : String(y), li = e => `<li><b>${e.f === e.t ? yrB(e.f) : yrB(e.f) + '–' + yrB(e.t)}</b> · ${esc(e.n)}<small>${esc(e.at)} · ${esc(e.toll.length > 120 ? e.toll.slice(0, 119) + '…' : e.toll)}</small></li>`;
+  return `<h4>Around their lifetime</h4><ul class="life">${eras.map(e => `<li><b>${e.from}</b> · ${esc(e.polity)}<small>Birthplace changed hands.${e.note ? ' ' + esc(e.note) : ''}</small></li>`).join('')}${evs.slice(0, 5).map(li).join('')}${evs.length > 5 ? `<li class="more"><details><summary>${evs.length - 5} more while they lived</summary><ul class="life">${evs.slice(5).map(li).join('')}</ul></details></li>` : ''}</ul>`;
+}
+function srcsHTML(p) {
+  const s = (M.srcs && M.srcs[p.id]) || []; if (!s.length || p.living) return '';
+  return `<h4>Sources (${s.length})</h4><ul class="srcs">${s.map(x => `<li>${x.u ? `<a href="${esc(x.u)}" target="_blank" rel="noopener">${esc(x.t)} &nearr;</a>` : esc(x.t)}</li>`).join('')}</ul>`;
+}
 function personPanel() {
   const keys = [...S.sel];
   if (!keys.length) return `<h3>Nobody selected</h3><p style="color:var(--lk-soft);font-weight:700">Click a card to see what the archives hold about them, or search above and drop someone in.</p>${S.cards.size ? `<div class="row"><button class="lk-btn is-small" data-do="legend">How to read the lines</button></div>` : ''}`;
@@ -2670,30 +3704,29 @@ function personPanel() {
     return `<h3>Two people selected</h3><p><b>${esc(a.name)}</b> (${esc(M.archives[a.a].name)}) and <b>${esc(b.name)}</b> (${esc(M.archives[b.a].name)})</p><div class="row"><button class="lk-btn is-primary" data-do="relate2">How are they related?</button></div>`;
   }
   const p = M.byKey.get(keys[0]), c = S.cards.get(keys[0]), a = M.archives[p.a];
-  const stats = TC.ancestorStats(M, p.i);
   const link = TC.url(M, p);
   const parentRow = (q, who, g) => q < 0 ? '' : `<li data-focus="${esc(M.P[q].key)}"><span style="flex:none">${swatch(TC.levelOfGrade(g), colour(p.a)).replace('<svg ', '<svg width="30" height="20" ')}</span><div><b>${who}: ${esc(M.P[q].name)}</b>${TC.levelOfGrade(g) === 'ungraded' ? '' : `<small>${TC.LEVELS[TC.levelOfGrade(g)].label.toUpperCase()} · ${TC.LEVELS[TC.levelOfGrade(g)].note}</small>`}</div></li>`;
   const kids = p.ch.length, sps = p.sp.map(s => M.P[s].name);
   const brs = (M.bridgesOf.get(p.i) || []);
   return `<h3>${esc(p.name)}</h3>
-    <div>${link ? `<a class="pill ac" style="--ac:${a.color}" href="${esc(link)}" target="_blank" rel="noopener" title="Open ${esc(p.name)} in the ${esc(a.name)} archive">${esc(a.name)} archive &nearr;</a>` : `<span class="pill ac" style="--ac:${a.color}">${esc(a.name)}${a.k === 'you' ? '' : ' archive'}</span>`}<span class="pill">${TC.years(p)}</span>${p.occ ? `<span class="pill">${esc(p.occ)}</span>` : ''}</div>
+    <div>${link ? `<a class="pill ac" style="--ac:${a.color}" href="${esc(link)}" target="_blank" rel="noopener" title="Open ${esc(p.name)} in the ${esc(a.name)} archive">${esc(a.name)} archive &nearr;</a>` : a.k === 'you' ? (() => { const ln = lineOf(p.i); return ln ? `<span class="pill ac" style="--ac:${ln.col}" title="On the ${esc(ln.names)} line from the marked person's grandparents">${esc(ln.names)} line</span>` : ''; })() : `<span class="pill ac" style="--ac:${a.color}">${esc(a.name)} archive</span>`}<span class="pill">${TC.years(p)}</span>${p.occ ? `<span class="pill">${esc(p.occ)}</span>` : ''}</div>
     ${a.k === 'you' && !p.ghost ? extLinksHTML(p) : ''}
     ${p.ghost ? `<p class="plines lvn">Named in the archive, but there is no record of their own yet: no dates, no places, no sources. ${p.how ? 'How the name is known: ' + esc(p.how) + '.' : ''}</p>
       ${p.sp.length ? `<p class="plines">Named as the spouse of ${p.sp.map(q => `<a href="#" data-focus="${esc(M.P[q].key)}">${esc(M.P[q].name)}</a>`).join(', ')}.</p>` : ''}
       <p class="plines lvn">No parents or children are drawn for a name like this: the archive joins people to each other only from a record of their own.</p>` : ''}
     ${p.living ? `<p class="plines lvn">This person is living, so their archive records them by <strong>name and family only</strong> — no dates, no places, no records. Nothing is missing from the research.</p>` : ''}
-    <p class="plines"${p.living || p.ghost ? ' hidden' : ''}>${p.bp ? (() => { const pl = TC.placeAt(M, p, p.bp, p.by); return 'Born: ' + flagHTML(pl, p.by, flagTip(pl, p.by, 'Born at'), true) + placeLinkHTML(pl) + eraNote(pl) + (p.fl & 4 ? ' <small>(place taken from a relative)</small>' : ''); })() : 'Birthplace not recorded.'}${p.dp && p.dp !== p.bp ? (() => { const pl = TC.placeAt(M, p, p.dp, p.dy); return '<br>Died: ' + flagHTML(pl, p.dy, flagTip(pl, p.dy, 'Died at'), true) + placeLinkHTML(pl) + eraNote(pl); })() : (p.dy != null ? '<br>Death place: same as birth, or not recorded.' : '')}</p>
+    <p class="plines"${p.living || p.ghost ? ' hidden' : ''}>${p.bp ? (() => { const pl = TC.placeAt(M, p, p.bp, p.by); return 'Born' + (p.bd ? ' <b>' + esc(TC.dateText(p.bd)) + '</b>' : '') + ': ' + flagHTML(pl, p.by, flagTip(pl, p.by, 'Born at'), true) + placeLinkHTML(pl) + eraNote(pl) + (p.fl & 4 ? ' <small>(place taken from a relative)</small>' : ''); })() : (p.bd ? 'Born <b>' + esc(TC.dateText(p.bd)) + '</b>. ' : '') + 'Birthplace not recorded.'}${p.dp && p.dp !== p.bp ? (() => { const pl = TC.placeAt(M, p, p.dp, p.dy); return '<br>Died' + (p.dd ? ' <b>' + esc(TC.dateText(p.dd)) + '</b>' : '') + ': ' + flagHTML(pl, p.dy, flagTip(pl, p.dy, 'Died at'), true) + placeLinkHTML(pl) + eraNote(pl); })() : (p.dy != null ? '<br>' + (p.dd ? 'Died <b>' + esc(TC.dateText(p.dd)) + '</b>. ' : '') + 'Death place: same as birth, or not recorded.' : '')}</p>
     ${(p.fl & 64) ? `<p class="plines"><small>Not on the Roots &amp; Routes maps: ${p.bp ? 'the Atlas could not place “' + esc(p.bp) + '”, and no relative has a place it could use' : 'the file gives no birth place, and no relative has one'}${p.by == null ? ', and there is no year to place them in' : ''}. They are here because the canvas does not need a place.</small></p>` : ''}
     ${(p.fl & 3) ? `<p style="color:var(--lk-mute)"><small>~ marks a year the archive itself estimates.</small></p>` : ''}
     <div class="row">
       ${p.living || p.ghost ? '' : `<button class="lk-btn is-small is-primary" data-do="next">Where to from here</button>`}
       ${c ? `<button class="lk-btn is-small" data-do="rel">${icon('relate', 'lk-icon')} How related to…</button>` : ''}</div>
+    <div class="row">${markPanelHTML(p)}${p.ghost || p.living ? '' : `<button class="lk-btn is-small" data-do="play" title="Build this person's tree up on the canvas a generation at a time">${icon('play', 'lk-icon')} Play the tree</button>`}</div>
     ${nameFormsHTML(p)}
     <div${p.ghost ? ' hidden' : ''}>
-    <h4>Parents and the evidence for each link</h4>
-    ${(p.f >= 0 || p.m >= 0) ? `<ul class="steps">${parentRow(p.f, 'Father', p.fg)}${parentRow(p.m, 'Mother', p.mg)}</ul>` : `<p>No parent recorded in ${esc(a.name)}.</p>`}
-    <p>${stats.count ? `<b>${stats.count}</b> ancestor${stats.count > 1 ? 's' : ''} on record, up to <b>${stats.depth}</b> generation${stats.depth > 1 ? 's' : ''} back (in ${esc(a.name)} alone).` : 'No ancestors on record in this archive.'}
-      ${kids ? `<br><b>${kids}</b> child${kids > 1 ? 'ren' : ''} on record.` : ''}${sps.length ? `<br>Spouse${sps.length > 1 ? 's' : ''}: ${esc(sps.join(', '))}` : ''}</p>
+    ${familyHTML(p, a)}
+    ${lifeHTML(p)}
+    ${srcsHTML(p)}
     ${brs.length ? `<h4>Possibly the same person in another archive</h4>${brs.map(b => { const o = M.P[TC.bridgeOther(b, p.i)], st = TC.bridgeState(M, b); return `<div class="warnbox${TC.bridgeDoubtful(b) ? ' bad' : ''}"><b>${esc(o.name)}</b> in ${esc(M.archives[o.a].name)} ${TC.years(o)}${o.bp ? ' · ' + esc(o.bp) : ''}<br><small>${esc(TC.bridgeNotes(b).join(' · '))}</small><div class="row"><button class="lk-btn is-small" data-br="${esc(b.id)}" data-do="show">${S.cards.has(o.key) ? 'Find' : 'Show'}</button>${st === 'rejected' ? `<button class="lk-btn is-small" data-br="${esc(b.id)}" data-do="restore">Unlinked: restore</button>` : `<button class="lk-btn is-small${st === 'confirmed' ? ' on' : ''}" data-br="${esc(b.id)}" data-do="confirm">${st === 'confirmed' ? 'Confirmed' : 'Confirm same person'}</button><button class="lk-btn is-small is-danger" data-br="${esc(b.id)}" data-do="unlink">Unlink</button>`}</div></div>`; }).join('')}` : ''}
     <div class="row one"><button class="lk-btn is-small" data-do="up">${icon('up', 'lk-icon')} Parents</button><button class="lk-btn is-small is-primary" data-do="upall">${icon('upall', 'lk-icon')} All the way back</button><button class="lk-btn is-small" data-do="dn">${icon('dn', 'lk-icon')} Children</button></div></div>`;
 }
@@ -2740,7 +3773,7 @@ function pathPanel() {
     <div class="big">${esc(A.name)} <i>&harr;</i> ${esc(B.name)}</div>
     <div class="warnbox" style="background:var(--lk-accent-soft);font-size:13.5px;color:var(--lk-ink)">${desc.exact ? `<b>${esc(B.name)}</b> is ${desc.kind === 'spouseOf' ? `the spouse of <b>${esc(A.name)}</b>'s <b>${esc(desc.term)}</b>` : `<b>${esc(A.name)}</b>'s <b>${esc(desc.words)}</b>`}${desc.reverse ? `;<br><b>${esc(A.name)}</b> is ${desc.rkind === 'spouseOf' ? `the spouse of <b>${esc(B.name)}</b>'s <b>${esc(desc.rterm)}</b>` : `<b>${esc(B.name)}</b>'s <b>${esc(desc.reverse)}</b>`}.` : '.'}` : esc(desc.sentence)}</div>
     <div><span class="pill">${desc.steps} step${desc.steps === 1 ? '' : 's'}${desc.bridges ? ` + ${desc.bridges} archive bridge${desc.bridges > 1 ? 's' : ''}` : ''}</span>${desc.marriage ? '<span class="pill">by marriage</span>' : ''}
-      ${desc.archives.map(a => `<span class="pill ac" style="--ac:${colour(a)}">${esc(M.archives[a].name)}</span>`).join('')}</div>
+      ${desc.archives.filter(a => M.archives[a].k !== 'you').map(a => `<span class="pill ac" style="--ac:${colour(a)}">${esc(M.archives[a].name)}</span>`).join('')}</div>
     <h4>Evidence strength: only as strong as the weakest step</h4>
     <div>${lvBadge(lv, 'currentColor')}</div>
     <p style="margin-top:6px">${esc(TC.strengthSentence(M, res, desc))}</p>
@@ -2748,6 +3781,92 @@ function pathPanel() {
     <h4>The chain, step by step</h4><ul class="steps">${stepRows}</ul>
     <div class="row"><button class="lk-btn is-small" data-do="fitpath">Fit to view</button><button class="lk-btn is-small" data-do="clearpath">Clear path</button></div>`;
 }
+
+/* ---------- the menu (burger): the things you look up rather than work with ---------- */
+function mainMenu() {
+  const m = $('#mainMenu');
+  const cur = document.documentElement.getAttribute('data-theme') || 'sticker';
+  const item = (k, ic, t, sub) => `<button class="mmi${(k === 'legend' ? $('#legendCard') && $('#legendCard').classList.contains('on') : S.tab === k && S.infoOpen !== false && $('#info').classList.contains('on')) ? ' on' : ''}" data-mm="${k}">${icon(ic, 'lk-icon')}<span><b>${t}</b><small>${sub}</small></span></button>`;
+  m.innerHTML = `<div class="mmlook">${icon('theme', 'lk-icon')}<span><b>Look</b><span class="mmchips" role="group" aria-label="Look">${THEMES.map(k => `<button type="button" class="mmchip${k === cur ? ' on' : ''}" data-look="${k}" aria-pressed="${k === cur}">${THEME_NAME[k] || (k[0].toUpperCase() + k.slice(1))}</button>`).join('')}</span></span></div>`
+    + item('legend', 'info', 'How to read the lines', 'What the line colours, patterns and seals mean')
+    + item('options', 'gear', 'Options', 'Links to MyHeritage and Ancestry, how paths are judged, your file')
+    + (SA ? recentHTML() : '');
+}
+/* ---------- opening a GEDCOM, and the last few used (standalone page only) ----------
+   The file is read by the page around the canvas and never leaves the device. "Last used" keeps the last three files in this browser's own storage (IndexedDB) so they can be opened
+   again in one click; nothing is sent anywhere, "Forget" removes them, and the switch turns remembering off (and clears them). */
+let SENDGED = null, RECENT = [];
+const RKEEP = 3;
+const rdb = () => new Promise((ok, no) => { try { const r = indexedDB.open('tcRecent', 1); r.onupgradeneeded = () => { r.result.createObjectStore('m', { keyPath: 'name' }); r.result.createObjectStore('b'); }; r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); } catch (e) { no(e); } });
+const rreq = r => new Promise((ok, no) => { r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); });
+const rememberOn = () => { try { return localStorage.getItem('tcRemember') !== '0'; } catch (e) { return true; } };
+async function recentLoad() {
+  try { const db = await rdb(), a = await rreq(db.transaction('m').objectStore('m').getAll()); RECENT = a.sort((x, y) => y.when - x.when); db.close(); } catch (e) { RECENT = []; }
+  if ($('#mainMenu') && $('#mainMenu').classList.contains('on')) mainMenu();
+}
+async function recentSave(name, bytes) {
+  if (!rememberOn()) return;
+  try {
+    const db = await rdb(), tx = db.transaction(['m', 'b'], 'readwrite'), mm = tx.objectStore('m'), bb = tx.objectStore('b');
+    mm.put({ name, size: bytes.byteLength, when: Date.now() }); bb.put(bytes, name);
+    const all = (await rreq(mm.getAll())).sort((x, y) => y.when - x.when); all.slice(RKEEP).forEach(o => { mm.delete(o.name); bb.delete(o.name); });
+    await new Promise(ok => { tx.oncomplete = ok; tx.onerror = ok; tx.onabort = ok; }); db.close();
+  } catch (e) { /* storage full or blocked: the file still opens, it just is not kept */ }
+  recentLoad();
+}
+async function recentOpen(name) {
+  try { const db = await rdb(), b = await rreq(db.transaction('b').objectStore('b').get(name)); db.close(); if (!b || !SENDGED) return toast('That file is no longer kept here. Open it again from your device.', 3500); SENDGED(new File([b], name)); }
+  catch (e) { toast('Could not open that file from this browser.', 3500); }
+}
+async function recentForget(name) {
+  try { const db = await rdb(), tx = db.transaction(['m', 'b'], 'readwrite'); if (name) { tx.objectStore('m').delete(name); tx.objectStore('b').delete(name); } else { tx.objectStore('m').clear(); tx.objectStore('b').clear(); } await new Promise(ok => { tx.oncomplete = ok; tx.onerror = ok; tx.onabort = ok; }); db.close(); } catch (e) { /* ignore */ }
+  recentLoad();
+}
+const fmtBytes = n => n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + ' MB' : Math.max(1, Math.round(n / 1e3)) + ' KB';
+const fmtWhen = t => { const d = new Date(t), now = new Date(), same = d.toDateString() === now.toDateString(); return same ? 'today ' + d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : d.toLocaleDateString([], { day: 'numeric', month: 'short' }) + ', ' + d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); };
+function recentHTML() {
+  const on = rememberOn();
+  return `<div class="mmsep"></div>`
+    + `<button class="mmi" data-gopen="1">${icon('folder', 'lk-icon')}<span><b>Open a GEDCOM file…</b><small>Read in this browser, never uploaded. A new file replaces this tree.</small></span></button>`
+    + (on && RECENT.length ? `<div class="mmrec"><b class="mmh">Last used</b>${RECENT.map(r => `<span class="mmr"><button type="button" data-recent="${esc(r.name)}" title="Open ${esc(r.name)} again"><b>${esc(r.name)}</b><small>${fmtBytes(r.size)} · ${fmtWhen(r.when)}</small></button><button type="button" class="mmx" data-forget="${esc(r.name)}" aria-label="Forget ${esc(r.name)}" title="Forget this file">${icon('x', 'lk-icon')}</button></span>`).join('')}</div>` : '')
+    + `<label class="mmrem"><input type="checkbox" id="mmRem"${on ? ' checked' : ''}><span>Keep the last ${RKEEP} files on this device<small>In this browser only, so they open in one click. Untick to forget them all.</small></span></label>`;
+}
+function openMainMenu(on) {
+  const m = $('#mainMenu'), b = $('#bMenu'); if (!m) return;
+  if (on == null) on = !m.classList.contains('on');
+  if (on) { openBloodMenu(false); mainMenu(); if (SA) recentLoad(); }
+  m.classList.toggle('on', on); b.setAttribute('aria-expanded', String(on)); b.classList.toggle('on', on);
+}
+/* the line key is an overlay in the same corner as the menu, not a tab in the side panel */
+function openLegend(on) {
+  const c = $('#legendCard'); if (!c) return;
+  if (on == null) on = !c.classList.contains('on');
+  if (on) { openBloodMenu(false); c.innerHTML = `<button type="button" class="lgx" data-lgx aria-label="Close">${icon('x', 'lk-icon')}</button>` + legendHTML(); c.scrollTop = 0; }
+  c.classList.toggle('on', on);
+}
+/* a tombstone in the Countries look: who it was. Select them, show their details, and bring them into focus. */
+function tombGo(g) {
+  const c = S.cards.get(g.dataset.tk); if (!c) return;
+  S.tab = 'person'; S.infoOpen = true; select([c.key]); fit([c], { maxK: 1 }); pulseCard(c);
+}
+document.addEventListener('click', e => { const g = e.target.closest && e.target.closest('#lanehead .tg'); if (g) tombGo(g); });
+document.addEventListener('keydown', e => { if (e.key !== 'Enter' && e.key !== ' ') return; const g = e.target.closest && e.target.closest('#lanehead .tg'); if (g) { e.preventDefault(); tombGo(g); } });
+document.addEventListener('click', e => {
+  const m = $('#mainMenu'); if (!m) return;
+  if (e.target.closest('[data-lgx]')) { openLegend(false); return; }
+  const go = e.target.closest('[data-gopen]'); if (go && m.contains(go)) { openMainMenu(false); const gi = $('#gedIn'); if (gi) gi.click(); return; }
+  const rc = e.target.closest('[data-recent]'); if (rc && m.contains(rc)) { openMainMenu(false); recentOpen(rc.dataset.recent); return; }
+  const fg = e.target.closest('[data-forget]'); if (fg && m.contains(fg)) { recentForget(fg.dataset.forget); return; }
+  const lk = e.target.closest('[data-look]');
+  if (lk && m.contains(lk)) { setTheme(lk.dataset.look); mainMenu(); return; }
+  const t = e.target.closest('[data-mm]');
+  if (t && m.contains(t)) { openMainMenu(false); if (t.dataset.mm === 'legend') openLegend(true); else { openLegend(false); S.tab = t.dataset.mm; S.infoOpen = true; renderInfo(); syncButtons(); } return; }
+  if (m.classList.contains('on') && !m.contains(e.target) && !e.target.closest('#bMenu')) openMainMenu(false);
+  const c = $('#legendCard'); if (c && c.classList.contains('on') && !c.contains(e.target) && !e.target.closest('[data-do="legend"]')) openLegend(false);
+});
+document.addEventListener('change', e => { const c = e.target; if (!c || c.id !== 'mmRem') return; try { localStorage.setItem('tcRemember', c.checked ? '1' : '0'); } catch (x) { /* ignore */ } if (!c.checked) recentForget(); else mainMenu(); });
+addEventListener('keydown', e => { if (e.key !== 'Escape') return; if ($('#mainMenu') && $('#mainMenu').classList.contains('on')) openMainMenu(false); else if ($('#legendCard') && $('#legendCard').classList.contains('on')) openLegend(false); });
+
 /* ---------- the Bloodline menu: add blood relatives / take away the rest / colour the rest ---------- */
 const BL_SCOPES = [[1, 'parents'], [2, 'grandparents'], [3, 'great-grandparents'], [Infinity, 'everyone']];
 let blScope = Infinity;
@@ -2775,7 +3894,7 @@ function bloodMenu() {
 function openBloodMenu(on) {
   const m = $('#bloodMenu'), b = $('#bBlood'); if (!m) return;
   if (on == null) on = !m.classList.contains('on');
-  if (on) bloodMenu();
+  if (on) { if (typeof openMainMenu === 'function') openMainMenu(false); bloodMenu(); }
   m.classList.toggle('on', on); b.setAttribute('aria-expanded', String(on)); b.classList.toggle('on', on || S.blood.tint);
 }
 function setTint(on, ref) {
@@ -2829,8 +3948,8 @@ function optionsPanel() {
     <div class="row"><button class="lk-btn is-small is-danger" data-do="clear">Clear the canvas</button></div>`;
 }
 function renderInfo() {
-  const el = $('#info'), tabs = [['person', 'Person'], ['next', 'Where next'], ...(fixList() ? [['fix', 'Fix list' + (fixList().people ? ' (' + fixList().people.toLocaleString() + ')' : '')]] : []), ['path', 'Path'], ['legend', 'Legend'], ['options', 'Options']];
-  const body = S.tab === 'person' ? personPanel() : S.tab === 'next' ? nextPanel() : S.tab === 'fix' ? fixPanel() : S.tab === 'path' ? pathPanel() : S.tab === 'legend' ? legendHTML() : optionsPanel();
+  const el = $('#info'), tabs = [['person', 'Person'], ['next', 'Where next'], ['ai', 'AI prompt'], ...(fixList() ? [['fix', 'Fix list' + (fixList().people ? ' (' + fixList().people.toLocaleString() + ')' : '')]] : []), ['path', 'Path'], ...(S.tab === 'options' ? [['options', 'Options']] : [])];
+  const body = S.tab === 'person' ? personPanel() : S.tab === 'next' ? nextPanel() : S.tab === 'ai' ? aipPanel() : S.tab === 'fix' ? fixPanel() : S.tab === 'path' ? pathPanel() : optionsPanel();
   el.innerHTML = `<div class="ih">${tabs.map(([k, n]) => `<button class="lk-tab${S.tab === k ? ' on' : ''}" data-tab="${k}">${n}${k === 'path' && S.path ? ' &bull;' : ''}</button>`).join('')}<span style="flex:1"></span><button class="lk-tab" data-tab="close" title="Close panel" aria-label="Close panel">&times;</button></div><div class="ib">${body}</div>`;
   if (S.infoOpen !== false) el.classList.add('on');
   { const ih = el.querySelector('.ih'), on = ih && ih.querySelector('.lk-tab.on'); if (on) { const l = on.offsetLeft - 8, r = on.offsetLeft + on.offsetWidth + 8; if (l < ih.scrollLeft) ih.scrollLeft = l; else if (r > ih.scrollLeft + ih.clientWidth) ih.scrollLeft = r - ih.clientWidth; } tabEdges(ih); }
@@ -2859,11 +3978,15 @@ $('#info').addEventListener('click', e => {
   if (f) { const c = S.cards.get(f.dataset.focus); if (c) { fit([c], { maxK: 1 }); pulseCard(c); } else { const p = M.byKey.get(f.dataset.focus); if (p) { const v = viewCentre(); dropPerson(p.i, v.x, v.y); } } return; }
   const d = e.target.closest('[data-do]'); if (!d) return;
   const act = d.dataset.do, key = [...S.sel][0], c = key && S.cards.get(key), brId = d.dataset.br;
-  if (act === 'legend') { S.tab = 'legend'; renderInfo(); }
+  if (act === 'legend') openLegend(true);
   else if (act === 'next') { S.tab = 'next'; renderInfo(); }
   else if (act === 'nextcopy') copyPlan();
+  else if (act === 'aicopy') copyAIPrompt();
   else if (act === 'up' && c) doUp(c); else if (act === 'upall' && c) doAllBack(c); else if (act === 'dn' && c) doDown(c, false);
   else if (act === 'rel' && c) startRelate(c.key);
+  else if (act === 'stat') { statOpen = statOpen === d.dataset.k ? null : d.dataset.k; renderInfo(); }
+  else if (act === 'play' && key) startPlay(M.byKey.get(key).i);
+  else if (act === 'mark' && key) setMark(key); else if (act === 'unmark') setMark(null);
   else if (act === 'relate2') { const ks = [...S.sel]; showPath(ks[0], ks[1]); }
   else if (act === 'clearpath') { S.path = null; S.noPath = null; clearPathUi(); refreshAll(); drawEdges(); S.tab = 'person'; renderInfo(); syncButtons(); }
   else if (act === 'fitpath' && S.path) fit([...S.path.nodeKeys].map(k => S.cards.get(k)), { maxK: 1 });
@@ -2901,25 +4024,40 @@ $('#pop').addEventListener('click', e => {
 
 /* ---------------- toolbar, themes, phone ---------------- */
 function dockH() { const d = $('.dock'); document.documentElement.style.setProperty('--dock-h', (document.documentElement.classList.contains('shelfoff') ? 0 : d.offsetHeight) + 'px'); }
+function syncGenButton() { const b = $('#bGen'); if (b) { b.classList.toggle('on', !!S.opts.gens); b.setAttribute('aria-pressed', String(!!S.opts.gens)); } }
+function toggleGens() {
+  S.opts.gens = !S.opts.gens; syncGenButton(); drawBands(); save();
+  if (S.opts.gens && S.cards.size > 1) { const gi = genInfo(), ys = new Map(); S.cards.forEach(c => { const k = gi.comp.get(c.key) + '|' + gi.gen.get(c.key); if (!ys.has(k)) ys.set(k, new Set()); ys.get(k).add(Math.round(c.y / 40)); }); if ([...ys.values()].some(v => v.size > 1)) toast('Press Arrange to line each generation up in its own row', 4000); }
+}
 function syncButtons() {
-  $('#bUndo').disabled = !S.undo.length;
+  if (typeof playGuard === 'function') playGuard();
+  $('#bUndo').disabled = !S.undo.length; { const a = $('#bArrange'); if (a) a.disabled = S.cards.size < 2; }
   $('#bRel').classList.toggle('on', !!S.relateFrom || S.sel.size === 2);
   $('#bRel').disabled = !(S.relateFrom || S.sel.size >= 1);
   $('#bClear').disabled = !S.cards.size;
   $('#bInfo').classList.toggle('on', $('#info').classList.contains('on'));
   $('#bFit').disabled = !S.cards.size;
+  markBar(); syncGenButton();
+  if (typeof drawNames === 'function') drawNames();
 }
 function syncUi() { hideHint(); syncButtons(); }
 function clearCanvas() {
   if (!S.cards.size) return;
   snapshot(); clearAll(); refreshAll(); drawEdges(); hideHint(); renderInfo(); save(); runSearchMarks(); toast('Cleared. Undo brings it back.');
 }
-const THEMES = ['sticker', 'paper', 'ground'];
+const THEMES = ['sticker', 'paper', 'ground', 'lanes', 'countries', 'names'];
+const THEME_NAME = { countries: 'Countries' };
 function setTheme(t) {
   if (!THEMES.includes(t)) t = 'sticker';
+  const was = document.documentElement.getAttribute('data-theme');
   document.documentElement.setAttribute('data-theme', t);
+  /* the Countries look is a layout as well as a colouring: the cards move into a column for each country of birth (Undo puts them back) */
+  if (t === 'countries' && was !== 'countries' && S.cards && S.cards.size > 1 && !S.busy) {
+    snapshot(); const cards = [...S.cards.values()];
+    tweenTo(arrangeTargets(cards), 800).then(() => { refreshAll(); drawEdges(); fit(); save(); miniDraw(); toast('Cards are in a column for each country of birth (Undo brings them back)', 3600); });
+  }
   try { localStorage.setItem('loamTheme', t); } catch (e) { /* ignore */ }
-  drawEdges(); miniDraw(); if (S.tab === 'options') renderInfo();
+  drawEdges(); miniDraw(); if (typeof drawNames === 'function') drawNames(true); if (S.tab === 'options') renderInfo();
 }
 function initTheme() {
   let t = null; try { t = localStorage.getItem('loamTheme'); } catch (e) { /* ignore */ }
@@ -2933,25 +4071,27 @@ function setPhone() {
 function wireToolbar() {
   const set = (id, name) => { const b = $(id); if (b) b.innerHTML = icon(name); };
   set('#bBlood', 'blood'); { const mm = document.createElement('div'); mm.id = 'bloodMenu'; mm.setAttribute('role', 'dialog'); mm.setAttribute('aria-label', 'Bloodline'); document.body.appendChild(mm); $('#bBlood').onclick = () => openBloodMenu(); }
-  set('#bShelf', 'search'); $('#si').innerHTML = icon('search', ''); set('#bUndo', 'undo'); set('#bFit', 'fit'); set('#bRel', 'relate'); set('#bInfo', 'info'); set('#bTheme', 'theme'); set('#bClear', 'clear'); set('#bMore', 'gear');
+  set('#bMenu', 'menu'); { const mm = document.createElement('div'); mm.id = 'mainMenu'; mm.setAttribute('role', 'menu'); mm.setAttribute('aria-label', 'Menu'); document.body.appendChild(mm); $('#bMenu').onclick = () => openMainMenu(); const lc = document.createElement('div'); lc.id = 'legendCard'; lc.setAttribute('role', 'dialog'); lc.setAttribute('aria-label', 'How to read the lines'); document.body.appendChild(lc); }
+  set('#bArrange', 'arrange'); set('#bGen', 'layers'); set('#bShelf', 'search'); $('#si').innerHTML = icon('search', ''); set('#bUndo', 'undo'); set('#bFit', 'fit'); set('#bRel', 'relate'); set('#bInfo', 'info'); set('#bClear', 'clear'); set('#bMore', 'gear');
   set('#zIn', 'plus'); set('#zOut', 'minus');
   if (EMBED) addEventListener('message', e => {
   if (e.origin !== location.origin || !e.data) return;
   if (e.data.tcLinks) { if (S.tab !== 'options') renderInfo(); return; }   // not while the Options box is being typed in: a redraw would take the cursor away
   if (!e.data.tcFix) return; refreshAll(); renderInfo(); syncButtons();
 });
-  $('#bShelf').onclick = () => { document.documentElement.classList.toggle('shelfoff'); dockH(); };
+  $('#bShelf').onclick = () => { const h = document.documentElement.classList; h.toggle('shelfoff'); $('#bShelf').setAttribute('aria-pressed', String(!h.contains('shelfoff'))); dockH(); };
   $('#bUndo').onclick = undo;
+  $('#bArrange').onclick = () => { if (!S.busy) doArrange(); };
+  $('#bGen').onclick = toggleGens;
   $('#bFit').onclick = () => fit();
   $('#bRel').onclick = () => { if (S.relateFrom) { cancelRelate(); return; } if (S.sel.size >= 2) { const ks = [...S.sel]; showPath(ks[0], ks[1]); } else if (S.sel.size === 1) startRelate([...S.sel][0]); };
   $('#bInfo').onclick = () => { const el = $('#info'); if (el.classList.contains('on')) { S.infoOpen = false; el.classList.remove('on'); } else { S.infoOpen = true; renderInfo(); } syncButtons(); };
   /* a tab on the panel's edge: the right panel runs the full height and folds away to the edge, and this brings it back (desktop; the phone has its own sheet) */
   { const t = document.createElement('button'); t.id = 'infoTab'; t.type = 'button'; t.setAttribute('aria-label', 'Show or hide the side panel'); t.title = 'Show or hide the side panel'; t.onclick = () => $('#bInfo').onclick(); document.body.appendChild(t); }
-  $('#bTheme').onclick = () => { const cur = document.documentElement.getAttribute('data-theme'); setTheme(THEMES[(THEMES.indexOf(cur) + 1) % 3]); };
   $('#bClear').onclick = clearCanvas;
   $('#bMore').onclick = () => $('.top').classList.toggle('more');
-  $('#zIn').onclick = () => zoomAt(1.25, innerWidth / 2, innerHeight / 2);
-  $('#zOut').onclick = () => zoomAt(0.8, innerWidth / 2, innerHeight / 2);
+  $('#zIn').onclick = () => zoomAt(1.25, null, null);
+  $('#zOut').onclick = () => zoomAt(0.8, null, null);
   $('#mini').onclick = e => { const m = $('#mini')._m; if (!m) return; const r = $('#mini').getBoundingClientRect(); const wx = (e.clientX - r.left - m.ox) / m.s, wy = (e.clientY - r.top - m.oy) / m.s; animateView({ x: innerWidth / 2 - wx * S.view.k, y: innerHeight / 2 - wy * S.view.k, k: S.view.k }, 400); };
   $('#exDemo').onclick = demo; if (EMBED) $('#exDemo').parentElement.style.display = 'none';
   if (SA) {
@@ -2967,8 +4107,10 @@ function wireToolbar() {
       if (!f) return;
       if (f.size > 400e6) return toast('That file is over 400 MB, more than this page can hold in memory.', 4000);
       const bytes = await f.arrayBuffer();
+      recentSave(f.name, bytes.slice(0));   /* a copy: the bytes themselves are handed over to the reader below */
       parent.postMessage({ tcOpen: { bytes, name: f.name } }, location.origin, [bytes]);
     };
+    SENDGED = send;
     $('#bOpen').onclick = () => $('#gedIn').click();
     $('#gedIn').onchange = e => { send(e.target.files[0]); e.target.value = ''; };
     $('#bLiv').onclick = () => parent.postMessage({ tcLiving: $('#bLiv').getAttribute('aria-pressed') !== 'true' }, location.origin);
@@ -3004,6 +4146,7 @@ async function demo() {
 S.rz = [null, null]; S.rzArm = null;
 function rzOver(x, y) { const r = $('#rz').getBoundingClientRect(); return x >= r.left - 6 && x <= r.right + 6 && y >= r.top - 6 && y <= r.bottom + 6; }
 function rzRender(msg) {
+  setTimeout(() => { if (typeof markPlace === 'function') markPlace(); }, 0);
   [0, 1].forEach(k => {
     const el = document.querySelector(`#rz .rzs[data-s="${k}"]`), i = S.rz[k];
     el.classList.toggle('armed', S.rzArm === k);
@@ -3050,10 +4193,66 @@ function rzClear() {
   rzRender();
 })();
 
+/* ---------------- the marked person: one person, and how the selected person is related to them ---------------- */
+const MARKKEY = STORE + '.mark';
+const markedPerson = () => (S.mark ? M.byKey.get(S.mark) || null : null);
+function loadMark() { if (EMBED) return; try { const k = localStorage.getItem(MARKKEY); if (k && M.byKey.has(k)) S.mark = k; } catch (e) { /* ignore */ } }
+function setMark(key) {
+  S.mark = key || null;
+  if (!EMBED) { try { if (key) localStorage.setItem(MARKKEY, key); else localStorage.removeItem(MARKKEY); } catch (e) { /* ignore */ } }
+  markCache.k = ''; refreshAll(); renderInfo(); if (key && typeof NAMES !== 'undefined') NAMES.focus = key; if (typeof drawNames === 'function') drawNames();
+  const p = markedPerson(); toast(p ? p.name + ' is marked: select anyone to see how they are related' : 'Mark removed', 3000);
+}
+let markCache = { k: '', v: null };
+function markRel(key) {
+  const a = markedPerson(), b = M.byKey.get(key); if (!a || !b) return null;
+  if (a === b) return { self: true, a, b };
+  const ck = [a.i, b.i, S.opts.suggested, M.decisions.size].join('|');
+  if (markCache.k === ck) return markCache.v;
+  const res = TC.findPath(M, a.i, b.i, { suggested: S.opts.suggested });
+  const v = res.found ? { a, b, res, d: TC.describePath(M, res) } : { a, b, none: true };
+  markCache = { k: ck, v }; return v;
+}
+const markTarget = () => (S.sel.size === 1 ? [...S.sel][0] : S.path && S.path.a === S.mark ? S.path.b : S.path && S.path.b === S.mark ? S.path.a : null);
+function markText(r, full) {
+  if (r.self) return 'This is the marked person.';
+  if (r.none) return `No path found between ${esc(r.b.name)} and ${esc(r.a.name)} in any archive.`;
+  const s = esc(full ? r.d.sentence : r.d.sentence.split('; ')[0].replace(/\.$/, ''));
+  return s + (r.d.level !== 'definite' && r.d.level !== 'supported' ? ` <small class="mkl">${esc(TC.LEVELS[r.d.level].label)}</small>` : '');
+}
+function markBar() {
+  let bar = $('#markBar');
+  if (!bar) {
+    bar = document.createElement('div'); bar.id = 'markBar'; bar.setAttribute('role', 'status'); document.body.appendChild(bar);
+    bar.addEventListener('click', e => {
+      const t = e.target.closest('[data-mk]'); if (!t) return;
+      if (t.dataset.mk === 'off') setMark(null);
+      else if (t.dataset.mk === 'path') showPath(S.mark, t.dataset.t);
+      else if (t.dataset.mk === 'go') { const c = S.cards.get(S.mark); if (c) { fit([c], { maxK: 1 }); pulseCard(c); } else { const p = markedPerson(); if (p) { const v = viewCentre(); dropPerson(p.i, v.x, v.y); } } }
+    });
+  }
+  const p = markedPerson(); bar.hidden = !p; if (!p) return;
+  markPlace();
+  const tk = markTarget(), r = tk && markRel(tk);
+  const L = markLines(), chips = L && L.heads.length && M.archives[p.a].k === 'you' ? `<span class="mkc">${L.heads.map(h => `<span class="mkch" style="--lc:${LINE_COLS[h.ci % LINE_COLS.length]}">${esc(h.name)}</span>`).join('')}</span>` : '';
+  bar.innerHTML = `<div class="mkrow"><button class="mkn" data-mk="go" title="Find ${esc(p.name)} on the canvas">&#9733; ${esc(p.name)}</button>`
+    + `<span class="mkt">${r ? markText(r, false) : 'Select anyone to see how they are related to ' + esc(p.name)}</span>`
+    + (r && !r.self && !r.none && !(S.path && S.path.a === S.mark && S.path.b === tk) ? `<button class="lk-btn is-small" data-mk="path" data-t="${esc(tk)}">Show path</button>` : '')
+    + `<button class="mkx" data-mk="off" title="Unmark ${esc(p.name)}" aria-label="Unmark">${icon('x', '')}</button></div>` + chips;
+}
+addEventListener('resize', () => markPlace());
+/* sits just under the "how related" bar, wherever that is */
+function markPlace() { const bar = $('#markBar'); if (bar) bar.style.top = ''; }   /* the relate row is in the dock now, so the mark bar keeps its place at the top (see the stylesheet) */
+function markPanelHTML(p) {
+  const marked = S.mark === p.key, r = !marked && markedPerson() ? markRel(p.key) : null;
+  return (r ? `<p class="plines mkrel">&#9733; ${markText(r, true)}</p>` : '') + `<button class="lk-btn is-small${marked ? ' is-primary' : ''}" data-do="${marked ? 'unmark' : 'mark'}" title="${marked ? 'Stop showing relationships from this person' : 'Mark this person: the canvas then shows how everyone you select is related to them (only one person can be marked)'}">&#9733; ${marked ? 'Marked: unmark' : 'Mark this person'}</button>`;
+}
+
 /* ---------------- start-up ---------------- */
 function boot() {
   buildFlagSprite();
   initTheme(); setPhone(); if (S.phone) S.infoOpen = false; wireToolbar(); renderTabs(); runSearch(); dockH();
+  loadMark();
   const d = loadSaved();
   const had = restore(d);
   S.cards.forEach(refreshCard);

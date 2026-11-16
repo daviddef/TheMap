@@ -677,6 +677,23 @@ html:not(.ph):has(#info.on) #namesCap{left:calc((100vw - 340px) / 2)}
 #namesCap .nmsc{display:inline-flex;gap:4px;margin:0 0 0 8px;vertical-align:middle}
 #namesCap .nmsc button{border:2px solid var(--lk-line);background:var(--lk-card);color:var(--lk-soft);border-radius:999px;padding:2px 10px;font:800 11.5px Nunito,system-ui;cursor:pointer}
 #namesCap .nmsc button:hover{background:var(--lk-hover)}#namesCap .nmsc button.on{background:var(--lk-accent-soft);border-color:var(--lk-accent);color:var(--lk-ink)}
+
+#mainMenu .mmsep{height:2px;background:var(--lk-line);margin:6px 8px;border-radius:2px}
+#mainMenu .mmrec{padding:2px 6px 4px 44px}#mainMenu .mmh{display:block;font:900 11px Nunito,system-ui;text-transform:uppercase;letter-spacing:.05em;color:var(--lk-mute);margin:2px 0 4px}
+#mainMenu .mmr{display:flex;align-items:center;gap:4px}
+#mainMenu .mmr>button:first-child{flex:1;min-width:0;text-align:left;border:0;background:transparent;border-radius:10px;padding:5px 8px;cursor:pointer;color:var(--lk-ink)}
+#mainMenu .mmr>button:first-child:hover,#mainMenu .mmr>button:first-child:focus-visible{background:var(--lk-hover);outline:none}
+#mainMenu .mmr b{display:block;font:900 13px Nunito,system-ui;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#mainMenu .mmr small{display:block;font:700 11px Nunito,system-ui;color:var(--lk-soft)}
+#mainMenu .mmx{flex:none;width:26px;height:26px;border:0;background:transparent;border-radius:8px;color:var(--lk-mute);cursor:pointer;display:grid;place-items:center}
+#mainMenu .mmx:hover{background:var(--lk-hover);color:var(--lk-ink)}#mainMenu .mmx svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round}
+#mainMenu .mmrem{display:flex;gap:10px;align-items:flex-start;padding:8px 10px 6px;font:800 12px Nunito,system-ui;color:var(--lk-soft);cursor:pointer}
+#mainMenu .mmrem input{margin:2px 0 0 2px;accent-color:var(--lk-accent);flex:none}#mainMenu .mmrem small{display:block;font:700 11px/1.3 Nunito,system-ui;color:var(--lk-mute);margin-top:1px}
+
+.aip-opts{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center;margin:8px 0 4px;font:800 12px Nunito,system-ui;color:var(--lk-soft)}
+.aip-opts select{font:800 13px Nunito,system-ui;padding:5px 8px;border:2px solid var(--lk-line);border-radius:10px;background:var(--lk-card);color:var(--lk-ink)}
+.aip-opts .aip-ck{grid-column:1/-1;display:flex;gap:8px;align-items:center;cursor:pointer}.aip-opts input[type=checkbox]{accent-color:var(--lk-accent)}
+.aip-text{width:100%;box-sizing:border-box;min-height:260px;resize:vertical;margin:6px 0;padding:10px 12px;border:2px solid var(--lk-line);border-radius:12px;background:var(--lk-card);color:var(--lk-ink);font:600 11.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
+.aip-n{margin-left:10px;color:var(--lk-mute);font-weight:800}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -2810,7 +2827,7 @@ function planFor(p) {
   if (st.state === 'loading') {
     loadPlanData(F).then(data => { st.plan = TCR.plan(F, data); st.state = 'ready'; })
       .catch(e => { st.state = 'error'; st.err = String(e && e.message || e); })
-      .then(() => { if (S.tab === 'next' && [...S.sel][0] === p.key) renderInfo(); });
+      .then(() => { if ((S.tab === 'next' || S.tab === 'ai') && [...S.sel][0] === p.key) renderInfo(); });
   }
   return st;
 }
@@ -2972,6 +2989,163 @@ function fixPanel() {
     ${sec ? `<h4>On this canvas, by kind</h4><ul class="fxl">${sec}</ul>` : ''}
     <h4>Everything on the list</h4>${fixAllHTML(F)}${note}`;
 }
+
+/* prompt.js — the "AI prompt" tab: for the selected person, one complete brief to hand to an AI that has never seen the Record Atlas.
+   The brief carries (1) the job, (2) what the tree already says, with the facts that are MISSING named, (3) how the Atlas works and how to read it (its open JSON files and pages,
+   the order to use them in), (4) what the Atlas said for THIS person when the brief was made (the same plan as "Where next": collections by cost, who ruled the place that
+   year and where the books went, neighbouring parishes, the wars), (5) why the records may be hard to find (the place under its name of the day, a change of rule, a mass-mortality
+   event in their lifetime) and (6) the rules and the shape of the answer.
+   Nothing is sent anywhere: the brief is text on this page, copied only when the visitor presses Copy. A living person gets no brief (the archive holds name and family only), and
+   a living relative of a dead person is never named in it. */
+const AIP = { task: 'missing', browse: true, inline: true };
+const AIP_TASKS = [
+  ['missing', 'Whatever is missing'], ['birth', 'Birth or baptism'], ['marriage', 'Marriage'], ['death', 'Death and burial'], ['parents', 'Parents'], ['verify', 'Check everything held, then fill gaps'],
+];
+const aipYr = (y, est) => y == null ? 'year not recorded' : (est ? 'about ' : '') + y;
+function aipMissing(p) {
+  const m = [];
+  if (p.by == null) m.push(['birth year', 'birth']); else m.push(['the full birth date (day and month; only the year is held)', 'birth']);
+  if (!p.bp) m.push(['birth place', 'birth']);
+  if (p.dy == null) m.push(['death year (or whether they were living at the end of the records)', 'death']); else m.push(['the full death date (only the year is held)', 'death']);
+  if (!p.dp) m.push(['death or burial place', 'death']);
+  if ((p.sp || []).length && !p.my) m.push(['marriage year and place', 'marriage']);
+  if (!(p.sp || []).length && p.by != null && (p.dy == null || p.dy - p.by >= 18)) m.push(['whether they married (no spouse is recorded)', 'marriage']);
+  if (p.f < 0) m.push(['father', 'parents']); if (p.m < 0) m.push(['mother (with her maiden name)', 'parents']);
+  return m;
+}
+function aipRel(q) { return q ? (q.living ? 'a living relative (not named here)' : `${q.name} (${TC.years(q)})`) : ''; }
+function aipPlace(pl) {
+  if (!pl || !pl.name) return 'place not recorded';
+  let s = pl.name; if (pl.cn) s += ', ' + pl.cn;
+  if (pl.era) s += ` — in that year the Atlas has it under ${pl.era.label} (${pl.era.from}–${pl.era.to})`;
+  return s;
+}
+function aipTaskText(task, miss) {
+  const list = miss.map(m => m[0]);
+  switch (task) {
+    case 'birth': return 'Find this person\'s birth or baptism: the exact date, the place, and both parents\' full names (the mother with her maiden name). If there is no civil birth record, the baptism is the record; say which you found.';
+    case 'marriage': return 'Find this person\'s marriage or marriages: the date, the place, the spouse\'s full name and both sets of parents. Marriages were often held in the bride\'s parish, not the groom\'s.';
+    case 'death': return 'Find this person\'s death and burial: the date, the place, the age given, who reported it, and the spouse and parents named in the entry. A death entry is the cheapest way back to the marriage and the birth.';
+    case 'parents': return 'Identify this person\'s parents: full names, the mother\'s maiden name, their places and approximate dates, and the record that names them as the parents of THIS person (not merely a person of the same name).';
+    case 'verify': return 'First check every fact listed below against a record: say for each whether you confirmed it, contradicted it, or could not test it. Then find what is missing' + (list.length ? ' (' + list.join('; ') + ')' : '') + '.';
+    default: return 'Begin the research on this person by finding what the tree is missing' + (list.length ? ': ' + list.join('; ') : '') + '. Work from the most recent event back (death, then marriage, then birth), because each record names the people for the next.';
+  }
+}
+function aipNames(p) {
+  const nf = TC.nameForms(M, p); if (!nf) return '';
+  const fm = a => a.map(f => f[0] + (f[1] === 'l' ? ' (lead: try it, not yet seen on a record)' : '')).join(', ');
+  let s = '';
+  if (nf.given) s += `Given name ${p.given.split(' ')[0]} is also written: ` + nf.given.langs.map(l => `${l.label}: ${fm(l.forms)}`).join('; ') + '.\n';
+  if (nf.sur) s += `Surname ${p.sur} is also written: ${fm(nf.sur.forms)}.\n`;
+  return s ? s + 'These come from the Record Atlas\'s name catalogues. Search the index under EVERY form: a clerk wrote what he heard, in his own language, and the Latin of a church register declines the name (Joannes, Joannem, Joannis).\n' : '';
+}
+function buildPrompt(p, st, o) {
+  const F = st.F, plan = st.plan, L = [], miss = aipMissing(p), today = new Date().toISOString().slice(0, 10);
+  const evs = TC.lifeEvents(M, p), eras = TC.eraChanges(M, p), yrB = y => y < 0 ? (-y) + ' BCE' : String(y);
+  L.push(`# Research brief: ${p.name} (${TC.years(p)})`, `Written ${today} by Tree Canvas, from the Record Atlas (https://recordatlas.org/). You may never have used the Record Atlas; section 3 teaches you how. Read the whole brief before you search.`, '');
+  L.push('## 1. Your job', aipTaskText(o.task, miss), 'Work from evidence: a date, a place or a parent counts as a FINDING only when you can point to a record that says it. Everything else is a lead, and must be called a lead.', '');
+  /* 2: what the tree holds */
+  L.push('## 2. What the tree already says');
+  L.push(`- Person: ${p.name}${p.sex === 'f' ? ' (female)' : p.sex === 'm' ? ' (male)' : ''}. Years: ${TC.years(p)}${(p.fl & 1 || p.fl & 2) ? ' (a "~" means the year is estimated, not read from a record)' : ''}.`);
+  L.push(`- Born: ${aipYr(p.by, p.fl & 1)}; ${aipPlace(F.born && F.born.place)}.`);
+  L.push(`- Died: ${aipYr(p.dy, p.fl & 2)}; ${aipPlace(F.died && F.died.place)}.`);
+  if (p.my) L.push(`- Married: ${aipYr(p.my, p.fl & 16)}; place not recorded.`);
+  F.stops.filter(s => s.place && s.place.name).forEach(s => L.push(`- Lived at: ${aipPlace(s.place)}${s.year != null ? ' from ' + (s.est ? 'about ' : '') + s.year : ''}.`));
+  const fa = p.f >= 0 ? M.P[p.f] : null, mo = p.m >= 0 ? M.P[p.m] : null, sp = (p.sp || []).map(i => M.P[i]).filter(Boolean), ch = (p.ch || []).map(e => M.P[e.c]).filter(Boolean);
+  L.push(`- Father: ${fa ? aipRel(fa) : 'not known'}. Mother: ${mo ? aipRel(mo) : 'not known'}.`);
+  if (sp.length) L.push(`- Spouse${sp.length > 1 ? 's' : ''}: ${sp.map(aipRel).join('; ')}.`);
+  if (ch.length) L.push(`- Children (${ch.length}): ${ch.slice(0, 8).map(aipRel).join('; ')}${ch.length > 8 ? '; and ' + (ch.length - 8) + ' more' : ''}.`);
+  const srcs = (M.srcs && M.srcs[p.id]) || []; if (srcs.length) L.push('- Sources the tree cites: ' + srcs.slice(0, 8).map(x => x.t + (x.u ? ' <' + x.u + '>' : '')).join('; ') + '.');
+  L.push('- MISSING: ' + (miss.length ? miss.map(m => m[0]).join('; ') : 'nothing obvious; check what is held.') + '.', '');
+  const nm = aipNames(p); if (nm) L.push('### Name forms to search', nm);
+  /* 3: how to use the Atlas */
+  L.push('## 3. The Record Atlas, and how to read it');
+  L.push('The Record Atlas is a free, open, read-only map of where the records of the world are, who held each place in each year, and which archive then holds the books. It needs no key and no account. Its data is plain JSON on public URLs, so you can read it directly. It is a finding aid, not a record: it points to collections, it does not contain the people. Never send it a name; it needs none.', '');
+  if (o.browse) {
+    L.push('Fetch these (GET, no key; keep the number of requests small and reuse what you have read):',
+      '- Place page (HTML, always works): https://recordatlas.org/place/<place-id>/  — every collection covering the place, with years, kinds (b births, m marriages, d deaths) and cost.',
+      '- Place data (JSON): https://recordatlas.org/p/<place-id>.json — { id, name, country, lat, lon, names[] (other names), collections[] { provider, title, kinds, from, to, access, url }, fs[] (FamilySearch collections), volumes[], parishes[], graves[], region }. Some fetch tools refuse /p/ because of robots.txt; if yours does, read the HTML place page instead.',
+      '- Who held the ground, year by year, and where the paper went: https://recordatlas.org/regions.json (regions[] with eras { from, to, polity, filedUnder[], note }) and https://recordatlas.org/context.json (the same, versioned, with evidence and gaps).',
+      '- Every source the Atlas knows (name, link, countries, cost): https://recordatlas.org/providers.json',
+      '- Every place with coordinates: https://recordatlas.org/index.json (and https://recordatlas.org/pi/<cell>.json for a five-degree cell) — use it to find neighbouring parishes and the Atlas id of a place.',
+      '- Name catalogues: https://recordatlas.org/given-names.json and https://recordatlas.org/surname-families.json (every form of a name, by language, with its evidence status); https://recordatlas.org/your-name/?q=<name> shows them.',
+      '- The name of a place on the date of the record: the place page and https://recordatlas.org/place-names/ list the dated names (for example Salisbury until 1982, Harare after; Fiume until 1945, Rijeka after).',
+      '- Wars, occupations and migrations: https://recordatlas.org/history.json.', '- Everything else the Atlas serves, with its licences: https://recordatlas.org/data/', '');
+  } else {
+    L.push('You cannot browse. So do not pretend to have read anything. Use section 4 (already read from the Atlas for you) and what you know, and for each next step tell me the exact Atlas page or record to open (give the URL), in order, with what to look for; I will paste back what I find. Say plainly which parts of your answer come from section 4, which from your own memory, and which are guesses.', '');
+  }
+  L.push('How to work, in this order:',
+    '1. Find each place\'s Atlas id (section 4 gives it, or search the Atlas by name). Read the place page or /p/<id>.json.',
+    '2. For the YEAR of the record, work out who then ruled the place (regions.json, era whose from..to holds the year) and where that rule filed its registers (filedUnder). A parish book may now be in a national archive of a different country from the one the place is in today.',
+    '3. Pick collections that cover that year and kind of record, cheapest first: free images, then a free account, then an index only (proves a record exists, does not show it), then paid, then a catalogue card (a letter), then paper in a building. Open them, search, and read the ENTRY, not just the index line.',
+    '4. Search under every form of the name (section 2) AND the place under its name in the year of the record, and under its neighbours: a hamlet is written into the book of the parish it walked to.',
+    '5. Read the entry for what it names: parents, godparents, witnesses, informant, residence. Each is the next lead.',
+    '6. Before you write "not found", say exactly what you searched: the collection, the years, the name forms and the place names. "Not indexed" is not "not there".', '');
+  /* 4: what the Atlas says now */
+  L.push('## 4. What the Atlas said for this person when this brief was written');
+  if (o.inline && plan && st.state === 'ready') L.push(planText(p, st).split('\n').slice(2).join('\n').trim());
+  else if (st.state === 'loading') L.push('(The Atlas is still being read for this person; press the tab again in a moment to include it.)');
+  else {
+    L.push(st.state === 'error' ? `(The Record Atlas could not be read when this was written: ${st.err}. Read the pages in section 3 yourself.)` : '(This page cannot read the Record Atlas directly, so its answer is not copied in. Use the pages in section 3.)');
+    const seen = new Set();
+    [F.born, F.died, ...F.stops].filter(e => e && e.place && e.place.name).forEach(e => { const k = e.place.name; if (seen.has(k)) return; seen.add(k); L.push(`- ${e.place.name}${e.place.cn ? ', ' + e.place.cn : ''}: ${e.place.id ? 'https://recordatlas.org/place/' + encodeURIComponent(e.place.id) + '/ (Atlas id ' + e.place.id + ')' : 'not linked to an Atlas place yet; search https://recordatlas.org/?q=' + encodeURIComponent(e.place.name)}`); });
+  }
+  L.push('');
+  /* 5: why it may be hard */
+  L.push('## 5. Why the records may be hard to find');
+  const hard = [];
+  eras.forEach(e => hard.push(`- ${e.from}: ${e.polity}. The birthplace changed hands during their life.${e.note ? ' ' + e.note : ''} Records before and after may be in different archives, in a different language, under a different name for the place.`));
+  evs.slice(0, 8).forEach(e => hard.push(`- ${e.f === e.t ? yrB(e.f) : yrB(e.f) + '–' + yrB(e.t)}, ${e.n}, at ${e.at}${e.toll ? ': ' + e.toll : ''}`));
+  if (hard.length) {
+    L.push(...hard);
+    if (evs.length) L.push('Their life crosses a war or mass-mortality event, so: (a) a missing death entry is NOT evidence they lived on, (b) parish books for those years may be destroyed, moved or incomplete, so search the substitutes (war-dead and civilian-loss registers, camp and prison records, relief and displacement lists, civil registers kept elsewhere, newspapers), (c) a record may be filed under the successor state or the occupier\'s name for the place, in the occupier\'s language, and (d) people were moved, so search the places they were sent to, not only where they lived.');
+    else L.push('A change of rule moves the paper: look in the archive of the rule in force in the year of the record (section 4 says which), and in the language and name of that rule.');
+  } else L.push('The Atlas holds no event or change of rule for the places in this tree at the years given. That is not proof there was none: check the place page.');
+  L.push('Always search a place under the name it had in the year of the record, not today\'s name, and under the language of the clerk. Also use what you know yourself about these places and years (wars, epidemics, famines, border changes, fires and floods that destroyed archives), but label it as your own knowledge, not the Atlas\'s, and check it against a source.', '');
+  /* 6: rules */
+  L.push('## 6. Rules',
+    '- Do not invent. If you did not read it in a record, it is a lead. Never fill a gap with a plausible guess and call it a finding.',
+    '- Do not merge two people because the names match. A same-name person in the same parish needs a second, independent fact (a parent, a spouse, an age that fits) before they are this person.',
+    '- Do not research living people. If a record suggests someone alive, stop and tell me; name no living person in anything you write.',
+    '- Never enter a password, work around a sign-in, a paywall, a rate limit or a bot check. If a record needs a free account, tell me which and I will sign in; if a site blocks you, record where you stopped and move to another open source.',
+    '- Quote what the record says in its own words and language, then translate. Give the collection, the volume or film, the page or entry number, the date and the URL so I can open it myself.',
+    '- If the Atlas is missing something (a place it does not hold, a collection that should exist, a dated name you needed), say so at the end, in one line each, so it can be reported back to the Atlas.', '');
+  /* 7: the answer */
+  L.push('## 7. What to give me back',
+    'A. A table: Fact | What you found | Record (collection, volume, page, URL) | Confidence (confirmed by a record / probable / possible) | What would confirm it.',
+    'B. Searches that found nothing: collection, years, name forms, place names tried.',
+    'C. The next three steps, in order, with the exact URLs.',
+    'D. Anything in the Atlas that was missing, wrong or confusing.',
+    'Keep findings and leads in separate lists, and tell me how sure you are of each.');
+  return L.join('\n');
+}
+function aipPanel() {
+  const keys = [...S.sel];
+  if (keys.length !== 1) return `<h3>AI prompt</h3><p style="color:var(--lk-soft);font-weight:700">Select one person and this writes a complete research brief you can give to any AI: what the tree says, what is missing, and how to use the Record Atlas to find the records.</p>`;
+  const p = M.byKey.get(keys[0]);
+  if (p.ghost) return `<h3>AI prompt</h3><p class="plines lvn">${esc(p.name)} is named in the archive but has no record of their own yet, so there is nothing to write a brief from. Select their spouse.</p>`;
+  if (p.living) return `<h3>AI prompt</h3><p class="plines lvn">This person is living, so their archive records them by <strong>name and family only</strong>. No research brief is written for a living person.</p>`;
+  const st = planFor(p), text = buildPrompt(p, st, AIP), words = text.split(/\s+/).length;
+  const status = AT.base == null ? 'This page cannot read the Record Atlas, so the brief teaches your AI to read it.' : st.state === 'ready' ? 'Includes what the Atlas says for this person now.' : st.state === 'loading' ? 'Reading the Atlas for this person…' : 'The Atlas could not be read just now, so the brief teaches your AI to read it.';
+  return `<h3>AI prompt</h3><p class="nx-lead"><b>${esc(p.name)}</b> <small>${TC.years(p)}</small>. A complete brief for an AI that has not met the Record Atlas: it explains how to use it, what is missing, why the records may be hard to find, and how to answer.</p>
+    <div class="aip-opts"><label for="aipTask">Find</label><select id="aipTask">${AIP_TASKS.map(([k, n]) => `<option value="${k}"${AIP.task === k ? ' selected' : ''}>${esc(n)}</option>`).join('')}</select>
+    <label class="aip-ck"><input type="checkbox" id="aipBrowse"${AIP.browse ? ' checked' : ''}> My AI can open web pages</label>
+    <label class="aip-ck"><input type="checkbox" id="aipInline"${AIP.inline ? ' checked' : ''}> Include what the Atlas says now</label></div>
+    <p class="nx-small">${esc(status)}</p>
+    <textarea id="aipText" class="aip-text" readonly rows="16" spellcheck="false" aria-label="The research brief">${esc(text)}</textarea>
+    <div class="row"><button class="lk-btn is-small" data-do="aicopy">Copy the prompt</button><small class="aip-n">about ${words.toLocaleString()} words</small></div>
+    <p class="nx-small">Written here from your tree and the Atlas. Nothing is sent anywhere unless you paste it into an AI yourself. Living relatives are never named in it. Read it before you send it.</p>`;
+}
+async function copyAIPrompt() {
+  const p = M.byKey.get([...S.sel][0]); if (!p || p.living || p.ghost) return;
+  const t = buildPrompt(p, planFor(p), AIP);
+  try { await navigator.clipboard.writeText(t); toast('Copied: paste it into your AI'); } catch (e) { const a = $('#aipText'); if (a) { a.focus(); a.select(); } toast('Select the text and copy it'); }
+}
+document.addEventListener('change', e => {
+  const t = e.target; if (!t || !t.id || t.id.slice(0, 3) !== 'aip') return;
+  if (t.id === 'aipTask') AIP.task = t.value; else if (t.id === 'aipBrowse') AIP.browse = t.checked; else if (t.id === 'aipInline') AIP.inline = t.checked; else return;
+  renderInfo();
+});
 
 /* play.js — Play: build one person's tree up on the canvas a generation at a time (the Roots & Routes "Generations" idea): the oldest generation first,
    then each one below it, with the numbered bands on. A bar over the shelf plays, pauses and scrubs. Undo puts the canvas back as it was. */
@@ -3201,7 +3375,7 @@ function select(keys, add) {
   if (!add) S.sel.clear();
   keys.forEach(k => S.sel.has(k) && add ? S.sel.delete(k) : S.sel.add(k));
   S.cards.forEach(c => c.el.classList.toggle('sel', S.sel.has(c.key)));
-  if (S.sel.size && S.tab !== 'path' && S.tab !== 'options' && S.tab !== 'next' && S.tab !== 'fix') S.tab = 'person';
+  if (S.sel.size && S.tab !== 'path' && S.tab !== 'options' && S.tab !== 'next' && S.tab !== 'ai' && S.tab !== 'fix') S.tab = 'person';
   if (S.sel.size && S.tab === 'path' && !S.path) S.tab = 'person';
   renderInfo(); syncButtons();
   /* the side panel is folded away: say where the person's details are */
@@ -3595,12 +3769,52 @@ function mainMenu() {
   const item = (k, ic, t, sub) => `<button class="mmi${(k === 'legend' ? $('#legendCard') && $('#legendCard').classList.contains('on') : S.tab === k && S.infoOpen !== false && $('#info').classList.contains('on')) ? ' on' : ''}" data-mm="${k}">${icon(ic, 'lk-icon')}<span><b>${t}</b><small>${sub}</small></span></button>`;
   m.innerHTML = `<div class="mmlook">${icon('theme', 'lk-icon')}<span><b>Look</b><span class="mmchips" role="group" aria-label="Look">${THEMES.map(k => `<button type="button" class="mmchip${k === cur ? ' on' : ''}" data-look="${k}" aria-pressed="${k === cur}">${THEME_NAME[k] || (k[0].toUpperCase() + k.slice(1))}</button>`).join('')}</span></span></div>`
     + item('legend', 'info', 'How to read the lines', 'What the line colours, patterns and seals mean')
-    + item('options', 'gear', 'Options', 'Links to MyHeritage and Ancestry, how paths are judged, your file');
+    + item('options', 'gear', 'Options', 'Links to MyHeritage and Ancestry, how paths are judged, your file')
+    + (SA ? recentHTML() : '');
+}
+/* ---------- opening a GEDCOM, and the last few used (standalone page only) ----------
+   The file is read by the page around the canvas and never leaves the device. "Last used" keeps the last three files in this browser's own storage (IndexedDB) so they can be opened
+   again in one click; nothing is sent anywhere, "Forget" removes them, and the switch turns remembering off (and clears them). */
+let SENDGED = null, RECENT = [];
+const RKEEP = 3;
+const rdb = () => new Promise((ok, no) => { try { const r = indexedDB.open('tcRecent', 1); r.onupgradeneeded = () => { r.result.createObjectStore('m', { keyPath: 'name' }); r.result.createObjectStore('b'); }; r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); } catch (e) { no(e); } });
+const rreq = r => new Promise((ok, no) => { r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); });
+const rememberOn = () => { try { return localStorage.getItem('tcRemember') !== '0'; } catch (e) { return true; } };
+async function recentLoad() {
+  try { const db = await rdb(), a = await rreq(db.transaction('m').objectStore('m').getAll()); RECENT = a.sort((x, y) => y.when - x.when); db.close(); } catch (e) { RECENT = []; }
+  if ($('#mainMenu') && $('#mainMenu').classList.contains('on')) mainMenu();
+}
+async function recentSave(name, bytes) {
+  if (!rememberOn()) return;
+  try {
+    const db = await rdb(), tx = db.transaction(['m', 'b'], 'readwrite'), mm = tx.objectStore('m'), bb = tx.objectStore('b');
+    mm.put({ name, size: bytes.byteLength, when: Date.now() }); bb.put(bytes, name);
+    const all = (await rreq(mm.getAll())).sort((x, y) => y.when - x.when); all.slice(RKEEP).forEach(o => { mm.delete(o.name); bb.delete(o.name); });
+    await new Promise(ok => { tx.oncomplete = ok; tx.onerror = ok; tx.onabort = ok; }); db.close();
+  } catch (e) { /* storage full or blocked: the file still opens, it just is not kept */ }
+  recentLoad();
+}
+async function recentOpen(name) {
+  try { const db = await rdb(), b = await rreq(db.transaction('b').objectStore('b').get(name)); db.close(); if (!b || !SENDGED) return toast('That file is no longer kept here. Open it again from your device.', 3500); SENDGED(new File([b], name)); }
+  catch (e) { toast('Could not open that file from this browser.', 3500); }
+}
+async function recentForget(name) {
+  try { const db = await rdb(), tx = db.transaction(['m', 'b'], 'readwrite'); if (name) { tx.objectStore('m').delete(name); tx.objectStore('b').delete(name); } else { tx.objectStore('m').clear(); tx.objectStore('b').clear(); } await new Promise(ok => { tx.oncomplete = ok; tx.onerror = ok; tx.onabort = ok; }); db.close(); } catch (e) { /* ignore */ }
+  recentLoad();
+}
+const fmtBytes = n => n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + ' MB' : Math.max(1, Math.round(n / 1e3)) + ' KB';
+const fmtWhen = t => { const d = new Date(t), now = new Date(), same = d.toDateString() === now.toDateString(); return same ? 'today ' + d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : d.toLocaleDateString([], { day: 'numeric', month: 'short' }) + ', ' + d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); };
+function recentHTML() {
+  const on = rememberOn();
+  return `<div class="mmsep"></div>`
+    + `<button class="mmi" data-gopen="1">${icon('folder', 'lk-icon')}<span><b>Open a GEDCOM file…</b><small>Read in this browser, never uploaded. A new file replaces this tree.</small></span></button>`
+    + (on && RECENT.length ? `<div class="mmrec"><b class="mmh">Last used</b>${RECENT.map(r => `<span class="mmr"><button type="button" data-recent="${esc(r.name)}" title="Open ${esc(r.name)} again"><b>${esc(r.name)}</b><small>${fmtBytes(r.size)} · ${fmtWhen(r.when)}</small></button><button type="button" class="mmx" data-forget="${esc(r.name)}" aria-label="Forget ${esc(r.name)}" title="Forget this file">${icon('x', 'lk-icon')}</button></span>`).join('')}</div>` : '')
+    + `<label class="mmrem"><input type="checkbox" id="mmRem"${on ? ' checked' : ''}><span>Keep the last ${RKEEP} files on this device<small>In this browser only, so they open in one click. Untick to forget them all.</small></span></label>`;
 }
 function openMainMenu(on) {
   const m = $('#mainMenu'), b = $('#bMenu'); if (!m) return;
   if (on == null) on = !m.classList.contains('on');
-  if (on) { openBloodMenu(false); mainMenu(); }
+  if (on) { openBloodMenu(false); mainMenu(); if (SA) recentLoad(); }
   m.classList.toggle('on', on); b.setAttribute('aria-expanded', String(on)); b.classList.toggle('on', on);
 }
 /* the line key is an overlay in the same corner as the menu, not a tab in the side panel */
@@ -3613,6 +3827,9 @@ function openLegend(on) {
 document.addEventListener('click', e => {
   const m = $('#mainMenu'); if (!m) return;
   if (e.target.closest('[data-lgx]')) { openLegend(false); return; }
+  const go = e.target.closest('[data-gopen]'); if (go && m.contains(go)) { openMainMenu(false); const gi = $('#gedIn'); if (gi) gi.click(); return; }
+  const rc = e.target.closest('[data-recent]'); if (rc && m.contains(rc)) { openMainMenu(false); recentOpen(rc.dataset.recent); return; }
+  const fg = e.target.closest('[data-forget]'); if (fg && m.contains(fg)) { recentForget(fg.dataset.forget); return; }
   const lk = e.target.closest('[data-look]');
   if (lk && m.contains(lk)) { setTheme(lk.dataset.look); mainMenu(); return; }
   const t = e.target.closest('[data-mm]');
@@ -3620,6 +3837,7 @@ document.addEventListener('click', e => {
   if (m.classList.contains('on') && !m.contains(e.target) && !e.target.closest('#bMenu')) openMainMenu(false);
   const c = $('#legendCard'); if (c && c.classList.contains('on') && !c.contains(e.target) && !e.target.closest('[data-do="legend"]')) openLegend(false);
 });
+document.addEventListener('change', e => { const c = e.target; if (!c || c.id !== 'mmRem') return; try { localStorage.setItem('tcRemember', c.checked ? '1' : '0'); } catch (x) { /* ignore */ } if (!c.checked) recentForget(); else mainMenu(); });
 addEventListener('keydown', e => { if (e.key !== 'Escape') return; if ($('#mainMenu') && $('#mainMenu').classList.contains('on')) openMainMenu(false); else if ($('#legendCard') && $('#legendCard').classList.contains('on')) openLegend(false); });
 
 /* ---------- the Bloodline menu: add blood relatives / take away the rest / colour the rest ---------- */
@@ -3703,8 +3921,8 @@ function optionsPanel() {
     <div class="row"><button class="lk-btn is-small is-danger" data-do="clear">Clear the canvas</button></div>`;
 }
 function renderInfo() {
-  const el = $('#info'), tabs = [['person', 'Person'], ['next', 'Where next'], ...(fixList() ? [['fix', 'Fix list' + (fixList().people ? ' (' + fixList().people.toLocaleString() + ')' : '')]] : []), ['path', 'Path'], ...(S.tab === 'options' ? [['options', 'Options']] : [])];
-  const body = S.tab === 'person' ? personPanel() : S.tab === 'next' ? nextPanel() : S.tab === 'fix' ? fixPanel() : S.tab === 'path' ? pathPanel() : optionsPanel();
+  const el = $('#info'), tabs = [['person', 'Person'], ['next', 'Where next'], ['ai', 'AI prompt'], ...(fixList() ? [['fix', 'Fix list' + (fixList().people ? ' (' + fixList().people.toLocaleString() + ')' : '')]] : []), ['path', 'Path'], ...(S.tab === 'options' ? [['options', 'Options']] : [])];
+  const body = S.tab === 'person' ? personPanel() : S.tab === 'next' ? nextPanel() : S.tab === 'ai' ? aipPanel() : S.tab === 'fix' ? fixPanel() : S.tab === 'path' ? pathPanel() : optionsPanel();
   el.innerHTML = `<div class="ih">${tabs.map(([k, n]) => `<button class="lk-tab${S.tab === k ? ' on' : ''}" data-tab="${k}">${n}${k === 'path' && S.path ? ' &bull;' : ''}</button>`).join('')}<span style="flex:1"></span><button class="lk-tab" data-tab="close" title="Close panel" aria-label="Close panel">&times;</button></div><div class="ib">${body}</div>`;
   if (S.infoOpen !== false) el.classList.add('on');
   { const ih = el.querySelector('.ih'), on = ih && ih.querySelector('.lk-tab.on'); if (on) { const l = on.offsetLeft - 8, r = on.offsetLeft + on.offsetWidth + 8; if (l < ih.scrollLeft) ih.scrollLeft = l; else if (r > ih.scrollLeft + ih.clientWidth) ih.scrollLeft = r - ih.clientWidth; } tabEdges(ih); }
@@ -3736,6 +3954,7 @@ $('#info').addEventListener('click', e => {
   if (act === 'legend') openLegend(true);
   else if (act === 'next') { S.tab = 'next'; renderInfo(); }
   else if (act === 'nextcopy') copyPlan();
+  else if (act === 'aicopy') copyAIPrompt();
   else if (act === 'up' && c) doUp(c); else if (act === 'upall' && c) doAllBack(c); else if (act === 'dn' && c) doDown(c, false);
   else if (act === 'rel' && c) startRelate(c.key);
   else if (act === 'stat') { statOpen = statOpen === d.dataset.k ? null : d.dataset.k; renderInfo(); }
@@ -3861,8 +4080,10 @@ function wireToolbar() {
       if (!f) return;
       if (f.size > 400e6) return toast('That file is over 400 MB, more than this page can hold in memory.', 4000);
       const bytes = await f.arrayBuffer();
+      recentSave(f.name, bytes.slice(0));   /* a copy: the bytes themselves are handed over to the reader below */
       parent.postMessage({ tcOpen: { bytes, name: f.name } }, location.origin, [bytes]);
     };
+    SENDGED = send;
     $('#bOpen').onclick = () => $('#gedIn').click();
     $('#gedIn').onchange = e => { send(e.target.files[0]); e.target.value = ''; };
     $('#bLiv').onclick = () => parent.postMessage({ tcLiving: $('#bLiv').getAttribute('aria-pressed') !== 'true' }, location.origin);

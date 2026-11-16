@@ -741,6 +741,8 @@ html:not(.rzopen) #rz{display:none}
 .sbtn{flex:none;width:28px;height:28px;border-radius:50%;border:2px solid var(--lk-line);background:var(--lk-card);color:var(--lk-ink);display:inline-flex;align-items:center;justify-content:center;font:400 11px/1 "Lilita One",system-ui;text-decoration:none;box-shadow:0 2px 0 var(--lk-line)}
 .sbtn:hover,.sbtn:focus-visible{border-color:#D9822B;color:#C4721F}.sbtn:focus-visible{outline:3px solid var(--lk-ink);outline-offset:2px}
 #playBar .pbl .pwho{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--lk-ink);font-weight:900}
+#playBar .pbm{flex:none;border:1.5px solid var(--lk-line);background:transparent;color:var(--lk-soft);border-radius:10px;font:800 11px Nunito,system-ui;padding:5px 8px;cursor:pointer;white-space:nowrap}#playBar .pbm.on{background:var(--lk-ink);color:var(--lk-card);border-color:var(--lk-ink)}
+@media (max-width:640px){#playBar .pbm{order:5}}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -1555,6 +1557,16 @@ html:not(.rzopen) #rz{display:none}
     return { gens, gen: g };
   }
 
+  /* the steps of a Play. 'out' (default): the person first, then each step adds the generation above AND the generation below them. 'oldest' (the reverse): the earliest
+     ancestor first, then every generation down. Each step lists the people that step ADDS; the player shows all steps up to the current one. */
+  function playSteps(M, i, mode) {
+    const base = playSet(M, i);
+    if (mode === 'oldest') return base;
+    const by = {}; base.gen.forEach((lv, x) => (by[Math.abs(lv)] = by[Math.abs(lv)] || []).push(x));
+    const gens = Object.keys(by).map(Number).sort((a, b) => a - b).map(n => by[n].sort((a, b) => (M.P[a].by == null ? 9999 : M.P[a].by) - (M.P[b].by == null ? 9999 : M.P[b].by)));
+    return { gens, gen: base.gen };
+  }
+
   /* THE NAMES: a person's ancestry written as surnames, not people. One node per surname family (the Record Atlas catalogue's canonical name when it knows the spelling, else the
      name as written), with how many ancestors bear it and their years; one edge between two names for each couple among the ancestors, counted. So a Defranceski who married a
      Kovacina and another, five generations back, who married a Lerena are one Defranceski node joined to two names, however far apart the marriages. The focus person's own
@@ -1606,8 +1618,8 @@ html:not(.rzopen) #rz{display:none}
     const N = [...nodes.values()].map(n => ({ ...n, depth: depth.get(n.key), parent: parent.get(n.key) || null }));
     return { root: rk, nodes: N, edges: E, people: mem.size, ancestors: gen.size, scope: blood ? 'blood' : 'anc' };
   }
-  const API = { nameTree, playSet, family, lifeEvents, eraChanges, lines, arrange, bloodSet, fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful,
-    placeAt, dateText, neighbours, edgeCost, parentLinks, ancestorStats, stopReason, otherSideHasParents, evidenceSummary, years, url, corrUrl, wikitreeUrl, searchLinks, levelOfGrade, LEVELS, kinshipOps, opsOf, reverseOps, bloodTerm, siblingKind, archivesOnPath, ord };
+  const API = { nameTree, playSet, playSteps, family, lifeEvents, eraChanges, lines, arrange, bloodSet, fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful,
+    placeAt, dateText, neighbours, edgeCost, parentLinks, ancestorStats, stopReason, otherSideHasParents, evidenceSummary, years, url, corrUrl, wikitreeUrl, searchLinks, levelOfGrade, LEVELS, playSteps, kinshipOps, opsOf, reverseOps, bloodTerm, siblingKind, archivesOnPath, ord };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TC = API;
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -3450,7 +3462,10 @@ document.addEventListener('change', e => {
 
 /* play.js — Play: build one person's tree up on the canvas a generation at a time (the Roots & Routes "Generations" idea): the oldest generation first,
    then each one below it, with the numbered bands on. A bar over the shelf plays, pauses and scrubs. Undo puts the canvas back as it was. */
-const PLAY = { on: false, playing: false, k: 0, set: null, focus: -1, speed: 1, timer: 0, token: 0 };
+const PLAY = { on: false, playing: false, k: 0, set: null, focus: -1, speed: 1, timer: 0, token: 0, mode: 'out' };
+/* the steps of a play. 'out' (the default) starts with the person and adds a generation above AND below them each step; 'oldest' (the reverse) starts with the
+   earliest ancestor and builds down through every generation, as the Roots & Routes Generations view does. */
+const playSetFor = (i, mode) => TC.playSteps(M, i, mode);
 const PLAY_DELAY = [2600, 1600, 850];   /* slow, normal, fast: the pause between generations */
 function playBar() {
   let b = $('#playBar');
@@ -3458,6 +3473,7 @@ function playBar() {
   b = document.createElement('div'); b.id = 'playBar'; b.setAttribute('role', 'group'); b.setAttribute('aria-label', 'Play the tree');
   b.innerHTML = `<button class="pbt" data-pl="toggle" aria-label="Play"></button><input id="plRange" type="range" min="0" max="0" value="0" aria-label="Generation">`
     + `<span class="pbl"><small id="plWho" class="pwho"></small><b id="plNum">I</b><small id="plYrs"></small></span>`
+    + `<button class="pbm" data-pl="mode" aria-pressed="false" title="Reverse: start with the earliest ancestor and build down">&#8644; Reverse</button>`
     + `<span class="pbs" role="group" aria-label="Speed"><button data-pl="speed" data-s="0">Slow</button><button data-pl="speed" data-s="1">Normal</button><button data-pl="speed" data-s="2">Fast</button></span>`
     + `<button class="pbx" data-pl="close" title="Close" aria-label="Close">${icon('x', '')}</button>`;
   document.body.appendChild(b);
@@ -3465,6 +3481,7 @@ function playBar() {
     const t = e.target.closest('[data-pl]'); if (!t) return;
     if (t.dataset.pl === 'toggle') { if (PLAY.playing) pausePlay(); else resumePlay(); }
     else if (t.dataset.pl === 'speed') { PLAY.speed = +t.dataset.s; playSync(); if (PLAY.playing) playSchedule(); }
+    else if (t.dataset.pl === 'mode') playMode(PLAY.mode === 'out' ? 'oldest' : 'out');
     else if (t.dataset.pl === 'close') stopPlay();
   });
   $('#plRange', b).addEventListener('input', e => { pausePlay(); playTo(+e.target.value); });
@@ -3476,7 +3493,8 @@ function playSync() {
   const G = PLAY.set.gens.length, k = PLAY.k, g = PLAY.set.gens[k] || [];
   const ys = g.map(i => M.P[i]).filter(p => p.by != null && !p.living);
   $('#plRange', b).max = G - 1; $('#plRange', b).value = k;
-  const w = M.P[PLAY.focus], wt = w ? 'Building ' + w.name + '\'s tree, earliest ancestor first' : ''; $('#plWho', b).textContent = w ? w.name + ' · earliest first' : ''; $('#plWho', b).title = wt; b.title = wt;
+  const w = M.P[PLAY.focus], old = PLAY.mode === 'oldest', wt = w ? 'Building ' + w.name + '\'s tree, ' + (old ? 'earliest ancestor first, down to them' : 'from them, a generation up and down at a time') : ''; $('#plWho', b).textContent = w ? w.name + (old ? ' · earliest first' : ' · up and down') : '';
+  const pm = b.querySelector('.pbm'); if (pm) { pm.classList.toggle('on', old); pm.setAttribute('aria-pressed', old); pm.title = old ? 'Back to playing from them, up and down' : 'Reverse: start with the earliest ancestor and build down'; } $('#plWho', b).title = wt; b.title = wt;
   $('#plNum', b).textContent = romanOf(k + 1) + ' of ' + romanOf(G);
   $('#plYrs', b).textContent = (ys.length ? Math.min(...ys.map(p => p.by)) + '–' + Math.max(...ys.map(p => p.dy != null ? p.dy : p.by)) + ' · ' : '') + g.length + (g.length === 1 ? ' person' : ' people');
   const t = $('.pbt', b); t.innerHTML = icon(PLAY.playing ? 'pause' : 'play', 'lk-icon'); t.setAttribute('aria-label', PLAY.playing ? 'Pause' : k >= G - 1 ? 'Play again' : 'Play');
@@ -3484,12 +3502,18 @@ function playSync() {
   playPlace();
 }
 async function startPlay(i) {
-  const set = TC.playSet(M, i), total = set.gens.reduce((n, g) => n + g.length, 0);
+  const set = playSetFor(i, PLAY.mode), total = set.gens.reduce((n, g) => n + g.length, 0);
   if (total < 2) { toast('No relatives on record to build up from ' + M.P[i].name); return; }
   stopPlay(true); snapshot();
   clearAll(true); S.path = null; S.noPath = null; clearPathUi(); S.sel.clear(); S.tab = 'person'; renderInfo();
   PLAY.set = set; PLAY.focus = i; PLAY.on = true; PLAY.k = 0; S.opts.gens = true; syncGenButton();
   playBar().classList.add('on'); playSync();
+  await playTo(0);
+  if (PLAY.on) { PLAY.playing = true; playSync(); playSchedule(); }
+}
+async function playMode(m) {   /* switch the order and begin again, without taking another undo snapshot */
+  if (!PLAY.on || PLAY.focus < 0) return;
+  PLAY.mode = m; stopPlay(true); PLAY.set = playSetFor(PLAY.focus, m); PLAY.k = 0; PLAY.on = true; playSync();
   await playTo(0);
   if (PLAY.on) { PLAY.playing = true; playSync(); playSchedule(); }
 }

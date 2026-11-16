@@ -670,8 +670,8 @@ html:not(.ph):has(#info.on) #infoTab{top:92px;transform:none}
 #namesview .nmbar{display:block;height:6px;border-radius:4px;background:var(--lk-line);overflow:hidden}#namesview .nmbar u{display:block;height:100%;background:var(--lk-accent);border-radius:4px;text-decoration:none}
 #namesview .nm small{font:800 10.5px Nunito,system-ui;color:var(--lk-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #namesview .nmhere{position:absolute;top:-11px;right:12px;padding:1px 9px;border-radius:999px;background:var(--lk-accent);color:#fff;font:900 10.5px Nunito,system-ui;letter-spacing:.03em;text-transform:uppercase}
-#namesview .nmpeek{position:absolute;left:-2px;right:-2px;top:calc(100% + 8px);margin:0;padding:8px 12px;list-style:none;max-height:260px;overflow:auto;background:var(--lk-card);border:2px solid var(--lk-accent);border-radius:14px;box-shadow:0 6px 0 var(--lk-line);font:700 12px/1.45 Nunito,system-ui;cursor:default}
-#namesview .nmpeek small{display:inline;color:var(--lk-mute)}
+#namesview .nmpeek{position:absolute;left:-2px;min-width:calc(100% + 4px);width:max-content;max-width:340px;box-sizing:border-box;top:calc(100% + 8px);margin:0;padding:8px 12px;list-style:none;max-height:260px;overflow:auto;background:var(--lk-card);border:2px solid var(--lk-accent);border-radius:14px;box-shadow:0 6px 0 var(--lk-line);font:700 12px/1.45 Nunito,system-ui;cursor:default}
+#namesview .nmpeek li{white-space:nowrap}#namesview .nmpeek small{display:inline;color:var(--lk-mute)}#namesview .nmpeek a.nmp{color:var(--lk-ink);text-decoration:underline;text-decoration-color:var(--lk-line);text-underline-offset:2px;cursor:pointer}#namesview .nmpeek a.nmp:hover{color:var(--lk-accent);text-decoration-color:var(--lk-accent)}
 #namesCap{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--dock-h,190px) + 22px);z-index:5;max-width:min(640px,calc(100vw - 420px));padding:8px 14px;background:var(--lk-card);border:2px solid var(--lk-line);border-radius:16px;box-shadow:0 3px 0 var(--lk-line);font:700 12.5px/1.4 Nunito,system-ui;color:var(--lk-soft);text-align:center}
 #namesCap[hidden]{display:none}#namesCap b{color:var(--lk-ink);font-weight:900;margin-right:4px}#namesCap small{display:block;font-size:11px;color:var(--lk-mute)}
 html:not(.ph):has(#info.on) #namesCap{left:calc((100vw - 340px) / 2)}
@@ -3660,7 +3660,7 @@ function namesBoxOf(T) {
 }
 function namesPeople(n) {
   const rows = n.people.map(j => M.P[j]).filter(p => !p.living).sort((a, b) => (a.by == null) - (b.by == null) || a.by - b.by);
-  const show = rows.slice(0, 12).map(p => `<li>${esc(p.given || '(no given name)')} <small>${TC.years(p)}</small></li>`).join('');
+  const show = rows.slice(0, 12).map(p => `<li><a href="#" class="nmp" data-nmp="${esc(p.key)}" title="Show ${esc(p.name)}">${esc(p.given || '(no given name)')}</a> <small>${TC.years(p)}</small></li>`).join('');
   return `<ul class="nmpeek">${show}${rows.length > 12 ? `<li><small>and ${rows.length - 12} more</small></li>` : ''}${n.living ? `<li><small>${n.living} living, not listed</small></li>` : ''}</ul>`;
 }
 function drawNames(force) {

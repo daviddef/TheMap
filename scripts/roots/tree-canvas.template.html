@@ -602,7 +602,7 @@ html:not(.ph):has(#info.on) #playBar{left:calc((100vw - 340px) / 2);width:min(64
 .ph #lanes .lnl{left:10px;width:56px}.ph #lanes .lnl b{font-size:min(24px,var(--fs,24px))}
 
 /* Look: Countries. The Lanes rows, plus a coloured column for each country of birth */
-#lanes .lcol{position:absolute;top:0;bottom:0;background:hsl(var(--h) 85% 91%);border-left:2px solid hsl(var(--h) 60% 78%)}
+#lanes .lcol{position:absolute;top:0;bottom:0;background:var(--lc,#FCE6CA);border-left:2px solid rgba(217,130,43,.3)}
 #lanes .lcol.none{background:#E9EAEE;border-left-color:#D3D7DE}
 #lanehead{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 #lanes.cols .lane{background:rgba(255,255,255,.55);border-top:1px solid rgba(31,37,48,.14)}
@@ -635,6 +635,9 @@ html:not(.ph):has(#info.on) #playBar{left:calc((100vw - 340px) / 2);width:min(64
 #lanehead .cnh b{display:block;max-width:100%;font:400 var(--fs,26px)/1.05 "Lilita One",system-ui,sans-serif;letter-spacing:.02em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 2px 0 rgba(255,255,255,.7)}
 #lanehead .cnh small{font:800 11px Nunito,system-ui;color:hsl(var(--h) 35% 36%);letter-spacing:.02em}
 #lanehead .cnh .fl{width:24px!important;height:auto;margin:0 0 3px;display:block;border-radius:2px}
+#lanehead .cnh{color:#6B3410}
+#lanehead .cnh small{color:#9A5A1E}
+#lanehead .cnh b{text-shadow:0 2px 0 rgba(255,255,255,.55)}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -2357,6 +2360,8 @@ function arrangeItems(cards) {
 /* where every card would go, kept around the middle of where the cards are now */
 /* the Countries look: a column for each country of birth (the country today, from the Atlas's place record) and a row for each generation.
    Columns run left to right by the year of the earliest birth in each, so the family's moves read across the page; a person with no birthplace stands in the last column. */
+/* the Countries columns are shades of the logo's orange, light to deeper */
+const LANE_SHADES = ['#FEF3E3', '#FCE6CA', '#FAD9AF', '#F8CC95', '#F5BF7C'];
 const isGridLook = () => document.documentElement.getAttribute('data-theme') === 'countries';
 function deathCountry(c) { const p = personOf(c); if (!p || p.living || p.ghost || !p.dp) return ''; const pl = TC.placeAt(M, p, p.dp, p.dy); return (pl && pl.cn) || ''; }
 function birthCountry(c) { const p = personOf(c); if (!p || !p.bp) return ''; const pl = TC.placeAt(M, p, p.bp, p.by); return (pl && pl.cn) || ''; }
@@ -2447,18 +2452,18 @@ function drawLanes() {
     const geo = new Map();
     cols.forEach((col, i) => {
       col.a = i ? (cols[i - 1].x1 + col.x0) / 2 : col.x0 - 40; col.b = i < cols.length - 1 ? (col.x1 + cols[i + 1].x0) / 2 : col.x1 + 40; col.i = i;
-      let hue = 0; for (const ch of col.cn) hue = (hue * 31 + ch.charCodeAt(0)) % 360; col.hue = col.cn ? Math.round(hue / 30) * 30 + 10 : 0; geo.set(col.cn, col);
+      col.shade = LANE_SHADES[(i * 2) % LANE_SHADES.length]; geo.set(col.cn, col);   /* neighbouring columns always differ: steps of two through five shades */
     });
     dth.forEach(t => { geo.get(t.cn).deaths++; });
     cols.forEach(col => {
       const left = v.x + col.a * v.k, wid = (col.b - col.a) * v.k; if (left > vw || left + wid < 0) return;
       let fl = ''; const src = col.cs.length ? col.cs.map(c => personOf(c).bp) : dth.filter(t => t.cn === col.cn).map(t => personOf(t.c).dp);
       for (const nm of src) { if (!nm) continue; const p = col.cs.length ? personOf(col.cs[0]) : personOf(dth.find(t => t.cn === col.cn).c); const pl = TC.placeAt(M, p, nm, 2100); if (pl && pl.fi >= 0) { fl = flagHTML(pl, 2100, 'The flag of ' + col.cn + ' today (Record Atlas)', false) + ' '; break; } }
-      h += `<div class="lcol${col.cn ? '' : ' none'}" style="left:${f1(left)}px;width:${f1(wid)}px;--h:${col.hue}"></div>`;
+      h += `<div class="lcol${col.cn ? '' : ' none'}" style="left:${f1(left)}px;width:${f1(wid)}px;--lc:${col.shade}"></div>`;
       /* the name is set in the header's own type, centred over the part of its column that is on screen; it shrinks to fit a narrow column */
       const v0 = Math.max(left, 0), v1 = Math.min(left + wid, vw), mid = (v0 + v1) / 2, nm = col.cn || 'Birthplace not recorded';
       const fs = Math.max(12, Math.min(28, (wid - 16) / (nm.length * 0.62)));
-      hh += `<div class="cnh" style="left:${f1(mid)}px;top:${f1(hy)}px;max-width:${f1(Math.max(40, v1 - v0 - 10))}px;--h:${col.hue};--fs:${f1(fs)}px">${fl}<b>${esc(nm)}</b><small>${col.cs.length ? col.cs.length + (col.cs.length === 1 ? ' person' : ' people') : col.deaths + ' died here'}</small></div>`;
+      hh += `<div class="cnh" style="left:${f1(mid)}px;top:${f1(hy)}px;max-width:${f1(Math.max(40, v1 - v0 - 10))}px;--fs:${f1(fs)}px">${fl}<b>${esc(nm)}</b><small>${col.cs.length ? col.cs.length + (col.cs.length === 1 ? ' person' : ' people') : col.deaths + ' died here'}</small></div>`;
     });
     /* a line from the person into the country they died in, ending at a tombstone in that column's near edge; several in one row stack up */
     const stack = new Map(), sz = Math.max(15, Math.min(26, 24 * v.k));
@@ -2468,7 +2473,7 @@ function drawLanes() {
       const sx = v.x + (right ? t.c.x + W : t.c.x) * v.k, sy = v.y + (t.c.y + H / 2) * v.k;
       const ex = right ? v.x + dst.a * v.k + sz * 0.9 : v.x + dst.b * v.k - sz * 0.9, ey = sy + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * (sz + 4) + (k ? 0 : 0);
       if (Math.max(sx, ex) < 0 || Math.min(sx, ex) > vw) return;
-      const dx = (ex - sx) * 0.5, col = `hsl(${dst.hue} 55% 38%)`;
+      const dx = (ex - sx) * 0.5, col = '#B4631A';
       tl += `<path d="M${f1(sx)} ${f1(sy)}C${f1(sx + dx)} ${f1(sy)} ${f1(ex - dx)} ${f1(ey)} ${f1(ex)} ${f1(ey)}" stroke="${col}"/><circle cx="${f1(sx)}" cy="${f1(sy)}" r="3.2" fill="${col}"/>`;
       ti += `<g transform="translate(${f1(ex - sz / 2)} ${f1(ey - sz / 2)})" style="--tc:${col}"><svg width="${f1(sz)}" height="${f1(sz)}" viewBox="0 0 24 24"><path d="M5.5 22V10a6.5 6.5 0 0113 0v12z" class="tomb"/><path d="M12 8v7M9.2 10.6h5.6" class="cross"/></svg>${t.y != null && sz > 18 ? `<text x="${f1(sz / 2)}" y="${f1(sz + 9)}" text-anchor="middle">${t.y}</text>` : ''}</g>`;
     });

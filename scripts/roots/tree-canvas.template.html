@@ -658,7 +658,7 @@ html:not(.ph):has(#info.on) #infoTab{top:92px;transform:none}
 #namesview .nmt,#namesview .nmx{fill:none;stroke-linecap:round}
 #namesview .nmt{stroke:var(--lk-accent);opacity:.8}
 #namesview .nmx{stroke:var(--lk-faint);stroke-dasharray:3 8}
-#namesview .nml{position:absolute;transform:translate(-50%,-50%);padding:2px 9px;border-radius:999px;background:var(--lk-card);border:2px solid var(--lk-line);font:800 11px Nunito,system-ui;color:var(--lk-soft);white-space:nowrap}
+#namesview .nml{pointer-events:auto;cursor:pointer;position:absolute;transform:translate(-50%,-50%);padding:2px 9px;border-radius:999px;background:var(--lk-card);border:2px solid var(--lk-line);font:800 11px Nunito,system-ui;color:var(--lk-soft);white-space:nowrap}
 #namesview .nm{position:absolute;box-sizing:border-box;padding:11px 14px 9px;background:var(--lk-card);border:2px solid var(--lk-line);border-radius:18px;box-shadow:0 4px 0 var(--lk-line);cursor:grab;touch-action:none;user-select:none;display:flex;flex-direction:column;gap:3px}
 #namesview .nm.dragging{cursor:grabbing;z-index:6;box-shadow:0 10px 0 var(--lk-line);border-color:var(--lk-accent)}
 #namesview .nmlabs{position:absolute;left:0;top:0;pointer-events:none}
@@ -670,8 +670,8 @@ html:not(.ph):has(#info.on) #infoTab{top:92px;transform:none}
 #namesview .nmbar{display:block;height:6px;border-radius:4px;background:var(--lk-line);overflow:hidden}#namesview .nmbar u{display:block;height:100%;background:var(--lk-accent);border-radius:4px;text-decoration:none}
 #namesview .nm small{font:800 10.5px Nunito,system-ui;color:var(--lk-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #namesview .nmhere{position:absolute;top:-11px;right:12px;padding:1px 9px;border-radius:999px;background:var(--lk-accent);color:#fff;font:900 10.5px Nunito,system-ui;letter-spacing:.03em;text-transform:uppercase}
-#namesview .nmpeek{position:absolute;left:-2px;right:-2px;top:calc(100% + 8px);margin:0;padding:8px 12px;list-style:none;max-height:260px;overflow:auto;background:var(--lk-card);border:2px solid var(--lk-accent);border-radius:14px;box-shadow:0 6px 0 var(--lk-line);font:700 12px/1.45 Nunito,system-ui;cursor:default}
-#namesview .nmpeek small{display:inline;color:var(--lk-mute)}
+#namesview .nmpeek{position:absolute;left:-2px;min-width:calc(100% + 4px);width:max-content;max-width:340px;box-sizing:border-box;top:calc(100% + 8px);margin:0;padding:8px 12px;list-style:none;max-height:260px;overflow:auto;background:var(--lk-card);border:2px solid var(--lk-accent);border-radius:14px;box-shadow:0 6px 0 var(--lk-line);font:700 12px/1.45 Nunito,system-ui;cursor:default}
+#namesview .nmpeek li{white-space:nowrap}#namesview .nmpeek small{display:inline;color:var(--lk-mute)}#namesview .nmpeek a.nmp{color:var(--lk-ink);text-decoration:underline;text-decoration-color:var(--lk-line);text-underline-offset:2px;cursor:pointer}#namesview .nmpeek a.nmp:hover{color:var(--lk-accent);text-decoration-color:var(--lk-accent)}
 #namesCap{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--dock-h,190px) + 22px);z-index:5;max-width:min(640px,calc(100vw - 420px));padding:8px 14px;background:var(--lk-card);border:2px solid var(--lk-line);border-radius:16px;box-shadow:0 3px 0 var(--lk-line);font:700 12.5px/1.4 Nunito,system-ui;color:var(--lk-soft);text-align:center}
 #namesCap[hidden]{display:none}#namesCap b{color:var(--lk-ink);font-weight:900;margin-right:4px}#namesCap small{display:block;font-size:11px;color:var(--lk-mute)}
 html:not(.ph):has(#info.on) #namesCap{left:calc((100vw - 340px) / 2)}
@@ -743,6 +743,18 @@ html:not(.rzopen) #rz{display:none}
 #playBar .pbl .pwho{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--lk-ink);font-weight:900}
 #playBar .pbm{flex:none;border:1.5px solid var(--lk-line);background:transparent;color:var(--lk-soft);border-radius:10px;font:800 11px Nunito,system-ui;padding:5px 8px;cursor:pointer;white-space:nowrap}#playBar .pbm.on{background:var(--lk-ink);color:var(--lk-card);border-color:var(--lk-ink)}
 @media (max-width:640px){#playBar .pbm{order:5}}
+.pill.cxp{background:var(--lk-card);border:1.5px solid var(--lk-line);color:var(--lk-ink);text-decoration:none;cursor:pointer}.pill.cxp .lk-icon{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.pill.cxp:hover,.pill.cxp:focus-visible{border-color:#D9822B;color:#C4721F}
+
+#namesview .nml:hover,#namesview .nml:focus-visible,#namesview .nml.open{border-color:var(--lk-accent);color:var(--lk-ink);outline:none}
+#namesview .nmcouples{position:absolute;z-index:5;transform:translate(-50%,16px);width:300px;max-height:280px;overflow:auto;padding:9px 13px;background:var(--lk-card);border:2px solid var(--lk-accent);border-radius:14px;box-shadow:0 6px 0 var(--lk-line);font:700 12px/1.4 Nunito,system-ui;color:var(--lk-ink);pointer-events:auto;cursor:default}
+#namesview .nmcouples b{display:block;margin-bottom:4px;font:400 15px "Lilita One",system-ui}
+#namesview .nmcouples ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+#namesview .nmcouples small{color:var(--lk-mute);font-weight:800}
+#namesview .nmand{color:var(--lk-accent)}
+#namesview .nmcouples a.nmp{color:var(--lk-ink);text-decoration:underline;text-decoration-color:var(--lk-line);text-underline-offset:2px;cursor:pointer}#namesview .nmcouples a.nmp:hover{color:var(--lk-accent);text-decoration-color:var(--lk-accent)}
+#namesview .nmd{fill:none;stroke-linecap:round;stroke:var(--lk-mute);opacity:.6}
+#namesview .nml.nmld{border-style:dashed;font-weight:700}
+#namesview .nmcouples>small{display:block;margin:-2px 0 5px}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -1578,13 +1590,14 @@ html:not(.rzopen) #rz{display:none}
   }
   function nameTree(M, i, scope) {
     const root = M.P[i]; if (!root) return null;
-    const blood = scope === 'blood';   /* 'blood': every blood relative (ancestors, and everyone descended from any of them) with their spouses; otherwise the ancestors only */
+    const blood = scope === 'blood' || scope === 'all';   /* 'all': the bloodline, plus the whole ancestry of every spouse and of every relative drawn: in-laws' families too */   /* 'blood': every blood relative (ancestors, and everyone descended from any of them) with their spouses; otherwise the ancestors only */
     const gen = new Map([[i, 0]]), q = [i];
     for (let h = 0; h < q.length; h++) { const p = M.P[q[h]], g = gen.get(q[h]); for (const r of [p.f, p.m]) if (r >= 0 && M.P[r] && !gen.has(r)) { gen.set(r, g + 1); q.push(r); } }
     const mem = new Map();
     if (blood) {
       bloodSet(M, i, Infinity).forEach(j => mem.set(j, gen.has(j) ? gen.get(j) : 0));
       [...mem.keys()].forEach(j => { const p = M.P[j]; p.sp.forEach(s => { if (M.P[s] && !mem.has(s)) mem.set(s, 0); }); [p.f, p.m].forEach(y => { if (y >= 0 && M.P[y] && !mem.has(y)) mem.set(y, 0); }); });
+      if (scope === 'all') { const st = [...mem.keys()]; while (st.length) { const j = st.pop(); [M.P[j].f, M.P[j].m].forEach(y => { if (y >= 0 && M.P[y] && !mem.has(y)) { mem.set(y, 0); st.push(y); } }); } }
     } else gen.forEach((g, j) => mem.set(j, g));
     const nodes = new Map();
     const add = (j, g) => {
@@ -1596,27 +1609,38 @@ html:not(.rzopen) #rz{display:none}
     };
     mem.forEach((g, j) => add(j, g));
     const edges = new Map(), seen = new Set(), pair = (a, b) => a < b ? a + '|' + b : b + '|' + a;
-    const link = (a, b) => {
+    const link = (a, b, implied) => {
       const ka = surKey(M, a).k, kb = surKey(M, b).k;
       if (ka === kb) { nodes.get(ka).self++; return; }
-      const key = ka < kb ? ka + '|' + kb : kb + '|' + ka; let e = edges.get(key); if (!e) edges.set(key, e = { a: ka < kb ? ka : kb, b: ka < kb ? kb : ka, n: 0 }); e.n++;
+      const key = ka < kb ? ka + '|' + kb : kb + '|' + ka; let e = edges.get(key); if (!e) edges.set(key, e = { a: ka < kb ? ka : kb, b: ka < kb ? kb : ka, n: 0, c: [] }); e.n++;
+      e.c.push(ka < kb ? [a.i, b.i, implied ? 1 : 0] : [b.i, a.i, implied ? 1 : 0]);   /* the couple behind the count, a's name first: indices only */
     };
     const couple = (x, y) => { const k = pair(x, y); if (!seen.has(k)) { seen.add(k); link(M.P[x], M.P[y]); } };
-    mem.forEach((g, j) => { const p = M.P[j]; if (p.f >= 0 && p.m >= 0 && M.P[p.f] && M.P[p.m]) couple(p.f, p.m); });
+    /* only a couple that are both in the family drawn: a spouse's parents are in-laws, and their marriage would join a name that has no card */
+    mem.forEach((g, j) => { const p = M.P[j]; if (p.f >= 0 && p.m >= 0 && mem.has(p.f) && mem.has(p.m)) couple(p.f, p.m); });
     /* a mother known without the father: the child carries the father's name, so the mother's name is joined to the child's (an implied marriage) */
-    mem.forEach((g, j) => { const p = M.P[j], mo = p.m >= 0 ? M.P[p.m] : null, fa = p.f >= 0 ? M.P[p.f] : null; if (mo && !fa && mo.sex === 'f' && squash(p.sur)) { const k = 'm' + j; if (!seen.has(k)) { seen.add(k); link(p, mo); } } });
+    mem.forEach((g, j) => { const p = M.P[j], mo = p.m >= 0 ? M.P[p.m] : null, fa = p.f >= 0 ? M.P[p.f] : null; if (mo && !fa && mem.has(p.m) && mo.sex === 'f' && squash(p.sur)) { const k = 'm' + j; if (!seen.has(k)) { seen.add(k); link(p, mo, true); } } });
     if (blood) mem.forEach((g, j) => M.P[j].sp.forEach(s => { if (mem.has(s) && s !== j) couple(j, s); }));
     else root.sp.forEach(s => { const o = M.P[s]; if (!o || mem.has(s)) return; mem.set(s, 0); add(s, 0); couple(i, s); });
     const rk = surKey(M, root).k, E = [...edges.values()];
-    /* depth by marriages from the focus person's name; the strongest edge to the row above is each name's parent in the layout */
-    const depth = new Map([[rk, 0]]), parent = new Map(), order = [rk];
+    /* DESCENT: a name that a parent bears and a child does not (a father written Brailey, his daughter Brayley; a mother's maiden name against her children's) is a line from the parent's name
+       to the child's, counted. A pair of names already joined by a marriage gets no second line. Only people both in the family drawn, so every line joins two names that have a card. */
+    const marr = new Set(E.map(e => e.a + '|' + e.b)), dmap = new Map();
+    mem.forEach((g, j) => { const c = M.P[j], kb = surKey(M, c).k; [c.f, c.m].forEach(y => {
+      if (y < 0 || !mem.has(y)) return; const ka = surKey(M, M.P[y]).k; if (ka === kb) return;
+      if (marr.has(ka < kb ? ka + '|' + kb : kb + '|' + ka)) return;
+      const key = ka + '>' + kb; let e = dmap.get(key); if (!e) dmap.set(key, e = { a: ka, b: kb, n: 0, c: [], d: 1 }); e.n++; e.c.push([y, j, 0]);
+    }); });
+    const D = [...dmap.values()];
+    /* depth by marriages (then descent) from the focus person's name; the strongest edge to the row above is each name's parent in the layout. A marriage is preferred to a descent line. */
+    const depth = new Map([[rk, 0]]), parent = new Map(), order = [rk], ALL = E.concat(D);
     for (let h = 0; h < order.length; h++) {
       const a = order[h];
-      E.filter(e => e.a === a || e.b === a).sort((x, y) => y.n - x.n).forEach(e => { const o = e.a === a ? e.b : e.a; if (!depth.has(o)) { depth.set(o, depth.get(a) + 1); parent.set(o, a); order.push(o); } });
+      ALL.filter(e => e.a === a || e.b === a).sort((x, y) => (x.d || 0) - (y.d || 0) || y.n - x.n).forEach(e => { const o = e.a === a ? e.b : e.a; if (!depth.has(o)) { depth.set(o, depth.get(a) + 1); parent.set(o, a); order.push(o); } });
     }
     nodes.forEach((n, k) => { if (!depth.has(k)) { depth.set(k, Math.max(...depth.values()) + 1); order.push(k); } });
     const N = [...nodes.values()].map(n => ({ ...n, depth: depth.get(n.key), parent: parent.get(n.key) || null }));
-    return { root: rk, nodes: N, edges: E, people: mem.size, ancestors: gen.size, scope: blood ? 'blood' : 'anc' };
+    return { root: rk, nodes: N, edges: E, desc: D, people: mem.size, ancestors: gen.size, scope: scope === 'all' ? 'all' : blood ? 'blood' : 'anc' };
   }
   const API = { nameTree, playSet, playSteps, family, lifeEvents, eraChanges, lines, arrange, bloodSet, fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful,
     placeAt, dateText, neighbours, edgeCost, parentLinks, ancestorStats, stopReason, otherSideHasParents, evidenceSummary, years, url, corrUrl, wikitreeUrl, searchLinks, levelOfGrade, LEVELS, playSteps, kinshipOps, opsOf, reverseOps, bloodTerm, siblingKind, archivesOnPath, ord };
@@ -1910,12 +1934,12 @@ html:not(.rzopen) #rz{display:none}
     const P = s => { if (!s) return -1; if (!pidx.has(s)) { pidx.set(s, places.length); places.push(s); } return pidx.get(s); };
     const O = s => { if (!s) return -1; if (!oidx.has(s)) { oidx.set(s, occs.length); occs.push(s); } return oidx.get(s); };
     let drawn = (tree && tree.people) || [];
-    if (arch) drawn = drawn.filter(p => !((p.dy == null || p.dye) && (p.by || 0) > 1920));
+    if (arch) drawn = drawn.filter(p => p.living === true || !((p.dy == null || p.dye) && (p.by || 0) > 1920));   /* a `living: true` row is name-only: nothing else of theirs is carried, so there is nothing for the lock to protect */
     /* People the Roots & Routes maps cannot draw (no place, or no year) still have names, dates and relatives, and the canvas needs no place: they are searchable and
        draw as cards here (fl bit 64 says so). Only people the page handed over with their details (not a hidden living person, who carries nothing). */
-    const und = arch ? [] : ((tree && tree.undrawn) || []).filter(u => u && (u.given !== undefined || u.sur !== undefined)).map(u => ({
+    const und = ((tree && tree.undrawn) || []).filter(u => u && (u.given !== undefined || u.sur !== undefined)).map(u => ({
       id: u.id, sex: u.sex || 'u', given: u.given || '', sur: u.sur || '', by: u.by == null ? null : u.by, bp: u.place || null, dy: u.dy == null ? null : u.dy, dp: null,
-      father: u.father, mother: u.mother, spouse: u.spouse || [], kids: u.kids || [], occ: u.occ || null, bye: !!u.bye, dye: !!u.dye, bpe: false, unplaced: 1, hid: 0 }));
+      father: u.father, mother: u.mother, spouse: u.spouse || [], kids: u.kids || [], occ: u.occ || null, bye: !!u.bye, dye: !!u.dye, bpe: false, unplaced: 1, hid: 0, living: u.living === true })).filter(u => !arch || u.living === true || !((u.dy == null || u.dye) && (u.by || 0) > 1920));   /* an `undrawn` row may carry `living: true` too: name and family only, like a living row in people */
     const src = drawn.concat(und);
     /* a drawn person's own father, mother and spouse fields stop at the people the page could draw: put back the ones that point to a person only this canvas draws */
     const extraF = new Map(), extraM = new Map(), extraS = new Map();
@@ -1927,10 +1951,13 @@ html:not(.rzopen) #rz{display:none}
     const g = ref => (ref != null && gidx.has(ref)) ? gidx.get(ref) : -1;
     const rows = src.map(p => {
       const hid = !!p.hid;
-      const fl = (p.bye ? 1 : 0) | (p.dye ? 2 : 0) | (p.bpe ? 4 : 0) | (hid ? 8 : 0) | (p.mye ? 16 : 0) | (hid ? 1 : 0) | (p.unplaced ? 64 : 0);
+      /* an archive that publishes a living person's NAME (and nothing else) on their own page sends `living: true`: the canvas draws them as a living card, name and family
+         only, with no dates, places, route or records, exactly as the archive prints them. A person the archive does not name is not sent, so is not drawn. */
+      const lv = !!(arch && !hid && p.living === true), blank = hid || lv;
+      const fl = (p.bye ? 1 : 0) | (p.dye ? 2 : 0) | (p.bpe ? 4 : 0) | (blank ? 8 : 0) | (p.mye ? 16 : 0) | (hid ? 1 : 0) | (p.unplaced ? 64 : 0);
       /* an archive's route: the stops between birth and death; one that only repeats birth then death adds nothing */
       let stops = 0;
-      if (arch && !hid && Array.isArray(p.route)) {
+      if (arch && !blank && Array.isArray(p.route)) {
         const st = p.route.filter(s => s && s[0]).map(s => [P(s[0]), s.length > 1 ? s[1] : null, s.length > 2 && s[2] ? 1 : 0]);
         const two = [P(p.bp), P(p.dp)].filter(x => x >= 0);
         stops = (st.length < 3 && st.map(x => x[0]).join() === two.join()) ? 0 : (st.length ? st : 0);
@@ -1938,12 +1965,12 @@ html:not(.rzopen) #rz{display:none}
       const gr = x => (arch && arch.graded && Number.isInteger(x)) ? x : -1;
       return [
         0, p.id, p.sex || 'u', hid ? '' : (p.given || ''), p.sur || '',
-        p.by == null ? null : p.by, P(hid ? null : p.bp), hid ? null : (p.dy == null ? null : p.dy), P(hid ? null : p.dp),
+        blank ? null : (p.by == null ? null : p.by), P(blank ? null : p.bp), blank ? null : (p.dy == null ? null : p.dy), P(blank ? null : p.dp),
         g(p.father != null ? p.father : (p.unplaced ? null : extraF.get(p.id))), g(p.mother != null ? p.mother : (p.unplaced ? null : extraM.get(p.id))), gr(p.fg), gr(p.mg),
         [...new Set([...(p.spouse || []), ...(p.unplaced ? [] : (extraS.get(p.id) || []))])].map(g).filter(x => x >= 0), (p.kids || []).map(g).filter(x => x >= 0),
-        (arch && !hid && typeof p.page === 'string') ? p.page : '', O(hid ? null : p.occ), fl, arch && Array.isArray(p.surAlso) ? p.surAlso : 0, stops, hid ? 0 : (p.my || 0),
-        '', hid || typeof p.bd !== 'string' ? '' : p.bd, hid || typeof p.dd !== 'string' ? '' : p.dd,   /* 22, 23: the full dates, when the tree carries them */
-        arch && !hid && Number.isInteger(p.cx) && p.cx > 0 ? p.cx : 0,   /* 24: how many corrections the archive has recorded about them (a count only) */
+        (arch && !blank && typeof p.page === 'string') ? p.page : '', O(blank ? null : p.occ), fl, arch && Array.isArray(p.surAlso) ? p.surAlso : 0, stops, blank ? 0 : (p.my || 0),
+        '', blank || typeof p.bd !== 'string' ? '' : p.bd, blank || typeof p.dd !== 'string' ? '' : p.dd,   /* 22, 23: the full dates, when the tree carries them */
+        arch && !blank && Number.isInteger(p.cx) && p.cx > 0 ? p.cx : 0,   /* 24: how many corrections the archive has recorded about them (a count only) */
       ];
     });
     /* an archive's names-only spouses (a wife or husband it names but holds no record for): a row with no dates, places or records (fl bit 32), joined by the marriage
@@ -2189,7 +2216,7 @@ const ICON = {
   menu: 'M4 7h16M4 12h16M4 17h16',
   layers: 'M12 3.5l9 4.8-9 4.8-9-4.8 9-4.8zM3 12.6l9 4.8 9-4.8M3 17l9 4.8 9-4.8', play: 'M8 5.5v13l11-6.5z', pause: 'M8 5v14M16 5v14',
   arrange: 'M9 3.5h6v5H9zM12 8.5V12M6 12h12M6 12v3M18 12v3M3 15.5h6v5H3zM15 15.5h6v5h-6z', relate: 'M4 8h14l-3-3.5M20 16H6l3 3.5', undo: 'M9 14L4 9l5-5M4 9h10a6 6 0 010 12h-4', fit: 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5',
-  plus: 'M12 5v14M5 12h14', compass: '<circle cx="12" cy="12" r="8.5"/><path d="M15.6 8.4l-2 5.2-5.2 2 2-5.2z"/>', star: 'M12 3.6l2.5 5.3 5.8.7-4.3 4 1.1 5.7-5.1-2.9-5.1 2.9 1.1-5.7-4.3-4 5.8-.7z', minus: 'M5 12h14', info: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.6v.2"/>',
+  plus: 'M12 5v14M5 12h14', compass: '<circle cx="12" cy="12" r="8.5"/><path d="M15.6 8.4l-2 5.2-5.2 2 2-5.2z"/>', help: '<circle cx="12" cy="12" r="9"/><path d="M9.4 9.6a2.7 2.7 0 115.1 1.2c-.5 1-2.5 1.6-2.5 3.2M12 17.4v.1"/>', flag: 'M5.5 21V3.5M5.5 4.5h12l-2.8 4.2 2.8 4.2H5.5', star: 'M12 3.6l2.5 5.3 5.8.7-4.3 4 1.1 5.7-5.1-2.9-5.1 2.9 1.1-5.7-4.3-4 5.8-.7z', minus: 'M5 12h14', info: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.6v.2"/>',
   search: '<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/>', theme: '<circle cx="12" cy="12" r="8"/><path d="M12 4v16"/><path d="M12 4a8 8 0 010 16z" fill="currentColor"/>',
   clear: 'M5 19l9-9 4 4-5 5H5zM13 7l2-2 4 4-2 2', gear: '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>',
   map: 'M4 6l5-2 6 2 5-2v14l-5 2-6-2-5 2zM9 4v14M15 6v14',
@@ -2264,7 +2291,7 @@ function undo() {
   clearAll(true);
   restore(d); S.view = d.view; applyView(); S.path = null; clearPathUi();
   S.cards.forEach(c => { c.el.classList.remove('pop'); });
-  refreshAll(); drawEdges(); save(); syncButtons(); toast('Undone');
+  refreshAll(); drawEdges(); save(); syncButtons(); if (typeof hideHint === 'function') hideHint(); toast('Undone');
   if (S._restorePath) { const [a, b] = S._restorePath; S._restorePath = null; showPath(a, b, { quiet: true, noPlace: true }); }
 }
 
@@ -2358,7 +2385,7 @@ function cardInner(c) {
   const ln = lineOf(c.i);
   let h = `<div class="cb" title="${esc(p.name)}${a.k === 'you' ? '' : ' · ' + esc(a.name) + ' archive'}${p.occ ? ' · ' + esc(p.occ) : ''} · ${esc(TC.evidenceSummary(M, p))}"><div class="nm">${esc(p.name)}${p.sex === 'f' || p.sex === 'm' ? `<span class="sx ${p.sex === 'f' ? 'mo' : 'fa'}" title="${p.sex === 'f' ? 'Female' : 'Male'}">${p.sex === 'f' ? '&#9792;' : '&#9794;'}&#xFE0E;</span>` : ''}</div>${dates}
     <div class="meta">${a.k === 'you' ? (ln ? `<span class="ar ln" style="--lc:${ln.col}" title="On the ${esc(ln.names)} line from the marked person's grandparents">${esc(ln.names)}</span>` : '') : `<span class="ar">${esc(a.name)}</span>`}${chips}${cxMark(p, a)}<span class="seals">${seals.join('')}</span></div></div>`;
-  if (c.key === S.mark) h += `<span class="mkb" title="The marked person: the canvas shows how everyone you select is related to them">&#9733;</span>`;
+  if (c.key === S.mark) h += `<span class="mkb" title="The marked person: the canvas shows how everyone you select is related to them">&#9873;</span>`;
   { const fx = fixOf(p); if (fx) h += `<button class="fxb" data-act="fixes" title="${fx.length} ${fx.length === 1 ? 'thing' : 'things'} on your fix list for ${esc(p.name)}: click to see what and how to fix it" aria-label="${fx.length} on the fix list">!</button>` ;  }
   /* ancestors */
   const parentCards = [p.f, p.m].filter(q => q >= 0 && !cardOfPerson(q));
@@ -3572,11 +3599,12 @@ addEventListener('resize', () => playPlace());
    One card per surname family with how many people bear it and their years; a line between two names for the marriages that join them, counted. The names are laid out in rings around the
    focus person's own name; each ring is one more marriage away, and any name can be dragged. The counting is TC.nameTree (logic.js); this file lays it out and draws it in the canvas world,
    so pan and zoom work as they always do. The people cards are hidden while this look is on and come back untouched when it is changed. */
-const NAMES = { box: null, sig: '', focus: null, open: null, scope: 'blood', pos: {}, psig: '', T: null, by: null, drag: null, dragEnd: 0 };
-try { if (!EMBED && localStorage.getItem('tcNamesScope') === 'anc') NAMES.scope = 'anc'; } catch (e) { /* ignore */ }
+const NAMES = { box: null, sig: '', focus: null, open: null, scope: 'blood', pos: {}, psig: '', openEdge: null, T: null, by: null, drag: null, dragEnd: 0 };
+try { if (!EMBED) { const sv = localStorage.getItem('tcNamesScope'); if (sv === 'anc' || sv === 'all') NAMES.scope = sv; } } catch (e) { /* ignore */ }
 const namesLook = () => document.documentElement.getAttribute('data-theme') === 'names';
 function namesBox() { return namesLook() ? NAMES.box : null; }
 function namesFocus() {
+  if (!S.cards.size) { NAMES.focus = null; NAMES.open = null; NAMES.openEdge = null; return null; }   /* an empty canvas shows no names, whoever was last looked at or marked */
   const k = S.sel.size === 1 ? [...S.sel][0] : null; let p = k && M.byKey.get(k);
   if (!p && NAMES.focus) p = M.byKey.get(NAMES.focus);   /* clicking empty canvas deselects; the names stay on the last person looked at */
   if (!p) p = markedPerson();
@@ -3614,13 +3642,34 @@ function namesEdge(a, b, tree) {   /* a gentle curve between two names; a marria
   const x0 = a.x + NM_W / 2, y0 = a.y + NM_H / 2, x1 = b.x + NM_W / 2, y1 = b.y + NM_H / 2, k = tree ? 0.92 : 0.5, cx = (x0 + x1) / 2 * k, cy = (y0 + y1) / 2 * k;
   return { d: `M${f1(x0)} ${f1(y0)}Q${f1(cx)} ${f1(cy)} ${f1(x1)} ${f1(y1)}`, mx: 0.25 * x0 + 0.5 * cx + 0.25 * x1, my: 0.25 * y0 + 0.5 * cy + 0.25 * y1 };
 }
+/* the couples behind a marriage pill: who married whom, their years, when and where the archive says. A couple with a living person is counted but not named. */
+function namesCouples(e, by, q) {
+  const yr = p => p.by != null ? p.by + (p.dy != null ? '–' + p.dy : '') : '';
+  const who = p => `<a href="#" class="nmp" data-nmp="${esc(p.key)}" title="Show ${esc(p.name)}">${esc(p.name)}</a>${yr(p) ? ' <small>' + yr(p) + '</small>' : ''}`;
+  if (e.d) {   /* a line of descent: parent, then child, in birth order */
+    const rs = e.c.map(([x, y]) => ({ A: M.P[x], B: M.P[y] })).sort((r, q) => (r.B.by == null) - (q.B.by == null) || r.B.by - q.B.by);
+    const dl = rs.map(r => (r.A.living || r.B.living) ? '<li>A parent and child, one of them living <small>(not named)</small></li>' : `<li>${who(r.A)} <span class="nmand">&rarr;</span> ${who(r.B)}</li>`).join('');
+    const a = by.get(e.a), b = by.get(e.b);
+    return `<div class="nmcouples" style="left:${f1(q.mx)}px;top:${f1(q.my)}px"><b>${esc(a.label || 'Surname not recorded')} &rarr; ${esc(b.label || 'Surname not recorded')}</b><small>a parent&rsquo;s name and their child&rsquo;s</small><ul>${dl}</ul></div>`;
+  }
+  const rows = e.c.map(([x, y, imp]) => { const A = M.P[x], B = M.P[y]; return { A, B, imp, yr: (A.my || B.my) || null, est: !!((A.my ? A.fl : B.fl) & 16) }; })
+    .sort((r, s) => (r.yr == null) - (s.yr == null) || r.yr - s.yr);
+  const li = rows.map(r => (r.A.living || r.B.living)
+    ? '<li>A marriage with a living person <small>(not named)</small></li>'
+    : `<li>${who(r.A)} <span class="nmand">&amp;</span> ${who(r.B)}${r.yr ? ` <small>married ${r.est ? 'c. ' : ''}${r.yr}</small>` : ' <small>no marriage year recorded</small>'}${r.imp ? ' <small>(implied: the child carries the father\'s name)</small>' : ''}</li>`).join('');
+  const a = by.get(e.a), b = by.get(e.b);
+  return `<div class="nmcouples" style="left:${f1(q.mx)}px;top:${f1(q.my)}px"><b>${esc(a.label || 'Surname not recorded')} &amp; ${esc(b.label || 'Surname not recorded')}</b><ul>${li}</ul></div>`;
+}
 function namesPaintEdges() {
   const host = $('#namesview'), T = NAMES.T, by = NAMES.by; if (!host || !T) return 0;
   let svg = '', lab = '', marriages = 0;
-  T.edges.forEach(e => {
-    const a = by.get(e.a), b = by.get(e.b), tree = a._p === b.key || b._p === a.key, q = namesEdge(a, b, tree); marriages += e.n;
-    svg += `<path d="${q.d}" class="${tree ? 'nmt' : 'nmx'}" style="stroke-width:${f1(Math.min(11, 2.5 + e.n * 1.6))}px"/>`;
-    lab += `<span class="nml" style="left:${f1(q.mx)}px;top:${f1(q.my)}px">${e.n} ${e.n === 1 ? 'marriage' : 'marriages'}</span>`;
+  T.edges.concat(T.desc || []).forEach(e => {
+    const a = by.get(e.a), b = by.get(e.b); if (!a || !b) return;
+    const tree = a._p === b.key || b._p === a.key, q = namesEdge(a, b, tree); if (!e.d) marriages += e.n;
+    svg += `<path d="${q.d}" class="${e.d ? 'nmd' : tree ? 'nmt' : 'nmx'}" style="stroke-width:${f1(e.d ? Math.min(7, 2 + e.n * 0.8) : Math.min(11, 2.5 + e.n * 1.6))}px"/>`;
+    const ek = (e.d ? 'd:' : '') + e.a + '|' + e.b, isOpen = NAMES.openEdge === ek;
+    const word = e.d ? (e.n === 1 ? 'child' : 'children') : (e.n === 1 ? 'marriage' : 'marriages');
+    lab += `<button type="button" class="nml${e.d ? ' nmld' : ''}${isOpen ? ' open' : ''}" data-ne="${esc(ek)}" style="left:${f1(q.mx)}px;top:${f1(q.my)}px" aria-expanded="${isOpen}" title="${e.d ? 'A parent&rsquo;s name and their child&rsquo;s: click to see who' : 'Click to see ' + (e.n === 1 ? 'this marriage' : 'these marriages')}">${e.d ? '&rarr; ' : ''}${e.n} ${word}</button>${isOpen ? namesCouples(e, by, q) : ''}`;
   });
   const sv = host.querySelector('.nmsvg'), lb = host.querySelector('.nmlabs'); if (sv) sv.innerHTML = svg; if (lb) lb.innerHTML = lab;
   return marriages;
@@ -3632,7 +3681,7 @@ function namesBoxOf(T) {
 }
 function namesPeople(n) {
   const rows = n.people.map(j => M.P[j]).filter(p => !p.living).sort((a, b) => (a.by == null) - (b.by == null) || a.by - b.by);
-  const show = rows.slice(0, 12).map(p => `<li>${esc(p.given || '(no given name)')} <small>${TC.years(p)}</small></li>`).join('');
+  const show = rows.slice(0, 12).map(p => `<li><a href="#" class="nmp" data-nmp="${esc(p.key)}" title="Show ${esc(p.name)}">${esc(p.given || '(no given name)')}</a> <small>${TC.years(p)}</small></li>`).join('');
   return `<ul class="nmpeek">${show}${rows.length > 12 ? `<li><small>and ${rows.length - 12} more</small></li>` : ''}${n.living ? `<li><small>${n.living} living, not listed</small></li>` : ''}</ul>`;
 }
 function drawNames(force) {
@@ -3645,7 +3694,7 @@ function drawNames(force) {
   const sig = p.key + '|' + NAMES.open + '|' + NAMES.scope; if (sig === NAMES.sig && !force) return;
   const changed = NAMES.focus !== p.key; NAMES.focus = p.key; NAMES.sig = sig;
   const T = TC.nameTree(M, p.i, NAMES.scope), by = namesLayout(T), max = Math.max(...T.nodes.map(n => n.n));
-  const ps = p.key + '|' + NAMES.scope; if (ps !== NAMES.psig) { NAMES.psig = ps; NAMES.pos = {}; }
+  const ps = p.key + '|' + NAMES.scope; if (ps !== NAMES.psig) { NAMES.psig = ps; NAMES.pos = {}; NAMES.openEdge = null; }
   T.nodes.forEach(n => { const o = NAMES.pos[n.key]; if (o) { n.x = o.x; n.y = o.y; } });
   NAMES.T = T; NAMES.by = by;
   let html = '';
@@ -3663,8 +3712,8 @@ function drawNames(force) {
   const marriages = namesPaintEdges(), moved = Object.keys(NAMES.pos).length > 0;
   cap.hidden = false;
   const sc = NAMES.scope;
-  cap.innerHTML = `<b>${sc === 'blood' ? 'Names in the bloodline of' : 'Names behind'} ${esc(p.name)}</b> ${T.people.toLocaleString()} ${T.people === 1 ? 'person' : 'people'} in ${T.nodes.length} ${T.nodes.length === 1 ? 'name' : 'names'}, ${marriages} ${marriages === 1 ? 'marriage' : 'marriages'}.
-    <span class="nmsc" role="group" aria-label="What to count"><button type="button" data-scope="blood" class="${sc === 'blood' ? 'on' : ''}">Whole bloodline</button><button type="button" data-scope="anc" class="${sc === 'anc' ? 'on' : ''}">Ancestors only</button></span>
+  cap.innerHTML = `<b>${sc === 'blood' ? 'Names in the bloodline of' : sc === 'all' ? 'Every name around' : 'Names behind'} ${esc(p.name)}</b> ${T.people.toLocaleString()} ${T.people === 1 ? 'person' : 'people'} in ${T.nodes.length} ${T.nodes.length === 1 ? 'name' : 'names'}, ${marriages} ${marriages === 1 ? 'marriage' : 'marriages'}${T.desc && T.desc.length ? ' and ' + T.desc.length + ' ' + (T.desc.length === 1 ? 'line' : 'lines') + ' of descent' : ''}.
+    <span class="nmsc" role="group" aria-label="What to count"><button type="button" data-scope="blood" class="${sc === 'blood' ? 'on' : ''}">Whole bloodline</button><button type="button" data-scope="all" class="${sc === 'all' ? 'on' : ''}" title="The bloodline, plus the whole ancestry of every spouse: the in-laws' families too">With in-laws</button><button type="button" data-scope="anc" class="${sc === 'anc' ? 'on' : ''}">Ancestors only</button></span>
     <small>Drag a name to move it${moved ? ' · <a href="#" data-tidy="1">Tidy up</a>' : ''} · click one to see who · select or mark someone else to change the centre.</small>`;
   if (changed) fit();
 }
@@ -3672,6 +3721,15 @@ document.addEventListener('click', e => {
   const sb = e.target.closest && e.target.closest('#namesCap [data-scope]');
   if (sb) { NAMES.scope = sb.dataset.scope; NAMES.open = null; try { if (!EMBED) localStorage.setItem('tcNamesScope', NAMES.scope); } catch (x) { /* ignore */ } drawNames(true); fit(); return; }
   if (e.target.closest && e.target.closest('#namesCap [data-tidy]')) { e.preventDefault(); NAMES.pos = {}; drawNames(true); fit(); return; }
+  const pa = e.target.closest && e.target.closest('#namesview .nmp');
+  if (pa && namesLook()) {   /* a name in a couple's panel: put them on the canvas if they are not there, select them (the Person panel shows them) and centre the names on them */
+    e.preventDefault(); const p = M.byKey.get(pa.dataset.nmp);
+    if (p) { if (!S.cards.has(p.key)) { const v = viewCentre(); dropPerson(p.i, v.x, v.y); } S.tab = 'person'; S.infoOpen = true; NAMES.openEdge = null; select([p.key]); drawNames(true); const c = S.cards.get(p.key); if (c) pulseCard(c); }
+    return;
+  }
+  const eb = e.target.closest && e.target.closest('#namesview .nml');
+  if (eb && namesLook()) { const k = eb.dataset.ne; NAMES.openEdge = NAMES.openEdge === k ? null : k; namesPaintEdges(); return; }
+  if (NAMES.openEdge && namesLook() && !(e.target.closest && e.target.closest('#namesview .nmcouples'))) { NAMES.openEdge = null; namesPaintEdges(); }
   const n = e.target.closest && e.target.closest('#namesview .nm'); if (!n || !namesLook()) return;
   if (Date.now() - NAMES.dragEnd < 350) return;   /* the click that ends a drag is not a click on the name */
   const k = n.dataset.nm; NAMES.open = NAMES.open === k ? null : k; drawNames(true);
@@ -3724,8 +3782,23 @@ function resHTML(p, via) {
   const on = S.cards.has(p.key), a = M.archives[p.a];
   return `<div class="res${on ? ' on' : ''}" data-i="${p.i}" style="--ac:${a.color}" title="${esc(p.name)} · ${esc(a.name)} · ${esc(TC.evidenceSummary(M, p))}"><div class="n">${esc(p.name)}</div>${via ? `<div class="via" title="Found as another form of this name, from the Record Atlas's name catalogue">as “${esc(via.charAt(0).toUpperCase() + via.slice(1))}”</div>` : ''}<div class="y">${a.k === 'you' ? '' : `<span class="ac">${esc(a.name)}</span>`}${TC.years(p)}${p.bp ? ' · ' + esc(p.bp) : ''}</div><div class="e">${esc(TC.evidenceSummary(M, p))}</div><button class="rplay" data-i="${p.i}" title="Play: build ${esc(p.name)}'s tree a generation at a time" aria-label="Play the tree of ${esc(p.name)}">${icon('play', 'lk-icon')}</button>${on ? '<span class="mk">&#10003;</span>' : ''}</div>`;
 }
+/* the search box tidies itself away about 10 seconds after a search has been made, so it stops covering the canvas. It waits while the cursor is in the box or the pointer is over it,
+   and the eye button brings it back. */
+let shelfT = 0, shelfToldOnce = false;
+function shelfArm() {
+  clearTimeout(shelfT);
+  shelfT = setTimeout(function tick() {
+    const h = document.documentElement.classList, dock = $('.dock');
+    if (h.contains('shelfoff') || !dock) return;
+    if (!S.cards.size) return;   /* nothing on the canvas: the search is the only way to start, so it stays */
+    if (document.activeElement === $('#q') || dock.matches(':hover') || S.rzArm != null) { shelfT = setTimeout(tick, 4000); return; }
+    h.add('shelfoff'); $('#bShelf').setAttribute('aria-pressed', 'false'); dockH();
+    if (!shelfToldOnce) { shelfToldOnce = true; toast('Search tucked away. The eye button brings it back.', 3200); }
+  }, 10000);
+}
 function runSearch() {
   const q = $('#q').value;
+  if (q.trim()) shelfArm();
   const r = TC.search(M, q, { archives: S.filter, limit: 80 });
   lastResults = r.list;
   const sh = $('#shelf');
@@ -3739,6 +3812,7 @@ function runSearch() {
   sh.scrollLeft = 0;
 }
 function addFromResult(p, pt) {
+  shelfArm();
   const i = p.i !== undefined ? p.i : p;
   const rel = S.relateFrom, wasEmpty = !S.cards.size;
   const c = pt ? dropPerson(i, pt.x, pt.y) : (() => { const v = viewCentre(); const sel = [...S.sel].map(k => S.cards.get(k)).filter(Boolean)[0]; return dropPerson(i, sel ? sel.x + W / 2 + W + 60 : v.x, sel ? sel.y + H / 2 + 30 : v.y); })();
@@ -3796,7 +3870,7 @@ function runSearchMarks() { document.querySelectorAll('#shelf .res').forEach(el 
   const st = $('#stage'), ptrs = new Map(); let pan = null, pinch = null, drag = null, raf = 0;
   const redraw = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; drawEdges(); }); };
   st.addEventListener('pointerdown', e => {
-    if (e.target.closest('.card') || e.target.closest('[data-br]') || e.target.closest('#namesview .nm') || e.target.closest('.tt .tg')) return;
+    if (e.target.closest('.card') || e.target.closest('[data-br]') || e.target.closest('#namesview .nm') || e.target.closest('#namesview .nml') || e.target.closest('#namesview .nmcouples') || e.target.closest('.tt .tg')) return;
     ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY }); st.setPointerCapture(e.pointerId);
     if (ptrs.size === 1) { pan = { x: e.clientX, y: e.clientY, vx: S.view.x, vy: S.view.y, moved: false }; closePop(); }
     if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), k: S.view.k, cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2, vx: S.view.x, vy: S.view.y }; pan = null; }
@@ -4015,20 +4089,19 @@ function personPanel() {
   const kids = p.ch.length, sps = p.sp.map(s => M.P[s].name);
   const brs = (M.bridgesOf.get(p.i) || []);
   return `<h3>${esc(p.name)}</h3>
-    <div>${link ? `<a class="pill ac" style="--ac:${a.color}" href="${esc(link)}" target="_blank" rel="noopener" title="Open ${esc(p.name)} in the ${esc(a.name)} archive">${esc(a.name)} archive &nearr;</a>` : a.k === 'you' ? (() => { const ln = lineOf(p.i); return ln ? `<span class="pill ac" style="--ac:${ln.col}" title="On the ${esc(ln.names)} line from the marked person's grandparents">${esc(ln.names)} line</span>` : ''; })() : `<span class="pill ac" style="--ac:${a.color}">${esc(a.name)} archive</span>`}<span class="pill">${TC.years(p)}</span>${p.occ ? `<span class="pill">${esc(p.occ)}</span>` : ''}</div>
+    <div>${link ? `<a class="pill ac" style="--ac:${a.color}" href="${esc(link)}" target="_blank" rel="noopener" title="Open ${esc(p.name)} in the ${esc(a.name)} archive">${esc(a.name)} archive &nearr;</a>` : a.k === 'you' ? (() => { const ln = lineOf(p.i); return ln ? `<span class="pill ac" style="--ac:${ln.col}" title="On the ${esc(ln.names)} line from the marked person's grandparents">${esc(ln.names)} line</span>` : ''; })() : `<span class="pill ac" style="--ac:${a.color}">${esc(a.name)} archive</span>`}<span class="pill">${TC.years(p)}</span>${p.occ ? `<span class="pill">${esc(p.occ)}</span>` : ''}${corrPill(p, a)}</div>
     ${a.k === 'you' && !p.ghost ? extLinksHTML(p) : ''}
     ${searchLinksHTML(p)}
-    ${TC.corrUrl(M, p) ? `<p class="plines"><a href="${esc(TC.corrUrl(M, p))}" target="_blank" rel="noopener">${p.cx} ${p.cx === 1 ? 'correction or note' : 'corrections and notes'} recorded about ${esc(p.name)} in the ${esc(a.name)} archive &nearr;</a><br><small>Only entries that name this person are counted, so no mark does not mean nothing was corrected.</small></p>` : ''}
     ${p.ghost ? `<p class="plines lvn">Named in the archive, but there is no record of their own yet: no dates, no places, no sources. ${p.how ? 'How the name is known: ' + esc(p.how) + '.' : ''}</p>
       ${p.sp.length ? `<p class="plines">Named as the spouse of ${p.sp.map(q => `<a href="#" data-focus="${esc(M.P[q].key)}">${esc(M.P[q].name)}</a>`).join(', ')}.</p>` : ''}
       <p class="plines lvn">No parents or children are drawn for a name like this: the archive joins people to each other only from a record of their own.</p>` : ''}
     ${p.living ? `<p class="plines lvn">This person is living, so their archive records them by <strong>name and family only</strong> — no dates, no places, no records. Nothing is missing from the research.</p>` : ''}
-    <p class="plines"${p.living || p.ghost ? ' hidden' : ''}>${p.bp ? (() => { const pl = TC.placeAt(M, p, p.bp, p.by); return 'Born' + (p.bd ? ' <b>' + esc(TC.dateText(p.bd)) + '</b>' : '') + ': ' + flagHTML(pl, p.by, flagTip(pl, p.by, 'Born at'), true) + placeLinkHTML(pl) + eraNote(pl) + (p.fl & 4 ? ' <small>(place taken from a relative)</small>' : ''); })() : (p.bd ? 'Born <b>' + esc(TC.dateText(p.bd)) + '</b>. ' : '') + 'Birthplace not recorded.'}${p.dp && p.dp !== p.bp ? (() => { const pl = TC.placeAt(M, p, p.dp, p.dy); return '<br>Died' + (p.dd ? ' <b>' + esc(TC.dateText(p.dd)) + '</b>' : '') + ': ' + flagHTML(pl, p.dy, flagTip(pl, p.dy, 'Died at'), true) + placeLinkHTML(pl) + eraNote(pl); })() : (p.dy != null ? '<br>' + (p.dd ? 'Died <b>' + esc(TC.dateText(p.dd)) + '</b>. ' : '') + (p.dp && p.bp ? 'Death place: same as birth.' : 'Death place: not recorded.') : '')}</p>
+    <p class="plines"${p.living || p.ghost ? ' hidden' : ''}>${p.bp ? (() => { const pl = TC.placeAt(M, p, p.bp, p.by); return 'Born' + (p.bd ? ' <b>' + esc(TC.dateText(p.bd)) + '</b>' : '') + ': ' + flagHTML(pl, p.by, flagTip(pl, p.by, 'Born at'), true) + placeLinkHTML(pl) + eraNote(pl) + (p.fl & 4 ? ' <small>(place taken from a relative)</small>' : ''); })() : (p.bd ? 'Born <b>' + esc(TC.dateText(p.bd)) + '</b>. ' : '') + 'Birthplace not recorded.'}${p.dp && p.dp !== p.bp ? (() => { const pl = TC.placeAt(M, p, p.dp, p.dy); return '<br>Died' + (p.dd ? ' <b>' + esc(TC.dateText(p.dd)) + '</b>' : '') + ': ' + flagHTML(pl, p.dy, flagTip(pl, p.dy, 'Died at'), true) + placeLinkHTML(pl) + eraNote(pl); })() : (p.dy != null ? '<br>Died' + (p.dd ? ' <b>' + esc(TC.dateText(p.dd)) + '</b>' : '') + (p.dp && p.bp ? ': ' + (() => { const pl = TC.placeAt(M, p, p.dp, p.dy); return flagHTML(pl, p.dy, flagTip(pl, p.dy, 'Died at'), true) + placeLinkHTML(pl); })() : '. Death place not recorded.') : '')}</p>
     ${(p.fl & 64) ? `<p class="plines"><small>Not on the Roots &amp; Routes maps: ${p.bp ? 'the Atlas could not place “' + esc(p.bp) + '”, and no relative has a place it could use' : 'the file gives no birth place, and no relative has one'}${p.by == null ? ', and there is no year to place them in' : ''}. They are here because the canvas does not need a place.</small></p>` : ''}
     ${(p.fl & 3) ? `<p style="color:var(--lk-mute)"><small>~ marks a year the archive itself estimates.</small></p>` : ''}
     ${markRelHTML(p)}
     <div class="row ibrow" role="group" aria-label="What to do with this person">
-      ${p.living || p.ghost ? '' : ibtn('next', 'compass', 'Where to from here: the records to look for next, in order')}
+      ${p.living || p.ghost ? '' : ibtn('next', 'help', 'Where to from here: the records to look for next, in order')}
       ${c ? ibtn('rel', 'relate', 'How related to ' + c.name + '…') : ''}
       ${markBtnHTML(p)}
       ${p.ghost || p.living ? '' : ibtn('play', 'play', "Play the tree: build this person's tree up on the canvas a generation at a time")}</div>
@@ -4101,7 +4174,7 @@ const cmpAvail = () => SA && (cmpMode() || (M.archives.length === 1 && M.archive
 function cmpAsk(key) { try { window.parent.postMessage({ tcCompare: { key, mark: S.mark || null } }, location.origin); } catch (e) { /* no page around */ } }
 function cmpPanel1() {
   return `<h3>Compare with an archive</h3>
-    <p class="plines">Set your file beside one of the family archives. Mark a person (★) and the canvas lines up their recorded parents, grandparents and children in your file with the archive's, and says where they agree, where a detail differs, and who is only in one of them.</p>
+    <p class="plines">Set your file beside one of the family archives. Mark a person (&#9873;) and the canvas lines up their recorded parents, grandparents and children in your file with the archive's, and says where they agree, where a detail differs, and who is only in one of them.</p>
     <p class="plines"><small>Your file stays in this browser. The archive's own public tree is read, with its living people left out. The canvas redraws once; your marked person is kept.</small></p>
     <div class="row">${CMPARCH.map(([k, n]) => `<button class="lk-btn is-small" data-cmp-arch="${k}">${esc(n)}</button>`).join('')}</div>`;
 }
@@ -4110,7 +4183,7 @@ function comparePanel() {
   if (!cmpMode()) return cmpPanel1();
   const AR = M.archives[1], head = `<h3>Your file and the ${esc(AR.name)} archive</h3><div class="row"><button class="lk-btn is-small" data-cmp-off="1">Stop comparing</button></div>`;
   const p = markedPerson();
-  if (!p || p.ghost) return head + `<p class="plines">Mark a person first: open <b>Person</b> for anyone in your file (or the archive) and press <b>★ Mark this person</b>. Their possible counterparts in the other record appear here.</p>`;
+  if (!p || p.ghost) return head + `<p class="plines">Mark a person first: open <b>Person</b> for anyone in your file (or the archive) and press the <b>flag</b> button to mark them. Their possible counterparts in the other record appear here.</p>`;
   if (p.living) return head + `<p class="plines lvn">The marked person is living, so they are never compared.</p>`;
   const other = p.a === 0 ? 1 : 0, cands = window.TCC.candidates(M, p, other, 6);
   if (!cands.length) return head + `<p class="plines"><b>${esc(p.name)}</b> has no likely counterpart in the ${other ? esc(AR.name) + ' archive' : 'file'}: no one with a matching name and a birth year within a few years.</p><p class="plines"><small>Mark someone else, or a person whose name is written the same way in both.</small></p>`;
@@ -4274,6 +4347,12 @@ function searchLinksHTML(p) {
   const mono = { wikitree: 'W', ancestry: 'A', myheritage: 'MH', geni: 'G' };
   return `<div class="row slrow" role="group" aria-label="Search for ${esc(p.name)} on other sites"><span class="slcap">Search</span>${L.map(x => `<a class="sbtn sb-${x.k}" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" title="${esc(x.tip)}" aria-label="${esc(x.tip)}">${mono[x.k]}</a>`).join('')}</div>`;
 }
+/* the corrections count as one small pill with the words on hover, instead of a paragraph */
+function corrPill(p, a) {
+  const u = TC.corrUrl(M, p); if (!u) return '';
+  const tip = `${p.cx} ${p.cx === 1 ? 'correction or note' : 'corrections and notes'} recorded about ${p.name} in the ${a.name} archive. Click to read ${p.cx === 1 ? 'it' : 'them'} on ${p.page ? 'their page' : 'the corrections page'}. Only entries that name this person are counted, so no pill does not mean nothing was corrected.`;
+  return `<a class="pill cxp" href="${esc(u)}" target="_blank" rel="noopener" title="${esc(tip)}" aria-label="${esc(tip)}">${icon('pencil', 'lk-icon')}${p.cx} ${p.cx === 1 ? 'correction' : 'corrections'}</a>`;
+}
 function extLinksHTML(p) {
   const L = RL(); if (!L) return '';
   let u = null; try { u = L.url(p.id, p.living ? '' : p.name); } catch (e) { u = null; }
@@ -4402,7 +4481,9 @@ function syncButtons() {
 function syncUi() { hideHint(); syncButtons(); }
 function clearCanvas() {
   if (!S.cards.size) return;
-  snapshot(); clearAll(); refreshAll(); drawEdges(); hideHint(); renderInfo(); save(); runSearchMarks(); toast('Cleared. Undo brings it back.');
+  snapshot(); clearAll(); refreshAll(); drawEdges(); hideHint(); renderInfo(); save(); runSearchMarks();
+  clearTimeout(shelfT); { const h = document.documentElement.classList; h.remove('shelfoff'); $('#bShelf').setAttribute('aria-pressed', 'true'); dockH(); }   /* a cleared canvas starts again: the search box comes back and stays until something is searched and added */
+  toast('Cleared. Undo brings it back.');
 }
 const THEMES = ['sticker', 'paper', 'ground', 'lanes', 'countries', 'names'];
 const THEME_NAME = { countries: 'Countries' };
@@ -4438,7 +4519,7 @@ function wireToolbar() {
   if (e.data.tcLinks) { if (S.tab !== 'options') renderInfo(); return; }   // not while the Options box is being typed in: a redraw would take the cursor away
   if (!e.data.tcFix) return; refreshAll(); renderInfo(); syncButtons();
 });
-  $('#bShelf').onclick = () => { const h = document.documentElement.classList; h.toggle('shelfoff'); $('#bShelf').setAttribute('aria-pressed', String(!h.contains('shelfoff'))); dockH(); };
+  $('#bShelf').onclick = () => { clearTimeout(shelfT); const h = document.documentElement.classList; h.toggle('shelfoff'); $('#bShelf').setAttribute('aria-pressed', String(!h.contains('shelfoff'))); dockH(); };
   $('#bUndo').onclick = undo;
   $('#bArrange').onclick = () => { if (!S.busy) doArrange(); };
   $('#bGen').onclick = toggleGens;
@@ -4608,7 +4689,7 @@ function markBar() {
   markPlace();
   const tk = markTarget(), r = tk && markRel(tk);
   const L = markLines(), chips = L && L.heads.length && M.archives[p.a].k === 'you' ? `<span class="mkc">${L.heads.map(h => `<span class="mkch" style="--lc:${LINE_COLS[h.ci % LINE_COLS.length]}">${esc(h.name)}</span>`).join('')}</span>` : '';
-  bar.innerHTML = `<div class="mkrow"><button class="mkn" data-mk="go" title="Find ${esc(p.name)} on the canvas">&#9733; ${esc(p.name)}</button>`
+  bar.innerHTML = `<div class="mkrow"><button class="mkn" data-mk="go" title="Find ${esc(p.name)} on the canvas">&#9873; ${esc(p.name)}</button>`
     + `<span class="mkt">${r ? markText(r, false) : 'Select anyone to see how they are related to ' + esc(p.name)}</span>`
     + (r && !r.self && !r.none && !(S.path && S.path.a === S.mark && S.path.b === tk) ? `<button class="lk-btn is-small" data-mk="path" data-t="${esc(tk)}">Show path</button>` : '')
     + `<button class="mkx" data-mk="off" title="Unmark ${esc(p.name)}" aria-label="Unmark">${icon('x', '')}</button></div>` + chips;
@@ -4618,11 +4699,11 @@ addEventListener('resize', () => markPlace());
 function markPlace() { const bar = $('#markBar'); if (bar) bar.style.top = ''; }   /* the relate row is in the dock now, so the mark bar keeps its place at the top (see the stylesheet) */
 function markRelHTML(p) {
   const marked = S.mark === p.key, r = !marked && markedPerson() ? markRel(p.key) : null;
-  return r ? `<p class="plines mkrel">&#9733; ${markText(r, true)}</p>` : '';
+  return r ? `<p class="plines mkrel">&#9873; ${markText(r, true)}</p>` : '';
 }
 function markBtnHTML(p) {
   const marked = S.mark === p.key;
-  return ibtn(marked ? 'unmark' : 'mark', 'star', marked ? 'Marked. Click to stop showing relationships from this person' : 'Mark this person: the canvas then shows how everyone you select is related to them (only one person can be marked)', marked);
+  return ibtn(marked ? 'unmark' : 'mark', 'flag', marked ? 'Marked. Click to stop showing relationships from this person' : 'Mark this person: the canvas then shows how everyone you select is related to them (only one person can be marked)', marked);
 }
 /* a round orange icon button: no text, the words are the hover text and the accessible name */
 function ibtn(act, ic, tip, on) { return `<button type="button" class="ibtn${on ? ' on' : ''}" data-do="${act}" title="${esc(tip)}" aria-label="${esc(tip)}"${on ? ' aria-pressed="true"' : ''}>${icon(ic, 'lk-icon')}</button>`; }

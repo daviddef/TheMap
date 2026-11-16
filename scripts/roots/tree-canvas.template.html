@@ -568,6 +568,25 @@ html:not(.ph):has(#info.on) #playBar{left:calc((100vw - 340px) / 2);width:min(64
 #mainMenu .mmi b{display:block;font:900 14px Nunito,system-ui}#mainMenu .mmi small{display:block;font:700 11.5px/1.3 Nunito,system-ui;color:var(--lk-soft);margin-top:1px}
 #bMenu.on{background:var(--lk-accent-soft);border-color:var(--lk-accent)}
 .ph #mainMenu{top:auto;bottom:calc(var(--dock-h,130px) + 16px);left:8px;right:8px;width:auto}
+
+/* Look (theme) inside the menu */
+#mainMenu .mmlook{display:flex;align-items:center;gap:12px;padding:10px 10px 8px}
+#mainMenu .mmlook>svg{flex:none;width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#mainMenu .mmlook b{display:block;font:900 14px Nunito,system-ui;margin-bottom:5px}
+#mainMenu .mmchips{display:flex;gap:6px;flex-wrap:wrap}
+#mainMenu .mmchip{border:2px solid var(--lk-line);background:var(--lk-card);color:var(--lk-ink);border-radius:999px;padding:3px 11px;font:800 12px Nunito,system-ui;cursor:pointer}
+#mainMenu .mmchip:hover{background:var(--lk-hover)}#mainMenu .mmchip.on{background:var(--lk-accent-soft);border-color:var(--lk-accent)}
+/* the line key: an overlay in the menu's corner */
+#legendCard{display:none;position:fixed;top:64px;right:12px;z-index:41;width:380px;max-width:calc(100vw - 24px);max-height:calc(100vh - 84px);overflow:auto;box-sizing:border-box;background:var(--lk-card);color:var(--lk-ink);border:2px solid var(--lk-ink);border-radius:16px;box-shadow:0 5px 0 var(--lk-line),0 14px 30px rgba(0,0,0,.18);padding:14px 16px 16px}
+#legendCard.on{display:block}
+#legendCard h3{margin:0 34px 2px 0;font:400 21px/1.15 "Lilita One",system-ui}
+#legendCard h4{margin:12px 0 4px;font:800 10.5px Nunito;letter-spacing:.6px;text-transform:uppercase;color:var(--lk-mute)}
+#legendCard p{margin:4px 0}
+#legendCard .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+#legendCard .lgx{position:absolute;top:8px;right:8px;width:30px;height:30px;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;color:var(--lk-ink);cursor:pointer}
+#legendCard .lgx:hover,#legendCard .lgx:focus-visible{background:var(--lk-hover);outline:none}
+#legendCard .lgx svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round}
+.ph #legendCard{top:auto;bottom:calc(var(--dock-h,130px) + 16px);left:8px;right:8px;width:auto;max-height:60vh}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -582,7 +601,6 @@ html:not(.ph):has(#info.on) #playBar{left:calc((100vw - 340px) / 2);width:min(64
   <button class="lk-ibtn" id="bUndo" title="Undo (Ctrl/Cmd Z)" aria-label="Undo"></button>
   <button class="lk-ibtn" id="bInfo" title="Side panel: person, where next, path" aria-label="Panel"></button>
   <button class="lk-ibtn" id="bMenu" title="Menu: how to read the lines, options" aria-label="Menu" aria-haspopup="true" aria-expanded="false"></button>
-  <button class="lk-ibtn xtra" id="bTheme" title="Look: Sticker, Paper or Ground" aria-label="Look"></button>
   <button class="lk-ibtn xtra" id="bClear" title="Clear the canvas (Undo brings it back)" aria-label="Clear"></button>
   <button class="lk-ibtn" id="bMore" title="More" aria-label="More" style="display:none"></button>
 </div>
@@ -2796,7 +2814,7 @@ function select(keys, add) {
   if (!add) S.sel.clear();
   keys.forEach(k => S.sel.has(k) && add ? S.sel.delete(k) : S.sel.add(k));
   S.cards.forEach(c => c.el.classList.toggle('sel', S.sel.has(c.key)));
-  if (S.sel.size && S.tab !== 'path' && S.tab !== 'legend' && S.tab !== 'options' && S.tab !== 'next' && S.tab !== 'fix') S.tab = 'person';
+  if (S.sel.size && S.tab !== 'path' && S.tab !== 'options' && S.tab !== 'next' && S.tab !== 'fix') S.tab = 'person';
   if (S.sel.size && S.tab === 'path' && !S.path) S.tab = 'person';
   renderInfo(); syncButtons();
   /* the side panel is folded away: say where the person's details are */
@@ -3186,8 +3204,10 @@ function pathPanel() {
 /* ---------- the menu (burger): the things you look up rather than work with ---------- */
 function mainMenu() {
   const m = $('#mainMenu');
-  const item = (k, ic, t, sub) => `<button class="mmi${S.tab === k && S.infoOpen !== false && $('#info').classList.contains('on') ? ' on' : ''}" data-mm="${k}">${icon(ic, 'lk-icon')}<span><b>${t}</b><small>${sub}</small></span></button>`;
-  m.innerHTML = item('legend', 'info', 'How to read the lines', 'What the line colours, patterns and seals mean')
+  const cur = document.documentElement.getAttribute('data-theme') || 'sticker';
+  const item = (k, ic, t, sub) => `<button class="mmi${(k === 'legend' ? $('#legendCard') && $('#legendCard').classList.contains('on') : S.tab === k && S.infoOpen !== false && $('#info').classList.contains('on')) ? ' on' : ''}" data-mm="${k}">${icon(ic, 'lk-icon')}<span><b>${t}</b><small>${sub}</small></span></button>`;
+  m.innerHTML = `<div class="mmlook">${icon('theme', 'lk-icon')}<span><b>Look</b><span class="mmchips" role="group" aria-label="Look">${THEMES.map(k => `<button type="button" class="mmchip${k === cur ? ' on' : ''}" data-look="${k}" aria-pressed="${k === cur}">${k[0].toUpperCase() + k.slice(1)}</button>`).join('')}</span></span></div>`
+    + item('legend', 'info', 'How to read the lines', 'What the line colours, patterns and seals mean')
     + item('options', 'gear', 'Options', 'Links to MyHeritage and Ancestry, how paths are judged, your file');
 }
 function openMainMenu(on) {
@@ -3196,13 +3216,24 @@ function openMainMenu(on) {
   if (on) { openBloodMenu(false); mainMenu(); }
   m.classList.toggle('on', on); b.setAttribute('aria-expanded', String(on)); b.classList.toggle('on', on);
 }
+/* the line key is an overlay in the same corner as the menu, not a tab in the side panel */
+function openLegend(on) {
+  const c = $('#legendCard'); if (!c) return;
+  if (on == null) on = !c.classList.contains('on');
+  if (on) { openBloodMenu(false); c.innerHTML = `<button type="button" class="lgx" data-lgx aria-label="Close">${icon('x', 'lk-icon')}</button>` + legendHTML(); c.scrollTop = 0; }
+  c.classList.toggle('on', on);
+}
 document.addEventListener('click', e => {
   const m = $('#mainMenu'); if (!m) return;
+  if (e.target.closest('[data-lgx]')) { openLegend(false); return; }
+  const lk = e.target.closest('[data-look]');
+  if (lk && m.contains(lk)) { setTheme(lk.dataset.look); mainMenu(); return; }
   const t = e.target.closest('[data-mm]');
-  if (t && m.contains(t)) { S.tab = t.dataset.mm; S.infoOpen = true; renderInfo(); syncButtons(); openMainMenu(false); return; }
+  if (t && m.contains(t)) { openMainMenu(false); if (t.dataset.mm === 'legend') openLegend(true); else { openLegend(false); S.tab = t.dataset.mm; S.infoOpen = true; renderInfo(); syncButtons(); } return; }
   if (m.classList.contains('on') && !m.contains(e.target) && !e.target.closest('#bMenu')) openMainMenu(false);
+  const c = $('#legendCard'); if (c && c.classList.contains('on') && !c.contains(e.target) && !e.target.closest('[data-do="legend"]')) openLegend(false);
 });
-addEventListener('keydown', e => { if (e.key === 'Escape' && $('#mainMenu') && $('#mainMenu').classList.contains('on')) openMainMenu(false); });
+addEventListener('keydown', e => { if (e.key !== 'Escape') return; if ($('#mainMenu') && $('#mainMenu').classList.contains('on')) openMainMenu(false); else if ($('#legendCard') && $('#legendCard').classList.contains('on')) openLegend(false); });
 
 /* ---------- the Bloodline menu: add blood relatives / take away the rest / colour the rest ---------- */
 const BL_SCOPES = [[1, 'parents'], [2, 'grandparents'], [3, 'great-grandparents'], [Infinity, 'everyone']];
@@ -3285,8 +3316,8 @@ function optionsPanel() {
     <div class="row"><button class="lk-btn is-small is-danger" data-do="clear">Clear the canvas</button></div>`;
 }
 function renderInfo() {
-  const el = $('#info'), tabs = [['person', 'Person'], ['next', 'Where next'], ...(fixList() ? [['fix', 'Fix list' + (fixList().people ? ' (' + fixList().people.toLocaleString() + ')' : '')]] : []), ['path', 'Path'], ...(S.tab === 'legend' ? [['legend', 'Legend']] : S.tab === 'options' ? [['options', 'Options']] : [])];
-  const body = S.tab === 'person' ? personPanel() : S.tab === 'next' ? nextPanel() : S.tab === 'fix' ? fixPanel() : S.tab === 'path' ? pathPanel() : S.tab === 'legend' ? legendHTML() : optionsPanel();
+  const el = $('#info'), tabs = [['person', 'Person'], ['next', 'Where next'], ...(fixList() ? [['fix', 'Fix list' + (fixList().people ? ' (' + fixList().people.toLocaleString() + ')' : '')]] : []), ['path', 'Path'], ...(S.tab === 'options' ? [['options', 'Options']] : [])];
+  const body = S.tab === 'person' ? personPanel() : S.tab === 'next' ? nextPanel() : S.tab === 'fix' ? fixPanel() : S.tab === 'path' ? pathPanel() : optionsPanel();
   el.innerHTML = `<div class="ih">${tabs.map(([k, n]) => `<button class="lk-tab${S.tab === k ? ' on' : ''}" data-tab="${k}">${n}${k === 'path' && S.path ? ' &bull;' : ''}</button>`).join('')}<span style="flex:1"></span><button class="lk-tab" data-tab="close" title="Close panel" aria-label="Close panel">&times;</button></div><div class="ib">${body}</div>`;
   if (S.infoOpen !== false) el.classList.add('on');
   { const ih = el.querySelector('.ih'), on = ih && ih.querySelector('.lk-tab.on'); if (on) { const l = on.offsetLeft - 8, r = on.offsetLeft + on.offsetWidth + 8; if (l < ih.scrollLeft) ih.scrollLeft = l; else if (r > ih.scrollLeft + ih.clientWidth) ih.scrollLeft = r - ih.clientWidth; } tabEdges(ih); }
@@ -3315,7 +3346,7 @@ $('#info').addEventListener('click', e => {
   if (f) { const c = S.cards.get(f.dataset.focus); if (c) { fit([c], { maxK: 1 }); pulseCard(c); } else { const p = M.byKey.get(f.dataset.focus); if (p) { const v = viewCentre(); dropPerson(p.i, v.x, v.y); } } return; }
   const d = e.target.closest('[data-do]'); if (!d) return;
   const act = d.dataset.do, key = [...S.sel][0], c = key && S.cards.get(key), brId = d.dataset.br;
-  if (act === 'legend') { S.tab = 'legend'; renderInfo(); }
+  if (act === 'legend') openLegend(true);
   else if (act === 'next') { S.tab = 'next'; renderInfo(); }
   else if (act === 'nextcopy') copyPlan();
   else if (act === 'up' && c) doUp(c); else if (act === 'upall' && c) doAllBack(c); else if (act === 'dn' && c) doDown(c, false);
@@ -3399,8 +3430,8 @@ function setPhone() {
 function wireToolbar() {
   const set = (id, name) => { const b = $(id); if (b) b.innerHTML = icon(name); };
   set('#bBlood', 'blood'); { const mm = document.createElement('div'); mm.id = 'bloodMenu'; mm.setAttribute('role', 'dialog'); mm.setAttribute('aria-label', 'Bloodline'); document.body.appendChild(mm); $('#bBlood').onclick = () => openBloodMenu(); }
-  set('#bMenu', 'menu'); { const mm = document.createElement('div'); mm.id = 'mainMenu'; mm.setAttribute('role', 'menu'); mm.setAttribute('aria-label', 'Menu'); document.body.appendChild(mm); $('#bMenu').onclick = () => openMainMenu(); }
-  set('#bArrange', 'arrange'); set('#bGen', 'layers'); set('#bShelf', 'search'); $('#si').innerHTML = icon('search', ''); set('#bUndo', 'undo'); set('#bFit', 'fit'); set('#bRel', 'relate'); set('#bInfo', 'info'); set('#bTheme', 'theme'); set('#bClear', 'clear'); set('#bMore', 'gear');
+  set('#bMenu', 'menu'); { const mm = document.createElement('div'); mm.id = 'mainMenu'; mm.setAttribute('role', 'menu'); mm.setAttribute('aria-label', 'Menu'); document.body.appendChild(mm); $('#bMenu').onclick = () => openMainMenu(); const lc = document.createElement('div'); lc.id = 'legendCard'; lc.setAttribute('role', 'dialog'); lc.setAttribute('aria-label', 'How to read the lines'); document.body.appendChild(lc); }
+  set('#bArrange', 'arrange'); set('#bGen', 'layers'); set('#bShelf', 'search'); $('#si').innerHTML = icon('search', ''); set('#bUndo', 'undo'); set('#bFit', 'fit'); set('#bRel', 'relate'); set('#bInfo', 'info'); set('#bClear', 'clear'); set('#bMore', 'gear');
   set('#zIn', 'plus'); set('#zOut', 'minus');
   if (EMBED) addEventListener('message', e => {
   if (e.origin !== location.origin || !e.data) return;
@@ -3416,7 +3447,6 @@ function wireToolbar() {
   $('#bInfo').onclick = () => { const el = $('#info'); if (el.classList.contains('on')) { S.infoOpen = false; el.classList.remove('on'); } else { S.infoOpen = true; renderInfo(); } syncButtons(); };
   /* a tab on the panel's edge: the right panel runs the full height and folds away to the edge, and this brings it back (desktop; the phone has its own sheet) */
   { const t = document.createElement('button'); t.id = 'infoTab'; t.type = 'button'; t.setAttribute('aria-label', 'Show or hide the side panel'); t.title = 'Show or hide the side panel'; t.onclick = () => $('#bInfo').onclick(); document.body.appendChild(t); }
-  $('#bTheme').onclick = () => { const cur = document.documentElement.getAttribute('data-theme'); setTheme(THEMES[(THEMES.indexOf(cur) + 1) % 3]); };
   $('#bClear').onclick = clearCanvas;
   $('#bMore').onclick = () => $('.top').classList.toggle('more');
   $('#zIn').onclick = () => zoomAt(1.25, innerWidth / 2, innerHeight / 2);

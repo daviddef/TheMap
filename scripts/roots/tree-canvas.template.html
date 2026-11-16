@@ -1911,12 +1911,12 @@ html:not(.rzopen) #rz{display:none}
     const P = s => { if (!s) return -1; if (!pidx.has(s)) { pidx.set(s, places.length); places.push(s); } return pidx.get(s); };
     const O = s => { if (!s) return -1; if (!oidx.has(s)) { oidx.set(s, occs.length); occs.push(s); } return oidx.get(s); };
     let drawn = (tree && tree.people) || [];
-    if (arch) drawn = drawn.filter(p => !((p.dy == null || p.dye) && (p.by || 0) > 1920));
+    if (arch) drawn = drawn.filter(p => p.living === true || !((p.dy == null || p.dye) && (p.by || 0) > 1920));   /* a `living: true` row is name-only: nothing else of theirs is carried, so there is nothing for the lock to protect */
     /* People the Roots & Routes maps cannot draw (no place, or no year) still have names, dates and relatives, and the canvas needs no place: they are searchable and
        draw as cards here (fl bit 64 says so). Only people the page handed over with their details (not a hidden living person, who carries nothing). */
-    const und = arch ? [] : ((tree && tree.undrawn) || []).filter(u => u && (u.given !== undefined || u.sur !== undefined)).map(u => ({
+    const und = ((tree && tree.undrawn) || []).filter(u => u && (u.given !== undefined || u.sur !== undefined)).map(u => ({
       id: u.id, sex: u.sex || 'u', given: u.given || '', sur: u.sur || '', by: u.by == null ? null : u.by, bp: u.place || null, dy: u.dy == null ? null : u.dy, dp: null,
-      father: u.father, mother: u.mother, spouse: u.spouse || [], kids: u.kids || [], occ: u.occ || null, bye: !!u.bye, dye: !!u.dye, bpe: false, unplaced: 1, hid: 0 }));
+      father: u.father, mother: u.mother, spouse: u.spouse || [], kids: u.kids || [], occ: u.occ || null, bye: !!u.bye, dye: !!u.dye, bpe: false, unplaced: 1, hid: 0 })).filter(u => !arch || !((u.dy == null || u.dye) && (u.by || 0) > 1920));
     const src = drawn.concat(und);
     /* a drawn person's own father, mother and spouse fields stop at the people the page could draw: put back the ones that point to a person only this canvas draws */
     const extraF = new Map(), extraM = new Map(), extraS = new Map();
@@ -1928,10 +1928,13 @@ html:not(.rzopen) #rz{display:none}
     const g = ref => (ref != null && gidx.has(ref)) ? gidx.get(ref) : -1;
     const rows = src.map(p => {
       const hid = !!p.hid;
-      const fl = (p.bye ? 1 : 0) | (p.dye ? 2 : 0) | (p.bpe ? 4 : 0) | (hid ? 8 : 0) | (p.mye ? 16 : 0) | (hid ? 1 : 0) | (p.unplaced ? 64 : 0);
+      /* an archive that publishes a living person's NAME (and nothing else) on their own page sends `living: true`: the canvas draws them as a living card, name and family
+         only, with no dates, places, route or records, exactly as the archive prints them. A person the archive does not name is not sent, so is not drawn. */
+      const lv = !!(arch && !hid && p.living === true), blank = hid || lv;
+      const fl = (p.bye ? 1 : 0) | (p.dye ? 2 : 0) | (p.bpe ? 4 : 0) | (blank ? 8 : 0) | (p.mye ? 16 : 0) | (hid ? 1 : 0) | (p.unplaced ? 64 : 0);
       /* an archive's route: the stops between birth and death; one that only repeats birth then death adds nothing */
       let stops = 0;
-      if (arch && !hid && Array.isArray(p.route)) {
+      if (arch && !blank && Array.isArray(p.route)) {
         const st = p.route.filter(s => s && s[0]).map(s => [P(s[0]), s.length > 1 ? s[1] : null, s.length > 2 && s[2] ? 1 : 0]);
         const two = [P(p.bp), P(p.dp)].filter(x => x >= 0);
         stops = (st.length < 3 && st.map(x => x[0]).join() === two.join()) ? 0 : (st.length ? st : 0);
@@ -1939,12 +1942,12 @@ html:not(.rzopen) #rz{display:none}
       const gr = x => (arch && arch.graded && Number.isInteger(x)) ? x : -1;
       return [
         0, p.id, p.sex || 'u', hid ? '' : (p.given || ''), p.sur || '',
-        p.by == null ? null : p.by, P(hid ? null : p.bp), hid ? null : (p.dy == null ? null : p.dy), P(hid ? null : p.dp),
+        blank ? null : (p.by == null ? null : p.by), P(blank ? null : p.bp), blank ? null : (p.dy == null ? null : p.dy), P(blank ? null : p.dp),
         g(p.father != null ? p.father : (p.unplaced ? null : extraF.get(p.id))), g(p.mother != null ? p.mother : (p.unplaced ? null : extraM.get(p.id))), gr(p.fg), gr(p.mg),
         [...new Set([...(p.spouse || []), ...(p.unplaced ? [] : (extraS.get(p.id) || []))])].map(g).filter(x => x >= 0), (p.kids || []).map(g).filter(x => x >= 0),
-        (arch && !hid && typeof p.page === 'string') ? p.page : '', O(hid ? null : p.occ), fl, arch && Array.isArray(p.surAlso) ? p.surAlso : 0, stops, hid ? 0 : (p.my || 0),
-        '', hid || typeof p.bd !== 'string' ? '' : p.bd, hid || typeof p.dd !== 'string' ? '' : p.dd,   /* 22, 23: the full dates, when the tree carries them */
-        arch && !hid && Number.isInteger(p.cx) && p.cx > 0 ? p.cx : 0,   /* 24: how many corrections the archive has recorded about them (a count only) */
+        (arch && !blank && typeof p.page === 'string') ? p.page : '', O(blank ? null : p.occ), fl, arch && Array.isArray(p.surAlso) ? p.surAlso : 0, stops, blank ? 0 : (p.my || 0),
+        '', blank || typeof p.bd !== 'string' ? '' : p.bd, blank || typeof p.dd !== 'string' ? '' : p.dd,   /* 22, 23: the full dates, when the tree carries them */
+        arch && !blank && Number.isInteger(p.cx) && p.cx > 0 ? p.cx : 0,   /* 24: how many corrections the archive has recorded about them (a count only) */
       ];
     });
     /* an archive's names-only spouses (a wife or husband it names but holds no record for): a row with no dates, places or records (fl bit 32), joined by the marriage

@@ -1311,8 +1311,10 @@ html:not(.ph):has(#info.on) #bShelf{right:356px}
      by name and family only. So the year line says that in words rather than drawing "?–?", which reads as a gap in research. */
   /* a full date as the archive wrote it ("1814-08-23", "1814-08", "c. 1814", "23 Aug 1814") said plainly: "23 Aug 1814", "Aug 1814". Anything else is returned as it came. */
   function dateText(t) {
-    t = String(t || '').trim(); const m = /^(~|c\.?\s*)?(\d{4})-(\d{2})(?:-(\d{2}))?$/.exec(t); if (!m) return t;
-    const mo = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][+m[3] - 1]; if (!mo) return t;
+    /* two shapes in the archives: 1882-02-22 (register) and 1950-Mar-19 / 1971-Jul-1 (death file: English month abbreviation, day not padded) */
+    t = String(t || '').trim(); const m = /^(~|c\.?\s*)?(\d{4})-(\d{2}|[A-Z][a-z]{2})(?:-(\d{1,2}))?$/.exec(t); if (!m) return t;
+    const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const mo = /^\d/.test(m[3]) ? MON[+m[3] - 1] : (MON.indexOf(m[3]) >= 0 ? m[3] : null); if (!mo) return t;
     return (m[1] ? 'about ' : '') + (m[4] ? (+m[4]) + ' ' : '') + mo + ' ' + m[2];
   }
   function years(p) {

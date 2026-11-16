@@ -304,7 +304,7 @@ button{font-family:inherit}
 #mini.on{display:block}
 #mini canvas{width:100%;height:100%;display:block}
 /* edge styles */
-.ev-def{stroke-width:3.6}.ev-sup{stroke-width:2.3}.ev-np{stroke-width:2.3;stroke-dasharray:7 6}.ev-ug{stroke-width:3;stroke-dasharray:.1 4.6;stroke-linecap:round;opacity:.95}
+.ev-def{stroke-width:3.6}.ev-sup{stroke-width:2.3}.ev-np{stroke-width:2.3;stroke-dasharray:7 6}.ev-ug{stroke-width:3.6;stroke-dasharray:.5 7;stroke-linecap:round;opacity:1}   /* dots: a 0.1px dash is dropped by some browsers, which hid every not-graded line */
 #edges path{fill:none;stroke-linecap:butt;stroke-linejoin:round}
 #edges .dimmed{opacity:.4}
 #edges .pathline{stroke:var(--lk-accent);stroke-width:9;opacity:.35;stroke-linecap:round;animation:draw 1.1s ease-out forwards}
@@ -428,6 +428,11 @@ html:has(#info.on) #infoTab{right:340px}html:has(#info.on) #infoTab::before{cont
 a.pill.ac{text-decoration:none;cursor:pointer}a.pill.ac:hover,a.pill.ac:focus-visible{filter:brightness(1.1);box-shadow:0 0 0 2px var(--ac)}
 #info .row.one{flex-wrap:nowrap;gap:5px}#info .row.one .lk-btn{flex:1 1 auto;min-width:0;padding-left:7px;padding-right:7px;font-size:12px;white-space:nowrap;justify-content:center}
 #info .row.one .lk-icon{width:13px;height:13px}
+
+.card .stops.up{top:auto;bottom:calc(100% + 6px)}
+
+/* the empty drop zones: centred, and a wrapped line is balanced (the right-hand padding is only needed once a person is in, for the remove button) */
+#rz .rzs.empty{justify-content:center;text-align:center;padding:4px 10px;text-wrap:balance;line-height:1.25}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -1505,7 +1510,8 @@ function cardInner(c) {
       const other = TC.otherSideHasParents(M, c.i).filter(q => !cardOfPerson(q.i));
       if (other.length) note += `<br><button data-act="br" data-b="${esc(M.bridgesOf.get(c.i).find(b => TC.bridgeOther(b, c.i) === other[0].i).id)}">${esc(M.archives[other[0].a].name)} has parents</button>`;
     } else if (c.stopG) note = `<b>stops here</b> &middot; the next link is index-entry only (not proven)<br><button data-act="upforce">follow it anyway</button>`;
-    if (note) h += `<div class="stops">${note}</div>`;
+    /* the note says the line above stops, so it sits above the card when a child is drawn below it: below, it would cover the line down to that child */
+    if (note) h += `<div class="stops${p.ch.some(e => cardOfPerson(e.c)) ? ' up' : ''}">${note}</div>`;
   }
   return h;
 }

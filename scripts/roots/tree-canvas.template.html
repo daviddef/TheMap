@@ -694,6 +694,8 @@ html:not(.ph):has(#info.on) #namesCap{left:calc((100vw - 340px) / 2)}
 .aip-opts .aip-ck{grid-column:1/-1;display:flex;gap:8px;align-items:center;cursor:pointer}.aip-opts input[type=checkbox]{accent-color:var(--lk-accent)}
 .aip-text{width:100%;box-sizing:border-box;min-height:260px;resize:vertical;margin:6px 0;padding:10px 12px;border:2px solid var(--lk-line);border-radius:12px;background:var(--lk-card);color:var(--lk-ink);font:600 11.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
 .aip-n{margin-left:10px;color:var(--lk-mute);font-weight:800}
+
+#lanehead .tt .tg{pointer-events:all;cursor:pointer}#lanehead .tt .tg:hover .tomb,#lanehead .tt .tg:focus-visible .tomb{fill:#FFF3E0;stroke-width:2.6}#lanehead .tt .tg:focus-visible{outline:none}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -2592,7 +2594,8 @@ function drawLanes() {
       if (Math.max(sx, ex) < 0 || Math.min(sx, ex) > vw) return;
       const dx = (ex - sx) * 0.5, col = '#B4631A';
       tl += `<path d="M${f1(sx)} ${f1(sy)}C${f1(sx + dx)} ${f1(sy)} ${f1(ex - dx)} ${f1(ey)} ${f1(ex)} ${f1(ey)}" stroke="${col}"/><circle cx="${f1(sx)}" cy="${f1(sy)}" r="3.2" fill="${col}"/>`;
-      ti += `<g transform="translate(${f1(ex - sz / 2)} ${f1(ey - sz / 2)})" style="--tc:${col}"><svg width="${f1(sz)}" height="${f1(sz)}" viewBox="0 0 24 24"><path d="M5.5 22V10a6.5 6.5 0 0113 0v12z" class="tomb"/><path d="M12 8v7M9.2 10.6h5.6" class="cross"/></svg>${t.y != null && sz > 18 ? `<text x="${f1(sz / 2)}" y="${f1(sz + 9)}" text-anchor="middle">${t.y}</text>` : ''}</g>`;
+      const who = personOf(t.c), tip = `${who.name}${t.y != null ? ', died ' + t.y : ''} in ${t.cn}. Click to select them.`;
+      ti += `<g class="tg" data-tk="${esc(t.c.key)}" role="button" tabindex="0" aria-label="${esc(tip)}" transform="translate(${f1(ex - sz / 2)} ${f1(ey - sz / 2)})" style="--tc:${col}"><title>${esc(tip)}</title><rect x="-4" y="-4" width="${f1(sz + 8)}" height="${f1(sz + 16)}" fill="transparent"/><svg width="${f1(sz)}" height="${f1(sz)}" viewBox="0 0 24 24"><path d="M5.5 22V10a6.5 6.5 0 0113 0v12z" class="tomb"/><path d="M12 8v7M9.2 10.6h5.6" class="cross"/></svg>${t.y != null && sz > 18 ? `<text x="${f1(sz / 2)}" y="${f1(sz + 9)}" text-anchor="middle">${t.y}</text>` : ''}</g>`;
     });
   }
   rows.forEach((r, i) => {
@@ -3481,7 +3484,7 @@ function runSearchMarks() { document.querySelectorAll('#shelf .res').forEach(el 
   const st = $('#stage'), ptrs = new Map(); let pan = null, pinch = null, drag = null, raf = 0;
   const redraw = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; drawEdges(); }); };
   st.addEventListener('pointerdown', e => {
-    if (e.target.closest('.card') || e.target.closest('[data-br]') || e.target.closest('#namesview .nm')) return;
+    if (e.target.closest('.card') || e.target.closest('[data-br]') || e.target.closest('#namesview .nm') || e.target.closest('.tt .tg')) return;
     ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY }); st.setPointerCapture(e.pointerId);
     if (ptrs.size === 1) { pan = { x: e.clientX, y: e.clientY, vx: S.view.x, vy: S.view.y, moved: false }; closePop(); }
     if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), k: S.view.k, cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2, vx: S.view.x, vy: S.view.y }; pan = null; }
@@ -3835,6 +3838,13 @@ function openLegend(on) {
   if (on) { openBloodMenu(false); c.innerHTML = `<button type="button" class="lgx" data-lgx aria-label="Close">${icon('x', 'lk-icon')}</button>` + legendHTML(); c.scrollTop = 0; }
   c.classList.toggle('on', on);
 }
+/* a tombstone in the Countries look: who it was. Select them, show their details, and bring them into focus. */
+function tombGo(g) {
+  const c = S.cards.get(g.dataset.tk); if (!c) return;
+  S.tab = 'person'; S.infoOpen = true; select([c.key]); fit([c], { maxK: 1 }); pulseCard(c);
+}
+document.addEventListener('click', e => { const g = e.target.closest && e.target.closest('#lanehead .tg'); if (g) tombGo(g); });
+document.addEventListener('keydown', e => { if (e.key !== 'Enter' && e.key !== ' ') return; const g = e.target.closest && e.target.closest('#lanehead .tg'); if (g) { e.preventDefault(); tombGo(g); } });
 document.addEventListener('click', e => {
   const m = $('#mainMenu'); if (!m) return;
   if (e.target.closest('[data-lgx]')) { openLegend(false); return; }

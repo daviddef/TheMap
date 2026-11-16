@@ -1843,14 +1843,18 @@ html:not(.rzopen) #rz{display:none}
  */
 (function (root) {
   'use strict';
-  function corpus(tree, atlas, label) {
+  /* `arch` ({key, name, host, color, graded}): the tree is one ARCHIVE's own published roots data, not a visitor's file. Then the rows carry what the archive
+     publishes (its page for each person, its evidence grades, a route, its corrections count) and the same second lock the eight-archive build applies:
+     a person with no death year, or only an estimated one, born after 1920, is treated as living and left out. */
+  function corpus(tree, atlas, label, arch) {
     const places = [], pidx = new Map(), occs = [], oidx = new Map();
     const P = s => { if (!s) return -1; if (!pidx.has(s)) { pidx.set(s, places.length); places.push(s); } return pidx.get(s); };
     const O = s => { if (!s) return -1; if (!oidx.has(s)) { oidx.set(s, occs.length); occs.push(s); } return oidx.get(s); };
-    const drawn = (tree && tree.people) || [];
+    let drawn = (tree && tree.people) || [];
+    if (arch) drawn = drawn.filter(p => !((p.dy == null || p.dye) && (p.by || 0) > 1920));
     /* People the Roots & Routes maps cannot draw (no place, or no year) still have names, dates and relatives, and the canvas needs no place: they are searchable and
        draw as cards here (fl bit 64 says so). Only people the page handed over with their details (not a hidden living person, who carries nothing). */
-    const und = ((tree && tree.undrawn) || []).filter(u => u && (u.given !== undefined || u.sur !== undefined)).map(u => ({
+    const und = arch ? [] : ((tree && tree.undrawn) || []).filter(u => u && (u.given !== undefined || u.sur !== undefined)).map(u => ({
       id: u.id, sex: u.sex || 'u', given: u.given || '', sur: u.sur || '', by: u.by == null ? null : u.by, bp: u.place || null, dy: u.dy == null ? null : u.dy, dp: null,
       father: u.father, mother: u.mother, spouse: u.spouse || [], kids: u.kids || [], occ: u.occ || null, bye: !!u.bye, dye: !!u.dye, bpe: false, unplaced: 1, hid: 0 }));
     const src = drawn.concat(und);
@@ -1865,17 +1869,41 @@ html:not(.rzopen) #rz{display:none}
     const rows = src.map(p => {
       const hid = !!p.hid;
       const fl = (p.bye ? 1 : 0) | (p.dye ? 2 : 0) | (p.bpe ? 4 : 0) | (hid ? 8 : 0) | (p.mye ? 16 : 0) | (hid ? 1 : 0) | (p.unplaced ? 64 : 0);
+      /* an archive's route: the stops between birth and death; one that only repeats birth then death adds nothing */
+      let stops = 0;
+      if (arch && !hid && Array.isArray(p.route)) {
+        const st = p.route.filter(s => s && s[0]).map(s => [P(s[0]), s.length > 1 ? s[1] : null, s.length > 2 && s[2] ? 1 : 0]);
+        const two = [P(p.bp), P(p.dp)].filter(x => x >= 0);
+        stops = (st.length < 3 && st.map(x => x[0]).join() === two.join()) ? 0 : (st.length ? st : 0);
+      }
+      const gr = x => (arch && arch.graded && Number.isInteger(x)) ? x : -1;
       return [
         0, p.id, p.sex || 'u', hid ? '' : (p.given || ''), p.sur || '',
         p.by == null ? null : p.by, P(hid ? null : p.bp), hid ? null : (p.dy == null ? null : p.dy), P(hid ? null : p.dp),
-        g(p.father != null ? p.father : (p.unplaced ? null : extraF.get(p.id))), g(p.mother != null ? p.mother : (p.unplaced ? null : extraM.get(p.id))), -1, -1,
+        g(p.father != null ? p.father : (p.unplaced ? null : extraF.get(p.id))), g(p.mother != null ? p.mother : (p.unplaced ? null : extraM.get(p.id))), gr(p.fg), gr(p.mg),
         [...new Set([...(p.spouse || []), ...(p.unplaced ? [] : (extraS.get(p.id) || []))])].map(g).filter(x => x >= 0), (p.kids || []).map(g).filter(x => x >= 0),
-        '', O(hid ? null : p.occ), fl, 0, 0, hid ? 0 : (p.my || 0),
+        (arch && !hid && typeof p.page === 'string') ? p.page : '', O(hid ? null : p.occ), fl, arch && Array.isArray(p.surAlso) ? p.surAlso : 0, stops, hid ? 0 : (p.my || 0),
         '', hid || typeof p.bd !== 'string' ? '' : p.bd, hid || typeof p.dd !== 'string' ? '' : p.dd,   /* 22, 23: the full dates, when the tree carries them */
+        arch && !hid && Number.isInteger(p.cx) && p.cx > 0 ? p.cx : 0,   /* 24: how many corrections the archive has recorded about them (a count only) */
       ];
     });
+    /* an archive's names-only spouses (a wife or husband it names but holds no record for): a row with no dates, places or records (fl bit 32), joined by the marriage
+       mark, born by 1900 only. No parent or child link is asserted. */
+    if (arch) src.forEach((p, i) => {
+      if (p.hid || p.by == null || p.by > 1900) return;
+      const seen = new Set();
+      (p.spn || []).forEach(sp => {
+        const nm = String((sp && sp.n) || '').replace(/\s+/g, ' ').trim(), slug = nm.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        if (!nm || seen.has(slug)) return; seen.add(slug);
+        const k = nm.indexOf(' '), first = k < 0 ? nm : nm.slice(0, k), rest = k < 0 ? '' : nm.slice(k + 1);
+        const sex = /née|nee /i.test(nm) ? 'f' : ({ m: 'f', f: 'm' }[p.sex] || 'u');
+        const gi = rows.length;
+        rows.push([0, 'spn:' + p.id + ':' + slug, sex, first, rest, null, -1, null, -1, -1, -1, -1, -1, [i], [], '', -1, 32, 0, 0, 0, (sp && sp.how) || '']);
+        rows[i][13].push(gi);
+      });
+    });
     /* the Atlas's own place records the page already carries: id, country, and the flag each era flew. Only the places this tree uses. */
-    const used = new Set(); src.forEach(p => { if (p.unplaced) return; if (p.bp && !p.hid) used.add(p.bp); if (!p.hid && p.dp) used.add(p.dp); });
+    const used = new Set(); src.forEach(p => { if (p.unplaced) return; if (p.bp && !p.hid) used.add(p.bp); if (!p.hid && p.dp) used.add(p.dp); if (arch && !p.hid && Array.isArray(p.route)) p.route.forEach(s => { if (s && s[0]) used.add(s[0]); }); });
     const flags = [], fidx = new Map();
     const A = atlas || {};
     const F = li => {
@@ -1899,7 +1927,7 @@ html:not(.rzopen) #rz{display:none}
     const name = label || (metaTitle && !/^roots\s*(&|&amp;|and)\s*routes/i.test(String(metaTitle).trim()) ? metaTitle : 'Your tree');
     return {
       built: new Date().toISOString().slice(0, 10), livingRule: 'as chosen on the roots page',
-      archives: [{ k: 'you', name, host: '', color: '#D2493A', graded: false, generated: tree && tree.meta && tree.meta.generated, living: tree && tree.meta && tree.meta.living, n: rows.length, droppedLiving: 0, livingNamed: 0 }],
+      archives: [{ k: arch ? arch.key : 'you', name: arch ? arch.name : name, host: arch ? arch.host : '', color: arch ? arch.color : '#D2493A', graded: !!(arch && arch.graded), generated: tree && tree.meta && tree.meta.generated, living: tree && tree.meta && tree.meta.living, n: rows.length, droppedLiving: 0, livingNamed: 0 }],
       places, occs, people: rows, flags, geo: { '0': geo }, eras: regionEras, events: evUsed, srcs,
     };
   }
@@ -1920,7 +1948,7 @@ const EMBED = !!window.TC_EMBED;
 /* Standalone: the same canvas, opened on its own at recordatlas.org/tree-canvas/ (the page around it reads the GEDCOM and hands the tree in).
    Only the title and two buttons differ; ?sa=1 turns it on, &liv=1 says living people are hidden, &ex=1 says the tree is the invented example. */
 const QS = new URLSearchParams(location.search), SA = EMBED && QS.has('sa');
-const CORPUS = EMBED ? window.TCF.corpus(window.parent.RR.tree, window.parent.RR.atlas) : JSON.parse(document.getElementById('corpus').textContent);
+const CORPUS = EMBED ? window.TCF.corpus(window.parent.RR.tree, window.parent.RR.atlas, undefined, window.parent.RR.archive || null) : JSON.parse(document.getElementById('corpus').textContent);
 const M = TC.build(CORPUS);
 const NA = M.archives.length;
 const W = 184, H = 92, GX = 30, COUPLE_GX = 22, ROWH = 150;
@@ -3446,7 +3474,7 @@ function renderTabs() {
   $('#tabs').innerHTML = M.archives.map((a, i) => `<button class="lk-tab${S.filter.has(i) ? '' : ' off'}" style="--ac:${a.color}" data-a="${i}" title="${S.filter.has(i) ? 'Searching' : 'Not searching'} ${esc(a.name)} (${a.n.toLocaleString()} people${a.graded ? ', graded links' : ', no evidence grades'})"><i></i>${esc(a.name)}</button>`).join('') +
     `<button class="lk-tab" data-a="all" title="Toggle all archives">${on === NA ? 'none' : 'all'}</button>`;
   $('#cnt').textContent = `${on} of ${NA} archives`;
-  const q = $('#q'); q.placeholder = `Search ${M.P.length.toLocaleString()} ${EMBED ? 'people in your file' : 'people'}: any order, accents optional`;
+  const q = $('#q'); q.placeholder = `Search ${M.P.length.toLocaleString()} ${EMBED ? (M.archives.length === 1 && M.archives[0].k !== 'you' ? 'people in the ' + M.archives[0].name + ' archive' : 'people in your file') : 'people'}: any order, accents optional`;
 }
 $('#q').addEventListener('input', () => runSearch());
 $('#q').addEventListener('keydown', e => { if (e.key === 'Enter' && lastResults[0]) addFromResult(lastResults[0]); if (e.key === 'Escape') { e.target.value = ''; runSearch(); e.target.blur(); } });
@@ -4154,7 +4182,7 @@ function wireToolbar() {
     for (const ev of ['dragenter', 'dragover']) document.addEventListener(ev, e => e.preventDefault());
     document.addEventListener('drop', e => { e.preventDefault(); send(e.dataTransfer && e.dataTransfer.files[0]); });
   }
-  if (EMBED) { const h = $('#hint'); h.firstChild.textContent = 'Search anyone in your tree, and drop them here '; const sm = h.querySelector('small'); if (sm) sm.innerHTML = 'Pull up their parents, all the way back, one generation at a time.<br>Click anyone, then "Where to from here" for the order to look for their records.'; }   // the example people are in the eight archives, not in a visitor's own file
+  if (EMBED) { const h = $('#hint'); h.firstChild.textContent = (M.archives.length === 1 && M.archives[0].k !== 'you' ? 'Search anyone in the ' + M.archives[0].name + ' archive, and drop them here ' : 'Search anyone in your tree, and drop them here '); const sm = h.querySelector('small'); if (sm) sm.innerHTML = 'Pull up their parents, all the way back, one generation at a time.<br>Click anyone, then "Where to from here" for the order to look for their records.'; }   // the example people are in the eight archives, not in a visitor's own file
   if (SA && QS.get('ex') === '1') { const h = $('#hint'); h.firstChild.textContent = 'This is an invented example family. '; const sm = h.querySelector('small'); if (sm) sm.innerHTML = 'Press the folder button (top right) to open a GEDCOM and draw your own tree: it is read in this browser and never uploaded.<br>Search anyone, drop them here, then click them and choose "Where to from here".'; }
   addEventListener('keydown', e => {
     const typing = /INPUT|TEXTAREA/.test(document.activeElement.tagName);

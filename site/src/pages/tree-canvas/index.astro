@@ -10,7 +10,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; frame-src 'self'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://archive.defranceski.com https://booyzen.defranceski.com https://luwinski.defranceski.com https://lerena.defranceski.com https://falco.defranceski.com https://blazevic.defranceski.com https://darcy.defranceski.com https://mazza.defranceski.com; worker-src 'self'; frame-src 'self'; form-action 'none'; base-uri 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex">
 <title>Tree Canvas · Record Atlas</title>
@@ -27,6 +27,20 @@
     <button type="button" class="stbtn" id="stDemo">Open an invented family example</button>
   </div>
   <input type="file" id="stFile" accept=".ged,.gedcom,.txt,text/plain" hidden>
+  <section id="stArch" class="strec" aria-labelledby="stArchTitle">
+    <h2 id="stArchTitle">Or draw one of the family archives</h2>
+    <div class="starch" id="stArchBtns">
+      <button type="button" class="stbtn small" data-k="defranceski">Defranceski</button>
+      <button type="button" class="stbtn small" data-k="booyzen">Booyzen</button>
+      <button type="button" class="stbtn small" data-k="luwinski">Luwinski</button>
+      <button type="button" class="stbtn small" data-k="lerena">Lerena</button>
+      <button type="button" class="stbtn small" data-k="falco">Falco</button>
+      <button type="button" class="stbtn small" data-k="blazevic">Blažević</button>
+      <button type="button" class="stbtn small" data-k="darcy">D'Arcy</button>
+      <button type="button" class="stbtn small" data-k="mazza">Mazza</button>
+    </div>
+    <p class="stnote">Reads that archive's own published tree (no living people). Nothing about you is sent.</p>
+  </section>
   <section id="stRecent" class="strec" hidden aria-labelledby="stRecTitle">
     <h2 id="stRecTitle">Last used</h2>
     <ul id="stList"></ul>

@@ -593,8 +593,8 @@ html:not(.ph):has(#info.on) #playBar{left:calc((100vw - 340px) / 2);width:min(64
 .nx-cn{color:var(--lk-soft);font-weight:800}
 
 /* Look: Lanes. White and light grey, a swim lane per generation, Roman numerals down the left */
-[data-theme="lanes"]{--lk-paper:#F4F5F7;--lk-card:#FFFFFF;--lk-line:#D3D7DE;--lk-ink:#1F2530;--lk-mute:#6B7280;--lk-soft:#4B5563;--lk-faint:#B6BCC7;--lk-accent:#D9822B;--lk-track:#D3D7DE;--lk-knob:#ffffff;--lk-board:#FFFFFF;--lk-pop-bg:#1F2530;--lk-pop-ink:#F4F5F7;--lk-accent-soft:color-mix(in srgb,#D9822B 16%,#FFFFFF);--lk-hover:color-mix(in srgb,#1F2530 6%,#FFFFFF);--lk-tag-comp-bg:#DCE9F4;--lk-tag-comp-fg:#2b6a94;--lk-tag-parts-bg:#F6E3C4;--lk-tag-parts-fg:#a5601a;--lk-tag-recipe-bg:#E3EFD8;--lk-tag-recipe-fg:#4c7a2e;--lk-tag-rule-bg:#E8EAEE;--lk-tag-rule-fg:#5b6370;color-scheme:light}
-[data-theme="lanes"] #stage{background-image:none}
+[data-theme="lanes"],[data-theme="countries"]{--lk-paper:#F4F5F7;--lk-card:#FFFFFF;--lk-line:#D3D7DE;--lk-ink:#1F2530;--lk-mute:#6B7280;--lk-soft:#4B5563;--lk-faint:#B6BCC7;--lk-accent:#D9822B;--lk-track:#D3D7DE;--lk-knob:#ffffff;--lk-board:#FFFFFF;--lk-pop-bg:#1F2530;--lk-pop-ink:#F4F5F7;--lk-accent-soft:color-mix(in srgb,#D9822B 16%,#FFFFFF);--lk-hover:color-mix(in srgb,#1F2530 6%,#FFFFFF);--lk-tag-comp-bg:#DCE9F4;--lk-tag-comp-fg:#2b6a94;--lk-tag-parts-bg:#F6E3C4;--lk-tag-parts-fg:#a5601a;--lk-tag-recipe-bg:#E3EFD8;--lk-tag-recipe-fg:#4c7a2e;--lk-tag-rule-bg:#E8EAEE;--lk-tag-rule-fg:#5b6370;color-scheme:light}
+[data-theme="lanes"] #stage,[data-theme="countries"] #stage{background-image:none}
 #lanes{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 #lanes .lane{position:absolute;left:0;right:0;background:#FFFFFF;border-top:1px solid var(--lk-line)}
 #lanes .lane.b{background:#EEF0F3}
@@ -602,6 +602,22 @@ html:not(.ph):has(#info.on) #playBar{left:calc((100vw - 340px) / 2);width:min(64
 #lanes .lnl b{display:block;font:400 32px/1 "Lilita One",Georgia,serif;color:#9AA1AE}
 #lanes .lnl small{display:block;margin-top:3px;font:800 11px Nunito,system-ui;color:var(--lk-mute)}
 .ph #lanes .lnl{left:10px;width:56px}.ph #lanes .lnl b{font-size:24px}
+
+/* Look: Countries. The Lanes rows, plus a coloured column for each country of birth */
+#lanes .lcol{position:absolute;top:0;bottom:0;background:hsl(var(--h) 85% 91%);border-left:2px solid hsl(var(--h) 60% 78%)}
+#lanes .lcol.none{background:#E9EAEE;border-left-color:#D3D7DE}
+#lanehead{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+#lanehead .cnh{position:absolute;top:66px;display:flex;align-items:center;gap:6px;padding:4px 11px 4px 8px;border-radius:999px;background:hsl(var(--h) 80% 80%);border:2px solid hsl(var(--h) 55% 42%);color:hsl(var(--h) 60% 18%);box-shadow:0 2px 0 hsl(var(--h) 55% 42%)}
+#lanehead .cnh b{font:900 13px Nunito,system-ui;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#lanehead .cnh small{font:900 11px Nunito,system-ui;background:hsl(var(--h) 60% 30%);color:#fff;border-radius:999px;padding:1px 7px}
+#lanehead .cnh .fl{margin:0;height:13px}
+#lanes.cols .lane{background:rgba(255,255,255,.55);border-top:1px solid rgba(31,37,48,.14)}
+#lanes.cols .lane.b{background:rgba(255,255,255,0)}
+#lanes.cols .lnl b{color:rgba(31,37,48,.42)}
+#lanes .tl{position:absolute;left:0;top:0;pointer-events:none}#lanes .tl path{fill:none;stroke-width:2.4;stroke-dasharray:7 5;stroke-linecap:round;opacity:.85}
+#lanehead .tt{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
+#lanehead .tt .tomb{fill:#fff;stroke:var(--tc);stroke-width:1.8;stroke-linejoin:round}#lanehead .tt .cross{fill:none;stroke:var(--tc);stroke-width:1.8;stroke-linecap:round}
+#lanehead .tt text{font:900 9.5px Nunito,system-ui;fill:var(--tc);paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -2171,6 +2187,7 @@ function spreadOverlaps(targets) {
   return targets;
 }
 async function relayout(c, ms) {
+  if (typeof isGridLook === 'function' && isGridLook() && S.cards.size > 1) return tweenTo(arrangeTargets([...S.cards.values()]), ms);
   const r = rootOf(c) || c;
   const t = layoutCluster(r);
   spreadOverlaps(t);
@@ -2315,9 +2332,38 @@ function arrangeItems(cards) {
   return cards.map(c => { const p = personOf(c); return { k: c.key, par: [p.f, p.m].filter(q => q >= 0 && key.has(q)).map(q => key.get(q)), mate: [...mate.get(c.key)] }; });
 }
 /* where every card would go, kept around the middle of where the cards are now */
+/* the Countries look: a column for each country of birth (the country today, from the Atlas's place record) and a row for each generation.
+   Columns run left to right by the year of the earliest birth in each, so the family's moves read across the page; a person with no birthplace stands in the last column. */
+const isGridLook = () => document.documentElement.getAttribute('data-theme') === 'countries';
+function deathCountry(c) { const p = personOf(c); if (!p || p.living || p.ghost || !p.dp) return ''; const pl = TC.placeAt(M, p, p.dp, p.dy); return (pl && pl.cn) || ''; }
+function birthCountry(c) { const p = personOf(c); if (!p || !p.bp) return ''; const pl = TC.placeAt(M, p, p.bp, p.by); return (pl && pl.cn) || ''; }
+function gridPositions(cards) {
+  const gi = genInfo(), CAP = 3, PX = W + GX, cells = new Map(), cols = new Map();
+  cards.forEach(c => {
+    const cn = birthCountry(c), g = gi.gen.get(c.key) || 0, p = personOf(c);
+    if (!cols.has(cn)) cols.set(cn, { cn, first: Infinity, maxN: 1 });
+    if (p.by != null && !p.living) cols.get(cn).first = Math.min(cols.get(cn).first, p.by);
+    const k = cn + '|' + g; if (!cells.has(k)) cells.set(k, []); cells.get(k).push(c);
+  });
+  const order = [...cols.values()].sort((a, b) => (a.cn === '') - (b.cn === '') || a.first - b.first || a.cn.localeCompare(b.cn));
+  let maxG = 0; cells.forEach((cs, k) => { maxG = Math.max(maxG, +k.split('|').pop()); });
+  const subRows = new Array(maxG + 1).fill(1);
+  cells.forEach((cs, k) => { const [cn, g] = [k.slice(0, k.lastIndexOf('|')), +k.slice(k.lastIndexOf('|') + 1)]; cols.get(cn).maxN = Math.max(cols.get(cn).maxN, Math.min(cs.length, CAP)); subRows[g] = Math.max(subRows[g], Math.ceil(cs.length / CAP)); });
+  const rowY = []; let y = 0; for (let g = 0; g <= maxG; g++) { rowY[g] = y; y += subRows[g] * ROWH + 26; }
+  const A = new Map(); let x = 0;
+  order.forEach(col => {
+    const width = col.maxN * PX;
+    for (let g = 0; g <= maxG; g++) {
+      const cs = (cells.get(col.cn + '|' + g) || []).slice().sort((a, b) => (gi.comp.get(a.key) - gi.comp.get(b.key)) || (a.x - b.x));
+      cs.forEach((c, i) => { const r = Math.floor(i / CAP), n = Math.min(CAP, cs.length - r * CAP), j = i % CAP; A.set(c.key, { x: x + (col.maxN - n) * PX / 2 + j * PX, y: rowY[g] + r * ROWH }); });
+    }
+    x += width + 70;
+  });
+  return A;
+}
 function arrangeTargets(cards) {
   const pos = {}; cards.forEach(c => { pos[c.key] = { x: c.x, y: c.y }; });
-  const A = TC.arrange(arrangeItems(cards), { W, H, GX, CGX: COUPLE_GX, ROWH, pos });
+  const A = isGridLook() ? gridPositions(cards) : TC.arrange(arrangeItems(cards), { W, H, GX, CGX: COUPLE_GX, ROWH, pos });
   let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity, a0 = Infinity, a1 = -Infinity, b0 = Infinity, b1 = -Infinity;
   cards.forEach(c => { x0 = Math.min(x0, c.x); x1 = Math.max(x1, c.x + W); y0 = Math.min(y0, c.y); y1 = Math.max(y1, c.y + H); const q = A.get(c.key); a0 = Math.min(a0, q.x); a1 = Math.max(a1, q.x + W); b0 = Math.min(b0, q.y); b1 = Math.max(b1, q.y + H); });
   const dx = (x0 + x1) / 2 - (a0 + a1) / 2, dy = (y0 + y1) / 2 - (b0 + b1) / 2, targets = new Map();
@@ -2348,7 +2394,11 @@ function genInfo() {
 function drawLanes() {
   let host = $('#lanes');
   if (!host) { host = document.createElement('div'); host.id = 'lanes'; host.setAttribute('aria-hidden', 'true'); const st = $('#stage'); st.insertBefore(host, $('#world')); }
-  if (document.documentElement.getAttribute('data-theme') !== 'lanes' || !S.cards.size) { if (host.innerHTML) host.innerHTML = ''; return; }
+  const th = document.documentElement.getAttribute('data-theme'), grid = th === 'countries';
+  host.classList.toggle('cols', grid);
+  let head = $('#lanehead'); if (!head) { head = document.createElement('div'); head.id = 'lanehead'; head.setAttribute('aria-hidden', 'true'); $('#stage').appendChild(head); }
+  if (!grid && head.innerHTML) head.innerHTML = '';
+  if ((th !== 'lanes' && !grid) || !S.cards.size) { if (host.innerHTML) host.innerHTML = ''; if (head.innerHTML) head.innerHTML = ''; return; }
   const gi = genInfo(), cs = [...S.cards.values()].sort((a, b) => a.y - b.y), rows = [];
   cs.forEach(c => { const r = rows[rows.length - 1]; if (r && c.y - r.last <= H * 0.6) { r.cs.push(c); r.last = c.y; } else rows.push({ cs: [c], last: c.y }); });
   rows.forEach(r => {
@@ -2358,7 +2408,44 @@ function drawLanes() {
     const ps = r.cs.map(c => personOf(c)).filter(p => p.by != null && !p.living);
     r.lo = ps.length ? Math.min(...ps.map(p => p.by)) : null; r.hi = ps.length ? Math.max(...ps.map(p => p.dy != null ? p.dy : p.by)) : null;
   });
-  const v = S.view, vh = innerHeight; let h = '';
+  const v = S.view, vh = innerHeight, vw = innerWidth; let h = '', hh = '';
+  let tl = '', ti = '';
+  if (grid) {   /* the vertical lanes: one column per country of birth, from the cards' own positions, each its own colour, headed by the country's flag and name.
+                   A country where people died but nobody in the picture was born gets a column of its own after the last one (the same place Arrange leaves for it). */
+    const by = new Map(); S.cards.forEach(c => { const k = birthCountry(c); if (!by.has(k)) by.set(k, []); by.get(k).push(c); });
+    const cols = [...by.entries()].map(([cn, cs]) => ({ cn, cs, x0: Math.min(...cs.map(c => c.x)), x1: Math.max(...cs.map(c => c.x)) + W, deaths: 0 })).sort((a, b) => (a.x0 + a.x1) - (b.x0 + b.x1));
+    const dth = [];   /* people who died in a different country from the one they were born in: card, where, when */
+    S.cards.forEach(c => { const d = deathCountry(c); if (d && d !== birthCountry(c)) dth.push({ c, cn: d, y: personOf(c).dy }); });
+    const ghosts = new Map(); dth.forEach(t => { if (!by.has(t.cn)) { if (!ghosts.has(t.cn)) ghosts.set(t.cn, { cn: t.cn, cs: [], first: Infinity, deaths: 0 }); const g = ghosts.get(t.cn); if (t.y != null) g.first = Math.min(g.first, t.y); } });
+    let edge = cols.length ? cols[cols.length - 1].x1 : 0;
+    [...ghosts.values()].sort((p, q) => p.first - q.first || p.cn.localeCompare(q.cn)).forEach(g => { g.x0 = edge + GX + 70; g.x1 = g.x0 + W; edge = g.x1; cols.push(g); });
+    const geo = new Map();
+    cols.forEach((col, i) => {
+      col.a = i ? (cols[i - 1].x1 + col.x0) / 2 : col.x0 - 40; col.b = i < cols.length - 1 ? (col.x1 + cols[i + 1].x0) / 2 : col.x1 + 40; col.i = i;
+      let hue = 0; for (const ch of col.cn) hue = (hue * 31 + ch.charCodeAt(0)) % 360; col.hue = col.cn ? Math.round(hue / 30) * 30 + 10 : 0; geo.set(col.cn, col);
+    });
+    dth.forEach(t => { geo.get(t.cn).deaths++; });
+    cols.forEach(col => {
+      const left = v.x + col.a * v.k, wid = (col.b - col.a) * v.k; if (left > vw || left + wid < 0) return;
+      let fl = ''; const src = col.cs.length ? col.cs.map(c => personOf(c).bp) : dth.filter(t => t.cn === col.cn).map(t => personOf(t.c).dp);
+      for (const nm of src) { if (!nm) continue; const p = col.cs.length ? personOf(col.cs[0]) : personOf(dth.find(t => t.cn === col.cn).c); const pl = TC.placeAt(M, p, nm, 2100); if (pl && pl.fi >= 0) { fl = flagHTML(pl, 2100, 'The flag of ' + col.cn + ' today (Record Atlas)', false) + ' '; break; } }
+      h += `<div class="lcol${col.cn ? '' : ' none'}" style="left:${f1(left)}px;width:${f1(wid)}px;--h:${col.hue}"></div>`;
+      const px = Math.max(left + 10, 10);   /* the label stays on the screen while its column is in view */
+      hh += `<div class="cnh" style="left:${f1(px)}px;max-width:${f1(Math.max(60, left + wid - px - 8))}px;--h:${col.hue}">${fl}<b>${esc(col.cn || 'Birthplace not recorded')}</b><small>${col.cs.length ? col.cs.length : '†' + col.deaths}</small></div>`;
+    });
+    /* a line from the person into the country they died in, ending at a tombstone in that column's near edge; several in one row stack up */
+    const stack = new Map(), sz = Math.max(15, Math.min(26, 24 * v.k));
+    dth.forEach(t => {
+      const src = geo.get(birthCountry(t.c)), dst = geo.get(t.cn); if (!src || !dst) return;
+      const right = dst.i > src.i, k0 = t.c.y + '|' + t.cn, k = stack.get(k0) || 0; stack.set(k0, k + 1);
+      const sx = v.x + (right ? t.c.x + W : t.c.x) * v.k, sy = v.y + (t.c.y + H / 2) * v.k;
+      const ex = right ? v.x + dst.a * v.k + sz * 0.9 : v.x + dst.b * v.k - sz * 0.9, ey = sy + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * (sz + 4) + (k ? 0 : 0);
+      if (Math.max(sx, ex) < 0 || Math.min(sx, ex) > vw) return;
+      const dx = (ex - sx) * 0.5, col = `hsl(${dst.hue} 55% 38%)`;
+      tl += `<path d="M${f1(sx)} ${f1(sy)}C${f1(sx + dx)} ${f1(sy)} ${f1(ex - dx)} ${f1(ey)} ${f1(ex)} ${f1(ey)}" stroke="${col}"/><circle cx="${f1(sx)}" cy="${f1(sy)}" r="3.2" fill="${col}"/>`;
+      ti += `<g transform="translate(${f1(ex - sz / 2)} ${f1(ey - sz / 2)})" style="--tc:${col}"><svg width="${f1(sz)}" height="${f1(sz)}" viewBox="0 0 24 24"><path d="M5.5 22V10a6.5 6.5 0 0113 0v12z" class="tomb"/><path d="M12 8v7M9.2 10.6h5.6" class="cross"/></svg>${t.y != null && sz > 18 ? `<text x="${f1(sz / 2)}" y="${f1(sz + 9)}" text-anchor="middle">${t.y}</text>` : ''}</g>`;
+    });
+  }
   rows.forEach((r, i) => {
     const a = i ? (rows[i - 1].y1 + r.y0) / 2 : r.y0 - 20, b = i < rows.length - 1 ? (r.y1 + rows[i + 1].y0) / 2 : r.y1 + 20;
     const top = v.y + a * v.k, hgt = (b - a) * v.k;
@@ -2366,13 +2453,14 @@ function drawLanes() {
     const vis0 = Math.max(top, 56), vis1 = Math.min(top + hgt, vh - 150), mid = (vis0 + vis1) / 2, show = r.g != null && vis1 - vis0 > 44;
     h += `<div class="lane${i % 2 ? ' b' : ''}" style="top:${f1(top)}px;height:${f1(hgt)}px">${show ? `<div class="lnl" style="top:${f1(mid - top)}px"><b>${romanOf(r.g + 1)}</b>${r.lo != null ? `<small>${r.lo}${r.hi !== r.lo ? '–' + r.hi : ''}</small>` : ''}</div>` : ''}</div>`;
   });
-  host.innerHTML = h;
+  if (grid) { h += `<svg class="tl" width="${vw}" height="${vh}" aria-hidden="true">${tl}</svg>`; hh += `<svg class="tt" width="${vw}" height="${vh}" aria-hidden="true">${ti}</svg>`; }
+  host.innerHTML = h; if (grid) head.innerHTML = hh;
 }
 function drawBands() {
   drawLanes();
   let host = $('#genbands');
   if (!host) { host = document.createElement('div'); host.id = 'genbands'; host.setAttribute('aria-hidden', 'true'); $('#world').insertBefore(host, $('#edges')); }
-  if (!S.opts.gens || S.cards.size < 2 || document.documentElement.getAttribute('data-theme') === 'lanes') { if (host.innerHTML) host.innerHTML = ''; return; }
+  if (!S.opts.gens || S.cards.size < 2 || ['lanes', 'countries'].includes(document.documentElement.getAttribute('data-theme'))) { if (host.innerHTML) host.innerHTML = ''; return; }
   const gi = genInfo(), rows = new Map();
   S.cards.forEach(c => { const g = gi.gen.get(c.key); if (g == null) return; const k = gi.comp.get(c.key) + '|' + g + '|' + Math.round(c.y / 40); if (!rows.has(k)) rows.set(k, { g, cs: [] }); rows.get(k).cs.push(c); });
   let h = '';
@@ -3254,7 +3342,7 @@ function mainMenu() {
   const m = $('#mainMenu');
   const cur = document.documentElement.getAttribute('data-theme') || 'sticker';
   const item = (k, ic, t, sub) => `<button class="mmi${(k === 'legend' ? $('#legendCard') && $('#legendCard').classList.contains('on') : S.tab === k && S.infoOpen !== false && $('#info').classList.contains('on')) ? ' on' : ''}" data-mm="${k}">${icon(ic, 'lk-icon')}<span><b>${t}</b><small>${sub}</small></span></button>`;
-  m.innerHTML = `<div class="mmlook">${icon('theme', 'lk-icon')}<span><b>Look</b><span class="mmchips" role="group" aria-label="Look">${THEMES.map(k => `<button type="button" class="mmchip${k === cur ? ' on' : ''}" data-look="${k}" aria-pressed="${k === cur}">${k[0].toUpperCase() + k.slice(1)}</button>`).join('')}</span></span></div>`
+  m.innerHTML = `<div class="mmlook">${icon('theme', 'lk-icon')}<span><b>Look</b><span class="mmchips" role="group" aria-label="Look">${THEMES.map(k => `<button type="button" class="mmchip${k === cur ? ' on' : ''}" data-look="${k}" aria-pressed="${k === cur}">${THEME_NAME[k] || (k[0].toUpperCase() + k.slice(1))}</button>`).join('')}</span></span></div>`
     + item('legend', 'info', 'How to read the lines', 'What the line colours, patterns and seals mean')
     + item('options', 'gear', 'Options', 'Links to MyHeritage and Ancestry, how paths are judged, your file');
 }
@@ -3459,10 +3547,17 @@ function clearCanvas() {
   if (!S.cards.size) return;
   snapshot(); clearAll(); refreshAll(); drawEdges(); hideHint(); renderInfo(); save(); runSearchMarks(); toast('Cleared. Undo brings it back.');
 }
-const THEMES = ['sticker', 'paper', 'ground', 'lanes'];
+const THEMES = ['sticker', 'paper', 'ground', 'lanes', 'countries'];
+const THEME_NAME = { countries: 'Countries' };
 function setTheme(t) {
   if (!THEMES.includes(t)) t = 'sticker';
+  const was = document.documentElement.getAttribute('data-theme');
   document.documentElement.setAttribute('data-theme', t);
+  /* the Countries look is a layout as well as a colouring: the cards move into a column for each country of birth (Undo puts them back) */
+  if (t === 'countries' && was !== 'countries' && S.cards && S.cards.size > 1 && !S.busy) {
+    snapshot(); const cards = [...S.cards.values()];
+    tweenTo(arrangeTargets(cards), 800).then(() => { refreshAll(); drawEdges(); fit(); save(); miniDraw(); toast('Cards are in a column for each country of birth (Undo brings them back)', 3600); });
+  }
   try { localStorage.setItem('loamTheme', t); } catch (e) { /* ignore */ }
   drawEdges(); miniDraw(); if (S.tab === 'options') renderInfo();
 }

@@ -513,6 +513,24 @@ html:not(.ph):has(#info.on) #markBar{left:calc((100vw - 340px) / 2);max-width:mi
 #markBar{flex-wrap:nowrap}
 #markBar .mkrow{display:flex;align-items:center;gap:10px}
 #markBar .mkc{flex:none;order:0}
+
+/* Person panel: counts you can open, the line bar, people lists, life events, sources (the same sections the Roots & Routes page has) */
+.stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 4px}
+.stt{border:2px solid var(--lk-line);border-radius:14px;background:var(--lk-card);color:var(--lk-ink);padding:7px 6px;font:400 22px/1.1 "Lilita One",system-ui;cursor:pointer;text-align:center;box-shadow:0 2px 0 var(--lk-line)}
+.stt small{display:block;font:800 9.5px Nunito,system-ui;letter-spacing:.06em;text-transform:uppercase;color:var(--lk-soft);margin-top:3px}
+.stt.on{border-color:var(--lk-accent);background:var(--lk-accent-soft)}.stt[disabled]{opacity:.45;cursor:default;box-shadow:none}
+.openlist h5{margin:10px 0 2px;font:900 10.5px Nunito,system-ui;letter-spacing:.06em;text-transform:uppercase;color:var(--lk-soft)}
+.plist{list-style:none;margin:2px 0 6px;padding:0}
+.plk{display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:1px dashed var(--lk-line);cursor:pointer;border-radius:8px;font-weight:800}
+.plk:hover{background:var(--lk-hover)}.plk i{flex:none;width:8px;height:18px;border-radius:4px}
+.plk .pn{flex:1 1 auto;min-width:0}.plk .pn small{color:var(--lk-mute);font-weight:800;margin-left:4px}
+.plk .py{flex:none;color:var(--lk-soft);font:800 11.5px Nunito,system-ui}
+.stack{display:flex;height:12px;border-radius:99px;overflow:hidden;margin:6px 0 4px;background:var(--lk-line)}.stack span{min-width:3px}
+.stackk{display:flex;flex-wrap:wrap;gap:4px 12px;font:800 11px Nunito,system-ui;color:var(--lk-soft)}.stackk i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}
+.life,.srcs{list-style:none;margin:4px 0 8px;padding:0}
+.life li{padding:5px 0;border-bottom:1px dashed var(--lk-line);font-weight:800}.life li small{display:block;color:var(--lk-soft);font-weight:700;font-size:11.5px;line-height:1.35;margin-top:1px}
+.life li.more{border:0}.srcs li{padding:4px 0;font-weight:700;font-size:12.5px;line-height:1.35}
+details.more summary,.life li.more summary{cursor:pointer;color:var(--lk-soft);font:800 11.5px Nunito,system-ui;margin:4px 0}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -686,7 +704,7 @@ html:not(.ph):has(#info.on) #markBar{left:calc((100vw - 340px) / 2);max-width:mi
      [arch, id, sex, given, sur, by, bpIdx, dy, dpIdx, father, mother, fg, mg, spouses[], kids[], page, occIdx, flags, surAlso, route, my] */
   function build(corpus) {
     const M = { archives: corpus.archives, places: corpus.places, occs: corpus.occs || [], built: corpus.built };
-    M.flags = corpus.flags || []; M.geo = corpus.geo || {}; M.regionEras = corpus.eras || {}; M.placeIdx = new Map((corpus.places || []).map((n, i) => [n, i]));
+    M.flags = corpus.flags || []; M.geo = corpus.geo || {}; M.regionEras = corpus.eras || {}; M.events = corpus.events || {}; M.srcs = corpus.srcs || {}; M.placeIdx = new Map((corpus.places || []).map((n, i) => [n, i]));
     const P = corpus.people.map((r, i) => {
       const a = corpus.archives[r[0]];
       const p = {
@@ -1156,6 +1174,39 @@ html:not(.ph):has(#info.on) #markBar{left:calc((100vw - 340px) / 2);max-width:mi
   }
 
 
+  /* everyone above, below and beside a person, for the Person panel: ancestors and descendants by generation, and siblings (anyone who shares a parent) */
+  function family(M, i) {
+    const anc = new Map(), desc = new Map(), sibs = new Set(), p = M.P[i];
+    let cur = [i], g = 0, seen = new Set([i]);
+    while (cur.length && g < 60) { g++; const nx = []; cur.forEach(x => [M.P[x].f, M.P[x].m].forEach(y => { if (y >= 0 && !seen.has(y)) { seen.add(y); anc.set(y, g); nx.push(y); } })); cur = nx; }
+    cur = [i]; g = 0; seen = new Set([i]);
+    while (cur.length && g < 60) { g++; const nx = []; cur.forEach(x => M.P[x].ch.forEach(e => { if (!seen.has(e.c)) { seen.add(e.c); desc.set(e.c, g); nx.push(e.c); } })); cur = nx; }
+    [p.f, p.m].forEach(q => { if (q >= 0) M.P[q].ch.forEach(e => { if (e.c !== i) sibs.add(e.c); }); });
+    return { anc, desc, sibs };
+  }
+  /* "Around their lifetime": the Atlas's events (wars, epidemics, a change of rule) that overlapped the years they were at a place, longest overlap first */
+  function lifeEvents(M, p) {
+    if (!M.events || !p || p.living || p.ghost || p.by == null) return [];
+    const end = p.dy == null ? new Date().getFullYear() : p.dy, my = p.my || null, m = new Map();
+    const stays = [{ n: p.bp, a: p.by, b: my || end }]; if (p.dp && p.dp !== p.bp) stays.push({ n: p.dp, a: my || p.by, b: end });
+    stays.forEach(s => {
+      if (!s.n) return; const pi = M.placeIdx.get(s.n), g = pi != null && M.geo[p.a] ? M.geo[p.a][String(pi)] : null; if (!g || !g[4]) return;
+      g[4].forEach(id => {
+        const e = M.events[id]; if (!e || e[2] > s.b || e[3] < s.a) return;
+        const ov = Math.min(e[3], s.b) - Math.max(e[2], s.a) + 1, o = m.get(id);
+        if (!o || ov > o.ov) m.set(id, { id, n: e[0], f: e[2], t: e[3], toll: e[5] || e[4] || '', at: s.n, ov });
+      });
+    });
+    return [...m.values()].sort((x, y) => y.ov - x.ov || x.f - y.f);
+  }
+  /* the birthplace's rule changing hands during their life */
+  function eraChanges(M, p) {
+    if (!p || p.living || p.ghost || p.by == null || !p.bp) return [];
+    const pi = M.placeIdx.get(p.bp), g = pi != null && M.geo[p.a] ? M.geo[p.a][String(pi)] : null, es = g && g[3] ? M.regionEras[g[3]] : null; if (!es) return [];
+    const end = p.dy == null ? new Date().getFullYear() : p.dy;
+    return es.filter(e => e[0] > p.by && e[0] <= end).map(e => ({ from: e[0], polity: e[2], note: e[3] || '' }));
+  }
+
   /* lines: from a marked person, each grandparent heads a line (a parent with no parents of their own heads one themselves) and every ancestor of that head
      belongs to it, all the way up. Returns { heads:[{i,ci,name}], of: Map person index -> [line numbers] }. The line is named by the head's surname. */
   function lines(M, i) {
@@ -1238,7 +1289,7 @@ html:not(.ph):has(#info.on) #markBar{left:calc((100vw - 340px) / 2);max-width:mi
     return out;
   }
 
-  const API = { lines, arrange, bloodSet, fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful,
+  const API = { family, lifeEvents, eraChanges, lines, arrange, bloodSet, fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful,
     placeAt, neighbours, edgeCost, parentLinks, ancestorStats, stopReason, otherSideHasParents, evidenceSummary, years, url, levelOfGrade, LEVELS, kinshipOps, opsOf, reverseOps, bloodTerm, siblingKind, archivesOnPath, ord };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TC = API;
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -1565,17 +1616,20 @@ html:not(.ph):has(#info.on) #markBar{left:calc((100vw - 340px) / 2);max-width:mi
     for (const pl of (A.places || [])) {
       if (!used.has(pl.n)) continue;
       const eras = (pl.fl || []).map(f => [parseInt(f[0], 10), F(f[1])]).sort((a, b) => a[0] - b[0]);
-      geo[String(P(pl.n))] = [pl.id || null, pl.cn || '', eras, pl.reg || null];
+      geo[String(P(pl.n))] = [pl.id || null, pl.cn || '', eras, pl.reg || null, pl.ev || []];
     }
     const regionEras = {};
-    for (const k of Object.keys(A.regions || {})) regionEras[k] = ((A.regions[k] || {}).eras || []).filter(e => e && e.length > 3 && e[3]).map(e => [e[0], e[1], e[3]]);
+    for (const k of Object.keys(A.regions || {})) regionEras[k] = ((A.regions[k] || {}).eras || []).filter(e => e && e.length > 3 && e[3]).map(e => [e[0], e[1], e[3], e[4] || '']);
+    /* what the Atlas knows happened where they lived (wars, epidemics, a change of rule): only the events the used places point to, and each person's sources */
+    const evUsed = {}; Object.keys(geo).forEach(k => (geo[k][4] || []).forEach(id => { if (A.events && A.events[id]) evUsed[id] = A.events[id]; }));
+    const srcs = {}; drawn.forEach(p => { if (!p.hid && p.srcs && p.srcs.length) srcs[p.id] = p.srcs.map(x => ({ t: String(x.t || '').slice(0, 140), u: /^https?:\/\//i.test(x.u || '') ? x.u : '' })); });
     const metaTitle = tree && tree.meta && tree.meta.title;
     /* the converter's stock title is the name of the viewer, not of the visitor's tree: call it "Your tree" */
     const name = label || (metaTitle && !/^roots\s*(&|&amp;|and)\s*routes/i.test(String(metaTitle).trim()) ? metaTitle : 'Your tree');
     return {
       built: new Date().toISOString().slice(0, 10), livingRule: 'as chosen on the roots page',
       archives: [{ k: 'you', name, host: '', color: '#D2493A', graded: false, generated: tree && tree.meta && tree.meta.generated, living: tree && tree.meta && tree.meta.living, n: rows.length, droppedLiving: 0, livingNamed: 0 }],
-      places, occs, people: rows, flags, geo: { '0': geo }, eras: regionEras,
+      places, occs, people: rows, flags, geo: { '0': geo }, eras: regionEras, events: evUsed, srcs,
     };
   }
   const API = { corpus };
@@ -2813,6 +2867,51 @@ function legendHTML() {
     <p>The small seals at the bottom of a card are its father and mother links (a link with no grade shows none).</p>
     <h4>Bloodline</h4><p>The <b>drop</b> button in the top row works from the selected person. A <b>dashed lilac</b> card is not a blood relative of the person you are colouring from: a spouse, in-law or someone from another family.</p>`;
 }
+
+/* ---- the Person panel's family sections: counts you can open, the line bar, parents / spouse / children, what happened around their life, sources ---- */
+let statOpen = null;
+const ordn = n => n === 1 ? '' : n === 2 ? 'Grand' : n === 3 ? 'Great-grand' : (n - 2) + '× great-grand';
+function plinkHTML(q, extra) {
+  const x = M.P[q], ln = lineOf(q), col = ln ? ln.col : colour(x.a);
+  return `<li class="plk" data-focus="${esc(x.key)}" title="${S.cards.has(x.key) ? 'Find them on the canvas' : 'Put them on the canvas'}"><i style="background:${col}"></i><span class="pn">${esc(x.name)}${extra ? ' <small>' + extra + '</small>' : ''}</span><span class="py">${TC.years(x)}</span></li>`;
+}
+function familyHTML(p, a) {
+  const F = TC.family(M, p.i), graded = a.graded !== false;
+  const tile = (k, n, l) => `<button class="stt${statOpen === k ? ' on' : ''}" data-do="stat" data-k="${k}"${n ? '' : ' disabled'} aria-expanded="${statOpen === k}">${n.toLocaleString()}<small>${l}${n ? (statOpen === k ? ' ▴' : ' ▾') : ''}</small></button>`;
+  let h = `<div class="stats3">${tile('anc', F.anc.size, 'Ancestors')}${tile('desc', F.desc.size, 'Descendants')}${tile('sib', F.sibs.size, 'Siblings')}</div>`;
+  if (statOpen) {
+    const grp = (m, lab) => { const by = {}; m.forEach((g, i) => (by[g] = by[g] || []).push(i)); return Object.keys(by).map(Number).sort((x, y) => x - y).map(g => `<h5>${lab(g)} (${by[g].length})</h5><ul class="plist">${by[g].sort((x, y) => (M.P[x].by || 9999) - (M.P[y].by || 9999)).map(q => plinkHTML(q)).join('')}</ul>`).join(''); };
+    h += `<div class="openlist">${statOpen === 'anc' ? grp(F.anc, g => g === 1 ? 'Parents' : ordn(g) + 'parents') : statOpen === 'desc' ? grp(F.desc, g => g === 1 ? 'Children' : ordn(g) + 'children') : `<h5>Siblings (${F.sibs.size})</h5><ul class="plist">${[...F.sibs].sort((x, y) => (M.P[x].by || 9999) - (M.P[y].by || 9999)).map(q => plinkHTML(q)).join('')}</ul>`}</div>`;
+  }
+  /* ancestry by line: the marked person's grandparent lines when there is a mark, else the ancestors' surnames */
+  if (F.anc.size >= 3) {
+    const by = new Map(), L = M.archives[p.a].k === 'you' ? markLines() : null;
+    F.anc.forEach((g, i) => { const ln = lineOf(i); const k = ln ? ln.names : (M.P[i].sur || 'unknown').trim(); by.set(k, (by.get(k) || 0) + 1); });
+    const top = [...by.entries()].sort((x, y) => y[1] - x[1]), shown = top.slice(0, 6), rest = top.slice(6).reduce((n, x) => n + x[1], 0);
+    const colFor = (k, idx) => { for (const q of F.anc.keys()) { const ln = lineOf(q); if (ln && ln.names === k) return ln.col; } return LINE_COLS[idx % LINE_COLS.length]; };
+    const gens = Math.max(...F.anc.values());
+    h += `<h4>Ancestry by ${L && L.heads.length ? 'line' : 'surname'} · ${gens} generation${gens === 1 ? '' : 's'} back</h4><div class="stack">${shown.map(([k, n], idx) => `<span style="flex:${n};background:${colFor(k, idx)}" title="${esc(k)}: ${n}"></span>`).join('')}${rest ? `<span style="flex:${rest};background:var(--lk-faint)" title="others: ${rest}"></span>` : ''}</div>`
+      + `<div class="stackk">${shown.map(([k, n], idx) => `<span><i style="background:${colFor(k, idx)}"></i>${esc(k)} ${n}</span>`).join('')}${rest ? `<span><i style="background:var(--lk-faint)"></i>others ${rest}</span>` : ''}</div>`;
+  }
+  /* parents (with the evidence for each link when the archive grades them), spouse, children */
+  const gradeRow = (q, who, g) => q < 0 ? '' : `<li data-focus="${esc(M.P[q].key)}"><span style="flex:none">${swatch(TC.levelOfGrade(g), colour(p.a)).replace('<svg ', '<svg width="30" height="20" ')}</span><div><b>${who}: ${esc(M.P[q].name)}</b>${TC.levelOfGrade(g) === 'ungraded' ? '' : `<small>${TC.LEVELS[TC.levelOfGrade(g)].label.toUpperCase()} · ${TC.LEVELS[TC.levelOfGrade(g)].note}</small>`}</div></li>`;
+  if (p.f >= 0 || p.m >= 0) h += graded ? `<h4>Parents and the evidence for each link</h4><ul class="steps">${gradeRow(p.f, 'Father', p.fg)}${gradeRow(p.m, 'Mother', p.mg)}</ul>`
+    : `<h4>Parents</h4><ul class="plist">${[p.f >= 0 ? plinkHTML(p.f, 'father') : '', p.m >= 0 ? plinkHTML(p.m, 'mother') : ''].join('')}</ul>`;
+  else h += `<p class="plines">No parent recorded${graded ? ' in ' + esc(a.name) : ''}.</p>`;
+  if (p.sp.length) h += `<h4>Spouse${p.sp.length > 1 ? 's' : ''}</h4><ul class="plist">${p.sp.map(q => plinkHTML(q)).join('')}</ul>`;
+  const kids = p.ch.map(e => e.c);
+  if (kids.length) h += `<h4>Children (${kids.length})</h4><ul class="plist">${kids.slice(0, 8).map(q => plinkHTML(q)).join('')}</ul>${kids.length > 8 ? `<details class="more"><summary>${kids.length - 8} more</summary><ul class="plist">${kids.slice(8).map(q => plinkHTML(q)).join('')}</ul></details>` : ''}`;
+  return h;
+}
+function lifeHTML(p) {
+  const evs = TC.lifeEvents(M, p), eras = TC.eraChanges(M, p); if (!evs.length && !eras.length) return '';
+  const yrB = y => y < 0 ? (-y) + ' BCE' : String(y), li = e => `<li><b>${e.f === e.t ? yrB(e.f) : yrB(e.f) + '–' + yrB(e.t)}</b> · ${esc(e.n)}<small>${esc(e.at)} · ${esc(e.toll.length > 120 ? e.toll.slice(0, 119) + '…' : e.toll)}</small></li>`;
+  return `<h4>Around their lifetime</h4><ul class="life">${eras.map(e => `<li><b>${e.from}</b> · ${esc(e.polity)}<small>Birthplace changed hands.${e.note ? ' ' + esc(e.note) : ''}</small></li>`).join('')}${evs.slice(0, 5).map(li).join('')}${evs.length > 5 ? `<li class="more"><details><summary>${evs.length - 5} more while they lived</summary><ul class="life">${evs.slice(5).map(li).join('')}</ul></details></li>` : ''}</ul>`;
+}
+function srcsHTML(p) {
+  const s = (M.srcs && M.srcs[p.id]) || []; if (!s.length || p.living) return '';
+  return `<h4>Sources (${s.length})</h4><ul class="srcs">${s.map(x => `<li>${x.u ? `<a href="${esc(x.u)}" target="_blank" rel="noopener">${esc(x.t)} &nearr;</a>` : esc(x.t)}</li>`).join('')}</ul>`;
+}
 function personPanel() {
   const keys = [...S.sel];
   if (!keys.length) return `<h3>Nobody selected</h3><p style="color:var(--lk-soft);font-weight:700">Click a card to see what the archives hold about them, or search above and drop someone in.</p>${S.cards.size ? `<div class="row"><button class="lk-btn is-small" data-do="legend">How to read the lines</button></div>` : ''}`;
@@ -2821,7 +2920,6 @@ function personPanel() {
     return `<h3>Two people selected</h3><p><b>${esc(a.name)}</b> (${esc(M.archives[a.a].name)}) and <b>${esc(b.name)}</b> (${esc(M.archives[b.a].name)})</p><div class="row"><button class="lk-btn is-primary" data-do="relate2">How are they related?</button></div>`;
   }
   const p = M.byKey.get(keys[0]), c = S.cards.get(keys[0]), a = M.archives[p.a];
-  const stats = TC.ancestorStats(M, p.i);
   const link = TC.url(M, p);
   const parentRow = (q, who, g) => q < 0 ? '' : `<li data-focus="${esc(M.P[q].key)}"><span style="flex:none">${swatch(TC.levelOfGrade(g), colour(p.a)).replace('<svg ', '<svg width="30" height="20" ')}</span><div><b>${who}: ${esc(M.P[q].name)}</b>${TC.levelOfGrade(g) === 'ungraded' ? '' : `<small>${TC.LEVELS[TC.levelOfGrade(g)].label.toUpperCase()} · ${TC.LEVELS[TC.levelOfGrade(g)].note}</small>`}</div></li>`;
   const kids = p.ch.length, sps = p.sp.map(s => M.P[s].name);
@@ -2842,10 +2940,9 @@ function personPanel() {
     <div class="row">${markPanelHTML(p)}</div>
     ${nameFormsHTML(p)}
     <div${p.ghost ? ' hidden' : ''}>
-    <h4>Parents and the evidence for each link</h4>
-    ${(p.f >= 0 || p.m >= 0) ? `<ul class="steps">${parentRow(p.f, 'Father', p.fg)}${parentRow(p.m, 'Mother', p.mg)}</ul>` : `<p>No parent recorded in ${esc(a.name)}.</p>`}
-    <p>${stats.count ? `<b>${stats.count}</b> ancestor${stats.count > 1 ? 's' : ''} on record, up to <b>${stats.depth}</b> generation${stats.depth > 1 ? 's' : ''} back (in ${esc(a.name)} alone).` : 'No ancestors on record in this archive.'}
-      ${kids ? `<br><b>${kids}</b> child${kids > 1 ? 'ren' : ''} on record.` : ''}${sps.length ? `<br>Spouse${sps.length > 1 ? 's' : ''}: ${esc(sps.join(', '))}` : ''}</p>
+    ${familyHTML(p, a)}
+    ${lifeHTML(p)}
+    ${srcsHTML(p)}
     ${brs.length ? `<h4>Possibly the same person in another archive</h4>${brs.map(b => { const o = M.P[TC.bridgeOther(b, p.i)], st = TC.bridgeState(M, b); return `<div class="warnbox${TC.bridgeDoubtful(b) ? ' bad' : ''}"><b>${esc(o.name)}</b> in ${esc(M.archives[o.a].name)} ${TC.years(o)}${o.bp ? ' · ' + esc(o.bp) : ''}<br><small>${esc(TC.bridgeNotes(b).join(' · '))}</small><div class="row"><button class="lk-btn is-small" data-br="${esc(b.id)}" data-do="show">${S.cards.has(o.key) ? 'Find' : 'Show'}</button>${st === 'rejected' ? `<button class="lk-btn is-small" data-br="${esc(b.id)}" data-do="restore">Unlinked: restore</button>` : `<button class="lk-btn is-small${st === 'confirmed' ? ' on' : ''}" data-br="${esc(b.id)}" data-do="confirm">${st === 'confirmed' ? 'Confirmed' : 'Confirm same person'}</button><button class="lk-btn is-small is-danger" data-br="${esc(b.id)}" data-do="unlink">Unlink</button>`}</div></div>`; }).join('')}` : ''}
     <div class="row one"><button class="lk-btn is-small" data-do="up">${icon('up', 'lk-icon')} Parents</button><button class="lk-btn is-small is-primary" data-do="upall">${icon('upall', 'lk-icon')} All the way back</button><button class="lk-btn is-small" data-do="dn">${icon('dn', 'lk-icon')} Children</button></div></div>`;
 }
@@ -3016,6 +3113,7 @@ $('#info').addEventListener('click', e => {
   else if (act === 'nextcopy') copyPlan();
   else if (act === 'up' && c) doUp(c); else if (act === 'upall' && c) doAllBack(c); else if (act === 'dn' && c) doDown(c, false);
   else if (act === 'rel' && c) startRelate(c.key);
+  else if (act === 'stat') { statOpen = statOpen === d.dataset.k ? null : d.dataset.k; renderInfo(); }
   else if (act === 'mark' && key) setMark(key); else if (act === 'unmark') setMark(null);
   else if (act === 'relate2') { const ks = [...S.sel]; showPath(ks[0], ks[1]); }
   else if (act === 'clearpath') { S.path = null; S.noPath = null; clearPathUi(); refreshAll(); drawEdges(); S.tab = 'person'; renderInfo(); syncButtons(); }

@@ -696,13 +696,19 @@ html:not(.ph):has(#info.on) #namesCap{left:calc((100vw - 340px) / 2)}
 .aip-n{margin-left:10px;color:var(--lk-mute);font-weight:800}
 
 #lanehead .tt .tg{pointer-events:all;cursor:pointer}#lanehead .tt .tg:hover .tomb,#lanehead .tt .tg:focus-visible .tomb{fill:#FFF3E0;stroke-width:2.6}#lanehead .tt .tg:focus-visible{outline:none}
+
+/* the search button floats at the bottom right, see-through until it is pointed at; it follows the side panel's edge and, on a phone, sits above the search shelf */
+#bShelf{position:fixed;right:16px;bottom:16px;z-index:9;background:rgba(255,255,255,.38);border-color:rgba(31,37,48,.14);box-shadow:none;color:var(--lk-ink);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);opacity:.8;transition:background .15s,opacity .15s,right .2s}
+#bShelf:hover,#bShelf:focus-visible{background:var(--lk-card);opacity:1;border-color:var(--lk-accent)}
+html:not(.ph):has(#info.on) #bShelf{right:356px}
+.ph #bShelf{right:10px;bottom:calc(var(--dock-h,130px) + 12px)}.ph.shelfoff #bShelf{bottom:calc(14px + env(safe-area-inset-bottom))}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
 <div class="logo">TREE<b> CANVAS</b><small>prototype</small></div>
 <div class="zoombar"><button class="lk-ibtn" id="zIn" title="Zoom in" aria-label="Zoom in"></button><button class="lk-ibtn" id="zOut" title="Zoom out" aria-label="Zoom out"></button><button class="lk-ibtn" id="bFit" title="Fit everything in view (F)" aria-label="Fit to view"></button></div>
+<button class="lk-ibtn" id="bShelf" title="Show or hide the search shelf" aria-label="Search shelf" aria-pressed="true"></button>
 <div class="top">
-  <button class="lk-ibtn" id="bShelf" title="Show or hide the search shelf" aria-label="Search shelf"></button>
   <button class="lk-ibtn" id="bRel" title="How are they related? Select a person, then another" aria-label="How are they related"></button>
   <button class="lk-ibtn" id="bBlood" title="Bloodline: add blood relatives, remove the rest, or colour them differently" aria-label="Bloodline" aria-haspopup="true" aria-expanded="false"></button>
   <button class="lk-ibtn" id="bGen" title="Generations: numbered bands behind each row (I is the oldest)" aria-label="Generations" aria-pressed="false"></button>
@@ -4073,7 +4079,7 @@ function wireToolbar() {
   if (e.data.tcLinks) { if (S.tab !== 'options') renderInfo(); return; }   // not while the Options box is being typed in: a redraw would take the cursor away
   if (!e.data.tcFix) return; refreshAll(); renderInfo(); syncButtons();
 });
-  $('#bShelf').onclick = () => { document.documentElement.classList.toggle('shelfoff'); dockH(); };
+  $('#bShelf').onclick = () => { const h = document.documentElement.classList; h.toggle('shelfoff'); $('#bShelf').setAttribute('aria-pressed', String(!h.contains('shelfoff'))); dockH(); };
   $('#bUndo').onclick = undo;
   $('#bArrange').onclick = () => { if (!S.busy) doArrange(); };
   $('#bGen').onclick = toggleGens;

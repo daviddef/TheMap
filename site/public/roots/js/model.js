@@ -128,10 +128,16 @@ export function famKeyer(families) {
 export function buildTree(P, placeFor, est, dest, opts = {}) {
   const living = opts.living || 'redact', sk = famKeyer(opts.families), maxLines = 8, hide = p => p.liv && living !== 'show';
   const keep = new Map(), undrawn = [];
+  /* the people who are not drawn on the Roots & Routes maps (no year, or no place) still have a name, dates and relatives. They are listed with all of that so the Tree
+     canvas, which needs no place, can search and draw them too; the viewer here only reads id, name, why, place and b, so the extra fields change nothing for it. A living
+     person who is hidden carries nothing but "Living person". */
+  const und = (p, why, extra) => ({ id: p.id, name: hide(p) ? 'Living person' : clean(p.given + ' ' + p.sur), why, ...extra,
+    ...(hide(p) ? {} : { given: p.given, sur: p.sur, sex: p.sex === 'f' || p.sex === 'm' ? p.sex : 'u', by: p.by, dy: p.dy, occ: p.occ || null, father: p.father || null, mother: p.mother || null,
+      spouse: p.spouse.slice(), kids: p.kids.slice(), bye: est.has(p.id) || !!p.byApprox, dye: dest.has(p.id) }) });
   const ok = raw => (raw ? placeFor(raw) : null);
   for (const p of P.values()) {
     if (p.liv && living === 'omit') continue;
-    if (p.by === null) { undrawn.push({ id: p.id, name: hide(p) ? 'Living person' : clean(p.given + ' ' + p.sur), why: 'year', ...(p.bpRaw && !hide(p) ? { place: p.bpRaw } : {}) }); continue; }
+    if (p.by === null) { undrawn.push(und(p, 'year', p.bpRaw && !hide(p) ? { place: p.bpRaw } : {})); continue; }
     keep.set(p.id, p);
   }
   for (const p of keep.values()) { const r = ok(p.bpRaw); p.bp = r ? r.name : null; p.bpe = false; }
@@ -146,7 +152,7 @@ export function buildTree(P, placeFor, est, dest, opts = {}) {
     }
   }
   const dropped = [];
-  for (const [id, p] of keep) if (!p.bp) { dropped.push(id); undrawn.push({ id, name: hide(p) ? 'Living person' : clean(p.given + ' ' + p.sur), why: 'place', b: hide(p) ? null : p.by, ...(p.bpRaw && !hide(p) ? { place: p.bpRaw } : {}) }); }
+  for (const [id, p] of keep) if (!p.bp) { dropped.push(id); undrawn.push(und(p, 'place', { b: hide(p) ? null : p.by, ...(p.bpRaw && !hide(p) ? { place: p.bpRaw } : {}) })); }
   for (const id of dropped) keep.delete(id);
   for (const p of keep.values()) {
     const dr = ok(p.dpRaw);

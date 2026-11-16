@@ -1,5 +1,6 @@
 /* The page around the Tree Canvas: nothing but the canvas and a status line. The canvas draws its own title bar and buttons. */
 html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font: 15px/1.4 system-ui, sans-serif; }
+#cv[hidden] { display: none; }
 #cv { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; background: #efe6d2; }
 #msg { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 10; margin: 0; max-width: calc(100vw - 32px);
   padding: 8px 16px; border-radius: 999px; background: #2b2118; color: #fff7e8; box-shadow: 0 2px 10px rgba(0, 0, 0, .25); }
@@ -10,3 +11,32 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
   html, body, #cv { background: #1d1a16; color: #f3e9d6; }
   .nojs { background: #2b2620; }
 }
+
+/* the page the canvas opens on, before any tree: two buttons and the files used before */
+#start[hidden] { display: none; }
+#start { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px 16px; text-align: center; overflow: auto; }
+#start h1 { margin: 0; font: 400 clamp(34px, 6vw, 52px)/1.05 "Lilita One", system-ui, sans-serif; letter-spacing: .01em; }
+#start .stlead { margin: 0; max-width: 34em; color: #6a5a45; }
+.stbtns { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 6px; }
+.stbtn { font: 700 16px/1 system-ui, sans-serif; padding: 14px 22px; border-radius: 14px; border: 2px solid #cdbf9f; background: #fff7e8; color: #2b2118; cursor: pointer; }
+.stbtn.primary { background: #d9822b; border-color: #d9822b; color: #fff; }
+.stbtn:hover { filter: brightness(.96); } .stbtn:focus-visible, .stlink:focus-visible, .strec button:focus-visible { outline: 3px solid #2b6cb0; outline-offset: 2px; }
+.strec { width: min(440px, 100%); margin-top: 10px; text-align: left; }
+.strec h2 { margin: 0 0 6px; font: 700 12px/1 system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #6a5a45; }
+.strec ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.strec li { display: flex; align-items: stretch; gap: 6px; }
+.strec li .recopen { flex: 1 1 auto; min-width: 0; text-align: left; padding: 10px 14px; border-radius: 12px; border: 2px solid #cdbf9f; background: #fff7e8; color: #2b2118; cursor: pointer; font: 700 15px/1.2 system-ui, sans-serif; }
+.strec li .recopen small { display: block; margin-top: 3px; font: 400 12px/1.2 system-ui, sans-serif; color: #6a5a45; }
+.strec li .recopen b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.strec li .recx { flex: 0 0 auto; width: 38px; border-radius: 12px; border: 2px solid #cdbf9f; background: transparent; color: #6a5a45; cursor: pointer; font: 700 16px/1 system-ui, sans-serif; }
+.stnote { margin: 10px 0 0; font-size: 12.5px; color: #6a5a45; }
+.stlink { background: none; border: 0; padding: 0; color: inherit; text-decoration: underline; cursor: pointer; font: inherit; }
+@media (prefers-color-scheme: dark) {
+  #start .stlead, .strec h2, .stnote, .strec li .recopen small, .strec li .recx { color: #c9bda5; }
+  .stbtn, .strec li .recopen { background: #2b2620; border-color: #4a4034; color: #f3e9d6; }
+  .stbtn.primary { background: #d9822b; border-color: #d9822b; color: #1d1a16; }
+  .strec li .recx { border-color: #4a4034; }
+}
+.strec li .recnote { display: block; margin-top: 4px; font: italic 400 13px/1.25 system-ui, sans-serif; color: #2b2118; white-space: normal; }
+.strec li .recin { flex: 1 1 auto; min-width: 0; padding: 10px 14px; border-radius: 12px; border: 2px solid #2b6cb0; background: #fff7e8; color: #2b2118; font: 15px/1.2 system-ui, sans-serif; }
+@media (prefers-color-scheme: dark) { .strec li .recnote, .strec li .recin { color: #f3e9d6; } .strec li .recin { background: #2b2620; } }

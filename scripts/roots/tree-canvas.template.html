@@ -188,7 +188,7 @@ button{font-family:inherit}
 #hint.off{opacity:0}
 #toast{position:fixed;left:50%;top:16px;--lk-toast-from:-10px;z-index:30}
 /* ---------- cards ---------- */
-.card{position:absolute;left:0;top:0;width:184px;height:76px;z-index:2}
+.card{position:absolute;left:0;top:0;width:184px;height:92px;z-index:2}
 .card.sel{z-index:4}.card:hover{z-index:5}
 .cb{position:absolute;inset:0;background:var(--lk-card);border:2px solid var(--lk-line);border-radius:16px;box-shadow:0 3px 0 var(--lk-line);padding:7px 8px 5px 17px;
   transition:transform .18s cubic-bezier(.3,1.7,.5,1),box-shadow .15s,border-color .15s,opacity .25s,filter .25s;cursor:grab;overflow:hidden}
@@ -205,6 +205,9 @@ button{font-family:inherit}
 .card .meta{display:flex;align-items:center;gap:5px;margin-top:3px;font:800 10px Nunito,system-ui;color:var(--lk-mute)}
 .card .ar.ln{background:var(--lc)}
 .card .ar{background:var(--ac);color:#fff;border-radius:99px;padding:1px 7px;letter-spacing:.3px;text-transform:uppercase;font-size:9.5px}
+.card .cxm{display:inline-flex;align-items:center;gap:2px;color:var(--lk-mute);text-decoration:none;border:1.5px solid var(--lk-line,currentColor);border-radius:99px;padding:0 5px 0 3px;font:800 10px/14px Nunito,system-ui}
+.card .cxm svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.card .cxm:hover,.card .cxm:focus-visible{color:var(--ac);border-color:var(--ac)}
 .card .seals{display:flex;gap:3px;align-items:center;margin-left:auto}
 .card .seals svg{width:14px;height:14px;display:block}
 .card.dim .cb{opacity:.38;filter:saturate(.5)}
@@ -702,6 +705,15 @@ html:not(.ph):has(#info.on) #namesCap{left:calc((100vw - 340px) / 2)}
 #bShelf:hover,#bShelf:focus-visible{background:var(--lk-card);opacity:1;border-color:var(--lk-accent)}
 html:not(.ph):has(#info.on) #bShelf{right:356px}
 .ph #bShelf{right:10px;bottom:calc(var(--dock-h,130px) + 12px)}.ph.shelfoff #bShelf{bottom:calc(14px + env(safe-area-inset-bottom))}
+
+/* the two relate slots stay out of the way until the how-are-they-related button opens them */
+html:not(.rzopen) #rz{display:none}
+
+/* a card: born and died on their own rows, the sex mark after the name */
+.card .yr b{font-weight:900;color:var(--lk-mute);margin-right:1px}
+.card .nm .sx{font-size:12px;margin-left:5px;vertical-align:1px}
+.card .meta{min-height:14px}
+#mainMenu .mmr small.mmnote{font-style:italic;color:var(--lk-ink);white-space:normal}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -709,7 +721,7 @@ html:not(.ph):has(#info.on) #bShelf{right:356px}
 <div class="zoombar"><button class="lk-ibtn" id="zIn" title="Zoom in" aria-label="Zoom in"></button><button class="lk-ibtn" id="zOut" title="Zoom out" aria-label="Zoom out"></button><button class="lk-ibtn" id="bFit" title="Fit everything in view (F)" aria-label="Fit to view"></button></div>
 <button class="lk-ibtn" id="bShelf" title="Show or hide the search shelf" aria-label="Search shelf" aria-pressed="true"></button>
 <div class="top">
-  <button class="lk-ibtn" id="bRel" title="How are they related? Select a person, then another" aria-label="How are they related"></button>
+  <button class="lk-ibtn" id="bRel" title="How are they related? Opens two slots: put one person in each" aria-label="How are they related"></button>
   <button class="lk-ibtn" id="bBlood" title="Bloodline: add blood relatives, remove the rest, or colour them differently" aria-label="Bloodline" aria-haspopup="true" aria-expanded="false"></button>
   <button class="lk-ibtn" id="bGen" title="Generations: numbered bands behind each row (I is the oldest)" aria-label="Generations" aria-pressed="false"></button>
   <button class="lk-ibtn" id="bArrange" title="Arrange: tidy every card on the canvas into one neat family tree" aria-label="Arrange"></button>
@@ -721,7 +733,7 @@ html:not(.ph):has(#info.on) #bShelf{right:356px}
 </div>
 <div id="flagsprite" aria-hidden="true"></div>
 <div id="hint">Search anyone, from any archive, and drop them here
-  <small>Pull up their parents, all the way back, one generation at a time.<br>Drop someone from another archive and ask how the two are related.<br>Solid means read from a register; dashed means not proven; dotted means the archive records no grade.</small>
+  <small>Pull up their parents, all the way back, one generation at a time.<br>Press the &#8644; button to ask how two people are related.<br>Solid means read from a register; dashed means not proven; dotted means the archive records no grade.</small>
   <div style="margin-top:14px;pointer-events:auto"><button class="lk-btn is-primary" id="exDemo">Show me an example</button></div></div>
 <div id="info" aria-live="polite"></div>
 <div id="pop"></div>
@@ -885,6 +897,8 @@ html:not(.ph):has(#info.on) #bShelf{right:356px}
         occ: r[16] >= 0 ? (corpus.occs || [])[r[16]] : '', fl: r[17], living: !!(r[17] & 8), ghost: !!(r[17] & 32), how: typeof r[21] === 'string' ? r[21] : '', surAlso: Array.isArray(r[18]) ? r[18] : [], ch: [],
         /* 19: the stops an archive records between birth and death [[place idx, year|null, estimated]]; 20: marriage year (fl bit 16 = estimated). Absent in an older corpus. */
         bd: typeof r[22] === 'string' ? r[22] : '', dd: typeof r[23] === 'string' ? r[23] : '',
+        /* 24: how many corrections the archive has recorded about this person (a count only; never what they say) */
+        cx: Number.isInteger(r[24]) && r[24] > 0 ? r[24] : 0,
         route: Array.isArray(r[19]) ? r[19].map(x => ({ name: corpus.places[x[0]], year: x[1], est: !!x[2] })) : [], my: r[20] || null,
       };
       p.name = (p.given + ' ' + p.sur).trim() || '(no name recorded)';
@@ -1345,6 +1359,8 @@ html:not(.ph):has(#info.on) #bShelf{right:356px}
     return { name, id: g[0] || null, cn: g[1] || '', fi, era };
   }
   function url(M, p) { return p.page ? 'https://' + M.archives[p.a].host + p.page : ''; }
+  /* the archive's own corrections page, when it has recorded corrections about this person */
+  function corrUrl(M, p) { const a = M.archives[p.a]; return p.cx > 0 && a && a.host && !p.living && !p.ghost ? 'https://' + a.host + '/corrections/' : ''; }
 
   /* BLOOD RELATIVES of person i: everyone who shares an ancestor with them, reached only through parent and child links (never through a marriage). That is the
      person, their ancestors back to `back` generations (Infinity = every one), and every descendant of any of those. A spouse is blood only if they are
@@ -1544,7 +1560,7 @@ html:not(.ph):has(#info.on) #bShelf{right:356px}
     return { root: rk, nodes: N, edges: E, people: mem.size, ancestors: gen.size, scope: blood ? 'blood' : 'anc' };
   }
   const API = { nameTree, playSet, family, lifeEvents, eraChanges, lines, arrange, bloodSet, fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful,
-    placeAt, dateText, neighbours, edgeCost, parentLinks, ancestorStats, stopReason, otherSideHasParents, evidenceSummary, years, url, levelOfGrade, LEVELS, kinshipOps, opsOf, reverseOps, bloodTerm, siblingKind, archivesOnPath, ord };
+    placeAt, dateText, neighbours, edgeCost, parentLinks, ancestorStats, stopReason, otherSideHasParents, evidenceSummary, years, url, corrUrl, levelOfGrade, LEVELS, kinshipOps, opsOf, reverseOps, bloodTerm, siblingKind, archivesOnPath, ord };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TC = API;
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -1907,7 +1923,7 @@ const QS = new URLSearchParams(location.search), SA = EMBED && QS.has('sa');
 const CORPUS = EMBED ? window.TCF.corpus(window.parent.RR.tree, window.parent.RR.atlas) : JSON.parse(document.getElementById('corpus').textContent);
 const M = TC.build(CORPUS);
 const NA = M.archives.length;
-const W = 184, H = 76, GX = 30, COUPLE_GX = 22, ROWH = 150;
+const W = 184, H = 92, GX = 30, COUPLE_GX = 22, ROWH = 150;
 const STORE = 'treecanvas.v1';
 
 const ICON = {
@@ -1920,6 +1936,7 @@ const ICON = {
   search: '<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/>', theme: '<circle cx="12" cy="12" r="8"/><path d="M12 4v16"/><path d="M12 4a8 8 0 010 16z" fill="currentColor"/>',
   clear: 'M5 19l9-9 4 4-5 5H5zM13 7l2-2 4 4-2 2', gear: '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>',
   map: 'M4 6l5-2 6 2 5-2v14l-5 2-6-2-5 2zM9 4v14M15 6v14',
+  pencil: 'M4 20l1-4.5L16.5 4a2 2 0 013 3L8 18.5zM14.5 6l3.5 3.5',
   blood: 'M12 3.5c3.2 4.2 6 7.2 6 10.6a6 6 0 01-12 0c0-3.4 2.8-6.4 6-10.6z',
   folder: 'M3 7.5A1.5 1.5 0 014.5 6H9l2 2.2h8.5A1.5 1.5 0 0121 9.7V17.5a1.5 1.5 0 01-1.5 1.5h-15A1.5 1.5 0 013 17.5z',
   eyeoff: '<path d="M3 12s3.3-6 9-6 9 6 9 6-3.3 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.6"/><path d="M4.5 4.5l15 15"/>',
@@ -2060,10 +2077,19 @@ function buildFlagSprite() {
    window.parent.RR.fix = { byId: { personId: [issue] }, total, people }. Nothing here is stored or sent. */
 function fixList() { if (!EMBED) return null; try { const F = window.parent.RR && window.parent.RR.fix; return F && F.byId ? F : null; } catch (e) { return null; } }
 function fixOf(p) { const F = fixList(); const l = F && p && !p.ghost ? F.byId[p.id] : null; return l && l.length ? l : null; }
+/* a small pencil with the count, when the archive has recorded corrections about this person: a link to the archive's corrections page */
+function cxMark(p, a) {
+  const u = TC.corrUrl(M, p); if (!u) return '';
+  return `<a class="cxm" href="${esc(u)}" target="_blank" rel="noopener" data-act="open" title="${p.cx} ${p.cx === 1 ? 'correction' : 'corrections'} recorded about ${esc(p.name)} in the ${esc(a.name)} archive. Click to read them.">${icon('pencil', '')}${p.cx}</a>`;
+}
 function cardInner(c) {
   const p = personOf(c), a = M.archives[p.a];
-  const bpl = p.bp ? TC.placeAt(M, p, p.bp, p.by) : null, dpl = p.dp && p.dp !== p.bp ? TC.placeAt(M, p, p.dp, p.dy) : null;
-  const place = p.bp ? ` &middot; ${flagHTML(bpl, p.by, flagTip(bpl, p.by, 'Born at'))}${esc(p.bp)}` + (dpl && dpl.fi >= 0 ? ` &rarr; ${flagHTML(dpl, p.dy, flagTip(dpl, p.dy, 'Died at'))}` : '') : '';
+  const bpl = p.bp ? TC.placeAt(M, p, p.bp, p.by) : null, dpl = p.dp ? TC.placeAt(M, p, p.dp, p.dy) : null;
+  /* born and died each on their own row, each with its flag and place; a person with no dates (named only, living) keeps the one plain line */
+  const yrOf = (y, est) => y == null ? '?' : (est ? '~' : '') + y;
+  const row = (lab, yr, pl, name, what, y) => `<div class="yr"><b>${lab}</b> ${yr}${name ? ` &middot; ${pl ? flagHTML(pl, y, flagTip(pl, y, what)) : ''}${esc(name)}` : ''}</div>`;
+  const dates = (p.ghost || p.living) ? `<div class="yr">${TC.years(p)}</div>`
+    : row('b.', yrOf(p.by, p.fl & 1), bpl, p.bp, 'Born at', p.by) + (p.dy != null || p.dp ? row('d.', yrOf(p.dy, p.fl & 2), dpl, p.dp, 'Died at', p.dy) : '');
   const seals = [];
   if (p.f >= 0 && TC.levelOfGrade(p.fg) !== 'ungraded') seals.push(`<span title="Father link: ${TC.LEVELS[TC.levelOfGrade(p.fg)].short}">${sealMini(TC.levelOfGrade(p.fg), colour(p.a))}</span>`);
   if (p.m >= 0 && TC.levelOfGrade(p.mg) !== 'ungraded') seals.push(`<span title="Mother link: ${TC.LEVELS[TC.levelOfGrade(p.mg)].short}">${sealMini(TC.levelOfGrade(p.mg), colour(p.a))}</span>`);
@@ -2073,8 +2099,8 @@ function cardInner(c) {
     return `<button class="brc" style="--bc:${colour(o.a)}" data-act="br" data-b="${esc(b.id)}" title="${st === 'confirmed' ? 'Confirmed' : 'Suggested'} same person in ${esc(M.archives[o.a].name)} (${esc(TC.bridgeNotes(b).join(', '))}). Click to add them to the canvas, bridged, not merged.">&asymp; ${esc(M.archives[o.a].name)}</button>`;
   }).join('') + (brs.length > 1 ? `<button class="brc more" style="--bc:var(--lk-accent)" data-act="brs" title="${brs.length - 1} more possible matches: open the Person panel">+${brs.length - 1}</button>` : '');
   const ln = lineOf(c.i);
-  let h = `<div class="cb" title="${esc(p.name)}${a.k === 'you' ? '' : ' · ' + esc(a.name) + ' archive'}${p.occ ? ' · ' + esc(p.occ) : ''} · ${esc(TC.evidenceSummary(M, p))}"><div class="nm">${esc(p.name)}</div><div class="yr">${TC.years(p)}${place}</div>
-    <div class="meta">${a.k === 'you' ? (ln ? `<span class="ar ln" style="--lc:${ln.col}" title="On the ${esc(ln.names)} line from the marked person's grandparents">${esc(ln.names)}</span>` : '') : `<span class="ar">${esc(a.name)}</span>`}${p.sex === 'f' || p.sex === 'm' ? `<span class="sx ${p.sex === 'f' ? 'mo' : 'fa'}" title="${p.sex === 'f' ? 'Female' : 'Male'}">${p.sex === 'f' ? '&#9792;' : '&#9794;'}&#xFE0E;</span>` : ''}${chips}<span class="seals">${seals.join('')}</span></div></div>`;
+  let h = `<div class="cb" title="${esc(p.name)}${a.k === 'you' ? '' : ' · ' + esc(a.name) + ' archive'}${p.occ ? ' · ' + esc(p.occ) : ''} · ${esc(TC.evidenceSummary(M, p))}"><div class="nm">${esc(p.name)}${p.sex === 'f' || p.sex === 'm' ? `<span class="sx ${p.sex === 'f' ? 'mo' : 'fa'}" title="${p.sex === 'f' ? 'Female' : 'Male'}">${p.sex === 'f' ? '&#9792;' : '&#9794;'}&#xFE0E;</span>` : ''}</div>${dates}
+    <div class="meta">${a.k === 'you' ? (ln ? `<span class="ar ln" style="--lc:${ln.col}" title="On the ${esc(ln.names)} line from the marked person's grandparents">${esc(ln.names)}</span>` : '') : `<span class="ar">${esc(a.name)}</span>`}${chips}${cxMark(p, a)}<span class="seals">${seals.join('')}</span></div></div>`;
   if (c.key === S.mark) h += `<span class="mkb" title="The marked person: the canvas shows how everyone you select is related to them">&#9733;</span>`;
   { const fx = fixOf(p); if (fx) h += `<button class="fxb" data-act="fixes" title="${fx.length} ${fx.length === 1 ? 'thing' : 'things'} on your fix list for ${esc(p.name)}: click to see what and how to fix it" aria-label="${fx.length} on the fix list">!</button>` ;  }
   /* ancestors */
@@ -3721,6 +3747,7 @@ function personPanel() {
   return `<h3>${esc(p.name)}</h3>
     <div>${link ? `<a class="pill ac" style="--ac:${a.color}" href="${esc(link)}" target="_blank" rel="noopener" title="Open ${esc(p.name)} in the ${esc(a.name)} archive">${esc(a.name)} archive &nearr;</a>` : a.k === 'you' ? (() => { const ln = lineOf(p.i); return ln ? `<span class="pill ac" style="--ac:${ln.col}" title="On the ${esc(ln.names)} line from the marked person's grandparents">${esc(ln.names)} line</span>` : ''; })() : `<span class="pill ac" style="--ac:${a.color}">${esc(a.name)} archive</span>`}<span class="pill">${TC.years(p)}</span>${p.occ ? `<span class="pill">${esc(p.occ)}</span>` : ''}</div>
     ${a.k === 'you' && !p.ghost ? extLinksHTML(p) : ''}
+    ${TC.corrUrl(M, p) ? `<p class="plines"><a href="${esc(TC.corrUrl(M, p))}" target="_blank" rel="noopener">${p.cx} ${p.cx === 1 ? 'correction' : 'corrections'} recorded about ${esc(p.name)} in the ${esc(a.name)} archive &nearr;</a><br><small>Only corrections that name this person are counted, so no mark does not mean nothing was corrected.</small></p>` : ''}
     ${p.ghost ? `<p class="plines lvn">Named in the archive, but there is no record of their own yet: no dates, no places, no sources. ${p.how ? 'How the name is known: ' + esc(p.how) + '.' : ''}</p>
       ${p.sp.length ? `<p class="plines">Named as the spouse of ${p.sp.map(q => `<a href="#" data-focus="${esc(M.P[q].key)}">${esc(M.P[q].name)}</a>`).join(', ')}.</p>` : ''}
       <p class="plines lvn">No parents or children are drawn for a name like this: the archive joins people to each other only from a record of their own.</p>` : ''}
@@ -3818,7 +3845,7 @@ async function recentSave(name, bytes) {
   if (!rememberOn()) return;
   try {
     const db = await rdb(), tx = db.transaction(['m', 'b'], 'readwrite'), mm = tx.objectStore('m'), bb = tx.objectStore('b');
-    mm.put({ name, size: bytes.byteLength, when: Date.now() }); bb.put(bytes, name);
+    const old = await rreq(mm.get(name)); mm.put({ ...(old || {}), name, size: bytes.byteLength, when: Date.now() }); bb.put(bytes, name);   /* what the page around the canvas learned (people, source, note) is kept */
     const all = (await rreq(mm.getAll())).sort((x, y) => y.when - x.when); all.slice(RKEEP).forEach(o => { mm.delete(o.name); bb.delete(o.name); });
     await new Promise(ok => { tx.oncomplete = ok; tx.onerror = ok; tx.onabort = ok; }); db.close();
   } catch (e) { /* storage full or blocked: the file still opens, it just is not kept */ }
@@ -3838,7 +3865,7 @@ function recentHTML() {
   const on = rememberOn();
   return `<div class="mmsep"></div>`
     + `<button class="mmi" data-gopen="1">${icon('folder', 'lk-icon')}<span><b>Open a GEDCOM file…</b><small>Read in this browser, never uploaded. A new file replaces this tree.</small></span></button>`
-    + (on && RECENT.length ? `<div class="mmrec"><b class="mmh">Last used</b>${RECENT.map(r => `<span class="mmr"><button type="button" data-recent="${esc(r.name)}" title="Open ${esc(r.name)} again"><b>${esc(r.name)}</b><small>${fmtBytes(r.size)} · ${fmtWhen(r.when)}</small></button><button type="button" class="mmx" data-forget="${esc(r.name)}" aria-label="Forget ${esc(r.name)}" title="Forget this file">${icon('x', 'lk-icon')}</button></span>`).join('')}</div>` : '')
+    + (on && RECENT.length ? `<div class="mmrec"><b class="mmh">Last used</b>${RECENT.map(r => `<span class="mmr"><button type="button" data-recent="${esc(r.name)}" title="Open ${esc(r.name)} again"><b>${esc(r.name)}</b><small>${[r.people ? r.people.toLocaleString('en') + (r.people === 1 ? ' person' : ' people') : '', r.tree || (r.from ? 'from ' + r.from : ''), fmtBytes(r.size), fmtWhen(r.when)].filter(Boolean).map(esc).join(' · ')}</small>${r.note ? `<small class="mmnote">${esc(r.note)}</small>` : ''}</button><button type="button" class="mmx" data-forget="${esc(r.name)}" aria-label="Forget ${esc(r.name)}" title="Forget this file">${icon('x', 'lk-icon')}</button></span>`).join('')}</div>` : '')
     + `<label class="mmrem"><input type="checkbox" id="mmRem"${on ? ' checked' : ''}><span>Keep the last ${RKEEP} files on this device<small>In this browser only, so they open in one click. Untick to forget them all.</small></span></label>`;
 }
 function openMainMenu(on) {
@@ -4042,8 +4069,8 @@ function toggleGens() {
 function syncButtons() {
   if (typeof playGuard === 'function') playGuard();
   $('#bUndo').disabled = !S.undo.length; { const a = $('#bArrange'); if (a) a.disabled = S.cards.size < 2; }
-  $('#bRel').classList.toggle('on', !!S.relateFrom || S.sel.size === 2);
-  $('#bRel').disabled = !(S.relateFrom || S.sel.size >= 1);
+  $('#bRel').classList.toggle('on', !!S.relateFrom || S.sel.size === 2 || document.documentElement.classList.contains('rzopen'));
+  $('#bRel').disabled = false;
   $('#bClear').disabled = !S.cards.size;
   $('#bInfo').classList.toggle('on', $('#info').classList.contains('on'));
   $('#bFit').disabled = !S.cards.size;
@@ -4094,7 +4121,7 @@ function wireToolbar() {
   $('#bArrange').onclick = () => { if (!S.busy) doArrange(); };
   $('#bGen').onclick = toggleGens;
   $('#bFit').onclick = () => fit();
-  $('#bRel').onclick = () => { if (S.relateFrom) { cancelRelate(); return; } if (S.sel.size >= 2) { const ks = [...S.sel]; showPath(ks[0], ks[1]); } else if (S.sel.size === 1) startRelate([...S.sel][0]); };
+  $('#bRel').onclick = () => { if (S.relateFrom) { cancelRelate(); return; } if (S.sel.size >= 2) { const ks = [...S.sel]; showPath(ks[0], ks[1]); return; } rzToggle(); };
   $('#bInfo').onclick = () => { const el = $('#info'); if (el.classList.contains('on')) { S.infoOpen = false; el.classList.remove('on'); } else { S.infoOpen = true; renderInfo(); } syncButtons(); };
   /* a tab on the panel's edge: the right panel runs the full height and folds away to the edge, and this brings it back (desktop; the phone has its own sheet) */
   { const t = document.createElement('button'); t.id = 'infoTab'; t.type = 'button'; t.setAttribute('aria-label', 'Show or hide the side panel'); t.title = 'Show or hide the side panel'; t.onclick = () => $('#bInfo').onclick(); document.body.appendChild(t); }
@@ -4154,6 +4181,18 @@ async function demo() {
 
 /* ---------------- the relate zone: drop two people, the whole path is drawn ---------------- */
 S.rz = [null, null]; S.rzArm = null;
+/* The two "Drop person A / B" slots are out of the way until asked for: the how-are-they-related button opens them (and closes them again). A person already
+   selected goes into the first slot, and the second waits for the next person tapped. */
+function rzToggle(show) {
+  const h = document.documentElement.classList, on = show == null ? !h.contains('rzopen') : !!show;
+  h.toggle('rzopen', on); $('#bRel').setAttribute('aria-pressed', String(on));
+  if (on) {
+    h.remove('shelfoff'); $('#bShelf').setAttribute('aria-pressed', 'true');
+    if (S.rz[0] == null && S.rz[1] == null && S.sel.size === 1) { const c = S.cards.get([...S.sel][0]); if (c) { S.rz[0] = personOf(c).i; S.rzArm = 1; } }
+    rzRender();
+  } else S.rzArm = null;
+  dockH(); syncButtons();
+}
 function rzOver(x, y) { const r = $('#rz').getBoundingClientRect(); return x >= r.left - 6 && x <= r.right + 6 && y >= r.top - 6 && y <= r.bottom + 6; }
 function rzRender(msg) {
   setTimeout(() => { if (typeof markPlace === 'function') markPlace(); }, 0);

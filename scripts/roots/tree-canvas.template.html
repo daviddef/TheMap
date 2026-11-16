@@ -396,7 +396,6 @@ button{font-family:inherit}
 .ph .top{flex-wrap:wrap;justify-content:flex-end;max-width:calc(100vw - 16px);row-gap:10px}
 .ph .top::after{content:"";order:4;flex:0 0 100%;height:0}   /* a line break before the extras */
 .ph .top .lk-btn{order:5}   /* the two extra buttons take their own row under the icons */
-.ph.sa #rz{top:106px}
 /* a spouse the archive names but holds no record for: a dashed, quieter card (the marriage mark joins it to the person who names her or him) */
 .card.ghost .cb{border-style:dashed;opacity:.9}
 .card.ghost .cb .yr{font-style:italic}
@@ -417,7 +416,6 @@ b.fxb.on{display:inline-grid;width:17px;height:17px;border-radius:50%;background
 html:not(.ph) #info{right:0;top:64px;bottom:0;width:340px;max-height:none;border-radius:18px 0 0 0;border-width:2px 0 0 2px;box-shadow:-3px 0 0 var(--lk-line)}
 html:not(.ph) #info .ib{flex:1;min-height:0}
 html:not(.ph):has(#info.on) .dock{left:calc((100vw - 340px) / 2);width:min(calc(100vw - 340px - 100px),900px)}
-html:not(.ph):has(#info.on) #rz{left:calc((100vw - 340px) / 2);max-width:calc(100vw - 340px - 150px)}
 #infoTab{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:8;width:22px;height:72px;padding:0;border:2px solid var(--lk-line);border-right:0;border-radius:12px 0 0 12px;background:var(--lk-card);color:var(--lk-ink);cursor:pointer;font:900 18px/1 Nunito,system-ui;box-shadow:-2px 2px 0 var(--lk-line);transition:right .2s}
 #infoTab::before{content:"\2039"}
 html:has(#info.on) #infoTab{right:340px}html:has(#info.on) #infoTab::before{content:"\203A"}
@@ -495,7 +493,7 @@ select.lk-input{width:auto;padding:4px 8px}
 /* the marked person: a star on the card, and a bar that says how the selected person is related to them */
 .card .mkb{position:absolute;left:-9px;bottom:-9px;z-index:3;width:23px;height:23px;border-radius:50%;border:2px solid var(--lk-card);background:#f0b429;color:#5a3b00;font:900 13px/19px Nunito,system-ui;text-align:center;box-shadow:0 2px 0 rgba(0,0,0,.18);pointer-events:none}
 .card.marked .cb{box-shadow:0 3px 0 var(--lk-line),0 0 0 3px #f0b429}
-#markBar{position:fixed;left:50%;top:112px;transform:translateX(-50%);z-index:5;display:flex;flex-direction:column;align-items:stretch;gap:6px;max-width:min(720px,calc(100vw - 440px));padding:6px 8px 6px 6px;background:var(--lk-card);border:2px solid #f0b429;border-radius:18px;box-shadow:0 3px 0 var(--lk-line);font:800 12.5px/1.3 Nunito,system-ui;color:var(--lk-ink)}
+#markBar{position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:5;display:flex;flex-direction:column;align-items:stretch;gap:6px;max-width:min(720px,calc(100vw - 440px));padding:6px 8px 6px 6px;background:var(--lk-card);border:2px solid #f0b429;border-radius:18px;box-shadow:0 3px 0 var(--lk-line);font:800 12.5px/1.3 Nunito,system-ui;color:var(--lk-ink)}
 #markBar[hidden]{display:none}
 #markBar .mkn{flex:none;border:0;border-radius:12px;padding:5px 10px;background:#f0b429;color:#5a3b00;font:900 12.5px Nunito,system-ui;cursor:pointer;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #markBar .mkt{flex:1 1 auto;min-width:0}
@@ -601,7 +599,7 @@ html:not(.ph):has(#info.on) #playBar{left:calc((100vw - 340px) / 2);width:min(64
 #lanes .lnl{position:absolute;left:62px;transform:translateY(-50%);width:80px;line-height:1.05;text-align:left}
 #lanes .lnl b{display:block;font:400 32px/1 "Lilita One",Georgia,serif;color:#9AA1AE}
 #lanes .lnl small{display:block;margin-top:3px;font:800 11px Nunito,system-ui;color:var(--lk-mute)}
-.ph #lanes .lnl{left:10px;width:56px}.ph #lanes .lnl b{font-size:24px}
+.ph #lanes .lnl{left:10px;width:56px}.ph #lanes .lnl b{font-size:min(24px,var(--fs,24px))}
 
 /* Look: Countries. The Lanes rows, plus a coloured column for each country of birth */
 #lanes .lcol{position:absolute;top:0;bottom:0;background:hsl(var(--h) 85% 91%);border-left:2px solid hsl(var(--h) 60% 78%)}
@@ -618,6 +616,23 @@ html:not(.ph):has(#info.on) #playBar{left:calc((100vw - 340px) / 2);width:min(64
 #lanehead .tt{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
 #lanehead .tt .tomb{fill:#fff;stroke:var(--tc);stroke-width:1.8;stroke-linejoin:round}#lanehead .tt .cross{fill:none;stroke:var(--tc);stroke-width:1.8;stroke-linecap:round}
 #lanehead .tt text{font:900 9.5px Nunito,system-ui;fill:var(--tc);paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}
+
+/* How related lives in the search dock now: a compact row of two slots between the search box and the archive filters, so a result can be dragged (or tapped) straight into it */
+@media (max-width:1450px){#markBar{top:64px}}
+.dock #rz{position:static;left:auto;top:auto;transform:none;z-index:auto;max-width:none;padding:0 0 6px;background:transparent;border:0;border-radius:0;box-shadow:none;gap:8px;flex-wrap:nowrap}
+.dock #rz .rzs{height:40px;min-width:0;padding:2px 26px 2px 12px;border-radius:12px}
+.dock #rz .rzs.empty{padding:2px 8px;font-size:12px}
+.dock #rz .rzs.full{padding-left:16px}
+.dock #rz .rzs.full::before{top:6px;bottom:6px}
+.dock #rz .rzp b{font-size:13.5px}
+.dock #rz .rzm{flex:none}.dock #rz .rzm small{display:none}
+.dock #rz .rzx{flex:none;flex-direction:row;align-items:center;min-width:0;gap:8px}
+.dock #rz #rzmsg{max-width:150px;overflow:hidden;text-overflow:ellipsis}
+.dock #rz.over .rzs.empty{border-color:var(--lk-accent);background:var(--lk-accent-soft)}
+.ph .dock #rz{left:auto;right:auto;top:auto;max-width:none;padding:0 0 4px;gap:6px;flex-wrap:nowrap}
+.ph .dock #rz .rzs{min-width:0;height:36px;padding:2px 22px 2px 8px}.ph .dock #rz .rzs.empty{font-size:11px;line-height:1.15}
+.ph .dock #rz .rzx{flex-direction:row}.ph .dock #rz #rzClr{padding:3px 8px}
+#lanes .lnl b{font-size:var(--fs,32px)}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -635,7 +650,6 @@ html:not(.ph):has(#info.on) #playBar{left:calc((100vw - 340px) / 2);width:min(64
   <button class="lk-ibtn xtra" id="bClear" title="Clear the canvas (Undo brings it back)" aria-label="Clear"></button>
   <button class="lk-ibtn" id="bMore" title="More" aria-label="More" style="display:none"></button>
 </div>
-<div id="rz" aria-label="Relate two people"><div class="rzs" data-s="0" tabindex="0" role="button"></div><div class="rzm" title="Drop two people here and the whole path between them is drawn">&#8644;<small>how related</small></div><div class="rzs" data-s="1" tabindex="0" role="button"></div><div class="rzx"><span id="rzmsg"></span><button class="lk-btn is-small" id="rzClr" type="button">Clear</button></div></div>
 <div id="flagsprite" aria-hidden="true"></div>
 <div id="hint">Search anyone, from any archive, and drop them here
   <small>Pull up their parents, all the way back, one generation at a time.<br>Drop someone from another archive and ask how the two are related.<br>Solid means read from a register; dashed means not proven; dotted means the archive records no grade.</small>
@@ -644,7 +658,7 @@ html:not(.ph):has(#info.on) #playBar{left:calc((100vw - 340px) / 2);width:min(64
 <div id="pop"></div>
 <div id="mini" title="Click to move there"><canvas></canvas></div>
 <div id="toast" class="lk-toast"></div>
-<div class="dock"><div class="srow"><span class="si" id="si"></span><input id="q" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Search people"><span class="cnt" id="cnt"></span></div><div class="tabs" id="tabs"></div><div class="shelf" id="shelf"></div></div>
+<div class="dock"><div class="srow"><span class="si" id="si"></span><input id="q" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Search people"><span class="cnt" id="cnt"></span></div><div id="rz" aria-label="Relate two people"><div class="rzs" data-s="0" tabindex="0" role="button"></div><div class="rzm" title="Drop two people here and the whole path between them is drawn">&#8644;<small>how related</small></div><div class="rzs" data-s="1" tabindex="0" role="button"></div><div class="rzx"><span id="rzmsg"></span><button class="lk-btn is-small" id="rzClr" type="button">Clear</button></div></div><div class="tabs" id="tabs"></div><div class="shelf" id="shelf"></div></div>
 <script type="application/json" id="corpus">null</script>
 <script type="application/json" id="period">{
  "v": 1,
@@ -2449,9 +2463,10 @@ function drawLanes() {
   rows.forEach((r, i) => {
     const a = i ? (rows[i - 1].y1 + r.y0) / 2 : r.y0 - 20, b = i < rows.length - 1 ? (r.y1 + rows[i + 1].y0) / 2 : r.y1 + 20;
     const top = v.y + a * v.k, hgt = (b - a) * v.k;
-    if (top > vh || top + hgt < 0) return;
-    const vis0 = Math.max(top, 56), vis1 = Math.min(top + hgt, vh - 150), mid = (vis0 + vis1) / 2, show = r.g != null && vis1 - vis0 > 44;
-    h += `<div class="lane${i % 2 ? ' b' : ''}" style="top:${f1(top)}px;height:${f1(hgt)}px">${show ? `<div class="lnl" style="top:${f1(mid - top)}px"><b>${romanOf(r.g + 1)}</b>${r.lo != null ? `<small>${r.lo}${r.hi !== r.lo ? '–' + r.hi : ''}</small>` : ''}</div>` : ''}</div>`;
+    if ((top > vh && i) || (top + hgt < 0 && i < rows.length - 1)) return;
+    const vis0 = Math.max(top, 56), vis1 = Math.min(top + hgt, vh - 150), mid = (vis0 + vis1) / 2, fs = Math.max(11, Math.min(32, hgt * 0.5)), show = r.g != null && vis1 - vis0 > fs * 1.4;   /* the numeral shrinks with the lane when zoomed out */
+    const ft = i === 0 ? Math.min(top, 0) : top, fb = i === rows.length - 1 ? Math.max(top + hgt, vh) : top + hgt;   /* the first lane runs up to the top of the screen and the last down to the bottom */
+    h += `<div class="lane${i % 2 ? ' b' : ''}" style="top:${f1(ft)}px;height:${f1(fb - ft)}px">${show ? `<div class="lnl" style="top:${f1(mid - ft)}px;--fs:${f1(fs)}px"><b>${romanOf(r.g + 1)}</b>${r.lo != null && hgt >= 52 ? `<small>${r.lo}${r.hi !== r.lo ? '–' + r.hi : ''}</small>` : ''}</div>` : ''}</div>`;
   });
   if (grid) { h += `<svg class="tl" width="${vw}" height="${vh}" aria-hidden="true">${tl}</svg>`; hh += `<svg class="tt" width="${vw}" height="${vh}" aria-hidden="true">${ti}</svg>`; }
   host.innerHTML = h; if (grid) head.innerHTML = hh;
@@ -3742,7 +3757,7 @@ function markBar() {
 }
 addEventListener('resize', () => markPlace());
 /* sits just under the "how related" bar, wherever that is */
-function markPlace() { const bar = $('#markBar'), rz = $('#rz'); if (!bar || S.phone) { if (bar) bar.style.top = ''; return; } const r = rz && rz.getBoundingClientRect(); bar.style.top = (r && r.height > 0 ? Math.round(r.bottom + 8) : 64) + 'px'; }
+function markPlace() { const bar = $('#markBar'); if (bar) bar.style.top = ''; }   /* the relate row is in the dock now, so the mark bar keeps its place at the top (see the stylesheet) */
 function markPanelHTML(p) {
   const marked = S.mark === p.key, r = !marked && markedPerson() ? markRel(p.key) : null;
   return (r ? `<p class="plines mkrel">&#9733; ${markText(r, true)}</p>` : '') + `<button class="lk-btn is-small${marked ? ' is-primary' : ''}" data-do="${marked ? 'unmark' : 'mark'}" title="${marked ? 'Stop showing relationships from this person' : 'Mark this person: the canvas then shows how everyone you select is related to them (only one person can be marked)'}">&#9733; ${marked ? 'Marked: unmark' : 'Mark this person'}</button>`;

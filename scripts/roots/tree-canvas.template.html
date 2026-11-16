@@ -1999,8 +1999,15 @@ function applyView() {
   miniDraw();
 }
 const toWorld = (px, py) => ({ x: (px - S.view.x) / S.view.k, y: (py - S.view.y) / S.view.k });
+/* Zoom about a point, but never about a point outside the cards: the pointer (or, for the buttons, the middle of the cards) is held inside the cards' own outline, so zooming out
+   shrinks the tree where it stands instead of sending it off toward a pointer parked over the search box or the middle of an empty window. */
 function zoomAt(f, px, py) {
-  const v = S.view, nk = Math.min(2.5, Math.max(0.12, v.k * f)), r = nk / v.k;
+  const v = S.view;
+  if (S.cards.size) {
+    const b = bbox([...S.cards.values()]), sx0 = b.x0 * v.k + v.x, sx1 = b.x1 * v.k + v.x, sy0 = b.y0 * v.k + v.y, sy1 = b.y1 * v.k + v.y;
+    px = px == null ? (sx0 + sx1) / 2 : Math.min(sx1, Math.max(sx0, px)); py = py == null ? (sy0 + sy1) / 2 : Math.min(sy1, Math.max(sy0, py));
+  } else { if (px == null) px = innerWidth / 2; if (py == null) py = innerHeight / 2; }
+  const nk = Math.min(2.5, Math.max(0.12, v.k * f)), r = nk / v.k;
   v.x = px - (px - v.x) * r; v.y = py - (py - v.y) * r; v.k = nk; applyView(); save();
 }
 function usable() { /* the part of the screen not covered by the dock and the info panel */
@@ -3613,8 +3620,8 @@ function wireToolbar() {
   { const t = document.createElement('button'); t.id = 'infoTab'; t.type = 'button'; t.setAttribute('aria-label', 'Show or hide the side panel'); t.title = 'Show or hide the side panel'; t.onclick = () => $('#bInfo').onclick(); document.body.appendChild(t); }
   $('#bClear').onclick = clearCanvas;
   $('#bMore').onclick = () => $('.top').classList.toggle('more');
-  $('#zIn').onclick = () => zoomAt(1.25, innerWidth / 2, innerHeight / 2);
-  $('#zOut').onclick = () => zoomAt(0.8, innerWidth / 2, innerHeight / 2);
+  $('#zIn').onclick = () => zoomAt(1.25, null, null);
+  $('#zOut').onclick = () => zoomAt(0.8, null, null);
   $('#mini').onclick = e => { const m = $('#mini')._m; if (!m) return; const r = $('#mini').getBoundingClientRect(); const wx = (e.clientX - r.left - m.ox) / m.s, wy = (e.clientY - r.top - m.oy) / m.s; animateView({ x: innerWidth / 2 - wx * S.view.k, y: innerHeight / 2 - wy * S.view.k, k: S.view.k }, 400); };
   $('#exDemo').onclick = demo; if (EMBED) $('#exDemo').parentElement.style.display = 'none';
   if (SA) {

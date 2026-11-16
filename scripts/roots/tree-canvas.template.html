@@ -752,6 +752,9 @@ html:not(.rzopen) #rz{display:none}
 #namesview .nmcouples small{color:var(--lk-mute);font-weight:800}
 #namesview .nmand{color:var(--lk-accent)}
 #namesview .nmcouples a.nmp{color:var(--lk-ink);text-decoration:underline;text-decoration-color:var(--lk-line);text-underline-offset:2px;cursor:pointer}#namesview .nmcouples a.nmp:hover{color:var(--lk-accent);text-decoration-color:var(--lk-accent)}
+#namesview .nmd{fill:none;stroke-linecap:round;stroke:var(--lk-mute);opacity:.6}
+#namesview .nml.nmld{border-style:dashed;font-weight:700}
+#namesview .nmcouples>small{display:block;margin:-2px 0 5px}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -1619,15 +1622,24 @@ html:not(.rzopen) #rz{display:none}
     if (blood) mem.forEach((g, j) => M.P[j].sp.forEach(s => { if (mem.has(s) && s !== j) couple(j, s); }));
     else root.sp.forEach(s => { const o = M.P[s]; if (!o || mem.has(s)) return; mem.set(s, 0); add(s, 0); couple(i, s); });
     const rk = surKey(M, root).k, E = [...edges.values()];
-    /* depth by marriages from the focus person's name; the strongest edge to the row above is each name's parent in the layout */
-    const depth = new Map([[rk, 0]]), parent = new Map(), order = [rk];
+    /* DESCENT: a name that a parent bears and a child does not (a father written Brailey, his daughter Brayley; a mother's maiden name against her children's) is a line from the parent's name
+       to the child's, counted. A pair of names already joined by a marriage gets no second line. Only people both in the family drawn, so every line joins two names that have a card. */
+    const marr = new Set(E.map(e => e.a + '|' + e.b)), dmap = new Map();
+    mem.forEach((g, j) => { const c = M.P[j], kb = surKey(M, c).k; [c.f, c.m].forEach(y => {
+      if (y < 0 || !mem.has(y)) return; const ka = surKey(M, M.P[y]).k; if (ka === kb) return;
+      if (marr.has(ka < kb ? ka + '|' + kb : kb + '|' + ka)) return;
+      const key = ka + '>' + kb; let e = dmap.get(key); if (!e) dmap.set(key, e = { a: ka, b: kb, n: 0, c: [], d: 1 }); e.n++; e.c.push([y, j, 0]);
+    }); });
+    const D = [...dmap.values()];
+    /* depth by marriages (then descent) from the focus person's name; the strongest edge to the row above is each name's parent in the layout. A marriage is preferred to a descent line. */
+    const depth = new Map([[rk, 0]]), parent = new Map(), order = [rk], ALL = E.concat(D);
     for (let h = 0; h < order.length; h++) {
       const a = order[h];
-      E.filter(e => e.a === a || e.b === a).sort((x, y) => y.n - x.n).forEach(e => { const o = e.a === a ? e.b : e.a; if (!depth.has(o)) { depth.set(o, depth.get(a) + 1); parent.set(o, a); order.push(o); } });
+      ALL.filter(e => e.a === a || e.b === a).sort((x, y) => (x.d || 0) - (y.d || 0) || y.n - x.n).forEach(e => { const o = e.a === a ? e.b : e.a; if (!depth.has(o)) { depth.set(o, depth.get(a) + 1); parent.set(o, a); order.push(o); } });
     }
     nodes.forEach((n, k) => { if (!depth.has(k)) { depth.set(k, Math.max(...depth.values()) + 1); order.push(k); } });
     const N = [...nodes.values()].map(n => ({ ...n, depth: depth.get(n.key), parent: parent.get(n.key) || null }));
-    return { root: rk, nodes: N, edges: E, people: mem.size, ancestors: gen.size, scope: blood ? 'blood' : 'anc' };
+    return { root: rk, nodes: N, edges: E, desc: D, people: mem.size, ancestors: gen.size, scope: blood ? 'blood' : 'anc' };
   }
   const API = { nameTree, playSet, playSteps, family, lifeEvents, eraChanges, lines, arrange, bloodSet, fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful,
     placeAt, dateText, neighbours, edgeCost, parentLinks, ancestorStats, stopReason, otherSideHasParents, evidenceSummary, years, url, corrUrl, wikitreeUrl, searchLinks, levelOfGrade, LEVELS, playSteps, kinshipOps, opsOf, reverseOps, bloodTerm, siblingKind, archivesOnPath, ord };
@@ -3633,6 +3645,12 @@ function namesEdge(a, b, tree) {   /* a gentle curve between two names; a marria
 function namesCouples(e, by, q) {
   const yr = p => p.by != null ? p.by + (p.dy != null ? '–' + p.dy : '') : '';
   const who = p => `<a href="#" class="nmp" data-nmp="${esc(p.key)}" title="Show ${esc(p.name)}">${esc(p.name)}</a>${yr(p) ? ' <small>' + yr(p) + '</small>' : ''}`;
+  if (e.d) {   /* a line of descent: parent, then child, in birth order */
+    const rs = e.c.map(([x, y]) => ({ A: M.P[x], B: M.P[y] })).sort((r, q) => (r.B.by == null) - (q.B.by == null) || r.B.by - q.B.by);
+    const dl = rs.map(r => (r.A.living || r.B.living) ? '<li>A parent and child, one of them living <small>(not named)</small></li>' : `<li>${who(r.A)} <span class="nmand">&rarr;</span> ${who(r.B)}</li>`).join('');
+    const a = by.get(e.a), b = by.get(e.b);
+    return `<div class="nmcouples" style="left:${f1(q.mx)}px;top:${f1(q.my)}px"><b>${esc(a.label || 'Surname not recorded')} &rarr; ${esc(b.label || 'Surname not recorded')}</b><small>a parent&rsquo;s name and their child&rsquo;s</small><ul>${dl}</ul></div>`;
+  }
   const rows = e.c.map(([x, y, imp]) => { const A = M.P[x], B = M.P[y]; return { A, B, imp, yr: (A.my || B.my) || null, est: !!((A.my ? A.fl : B.fl) & 16) }; })
     .sort((r, s) => (r.yr == null) - (s.yr == null) || r.yr - s.yr);
   const li = rows.map(r => (r.A.living || r.B.living)
@@ -3644,11 +3662,13 @@ function namesCouples(e, by, q) {
 function namesPaintEdges() {
   const host = $('#namesview'), T = NAMES.T, by = NAMES.by; if (!host || !T) return 0;
   let svg = '', lab = '', marriages = 0;
-  T.edges.forEach(e => {
-    const a = by.get(e.a), b = by.get(e.b), tree = a._p === b.key || b._p === a.key, q = namesEdge(a, b, tree); marriages += e.n;
-    svg += `<path d="${q.d}" class="${tree ? 'nmt' : 'nmx'}" style="stroke-width:${f1(Math.min(11, 2.5 + e.n * 1.6))}px"/>`;
-    const ek = e.a + '|' + e.b, isOpen = NAMES.openEdge === ek;
-    lab += `<button type="button" class="nml${isOpen ? ' open' : ''}" data-ne="${esc(ek)}" style="left:${f1(q.mx)}px;top:${f1(q.my)}px" aria-expanded="${isOpen}" title="Click to see ${e.n === 1 ? 'this marriage' : 'these marriages'}">${e.n} ${e.n === 1 ? 'marriage' : 'marriages'}</button>${isOpen ? namesCouples(e, by, q) : ''}`;
+  T.edges.concat(T.desc || []).forEach(e => {
+    const a = by.get(e.a), b = by.get(e.b); if (!a || !b) return;
+    const tree = a._p === b.key || b._p === a.key, q = namesEdge(a, b, tree); if (!e.d) marriages += e.n;
+    svg += `<path d="${q.d}" class="${e.d ? 'nmd' : tree ? 'nmt' : 'nmx'}" style="stroke-width:${f1(e.d ? Math.min(7, 2 + e.n * 0.8) : Math.min(11, 2.5 + e.n * 1.6))}px"/>`;
+    const ek = (e.d ? 'd:' : '') + e.a + '|' + e.b, isOpen = NAMES.openEdge === ek;
+    const word = e.d ? (e.n === 1 ? 'child' : 'children') : (e.n === 1 ? 'marriage' : 'marriages');
+    lab += `<button type="button" class="nml${e.d ? ' nmld' : ''}${isOpen ? ' open' : ''}" data-ne="${esc(ek)}" style="left:${f1(q.mx)}px;top:${f1(q.my)}px" aria-expanded="${isOpen}" title="${e.d ? 'A parent&rsquo;s name and their child&rsquo;s: click to see who' : 'Click to see ' + (e.n === 1 ? 'this marriage' : 'these marriages')}">${e.d ? '&rarr; ' : ''}${e.n} ${word}</button>${isOpen ? namesCouples(e, by, q) : ''}`;
   });
   const sv = host.querySelector('.nmsvg'), lb = host.querySelector('.nmlabs'); if (sv) sv.innerHTML = svg; if (lb) lb.innerHTML = lab;
   return marriages;
@@ -3691,7 +3711,7 @@ function drawNames(force) {
   const marriages = namesPaintEdges(), moved = Object.keys(NAMES.pos).length > 0;
   cap.hidden = false;
   const sc = NAMES.scope;
-  cap.innerHTML = `<b>${sc === 'blood' ? 'Names in the bloodline of' : 'Names behind'} ${esc(p.name)}</b> ${T.people.toLocaleString()} ${T.people === 1 ? 'person' : 'people'} in ${T.nodes.length} ${T.nodes.length === 1 ? 'name' : 'names'}, ${marriages} ${marriages === 1 ? 'marriage' : 'marriages'}.
+  cap.innerHTML = `<b>${sc === 'blood' ? 'Names in the bloodline of' : 'Names behind'} ${esc(p.name)}</b> ${T.people.toLocaleString()} ${T.people === 1 ? 'person' : 'people'} in ${T.nodes.length} ${T.nodes.length === 1 ? 'name' : 'names'}, ${marriages} ${marriages === 1 ? 'marriage' : 'marriages'}${T.desc && T.desc.length ? ' and ' + T.desc.length + ' ' + (T.desc.length === 1 ? 'line' : 'lines') + ' of descent' : ''}.
     <span class="nmsc" role="group" aria-label="What to count"><button type="button" data-scope="blood" class="${sc === 'blood' ? 'on' : ''}">Whole bloodline</button><button type="button" data-scope="anc" class="${sc === 'anc' ? 'on' : ''}">Ancestors only</button></span>
     <small>Drag a name to move it${moved ? ' · <a href="#" data-tidy="1">Tidy up</a>' : ''} · click one to see who · select or mark someone else to change the centre.</small>`;
   if (changed) fit();

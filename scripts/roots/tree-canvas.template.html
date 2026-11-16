@@ -1312,8 +1312,16 @@ html:not(.ph):has(#info.on) #bShelf{right:356px}
   /* a full date as the archive wrote it ("1814-08-23", "1814-08", "c. 1814", "23 Aug 1814") said plainly: "23 Aug 1814", "Aug 1814". Anything else is returned as it came. */
   function dateText(t) {
     /* two shapes in the archives: 1882-02-22 (register) and 1950-Mar-19 / 1971-Jul-1 (death file: English month abbreviation, day not padded) */
-    t = String(t || '').trim(); const m = /^(~|c\.?\s*)?(\d{4})-(\d{2}|[A-Z][a-z]{2})(?:-(\d{1,2}))?$/.exec(t); if (!m) return t;
+    t = String(t || '').trim();
     const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    /* day-month-year as an archive prints it: "23 Mar 1850", "14 January 1838", GEDCOM "20 APR 1779" -> "20 Apr 1779" (only a bare date; a note or a qualifier is left as written) */
+    const FULLM = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+    const monOf = w => { const k = MON.findIndex(x => x.toLowerCase() === w.slice(0, 3).toLowerCase()), lw = w.toLowerCase(); return k >= 0 && (w.length === 3 || lw === FULLM[k] || (lw === 'sept' && k === 8)) ? k : -1; };
+    const md = /^([A-Za-z]{3,9}) (\d{1,2}) (\d{4})$/.exec(t);   /* month-day-year, as Falco prints it: "Mar 19 1950", "June 7 1878" */
+    if (md) { const k = monOf(md[1]); return k >= 0 ? (+md[2]) + ' ' + MON[k] + ' ' + md[3] : t; }
+    const dm = /^(\d{1,2}) ([A-Za-z]{3,9}) (\d{4})$/.exec(t);
+    if (dm) { const k = monOf(dm[2]); return k >= 0 ? (+dm[1]) + ' ' + MON[k] + ' ' + dm[3] : t; }
+    const m = /^(~|c\.?\s*)?(\d{4})-(\d{2}|[A-Z][a-z]{2})(?:-(\d{1,2}))?$/.exec(t); if (!m) return t;
     const mo = /^\d/.test(m[3]) ? MON[+m[3] - 1] : (MON.indexOf(m[3]) >= 0 ? m[3] : null); if (!mo) return t;
     return (m[1] ? 'about ' : '') + (m[4] ? (+m[4]) + ' ' : '') + mo + ' ' + m[2];
   }

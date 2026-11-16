@@ -558,6 +558,16 @@ html:not(.ph):has(#info.on) #playBar{left:calc((100vw - 340px) / 2);width:min(64
 @keyframes markglow{0%,100%{box-shadow:0 3px 0 var(--lk-line),0 0 0 3px #f0b429,0 0 0 3px rgba(240,180,41,.0)}50%{box-shadow:0 3px 0 var(--lk-line),0 0 0 4px #f0b429,0 0 22px 9px rgba(240,180,41,.55)}}
 .card.marked .cb{animation:markglow 2.6s ease-in-out infinite}
 @media (prefers-reduced-motion:reduce){.card.marked .cb{animation:none}}
+
+/* the menu (burger) in the top row: Legend and Options live here, not in the side panel's tab strip */
+#mainMenu{display:none;position:fixed;top:64px;right:12px;z-index:40;width:300px;max-width:calc(100vw - 24px);box-sizing:border-box;background:var(--lk-card);border:2px solid var(--lk-ink);border-radius:16px;box-shadow:0 5px 0 var(--lk-line),0 14px 30px rgba(0,0,0,.18);padding:6px}
+#mainMenu.on{display:block}
+#mainMenu .mmi{display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;text-align:left;border:0;background:transparent;color:var(--lk-ink);border-radius:12px;padding:10px 10px;cursor:pointer;font:inherit}
+#mainMenu .mmi:hover,#mainMenu .mmi:focus-visible{background:var(--lk-hover);outline:none}#mainMenu .mmi.on{background:var(--lk-accent-soft)}
+#mainMenu .mmi svg{flex:none;width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#mainMenu .mmi b{display:block;font:900 14px Nunito,system-ui}#mainMenu .mmi small{display:block;font:700 11.5px/1.3 Nunito,system-ui;color:var(--lk-soft);margin-top:1px}
+#bMenu.on{background:var(--lk-accent-soft);border-color:var(--lk-accent)}
+.ph #mainMenu{top:auto;bottom:calc(var(--dock-h,130px) + 16px);left:8px;right:8px;width:auto}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -570,7 +580,8 @@ html:not(.ph):has(#info.on) #playBar{left:calc((100vw - 340px) / 2);width:min(64
   <button class="lk-ibtn" id="bGen" title="Generations: numbered bands behind each row (I is the oldest)" aria-label="Generations" aria-pressed="false"></button>
   <button class="lk-ibtn" id="bArrange" title="Arrange: tidy every card on the canvas into one neat family tree" aria-label="Arrange"></button>
   <button class="lk-ibtn" id="bUndo" title="Undo (Ctrl/Cmd Z)" aria-label="Undo"></button>
-  <button class="lk-ibtn" id="bInfo" title="Panel: person, path, legend, options" aria-label="Panel"></button>
+  <button class="lk-ibtn" id="bInfo" title="Side panel: person, where next, path" aria-label="Panel"></button>
+  <button class="lk-ibtn" id="bMenu" title="Menu: how to read the lines, options" aria-label="Menu" aria-haspopup="true" aria-expanded="false"></button>
   <button class="lk-ibtn xtra" id="bTheme" title="Look: Sticker, Paper or Ground" aria-label="Look"></button>
   <button class="lk-ibtn xtra" id="bClear" title="Clear the canvas (Undo brings it back)" aria-label="Clear"></button>
   <button class="lk-ibtn" id="bMore" title="More" aria-label="More" style="display:none"></button>
@@ -1701,6 +1712,7 @@ const STORE = 'treecanvas.v1';
 const ICON = {
   up: 'M12 19V6M6 11l6-6 6 6', upall: 'M6 11l6-6 6 6M6 18l6-6 6 6', dn: 'M12 5v13M6 13l6 6 6-6', dnall: 'M6 6l6 6 6-6M6 13l6 6 6-6',
   sp: '<circle cx="9" cy="12" r="4.5"/><circle cx="15.5" cy="12" r="4.5"/>', x: 'M7 7l10 10M17 7L7 17', open: 'M14 4h6v6M20 4l-9 9M18 14v5H5V6h5',
+  menu: 'M4 7h16M4 12h16M4 17h16',
   layers: 'M12 3.5l9 4.8-9 4.8-9-4.8 9-4.8zM3 12.6l9 4.8 9-4.8M3 17l9 4.8 9-4.8', play: 'M8 5.5v13l11-6.5z', pause: 'M8 5v14M16 5v14',
   arrange: 'M9 3.5h6v5H9zM12 8.5V12M6 12h12M6 12v3M18 12v3M3 15.5h6v5H3zM15 15.5h6v5h-6z', relate: 'M4 8h14l-3-3.5M20 16H6l3 3.5', undo: 'M9 14L4 9l5-5M4 9h10a6 6 0 010 12h-4', fit: 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5',
   plus: 'M12 5v14M5 12h14', minus: 'M5 12h14', info: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.6v.2"/>',
@@ -3170,6 +3182,28 @@ function pathPanel() {
     <h4>The chain, step by step</h4><ul class="steps">${stepRows}</ul>
     <div class="row"><button class="lk-btn is-small" data-do="fitpath">Fit to view</button><button class="lk-btn is-small" data-do="clearpath">Clear path</button></div>`;
 }
+
+/* ---------- the menu (burger): the things you look up rather than work with ---------- */
+function mainMenu() {
+  const m = $('#mainMenu');
+  const item = (k, ic, t, sub) => `<button class="mmi${S.tab === k && S.infoOpen !== false && $('#info').classList.contains('on') ? ' on' : ''}" data-mm="${k}">${icon(ic, 'lk-icon')}<span><b>${t}</b><small>${sub}</small></span></button>`;
+  m.innerHTML = item('legend', 'info', 'How to read the lines', 'What the line colours, patterns and seals mean')
+    + item('options', 'gear', 'Options', 'Links to MyHeritage and Ancestry, how paths are judged, your file');
+}
+function openMainMenu(on) {
+  const m = $('#mainMenu'), b = $('#bMenu'); if (!m) return;
+  if (on == null) on = !m.classList.contains('on');
+  if (on) { openBloodMenu(false); mainMenu(); }
+  m.classList.toggle('on', on); b.setAttribute('aria-expanded', String(on)); b.classList.toggle('on', on);
+}
+document.addEventListener('click', e => {
+  const m = $('#mainMenu'); if (!m) return;
+  const t = e.target.closest('[data-mm]');
+  if (t && m.contains(t)) { S.tab = t.dataset.mm; S.infoOpen = true; renderInfo(); syncButtons(); openMainMenu(false); return; }
+  if (m.classList.contains('on') && !m.contains(e.target) && !e.target.closest('#bMenu')) openMainMenu(false);
+});
+addEventListener('keydown', e => { if (e.key === 'Escape' && $('#mainMenu') && $('#mainMenu').classList.contains('on')) openMainMenu(false); });
+
 /* ---------- the Bloodline menu: add blood relatives / take away the rest / colour the rest ---------- */
 const BL_SCOPES = [[1, 'parents'], [2, 'grandparents'], [3, 'great-grandparents'], [Infinity, 'everyone']];
 let blScope = Infinity;
@@ -3197,7 +3231,7 @@ function bloodMenu() {
 function openBloodMenu(on) {
   const m = $('#bloodMenu'), b = $('#bBlood'); if (!m) return;
   if (on == null) on = !m.classList.contains('on');
-  if (on) bloodMenu();
+  if (on) { if (typeof openMainMenu === 'function') openMainMenu(false); bloodMenu(); }
   m.classList.toggle('on', on); b.setAttribute('aria-expanded', String(on)); b.classList.toggle('on', on || S.blood.tint);
 }
 function setTint(on, ref) {
@@ -3251,7 +3285,7 @@ function optionsPanel() {
     <div class="row"><button class="lk-btn is-small is-danger" data-do="clear">Clear the canvas</button></div>`;
 }
 function renderInfo() {
-  const el = $('#info'), tabs = [['person', 'Person'], ['next', 'Where next'], ...(fixList() ? [['fix', 'Fix list' + (fixList().people ? ' (' + fixList().people.toLocaleString() + ')' : '')]] : []), ['path', 'Path'], ['legend', 'Legend'], ['options', 'Options']];
+  const el = $('#info'), tabs = [['person', 'Person'], ['next', 'Where next'], ...(fixList() ? [['fix', 'Fix list' + (fixList().people ? ' (' + fixList().people.toLocaleString() + ')' : '')]] : []), ['path', 'Path'], ...(S.tab === 'legend' ? [['legend', 'Legend']] : S.tab === 'options' ? [['options', 'Options']] : [])];
   const body = S.tab === 'person' ? personPanel() : S.tab === 'next' ? nextPanel() : S.tab === 'fix' ? fixPanel() : S.tab === 'path' ? pathPanel() : S.tab === 'legend' ? legendHTML() : optionsPanel();
   el.innerHTML = `<div class="ih">${tabs.map(([k, n]) => `<button class="lk-tab${S.tab === k ? ' on' : ''}" data-tab="${k}">${n}${k === 'path' && S.path ? ' &bull;' : ''}</button>`).join('')}<span style="flex:1"></span><button class="lk-tab" data-tab="close" title="Close panel" aria-label="Close panel">&times;</button></div><div class="ib">${body}</div>`;
   if (S.infoOpen !== false) el.classList.add('on');
@@ -3365,6 +3399,7 @@ function setPhone() {
 function wireToolbar() {
   const set = (id, name) => { const b = $(id); if (b) b.innerHTML = icon(name); };
   set('#bBlood', 'blood'); { const mm = document.createElement('div'); mm.id = 'bloodMenu'; mm.setAttribute('role', 'dialog'); mm.setAttribute('aria-label', 'Bloodline'); document.body.appendChild(mm); $('#bBlood').onclick = () => openBloodMenu(); }
+  set('#bMenu', 'menu'); { const mm = document.createElement('div'); mm.id = 'mainMenu'; mm.setAttribute('role', 'menu'); mm.setAttribute('aria-label', 'Menu'); document.body.appendChild(mm); $('#bMenu').onclick = () => openMainMenu(); }
   set('#bArrange', 'arrange'); set('#bGen', 'layers'); set('#bShelf', 'search'); $('#si').innerHTML = icon('search', ''); set('#bUndo', 'undo'); set('#bFit', 'fit'); set('#bRel', 'relate'); set('#bInfo', 'info'); set('#bTheme', 'theme'); set('#bClear', 'clear'); set('#bMore', 'gear');
   set('#zIn', 'plus'); set('#zOut', 'minus');
   if (EMBED) addEventListener('message', e => {

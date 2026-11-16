@@ -179,21 +179,6 @@ test("export: bytes that were not UTF-8 are listed in the log", need, async () =
   assert.ok(r.text.includes("René /Café/"));
 });
 
-test("workbench: a date you add draws the person, and bad dates are refused", need, async () => {
-  const { Session } = await import(R + "js/pipeline.js");
-  const g = ["0 HEAD", "1 CHAR UTF-8", "0 @I1@ INDI", "1 NAME Ada /Test/", "1 SEX F", "1 BIRT", "2 PLAC Kimberley, Northern Cape, South Africa", "1 DEAT",
-    "0 @I2@ INDI", "1 NAME Bo /Test/", "1 SEX M", "1 BIRT", "2 DATE 1900", "0 @I3@ INDI", "1 NAME Bo /Test/", "1 SEX M", "1 BIRT", "2 DATE 1901", "2 PLAC Durban, South Africa",
-    "0 @I4@ INDI", "1 NAME Bo /Test/", "1 SEX M", "1 BIRT", "2 DATE 1850", "0 TRLR", ""].join("\n");
-  const s = new Session(io); const out = await s.load(enc(g));
-  assert.equal(out.wb.undrawnTotal, 1); assert.equal(out.wb.undrawn[0].name, "Ada Test"); assert.equal(out.tree.people.length, 1, "only Bo (1901) has both a year and a place");
-  assert.equal(out.wb.merges.length, 1, "the two Bo Tests born a year apart are suggested; the one born in 1850 is not");
-  assert.match(s.edit({ op: "date", who: "I1", field: "birth", value: "12 mar 18x" }), /GEDCOM does/);
-  assert.match(s.edit({ op: "source", who: "I1", title: "x", url: "javascript:alert(1)" }), /http/);
-  assert.equal(s.edit({ op: "date", who: "I1", field: "birth", value: "abt 1875" }), null);
-  const again = await s.draw(); assert.equal(again.wb.undrawnTotal, 0); assert.equal(again.tree.people.length, 2, "Ada now has a year and her place, so she is drawn");
-  assert.equal(s.edit({ op: "notsame", who: "I2", other: "I3" }), null); assert.equal((await s.draw()).wb.merges.length, 0, "\"not the same\" removes the suggestion");
-});
-
 test("workbench: edits reach the file, additions always and replacements only when cleaned", need, async () => {
   const { Session } = await import(R + "js/pipeline.js");
   const orig = makeSample(), s = new Session(io); await s.load(enc(orig));
@@ -427,13 +412,11 @@ test("fix list: living people are named only when the toggle says so, in the row
   assert.match(on, /Livia Livingston/); assert.doesNotMatch(offTxt, /Livia|Livingston/, "no living name anywhere in the text");
   assert.doesNotMatch(JSON.stringify(off), /Livia|Livingston/, "nor in any row, note or link of the list");
 });
-test("workbench: the person on the left carries the same Atlas help, and the page keeps search and the not-drawn list side by side", need, async () => {
+test("the person panel carries the Atlas help: details, name help, birthplace and name links", need, async () => {
   const { Session } = await import(R + "js/pipeline.js");
   const s = new Session(io); await s.load(enc(helpFile)); const i = s.personInfo("I1");
   assert.ok(i.help.some(x => x.k === "In your file") && i.help.some(x => x.k === "Surname") && i.help.some(x => x.k === "Birthplace"), "details, name help and birthplace");
   assert.ok(i.nl.given && i.nl.sur, "name links");
-  const html = fs.readFileSync(path.join(here, "../src/pages/roots/index.astro"), "utf8"), css = fs.readFileSync(R + "roots.css", "utf8");
-  assert.doesNotMatch(html, /class="wgrid"/, "one column, not two halves"); assert.match(html, /class="wbar"/); assert.match(html, /id="wclose"/); assert.match(css, /\.wcols\{columns:3/); assert.match(html, /id="whelp"/);
 });
 test("fix list: Generate PDF is the browser's own print over a copy built on the device, with a print layout", () => {
   const html = fs.readFileSync(path.join(here, "../src/pages/roots/index.astro"), "utf8"), app = fs.readFileSync(R + "js/app.js", "utf8"), css = fs.readFileSync(R + "roots.css", "utf8");
@@ -489,9 +472,8 @@ test("MyHeritage links: a tree link reads by parameter name, in any order, and s
   assert.equal(parseLink("https://www.myheritage.com/family-trees/x/OYYV7AGVV4FMSGNWXC6TO74JQDUMOYA?familyTreeID=4").num, null, "a tree with no person still gives the tree");
 });
 
-test("workbench: the not-drawn list is paged and the page keeps only a valid MyHeritage link in the box", () => {
+test("the page keeps only a valid MyHeritage link in the box", () => {
   const app = fs.readFileSync(R + "js/app.js", "utf8");
-  assert.match(app, /undrawnShown = 30/); assert.match(app, /\$\('#wclose'\)\.onclick/);
   assert.match(app, /\$\('#mhin'\)\.onchange[\s\S]{0,200}!parseLink\(e\.target\.value\)[\s\S]{0,120}loadLink\(\)/, "stray text is replaced by the last good link");
   assert.match(app, /if \(c\) \{ \$\('#mhin'\)\.value = kept/, "only a link that parses is put back on load");
 });

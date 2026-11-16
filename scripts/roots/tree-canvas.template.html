@@ -485,6 +485,11 @@ select.lk-input{width:auto;padding:4px 8px}
 .card.nb .cb::before{background:repeating-linear-gradient(135deg,var(--ac) 0 4px,#9b86d4 4px 8px)}
 /* the Bloodline button is a drop of blood: filled red inside the outline */
 #bBlood .lk-icon path{fill:#d2493a;stroke:currentColor}
+
+/* lines between cards were too faint: heavier strokes, tighter dashes, full opacity */
+.ev-def{stroke-width:5}.ev-sup{stroke-width:4}.ev-np{stroke-width:4;stroke-dasharray:10 6}.ev-ug{stroke-width:4.5;stroke-dasharray:.5 6.5}
+#edges path.ev-def,#edges path.ev-sup,#edges path.ev-np,#edges path.ev-ug{opacity:1}
+#edges path.ev-def.dimmed,#edges path.ev-sup.dimmed,#edges path.ev-np.dimmed,#edges path.ev-ug.dimmed{opacity:.4}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -2107,7 +2112,7 @@ function drawEdges() {
       add(fid, `M${f1(cx(F))} ${f1(F.y + H)}V${f1(by)}H${f1(jx)}`, EVCLS[lvF], col);
       add(mid, `M${f1(cx(Mo))} ${f1(Mo.y + H)}V${f1(by)}H${f1(jx)}`, EVCLS[lvM], col);
       const jid = 'j:' + p.f + '+' + p.m + '>' + c.i;
-      out.push(`<path d="M${f1(jx)} ${f1(by)}V${f1((by + ty) / 2)}H${f1(tx)}V${f1(ty)}" class="ev-sup${dimOf(fid)}" stroke="${col}" style="stroke-width:2.2"/>`);
+      out.push(`<path d="M${f1(jx)} ${f1(by)}V${f1((by + ty) / 2)}H${f1(tx)}V${f1(ty)}" class="ev-sup${dimOf(fid)}" stroke="${col}"/>`);
       if (pathIds && (pathIds.has(fid) || pathIds.has(mid))) under.push(pathLine(`M${f1(jx)} ${f1(by)}V${f1((by + ty) / 2)}H${f1(tx)}V${f1(ty)}`));
       const married = p.sp.includes(p.m);
       /* the badge sits on the last drop just above the child, never between the parents: when the parents are far apart (or one is off screen) a badge halfway between them floats in empty space */
@@ -2139,11 +2144,11 @@ function drawEdges() {
     if (joined) {
       if (pathIds && pathIds.has(id)) under.push(pathLine(`M${f1(L.x + W / 2)} ${f1(L.y + H / 2)}H${f1(R.x + W / 2)}`));
       /* a couple that shares a child and sits on one row also gets its own marriage line, so the pair reads as a pair */
-      if (Math.abs(L.y - R.y) < H * 0.8 && R.x > L.x + W + 6) add(id, `M${f1(L.x + W)} ${f1(L.y + H / 2)}L${f1(R.x)} ${f1(R.y + H / 2)}`, 'ev-sup', 'var(--lk-mute)');
+      if (Math.abs(L.y - R.y) < H * 0.8 && R.x > L.x + W + 6) add(id, `M${f1(L.x + W)} ${f1(L.y + H / 2)}L${f1(R.x)} ${f1(R.y + H / 2)}`, 'ev-sup', 'var(--lk-soft)');
       return;
     }
     const d = Math.abs(L.y - R.y) < 20 ? `M${f1(L.x + W)} ${f1(L.y + H / 2)}H${f1(R.x)}` : `M${f1(L.x + W)} ${f1(L.y + H / 2)}C${f1(L.x + W + 40)} ${f1(L.y + H / 2)} ${f1(R.x - 40)} ${f1(R.y + H / 2)} ${f1(R.x)} ${f1(R.y + H / 2)}`;
-    add(id, d, 'ev-ug', 'var(--lk-mute)');
+    add(id, d, 'ev-ug', 'var(--lk-soft)');
     const mx = (L.x + W + R.x) / 2, my = (L.y + R.y) / 2 + H / 2;
     out.push(`<g class="badge${dimOf(id)}" transform="translate(${f1(mx)} ${f1(my)})"><circle class="bg" r="11"/><text y="4.5">&#9901;</text><title>Recorded as spouses: NOT GRADED (no archive grades a marriage)</title></g>`);
   }));

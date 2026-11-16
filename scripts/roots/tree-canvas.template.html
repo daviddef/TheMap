@@ -490,6 +490,21 @@ select.lk-input{width:auto;padding:4px 8px}
 .ev-def{stroke-width:5}.ev-sup{stroke-width:4}.ev-np{stroke-width:4;stroke-dasharray:10 6}.ev-ug{stroke-width:4.5;stroke-dasharray:.5 6.5}
 #edges path.ev-def,#edges path.ev-sup,#edges path.ev-np,#edges path.ev-ug{opacity:1}
 #edges path.ev-def.dimmed,#edges path.ev-sup.dimmed,#edges path.ev-np.dimmed,#edges path.ev-ug.dimmed{opacity:.4}
+
+/* the marked person: a star on the card, and a bar that says how the selected person is related to them */
+.card .mkb{position:absolute;left:-9px;bottom:-9px;z-index:3;width:23px;height:23px;border-radius:50%;border:2px solid var(--lk-card);background:#f0b429;color:#5a3b00;font:900 13px/19px Nunito,system-ui;text-align:center;box-shadow:0 2px 0 rgba(0,0,0,.18);pointer-events:none}
+.card.marked .cb{box-shadow:0 3px 0 var(--lk-line),0 0 0 3px #f0b429}
+#markBar{position:fixed;left:50%;top:112px;transform:translateX(-50%);z-index:5;display:flex;align-items:center;gap:10px;max-width:min(720px,calc(100vw - 440px));padding:6px 8px 6px 6px;background:var(--lk-card);border:2px solid #f0b429;border-radius:18px;box-shadow:0 3px 0 var(--lk-line);font:800 12.5px/1.3 Nunito,system-ui;color:var(--lk-ink)}
+#markBar[hidden]{display:none}
+#markBar .mkn{flex:none;border:0;border-radius:12px;padding:5px 10px;background:#f0b429;color:#5a3b00;font:900 12.5px Nunito,system-ui;cursor:pointer;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#markBar .mkt{flex:1 1 auto;min-width:0}
+#markBar .mkl{background:var(--lk-accent-soft);border-radius:8px;padding:1px 6px;margin-left:4px;font-weight:800}
+#markBar .mkx{flex:none;width:26px;height:26px;border:0;border-radius:50%;background:transparent;color:var(--lk-mute);cursor:pointer;display:grid;place-items:center}
+#markBar .mkx:hover{background:var(--lk-line);color:var(--lk-ink)}
+#markBar .mkx svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round}
+.mkrel{background:#fff6dc;border:1.5px solid #f0b429;border-radius:12px;padding:6px 10px;color:#4a3300}
+html:not(.ph):has(#info.on) #markBar{left:calc((100vw - 340px) / 2);max-width:min(720px,calc(100vw - 340px - 100px))}
+.ph #markBar{left:8px;right:8px;transform:none;max-width:none;top:58px;flex-wrap:wrap}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -1582,6 +1597,7 @@ const S = {
   cards: new Map(),                 /* key -> card {key,i,x,y,pinned,up,down,sp,stopG,from,el} */
   view: { x: 0, y: 0, k: 1 },
   sel: new Set(),
+  mark: null,                       /* the one marked person (a person key): the canvas shows how the selected person is related to them */
   blood: { tint: false, ref: null, set: null },   /* colour the people who are NOT blood relatives of `ref` (a person index); `set` is their blood relatives, all of them */
   relateFrom: null,                 /* key while "how are they related?" waits for the second person */
   path: null,                       /* {a,b,nodes,edges,desc} */
@@ -1713,6 +1729,7 @@ function cardInner(c) {
   }).join('') + (brs.length > 1 ? `<button class="brc more" style="--bc:var(--lk-accent)" data-act="brs" title="${brs.length - 1} more possible matches: open the Person panel">+${brs.length - 1}</button>` : '');
   let h = `<div class="cb" title="${esc(p.name)} · ${esc(a.name)} archive${p.occ ? ' · ' + esc(p.occ) : ''} · ${esc(TC.evidenceSummary(M, p))}"><div class="nm">${esc(p.name)}</div><div class="yr">${TC.years(p)}${place}</div>
     <div class="meta"><span class="ar">${esc(a.name)}</span>${p.sex === 'f' || p.sex === 'm' ? `<span class="sx ${p.sex === 'f' ? 'mo' : 'fa'}" title="${p.sex === 'f' ? 'Female' : 'Male'}">${p.sex === 'f' ? '&#9792;' : '&#9794;'}&#xFE0E;</span>` : ''}${chips}<span class="seals">${seals.join('')}</span></div></div>`;
+  if (c.key === S.mark) h += `<span class="mkb" title="The marked person: the canvas shows how everyone you select is related to them">&#9733;</span>`;
   { const fx = fixOf(p); if (fx) h += `<button class="fxb" data-act="fixes" title="${fx.length} ${fx.length === 1 ? 'thing' : 'things'} on your fix list for ${esc(p.name)}: click to see what and how to fix it" aria-label="${fx.length} on the fix list">!</button>` ;  }
   /* ancestors */
   const parentCards = [p.f, p.m].filter(q => q >= 0 && !cardOfPerson(q));
@@ -1755,6 +1772,7 @@ function refreshCard(c) {
   if (S.blood.tint && S.blood.set && !S.blood.set.has(c.i) && !personOf(c).ghost) cls.push('nb');
   if (S.path) { cls.push(S.path.nodeKeys.has(c.key) ? 'onpath' : 'dim'); if (c.key === S.path.a || c.key === S.path.b) cls.push('endpt'); }
   if (S.relateFrom === c.key) cls.push('pulse');
+  if (c.key === S.mark) cls.push('marked');
   c.el.className = cls.join(' ');
   c.el.innerHTML = cardInner(c);
 }
@@ -2785,6 +2803,7 @@ function personPanel() {
     <div class="row">
       ${p.living || p.ghost ? '' : `<button class="lk-btn is-small is-primary" data-do="next">Where to from here</button>`}
       ${c ? `<button class="lk-btn is-small" data-do="rel">${icon('relate', 'lk-icon')} How related to…</button>` : ''}</div>
+    <div class="row">${markPanelHTML(p)}</div>
     ${nameFormsHTML(p)}
     <div${p.ghost ? ' hidden' : ''}>
     <h4>Parents and the evidence for each link</h4>
@@ -2961,6 +2980,7 @@ $('#info').addEventListener('click', e => {
   else if (act === 'nextcopy') copyPlan();
   else if (act === 'up' && c) doUp(c); else if (act === 'upall' && c) doAllBack(c); else if (act === 'dn' && c) doDown(c, false);
   else if (act === 'rel' && c) startRelate(c.key);
+  else if (act === 'mark' && key) setMark(key); else if (act === 'unmark') setMark(null);
   else if (act === 'relate2') { const ks = [...S.sel]; showPath(ks[0], ks[1]); }
   else if (act === 'clearpath') { S.path = null; S.noPath = null; clearPathUi(); refreshAll(); drawEdges(); S.tab = 'person'; renderInfo(); syncButtons(); }
   else if (act === 'fitpath' && S.path) fit([...S.path.nodeKeys].map(k => S.cards.get(k)), { maxK: 1 });
@@ -3005,6 +3025,7 @@ function syncButtons() {
   $('#bClear').disabled = !S.cards.size;
   $('#bInfo').classList.toggle('on', $('#info').classList.contains('on'));
   $('#bFit').disabled = !S.cards.size;
+  markBar();
 }
 function syncUi() { hideHint(); syncButtons(); }
 function clearCanvas() {
@@ -3102,6 +3123,7 @@ async function demo() {
 S.rz = [null, null]; S.rzArm = null;
 function rzOver(x, y) { const r = $('#rz').getBoundingClientRect(); return x >= r.left - 6 && x <= r.right + 6 && y >= r.top - 6 && y <= r.bottom + 6; }
 function rzRender(msg) {
+  setTimeout(() => { if (typeof markPlace === 'function') markPlace(); }, 0);
   [0, 1].forEach(k => {
     const el = document.querySelector(`#rz .rzs[data-s="${k}"]`), i = S.rz[k];
     el.classList.toggle('armed', S.rzArm === k);
@@ -3148,10 +3170,65 @@ function rzClear() {
   rzRender();
 })();
 
+/* ---------------- the marked person: one person, and how the selected person is related to them ---------------- */
+const MARKKEY = STORE + '.mark';
+const markedPerson = () => (S.mark ? M.byKey.get(S.mark) || null : null);
+function loadMark() { if (EMBED) return; try { const k = localStorage.getItem(MARKKEY); if (k && M.byKey.has(k)) S.mark = k; } catch (e) { /* ignore */ } }
+function setMark(key) {
+  S.mark = key || null;
+  if (!EMBED) { try { if (key) localStorage.setItem(MARKKEY, key); else localStorage.removeItem(MARKKEY); } catch (e) { /* ignore */ } }
+  markCache.k = ''; refreshAll(); renderInfo();
+  const p = markedPerson(); toast(p ? p.name + ' is marked: select anyone to see how they are related' : 'Mark removed', 3000);
+}
+let markCache = { k: '', v: null };
+function markRel(key) {
+  const a = markedPerson(), b = M.byKey.get(key); if (!a || !b) return null;
+  if (a === b) return { self: true, a, b };
+  const ck = [a.i, b.i, S.opts.suggested, M.decisions.size].join('|');
+  if (markCache.k === ck) return markCache.v;
+  const res = TC.findPath(M, a.i, b.i, { suggested: S.opts.suggested });
+  const v = res.found ? { a, b, res, d: TC.describePath(M, res) } : { a, b, none: true };
+  markCache = { k: ck, v }; return v;
+}
+const markTarget = () => (S.sel.size === 1 ? [...S.sel][0] : S.path && S.path.a === S.mark ? S.path.b : S.path && S.path.b === S.mark ? S.path.a : null);
+function markText(r, full) {
+  if (r.self) return 'This is the marked person.';
+  if (r.none) return `No path found between ${esc(r.b.name)} and ${esc(r.a.name)} in any archive.`;
+  const s = esc(full ? r.d.sentence : r.d.sentence.split('; ')[0].replace(/\.$/, ''));
+  return s + (r.d.level !== 'definite' && r.d.level !== 'supported' ? ` <small class="mkl">${esc(TC.LEVELS[r.d.level].label)}</small>` : '');
+}
+function markBar() {
+  let bar = $('#markBar');
+  if (!bar) {
+    bar = document.createElement('div'); bar.id = 'markBar'; bar.setAttribute('role', 'status'); document.body.appendChild(bar);
+    bar.addEventListener('click', e => {
+      const t = e.target.closest('[data-mk]'); if (!t) return;
+      if (t.dataset.mk === 'off') setMark(null);
+      else if (t.dataset.mk === 'path') showPath(S.mark, t.dataset.t);
+      else if (t.dataset.mk === 'go') { const c = S.cards.get(S.mark); if (c) { fit([c], { maxK: 1 }); pulseCard(c); } else { const p = markedPerson(); if (p) { const v = viewCentre(); dropPerson(p.i, v.x, v.y); } } }
+    });
+  }
+  const p = markedPerson(); bar.hidden = !p; if (!p) return;
+  markPlace();
+  const tk = markTarget(), r = tk && markRel(tk);
+  bar.innerHTML = `<button class="mkn" data-mk="go" title="Find ${esc(p.name)} on the canvas">&#9733; ${esc(p.name)}</button>`
+    + `<span class="mkt">${r ? markText(r, false) : 'Select anyone to see how they are related to ' + esc(p.name)}</span>`
+    + (r && !r.self && !r.none && !(S.path && S.path.a === S.mark && S.path.b === tk) ? `<button class="lk-btn is-small" data-mk="path" data-t="${esc(tk)}">Show path</button>` : '')
+    + `<button class="mkx" data-mk="off" title="Unmark ${esc(p.name)}" aria-label="Unmark">${icon('x', '')}</button>`;
+}
+addEventListener('resize', () => markPlace());
+/* sits just under the "how related" bar, wherever that is */
+function markPlace() { const bar = $('#markBar'), rz = $('#rz'); if (!bar || S.phone) { if (bar) bar.style.top = ''; return; } const r = rz && rz.getBoundingClientRect(); bar.style.top = (r && r.height > 0 ? Math.round(r.bottom + 8) : 64) + 'px'; }
+function markPanelHTML(p) {
+  const marked = S.mark === p.key, r = !marked && markedPerson() ? markRel(p.key) : null;
+  return (r ? `<p class="plines mkrel">&#9733; ${markText(r, true)}</p>` : '') + `<button class="lk-btn is-small${marked ? ' is-primary' : ''}" data-do="${marked ? 'unmark' : 'mark'}" title="${marked ? 'Stop showing relationships from this person' : 'Mark this person: the canvas then shows how everyone you select is related to them (only one person can be marked)'}">&#9733; ${marked ? 'Marked: unmark' : 'Mark this person'}</button>`;
+}
+
 /* ---------------- start-up ---------------- */
 function boot() {
   buildFlagSprite();
   initTheme(); setPhone(); if (S.phone) S.infoOpen = false; wireToolbar(); renderTabs(); runSearch(); dockH();
+  loadMark();
   const d = loadSaved();
   const had = restore(d);
   S.cards.forEach(refreshCard);

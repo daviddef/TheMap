@@ -740,6 +740,7 @@ html:not(.rzopen) #rz{display:none}
 .slcap{font:800 9.5px Nunito,system-ui;letter-spacing:.06em;text-transform:uppercase;color:var(--lk-soft);margin-right:2px}
 .sbtn{flex:none;width:28px;height:28px;border-radius:50%;border:2px solid var(--lk-line);background:var(--lk-card);color:var(--lk-ink);display:inline-flex;align-items:center;justify-content:center;font:400 11px/1 "Lilita One",system-ui;text-decoration:none;box-shadow:0 2px 0 var(--lk-line)}
 .sbtn:hover,.sbtn:focus-visible{border-color:#D9822B;color:#C4721F}.sbtn:focus-visible{outline:3px solid var(--lk-ink);outline-offset:2px}
+#playBar .pbl .pwho{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--lk-ink);font-weight:900}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -3456,7 +3457,7 @@ function playBar() {
   if (b) return b;
   b = document.createElement('div'); b.id = 'playBar'; b.setAttribute('role', 'group'); b.setAttribute('aria-label', 'Play the tree');
   b.innerHTML = `<button class="pbt" data-pl="toggle" aria-label="Play"></button><input id="plRange" type="range" min="0" max="0" value="0" aria-label="Generation">`
-    + `<span class="pbl"><b id="plNum">I</b><small id="plYrs"></small></span>`
+    + `<span class="pbl"><small id="plWho" class="pwho"></small><b id="plNum">I</b><small id="plYrs"></small></span>`
     + `<span class="pbs" role="group" aria-label="Speed"><button data-pl="speed" data-s="0">Slow</button><button data-pl="speed" data-s="1">Normal</button><button data-pl="speed" data-s="2">Fast</button></span>`
     + `<button class="pbx" data-pl="close" title="Close" aria-label="Close">${icon('x', '')}</button>`;
   document.body.appendChild(b);
@@ -3475,6 +3476,7 @@ function playSync() {
   const G = PLAY.set.gens.length, k = PLAY.k, g = PLAY.set.gens[k] || [];
   const ys = g.map(i => M.P[i]).filter(p => p.by != null && !p.living);
   $('#plRange', b).max = G - 1; $('#plRange', b).value = k;
+  const w = M.P[PLAY.focus], wt = w ? 'Building ' + w.name + '\'s tree, earliest ancestor first' : ''; $('#plWho', b).textContent = w ? w.name + ' · earliest first' : ''; $('#plWho', b).title = wt; b.title = wt;
   $('#plNum', b).textContent = romanOf(k + 1) + ' of ' + romanOf(G);
   $('#plYrs', b).textContent = (ys.length ? Math.min(...ys.map(p => p.by)) + '–' + Math.max(...ys.map(p => p.dy != null ? p.dy : p.by)) + ' · ' : '') + g.length + (g.length === 1 ? ' person' : ' people');
   const t = $('.pbt', b); t.innerHTML = icon(PLAY.playing ? 'pause' : 'play', 'lk-icon'); t.setAttribute('aria-label', PLAY.playing ? 'Pause' : k >= G - 1 ? 'Play again' : 'Play');

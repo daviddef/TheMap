@@ -16,7 +16,7 @@ import argparse, json, os, re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from geo import country_of, in_ring_latlon
 
-SRC = "/Users/daviddefranceski/Claude/Projects/Defranceski Family/site/src/data/researchmap.json"
+SRC = "/Volumes/DJ - Crucial - 4TB-SSD/Claude Projects/Family Projects/Defranceski Family/site/src/data/researchmap.json"
 
 # HAND-RUN ONLY, AND NEVER FROM THE BUILD. This reads a sibling repository
 # through an absolute path that exists on one laptop. That is fine for a

@@ -1,7 +1,25 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "atlas", "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "site", "run", "preview"], "port": 4332 }
+    {
+      "name": "atlas",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "site",
+        "run",
+        "preview"
+      ],
+      "port": 4332
+    },
+    {
+      "name": "atlas-dev",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "cd site && npx astro dev --port 4330"
+      ],
+      "port": 4330
+    }
   ]
 }

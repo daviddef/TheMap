@@ -13,7 +13,7 @@
 # `pgrep -f` matches the checker's own command line — the bug that made
 # every wait-loop written this morning wait on itself forever.
 export PATH="/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-ROOT="/Users/daviddefranceski/Documents/Claude/Family Projects/Record Atlas"
+ROOT="/Volumes/DJ - Crucial - 4TB-SSD/Claude Projects/Family Projects/Record Atlas"
 cd "$ROOT" || exit 1
 LOG=".keepalive.log"
 say() { echo "$(date '+%F %T')  $*" >> "$LOG"; }

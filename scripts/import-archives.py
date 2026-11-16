@@ -32,7 +32,7 @@ _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(_ROOT)
 from geo import country_of, in_ring_latlon
 
-PROJ = "/Users/daviddefranceski/Claude/Projects"
+PROJ = "/Volumes/DJ - Crucial - 4TB-SSD/Claude Projects/Family Projects"
 
 # HAND-RUN ONLY, AND NEVER FROM THE BUILD. This reads a sibling repository
 # through an absolute path that exists on one laptop. That is fine for a

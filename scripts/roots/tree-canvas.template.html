@@ -647,6 +647,30 @@ html:not(.ph) #info .ih .lk-tab:hover{background:var(--lk-accent-soft);color:var
 html:not(.ph) #info .ih .lk-tab.on{width:28px;background:var(--lk-card);color:var(--lk-ink);margin-right:-2px;padding-right:2px;box-shadow:-2px 2px 0 var(--lk-line)}
 html:not(.ph) #info .ih span,html:not(.ph) #info .ih .lk-tab[data-tab="close"]{display:none}
 html:not(.ph):has(#info.on) #infoTab{top:92px;transform:none}
+
+/* Look: Names. The ancestry as surnames: a card per name, a line per set of marriages. The people cards step aside. */
+[data-theme="names"] #cards,[data-theme="names"] #edges,[data-theme="names"] #genbands,[data-theme="names"] #mini{display:none}
+#namesview{position:absolute;left:0;top:0;width:1px;height:1px;overflow:visible}
+#namesview .nmsvg{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+#namesview .nmt,#namesview .nmx{fill:none;stroke-linecap:round}
+#namesview .nmt{stroke:var(--lk-accent);opacity:.8}
+#namesview .nmx{stroke:var(--lk-faint);stroke-dasharray:3 8}
+#namesview .nml{position:absolute;transform:translate(-50%,-50%);padding:2px 9px;border-radius:999px;background:var(--lk-card);border:2px solid var(--lk-line);font:800 11px Nunito,system-ui;color:var(--lk-soft);white-space:nowrap}
+#namesview .nm{position:absolute;box-sizing:border-box;padding:11px 14px 9px;background:var(--lk-card);border:2px solid var(--lk-line);border-radius:18px;box-shadow:0 4px 0 var(--lk-line);cursor:pointer;display:flex;flex-direction:column;gap:3px}
+#namesview .nm:hover,#namesview .nm:focus-visible{border-color:var(--lk-accent);outline:none}
+#namesview .nm.root{border-color:var(--lk-accent);background:var(--lk-accent-soft);box-shadow:0 4px 0 var(--lk-accent)}
+#namesview .nm.open{z-index:3}
+#namesview .nmn{font:400 25px/1.05 "Lilita One",system-ui,sans-serif;letter-spacing:.01em;color:var(--lk-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#namesview .nmc{font:800 12.5px Nunito,system-ui;color:var(--lk-soft)}#namesview .nmc em{font:400 18px "Lilita One",system-ui;font-style:normal;color:var(--lk-accent);margin-right:2px}
+#namesview .nmbar{display:block;height:6px;border-radius:4px;background:var(--lk-line);overflow:hidden}#namesview .nmbar u{display:block;height:100%;background:var(--lk-accent);border-radius:4px;text-decoration:none}
+#namesview .nm small{font:800 10.5px Nunito,system-ui;color:var(--lk-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#namesview .nmhere{position:absolute;top:-11px;right:12px;padding:1px 9px;border-radius:999px;background:var(--lk-accent);color:#fff;font:900 10.5px Nunito,system-ui;letter-spacing:.03em;text-transform:uppercase}
+#namesview .nmpeek{position:absolute;left:-2px;right:-2px;top:calc(100% + 8px);margin:0;padding:8px 12px;list-style:none;max-height:260px;overflow:auto;background:var(--lk-card);border:2px solid var(--lk-accent);border-radius:14px;box-shadow:0 6px 0 var(--lk-line);font:700 12px/1.45 Nunito,system-ui;cursor:default}
+#namesview .nmpeek small{display:inline;color:var(--lk-mute)}
+#namesCap{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--dock-h,190px) + 22px);z-index:5;max-width:min(640px,calc(100vw - 420px));padding:8px 14px;background:var(--lk-card);border:2px solid var(--lk-line);border-radius:16px;box-shadow:0 3px 0 var(--lk-line);font:700 12.5px/1.4 Nunito,system-ui;color:var(--lk-soft);text-align:center}
+#namesCap[hidden]{display:none}#namesCap b{color:var(--lk-ink);font-weight:900;margin-right:4px}#namesCap small{display:block;font-size:11px;color:var(--lk-mute)}
+html:not(.ph):has(#info.on) #namesCap{left:calc((100vw - 340px) / 2)}
+.ph #namesCap{left:8px;right:8px;transform:none;max-width:none}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -1420,7 +1444,50 @@ html:not(.ph):has(#info.on) #infoTab{top:92px;transform:none}
     return { gens, gen: g };
   }
 
-  const API = { playSet, family, lifeEvents, eraChanges, lines, arrange, bloodSet, fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful,
+  /* THE NAMES: a person's ancestry written as surnames, not people. One node per surname family (the Record Atlas catalogue's canonical name when it knows the spelling, else the
+     name as written), with how many ancestors bear it and their years; one edge between two names for each couple among the ancestors, counted. So a Defranceski who married a
+     Kovacina and another, five generations back, who married a Lerena are one Defranceski node joined to two names, however far apart the marriages. The focus person's own
+     spouses are included. A name's depth is its distance from the focus person's name through those marriages. Nothing about any one person is carried except an index. */
+  function surKey(M, p) {
+    const nf = nameForms(M, p);
+    if (nf && nf.sur && nf.sur.canon) return { k: 'f:' + nf.sur.canon, label: nf.sur.canon };
+    const s = squash(p.sur); return s ? { k: 's:' + s, label: p.sur } : { k: '?', label: '' };
+  }
+  function nameTree(M, i) {
+    const root = M.P[i]; if (!root) return null;
+    const gen = new Map([[i, 0]]), q = [i];
+    for (let h = 0; h < q.length; h++) { const p = M.P[q[h]], g = gen.get(q[h]); for (const r of [p.f, p.m]) if (r >= 0 && M.P[r] && !gen.has(r)) { gen.set(r, g + 1); q.push(r); } }
+    const nodes = new Map();
+    const add = (j, g) => {
+      const p = M.P[j], k = surKey(M, p); let n = nodes.get(k.k);
+      if (!n) nodes.set(k.k, n = { key: k.k, label: k.label, n: 0, living: 0, people: [], from: null, to: null, g0: Infinity, g1: -1, self: 0 });
+      n.n++; n.people.push(j); if (p.living) n.living++;
+      if (p.by != null) { n.from = n.from == null ? p.by : Math.min(n.from, p.by); const e = p.dy != null ? p.dy : p.by; n.to = n.to == null ? e : Math.max(n.to, e); }
+      n.g0 = Math.min(n.g0, g); n.g1 = Math.max(n.g1, g);
+    };
+    gen.forEach((g, j) => add(j, g));
+    const edges = new Map(), seen = new Set();
+    const link = (a, b) => {
+      const ka = surKey(M, a).k, kb = surKey(M, b).k;
+      if (ka === kb) { nodes.get(ka).self++; return; }
+      const key = ka < kb ? ka + '|' + kb : kb + '|' + ka; let e = edges.get(key); if (!e) edges.set(key, e = { a: ka < kb ? ka : kb, b: ka < kb ? kb : ka, n: 0 }); e.n++;
+    };
+    gen.forEach((g, j) => { const p = M.P[j]; if (p.f >= 0 && p.m >= 0 && M.P[p.f] && M.P[p.m]) { const k = p.f + '|' + p.m; if (!seen.has(k)) { seen.add(k); link(M.P[p.f], M.P[p.m]); } } });
+    /* a mother known without the father: the child carries the father's name, so the mother's name is joined to the child's (an implied marriage) */
+    gen.forEach((g, j) => { const p = M.P[j], mo = p.m >= 0 ? M.P[p.m] : null, fa = p.f >= 0 ? M.P[p.f] : null; if (mo && !fa && mo.sex === 'f' && squash(p.sur)) { const k = 'm' + j; if (!seen.has(k)) { seen.add(k); link(p, mo); } } });
+    root.sp.forEach(s => { const o = M.P[s]; if (!o || gen.has(s)) return; add(s, 0); link(root, o); });
+    const rk = surKey(M, root).k, E = [...edges.values()];
+    /* depth by marriages from the focus person's name; the strongest edge to the row above is each name's parent in the layout */
+    const depth = new Map([[rk, 0]]), parent = new Map(), order = [rk];
+    for (let h = 0; h < order.length; h++) {
+      const a = order[h];
+      E.filter(e => e.a === a || e.b === a).sort((x, y) => y.n - x.n).forEach(e => { const o = e.a === a ? e.b : e.a; if (!depth.has(o)) { depth.set(o, depth.get(a) + 1); parent.set(o, a); order.push(o); } });
+    }
+    nodes.forEach((n, k) => { if (!depth.has(k)) { depth.set(k, Math.max(...depth.values()) + 1); order.push(k); } });
+    const N = [...nodes.values()].map(n => ({ ...n, depth: depth.get(n.key), parent: parent.get(n.key) || null }));
+    return { root: rk, nodes: N, edges: E, people: gen.size + root.sp.filter(s => M.P[s] && !gen.has(s)).length, ancestors: gen.size };
+  }
+  const API = { nameTree, playSet, family, lifeEvents, eraChanges, lines, arrange, bloodSet, fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful,
     placeAt, neighbours, edgeCost, parentLinks, ancestorStats, stopReason, otherSideHasParents, evidenceSummary, years, url, levelOfGrade, LEVELS, kinshipOps, opsOf, reverseOps, bloodTerm, siblingKind, archivesOnPath, ord };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TC = API;
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -2015,8 +2082,9 @@ const toWorld = (px, py) => ({ x: (px - S.view.x) / S.view.k, y: (py - S.view.y)
    shrinks the tree where it stands instead of sending it off toward a pointer parked over the search box or the middle of an empty window. */
 function zoomAt(f, px, py) {
   const v = S.view;
-  if (S.cards.size) {
-    const b = bbox([...S.cards.values()]), sx0 = b.x0 * v.k + v.x, sx1 = b.x1 * v.k + v.x, sy0 = b.y0 * v.k + v.y, sy1 = b.y1 * v.k + v.y;
+  const nb = typeof namesBox === 'function' ? namesBox() : null;
+  if (nb || S.cards.size) {
+    const b = nb || bbox([...S.cards.values()]), sx0 = b.x0 * v.k + v.x, sx1 = b.x1 * v.k + v.x, sy0 = b.y0 * v.k + v.y, sy1 = b.y1 * v.k + v.y;
     px = px == null ? (sx0 + sx1) / 2 : Math.min(sx1, Math.max(sx0, px)); py = py == null ? (sy0 + sy1) / 2 : Math.min(sy1, Math.max(sy0, py));
   } else { if (px == null) px = innerWidth / 2; if (py == null) py = innerHeight / 2; }
   const nk = Math.min(2.5, Math.max(0.12, v.k * f)), r = nk / v.k;
@@ -2045,9 +2113,10 @@ function bbox(cards) {
 }
 function fit(cards, opt) {
   cards = cards && cards.length ? cards : [...S.cards.values()];
-  if (!cards.length) return;
+  const nb = typeof namesBox === 'function' ? namesBox() : null;   /* in the Names look the picture is the name cards, not the people cards */
+  if (!cards.length && !nb) return;
   opt = opt || {};
-  const b = bbox(cards), u = usable(), pad = 40;
+  const b = nb || bbox(cards), u = usable(), pad = 40;
   const aw = u.r - u.l - pad * 2, ah = u.b - u.t - pad * 2;
   let k = Math.min(aw / (b.x1 - b.x0), ah / (b.y1 - b.y0));
   k = Math.max(0.12, Math.min(opt.maxK || 1.05, k));
@@ -2985,6 +3054,82 @@ function stopPlay(keep) {
 function playGuard() { if (PLAY.on && !S.cards.size) stopPlay(); }
 addEventListener('resize', () => playPlace());
 
+/* names.js — the Names look: the selected (or marked) person's ancestry written as SURNAMES, not people.
+   One card per surname family with how many people bear it and their years; a line between two names for the marriages that join them, counted. The tree runs from the
+   focus person's own name at the top; each row is one more marriage away. The counting is TC.nameTree (logic.js); this file lays it out and draws it in the canvas world,
+   so pan and zoom work as they always do. The people cards are hidden while this look is on and come back untouched when it is changed. */
+const NAMES = { box: null, sig: '', focus: null, open: null };
+const namesLook = () => document.documentElement.getAttribute('data-theme') === 'names';
+function namesBox() { return namesLook() ? NAMES.box : null; }
+function namesFocus() {
+  const k = S.sel.size === 1 ? [...S.sel][0] : null; let p = k && M.byKey.get(k);
+  if (!p && NAMES.focus) p = M.byKey.get(NAMES.focus);   /* clicking empty canvas deselects; the names stay on the last person looked at */
+  if (!p) p = markedPerson();
+  if (!p) { const c = [...S.cards.values()][0]; p = c && personOf(c); }
+  return p || null;
+}
+const NM_W = 214, NM_H = 104, NM_GX = 34, NM_GY = 88;
+function namesLayout(T) {
+  const by = new Map(T.nodes.map(n => [n.key, n])), kids = new Map();
+  T.nodes.forEach(n => { n._w = null; if (n.parent) { if (!kids.has(n.parent)) kids.set(n.parent, []); kids.get(n.parent).push(n); } });
+  kids.forEach(a => a.sort((x, y) => y.n - x.n));
+  const wid = n => n._w != null ? n._w : (n._w = Math.max(NM_W, (kids.get(n.key) || []).reduce((s, c) => s + wid(c) + NM_GX, -NM_GX)));
+  const place = (n, x0) => {
+    n.x = x0 + wid(n) / 2 - NM_W / 2; n.y = n.depth * (NM_H + NM_GY);
+    const ks = kids.get(n.key) || [], total = ks.reduce((s, c) => s + wid(c) + NM_GX, -NM_GX); let cx = x0 + (wid(n) - total) / 2;
+    ks.forEach(c => { place(c, cx); cx += wid(c) + NM_GX; });
+  };
+  const roots = [by.get(T.root), ...T.nodes.filter(n => !n.parent && n.key !== T.root)];
+  let x = 0; roots.forEach(r => { place(r, x); x += wid(r) + NM_GX * 2; });
+  return by;
+}
+function namesEdge(a, b) {   /* from the higher name down to the lower; two names in one row are joined by an arc over the top */
+  if (a.depth === b.depth) { const x0 = a.x + NM_W / 2, x1 = b.x + NM_W / 2, y = a.y, up = 64 + Math.min(80, Math.abs(x1 - x0) * 0.12); return { d: `M${f1(x0)} ${f1(y)}C${f1(x0)} ${f1(y - up)} ${f1(x1)} ${f1(y - up)} ${f1(x1)} ${f1(y)}`, mx: (x0 + x1) / 2, my: y - up * 0.75 }; }
+  const [t, u] = a.depth < b.depth ? [a, b] : [b, a], x0 = t.x + NM_W / 2, y0 = t.y + NM_H, x1 = u.x + NM_W / 2, y1 = u.y, m = (y0 + y1) / 2;
+  return { d: `M${f1(x0)} ${f1(y0)}C${f1(x0)} ${f1(m)} ${f1(x1)} ${f1(m)} ${f1(x1)} ${f1(y1)}`, mx: (x0 + x1) / 2, my: m };
+}
+function namesPeople(n) {
+  const rows = n.people.map(j => M.P[j]).filter(p => !p.living).sort((a, b) => (a.by == null) - (b.by == null) || a.by - b.by);
+  const show = rows.slice(0, 12).map(p => `<li>${esc(p.given || '(no given name)')} <small>${TC.years(p)}</small></li>`).join('');
+  return `<ul class="nmpeek">${show}${rows.length > 12 ? `<li><small>and ${rows.length - 12} more</small></li>` : ''}${n.living ? `<li><small>${n.living} living, not listed</small></li>` : ''}</ul>`;
+}
+function drawNames(force) {
+  let host = $('#namesview'), cap = $('#namesCap');
+  if (!host) { host = document.createElement('div'); host.id = 'namesview'; $('#world').appendChild(host); }
+  if (!cap) { cap = document.createElement('div'); cap.id = 'namesCap'; cap.hidden = true; document.body.appendChild(cap); }
+  if (!namesLook()) { if (host.innerHTML) host.innerHTML = ''; cap.hidden = true; NAMES.sig = ''; NAMES.box = null; NAMES.focus = null; return; }
+  const p = namesFocus();
+  if (!p) { host.innerHTML = ''; NAMES.box = null; NAMES.sig = ''; cap.hidden = false; cap.innerHTML = '<b>Names</b> Put someone on the canvas, then select or mark them: this shows their ancestry as surnames.'; return; }
+  const sig = p.key + '|' + NAMES.open; if (sig === NAMES.sig && !force) return;
+  const changed = NAMES.focus !== p.key; NAMES.focus = p.key; NAMES.sig = sig;
+  const T = TC.nameTree(M, p.i), by = namesLayout(T), max = Math.max(...T.nodes.map(n => n.n));
+  let svg = '', html = '', lab = '', x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9, marriages = 0;
+  T.edges.forEach(e => {
+    const a = by.get(e.a), b = by.get(e.b), q = namesEdge(a, b), tree = a.parent === b.key || b.parent === a.key; marriages += e.n;
+    svg += `<path d="${q.d}" class="${tree ? 'nmt' : 'nmx'}" style="stroke-width:${f1(Math.min(11, 2.5 + e.n * 1.6))}px"/>`;
+    lab += `<span class="nml" style="left:${f1(q.mx)}px;top:${f1(q.my)}px">${e.n} ${e.n === 1 ? 'marriage' : 'marriages'}</span>`;
+  });
+  T.nodes.forEach(n => {
+    x0 = Math.min(x0, n.x); y0 = Math.min(y0, n.y - 90); x1 = Math.max(x1, n.x + NM_W); y1 = Math.max(y1, n.y + NM_H);
+    const span = n.g1 - n.g0 + 1, yrs = n.from != null ? `${n.from}–${n.to != null ? n.to : '?'}` : '';
+    html += `<div class="nm${n.key === T.root ? ' root' : ''}${NAMES.open === n.key ? ' open' : ''}" data-nm="${esc(n.key)}" style="left:${f1(n.x)}px;top:${f1(n.y)}px;width:${NM_W}px;height:${NM_H}px" tabindex="0" role="button" aria-label="${esc(n.label || 'No surname')}: ${n.n} people">
+      <b class="nmn">${esc(n.label || 'Surname not recorded')}</b>
+      <span class="nmc"><em>${n.n}</em> ${n.n === 1 ? 'person' : 'people'}</span>
+      <i class="nmbar"><u style="width:${f1(100 * n.n / max)}%"></u></i>
+      <small>${yrs}${yrs && span > 1 ? ' · ' : ''}${span > 1 ? span + ' generations' : ''}${n.self ? ' · married within the name' + (n.self > 1 ? ' ×' + n.self : '') : ''}</small>
+      ${n.key === T.root ? '<span class="nmhere">starts here</span>' : ''}${NAMES.open === n.key ? namesPeople(n) : ''}</div>`;
+  });
+  NAMES.box = { x0, y0, x1, y1 };
+  host.innerHTML = `<svg class="nmsvg" width="1" height="1" aria-hidden="true">${svg}</svg>${lab}${html}`;
+  cap.hidden = false;
+  cap.innerHTML = `<b>Names behind ${esc(p.name)}</b> ${T.ancestors.toLocaleString()} ${T.ancestors === 1 ? 'person' : 'people'} in ${T.nodes.length} ${T.nodes.length === 1 ? 'name' : 'names'}, ${marriages} ${marriages === 1 ? 'marriage' : 'marriages'}. <small>Select or mark someone else to change it; click a name to see who.</small>`;
+  if (changed) fit();
+}
+document.addEventListener('click', e => {
+  const n = e.target.closest && e.target.closest('#namesview .nm'); if (!n || !namesLook()) return;
+  const k = n.dataset.nm; NAMES.open = NAMES.open === k ? null : k; drawNames(true);
+});
+
 /* ui.js — the shelf and search, pan / zoom / drag, the side panel, pathways, themes, phone mode, start-up. */
 
 /* ---------------- selection ---------------- */
@@ -3087,7 +3232,7 @@ function runSearchMarks() { document.querySelectorAll('#shelf .res').forEach(el 
   const st = $('#stage'), ptrs = new Map(); let pan = null, pinch = null, drag = null, raf = 0;
   const redraw = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; drawEdges(); }); };
   st.addEventListener('pointerdown', e => {
-    if (e.target.closest('.card') || e.target.closest('[data-br]')) return;
+    if (e.target.closest('.card') || e.target.closest('[data-br]') || e.target.closest('#namesview .nm')) return;
     ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY }); st.setPointerCapture(e.pointerId);
     if (ptrs.size === 1) { pan = { x: e.clientX, y: e.clientY, vx: S.view.x, vy: S.view.y, moved: false }; closePop(); }
     if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), k: S.view.k, cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2, vx: S.view.x, vy: S.view.y }; pan = null; }
@@ -3583,13 +3728,14 @@ function syncButtons() {
   $('#bInfo').classList.toggle('on', $('#info').classList.contains('on'));
   $('#bFit').disabled = !S.cards.size;
   markBar(); syncGenButton();
+  if (typeof drawNames === 'function') drawNames();
 }
 function syncUi() { hideHint(); syncButtons(); }
 function clearCanvas() {
   if (!S.cards.size) return;
   snapshot(); clearAll(); refreshAll(); drawEdges(); hideHint(); renderInfo(); save(); runSearchMarks(); toast('Cleared. Undo brings it back.');
 }
-const THEMES = ['sticker', 'paper', 'ground', 'lanes', 'countries'];
+const THEMES = ['sticker', 'paper', 'ground', 'lanes', 'countries', 'names'];
 const THEME_NAME = { countries: 'Countries' };
 function setTheme(t) {
   if (!THEMES.includes(t)) t = 'sticker';
@@ -3601,7 +3747,7 @@ function setTheme(t) {
     tweenTo(arrangeTargets(cards), 800).then(() => { refreshAll(); drawEdges(); fit(); save(); miniDraw(); toast('Cards are in a column for each country of birth (Undo brings them back)', 3600); });
   }
   try { localStorage.setItem('loamTheme', t); } catch (e) { /* ignore */ }
-  drawEdges(); miniDraw(); if (S.tab === 'options') renderInfo();
+  drawEdges(); miniDraw(); if (typeof drawNames === 'function') drawNames(true); if (S.tab === 'options') renderInfo();
 }
 function initTheme() {
   let t = null; try { t = localStorage.getItem('loamTheme'); } catch (e) { /* ignore */ }
@@ -3742,7 +3888,7 @@ function loadMark() { if (EMBED) return; try { const k = localStorage.getItem(MA
 function setMark(key) {
   S.mark = key || null;
   if (!EMBED) { try { if (key) localStorage.setItem(MARKKEY, key); else localStorage.removeItem(MARKKEY); } catch (e) { /* ignore */ } }
-  markCache.k = ''; refreshAll(); renderInfo();
+  markCache.k = ''; refreshAll(); renderInfo(); if (key && typeof NAMES !== 'undefined') NAMES.focus = key; if (typeof drawNames === 'function') drawNames();
   const p = markedPerson(); toast(p ? p.name + ' is marked: select anyone to see how they are related' : 'Mark removed', 3000);
 }
 let markCache = { k: '', v: null };

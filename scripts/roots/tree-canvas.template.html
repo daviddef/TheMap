@@ -639,13 +639,14 @@ html:not(.ph):has(#info.on) #playBar{left:calc((100vw - 340px) / 2);width:min(64
 #lanehead .cnh small{color:#9A5A1E}
 #lanehead .cnh b{text-shadow:0 2px 0 rgba(255,255,255,.55)}
 
-/* the side pane's tabs run down its right edge (the phone keeps its row of tabs along the top of the sheet) */
-html:not(.ph) #info.on{flex-direction:row-reverse}
-html:not(.ph) #info .ih{flex:none;flex-direction:column;align-items:stretch;gap:4px;width:46px;padding:10px 5px;border-bottom:0;border-left:2px solid var(--lk-line);overflow:hidden auto;cursor:auto;touch-action:auto;-webkit-mask-image:none!important;mask-image:none!important;scrollbar-width:none;background:color-mix(in srgb,var(--lk-paper) 45%,var(--lk-card))}
-html:not(.ph) #info .ih .lk-tab{writing-mode:vertical-rl;text-orientation:mixed;padding:13px 7px;border-radius:12px;font-size:13px;letter-spacing:.01em;text-align:left;white-space:nowrap;flex:none}
-html:not(.ph) #info .ih .lk-tab.on{background:var(--lk-card);box-shadow:0 0 0 2px var(--lk-line),0 2px 0 var(--lk-line)}
-html:not(.ph) #info .ih span{display:none}
-html:not(.ph) #info .ih .lk-tab[data-tab="close"]{order:-1;writing-mode:horizontal-tb;padding:6px 0;margin-bottom:6px;text-align:center;font-size:20px;line-height:1}
+/* the side pane's tabs hang off its left edge, in the same style as the collapse handle: small vertical tabs stacked under it, no column of their own (the phone keeps its row of tabs along the top of the sheet) */
+html:not(.ph) #info{overflow:visible}
+html:not(.ph) #info .ih{position:absolute;left:-26px;top:108px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;width:auto;padding:0;border:0;background:transparent;overflow:visible;cursor:auto;touch-action:auto;-webkit-mask-image:none!important;mask-image:none!important}
+html:not(.ph) #info .ih .lk-tab{writing-mode:vertical-rl;text-orientation:mixed;width:24px;padding:12px 0;border:2px solid var(--lk-line);border-right:0;border-radius:12px 0 0 12px;background:var(--lk-paper);color:var(--lk-mute);font:800 12px/1 Nunito,system-ui;white-space:nowrap;text-align:center;box-shadow:-2px 2px 0 var(--lk-line);flex:none}
+html:not(.ph) #info .ih .lk-tab:hover{background:var(--lk-accent-soft);color:var(--lk-accent)}
+html:not(.ph) #info .ih .lk-tab.on{width:28px;background:var(--lk-card);color:var(--lk-ink);margin-right:-2px;padding-right:2px;box-shadow:-2px 2px 0 var(--lk-line)}
+html:not(.ph) #info .ih span,html:not(.ph) #info .ih .lk-tab[data-tab="close"]{display:none}
+html:not(.ph):has(#info.on) #infoTab{top:92px;transform:none}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>

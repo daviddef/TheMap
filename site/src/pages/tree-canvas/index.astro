@@ -19,8 +19,22 @@
 <link rel="stylesheet" href="/tree-canvas/page.css">
 </head>
 <body>
-<iframe id="cv" title="Tree Canvas, drawn from your GEDCOM"></iframe>
-<p id="msg" role="status" aria-live="polite">Starting…</p>
+<main id="start" aria-labelledby="stTitle">
+  <h1 id="stTitle">Tree Canvas</h1>
+  <p class="stlead">Draw your family tree on one canvas, with the Atlas's places, rulers and record collections for each person. Your file is read in this browser and never uploaded.</p>
+  <div class="stbtns">
+    <button type="button" class="stbtn primary" id="stOpen">Open your GEDCOM</button>
+    <button type="button" class="stbtn" id="stDemo">Open an invented family example</button>
+  </div>
+  <input type="file" id="stFile" accept=".ged,.gedcom,.txt,text/plain" hidden>
+  <section id="stRecent" class="strec" hidden aria-labelledby="stRecTitle">
+    <h2 id="stRecTitle">Last used</h2>
+    <ul id="stList"></ul>
+    <p class="stnote">Kept in this browser only, so you can open them again in one click. <button type="button" class="stlink" id="stForget">Forget them all</button></p>
+  </section>
+</main>
+<iframe id="cv" title="Tree Canvas, drawn from your GEDCOM" hidden></iframe>
+<p id="msg" role="status" aria-live="polite" hidden></p>
 <noscript><p class="nojs">The Tree Canvas needs JavaScript to read your file in this browser. Nothing is uploaded. <a href="/">Back to Record Atlas</a></p></noscript>
 <script is:inline src="/tree-canvas/app.js" type="module"></script>
 </body>

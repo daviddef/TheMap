@@ -188,7 +188,7 @@ button{font-family:inherit}
 #hint.off{opacity:0}
 #toast{position:fixed;left:50%;top:16px;--lk-toast-from:-10px;z-index:30}
 /* ---------- cards ---------- */
-.card{position:absolute;left:0;top:0;width:184px;height:76px;z-index:2}
+.card{position:absolute;left:0;top:0;width:184px;height:92px;z-index:2}
 .card.sel{z-index:4}.card:hover{z-index:5}
 .cb{position:absolute;inset:0;background:var(--lk-card);border:2px solid var(--lk-line);border-radius:16px;box-shadow:0 3px 0 var(--lk-line);padding:7px 8px 5px 17px;
   transition:transform .18s cubic-bezier(.3,1.7,.5,1),box-shadow .15s,border-color .15s,opacity .25s,filter .25s;cursor:grab;overflow:hidden}
@@ -702,6 +702,14 @@ html:not(.ph):has(#info.on) #namesCap{left:calc((100vw - 340px) / 2)}
 #bShelf:hover,#bShelf:focus-visible{background:var(--lk-card);opacity:1;border-color:var(--lk-accent)}
 html:not(.ph):has(#info.on) #bShelf{right:356px}
 .ph #bShelf{right:10px;bottom:calc(var(--dock-h,130px) + 12px)}.ph.shelfoff #bShelf{bottom:calc(14px + env(safe-area-inset-bottom))}
+
+/* the two relate slots stay out of the way until the how-are-they-related button opens them */
+html:not(.rzopen) #rz{display:none}
+
+/* a card: born and died on their own rows, the sex mark after the name */
+.card .yr b{font-weight:900;color:var(--lk-mute);margin-right:1px}
+.card .nm .sx{font-size:12px;margin-left:5px;vertical-align:1px}
+.card .meta{min-height:14px}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -709,7 +717,7 @@ html:not(.ph):has(#info.on) #bShelf{right:356px}
 <div class="zoombar"><button class="lk-ibtn" id="zIn" title="Zoom in" aria-label="Zoom in"></button><button class="lk-ibtn" id="zOut" title="Zoom out" aria-label="Zoom out"></button><button class="lk-ibtn" id="bFit" title="Fit everything in view (F)" aria-label="Fit to view"></button></div>
 <button class="lk-ibtn" id="bShelf" title="Show or hide the search shelf" aria-label="Search shelf" aria-pressed="true"></button>
 <div class="top">
-  <button class="lk-ibtn" id="bRel" title="How are they related? Select a person, then another" aria-label="How are they related"></button>
+  <button class="lk-ibtn" id="bRel" title="How are they related? Opens two slots: put one person in each" aria-label="How are they related"></button>
   <button class="lk-ibtn" id="bBlood" title="Bloodline: add blood relatives, remove the rest, or colour them differently" aria-label="Bloodline" aria-haspopup="true" aria-expanded="false"></button>
   <button class="lk-ibtn" id="bGen" title="Generations: numbered bands behind each row (I is the oldest)" aria-label="Generations" aria-pressed="false"></button>
   <button class="lk-ibtn" id="bArrange" title="Arrange: tidy every card on the canvas into one neat family tree" aria-label="Arrange"></button>
@@ -721,7 +729,7 @@ html:not(.ph):has(#info.on) #bShelf{right:356px}
 </div>
 <div id="flagsprite" aria-hidden="true"></div>
 <div id="hint">Search anyone, from any archive, and drop them here
-  <small>Pull up their parents, all the way back, one generation at a time.<br>Drop someone from another archive and ask how the two are related.<br>Solid means read from a register; dashed means not proven; dotted means the archive records no grade.</small>
+  <small>Pull up their parents, all the way back, one generation at a time.<br>Press the &#8644; button to ask how two people are related.<br>Solid means read from a register; dashed means not proven; dotted means the archive records no grade.</small>
   <div style="margin-top:14px;pointer-events:auto"><button class="lk-btn is-primary" id="exDemo">Show me an example</button></div></div>
 <div id="info" aria-live="polite"></div>
 <div id="pop"></div>
@@ -1907,7 +1915,7 @@ const QS = new URLSearchParams(location.search), SA = EMBED && QS.has('sa');
 const CORPUS = EMBED ? window.TCF.corpus(window.parent.RR.tree, window.parent.RR.atlas) : JSON.parse(document.getElementById('corpus').textContent);
 const M = TC.build(CORPUS);
 const NA = M.archives.length;
-const W = 184, H = 76, GX = 30, COUPLE_GX = 22, ROWH = 150;
+const W = 184, H = 92, GX = 30, COUPLE_GX = 22, ROWH = 150;
 const STORE = 'treecanvas.v1';
 
 const ICON = {
@@ -2062,8 +2070,12 @@ function fixList() { if (!EMBED) return null; try { const F = window.parent.RR &
 function fixOf(p) { const F = fixList(); const l = F && p && !p.ghost ? F.byId[p.id] : null; return l && l.length ? l : null; }
 function cardInner(c) {
   const p = personOf(c), a = M.archives[p.a];
-  const bpl = p.bp ? TC.placeAt(M, p, p.bp, p.by) : null, dpl = p.dp && p.dp !== p.bp ? TC.placeAt(M, p, p.dp, p.dy) : null;
-  const place = p.bp ? ` &middot; ${flagHTML(bpl, p.by, flagTip(bpl, p.by, 'Born at'))}${esc(p.bp)}` + (dpl && dpl.fi >= 0 ? ` &rarr; ${flagHTML(dpl, p.dy, flagTip(dpl, p.dy, 'Died at'))}` : '') : '';
+  const bpl = p.bp ? TC.placeAt(M, p, p.bp, p.by) : null, dpl = p.dp ? TC.placeAt(M, p, p.dp, p.dy) : null;
+  /* born and died each on their own row, each with its flag and place; a person with no dates (named only, living) keeps the one plain line */
+  const yrOf = (y, est) => y == null ? '?' : (est ? '~' : '') + y;
+  const row = (lab, yr, pl, name, what, y) => `<div class="yr"><b>${lab}</b> ${yr}${name ? ` &middot; ${pl ? flagHTML(pl, y, flagTip(pl, y, what)) : ''}${esc(name)}` : ''}</div>`;
+  const dates = (p.ghost || p.living) ? `<div class="yr">${TC.years(p)}</div>`
+    : row('b.', yrOf(p.by, p.fl & 1), bpl, p.bp, 'Born at', p.by) + (p.dy != null || p.dp ? row('d.', yrOf(p.dy, p.fl & 2), dpl, p.dp, 'Died at', p.dy) : '');
   const seals = [];
   if (p.f >= 0 && TC.levelOfGrade(p.fg) !== 'ungraded') seals.push(`<span title="Father link: ${TC.LEVELS[TC.levelOfGrade(p.fg)].short}">${sealMini(TC.levelOfGrade(p.fg), colour(p.a))}</span>`);
   if (p.m >= 0 && TC.levelOfGrade(p.mg) !== 'ungraded') seals.push(`<span title="Mother link: ${TC.LEVELS[TC.levelOfGrade(p.mg)].short}">${sealMini(TC.levelOfGrade(p.mg), colour(p.a))}</span>`);
@@ -2073,8 +2085,8 @@ function cardInner(c) {
     return `<button class="brc" style="--bc:${colour(o.a)}" data-act="br" data-b="${esc(b.id)}" title="${st === 'confirmed' ? 'Confirmed' : 'Suggested'} same person in ${esc(M.archives[o.a].name)} (${esc(TC.bridgeNotes(b).join(', '))}). Click to add them to the canvas, bridged, not merged.">&asymp; ${esc(M.archives[o.a].name)}</button>`;
   }).join('') + (brs.length > 1 ? `<button class="brc more" style="--bc:var(--lk-accent)" data-act="brs" title="${brs.length - 1} more possible matches: open the Person panel">+${brs.length - 1}</button>` : '');
   const ln = lineOf(c.i);
-  let h = `<div class="cb" title="${esc(p.name)}${a.k === 'you' ? '' : ' · ' + esc(a.name) + ' archive'}${p.occ ? ' · ' + esc(p.occ) : ''} · ${esc(TC.evidenceSummary(M, p))}"><div class="nm">${esc(p.name)}</div><div class="yr">${TC.years(p)}${place}</div>
-    <div class="meta">${a.k === 'you' ? (ln ? `<span class="ar ln" style="--lc:${ln.col}" title="On the ${esc(ln.names)} line from the marked person's grandparents">${esc(ln.names)}</span>` : '') : `<span class="ar">${esc(a.name)}</span>`}${p.sex === 'f' || p.sex === 'm' ? `<span class="sx ${p.sex === 'f' ? 'mo' : 'fa'}" title="${p.sex === 'f' ? 'Female' : 'Male'}">${p.sex === 'f' ? '&#9792;' : '&#9794;'}&#xFE0E;</span>` : ''}${chips}<span class="seals">${seals.join('')}</span></div></div>`;
+  let h = `<div class="cb" title="${esc(p.name)}${a.k === 'you' ? '' : ' · ' + esc(a.name) + ' archive'}${p.occ ? ' · ' + esc(p.occ) : ''} · ${esc(TC.evidenceSummary(M, p))}"><div class="nm">${esc(p.name)}${p.sex === 'f' || p.sex === 'm' ? `<span class="sx ${p.sex === 'f' ? 'mo' : 'fa'}" title="${p.sex === 'f' ? 'Female' : 'Male'}">${p.sex === 'f' ? '&#9792;' : '&#9794;'}&#xFE0E;</span>` : ''}</div>${dates}
+    <div class="meta">${a.k === 'you' ? (ln ? `<span class="ar ln" style="--lc:${ln.col}" title="On the ${esc(ln.names)} line from the marked person's grandparents">${esc(ln.names)}</span>` : '') : `<span class="ar">${esc(a.name)}</span>`}${chips}<span class="seals">${seals.join('')}</span></div></div>`;
   if (c.key === S.mark) h += `<span class="mkb" title="The marked person: the canvas shows how everyone you select is related to them">&#9733;</span>`;
   { const fx = fixOf(p); if (fx) h += `<button class="fxb" data-act="fixes" title="${fx.length} ${fx.length === 1 ? 'thing' : 'things'} on your fix list for ${esc(p.name)}: click to see what and how to fix it" aria-label="${fx.length} on the fix list">!</button>` ;  }
   /* ancestors */
@@ -4042,8 +4054,8 @@ function toggleGens() {
 function syncButtons() {
   if (typeof playGuard === 'function') playGuard();
   $('#bUndo').disabled = !S.undo.length; { const a = $('#bArrange'); if (a) a.disabled = S.cards.size < 2; }
-  $('#bRel').classList.toggle('on', !!S.relateFrom || S.sel.size === 2);
-  $('#bRel').disabled = !(S.relateFrom || S.sel.size >= 1);
+  $('#bRel').classList.toggle('on', !!S.relateFrom || S.sel.size === 2 || document.documentElement.classList.contains('rzopen'));
+  $('#bRel').disabled = false;
   $('#bClear').disabled = !S.cards.size;
   $('#bInfo').classList.toggle('on', $('#info').classList.contains('on'));
   $('#bFit').disabled = !S.cards.size;
@@ -4094,7 +4106,7 @@ function wireToolbar() {
   $('#bArrange').onclick = () => { if (!S.busy) doArrange(); };
   $('#bGen').onclick = toggleGens;
   $('#bFit').onclick = () => fit();
-  $('#bRel').onclick = () => { if (S.relateFrom) { cancelRelate(); return; } if (S.sel.size >= 2) { const ks = [...S.sel]; showPath(ks[0], ks[1]); } else if (S.sel.size === 1) startRelate([...S.sel][0]); };
+  $('#bRel').onclick = () => { if (S.relateFrom) { cancelRelate(); return; } if (S.sel.size >= 2) { const ks = [...S.sel]; showPath(ks[0], ks[1]); return; } rzToggle(); };
   $('#bInfo').onclick = () => { const el = $('#info'); if (el.classList.contains('on')) { S.infoOpen = false; el.classList.remove('on'); } else { S.infoOpen = true; renderInfo(); } syncButtons(); };
   /* a tab on the panel's edge: the right panel runs the full height and folds away to the edge, and this brings it back (desktop; the phone has its own sheet) */
   { const t = document.createElement('button'); t.id = 'infoTab'; t.type = 'button'; t.setAttribute('aria-label', 'Show or hide the side panel'); t.title = 'Show or hide the side panel'; t.onclick = () => $('#bInfo').onclick(); document.body.appendChild(t); }
@@ -4154,6 +4166,18 @@ async function demo() {
 
 /* ---------------- the relate zone: drop two people, the whole path is drawn ---------------- */
 S.rz = [null, null]; S.rzArm = null;
+/* The two "Drop person A / B" slots are out of the way until asked for: the how-are-they-related button opens them (and closes them again). A person already
+   selected goes into the first slot, and the second waits for the next person tapped. */
+function rzToggle(show) {
+  const h = document.documentElement.classList, on = show == null ? !h.contains('rzopen') : !!show;
+  h.toggle('rzopen', on); $('#bRel').setAttribute('aria-pressed', String(on));
+  if (on) {
+    h.remove('shelfoff'); $('#bShelf').setAttribute('aria-pressed', 'true');
+    if (S.rz[0] == null && S.rz[1] == null && S.sel.size === 1) { const c = S.cards.get([...S.sel][0]); if (c) { S.rz[0] = personOf(c).i; S.rzArm = 1; } }
+    rzRender();
+  } else S.rzArm = null;
+  dockH(); syncButtons();
+}
 function rzOver(x, y) { const r = $('#rz').getBoundingClientRect(); return x >= r.left - 6 && x <= r.right + 6 && y >= r.top - 6 && y <= r.bottom + 6; }
 function rzRender(msg) {
   setTimeout(() => { if (typeof markPlace === 'function') markPlace(); }, 0);

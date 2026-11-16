@@ -11,7 +11,7 @@ import { loadTrees, saveTreeLink, loadSite, saveSite } from '/roots/js/remember.
 const $ = s => document.querySelector(s);
 const base = new URL('/roots/', location.href).href;   // the reader fetches its place files relative to this, as it does on /roots/
 const STAMP = Date.now();                              // a fresh canvas each time the page is opened, never an old cached copy
-let worker = null, hide = false, example = true;
+let worker = null, hide = false, example = false;
 
 /* The Atlas's own name catalogues, for the canvas's search by any form of a name and its panel of name forms: two static files from this site, the same for
    everyone. Nothing about the tree is sent. Fetched once, when the canvas first asks. */
@@ -52,11 +52,11 @@ function mount() {
   const old = $('#cv'), f = document.createElement('iframe');
   f.id = 'cv'; f.title = old.title;
   f.src = '/roots/canvas.html?sa=1&v=' + STAMP + (hide ? '&liv=1' : '') + (example ? '&ex=1' : '');
-  old.replaceWith(f);
+  f.hidden = false; old.replaceWith(f);
 }
 
 function start(bytes) {
-  say('Reading your file…');
+  $('#start').hidden = true; say('Reading your file…');
   if (worker) worker.terminate();
   worker = new Worker('/roots/js/worker.js', { type: 'module' });
   worker.onmessage = e => {
@@ -67,7 +67,7 @@ function start(bytes) {
       try { window.RR.fix = issuesByPerson(m); } catch (e) { window.RR.fix = null; }
       const f = $('#cv'); if (f && f.contentWindow) f.contentWindow.postMessage({ tcFix: 1 }, location.origin);
     }
-    else if (m.type === 'error') say('Sorry, that file could not be read: ' + m.msg, true);
+    else if (m.type === 'error') { say('Sorry, that file could not be read: ' + m.msg, true); if (!window.RR) showStart(); }
     else if (m.type === 'done') {
       if (m.first && hide) { say('Hiding living people…'); worker.postMessage({ cmd: 'living', hide: true }); return; }   // keep the choice for the next file
       const prevMh = mhFile; mhFile = m.mh || null; anc = m.anc || null;
@@ -77,7 +77,7 @@ function start(bytes) {
       worker.postMessage({ cmd: 'checklist', living: !hide, ancestry: 'com' });   // the fix list, for the "!" marks; it follows a moment after the canvas is drawn
     }
   };
-  worker.onerror = e => say('The reader crashed: ' + (e.message || 'unknown error'), true);
+  worker.onerror = e => { say('The reader crashed: ' + (e.message || 'unknown error'), true); if (!window.RR) showStart(); };
   worker.postMessage({ cmd: 'load', bytes, base }, [bytes]);
 }
 
@@ -91,4 +91,51 @@ addEventListener('message', e => {
   }
 });
 
-start(new TextEncoder().encode(makeSample()).buffer);   // open on the invented sample family, so there is a tree to look at straight away
+/* ---- the page it opens on: nothing is read until the visitor chooses. Two buttons, and the files used before (kept in this browser's own storage by the canvas
+   too: the same database, so "Last used" in the canvas menu and here are one list). Nothing is sent anywhere. ---- */
+const RKEEP = 3;
+const rdb = () => new Promise((ok, no) => { try { const r = indexedDB.open('tcRecent', 1); r.onupgradeneeded = () => { r.result.createObjectStore('m', { keyPath: 'name' }); r.result.createObjectStore('b'); }; r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); } catch (e) { no(e); } });
+const rreq = r => new Promise((ok, no) => { r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); });
+const rememberOn = () => { try { return localStorage.getItem('tcRemember') !== '0'; } catch (e) { return true; } };
+const done = tx => new Promise(ok => { tx.oncomplete = ok; tx.onerror = ok; tx.onabort = ok; });
+async function recentList() { try { const db = await rdb(), a = await rreq(db.transaction('m').objectStore('m').getAll()); db.close(); return a.sort((x, y) => y.when - x.when); } catch (e) { return []; } }
+async function recentSave(name, bytes) {
+  if (!rememberOn()) return;
+  try {
+    const db = await rdb(), tx = db.transaction(['m', 'b'], 'readwrite'), mm = tx.objectStore('m'), bb = tx.objectStore('b');
+    mm.put({ name, size: bytes.byteLength, when: Date.now() }); bb.put(bytes, name);
+    const all = (await rreq(mm.getAll())).sort((x, y) => y.when - x.when); all.slice(RKEEP).forEach(o => { mm.delete(o.name); bb.delete(o.name); });
+    await done(tx); db.close();
+  } catch (e) { /* storage full or blocked: the file still opens, it just is not kept */ }
+}
+async function recentForget(name) {
+  try { const db = await rdb(), tx = db.transaction(['m', 'b'], 'readwrite'); if (name) { tx.objectStore('m').delete(name); tx.objectStore('b').delete(name); } else { tx.objectStore('m').clear(); tx.objectStore('b').clear(); } await done(tx); db.close(); } catch (e) { /* ignore */ }
+}
+const fmtBytes = n => n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + ' MB' : Math.max(1, Math.round(n / 1e3)) + ' KB';
+const fmtWhen = t => { const d = new Date(t), same = d.toDateString() === new Date().toDateString(); return same ? 'today ' + d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : d.toLocaleDateString([], { day: 'numeric', month: 'short' }); };
+async function showStart() {
+  say(''); $('#start').hidden = false;
+  const rec = rememberOn() ? await recentList() : [], ul = $('#stList'); ul.textContent = '';
+  $('#stRecent').hidden = !rec.length;
+  for (const r of rec) {
+    const li = document.createElement('li'), b = document.createElement('button'), x = document.createElement('button'), n = document.createElement('b'), sm = document.createElement('small');
+    b.type = x.type = 'button'; b.className = 'recopen'; x.className = 'recx'; x.textContent = '×'; x.title = 'Forget ' + r.name; x.setAttribute('aria-label', 'Forget ' + r.name);
+    n.textContent = r.name; sm.textContent = fmtBytes(r.size || 0) + ' · ' + fmtWhen(r.when); b.append(n, sm); b.title = 'Open ' + r.name + ' again';
+    b.onclick = async () => {
+      try { const db = await rdb(), bytes = await rreq(db.transaction('b').objectStore('b').get(r.name)); db.close(); if (!bytes) throw 0; example = false; recentSave(r.name, bytes.slice(0)); start(bytes); }
+      catch (e) { say('That file is no longer kept here. Open it again from your device.', true); await recentForget(r.name); showStart(); }
+    };
+    x.onclick = async () => { await recentForget(r.name); showStart(); };
+    li.append(b, x); ul.append(li);
+  }
+}
+$('#stOpen').onclick = () => $('#stFile').click();
+$('#stFile').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try { const bytes = await f.arrayBuffer(); example = false; recentSave(f.name, bytes.slice(0)); start(bytes); } catch (err) { say('That file could not be read.', true); }
+};
+$('#stDemo').onclick = () => { example = true; start(new TextEncoder().encode(makeSample()).buffer); };   // the invented family is only built when asked for
+$('#stForget').onclick = async () => { await recentForget(); showStart(); };
+for (const ev of ['dragenter', 'dragover']) addEventListener(ev, e => { if (!$('#start').hidden) e.preventDefault(); });
+addEventListener('drop', e => { if ($('#start').hidden) return; e.preventDefault(); const f = e.dataTransfer && e.dataTransfer.files[0]; if (f) f.arrayBuffer().then(b => { example = false; recentSave(f.name, b.slice(0)); start(b); }); });
+showStart();

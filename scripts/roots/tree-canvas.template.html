@@ -714,6 +714,16 @@ html:not(.rzopen) #rz{display:none}
 .card .nm .sx{font-size:12px;margin-left:5px;vertical-align:1px}
 .card .meta{min-height:14px}
 #mainMenu .mmr small.mmnote{font-style:italic;color:var(--lk-ink);white-space:normal}
+
+/* Compare tab */
+.cmp,.cmpc{list-style:none;margin:6px 0;padding:0;display:grid;gap:6px}
+.cmpr{border:2px solid var(--lk-line);border-radius:10px;padding:6px 9px;background:var(--lk-card);font:700 12.5px/1.35 Nunito,system-ui}
+.cmpr.ok{border-left:6px solid var(--ok,#2c8a4b)}.cmpr.chk{border-left:6px solid #d49a1a}.cmpr.no{border-left:6px solid #c9452b}.cmpr.one{border-left:6px solid var(--lk-soft)}
+.cmpt{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:2px}
+.cmpchip{font:800 10.5px/1 Nunito,system-ui;padding:3px 7px;border-radius:99px;border:1.5px solid currentColor;white-space:nowrap}
+.cmpchip.ok{color:var(--ok,#2c8a4b)}.cmpchip.chk{color:#9a6b00}.cmpchip.no{color:#c9452b}.cmpchip.one{color:var(--lk-soft)}
+.cmps{color:var(--lk-mute);font-weight:800}.cmpno{color:var(--lk-mute)}.cmpr small{display:block;color:var(--lk-mute);font-weight:700}
+.cmpc label{display:flex;gap:8px;align-items:flex-start;cursor:pointer;font:700 13px/1.3 Nunito,system-ui}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -1937,8 +1947,174 @@ html:not(.rzopen) #rz{display:none}
       places, occs, people: rows, flags, geo: { '0': geo }, eras: regionEras, events: evUsed, srcs,
     };
   }
-  const API = { corpus };
+  /* Two corpora in one, for comparing a visitor's own file (a) with an archive's tree (b): the places, occupations and flags are shared, and b's people
+     follow a's with their references moved over. Row layout: see corpus(); archive 0 is a's, archive 1 is b's. Nothing is matched here; compare.js does that. */
+  function merge(a, b) {
+    const places = a.places.slice(), pm = new Map(places.map((s, i) => [s, i]));
+    const occs = (a.occs || []).slice(), om = new Map(occs.map((s, i) => [s, i]));
+    const mp = i => { if (i == null || i < 0) return -1; const s = b.places[i]; if (!pm.has(s)) { pm.set(s, places.length); places.push(s); } return pm.get(s); };
+    const mo = i => { if (i == null || i < 0) return -1; const s = (b.occs || [])[i]; if (!om.has(s)) { om.set(s, occs.length); occs.push(s); } return om.get(s); };
+    const flags = a.flags.slice(), fm = new Map(flags.map((f, i) => [JSON.stringify(f), i]));
+    const mf = i => { const f = b.flags[i], k = JSON.stringify(f); if (!fm.has(k)) { fm.set(k, flags.length); flags.push(f); } return fm.get(k); };
+    const off = a.people.length, r = x => (x == null || x < 0) ? -1 : x + off, rl = l => (l || []).map(x => x + off);
+    const rows = a.people.slice();
+    b.people.forEach(p => {
+      const q = p.slice(); q[0] = 1; q[6] = mp(p[6]); q[8] = mp(p[8]); q[9] = r(p[9]); q[10] = r(p[10]); q[13] = rl(p[13]); q[14] = rl(p[14]); q[16] = mo(p[16]);
+      if (Array.isArray(p[19])) q[19] = p[19].map(s => [mp(s[0]), s[1], s[2]]);
+      rows.push(q);
+    });
+    const geoB = {}; Object.keys((b.geo && b.geo['0']) || {}).forEach(k => { const g = b.geo['0'][k]; geoB[String(mp(+k))] = [g[0], g[1], (g[2] || []).map(e => [e[0], mf(e[1])]), g[3], g[4]]; });
+    return { built: a.built, livingRule: a.livingRule, archives: [a.archives[0], b.archives[0]], places, occs, people: rows, flags,
+      geo: { '0': a.geo['0'] || {}, '1': geoB }, eras: Object.assign({}, b.eras || {}, a.eras || {}), events: Object.assign({}, b.events || {}, a.events || {}), srcs: Object.assign({}, b.srcs || {}, a.srcs || {}) };
+  }
+  const API = { corpus, merge };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCF = API;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* compare.js — set one person's recorded line in the visitor's own file beside the same person's line in an archive, generation by generation.
+ *
+ * It runs on a model built from a MERGED corpus (fromtree.merge): archive 0 is the visitor's file, archive 1 the archive. It never merges people and never
+ * claims two records are the same person: the seed pair is chosen by the visitor (candidates() only ranks them), and from there the two lines are walked
+ * in step, father with father and mother with mother, and each pair is judged on what both records say (name, birth year, birthplace, sex). A pair that
+ * disagrees about who it is stops the walk: from there the two lines are different people, and nothing further up is compared.
+ *
+ * Pure functions; the page draws the result (ui.js, the Compare tab). Nothing is sent anywhere. */
+(function (root) {
+  'use strict';
+  const TC = typeof module !== 'undefined' && module.exports ? require('./logic.js') : root.TC;
+  const fold = s => TC.fold(s || ''), sq = s => TC.squash(s || '');
+
+  /* names: how alike two given-name / surname pairs are, 0..1. Given names compare by their first token and by any shared token; a surname, ignoring spaces
+     and hyphens, may differ by one letter (a clerk's slip, a transcription); an initial matches a name that starts with it. */
+  function lev1(a, b) {   /* true when a and b differ by at most one insertion, deletion or substitution */
+    if (a === b) return true; if (Math.abs(a.length - b.length) > 1) return false;
+    let i = 0; while (i < a.length && i < b.length && a[i] === b[i]) i++;
+    if (a.length === b.length) return a.slice(i + 1) === b.slice(i + 1);
+    return a.length > b.length ? a.slice(i + 1) === b.slice(i) : b.slice(i + 1) === a.slice(i);
+  }
+  function surScore(A, B) {
+    const a = sq(A.sur), b = sq(B.sur); if (!a || !b) return 0.5;   /* an unknown surname is neither for nor against */
+    if (a === b) return 1; if (a.length > 4 && lev1(a, b)) return 0.8; return 0;
+  }
+  function givenScore(M, A, B) {
+    const ta = fold(A.given).split(' ').filter(Boolean), tb = fold(B.given).split(' ').filter(Boolean);
+    if (!ta.length || !tb.length) return 0.5;
+    if (ta[0] === tb[0]) return 1;
+    if (ta.some(t => tb.includes(t))) return 0.85;
+    /* the same given name in another form: the Atlas's catalogue when it is loaded (Giovanni, Ivan, Joannes), else a name that begins the other (Dan, Daniel) */
+    if (M && TC.variantsOf) { const v = TC.variantsOf(M, ta[0]); if (v && (v.given.has(tb[0]) || v.given.has(tb[0].replace(/ /g, '')))) return 0.9; }
+    if (ta[0].length >= 3 && tb[0].length >= 3 && (ta[0].startsWith(tb[0]) || tb[0].startsWith(ta[0]))) return 0.8;
+    const ini = (x, y) => x.length === 1 && y.startsWith(x);
+    if (ini(ta[0], tb[0]) || ini(tb[0], ta[0])) return 0.7;
+    if (ta[0].length > 3 && lev1(ta[0], tb[0])) return 0.7;
+    return 0;
+  }
+  const nameScore = (M, A, B) => { const s = surScore(A, B), g = givenScore(M, A, B); return s === 0 || g === 0 ? 0 : (s + g) / 2; };
+
+  /* a pair of records, judged: level 'same' (agree on everything both record), 'check' (alike, but a detail differs), 'differs' (not the same person as recorded) */
+  function judge(M, A, B) {
+    const notes = [], n = nameScore(M, A, B);
+    const yd = A.by != null && B.by != null ? Math.abs(A.by - B.by) : null;
+    const sexDiffer = A.sex !== 'u' && B.sex !== 'u' && A.sex !== B.sex;
+    if (n === 0 || sexDiffer || (yd != null && yd > 8)) {
+      if (n === 0) notes.push('different names'); if (sexDiffer) notes.push('recorded sex differs'); if (yd != null && yd > 8) notes.push('born ' + A.by + ' against ' + B.by);
+      return { level: 'differs', score: 0, notes };
+    }
+    let level = 'same';
+    if (n < 1) { level = 'check'; notes.push('the name is written differently'); }
+    if (yd != null && yd > 0) { level = 'check'; notes.push('born ' + A.by + ' against ' + B.by); }
+    if (A.dy != null && B.dy != null && A.dy !== B.dy) { level = 'check'; notes.push('died ' + A.dy + ' against ' + B.dy); }
+    if (A.bp && B.bp && fold(A.bp) !== fold(B.bp) && !fold(A.bp).includes(fold(B.bp)) && !fold(B.bp).includes(fold(A.bp))) { level = 'check'; notes.push('born at ' + A.bp + ' against ' + B.bp); }
+    if (A.bd && B.bd && TC.dateText(A.bd) !== TC.dateText(B.bd)) { level = 'check'; notes.push('birth date ' + TC.dateText(A.bd) + ' against ' + TC.dateText(B.bd)); }
+    let score = n - (yd || 0) * 0.04 - (level === 'same' ? 0 : 0.05);
+    if (yd === 0) score += 0.1; if (A.bp && B.bp && fold(A.bp) === fold(B.bp)) score += 0.05;
+    return { level, score: Math.max(0, Math.min(1.2, score)), notes };
+  }
+
+  /* who in the archive (archive index `arch`) might be the same person as p: ranked, best first. A confirmed or suggested bridge comes first. */
+  function candidates(M, p, arch, limit) {
+    const out = [];
+    M.P.forEach(q => {
+      if (q.a !== arch || q.ghost || q.living) return;
+      const j = judge(M, p, q); if (j.level === 'differs') return;
+      const br = (M.bridgesOf.get(p.i) || []).some(b => TC.bridgeOther ? TC.bridgeOther(b, p.i) === q.i : false);
+      out.push({ i: q.i, score: j.score + (br ? 0.5 : 0), level: j.level, notes: j.notes });
+    });
+    out.sort((x, y) => y.score - x.score || x.i - y.i);
+    return out.slice(0, limit || 6);
+  }
+
+  /* how far each side's recorded line runs above a person (generations, capped) */
+  function depthUp(M, p, cap) {
+    let d = 0, cur = [p.i], seen = new Set(cur);
+    while (d < cap) {
+      const nx = [];
+      cur.forEach(i => { const q = M.P[i]; [q.f, q.m].forEach(x => { if (x >= 0 && !seen.has(x)) { seen.add(x); nx.push(x); } }); });
+      if (!nx.length) break; d++; cur = nx;
+    }
+    return d;
+  }
+  const countUp = (M, p, cap) => { const seen = new Set(), st = [[p.i, 0]]; while (st.length) { const [i, g] = st.pop(); if (g >= cap) continue; const q = M.P[i]; [q.f, q.m].forEach(x => { if (x >= 0 && !seen.has(x)) { seen.add(x); st.push([x, g + 1]); } }); } return seen.size; };
+
+  /* a person's place above the seed, by the path from them: 'f' father, 'm' mother, 'ff' paternal grandfather, 'mf' maternal grandfather, ... */
+  function ancLabel(path) {
+    if (!path) return 'Seed';
+    const g = path.length, male = path[g - 1] === 'f', side = path[0] === 'f' ? 'paternal' : 'maternal';
+    if (g === 1) return male ? 'Father' : 'Mother';
+    const base = g === 2 ? (male ? 'grandfather' : 'grandmother') : (g === 3 ? '' : (g - 2) + '× ') + 'great-' + (male ? 'grandfather' : 'grandmother');
+    return side[0].toUpperCase() + side.slice(1) + ' ' + base;
+  }
+  /* the two lines above a seed pair, walked in step. rows: { gen, role, a, b, level: 'same'|'check'|'differs'|'only-a'|'only-b', notes, more } */
+  function up(M, A, B, maxGen) {
+    const rows = [];
+    (function walk(a, b, gen, role, path) {
+      const row = { gen, role, path, label: ancLabel(path), a: a ? a.i : null, b: b ? b.i : null, level: null, notes: [] };
+      if (a && b) { const j = judge(M, a, b); row.level = j.level; row.notes = j.notes; }
+      else row.level = a ? 'only-a' : 'only-b';
+      const lone = a && !b ? a : !a && b ? b : null;
+      if (lone) { row.more = countUp(M, lone, 12); }
+      rows.push(row);
+      if (!a || !b || row.level === 'differs' || gen >= maxGen) return;
+      [['father', 'f'], ['mother', 'm']].forEach(([r, k]) => {
+        const pa = a[k] >= 0 ? M.P[a[k]] : null, pb = b[k] >= 0 ? M.P[b[k]] : null;
+        if (pa || pb) walk(pa, pb, gen + 1, r, path + k);
+      });
+    })(A, B, 0, 'self', '');
+    return rows;
+  }
+
+  /* the children of a matched pair, matched by name and birth year (best first, each used once); the rest are only in one record. Then each matched child's own children. */
+  function down(M, A, B, maxGen) {
+    const rows = [];
+    (function walk(a, b, gen) {
+      const ca = a.ch.map(e => M.P[e.c]), cb = b.ch.map(e => M.P[e.c]), used = new Set(), pairs = [];
+      ca.forEach(x => cb.forEach(y => { const j = judge(M, x, y); if (j.level !== 'differs') pairs.push({ x, y, j }); }));
+      pairs.sort((p, q) => q.j.score - p.j.score);
+      const mx = new Set(), my = new Set(), got = [];
+      pairs.forEach(p => { if (mx.has(p.x.i) || my.has(p.y.i)) return; mx.add(p.x.i); my.add(p.y.i); got.push(p); });
+      got.sort((p, q) => (p.x.by || 9999) - (q.x.by || 9999));
+      got.forEach(p => { rows.push({ gen: gen + 1, role: 'child', a: p.x.i, b: p.y.i, level: p.j.level, notes: p.j.notes }); if (gen + 1 < maxGen) walk(p.x, p.y, gen + 1); });
+      ca.filter(x => !mx.has(x.i)).forEach(x => rows.push({ gen: gen + 1, role: 'child', a: x.i, b: null, level: 'only-a', notes: [] }));
+      cb.filter(y => !my.has(y.i)).forEach(y => rows.push({ gen: gen + 1, role: 'child', a: null, b: y.i, level: 'only-b', notes: [] }));
+    })(A, B, 0);
+    return rows;
+  }
+
+  function summary(rows) {
+    const s = { same: 0, check: 0, differs: 0, onlyA: 0, onlyB: 0 };
+    rows.forEach(r => { if (r.level === 'same') s.same++; else if (r.level === 'check') s.check++; else if (r.level === 'differs') s.differs++; else if (r.level === 'only-a') s.onlyA++; else if (r.level === 'only-b') s.onlyB++; });
+    return s;
+  }
+
+  /* the comparison from a chosen seed pair: ia in the file, ib in the archive */
+  function compare(M, ia, ib, o) {
+    o = o || {}; const A = M.P[ia], B = M.P[ib], upG = o.up == null ? 8 : o.up, dnG = o.down == null ? 3 : o.down;
+    const u = up(M, A, B, upG), d = down(M, A, B, dnG);
+    return { seed: { a: ia, b: ib, judged: judge(M, A, B) }, up: u, down: d, summary: { up: summary(u), down: summary(d) }, depth: { a: depthUp(M, A, 30), b: depthUp(M, B, 30) } };
+  }
+
+  const API = { compare, candidates, judge, nameScore, up, down, ancLabel };
+  if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCC = API;
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
 <script>(function(){'use strict';
@@ -1954,7 +2130,11 @@ const EMBED = !!window.TC_EMBED;
 /* Standalone: the same canvas, opened on its own at recordatlas.org/tree-canvas/ (the page around it reads the GEDCOM and hands the tree in).
    Only the title and two buttons differ; ?sa=1 turns it on, &liv=1 says living people are hidden, &ex=1 says the tree is the invented example. */
 const QS = new URLSearchParams(location.search), SA = EMBED && QS.has('sa');
-const CORPUS = EMBED ? window.TCF.corpus(window.parent.RR.tree, window.parent.RR.atlas, undefined, window.parent.RR.archive || null) : JSON.parse(document.getElementById('corpus').textContent);
+/* a visitor's own file, an archive's own tree, or (Compare) the file and an archive in one corpus: the file is archive 0, the archive archive 1 */
+const RRP = EMBED ? window.parent.RR : null;
+const CORPUS = EMBED ? (RRP.compare && !RRP.archive
+  ? window.TCF.merge(window.TCF.corpus(RRP.tree, RRP.atlas), window.TCF.corpus(RRP.compare.tree, RRP.compare.atlas, undefined, RRP.compare.archive))
+  : window.TCF.corpus(RRP.tree, RRP.atlas, undefined, RRP.archive || null)) : JSON.parse(document.getElementById('corpus').textContent);
 const M = TC.build(CORPUS);
 const NA = M.archives.length;
 const W = 184, H = 92, GX = 30, COUPLE_GX = 22, ROWH = 150;
@@ -3465,7 +3645,7 @@ function select(keys, add) {
   if (!add) S.sel.clear();
   keys.forEach(k => S.sel.has(k) && add ? S.sel.delete(k) : S.sel.add(k));
   S.cards.forEach(c => c.el.classList.toggle('sel', S.sel.has(c.key)));
-  if (S.sel.size && S.tab !== 'path' && S.tab !== 'options' && S.tab !== 'next' && S.tab !== 'ai' && S.tab !== 'fix') S.tab = 'person';
+  if (S.sel.size && S.tab !== 'path' && S.tab !== 'options' && S.tab !== 'next' && S.tab !== 'ai' && S.tab !== 'fix' && S.tab !== 'compare') S.tab = 'person';
   if (S.sel.size && S.tab === 'path' && !S.path) S.tab = 'person';
   renderInfo(); syncButtons();
   /* the side panel is folded away: say where the person's details are */
@@ -3480,7 +3660,7 @@ function renderTabs() {
   $('#tabs').innerHTML = M.archives.map((a, i) => `<button class="lk-tab${S.filter.has(i) ? '' : ' off'}" style="--ac:${a.color}" data-a="${i}" title="${S.filter.has(i) ? 'Searching' : 'Not searching'} ${esc(a.name)} (${a.n.toLocaleString()} people${a.graded ? ', graded links' : ', no evidence grades'})"><i></i>${esc(a.name)}</button>`).join('') +
     `<button class="lk-tab" data-a="all" title="Toggle all archives">${on === NA ? 'none' : 'all'}</button>`;
   $('#cnt').textContent = `${on} of ${NA} archives`;
-  const q = $('#q'); q.placeholder = `Search ${M.P.length.toLocaleString()} ${EMBED ? (M.archives.length === 1 && M.archives[0].k !== 'you' ? 'people in the ' + M.archives[0].name + ' archive' : 'people in your file') : 'people'}: any order, accents optional`;
+  const q = $('#q'); q.placeholder = `Search ${M.P.length.toLocaleString()} ${EMBED ? (M.archives.length === 1 && M.archives[0].k !== 'you' ? 'people in the ' + M.archives[0].name + ' archive' : M.archives.length === 2 ? 'people in your file and the ' + M.archives[1].name + ' archive' : 'people in your file') : 'people'}: any order, accents optional`;
 }
 $('#q').addEventListener('input', () => runSearch());
 $('#q').addEventListener('keydown', e => { if (e.key === 'Enter' && lastResults[0]) addFromResult(lastResults[0]); if (e.key === 'Escape') { e.target.value = ''; runSearch(); e.target.blur(); } });
@@ -3854,6 +4034,43 @@ function pathPanel() {
     <div class="row"><button class="lk-btn is-small" data-do="fitpath">Fit to view</button><button class="lk-btn is-small" data-do="clearpath">Clear path</button></div>`;
 }
 
+/* ---------- Compare: the visitor's own file beside an archive's tree, from the marked person up and down ----------
+   The file stays in this browser; the archive's own published page is read (see the page around the canvas). The canvas never says two records ARE the same
+   person: the visitor picks the counterpart, and the lines are then walked in step and judged on what both records say (compare.js). */
+const CMPARCH = [['defranceski', 'Defranceski'], ['booyzen', 'Booyzen'], ['luwinski', 'Luwinski'], ['lerena', 'Lerena'], ['falco', 'Falco'], ['blazevic', 'Blažević'], ['darcy', "D'Arcy"], ['mazza', 'Mazza']];
+const cmpMode = () => M.archives.length === 2 && M.archives[0].k === 'you';
+const cmpAvail = () => SA && (cmpMode() || (M.archives.length === 1 && M.archives[0].k === 'you'));
+function cmpAsk(key) { try { window.parent.postMessage({ tcCompare: { key, mark: S.mark || null } }, location.origin); } catch (e) { /* no page around */ } }
+function cmpPanel1() {
+  return `<h3>Compare with an archive</h3>
+    <p class="plines">Set your file beside one of the family archives. Mark a person (★) and the canvas lines up their recorded parents, grandparents and children in your file with the archive's, and says where they agree, where a detail differs, and who is only in one of them.</p>
+    <p class="plines"><small>Your file stays in this browser. The archive's own public tree is read, with its living people left out. The canvas redraws once; your marked person is kept.</small></p>
+    <div class="row">${CMPARCH.map(([k, n]) => `<button class="lk-btn is-small" data-cmp-arch="${k}">${esc(n)}</button>`).join('')}</div>`;
+}
+const CMPCHIP = { same: ['agree', 'ok'], check: ['check', 'chk'], differs: ['different people', 'no'], 'only-a': ['only in your file', 'one'], 'only-b': ['only in the archive', 'one'] };
+function comparePanel() {
+  if (!cmpMode()) return cmpPanel1();
+  const AR = M.archives[1], head = `<h3>Your file and the ${esc(AR.name)} archive</h3><div class="row"><button class="lk-btn is-small" data-cmp-off="1">Stop comparing</button></div>`;
+  const p = markedPerson();
+  if (!p || p.ghost) return head + `<p class="plines">Mark a person first: open <b>Person</b> for anyone in your file (or the archive) and press <b>★ Mark this person</b>. Their possible counterparts in the other record appear here.</p>`;
+  if (p.living) return head + `<p class="plines lvn">The marked person is living, so they are never compared.</p>`;
+  const other = p.a === 0 ? 1 : 0, cands = window.TCC.candidates(M, p, other, 6);
+  if (!cands.length) return head + `<p class="plines"><b>${esc(p.name)}</b> has no likely counterpart in the ${other ? esc(AR.name) + ' archive' : 'file'}: no one with a matching name and a birth year within a few years.</p><p class="plines"><small>Mark someone else, or a person whose name is written the same way in both.</small></p>`;
+  if (S.cmpPick == null || !cands.some(c => c.i === S.cmpPick)) S.cmpPick = cands[0].i;
+  const nm = q => esc(q.name) + ' <small>' + esc(TC.years(q)) + (q.bp ? ' · ' + esc(q.bp) : '') + '</small>';
+  const pick = `<h4>Who is ${esc(p.name)} in the ${other ? esc(AR.name) + ' archive' : 'file'}?</h4><ul class="cmpc">${cands.map(c => { const q = M.P[c.i]; return `<li><label><input type="radio" name="cmpc" data-cmp-pick="${c.i}"${c.i === S.cmpPick ? ' checked' : ''}> <span>${nm(q)}${c.notes.length ? `<br><small>${esc(c.notes.join('; '))}</small>` : ''}</span></label></li>`; }).join('')}</ul>
+    <div class="row"><button class="lk-btn is-small is-primary" data-cmp-go="1">Compare their lines</button></div><p class="plines"><small>A match is your call: the canvas only ranks the candidates by name and birth year.</small></p>`;
+  if (!S.cmpRun) return head + pick;
+  const ia = p.a === 0 ? p.i : S.cmpPick, ib = p.a === 0 ? S.cmpPick : p.i, R = window.TCC.compare(M, ia, ib, { up: 8, down: 3 });
+  const who = (i, side) => i == null ? `<span class="cmpno">${side}: not recorded</span>` : `<span class="cmps">${side}:</span> <a href="#" data-focus="${esc(M.P[i].key)}">${esc(M.P[i].name)}</a> <small>${esc(TC.years(M.P[i]))}</small>`;
+  const rowH = r => { const [t, k] = CMPCHIP[r.level]; return `<li class="cmpr ${k}" style="margin-left:${Math.min(r.gen, 6) * 12}px"><div class="cmpt"><b>${esc(r.label || (r.role === 'self' ? 'Seed' : 'Child'))}</b><span class="cmpchip ${k}">${t}</span></div><div>${who(r.a, 'File')}</div><div>${who(r.b, esc(AR.name))}</div>${r.notes && r.notes.length ? `<small>${esc(r.notes.join('; '))}</small>` : ''}${r.more ? `<small>${r.more} more ${r.more === 1 ? 'person is' : 'people are'} recorded above them${r.level === 'only-a' ? ' in your file' : ' in the archive'}.</small>` : ''}</li>`; };
+  const sm = s => `${s.same} agree, ${s.check} to check, ${s.differs} different, ${s.onlyA} only in your file, ${s.onlyB} only in the archive`;
+  const stopped = R.up.some(r => r.level === 'differs' && r.role !== 'self');
+  return head + pick + `<h4>Above ${esc(p.name)}</h4><p class="plines"><small>${sm(R.summary.up)}.${stopped ? ' Where two records are different people, the walk stops: nothing above them is compared.' : ''}</small></p><ul class="cmp">${R.up.map(rowH).join('')}</ul>
+    <h4>Below ${esc(p.name)}</h4>${R.down.length ? `<p class="plines"><small>${sm(R.summary.down)}.</small></p><ul class="cmp">${R.down.map(rowH).join('')}</ul>` : '<p class="plines"><small>No children are recorded in either.</small></p>'}
+    <p class="plines"><small>Click a name to bring them onto the canvas. “Agree” means the two records agree on everything both of them state; it does not prove either is right.</small></p>`;
+}
+
 /* ---------- the menu (burger): the things you look up rather than work with ---------- */
 function mainMenu() {
   const m = $('#mainMenu');
@@ -3861,6 +4078,7 @@ function mainMenu() {
   const item = (k, ic, t, sub) => `<button class="mmi${(k === 'legend' ? $('#legendCard') && $('#legendCard').classList.contains('on') : S.tab === k && S.infoOpen !== false && $('#info').classList.contains('on')) ? ' on' : ''}" data-mm="${k}">${icon(ic, 'lk-icon')}<span><b>${t}</b><small>${sub}</small></span></button>`;
   m.innerHTML = `<div class="mmlook">${icon('theme', 'lk-icon')}<span><b>Look</b><span class="mmchips" role="group" aria-label="Look">${THEMES.map(k => `<button type="button" class="mmchip${k === cur ? ' on' : ''}" data-look="${k}" aria-pressed="${k === cur}">${THEME_NAME[k] || (k[0].toUpperCase() + k.slice(1))}</button>`).join('')}</span></span></div>`
     + item('legend', 'info', 'How to read the lines', 'What the line colours, patterns and seals mean')
+    + (cmpAvail() ? item('compare', 'layers', 'Compare with an archive', cmpMode() ? 'Your file beside ' + M.archives[1].name + ', from a marked person' : 'Set your file beside one of the family archives') : '')
     + item('options', 'gear', 'Options', 'Links to MyHeritage and Ancestry, how paths are judged, your file')
     + (SA ? recentHTML() : '');
 }
@@ -4020,8 +4238,8 @@ function optionsPanel() {
     <div class="row"><button class="lk-btn is-small is-danger" data-do="clear">Clear the canvas</button></div>`;
 }
 function renderInfo() {
-  const el = $('#info'), tabs = [['person', 'Person'], ['next', 'Where next'], ['ai', 'AI prompt'], ...(fixList() ? [['fix', 'Fix list' + (fixList().people ? ' (' + fixList().people.toLocaleString() + ')' : '')]] : []), ['path', 'Path'], ...(S.tab === 'options' ? [['options', 'Options']] : [])];
-  const body = S.tab === 'person' ? personPanel() : S.tab === 'next' ? nextPanel() : S.tab === 'ai' ? aipPanel() : S.tab === 'fix' ? fixPanel() : S.tab === 'path' ? pathPanel() : optionsPanel();
+  const el = $('#info'), tabs = [['person', 'Person'], ['next', 'Where next'], ['ai', 'AI prompt'], ...(fixList() ? [['fix', 'Fix list' + (fixList().people ? ' (' + fixList().people.toLocaleString() + ')' : '')]] : []), ...(cmpAvail() ? [['compare', 'Compare']] : []), ['path', 'Path'], ...(S.tab === 'options' ? [['options', 'Options']] : [])];
+  const body = S.tab === 'person' ? personPanel() : S.tab === 'next' ? nextPanel() : S.tab === 'ai' ? aipPanel() : S.tab === 'fix' ? fixPanel() : S.tab === 'compare' ? comparePanel() : S.tab === 'path' ? pathPanel() : optionsPanel();
   el.innerHTML = `<div class="ih">${tabs.map(([k, n]) => `<button class="lk-tab${S.tab === k ? ' on' : ''}" data-tab="${k}">${n}${k === 'path' && S.path ? ' &bull;' : ''}</button>`).join('')}<span style="flex:1"></span><button class="lk-tab" data-tab="close" title="Close panel" aria-label="Close panel">&times;</button></div><div class="ib">${body}</div>`;
   if (S.infoOpen !== false) el.classList.add('on');
   { const ih = el.querySelector('.ih'), on = ih && ih.querySelector('.lk-tab.on'); if (on) { const l = on.offsetLeft - 8, r = on.offsetLeft + on.offsetWidth + 8; if (l < ih.scrollLeft) ih.scrollLeft = l; else if (r > ih.scrollLeft + ih.clientWidth) ih.scrollLeft = r - ih.clientWidth; } tabEdges(ih); }
@@ -4046,6 +4264,11 @@ $('#info').addEventListener('click', e => {
   const opt = e.target.closest('[data-opt]');
   if (opt) { const o = opt.dataset.opt; if (o === 'suggested') S.opts.suggested = !S.opts.suggested; if (o === 'stopNP') S.opts.stopAtNotProven = !S.opts.stopAtNotProven; save(); if (S.path && o === 'suggested') showPath(S.path.a, S.path.b, { noPlace: true }); else renderInfo(); return; }
   const th = e.target.closest('#info [data-theme]'); if (th) { setTheme(th.dataset.theme); return; }
+  const ca = e.target.closest('[data-cmp-arch]');
+  if (ca) { cmpAsk(ca.dataset.cmpArch); return; }
+  if (e.target.closest('[data-cmp-off]')) { cmpAsk(null); return; }
+  const cp = e.target.closest('[data-cmp-pick]'); if (cp) { S.cmpPick = +cp.dataset.cmpPick; S.cmpRun = null; renderInfo(); return; }
+  if (e.target.closest('[data-cmp-go]')) { S.cmpRun = true; renderInfo(); return; }
   const f = e.target.closest('[data-focus]');
   if (f) { const c = S.cards.get(f.dataset.focus); if (c) { fit([c], { maxK: 1 }); pulseCard(c); } else { const p = M.byKey.get(f.dataset.focus); if (p) { const v = viewCentre(); dropPerson(p.i, v.x, v.y); } } return; }
   const d = e.target.closest('[data-do]'); if (!d) return;
@@ -4280,7 +4503,9 @@ function rzClear() {
 /* ---------------- the marked person: one person, and how the selected person is related to them ---------------- */
 const MARKKEY = STORE + '.mark';
 const markedPerson = () => (S.mark ? M.byKey.get(S.mark) || null : null);
-function loadMark() { if (EMBED) return; try { const k = localStorage.getItem(MARKKEY); if (k && M.byKey.has(k)) S.mark = k; } catch (e) { /* ignore */ } }
+function loadMark() {
+  if (EMBED) { const R = window.parent && window.parent.RR; if (R && R.carryMark && M.byKey.has(R.carryMark)) S.mark = R.carryMark; if (R && R.carryTab) { S.tab = R.carryTab; S.infoOpen = true; } return; }
+  try { const k = localStorage.getItem(MARKKEY); if (k && M.byKey.has(k)) S.mark = k; } catch (e) { /* ignore */ } }
 function setMark(key) {
   S.mark = key || null;
   if (!EMBED) { try { if (key) localStorage.setItem(MARKKEY, key); else localStorage.removeItem(MARKKEY); } catch (e) { /* ignore */ } }

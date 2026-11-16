@@ -658,7 +658,7 @@ html:not(.ph):has(#info.on) #infoTab{top:92px;transform:none}
 #namesview .nmt,#namesview .nmx{fill:none;stroke-linecap:round}
 #namesview .nmt{stroke:var(--lk-accent);opacity:.8}
 #namesview .nmx{stroke:var(--lk-faint);stroke-dasharray:3 8}
-#namesview .nml{position:absolute;transform:translate(-50%,-50%);padding:2px 9px;border-radius:999px;background:var(--lk-card);border:2px solid var(--lk-line);font:800 11px Nunito,system-ui;color:var(--lk-soft);white-space:nowrap}
+#namesview .nml{pointer-events:auto;cursor:pointer;position:absolute;transform:translate(-50%,-50%);padding:2px 9px;border-radius:999px;background:var(--lk-card);border:2px solid var(--lk-line);font:800 11px Nunito,system-ui;color:var(--lk-soft);white-space:nowrap}
 #namesview .nm{position:absolute;box-sizing:border-box;padding:11px 14px 9px;background:var(--lk-card);border:2px solid var(--lk-line);border-radius:18px;box-shadow:0 4px 0 var(--lk-line);cursor:grab;touch-action:none;user-select:none;display:flex;flex-direction:column;gap:3px}
 #namesview .nm.dragging{cursor:grabbing;z-index:6;box-shadow:0 10px 0 var(--lk-line);border-color:var(--lk-accent)}
 #namesview .nmlabs{position:absolute;left:0;top:0;pointer-events:none}
@@ -744,6 +744,13 @@ html:not(.rzopen) #rz{display:none}
 #playBar .pbm{flex:none;border:1.5px solid var(--lk-line);background:transparent;color:var(--lk-soft);border-radius:10px;font:800 11px Nunito,system-ui;padding:5px 8px;cursor:pointer;white-space:nowrap}#playBar .pbm.on{background:var(--lk-ink);color:var(--lk-card);border-color:var(--lk-ink)}
 @media (max-width:640px){#playBar .pbm{order:5}}
 .pill.cxp{background:var(--lk-card);border:1.5px solid var(--lk-line);color:var(--lk-ink);text-decoration:none;cursor:pointer}.pill.cxp .lk-icon{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.pill.cxp:hover,.pill.cxp:focus-visible{border-color:#D9822B;color:#C4721F}
+
+#namesview .nml:hover,#namesview .nml:focus-visible,#namesview .nml.open{border-color:var(--lk-accent);color:var(--lk-ink);outline:none}
+#namesview .nmcouples{position:absolute;z-index:5;transform:translate(-50%,16px);width:300px;max-height:280px;overflow:auto;padding:9px 13px;background:var(--lk-card);border:2px solid var(--lk-accent);border-radius:14px;box-shadow:0 6px 0 var(--lk-line);font:700 12px/1.4 Nunito,system-ui;color:var(--lk-ink);pointer-events:auto;cursor:default}
+#namesview .nmcouples b{display:block;margin-bottom:4px;font:400 15px "Lilita One",system-ui}
+#namesview .nmcouples ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+#namesview .nmcouples small{color:var(--lk-mute);font-weight:800}
+#namesview .nmand{color:var(--lk-accent)}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -1597,15 +1604,16 @@ html:not(.rzopen) #rz{display:none}
     };
     mem.forEach((g, j) => add(j, g));
     const edges = new Map(), seen = new Set(), pair = (a, b) => a < b ? a + '|' + b : b + '|' + a;
-    const link = (a, b) => {
+    const link = (a, b, implied) => {
       const ka = surKey(M, a).k, kb = surKey(M, b).k;
       if (ka === kb) { nodes.get(ka).self++; return; }
-      const key = ka < kb ? ka + '|' + kb : kb + '|' + ka; let e = edges.get(key); if (!e) edges.set(key, e = { a: ka < kb ? ka : kb, b: ka < kb ? kb : ka, n: 0 }); e.n++;
+      const key = ka < kb ? ka + '|' + kb : kb + '|' + ka; let e = edges.get(key); if (!e) edges.set(key, e = { a: ka < kb ? ka : kb, b: ka < kb ? kb : ka, n: 0, c: [] }); e.n++;
+      e.c.push(ka < kb ? [a.i, b.i, implied ? 1 : 0] : [b.i, a.i, implied ? 1 : 0]);   /* the couple behind the count, a's name first: indices only */
     };
     const couple = (x, y) => { const k = pair(x, y); if (!seen.has(k)) { seen.add(k); link(M.P[x], M.P[y]); } };
     mem.forEach((g, j) => { const p = M.P[j]; if (p.f >= 0 && p.m >= 0 && M.P[p.f] && M.P[p.m]) couple(p.f, p.m); });
     /* a mother known without the father: the child carries the father's name, so the mother's name is joined to the child's (an implied marriage) */
-    mem.forEach((g, j) => { const p = M.P[j], mo = p.m >= 0 ? M.P[p.m] : null, fa = p.f >= 0 ? M.P[p.f] : null; if (mo && !fa && mo.sex === 'f' && squash(p.sur)) { const k = 'm' + j; if (!seen.has(k)) { seen.add(k); link(p, mo); } } });
+    mem.forEach((g, j) => { const p = M.P[j], mo = p.m >= 0 ? M.P[p.m] : null, fa = p.f >= 0 ? M.P[p.f] : null; if (mo && !fa && mo.sex === 'f' && squash(p.sur)) { const k = 'm' + j; if (!seen.has(k)) { seen.add(k); link(p, mo, true); } } });
     if (blood) mem.forEach((g, j) => M.P[j].sp.forEach(s => { if (mem.has(s) && s !== j) couple(j, s); }));
     else root.sp.forEach(s => { const o = M.P[s]; if (!o || mem.has(s)) return; mem.set(s, 0); add(s, 0); couple(i, s); });
     const rk = surKey(M, root).k, E = [...edges.values()];
@@ -2268,7 +2276,7 @@ function undo() {
   clearAll(true);
   restore(d); S.view = d.view; applyView(); S.path = null; clearPathUi();
   S.cards.forEach(c => { c.el.classList.remove('pop'); });
-  refreshAll(); drawEdges(); save(); syncButtons(); toast('Undone');
+  refreshAll(); drawEdges(); save(); syncButtons(); if (typeof hideHint === 'function') hideHint(); toast('Undone');
   if (S._restorePath) { const [a, b] = S._restorePath; S._restorePath = null; showPath(a, b, { quiet: true, noPlace: true }); }
 }
 
@@ -3576,11 +3584,12 @@ addEventListener('resize', () => playPlace());
    One card per surname family with how many people bear it and their years; a line between two names for the marriages that join them, counted. The names are laid out in rings around the
    focus person's own name; each ring is one more marriage away, and any name can be dragged. The counting is TC.nameTree (logic.js); this file lays it out and draws it in the canvas world,
    so pan and zoom work as they always do. The people cards are hidden while this look is on and come back untouched when it is changed. */
-const NAMES = { box: null, sig: '', focus: null, open: null, scope: 'blood', pos: {}, psig: '', T: null, by: null, drag: null, dragEnd: 0 };
+const NAMES = { box: null, sig: '', focus: null, open: null, scope: 'blood', pos: {}, psig: '', openEdge: null, T: null, by: null, drag: null, dragEnd: 0 };
 try { if (!EMBED && localStorage.getItem('tcNamesScope') === 'anc') NAMES.scope = 'anc'; } catch (e) { /* ignore */ }
 const namesLook = () => document.documentElement.getAttribute('data-theme') === 'names';
 function namesBox() { return namesLook() ? NAMES.box : null; }
 function namesFocus() {
+  if (!S.cards.size) { NAMES.focus = null; NAMES.open = null; NAMES.openEdge = null; return null; }   /* an empty canvas shows no names, whoever was last looked at or marked */
   const k = S.sel.size === 1 ? [...S.sel][0] : null; let p = k && M.byKey.get(k);
   if (!p && NAMES.focus) p = M.byKey.get(NAMES.focus);   /* clicking empty canvas deselects; the names stay on the last person looked at */
   if (!p) p = markedPerson();
@@ -3618,13 +3627,26 @@ function namesEdge(a, b, tree) {   /* a gentle curve between two names; a marria
   const x0 = a.x + NM_W / 2, y0 = a.y + NM_H / 2, x1 = b.x + NM_W / 2, y1 = b.y + NM_H / 2, k = tree ? 0.92 : 0.5, cx = (x0 + x1) / 2 * k, cy = (y0 + y1) / 2 * k;
   return { d: `M${f1(x0)} ${f1(y0)}Q${f1(cx)} ${f1(cy)} ${f1(x1)} ${f1(y1)}`, mx: 0.25 * x0 + 0.5 * cx + 0.25 * x1, my: 0.25 * y0 + 0.5 * cy + 0.25 * y1 };
 }
+/* the couples behind a marriage pill: who married whom, their years, when and where the archive says. A couple with a living person is counted but not named. */
+function namesCouples(e, by, q) {
+  const yr = p => p.by != null ? p.by + (p.dy != null ? '–' + p.dy : '') : '';
+  const who = p => `${esc(p.name)}${yr(p) ? ' <small>' + yr(p) + '</small>' : ''}`;
+  const rows = e.c.map(([x, y, imp]) => { const A = M.P[x], B = M.P[y]; return { A, B, imp, yr: (A.my || B.my) || null, est: !!((A.my ? A.fl : B.fl) & 16) }; })
+    .sort((r, s) => (r.yr == null) - (s.yr == null) || r.yr - s.yr);
+  const li = rows.map(r => (r.A.living || r.B.living)
+    ? '<li>A marriage with a living person <small>(not named)</small></li>'
+    : `<li>${who(r.A)} <span class="nmand">&amp;</span> ${who(r.B)}${r.yr ? ` <small>married ${r.est ? 'c. ' : ''}${r.yr}</small>` : ' <small>no marriage year recorded</small>'}${r.imp ? ' <small>(implied: the child carries the father\'s name)</small>' : ''}</li>`).join('');
+  const a = by.get(e.a), b = by.get(e.b);
+  return `<div class="nmcouples" style="left:${f1(q.mx)}px;top:${f1(q.my)}px"><b>${esc(a.label || 'Surname not recorded')} &amp; ${esc(b.label || 'Surname not recorded')}</b><ul>${li}</ul></div>`;
+}
 function namesPaintEdges() {
   const host = $('#namesview'), T = NAMES.T, by = NAMES.by; if (!host || !T) return 0;
   let svg = '', lab = '', marriages = 0;
   T.edges.forEach(e => {
     const a = by.get(e.a), b = by.get(e.b), tree = a._p === b.key || b._p === a.key, q = namesEdge(a, b, tree); marriages += e.n;
     svg += `<path d="${q.d}" class="${tree ? 'nmt' : 'nmx'}" style="stroke-width:${f1(Math.min(11, 2.5 + e.n * 1.6))}px"/>`;
-    lab += `<span class="nml" style="left:${f1(q.mx)}px;top:${f1(q.my)}px">${e.n} ${e.n === 1 ? 'marriage' : 'marriages'}</span>`;
+    const ek = e.a + '|' + e.b, isOpen = NAMES.openEdge === ek;
+    lab += `<button type="button" class="nml${isOpen ? ' open' : ''}" data-ne="${esc(ek)}" style="left:${f1(q.mx)}px;top:${f1(q.my)}px" aria-expanded="${isOpen}" title="Click to see ${e.n === 1 ? 'this marriage' : 'these marriages'}">${e.n} ${e.n === 1 ? 'marriage' : 'marriages'}</button>${isOpen ? namesCouples(e, by, q) : ''}`;
   });
   const sv = host.querySelector('.nmsvg'), lb = host.querySelector('.nmlabs'); if (sv) sv.innerHTML = svg; if (lb) lb.innerHTML = lab;
   return marriages;
@@ -3649,7 +3671,7 @@ function drawNames(force) {
   const sig = p.key + '|' + NAMES.open + '|' + NAMES.scope; if (sig === NAMES.sig && !force) return;
   const changed = NAMES.focus !== p.key; NAMES.focus = p.key; NAMES.sig = sig;
   const T = TC.nameTree(M, p.i, NAMES.scope), by = namesLayout(T), max = Math.max(...T.nodes.map(n => n.n));
-  const ps = p.key + '|' + NAMES.scope; if (ps !== NAMES.psig) { NAMES.psig = ps; NAMES.pos = {}; }
+  const ps = p.key + '|' + NAMES.scope; if (ps !== NAMES.psig) { NAMES.psig = ps; NAMES.pos = {}; NAMES.openEdge = null; }
   T.nodes.forEach(n => { const o = NAMES.pos[n.key]; if (o) { n.x = o.x; n.y = o.y; } });
   NAMES.T = T; NAMES.by = by;
   let html = '';
@@ -3676,6 +3698,9 @@ document.addEventListener('click', e => {
   const sb = e.target.closest && e.target.closest('#namesCap [data-scope]');
   if (sb) { NAMES.scope = sb.dataset.scope; NAMES.open = null; try { if (!EMBED) localStorage.setItem('tcNamesScope', NAMES.scope); } catch (x) { /* ignore */ } drawNames(true); fit(); return; }
   if (e.target.closest && e.target.closest('#namesCap [data-tidy]')) { e.preventDefault(); NAMES.pos = {}; drawNames(true); fit(); return; }
+  const eb = e.target.closest && e.target.closest('#namesview .nml');
+  if (eb && namesLook()) { const k = eb.dataset.ne; NAMES.openEdge = NAMES.openEdge === k ? null : k; namesPaintEdges(); return; }
+  if (NAMES.openEdge && namesLook() && !(e.target.closest && e.target.closest('#namesview .nmcouples'))) { NAMES.openEdge = null; namesPaintEdges(); }
   const n = e.target.closest && e.target.closest('#namesview .nm'); if (!n || !namesLook()) return;
   if (Date.now() - NAMES.dragEnd < 350) return;   /* the click that ends a drag is not a click on the name */
   const k = n.dataset.nm; NAMES.open = NAMES.open === k ? null : k; drawNames(true);
@@ -3815,7 +3840,7 @@ function runSearchMarks() { document.querySelectorAll('#shelf .res').forEach(el 
   const st = $('#stage'), ptrs = new Map(); let pan = null, pinch = null, drag = null, raf = 0;
   const redraw = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; drawEdges(); }); };
   st.addEventListener('pointerdown', e => {
-    if (e.target.closest('.card') || e.target.closest('[data-br]') || e.target.closest('#namesview .nm') || e.target.closest('.tt .tg')) return;
+    if (e.target.closest('.card') || e.target.closest('[data-br]') || e.target.closest('#namesview .nm') || e.target.closest('#namesview .nml') || e.target.closest('#namesview .nmcouples') || e.target.closest('.tt .tg')) return;
     ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY }); st.setPointerCapture(e.pointerId);
     if (ptrs.size === 1) { pan = { x: e.clientX, y: e.clientY, vx: S.view.x, vy: S.view.y, moved: false }; closePop(); }
     if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), k: S.view.k, cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2, vx: S.view.x, vy: S.view.y }; pan = null; }

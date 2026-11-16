@@ -605,10 +605,6 @@ html:not(.ph):has(#info.on) #playBar{left:calc((100vw - 340px) / 2);width:min(64
 #lanes .lcol{position:absolute;top:0;bottom:0;background:hsl(var(--h) 85% 91%);border-left:2px solid hsl(var(--h) 60% 78%)}
 #lanes .lcol.none{background:#E9EAEE;border-left-color:#D3D7DE}
 #lanehead{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-#lanehead .cnh{position:absolute;top:66px;display:flex;align-items:center;gap:6px;padding:4px 11px 4px 8px;border-radius:999px;background:hsl(var(--h) 80% 80%);border:2px solid hsl(var(--h) 55% 42%);color:hsl(var(--h) 60% 18%);box-shadow:0 2px 0 hsl(var(--h) 55% 42%)}
-#lanehead .cnh b{font:900 13px Nunito,system-ui;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#lanehead .cnh small{font:900 11px Nunito,system-ui;background:hsl(var(--h) 60% 30%);color:#fff;border-radius:999px;padding:1px 7px}
-#lanehead .cnh .fl{margin:0;height:13px}
 #lanes.cols .lane{background:rgba(255,255,255,.55);border-top:1px solid rgba(31,37,48,.14)}
 #lanes.cols .lane.b{background:rgba(255,255,255,0)}
 #lanes.cols .lnl b{color:rgba(31,37,48,.42)}
@@ -633,6 +629,12 @@ html:not(.ph):has(#info.on) #playBar{left:calc((100vw - 340px) / 2);width:min(64
 .ph .dock #rz .rzs{min-width:0;height:36px;padding:2px 22px 2px 8px}.ph .dock #rz .rzs.empty{font-size:11px;line-height:1.15}
 .ph .dock #rz .rzx{flex-direction:row}.ph .dock #rz #rzClr{padding:3px 8px}
 #lanes .lnl b{font-size:var(--fs,32px)}
+
+/* country names over the columns: the logo's type (Lilita One, capitals), centred, in the column's own deep colour */
+#lanehead .cnh{position:absolute;top:68px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:1px;text-align:center;color:hsl(var(--h) 58% 26%)}
+#lanehead .cnh b{display:block;max-width:100%;font:400 var(--fs,26px)/1.05 "Lilita One",system-ui,sans-serif;letter-spacing:.02em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 2px 0 rgba(255,255,255,.7)}
+#lanehead .cnh small{font:800 11px Nunito,system-ui;color:hsl(var(--h) 35% 36%);letter-spacing:.02em}
+#lanehead .cnh .fl{width:24px!important;height:auto;margin:0 0 3px;display:block;border-radius:2px}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -2444,8 +2446,10 @@ function drawLanes() {
       let fl = ''; const src = col.cs.length ? col.cs.map(c => personOf(c).bp) : dth.filter(t => t.cn === col.cn).map(t => personOf(t.c).dp);
       for (const nm of src) { if (!nm) continue; const p = col.cs.length ? personOf(col.cs[0]) : personOf(dth.find(t => t.cn === col.cn).c); const pl = TC.placeAt(M, p, nm, 2100); if (pl && pl.fi >= 0) { fl = flagHTML(pl, 2100, 'The flag of ' + col.cn + ' today (Record Atlas)', false) + ' '; break; } }
       h += `<div class="lcol${col.cn ? '' : ' none'}" style="left:${f1(left)}px;width:${f1(wid)}px;--h:${col.hue}"></div>`;
-      const px = Math.max(left + 10, 10);   /* the label stays on the screen while its column is in view */
-      hh += `<div class="cnh" style="left:${f1(px)}px;max-width:${f1(Math.max(60, left + wid - px - 8))}px;--h:${col.hue}">${fl}<b>${esc(col.cn || 'Birthplace not recorded')}</b><small>${col.cs.length ? col.cs.length : '†' + col.deaths}</small></div>`;
+      /* the name is set in the header's own type, centred over the part of its column that is on screen; it shrinks to fit a narrow column */
+      const v0 = Math.max(left, 0), v1 = Math.min(left + wid, vw), mid = (v0 + v1) / 2, nm = col.cn || 'Birthplace not recorded';
+      const fs = Math.max(12, Math.min(28, (wid - 16) / (nm.length * 0.62)));
+      hh += `<div class="cnh" style="left:${f1(mid)}px;max-width:${f1(Math.max(40, v1 - v0 - 10))}px;--h:${col.hue};--fs:${f1(fs)}px">${fl}<b>${esc(nm)}</b><small>${col.cs.length ? col.cs.length + (col.cs.length === 1 ? ' person' : ' people') : col.deaths + ' died here'}</small></div>`;
     });
     /* a line from the person into the country they died in, ending at a tombstone in that column's near edge; several in one row stack up */
     const stack = new Map(), sz = Math.max(15, Math.min(26, 24 * v.k));

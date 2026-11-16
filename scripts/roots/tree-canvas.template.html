@@ -499,6 +499,7 @@ select.lk-input{width:auto;padding:4px 8px}
   <button class="lk-ibtn" id="bShelf" title="Show or hide the search shelf" aria-label="Search shelf"></button>
   <button class="lk-ibtn" id="bRel" title="How are they related? Select a person, then another" aria-label="How are they related"></button>
   <button class="lk-ibtn" id="bBlood" title="Bloodline: add blood relatives, remove the rest, or colour them differently" aria-label="Bloodline" aria-haspopup="true" aria-expanded="false"></button>
+  <button class="lk-ibtn" id="bArrange" title="Arrange: tidy every card on the canvas into one neat family tree" aria-label="Arrange"></button>
   <button class="lk-ibtn" id="bUndo" title="Undo (Ctrl/Cmd Z)" aria-label="Undo"></button>
   <button class="lk-ibtn" id="bInfo" title="Panel: person, path, legend, options" aria-label="Panel"></button>
   <button class="lk-ibtn xtra" id="bTheme" title="Look: Sticker, Paper or Ground" aria-label="Look"></button>
@@ -1131,7 +1132,75 @@ select.lk-input{width:auto;padding:4px 8px}
     return set;
   }
 
-  const API = { bloodSet, fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful,
+
+  /* arrange: a tidy family-tree layout for a set of cards. items = [{k, par:[k], mate:[k]}] (par = the parents that are in the set, mate = spouses and same-person
+     partners). Couples stay side by side as one "blob"; each blob sits on a generation row (below its lowest parent, level with its spouse); rows are ordered to
+     cut crossings (barycentre sweeps) and spaced so children sit under their parents and parents over their children, with no two cards touching.
+     o = {W,H,GX,CGX,ROWH,pos:{k:{x,y}}} (pos = where the cards are now, used only to keep the reader's left-to-right order). Returns Map k -> {x,y} (top-left), origin 0,0. */
+  function arrange(items, o) {
+    const W = o.W, H = o.H, GX = o.GX, CG = o.CGX, RH = o.ROWH, pos0 = o.pos || {}, n = items.length;
+    const idx = new Map(items.map((it, i) => [it.k, i]));
+    const par = items.map(it => it.par.map(k => idx.get(k)).filter(i => i !== undefined));
+    const mate = items.map(it => it.mate.map(k => idx.get(k)).filter(i => i !== undefined));
+    /* blobs: couples (and same-person pairs) that must stay together */
+    const uf = items.map((_, i) => i), find = i => { while (uf[i] !== i) { uf[i] = uf[uf[i]]; i = uf[i]; } return i; };
+    mate.forEach((ms, i) => ms.forEach(m => { const a = find(i), b = find(m); if (a !== b) uf[a] = b; }));
+    const bid = new Map(), blobs = [];
+    for (let i = 0; i < n; i++) { const r = find(i); if (!bid.has(r)) { bid.set(r, blobs.length); blobs.push({ mem: [], par: new Set(), kid: new Set(), gen: 0 }); } blobs[bid.get(r)].mem.push(i); }
+    const B = items.map((_, i) => bid.get(find(i)));
+    blobs.forEach((b, bi) => b.mem.sort((a, c) => ((pos0[items[a].k] || {}).x || 0) - ((pos0[items[c].k] || {}).x || 0) || a - c));
+    par.forEach((ps, i) => ps.forEach(p => { if (B[p] !== B[i]) { blobs[B[i]].par.add(B[p]); blobs[B[p]].kid.add(B[i]); } }));
+    /* connected components of blobs */
+    const comp = new Array(blobs.length).fill(-1), comps = [];
+    blobs.forEach((_, s) => { if (comp[s] >= 0) return; const L = [s]; comp[s] = comps.length; for (let q = 0; q < L.length; q++) [...blobs[L[q]].par, ...blobs[L[q]].kid].forEach(t => { if (comp[t] < 0) { comp[t] = comps.length; L.push(t); } }); comps.push(L); });
+    const out = new Map(), laid = [];
+    comps.forEach(L => {
+      /* generations: below the lowest parent; then a parentless blob is drawn just above its first child instead of at the very top */
+      for (let r = 0; r <= L.length + 1; r++) { let ch = false; L.forEach(b => blobs[b].par.forEach(p => { if (blobs[b].gen < blobs[p].gen + 1 && blobs[p].gen < L.length) { blobs[b].gen = blobs[p].gen + 1; ch = true; } })); if (!ch) break; }
+      L.forEach(b => { if (!blobs[b].par.size && blobs[b].kid.size) { const g = Math.min(...[...blobs[b].kid].map(k => blobs[k].gen)) - 1; if (g > blobs[b].gen) blobs[b].gen = g; } });
+      const rows = []; L.forEach(b => { (rows[blobs[b].gen] = rows[blobs[b].gen] || []).push(b); });
+      for (let g = 0; g < rows.length; g++) if (!rows[g]) rows[g] = [];
+      const bw = b => blobs[b].mem.length * W + (blobs[b].mem.length - 1) * CG;
+      const gap = (a, b) => { for (const p of blobs[a].par) if (blobs[b].par.has(p)) return GX; return GX * 2; };
+      const cx = new Map();
+      const rowX = (row, want) => {       /* left to right, never closer than the gap, then re-centred so the row is not dragged sideways */
+        let prev = null, c = [];
+        row.forEach((b, j) => { let x = want[j]; if (prev !== null) x = Math.max(x, c[j - 1] + (bw(row[j - 1]) + bw(b)) / 2 + gap(row[j - 1], b)); c.push(x); prev = x; });
+        const shift = row.length ? row.reduce((a, _, j) => a + (want[j] - c[j]), 0) / row.length : 0;
+        row.forEach((b, j) => cx.set(b, c[j] + shift));
+      };
+      const mean = a => a.reduce((x, y) => x + y, 0) / a.length;
+      /* start: each row packed in the order the cards are in now */
+      rows.forEach(row => { row.sort((a, b) => mean(blobs[a].mem.map(i => (pos0[items[i].k] || {}).x || 0)) - mean(blobs[b].mem.map(i => (pos0[items[i].k] || {}).x || 0))); rowX(row, row.map((_, j) => j * (W + GX * 2))); });
+      /* order: sweep down on the parents' places, up on the children's, a few times */
+      const reorder = (g, nb) => { const row = rows[g], key = new Map(); row.forEach((b, j) => { const ns = [...blobs[b][nb]].filter(t => cx.has(t)); key.set(b, ns.length ? mean(ns.map(t => cx.get(t))) : cx.get(b)); }); row.sort((a, b) => key.get(a) - key.get(b) || cx.get(a) - cx.get(b)); rowX(row, row.map(b => Math.max(key.get(b), -1e9))); };
+      for (let it = 0; it < 4; it++) { for (let g = 1; g < rows.length; g++) reorder(g, 'par'); for (let g = rows.length - 2; g >= 0; g--) reorder(g, 'kid'); }
+      /* positions: children under their parents, parentless parents over their children */
+      for (let it = 0; it < 8; it++) {
+        for (let g = rows.length - 2; g >= 0; g--) { const row = rows[g]; rowX(row, row.map(b => { const ks = [...blobs[b].kid].filter(k => blobs[k].gen > g); return !blobs[b].par.size && ks.length ? mean(ks.map(k => cx.get(k))) : cx.get(b); })); }
+        for (let g = 1; g < rows.length; g++) { const row = rows[g]; rowX(row, row.map(b => blobs[b].par.size ? mean([...blobs[b].par].map(p => cx.get(p))) : cx.get(b))); }
+      }
+      /* inside a couple: the one whose parents are further left goes left */
+      let x0 = Infinity, x1 = -Infinity;
+      L.forEach(b => {
+        const mem = blobs[b].mem.slice(), key = i => { const ps = par[i].filter(p => cx.has(B[p])); return ps.length ? mean(ps.map(p => cx.get(B[p]))) : cx.get(b); };
+        const ks = new Map(mem.map(i => [i, key(i)])); if (mem.length > 1) mem.sort((a, c) => ks.get(a) - ks.get(c));
+        const left = cx.get(b) - bw(b) / 2; mem.forEach((i, j) => out.set(items[i].k, { x: left + j * (W + CG), y: blobs[b].gen * RH }));
+        x0 = Math.min(x0, left); x1 = Math.max(x1, left + bw(b));
+      });
+      const w = x1 - x0, h = (rows.length - 1) * RH + H, ks = [];
+      L.forEach(b => blobs[b].mem.forEach(i => { const q = out.get(items[i].k); q.x -= x0; ks.push(items[i].k); }));
+      laid.push({ ks, w, h });
+    });
+    /* components side by side, wrapping onto shelves so the whole thing stays about as wide as it is tall */
+    laid.sort((a, b) => b.ks.length - a.ks.length);
+    const area = laid.reduce((a, c) => a + (c.w + 120) * (c.h + 120), 0), maxW = Math.max(2400, Math.sqrt(area) * 1.8);
+    let sx = 0, sy = 0, rowH = 0;
+    laid.forEach(c => { if (sx > 0 && sx + c.w > maxW) { sx = 0; sy += rowH + 140; rowH = 0; } c.ks.forEach(k => { const q = out.get(k); q.x += sx; q.y += sy; }); sx += c.w + 120; rowH = Math.max(rowH, c.h); });
+    return out;
+  }
+
+  const API = { arrange, bloodSet, fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful,
     placeAt, neighbours, edgeCost, parentLinks, ancestorStats, stopReason, otherSideHasParents, evidenceSummary, years, url, levelOfGrade, LEVELS, kinshipOps, opsOf, reverseOps, bloodTerm, siblingKind, archivesOnPath, ord };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TC = API;
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -1497,7 +1566,7 @@ const STORE = 'treecanvas.v1';
 const ICON = {
   up: 'M12 19V6M6 11l6-6 6 6', upall: 'M6 11l6-6 6 6M6 18l6-6 6 6', dn: 'M12 5v13M6 13l6 6 6-6', dnall: 'M6 6l6 6 6-6M6 13l6 6 6-6',
   sp: '<circle cx="9" cy="12" r="4.5"/><circle cx="15.5" cy="12" r="4.5"/>', x: 'M7 7l10 10M17 7L7 17', open: 'M14 4h6v6M20 4l-9 9M18 14v5H5V6h5',
-  relate: 'M4 8h14l-3-3.5M20 16H6l3 3.5', undo: 'M9 14L4 9l5-5M4 9h10a6 6 0 010 12h-4', fit: 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5',
+  arrange: 'M9 3.5h6v5H9zM12 8.5V12M6 12h12M6 12v3M18 12v3M3 15.5h6v5H3zM15 15.5h6v5h-6z', relate: 'M4 8h14l-3-3.5M20 16H6l3 3.5', undo: 'M9 14L4 9l5-5M4 9h10a6 6 0 010 12h-4', fit: 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5',
   plus: 'M12 5v14M5 12h14', minus: 'M5 12h14', info: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.6v.2"/>',
   search: '<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/>', theme: '<circle cx="12" cy="12" r="8"/><path d="M12 4v16"/><path d="M12 4a8 8 0 010 16z" fill="currentColor"/>',
   clear: 'M5 19l9-9 4 4-5 5H5zM13 7l2-2 4 4-2 2', gear: '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>',
@@ -2035,6 +2104,29 @@ function doStripBlood(c) {
   if (S.path && S.path.nodeKeys && [...S.path.nodeKeys].some(k => !S.cards.has(k))) { S.path = null; clearPathUi(); }
   refreshAll(); drawEdges(); save(); runSearchMarks(); renderInfo();
   toast(drop.length + ' not of the bloodline removed (Undo brings them back)', 3200);
+}
+/* Arrange: every card on the canvas, laid out as one neat family tree. Couples side by side, a row for each generation, children under their parents,
+   separate families side by side. Nothing is added or removed, and Undo puts every card back where it was. */
+async function doArrange() {
+  const cards = [...S.cards.values()];
+  if (cards.length < 2) { toast('Put a few people on the canvas first, then Arrange tidies them'); return; }
+  const key = new Map(cards.map(c => [c.i, c.key]));
+  const mate = new Map(cards.map(c => [c.key, new Set()]));
+  const link = (a, b) => { if (a && b && a !== b && mate.has(a) && mate.has(b)) { mate.get(a).add(b); mate.get(b).add(a); } };
+  cards.forEach(c => personOf(c).sp.forEach(s => link(c.key, key.get(s))));
+  M.bridges.forEach(br => { if (TC.bridgeState(M, br) !== 'rejected') link(key.get(br.a), key.get(br.b)); });
+  const items = cards.map(c => { const p = personOf(c); return { k: c.key, par: [p.f, p.m].filter(q => q >= 0 && key.has(q)).map(q => key.get(q)), mate: [...mate.get(c.key)] }; });
+  const pos = {}; cards.forEach(c => { pos[c.key] = { x: c.x, y: c.y }; });
+  snapshot();
+  const A = TC.arrange(items, { W, H, GX, CGX: COUPLE_GX, ROWH, pos });
+  /* keep the new layout where the old one was: centre on the middle of the cards as they stand */
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity, a0 = Infinity, a1 = -Infinity, b0 = Infinity, b1 = -Infinity;
+  cards.forEach(c => { x0 = Math.min(x0, c.x); x1 = Math.max(x1, c.x + W); y0 = Math.min(y0, c.y); y1 = Math.max(y1, c.y + H); const q = A.get(c.key); a0 = Math.min(a0, q.x); a1 = Math.max(a1, q.x + W); b0 = Math.min(b0, q.y); b1 = Math.max(b1, q.y + H); });
+  const dx = (x0 + x1) / 2 - (a0 + a1) / 2, dy = (y0 + y1) / 2 - (b0 + b1) / 2;
+  const targets = new Map(); cards.forEach(c => { const q = A.get(c.key); targets.set(c, { x: q.x + dx, y: q.y + dy }); });
+  await tweenTo(targets, 800);
+  refreshAll(); drawEdges(); fit(); save(); miniDraw();
+  toast('Arranged ' + cards.length.toLocaleString() + ' cards (Undo brings them back)', 3200);
 }
 async function doSpouse(c) { snapshot(); await settle(c, addSpouses(c)); }
 async function doBridge(c, brId) {
@@ -2907,7 +2999,7 @@ $('#pop').addEventListener('click', e => {
 /* ---------------- toolbar, themes, phone ---------------- */
 function dockH() { const d = $('.dock'); document.documentElement.style.setProperty('--dock-h', (document.documentElement.classList.contains('shelfoff') ? 0 : d.offsetHeight) + 'px'); }
 function syncButtons() {
-  $('#bUndo').disabled = !S.undo.length;
+  $('#bUndo').disabled = !S.undo.length; { const a = $('#bArrange'); if (a) a.disabled = S.cards.size < 2; }
   $('#bRel').classList.toggle('on', !!S.relateFrom || S.sel.size === 2);
   $('#bRel').disabled = !(S.relateFrom || S.sel.size >= 1);
   $('#bClear').disabled = !S.cards.size;
@@ -2938,7 +3030,7 @@ function setPhone() {
 function wireToolbar() {
   const set = (id, name) => { const b = $(id); if (b) b.innerHTML = icon(name); };
   set('#bBlood', 'blood'); { const mm = document.createElement('div'); mm.id = 'bloodMenu'; mm.setAttribute('role', 'dialog'); mm.setAttribute('aria-label', 'Bloodline'); document.body.appendChild(mm); $('#bBlood').onclick = () => openBloodMenu(); }
-  set('#bShelf', 'search'); $('#si').innerHTML = icon('search', ''); set('#bUndo', 'undo'); set('#bFit', 'fit'); set('#bRel', 'relate'); set('#bInfo', 'info'); set('#bTheme', 'theme'); set('#bClear', 'clear'); set('#bMore', 'gear');
+  set('#bArrange', 'arrange'); set('#bShelf', 'search'); $('#si').innerHTML = icon('search', ''); set('#bUndo', 'undo'); set('#bFit', 'fit'); set('#bRel', 'relate'); set('#bInfo', 'info'); set('#bTheme', 'theme'); set('#bClear', 'clear'); set('#bMore', 'gear');
   set('#zIn', 'plus'); set('#zOut', 'minus');
   if (EMBED) addEventListener('message', e => {
   if (e.origin !== location.origin || !e.data) return;
@@ -2947,6 +3039,7 @@ function wireToolbar() {
 });
   $('#bShelf').onclick = () => { document.documentElement.classList.toggle('shelfoff'); dockH(); };
   $('#bUndo').onclick = undo;
+  $('#bArrange').onclick = () => { if (!S.busy) doArrange(); };
   $('#bFit').onclick = () => fit();
   $('#bRel').onclick = () => { if (S.relateFrom) { cancelRelate(); return; } if (S.sel.size >= 2) { const ks = [...S.sel]; showPath(ks[0], ks[1]); } else if (S.sel.size === 1) startRelate([...S.sel][0]); };
   $('#bInfo').onclick = () => { const el = $('#info'); if (el.classList.contains('on')) { S.infoOpen = false; el.classList.remove('on'); } else { S.infoOpen = true; renderInfo(); } syncButtons(); };

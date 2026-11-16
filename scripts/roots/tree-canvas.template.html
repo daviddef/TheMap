@@ -495,7 +495,7 @@ select.lk-input{width:auto;padding:4px 8px}
 /* the marked person: a star on the card, and a bar that says how the selected person is related to them */
 .card .mkb{position:absolute;left:-9px;bottom:-9px;z-index:3;width:23px;height:23px;border-radius:50%;border:2px solid var(--lk-card);background:#f0b429;color:#5a3b00;font:900 13px/19px Nunito,system-ui;text-align:center;box-shadow:0 2px 0 rgba(0,0,0,.18);pointer-events:none}
 .card.marked .cb{box-shadow:0 3px 0 var(--lk-line),0 0 0 3px #f0b429}
-#markBar{position:fixed;left:50%;top:112px;transform:translateX(-50%);z-index:5;display:flex;align-items:center;gap:10px;max-width:min(720px,calc(100vw - 440px));padding:6px 8px 6px 6px;background:var(--lk-card);border:2px solid #f0b429;border-radius:18px;box-shadow:0 3px 0 var(--lk-line);font:800 12.5px/1.3 Nunito,system-ui;color:var(--lk-ink)}
+#markBar{position:fixed;left:50%;top:112px;transform:translateX(-50%);z-index:5;display:flex;flex-direction:column;align-items:stretch;gap:6px;max-width:min(720px,calc(100vw - 440px));padding:6px 8px 6px 6px;background:var(--lk-card);border:2px solid #f0b429;border-radius:18px;box-shadow:0 3px 0 var(--lk-line);font:800 12.5px/1.3 Nunito,system-ui;color:var(--lk-ink)}
 #markBar[hidden]{display:none}
 #markBar .mkn{flex:none;border:0;border-radius:12px;padding:5px 10px;background:#f0b429;color:#5a3b00;font:900 12.5px Nunito,system-ui;cursor:pointer;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #markBar .mkt{flex:1 1 auto;min-width:0}
@@ -510,6 +510,9 @@ html:not(.ph):has(#info.on) #markBar{left:calc((100vw - 340px) / 2);max-width:mi
 #markBar .mkc{flex:1 1 100%;order:5;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font:800 10.5px Nunito,system-ui;color:var(--lk-soft)}
 #markBar .mkc::before{content:"Lines from the grandparents:";margin-right:2px}
 #markBar .mkch{background:var(--lc);color:#fff;border-radius:99px;padding:1px 8px;text-transform:uppercase;letter-spacing:.3px}
+#markBar{flex-wrap:nowrap}
+#markBar .mkrow{display:flex;align-items:center;gap:10px}
+#markBar .mkc{flex:none;order:0}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -3245,10 +3248,10 @@ function markBar() {
   markPlace();
   const tk = markTarget(), r = tk && markRel(tk);
   const L = markLines(), chips = L && L.heads.length && M.archives[p.a].k === 'you' ? `<span class="mkc">${L.heads.map(h => `<span class="mkch" style="--lc:${LINE_COLS[h.ci % LINE_COLS.length]}">${esc(h.name)}</span>`).join('')}</span>` : '';
-  bar.innerHTML = `<button class="mkn" data-mk="go" title="Find ${esc(p.name)} on the canvas">&#9733; ${esc(p.name)}</button>`
+  bar.innerHTML = `<div class="mkrow"><button class="mkn" data-mk="go" title="Find ${esc(p.name)} on the canvas">&#9733; ${esc(p.name)}</button>`
     + `<span class="mkt">${r ? markText(r, false) : 'Select anyone to see how they are related to ' + esc(p.name)}</span>`
     + (r && !r.self && !r.none && !(S.path && S.path.a === S.mark && S.path.b === tk) ? `<button class="lk-btn is-small" data-mk="path" data-t="${esc(tk)}">Show path</button>` : '')
-    + chips + `<button class="mkx" data-mk="off" title="Unmark ${esc(p.name)}" aria-label="Unmark">${icon('x', '')}</button>`;
+    + `<button class="mkx" data-mk="off" title="Unmark ${esc(p.name)}" aria-label="Unmark">${icon('x', '')}</button></div>` + chips;
 }
 addEventListener('resize', () => markPlace());
 /* sits just under the "how related" bar, wherever that is */

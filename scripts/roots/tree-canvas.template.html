@@ -1590,13 +1590,14 @@ html:not(.rzopen) #rz{display:none}
   }
   function nameTree(M, i, scope) {
     const root = M.P[i]; if (!root) return null;
-    const blood = scope === 'blood';   /* 'blood': every blood relative (ancestors, and everyone descended from any of them) with their spouses; otherwise the ancestors only */
+    const blood = scope === 'blood' || scope === 'all';   /* 'all': the bloodline, plus the whole ancestry of every spouse and of every relative drawn: in-laws' families too */   /* 'blood': every blood relative (ancestors, and everyone descended from any of them) with their spouses; otherwise the ancestors only */
     const gen = new Map([[i, 0]]), q = [i];
     for (let h = 0; h < q.length; h++) { const p = M.P[q[h]], g = gen.get(q[h]); for (const r of [p.f, p.m]) if (r >= 0 && M.P[r] && !gen.has(r)) { gen.set(r, g + 1); q.push(r); } }
     const mem = new Map();
     if (blood) {
       bloodSet(M, i, Infinity).forEach(j => mem.set(j, gen.has(j) ? gen.get(j) : 0));
       [...mem.keys()].forEach(j => { const p = M.P[j]; p.sp.forEach(s => { if (M.P[s] && !mem.has(s)) mem.set(s, 0); }); [p.f, p.m].forEach(y => { if (y >= 0 && M.P[y] && !mem.has(y)) mem.set(y, 0); }); });
+      if (scope === 'all') { const st = [...mem.keys()]; while (st.length) { const j = st.pop(); [M.P[j].f, M.P[j].m].forEach(y => { if (y >= 0 && M.P[y] && !mem.has(y)) { mem.set(y, 0); st.push(y); } }); } }
     } else gen.forEach((g, j) => mem.set(j, g));
     const nodes = new Map();
     const add = (j, g) => {
@@ -1639,7 +1640,7 @@ html:not(.rzopen) #rz{display:none}
     }
     nodes.forEach((n, k) => { if (!depth.has(k)) { depth.set(k, Math.max(...depth.values()) + 1); order.push(k); } });
     const N = [...nodes.values()].map(n => ({ ...n, depth: depth.get(n.key), parent: parent.get(n.key) || null }));
-    return { root: rk, nodes: N, edges: E, desc: D, people: mem.size, ancestors: gen.size, scope: blood ? 'blood' : 'anc' };
+    return { root: rk, nodes: N, edges: E, desc: D, people: mem.size, ancestors: gen.size, scope: scope === 'all' ? 'all' : blood ? 'blood' : 'anc' };
   }
   const API = { nameTree, playSet, playSteps, family, lifeEvents, eraChanges, lines, arrange, bloodSet, fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful,
     placeAt, dateText, neighbours, edgeCost, parentLinks, ancestorStats, stopReason, otherSideHasParents, evidenceSummary, years, url, corrUrl, wikitreeUrl, searchLinks, levelOfGrade, LEVELS, playSteps, kinshipOps, opsOf, reverseOps, bloodTerm, siblingKind, archivesOnPath, ord };
@@ -1938,7 +1939,7 @@ html:not(.rzopen) #rz{display:none}
        draw as cards here (fl bit 64 says so). Only people the page handed over with their details (not a hidden living person, who carries nothing). */
     const und = ((tree && tree.undrawn) || []).filter(u => u && (u.given !== undefined || u.sur !== undefined)).map(u => ({
       id: u.id, sex: u.sex || 'u', given: u.given || '', sur: u.sur || '', by: u.by == null ? null : u.by, bp: u.place || null, dy: u.dy == null ? null : u.dy, dp: null,
-      father: u.father, mother: u.mother, spouse: u.spouse || [], kids: u.kids || [], occ: u.occ || null, bye: !!u.bye, dye: !!u.dye, bpe: false, unplaced: 1, hid: 0 })).filter(u => !arch || !((u.dy == null || u.dye) && (u.by || 0) > 1920));
+      father: u.father, mother: u.mother, spouse: u.spouse || [], kids: u.kids || [], occ: u.occ || null, bye: !!u.bye, dye: !!u.dye, bpe: false, unplaced: 1, hid: 0, living: u.living === true })).filter(u => !arch || u.living === true || !((u.dy == null || u.dye) && (u.by || 0) > 1920));   /* an `undrawn` row may carry `living: true` too: name and family only, like a living row in people */
     const src = drawn.concat(und);
     /* a drawn person's own father, mother and spouse fields stop at the people the page could draw: put back the ones that point to a person only this canvas draws */
     const extraF = new Map(), extraM = new Map(), extraS = new Map();
@@ -3599,7 +3600,7 @@ addEventListener('resize', () => playPlace());
    focus person's own name; each ring is one more marriage away, and any name can be dragged. The counting is TC.nameTree (logic.js); this file lays it out and draws it in the canvas world,
    so pan and zoom work as they always do. The people cards are hidden while this look is on and come back untouched when it is changed. */
 const NAMES = { box: null, sig: '', focus: null, open: null, scope: 'blood', pos: {}, psig: '', openEdge: null, T: null, by: null, drag: null, dragEnd: 0 };
-try { if (!EMBED && localStorage.getItem('tcNamesScope') === 'anc') NAMES.scope = 'anc'; } catch (e) { /* ignore */ }
+try { if (!EMBED) { const sv = localStorage.getItem('tcNamesScope'); if (sv === 'anc' || sv === 'all') NAMES.scope = sv; } } catch (e) { /* ignore */ }
 const namesLook = () => document.documentElement.getAttribute('data-theme') === 'names';
 function namesBox() { return namesLook() ? NAMES.box : null; }
 function namesFocus() {
@@ -3711,8 +3712,8 @@ function drawNames(force) {
   const marriages = namesPaintEdges(), moved = Object.keys(NAMES.pos).length > 0;
   cap.hidden = false;
   const sc = NAMES.scope;
-  cap.innerHTML = `<b>${sc === 'blood' ? 'Names in the bloodline of' : 'Names behind'} ${esc(p.name)}</b> ${T.people.toLocaleString()} ${T.people === 1 ? 'person' : 'people'} in ${T.nodes.length} ${T.nodes.length === 1 ? 'name' : 'names'}, ${marriages} ${marriages === 1 ? 'marriage' : 'marriages'}${T.desc && T.desc.length ? ' and ' + T.desc.length + ' ' + (T.desc.length === 1 ? 'line' : 'lines') + ' of descent' : ''}.
-    <span class="nmsc" role="group" aria-label="What to count"><button type="button" data-scope="blood" class="${sc === 'blood' ? 'on' : ''}">Whole bloodline</button><button type="button" data-scope="anc" class="${sc === 'anc' ? 'on' : ''}">Ancestors only</button></span>
+  cap.innerHTML = `<b>${sc === 'blood' ? 'Names in the bloodline of' : sc === 'all' ? 'Every name around' : 'Names behind'} ${esc(p.name)}</b> ${T.people.toLocaleString()} ${T.people === 1 ? 'person' : 'people'} in ${T.nodes.length} ${T.nodes.length === 1 ? 'name' : 'names'}, ${marriages} ${marriages === 1 ? 'marriage' : 'marriages'}${T.desc && T.desc.length ? ' and ' + T.desc.length + ' ' + (T.desc.length === 1 ? 'line' : 'lines') + ' of descent' : ''}.
+    <span class="nmsc" role="group" aria-label="What to count"><button type="button" data-scope="blood" class="${sc === 'blood' ? 'on' : ''}">Whole bloodline</button><button type="button" data-scope="all" class="${sc === 'all' ? 'on' : ''}" title="The bloodline, plus the whole ancestry of every spouse: the in-laws' families too">With in-laws</button><button type="button" data-scope="anc" class="${sc === 'anc' ? 'on' : ''}">Ancestors only</button></span>
     <small>Drag a name to move it${moved ? ' · <a href="#" data-tidy="1">Tidy up</a>' : ''} · click one to see who · select or mark someone else to change the centre.</small>`;
   if (changed) fit();
 }

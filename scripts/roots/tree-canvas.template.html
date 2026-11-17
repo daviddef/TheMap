@@ -403,6 +403,10 @@ button{font-family:inherit}
 .card.ghost .cb{border-style:dashed;opacity:.9}
 .card.ghost .cb .yr{font-style:italic}
 
+/* a stand-in the archive marks `placeholder`: a quiet dashed outline and a small "?", never hidden */
+.card.standin .cb{border-style:dashed;border-color:var(--lk-mute);opacity:.92}
+.card .sib{position:absolute;right:-8px;top:-9px;z-index:3;width:19px;height:19px;border-radius:50%;border:2px solid var(--lk-card);background:var(--lk-mute);color:#fff;font:900 12px/1 Nunito,system-ui;display:grid;place-items:center;cursor:help}
+
 /* the fix list: a "!" on a card, and the tab */
 .card .fxb{position:absolute;left:-9px;top:-10px;z-index:3;width:21px;height:21px;border-radius:50%;border:2px solid var(--lk-card);background:#d24b1f;color:#fff;font:900 13px/1 Nunito,system-ui;padding:0;cursor:pointer;display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.3)}
 .card .fxb:hover,.card .fxb:focus-visible{transform:scale(1.15)}
@@ -942,7 +946,7 @@ html:not(.rzopen) #rz{display:none}
         i, a: r[0], id: r[1], key: a.k + ':' + r[1], sex: r[2], given: r[3], sur: r[4], by: r[5],
         bp: r[6] >= 0 ? corpus.places[r[6]] : '', dy: r[7], dp: r[8] >= 0 ? corpus.places[r[8]] : '',
         f: r[9], m: r[10], fg: r[11], mg: r[12], sp: r[13].slice(), kids: r[14], page: r[15],
-        occ: r[16] >= 0 ? (corpus.occs || [])[r[16]] : '', fl: r[17], living: !!(r[17] & 8), ghost: !!(r[17] & 32), how: typeof r[21] === 'string' ? r[21] : '', surAlso: Array.isArray(r[18]) ? r[18] : [], ch: [],
+        occ: r[16] >= 0 ? (corpus.occs || [])[r[16]] : '', fl: r[17], living: !!(r[17] & 8), ghost: !!(r[17] & 32), standin: !!(r[17] & 128) && !(r[17] & 8), how: typeof r[21] === 'string' ? r[21] : '', surAlso: Array.isArray(r[18]) ? r[18] : [], ch: [],
         /* 19: the stops an archive records between birth and death [[place idx, year|null, estimated]]; 20: marriage year (fl bit 16 = estimated). Absent in an older corpus. */
         bd: typeof r[22] === 'string' ? r[22] : '', dd: typeof r[23] === 'string' ? r[23] : '',
         /* 24: how many corrections the archive has recorded about this person (a count only; never what they say) */
@@ -1946,7 +1950,7 @@ html:not(.rzopen) #rz{display:none}
        draw as cards here (fl bit 64 says so). Only people the page handed over with their details (not a hidden living person, who carries nothing). */
     const und = ((tree && tree.undrawn) || []).filter(u => u && (u.given !== undefined || u.sur !== undefined)).map(u => ({
       id: u.id, sex: u.sex || 'u', given: u.given || '', sur: u.sur || '', by: u.by == null ? null : u.by, bp: u.place || null, dy: u.dy == null ? null : u.dy, dp: null,
-      father: u.father, mother: u.mother, spouse: u.spouse || [], kids: u.kids || [], occ: u.occ || null, bye: !!u.bye, dye: !!u.dye, bpe: false, unplaced: 1, hid: 0, living: u.living === true })).filter(u => !arch || u.living === true || !((u.dy == null || u.dye) && (u.by || 0) > 1920));   /* an `undrawn` row may carry `living: true` too: name and family only, like a living row in people */
+      father: u.father, mother: u.mother, spouse: u.spouse || [], kids: u.kids || [], occ: u.occ || null, bye: !!u.bye, dye: !!u.dye, bpe: false, unplaced: 1, hid: 0, living: u.living === true, placeholder: u.placeholder === true })).filter(u => !arch || u.living === true || !((u.dy == null || u.dye) && (u.by || 0) > 1920));   /* an `undrawn` row may carry `living: true` too: name and family only, like a living row in people */
     const src = drawn.concat(und);
     /* a drawn person's own father, mother and spouse fields stop at the people the page could draw: put back the ones that point to a person only this canvas draws */
     const extraF = new Map(), extraM = new Map(), extraS = new Map();
@@ -1961,7 +1965,7 @@ html:not(.rzopen) #rz{display:none}
       /* an archive that publishes a living person's NAME (and nothing else) on their own page sends `living: true`: the canvas draws them as a living card, name and family
          only, with no dates, places, route or records, exactly as the archive prints them. A person the archive does not name is not sent, so is not drawn. */
       const lv = !!(arch && !hid && p.living === true), blank = hid || lv;
-      const fl = (p.bye ? 1 : 0) | (p.dye ? 2 : 0) | (p.bpe ? 4 : 0) | (blank ? 8 : 0) | (p.mye ? 16 : 0) | (hid ? 1 : 0) | (p.unplaced ? 64 : 0);
+      const fl = (p.bye ? 1 : 0) | (p.dye ? 2 : 0) | (p.bpe ? 4 : 0) | (blank ? 8 : 0) | (p.mye ? 16 : 0) | (hid ? 1 : 0) | (p.unplaced ? 64 : 0) | (arch && !blank && p.placeholder === true ? 128 : 0);   /* 128: the archive marks this row a placeholder, a stand-in for a person it does not name (never set on a living card) */
       /* an archive's route: the stops between birth and death; one that only repeats birth then death adds nothing */
       let stops = 0;
       if (arch && !blank && Array.isArray(p.route)) {
@@ -2373,6 +2377,7 @@ function cxMark(p, a) {
   const u = TC.corrUrl(M, p); if (!u) return '';
   return `<a class="cxm" href="${esc(u)}" target="_blank" rel="noopener" data-act="open" title="${p.cx} ${p.cx === 1 ? 'correction or note' : 'corrections and notes'} recorded about ${esc(p.name)} in the ${esc(a.name)} archive. Click to read them on their page.">${icon('pencil', '')}${p.cx}</a>`;
 }
+const STANDIN_TIP = 'A stand-in: the archive keeps this place in the tree for a person it does not name (a parent or partner whose name is not known). Shown so the line is not lost; nothing about them is recorded.';
 function cardInner(c) {
   const p = personOf(c), a = M.archives[p.a];
   const bpl = p.bp ? TC.placeAt(M, p, p.bp, p.by) : null, dpl = p.dp ? TC.placeAt(M, p, p.dp, p.dy) : null;
@@ -2392,6 +2397,7 @@ function cardInner(c) {
   const ln = lineOf(c.i);
   let h = `<div class="cb" title="${esc(p.name)}${a.k === 'you' ? '' : ' · ' + esc(a.name) + ' archive'}${p.occ ? ' · ' + esc(p.occ) : ''} · ${esc(TC.evidenceSummary(M, p))}"><div class="nm">${esc(p.name)}${p.sex === 'f' || p.sex === 'm' ? `<span class="sx ${p.sex === 'f' ? 'mo' : 'fa'}" title="${p.sex === 'f' ? 'Female' : 'Male'}">${p.sex === 'f' ? '&#9792;' : '&#9794;'}&#xFE0E;</span>` : ''}</div>${dates}
     <div class="meta">${a.k === 'you' ? (ln ? `<span class="ar ln" style="--lc:${ln.col}" title="On the ${esc(ln.names)} line from the marked person's grandparents">${esc(ln.names)}</span>` : '') : `<span class="ar">${esc(a.name)}</span>`}${chips}${cxMark(p, a)}<span class="seals">${seals.join('')}</span></div></div>`;
+  if (p.standin) h += `<span class="sib" title="${esc(STANDIN_TIP)}" aria-label="Stand-in for an unnamed person">?</span>`;
   if (c.key === S.mark) h += `<span class="mkb" title="The marked person: the canvas shows how everyone you select is related to them">&#9873;</span>`;
   { const fx = fixOf(p); if (fx) h += `<button class="fxb" data-act="fixes" title="${fx.length} ${fx.length === 1 ? 'thing' : 'things'} on your fix list for ${esc(p.name)}: click to see what and how to fix it" aria-label="${fx.length} on the fix list">!</button>` ;  }
   /* ancestors */
@@ -2432,6 +2438,7 @@ function refreshCard(c) {
   if (S.sel.has(c.key)) cls.push('sel');
   if (c._pop) cls.push('pop');
   if (personOf(c).ghost) cls.push('ghost');
+  if (personOf(c).standin) cls.push('standin');
   if (S.blood.tint && S.blood.set && !S.blood.set.has(c.i) && !personOf(c).ghost) cls.push('nb');
   if (S.path) { cls.push(S.path.nodeKeys.has(c.key) ? 'onpath' : 'dim'); if (c.key === S.path.a || c.key === S.path.b) cls.push('endpt'); }
   if (S.relateFrom === c.key) cls.push('pulse');
@@ -4155,6 +4162,7 @@ function personPanel() {
       ${p.sp.length ? `<p class="plines">Named as the spouse of ${p.sp.map(q => `<a href="#" data-focus="${esc(M.P[q].key)}">${esc(M.P[q].name)}</a>`).join(', ')}.</p>` : ''}
       <p class="plines lvn">No parents or children are drawn for a name like this: the archive joins people to each other only from a record of their own.</p>` : ''}
     ${p.living ? `<p class="plines lvn">This person is living, so their archive records them by <strong>name and family only</strong> — no dates, no places, no records. Nothing is missing from the research.</p>` : ''}
+    ${p.standin ? `<p class="plines lvn">A stand-in (the <b>?</b> on the card): the archive keeps this place in the tree for a person it does not name, so the line is not lost. It is shown, never hidden; nothing about them is recorded here.</p>` : ''}
     <p class="plines"${p.living || p.ghost ? ' hidden' : ''}>${p.bp ? (() => { const pl = TC.placeAt(M, p, p.bp, p.by); return 'Born' + (p.bd ? ' <b>' + esc(TC.dateText(p.bd)) + '</b>' : '') + ': ' + flagHTML(pl, p.by, flagTip(pl, p.by, 'Born at'), true) + placeLinkHTML(pl) + eraNote(pl) + (p.fl & 4 ? ' <small>(place taken from a relative)</small>' : ''); })() : (p.bd ? 'Born <b>' + esc(TC.dateText(p.bd)) + '</b>. ' : '') + 'Birthplace not recorded.'}${p.dp && p.dp !== p.bp ? (() => { const pl = TC.placeAt(M, p, p.dp, p.dy); return '<br>Died' + (p.dd ? ' <b>' + esc(TC.dateText(p.dd)) + '</b>' : '') + ': ' + flagHTML(pl, p.dy, flagTip(pl, p.dy, 'Died at'), true) + placeLinkHTML(pl) + eraNote(pl); })() : (p.dy != null ? '<br>Died' + (p.dd ? ' <b>' + esc(TC.dateText(p.dd)) + '</b>' : '') + (p.dp && p.bp ? ': ' + (() => { const pl = TC.placeAt(M, p, p.dp, p.dy); return flagHTML(pl, p.dy, flagTip(pl, p.dy, 'Died at'), true) + placeLinkHTML(pl); })() : '. Death place not recorded.') : '')}</p>
     ${(p.fl & 64) ? `<p class="plines"><small>Not on the Roots &amp; Routes maps: ${p.bp ? 'the Atlas could not place “' + esc(p.bp) + '”, and no relative has a place it could use' : 'the file gives no birth place, and no relative has one'}${p.by == null ? ', and there is no year to place them in' : ''}. They are here because the canvas does not need a place.</small></p>` : ''}
     ${(p.fl & 3) ? `<p style="color:var(--lk-mute)"><small>~ marks a year the archive itself estimates.</small></p>` : ''}

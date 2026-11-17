@@ -4227,8 +4227,18 @@ window.addEventListener("load", async function () {
      the header would paint over it. I could not get the page to scroll in
      the harness to prove that either way, and closing on scroll makes the
      question moot rather than leaving it open. */
+  /* A TEXT FIELD INSIDE A POPOVER IS NOT A REASON TO CLOSE IT. On a phone, tapping «Name this view» raises the keyboard and the browser scrolls the page
+     (or zooms it, below 16px) to bring the field into view; that scroll closed the popover under the finger, so the name could never be typed.
+     While a field inside a dropdown has focus, and for a moment after it took it, a scroll is the keyboard's, not the reader's. */
+  var dropTypedAt = 0;
+  function inDropField() {
+    var a = document.activeElement;
+    return !!(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && a.closest && a.closest(".ra-drop"));
+  }
+  document.addEventListener("focusin", function () { if (inDropField()) dropTypedAt = Date.now(); });
   window.addEventListener("scroll", function () {
     if (!drops().some(function (d) { return d.open; })) return;
+    if (inDropField() || Date.now() - dropTypedAt < 1200) return;
     drops().forEach(function (d) { d.open = false; });
     document.querySelector(".ra-bar").classList.remove("ra-bar-raised");
   }, { passive: true });
@@ -8190,14 +8200,26 @@ window.addEventListener("load", async function () {
     AREA.meta = { id: id, name: name };
     myaSave(); areaRender(); areaAddUi();
   }
+  /* A SAVED VIEW IS THE ADDRESS. The map already writes where it looks, the layers, the filters, the years and the base map into the address bar
+     (see «URL as state» above), so a view keeps that string, and going to it, or sending it, is the same link. «at» (a place panel left open) and
+     «hub» are left out: a view is a way of looking at the map, not one open place. */
+  function viewQuery() {
+    var p = new URLSearchParams(Q.toString()); p.delete("at"); p.delete("hub");
+    var c = map.getCenter(); p.set("view", c.lat.toFixed(4) + "," + c.lng.toFixed(4) + "," + map.getZoom());   /* always, even before the map has been moved */
+    return p.toString();
+  }
+  function viewUrl(v) {
+    return location.origin + location.pathname + (v && v.q ? "?" + v.q : "");
+  }
   function viewsRender() {
     var box = document.getElementById("ra-viewin"); if (!box) return;
     var vs = myaSorted(MYA.views), as = myaSorted(MYA.areas), h = [];
     h.push('<p class="ra-fgroup-h">Views</p>');
-    h.push('<p class="ra-key-lead">Save where the map is looking now, and come back to it in one click.</p>');
+    h.push('<p class="ra-key-lead">Save where the map is looking now (place, zoom, layers and filters), and come back to it in one click. The address of this page is always the view you are looking at, so you can also send it as it is.</p>');
+    h.push('<p class="ra-vnow"><button type="button" class="ra-vcopy" data-copy="now">Copy a link to this view</button><span class="ra-vnote" role="status" aria-live="polite"></span></p>');
     h.push('<form class="ra-vsave" data-f="view"><input type="text" maxlength="60" aria-label="Name this view" placeholder="Name this view, e.g. Kvarner coast"><button type="submit">Save view</button></form>');
     h.push(vs.length ? '<ul class="ra-vlist">' + vs.map(function (id) {
-      return '<li><button type="button" class="ra-vgo" data-go="view:' + id + '">' + esc(MYA.views[id].name) + '</button><button type="button" class="ra-vdel" data-del="view:' + id + '" aria-label="Delete the view ' + esc(MYA.views[id].name) + '">×</button></li>';
+      return '<li><button type="button" class="ra-vgo" data-go="view:' + id + '">' + esc(MYA.views[id].name) + '</button><button type="button" class="ra-vcopy" data-copy="' + id + '" aria-label="Copy a link to the view ' + esc(MYA.views[id].name) + '" title="Copy a link to this view">Copy link</button><button type="button" class="ra-vdel" data-del="view:' + id + '" aria-label="Delete the view ' + esc(MYA.views[id].name) + '">×</button></li>';
     }).join("") + "</ul>" : '<p class="at-sub">No saved views yet.</p>');
     h.push('<p class="ra-fgroup-h">Areas</p>');
     h.push('<p class="ra-key-lead">Draw a box or shape with the two tools on the map, use Add area for as many more as you like, then Save to name them as one group. Tick the areas you want drawn on the map; a group lists what lies inside all of it and can be a research group.</p>');
@@ -8216,7 +8238,7 @@ window.addEventListener("load", async function () {
       var f = e.target.closest && e.target.closest("form.ra-vsave"); if (!f) return;
       e.preventDefault();
       var name = f.querySelector("input").value.trim() || "View " + (Object.keys(MYA.views).length + 1), c = map.getCenter(), id = myaId("v");
-      MYA.views[id] = { name: name.slice(0, 60), lat: +c.lat.toFixed(4), lng: +c.lng.toFixed(4), z: map.getZoom(), rc: RC.on ? 1 : 0, upd: new Date().toISOString() };
+      MYA.views[id] = { name: name.slice(0, 60), lat: +c.lat.toFixed(4), lng: +c.lng.toFixed(4), z: map.getZoom(), rc: RC.on ? 1 : 0, q: viewQuery(), upd: new Date().toISOString() };
       delete MYA.gone[id]; myaSave();
     });
     box.addEventListener("change", function (e) {
@@ -8226,11 +8248,23 @@ window.addEventListener("load", async function () {
       myaOffSave(); areaDrawSaved(); viewsRender();
     });
     box.addEventListener("click", function (e) {
-      var go = e.target.closest && e.target.closest("[data-go]"), del = e.target.closest && e.target.closest("[data-del]");
+      var go = e.target.closest && e.target.closest("[data-go]"), del = e.target.closest && e.target.closest("[data-del]"),
+          cp = e.target.closest && e.target.closest("[data-copy]");
+      if (cp) {
+        var cid = cp.getAttribute("data-copy"), url = cid === "now" ? viewUrl({ q: viewQuery() }) : viewUrl(MYA.views[cid] && MYA.views[cid].q ? MYA.views[cid] : { q: viewQuery() }),
+            note = box.querySelector(".ra-vnote"), say = function (t) { if (note) { note.textContent = t; setTimeout(function () { note.textContent = ""; }, 2500); } };
+        if (cid !== "now" && MYA.views[cid] && !MYA.views[cid].q) say("That view was saved before links; this copies where the map is looking now.");
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(function () { say("Link copied."); }, function () { window.prompt("Copy this link", url); });
+        else window.prompt("Copy this link", url);
+        return;
+      }
       if (go) {
         var p = go.getAttribute("data-go").split(":"), id = p[1];
         if (p[0] === "view" && MYA.views[id]) {
-          var v = MYA.views[id]; map.setView([v.lat, v.lng], v.z);
+          var v = MYA.views[id];
+          /* a view saved with its address opens that address (layers, filters, years, base map and place all come back); an older one only moves the map */
+          if (v.q) { location.href = viewUrl(v); return; }
+          map.setView([v.lat, v.lng], v.z);
           var cb = document.getElementById("ra-rc");
           if (cb && cb.checked !== !!v.rc) { cb.checked = !!v.rc; cb.dispatchEvent(new Event("change")); }
         } else if (p[0] === "area") areaOpenSaved(id);
@@ -10326,6 +10360,14 @@ window.addEventListener("load", async function () {
   :global(.ra-vsave), :global(.ra-area-nm), :global(.ra-area-rn) { display: flex; gap: 8px; align-items: center; margin: 0 0 10px; }
   :global(.ra-vsave input), :global(.ra-area-nm input), :global(.ra-area-rn input) { flex: 1 1 0; min-width: 0; font: 400 13.5px/1.2 var(--sans); padding: 9px 11px;
     border: 1px solid var(--rule-strong); border-radius: 8px; background: var(--panel); color: var(--ink); }
+  /* iOS zooms the page when a field under 16px takes focus, which scrolled the page and closed the popover. */
+  @media (pointer: coarse) {
+    :global(.ra-vsave input), :global(.ra-area-nm input), :global(.ra-area-rn input) { font-size: 16px; }
+  }
+  :global(.ra-vnow) { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 12px; }
+  :global(.ra-vnote) { font: 400 12px/1.4 var(--sans); color: var(--ink-2); }
+  :global(.ra-vcopy) { font: 600 12px/1 var(--sans); padding: 8px 10px; border: 1px solid var(--rule-strong); background: transparent; color: var(--ink-2); border-radius: 6px; cursor: pointer; }
+  :global(.ra-vcopy:hover), :global(.ra-vcopy:focus-visible) { border-color: var(--accent); color: var(--ink); }
   :global(.ra-vsave button), :global(.ra-area-nm button), :global(.ra-area-rn button), :global(.ra-area-ed button), :global(.ra-area-ask button) {
     font: 600 12.5px/1 var(--sans); padding: 9px 13px; border-radius: 999px; cursor: pointer; border: 1px solid var(--rule-strong); background: var(--panel); color: var(--accent); white-space: nowrap; }
   :global(.ra-vsave button[type="submit"]), :global(.ra-area-nm button[type="submit"]), :global(.ra-area-rn button) { background: var(--accent); color: #fff; border-color: var(--accent); }

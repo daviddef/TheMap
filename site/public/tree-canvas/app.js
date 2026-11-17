@@ -124,6 +124,8 @@ async function openArchive(key) {
     const f = await fetchArchive(key);
     mhFile = null; mhc = null; anc = null;
     window.RR = { tree: f.tree, atlas: f.atlas, loadNames, links, archive: f.archive };
+    /* ?p=<slug>: an archive's link to one person's page; the canvas puts that person on and selects them (only a plain slug is passed on) */
+    { const pp = new URLSearchParams(location.search).get('p'); if (pp && /^[a-z0-9-]{1,120}$/.test(pp)) window.RR.carryPerson = pp; }
     say(''); mount();
   } catch (err) { say('The ' + a.name + ' archive could not be opened just now (' + (err && err.message || 'error') + '). You can open a GEDCOM instead.', true); showStart(); }
 }

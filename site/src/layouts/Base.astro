@@ -259,9 +259,9 @@ import { volumes as invVolumes } from "../lib/inventory.js";
       <span class="bars" aria-hidden="true"></span>
     </button>
     <nav class="topnav" aria-label="Main" data-latest={newestNews}>
-      {nav.map(([label, links]) => (
+      {nav.map(([label, links, opt]) => (
         typeof links === "string"
-          ? <a class:list={["menulink", here === u(links) ? "on" : ""]} href={u(links)}>{label}</a>
+          ? <a class:list={["menulink", here === u(links) ? "on" : ""]} href={u(links)} target={opt?.newTab ? "_blank" : undefined} rel={opt?.newTab ? "noopener" : undefined}>{label}</a>
           : <details class="menu">
               <summary data-spot={"menu-" + label.toLowerCase().replace(/[^a-z]+/g, "-")}>{label}</summary>
               <div class:list={["panel", links.length > 14 ? "long" : ""]}>
@@ -340,9 +340,9 @@ import { volumes as invVolumes } from "../lib/inventory.js";
           «the family is in the drawer») had nowhere to be. The script below moves the real, bound control here at that width and back to the header
           when it widens; the plain link stays as the fallback until then. */}
       <div class="dgrp" id="ra-drawer-lines"><span class="gl">Researching</span><a class:list={["ra-dr-fallback", here === u("/my-research/") ? "on" : ""]} href={u("/my-research/")}>My research</a></div>
-    {nav.map(([label, links]) => (
+    {nav.map(([label, links, opt]) => (
       typeof links === "string"
-        ? <div class="dgrp"><a href={u(links)} class={here === u(links) ? "on" : ""}>{label}</a></div>
+        ? <div class="dgrp"><a href={u(links)} class={here === u(links) ? "on" : ""} target={opt?.newTab ? "_blank" : undefined} rel={opt?.newTab ? "noopener" : undefined}>{label}</a></div>
         : <div class="dgrp"><span class="gl">{label}</span>
             {links.map(([h, l]) => h === null ? <span class="gl gl2">{l}</span> : <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}
           </div>

@@ -53,7 +53,7 @@ export const nav = [
   /* THE TREE CANVAS IS AN ICON IN THE BAR, A TEXT ROW IN THE DRAWER, like the Record Reader above: public/js/theme.js makes the round icon beside
      the toggle, styles.css hides this link in the bar. David: «link /tree-canvas/ from the Atlas as an icon similar to defranceski» (the family
      archives' menu bar ends in round icon buttons). */
-  ["Tree Canvas", "/tree-canvas/"],
+  ["Tree Canvas", "/tree-canvas/", { newTab: true }],   /* David: the canvas opens in a new tab, so the atlas page you were on is still there */
   /* PLACES HOLDS THE FLAGS TOO. David: «could we bring flags under the places menu tab?» A flag page is a country's other face (see the
      links between a country page and its flag history), so the two share a door: every place, the countries, the Flags Atlas, then ONE row to
      the hubs (the Flags Atlas page's own hub section). They were listed here, 34 rows, and took the whole menu; the count is read from

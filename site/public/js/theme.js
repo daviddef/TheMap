@@ -42,7 +42,7 @@
     /* THE TREE CANVAS IS A SECOND ROUND ICON, to the right of the Record Reader's. Hover text only, like it. */
     if (nav && !nav.querySelector(".ra-canvas")) {
       var cv = document.createElement("a"), cbase = (root.getAttribute("data-base") || "/").replace(/\/?$/, "/");
-      cv.className = "ra-canvas"; cv.href = cbase + "tree-canvas/";
+      cv.className = "ra-canvas"; cv.href = cbase + "tree-canvas/"; cv.target = "_blank"; cv.rel = "noopener";
       cv.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="3" y="4" width="7" height="5" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="14" y="15" width="7" height="5" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="14" y="4" width="7" height="5" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M10 6.5h4M6.5 9v8.5H14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
       var ctip = T("Tree Canvas: draw a family tree file on one canvas"); cv.title = ctip; cv.setAttribute("aria-label", ctip);
       if (location.pathname.replace(/\/+$/, "").slice(-12) === "/tree-canvas") cv.setAttribute("aria-current", "page");

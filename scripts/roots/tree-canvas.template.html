@@ -3613,8 +3613,8 @@ addEventListener('resize', () => playPlace());
    One card per surname family with how many people bear it and their years; a line between two names for the marriages that join them, counted. The names are laid out in rings around the
    focus person's own name; each ring is one more marriage away, and any name can be dragged. The counting is TC.nameTree (logic.js); this file lays it out and draws it in the canvas world,
    so pan and zoom work as they always do. The people cards are hidden while this look is on and come back untouched when it is changed. */
-const NAMES = { box: null, sig: '', focus: null, open: null, scope: 'blood', lay: 'free', lanes: null, pos: {}, psig: '', openEdge: null, T: null, by: null, drag: null, dragEnd: 0 };
-try { if (!EMBED && localStorage.getItem('tcNamesLay') === 'country') NAMES.lay = 'country'; } catch (e) { /* ignore */ }
+const NAMES = { box: null, sig: '', focus: null, open: null, scope: 'blood', lay: 'free', basis: 'now', lanes: null, pos: {}, psig: '', openEdge: null, T: null, by: null, drag: null, dragEnd: 0 };
+try { if (!EMBED && localStorage.getItem('tcNamesLay') === 'country') NAMES.lay = 'country'; if (!EMBED && localStorage.getItem('tcNamesBasis') === 'then') NAMES.basis = 'then'; } catch (e) { /* ignore */ }
 try { if (!EMBED) { const sv = localStorage.getItem('tcNamesScope'); if (sv === 'anc' || sv === 'all') NAMES.scope = sv; } } catch (e) { /* ignore */ }
 const namesLook = () => document.documentElement.getAttribute('data-theme') === 'names';
 function namesBox() { return namesLook() ? NAMES.box : null; }
@@ -3658,7 +3658,15 @@ function namesLayout(T) {
    called, as the Countries look does), and its card is placed along the lane by the year of its earliest person, so a lane reads left to right as time. Cards that would overlap drop to a
    new row in the lane. A name whose people were born in several countries stays in its main one and says how many were born elsewhere. No birthplace, no lane: they share the last one. */
 const NM_LBL = 200;   /* room at the left of every lane for its country's flag and name */
-function namesBirthCountry(p) { if (!p || p.living || p.ghost || !p.bp) return ''; const pl = TC.placeAt(M, p, p.bp, p.by); return (pl && pl.cn) || ''; }
+/* The lane a person's birth puts them in. Basis 'now': the country the birthplace is in today. Basis 'then': the state that ruled the birthplace in the year of the birth, as the Atlas
+   names it (the part of its era label before the dash: "Republic of Venice", "Austria", "Yugoslavia"), where the Atlas has an era for that place and year; a birth with no era known,
+   or no birth year, stays in today's country, so nobody drops out of the lanes. */
+function namesBirthCountry(p) {
+  if (!p || p.living || p.ghost || !p.bp) return '';
+  const pl = TC.placeAt(M, p, p.bp, p.by);
+  if (NAMES.basis === 'then' && pl && pl.era && p.by != null) return String(pl.era.label).split(' \u2014 ')[0].trim() || pl.cn || '';
+  return (pl && pl.cn) || '';
+}
 function namesLayoutCountry(T) {
   const by = new Map(T.nodes.map(n => [n.key, n])), lanes = new Map();
   T.nodes.forEach(n => {
@@ -3690,7 +3698,7 @@ function namesLanesHTML() {
   const Ls = NAMES.lanes; if (!Ls || NAMES.lay !== 'country') return '';
   let h = '';
   Ls.forEach(L => {
-    let fl = ''; for (const n of L.nodes) { for (const j of n.people) { const p = M.P[j]; if (namesBirthCountry(p) !== L.cn || !L.cn) continue; const pl = TC.placeAt(M, p, p.bp, 2100); if (pl && pl.fi >= 0) { fl = flagHTML(pl, 2100, 'The flag of ' + L.cn + ' today (Record Atlas)', false); break; } } if (fl) break; }
+    let fl = ''; for (const n of L.nodes) { for (const j of n.people) { const p = M.P[j]; if (namesBirthCountry(p) !== L.cn || !L.cn) continue; const then = NAMES.basis === 'then' && p.by != null, yr = then ? p.by : 2100, pl = TC.placeAt(M, p, p.bp, yr); if (pl && pl.fi >= 0) { fl = flagHTML(pl, yr, then ? 'The flag over ' + L.cn + ' in ' + yr + ' (Record Atlas)' : 'The flag of ' + L.cn + ' today (Record Atlas)', false); break; } } if (fl) break; }
     const yrs = L.from !== Infinity ? 'from ' + L.from : '';
     h += `<div class="nmlane${L.cn ? '' : ' none'}" style="top:${f1(L.y0)}px;height:${f1(L.h)}px;left:${f1(L.x0)}px;width:${f1(L.x1 - L.x0)}px;--lc:${LANE_SHADES[(L.i * 2) % LANE_SHADES.length]}"><div class="nmlh">${fl}<b>${esc(L.cn || 'Birthplace not recorded')}</b><small>${L.nodes.length} ${L.nodes.length === 1 ? 'name' : 'names'} &middot; ${L.people} ${L.people === 1 ? 'person' : 'people'}${yrs ? ' &middot; ' + yrs : ''}</small></div></div>`;
   });
@@ -3752,11 +3760,11 @@ function drawNames(force) {
   if (!namesLook()) { if (host.innerHTML) host.innerHTML = ''; cap.hidden = true; NAMES.sig = ''; NAMES.box = null; NAMES.focus = null; return; }
   const p = namesFocus();
   if (!p) { host.innerHTML = ''; NAMES.box = null; NAMES.sig = ''; cap.hidden = false; cap.innerHTML = '<b>Names</b> Put someone on the canvas, then select or mark them: this shows their ancestry as surnames.'; return; }
-  const sig = p.key + '|' + NAMES.open + '|' + NAMES.scope + '|' + NAMES.lay; if (sig === NAMES.sig && !force) return;
+  const sig = p.key + '|' + NAMES.open + '|' + NAMES.scope + '|' + NAMES.lay + '|' + NAMES.basis; if (sig === NAMES.sig && !force) return;
   const changed = NAMES.focus !== p.key; NAMES.focus = p.key; NAMES.sig = sig;
   const T = TC.nameTree(M, p.i, NAMES.scope), by = NAMES.lay === 'country' ? namesLayoutCountry(T) : namesLayout(T), max = Math.max(...T.nodes.map(n => n.n));
   if (NAMES.lay !== 'country') NAMES.lanes = null;
-  const ps = p.key + '|' + NAMES.scope + '|' + NAMES.lay; if (ps !== NAMES.psig) { NAMES.psig = ps; NAMES.pos = {}; NAMES.openEdge = null; }
+  const ps = p.key + '|' + NAMES.scope + '|' + NAMES.lay + '|' + NAMES.basis; if (ps !== NAMES.psig) { NAMES.psig = ps; NAMES.pos = {}; NAMES.openEdge = null; }
   T.nodes.forEach(n => { const o = NAMES.pos[n.key]; if (o) { n.x = o.x; n.y = o.y; } });
   NAMES.T = T; NAMES.by = by;
   let html = '';
@@ -3776,13 +3784,16 @@ function drawNames(force) {
   const sc = NAMES.scope;
   cap.innerHTML = `<b>${sc === 'blood' ? 'Names in the bloodline of' : sc === 'all' ? 'Every name around' : 'Names behind'} ${esc(p.name)}</b> ${T.people.toLocaleString()} ${T.people === 1 ? 'person' : 'people'} in ${T.nodes.length} ${T.nodes.length === 1 ? 'name' : 'names'}, ${marriages} ${marriages === 1 ? 'marriage' : 'marriages'}${T.desc && T.desc.length ? ' and ' + T.desc.length + ' ' + (T.desc.length === 1 ? 'line' : 'lines') + ' of descent' : ''}.
     <span class="nmsc" role="group" aria-label="What to count"><button type="button" data-scope="blood" class="${sc === 'blood' ? 'on' : ''}">Whole bloodline</button><button type="button" data-scope="all" class="${sc === 'all' ? 'on' : ''}" title="The bloodline, plus the whole ancestry of every spouse: the in-laws' families too">With in-laws</button><button type="button" data-scope="anc" class="${sc === 'anc' ? 'on' : ''}">Ancestors only</button></span>
-    <span class="nmsc nmlay" role="group" aria-label="Layout"><button type="button" data-lay="country" class="${NAMES.lay === 'country' ? 'on' : ''}" title="Swim lanes, one for each country the names were born in, oldest first">By country</button></span>
+    <span class="nmsc nmlay" role="group" aria-label="Layout"><button type="button" data-lay="country" class="${NAMES.lay === 'country' ? 'on' : ''}" title="Swim lanes, one for each country the names were born in, oldest first. Choose today's country or the state at the time of birth.">By country</button></span>${NAMES.lay === 'country' ? `
+    <span class="nmsc nmlay" role="group" aria-label="Which country"><button type="button" data-basis="now" class="${NAMES.basis === 'now' ? 'on' : ''}" title="The country each birthplace is in today">Country today</button><button type="button" data-basis="then" class="${NAMES.basis === 'then' ? 'on' : ''}" title="The state that ruled each birthplace in the year of the birth, as the Record Atlas names it (a birth with no era known stays in today's country)">State at birth</button></span>` : ''}
     <small>Drag a name to move it${moved ? ' · <a href="#" data-tidy="1">Tidy up</a>' : ''} · click one to see who · select or mark someone else to change the centre.</small>`;
   if (changed) fit();
 }
 document.addEventListener('click', e => {
   const sb = e.target.closest && e.target.closest('#namesCap [data-scope]');
   if (sb) { NAMES.scope = sb.dataset.scope; NAMES.open = null; try { if (!EMBED) localStorage.setItem('tcNamesScope', NAMES.scope); } catch (x) { /* ignore */ } drawNames(true); fit(); return; }
+  const bb = e.target.closest && e.target.closest('#namesCap [data-basis]');
+  if (bb) { NAMES.basis = bb.dataset.basis === 'then' ? 'then' : 'now'; NAMES.open = null; NAMES.openEdge = null; try { if (!EMBED) localStorage.setItem('tcNamesBasis', NAMES.basis); } catch (x) { /* ignore */ } drawNames(true); fit(); return; }
   const lb = e.target.closest && e.target.closest('#namesCap [data-lay]');
   if (lb) { NAMES.lay = NAMES.lay === 'country' ? 'free' : 'country'; NAMES.open = null; NAMES.openEdge = null; try { if (!EMBED) localStorage.setItem('tcNamesLay', NAMES.lay); } catch (x) { /* ignore */ } drawNames(true); fit(); return; }
   if (e.target.closest && e.target.closest('#namesCap [data-tidy]')) { e.preventDefault(); NAMES.pos = {}; drawNames(true); fit(); return; }

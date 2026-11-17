@@ -1001,6 +1001,9 @@ header.site nav a.findbtn:hover{background:var(--accent-2);color:#fff!important}
   width:38px;height:38px;padding:0;flex:0 0 auto;
   color:var(--ink);cursor:pointer}
 .drawer{border-top:1px solid var(--rule);background:var(--panel);padding:16px 0 22px;max-height:70vh;overflow:auto}
+/* FIT THE SCREEN YOU CAN SEE. 70vh counts the space behind a phone browser's toolbars, so the panel could end below the visible edge; dvh is the
+   visible height. The 76px is the sticky header and a margin. Browsers without dvh keep the 70vh above. */
+@supports (height:100dvh){.drawer{max-height:calc(100dvh - 76px);overscroll-behavior:contain}}
 .drawer .dgrp{padding:10px 0;border-bottom:1px solid var(--rule)}
 .drawer .dgrp:last-child{border-bottom:0}
 .drawer .gl{display:block;font-family:var(--sans);font-size:9.5px;font-weight:600;
@@ -1862,3 +1865,16 @@ header.site .ra-grp a.ra-lines-l .ra-lines-i{flex:0 0 auto}
 .lf-strip .lf-links { display: flex; flex-wrap: wrap; gap: 6px 8px; }
 .lf-strip .lf-links a { display: inline-block; padding: 5px 11px; border: 1px solid var(--rule-strong); border-radius: 999px; font: 500 13px/1.2 var(--sans); text-decoration: none; background: var(--panel); }
 .lf-strip .lf-links a:hover { background: var(--accent-wash); border-color: var(--accent); }
+
+/* THE DRAWER'S QUICK ROW (Base.astro #ra-quick; buttons bound by theme.js and sources-pop.js). The round icons that vanish with the top bar below
+   1180px, as four labelled buttons at the top of the drawer. Reader and Canvas keep their bar styling: a plain ring, and the canvas orange. */
+.drawer .dquick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:4px 0 14px}
+.drawer .dquick .dq{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;padding:4px 0;border:0;background:none;color:var(--ink-2);font:500 12px/1.2 var(--sans,system-ui);text-align:center;text-decoration:none;cursor:pointer}
+.drawer .dquick .dq[hidden]{display:none}
+.drawer .dquick .dq .dqi{display:grid;place-items:center;width:46px;height:46px;border:1px solid var(--rule-strong,var(--rule,#ccc));border-radius:50%;background:var(--panel,transparent);color:var(--ink,#222)}
+.drawer .dquick .dq:hover .dqi,.drawer .dquick .dq[aria-current="page"] .dqi{border-color:var(--accent,#1f5c6b);color:var(--accent,#1f5c6b)}
+.drawer .dquick .dq-canvas .dqi{border-color:#D9822B;background:#D9822B;color:#fff}
+.drawer .dquick .dq-canvas:hover .dqi,.drawer .dquick .dq-canvas[aria-current="page"] .dqi{background:#C4721F;border-color:#C4721F;color:#fff}
+.drawer .dquick .dq:focus-visible{outline:3px solid var(--accent,#1f5c6b);outline-offset:2px;border-radius:10px}
+/* the text rows these four replace are hidden (a browser without :has keeps them, which only repeats a link) */
+.drawer .dgrp:not(.dquick):has(> a[href$="/read/"]),.drawer .dgrp:not(.dquick):has(> a[href$="/tree-canvas/"]),.drawer .dgrp:has(> .ra-theme-row),.drawer .dgrp:has(> .ra-sources-row){display:none}

@@ -2049,6 +2049,39 @@ window.addEventListener("load", async function () {
     storyCcs = ccs && ccs.length ? ccs : null;
     if (FLAGIDX) drawFlagRes(qbox ? qbox.value : ""); else if (storyCcs) loadFlagIndex();
   };
+  /* THE FLAGS FOLLOW THE MAP. David: the cards under the map did not change when the map was moved or zoomed, only when something was typed.
+     With nothing typed, no place open and no story, the cards are now the countries that have places inside the view, and the hubs those
+     countries belong to, in name order (not by how many dots: a count order reads as «not sorted»). Typing, an open place and a story each
+     still win, and «Show all» gives the whole list back. It is recomputed 300 ms after the map stops, and again when a tile of places
+     arrives, because the places of a view are fetched as it is reached. */
+  var viewAll = false, viewKey = null, viewSet = null, viewTimer = null;
+  function placesInView() {
+    var b = map.getBounds(), s = b.getSouth(), n = b.getNorth(), w = b.getWest(), e = b.getEast(), out = {}, wide = (e - w) >= 360;
+    idx.places.forEach(function (p) {
+      if (!p.cc || p.y < s || p.y > n) return;
+      var x = p.x;
+      if (wide || (x >= w && x <= e) || (x + 360 >= w && x + 360 <= e) || (x - 360 >= w && x - 360 <= e)) out[p.cc] = 1;
+    });
+    return out;
+  }
+  function viewFlagsSoon() {
+    if (viewTimer) clearTimeout(viewTimer);
+    viewTimer = setTimeout(function () {
+      viewTimer = null;
+      if (!map) return;
+      var set = placesInView(), key = Object.keys(set).sort().join(",");
+      if (key === viewKey) return;
+      viewKey = key; viewSet = set;
+      if (FLAGIDX && !viewAll) drawFlagRes(qbox ? qbox.value : "");
+    }, 300);
+  }
+  map.on("moveend zoomend", viewFlagsSoon);
+  if (fSub) fSub.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("[data-flagview]"); if (!b) return;
+    viewAll = b.getAttribute("data-flagview") === "all";
+    if (viewAll) { /* nothing to recompute */ } else { viewKey = null; viewSet = placesInView(); viewKey = Object.keys(viewSet).sort().join(","); }
+    drawFlagRes(qbox ? qbox.value : "");
+  });
   function drawFlagRes(q) {
     if (!FLAGIDX || !fSec) return;
     var k = fold((q || "").trim());
@@ -2091,6 +2124,17 @@ window.addEventListener("load", async function () {
       mh = hs.filter(function (h) { return asWords(hubHay(h)); });
     }
 
+    /* NOTHING TYPED: THE MAP DECIDES. */
+    var inView = false;
+    if (!k && !viewAll) {
+      if (!viewSet) { viewSet = placesInView(); viewKey = Object.keys(viewSet).sort().join(","); }
+      buildCC2FLAG();
+      var vc = Object.keys(viewSet).map(function (cc) { return CC2FLAG && CC2FLAG[cc]; }).filter(Boolean)
+        .sort(function (a, b) { return a.name.localeCompare(b.name); });
+      var vh = hs.filter(function (h) { return h.holds && (h.holds.ccs || []).some(function (cc) { return viewSet[cc]; }); })
+        .sort(function (a, b) { return a.name.localeCompare(b.name); });
+      if (vc.length || vh.length) { mc = vc; mh = vh; inView = true; }
+    }
     /* Nothing matches the typed text: if a place is open, its country's card
        is the answer; hiding the section is for a search that found nothing. */
     if (k && !mc.length && !mh.length) {
@@ -2098,10 +2142,17 @@ window.addEventListener("load", async function () {
       fSec.hidden = true; return;
     }
     fSec.hidden = false;
-    fSub.textContent = k
-      ? T(mc.length + " of " + cs.length + " countries, " + mh.length + " of " +
-        hs.length + " hubs")
-      : T(cs.length + " countries and " + hs.length + " hubs — type to filter");
+    if (inView) {
+      fSub.innerHTML = esc(T("In view") + ": " + mc.length + " countr" + (mc.length === 1 ? "y" : "ies") +
+        (mh.length ? ", " + mh.length + " hub" + (mh.length === 1 ? "" : "s") : "") +
+        (mc.length > 60 ? " \u2014 " + T("zoom in to narrow") : "")) +
+        ' \u00b7 <button type="button" class="ra-flagmode" data-flagview="all">' + esc(T("Show all") + " " + cs.length) + "</button>";
+    } else if (k) {
+      fSub.textContent = T(mc.length + " of " + cs.length + " countries, " + mh.length + " of " + hs.length + " hubs");
+    } else {
+      fSub.innerHTML = esc(T(cs.length + " countries and " + hs.length + " hubs — type to filter")) +
+        ' \u00b7 <button type="button" class="ra-flagmode" data-flagview="map">' + esc(T("Follow the map")) + "</button>";
+    }
 
     /* Capped at 60. Painting 210 cards with inline SVG on every keystroke is
        work nobody asked for; an unfiltered reader is browsing, not looking. */
@@ -8561,6 +8612,7 @@ window.addEventListener("load", async function () {
       idx.places.push(p);
     });
     if (!added) return 0;
+    viewFlagsSoon();
     if (absorbTimer) clearTimeout(absorbTimer);
     absorbTimer = setTimeout(settle, 60);
     return added;
@@ -9496,6 +9548,7 @@ window.addEventListener("load", async function () {
      vocabulary and are not touched. */
   .ra-flagres { margin: 30px 0 8px; }
   .ra-flagres[hidden] { display: none; }
+  :global(.ra-flagmode) { font: inherit; font-size: inherit; padding: 0; border: 0; background: none; color: var(--accent); text-decoration: underline; cursor: pointer; }
   .ra-flagres-head h2 { font-family: var(--serif); font-size: 22px; margin: 0; }
   .ra-flagres-head .cap { font-family: var(--mono); font-size: 11.5px;
     color: var(--ink-3); margin: 4px 0 14px; }

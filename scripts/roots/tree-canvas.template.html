@@ -4803,6 +4803,10 @@ function boot() {
   if (S.phone) { S.infoOpen = false; $('#info').classList.remove('on'); }
   syncButtons();
   runSearchMarks();
+  /* a link to one person (the archive page sends ?p=<slug of the person's page>, the wrapper hands it over as RR.carryPerson): put that person on the canvas and select them, unless the visitor's saved canvas already holds them */
+  if (EMBED) { const R = window.parent && window.parent.RR, slug = R && typeof R.carryPerson === 'string' ? R.carryPerson : '';
+    if (slug) { const hit = M.P.find(p => p.page && p.page.replace(/\/+$/, '').split('/').pop() === slug);
+      if (hit) { if (!S.cards.has(hit.key)) addFromResult(hit); select([hit.key]); const c = S.cards.get(hit.key); if (c) fit([c], { maxK: 1, ms: 0 }); } } }
   if (matchMedia('(prefers-reduced-motion:reduce)').matches) document.documentElement.classList.add('rm');
   window.__TC = { S, M, TC, dropPerson, doUp, doDown, doAllBack, showPath, drawEdges, layoutCluster, fit, select, cardOfPerson, relayout, snapshot, undo, setTheme, decide, clearCanvas, runSearch, toast };
 }

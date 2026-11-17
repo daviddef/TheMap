@@ -10,6 +10,7 @@ import { u } from "../../lib/url.js";
 import full from "../../data/places-full.json";
 import regions from "../../../public/regions.json";
 import provs from "../../../public/providers.json";
+import { atlas as idx } from "../../lib/atlas.js";
 
 export async function getStaticPaths() {
   const provs = (await import("../../../public/providers.json")).default;
@@ -29,6 +30,24 @@ const holds = full.places
   .filter((x) => x.n > 0)
   .sort((a, b) => b.n - a.n || a.p.name.localeCompare(b.p.name));
 const vols = holds.reduce((a, x) => a + x.n, 0);
+/* WHAT THE MAP KNOWS WHEN NO VOLUME IS PLACED. Almost every source has no places attached yet (only FamilySearch, DAPA, Antenati and Beweb do), so the empty state
+   is the page most sources show. It says what is known (the countries it covers, its own address) rather than reading as an error, and lists the places on this
+   map nearest the archive's address, which is where it is, NOT what it holds. Nothing here is guessed: no place is attached to the archive. */
+const CN = idx.countries || {};
+const world = (prov.countries || []).includes("*");
+const covers = world ? [] : (prov.countries || []);
+let near = [];
+if (!holds.length && prov.at) {
+  const k = Math.cos((prov.at.lat * Math.PI) / 180);
+  near = full.places
+    .filter((p) => !covers.length || covers.includes(p.country))
+    .map((p) => ({ p, d: Math.hypot((p.lat - prov.at.lat) * 111, (p.lon - prov.at.lon) * 111 * k) }))
+    .filter((x) => x.d <= 150)
+    .sort((a, b) => a.d - b.d)
+    .slice(0, 6)
+    .map((x) => x.p)
+    .sort((a, b) => a.name.localeCompare(b.name));   /* the six nearest, shown by name */
+}
 /* And which record regions name it as the holder of their records. */
 const cited = regions.regions
   .map((r) => ({ r, eras: r.eras.filter((e) => e.filedUnder.includes(prov.id)) }))
@@ -109,11 +128,17 @@ const KIND = {
     </section>
   ) : (
     <div class="one" style="margin-top:32px;border-left-color:var(--rule-strong)">
-      <div class="lab">No places here yet</div>
-      <p class="cap">This map knows {prov.name} covers
-      {" " + (prov.countries.includes("*") ? "the world" : prov.countries.join(", "))},
-      but nobody has walked its catalogue into the shelf. <b>That is a gap in this map, not a
-      gap in the record.</b> <a href={u("/add/")}>Help fill it →</a></p>
+      <div class="lab">What this map knows so far</div>
+      <p class="cap">{prov.name} is listed as covering
+      {world ? " the world" : covers.map((cc, i) => (
+        <>{i ? (i === covers.length - 1 ? " and " : ", ") : " "}<a href={u(`/country/${cc}/`)}>{CN[cc] || cc}</a></>
+      ))}.
+      No volume from it is placed on a map place yet. <b>That is a gap in this map, not a gap in the record.</b>
+      Know a series or register it holds for a place? <a href={u("/add/")}>Tell us →</a></p>
+      {near.length > 0 && (
+        <p class="cap">On this map near the archive's address (where it is, not a list of what it holds):
+          {near.map((p, i) => <>{i ? ", " : " "}<a href={u(`/place/${p.id}/`)}>{p.name}</a></>)}.</p>
+      )}
     </div>
   )}
 

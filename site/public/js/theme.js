@@ -17,8 +17,11 @@
   function paint() {
     var now = effective(), next = now === "dark" ? "light" : "dark";
     buttons.forEach(function (b) {
-      var row = b.classList.contains("ra-theme-row");
-      b.innerHTML = (now === "dark" ? MOON : SUN) + (row ? "<span>" + T(now === "dark" ? "Dark mode — switch to light" : "Light mode — switch to dark") + "</span>" : "");
+      var row = b.classList.contains("ra-theme-row"), quick = b.classList.contains("dq-theme");
+      var ico = (now === "dark" ? MOON : SUN).replace(/width="18" height="18"/, 'width="20" height="20"');
+      /* the drawer's quick row (Base.astro #ra-quick): a round icon with a short label under it, like its neighbours */
+      b.innerHTML = quick ? '<span class="dqi">' + ico + "</span><span>" + T(now === "dark" ? "Dark" : "Light") + "</span>"
+        : (now === "dark" ? MOON : SUN) + (row ? "<span>" + T(now === "dark" ? "Dark mode — switch to light" : "Light mode — switch to dark") + "</span>" : "");
       var say = T("Colour theme: " + now + (stored() ? "" : " (following your device)") + ". Switch to " + next + ".");
       b.setAttribute("aria-label", say); b.title = say;
     });
@@ -50,6 +53,9 @@
     }
     if (nav && !nav.querySelector(".ra-theme")) nav.appendChild(make("ra-theme"));
     if (wrap && !wrap.querySelector(".ra-theme-row")) { var g = document.createElement("div"); g.className = "dgrp"; g.appendChild(make("ra-theme-row")); wrap.appendChild(g); }
+    /* the quick row's button is in the page already (hidden until it can work): bind it the same way as the others */
+    var qb = document.querySelector("#ra-quick .dq-theme");
+    if (qb && !qb.__ra) { qb.__ra = 1; qb.hidden = false; qb.addEventListener("click", flip); buttons.push(qb); }
     paint(); return true;
   }
   apply();

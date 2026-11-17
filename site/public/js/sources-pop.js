@@ -112,6 +112,15 @@
       });
       g.appendChild(r); wrap.appendChild(g);
     }
+    /* the drawer's quick row (Base.astro #ra-quick) has a Sources button in the page already, hidden until it can work */
+    var qs = document.querySelector("#ra-quick .dq-sources");
+    if (qs && !qs.__ra) {
+      qs.__ra = 1; qs.hidden = false; qs.title = TIP; qs.setAttribute("aria-label", TIP); qs.setAttribute("aria-haspopup", "dialog");
+      qs.addEventListener("click", function () {
+        var burger = document.querySelector("header.site .burger"); if (burger && burger.getAttribute("aria-expanded") === "true") burger.click();
+        open(qs);
+      });
+    }
     return true;
   }
   var tries = 0; (function look() { if (!mount() && ++tries < 20) setTimeout(look, 150); })();

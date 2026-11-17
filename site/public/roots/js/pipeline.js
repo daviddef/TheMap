@@ -5,7 +5,7 @@ import { parseGedcom } from './gedcom.js';
 import * as model from './model.js';
 import { readPeople, prepare, buildTree } from './model.js';
 import { BUILD } from './build.js';
-import { Gazetteer, resolveAll, REAL, COARSE, REVIEW, addCountryNames, parseParts } from './resolver.js';
+import { Gazetteer, resolveAll, REAL, COARSE, REVIEW, addCountryNames, parseParts, isoOfCountry } from './resolver.js';
 import { buildExport, logText } from './export.js';
 import { offerable } from './contribute.js';
 import { Overlay, suggestMerges, cleanDate, yearOf } from './workbench.js';
@@ -15,6 +15,7 @@ import { detectAncestry } from './ancestry.js';
 import { detectMyHeritage } from './myheritage.js';
 import { buildConsistency } from './consistency.js';
 import { AtlasCore, targetOf, nameTargets, buildAtlas } from './atlas.js';
+import { readTreeJson, placeMentions, describe as describeTree } from './treejson.js';
 
 const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
 
@@ -44,8 +45,53 @@ export class Session {
     return this.draw();
   }
 
+
+  /* A tree.json built elsewhere (see treejson.js): the same Atlas files place it, then the same canvas draws it. No GEDCOM is involved, so nothing here is the fix list's. */
+  async loadTree(bytes) {
+    this.progress('Reading the file');
+    const out = readTreeJson(new TextDecoder('utf-8').decode(bytes));
+    if (!out.ok) throw new Error(out.error);
+    this.src = out; this.parsed = null; this.mentions = placeMentions(out.tree);
+    this.progress('Reading the Atlas');
+    this.core = new AtlasCore(await this.io.json('data/atlas.json'));
+    addCountryNames(this.core.c.countries);
+    /* a place the file already placed (name, coordinates, country) is used as given; the rest are looked up by their text */
+    /* the file's own table is read once the country names are known: a name it gives with a country the Atlas does not know is looked up by its text instead */
+    const given = out.tree.places; for (const [k, g] of [...given]) { const iso = isoOfCountry(g.cn); if (iso && this.core.c.countries[iso]) g.cn = iso; else given.delete(k); }
+    const rest = new Map([...this.mentions].filter(([k]) => !given.has(k)));
+    this.progress('Placing ' + rest.size.toLocaleString('en') + ' different places');
+    const r = rest.size ? await resolveAll(rest, this.gz, this.io, (kind, i, n, cc) => this.progress('Loading the ' + cc + ' places (' + i + ' of ' + n + ')')) : { res: new Map(), byNeighbours: 0, prior: new Set(), countries: [] };
+    this.nb = r.byNeighbours; this.res = r.res; this.prior = r.prior; this.countries = r.countries;
+    return this.drawTree();
+  }
+  async drawTree() {
+    const { tree: t0, notes } = this.src, targets = new Map(), of = new Map();
+    const given = this.src.tree.places;
+    for (const raw of this.mentions.keys()) {
+      const g = given.get(raw), tg = g ? { id: 'p|' + g.cn + '|' + raw + '|' + g.lat + '|' + g.lon, name: raw, lat: g.lat, lon: g.lon, iso: g.cn, region: null, kind: 'place' } : targetOf(this.res.get(raw), this.core.c);
+      if (!tg) continue; if (!targets.has(tg.id)) targets.set(tg.id, tg); of.set(raw, tg.id); }
+    nameTargets(targets);
+    const nameOf = raw => { const id = of.get(raw); return id ? targets.get(id).n : null; };
+    /* a place the Atlas cannot place stays as the text the file gives (no flag, no country) and the person is marked as one the maps cannot draw */
+    const people = t0.people.map(p => {
+      if (p.living) return { ...p };
+      const bp = nameOf(p.bp);
+      return { ...p, bp: bp || p.bp, dp: nameOf(p.dp) || p.dp, bpe: false, unplaced: !bp || undefined,
+        route: p.route.map(s => [nameOf(s[0]) || s[0], s[1], s[2]]), sk: null };
+    });
+    const used = new Set(); for (const p of people) { if (p.living) continue; if (p.bp) used.add(p.bp); if (p.dp) used.add(p.dp); for (const s of p.route) used.add(s[0]); }
+    const keep = new Map([...targets].filter(([, tg]) => used.has(tg.n)));
+    this.progress('Drawing flags and regimes');
+    const atlas = await buildAtlas(keep, this.core, id => this.io.flag(id));
+    const tree = { ...t0, people };
+    this.tree = tree; this.atlas = atlas;
+    const placed = people.filter(p => !p.living && !p.unplaced).length;
+    return { tree, atlas, anc: null, mh: null, kind: 'tree', say: describeTree(notes), report: { people: { individuals: people.length, drawn: placed, living: notes.living }, file: {} }, review: [], timings: { ...this.t }, build: { pipeline: BUILD, model: model.MODEL_BUILD } };
+  }
+
   /* (Re)draw from the current resolutions plus the user's picks. Cheap enough to run after every pick. */
   async draw(living = this.liveMode) {
+    if (this.src) return this.drawTree();   // a tree.json: the living rule was applied when it was read and does not depend on the page's toggle
     const T = this.t; let t0 = now(); this.progress('Building the tree');
     const targets = new Map(), of = new Map();
     for (const raw of this.mentions.keys()) {

@@ -56,8 +56,11 @@ function mount() {
 }
 
 let curName = null, curHead = null;
+/* A Roots & Routes tree.json is JSON; a GEDCOM never starts with a brace. Told apart by the first character, not the name, so a renamed file still opens. */
+const isTreeJson = bytes => { try { return /^\uFEFF?\s*\{/.test(new TextDecoder('utf-8').decode(new Uint8Array(bytes, 0, Math.min(64, bytes.byteLength)))); } catch (e) { return false; } };
 function start(bytes, name) {
-  curName = name || null; curHead = name ? headInfo(bytes) : null;
+  const json = isTreeJson(bytes);
+  curName = name || null; curHead = name && !json ? headInfo(bytes) : (json ? { from: 'tree.json', tree: '' } : null);
   $('#start').hidden = true; say('Reading your file…');
   if (worker) worker.terminate();
   worker = new Worker('/roots/js/worker.js', { type: 'module' });
@@ -69,19 +72,20 @@ function start(bytes, name) {
       try { window.RR.fix = issuesByPerson(m); } catch (e) { window.RR.fix = null; }
       const f = $('#cv'); if (f && f.contentWindow) f.contentWindow.postMessage({ tcFix: 1 }, location.origin);
     }
-    else if (m.type === 'error') { say('Sorry, that file could not be read: ' + m.msg, true); if (!window.RR) showStart(); }
+    else if (m.type === 'error') { say((json ? 'That file could not be opened as a tree.json. ' : 'Sorry, that file could not be read: ') + m.msg, true); if (!window.RR) showStart(); }
     else if (m.type === 'done') {
-      if (m.first && hide) { say('Hiding living people…'); worker.postMessage({ cmd: 'living', hide: true }); return; }   // keep the choice for the next file
+      if (m.first && hide && m.kind !== 'tree') { say('Hiding living people…'); worker.postMessage({ cmd: 'living', hide: true }); return; }   // keep the choice for the next file (a tree.json already shows its living people by name and family only)
       const prevMh = mhFile; mhFile = m.mh || null; anc = m.anc || null;
       if (!prevMh || !mhFile || prevMh.guid !== mhFile.guid) { mhc = null; mhText = ''; mhNote = ''; applyTreeLink(); }   // a different tree: start from what is remembered or known for it
       window.RR = { tree: m.tree, atlas: m.atlas, loadNames, links };
       if (curName && m.report && m.report.people) recentMeta(curName, { people: m.report.people.individuals, from: curHead ? curHead.from : '', tree: curHead ? curHead.tree : '' });
       say(''); mount();
-      worker.postMessage({ cmd: 'checklist', living: !hide, ancestry: 'com' });   // the fix list, for the "!" marks; it follows a moment after the canvas is drawn
+      if (m.kind === 'tree') { if (m.say && m.say.length) { say('Opened as a tree.json: ' + m.say.join('; ') + '.'); setTimeout(() => say(''), 9000); } }   // what was left out, in the visitor's words
+      else worker.postMessage({ cmd: 'checklist', living: !hide, ancestry: 'com' });   // the fix list, for the "!" marks; it follows a moment after the canvas is drawn (a tree.json has no GEDCOM to check)
     }
   };
   worker.onerror = e => { say('The reader crashed: ' + (e.message || 'unknown error'), true); if (!window.RR) showStart(); };
-  worker.postMessage({ cmd: 'load', bytes, base }, [bytes]);
+  worker.postMessage({ cmd: json ? 'loadTree' : 'load', bytes, base }, [bytes]);
 }
 
 /* ---- an archive's own tree. Coming from an archive (its header icon, which carries ?archive=<key>, or the page it came from), or choosing one below, the canvas draws

@@ -1,0 +1,89 @@
+---
+/* PUBLISHING YOUR OWN ARCHIVE ON THE TREE CANVAS.
+ *
+ * Somebody outside the eight family archives, with their own research, can draw it on the Tree Canvas in two ways. The first (drop a tree.json) is built and
+ * is described here as what it does today; the second (an archive the canvas knows by name) is a decision the Atlas makes archive by archive, and is described
+ * as that. The file format below is read off the reader that runs: site/public/roots/js/treejson.js, which is also what scripts/test-tree-json.mjs checks.
+ *
+ * WHAT IS NOT PROMISED: a box where anyone types a web address (it needs the page's security policy opened to every site), and any check of what a file says
+ * about its own people beyond the shape and the living rule.
+ */
+import Base from "../../layouts/Base.astro";
+import { u } from "../../lib/url.js";
+---
+<Base
+  title="Publishing your own archive on the Tree Canvas"
+  eyebrow="Tree Canvas · for researchers who keep their own family history"
+  dek="Draw your own research on the canvas with its page links and correction marks, from one file, without uploading it and without asking anyone.">
+
+  <div class="k-hi">
+    <p><b>Two ways, and only the first is open to everyone.</b> Drop a <code>tree.json</code> on the canvas and it draws your tree, read in your browser and never uploaded.
+    Or ask for your site to be listed, so the canvas knows it by name, which is a decision the Atlas makes for each archive.</p>
+    <p><a href={u("/tree-canvas/")}>Open the Tree Canvas</a> · <a href={u("/tree-canvas/example-tree.json")} download>Download an invented example file</a> to try it now.</p>
+  </div>
+
+  <h2 class="k-h" id="route1">Route 1: drop a tree.json <span class="k-count">open to anyone · available now</span></h2>
+  <p class="k-lede">If you build a Roots &amp; Routes tree for your own site, it already makes a <code>tree.json</code>. Open the folder button on the canvas, or drag the file onto the page, as you would a
+    GEDCOM. The canvas tells the two apart by what is inside, not by the file name.</p>
+  <ul class="k-steps">
+    <li><b>Nothing is uploaded and nobody has to approve it.</b> The file is read in your browser. The only requests the page makes are for the Atlas's own public files for the places your file names, the same ones a GEDCOM needs.</li>
+    <li><b>What you get that a GEDCOM cannot give.</b> A link from each person to their own page on your site, a mark where you have recorded corrections or notes, full dates as you wrote them, the route a person travelled, and your sources. All of it comes from the file.</li>
+    <li><b>It is labelled as yours.</b> It appears under the title in your file's <code>meta.title</code>, never as one of the Atlas's archives, and the canvas does not check what it says. You can still set it beside a family archive and compare.</li>
+    <li><b>Anyone who may be alive is left as a name and a family.</b> This is applied to every file before anything is drawn, whatever the file says: a person marked <code>living</code>, or with no death year (or only an estimated one) and born after 1920, keeps their name and their family links, and loses dates, places, page link, sources and occupation. A careless export cannot put a living person's details on the canvas. The canvas says how many it did this to.</li>
+  </ul>
+
+  <h2 class="k-h" id="format">The file format <span class="k-count">what the reader takes, and nothing more</span></h2>
+  <p class="k-lede">The top level is an object with <code>meta</code> and <code>people</code> (a list), and optionally <code>places</code>. Each person is an object. Anything not in the table is ignored. Text is cut to a safe length, years must be whole numbers from 1000 to 2100, and a link to someone who is not in the file is dropped and counted.</p>
+  <div class="scroll"><table class="k-table">
+    <thead><tr><th>Field</th><th>Meaning</th><th>Needed</th></tr></thead>
+    <tbody>
+      <tr><td><code>id</code></td><td>A unique, stable text id. A repeated id is skipped.</td><td>Yes</td></tr>
+      <tr><td><code>sex</code></td><td><code>m</code>, <code>f</code> or <code>u</code></td><td>Optional</td></tr>
+      <tr><td><code>given</code>, <code>sur</code></td><td>Given names, surname</td><td>Optional</td></tr>
+      <tr><td><code>by</code>, <code>dy</code></td><td>Birth year, death year (numbers). </td><td>Optional</td></tr>
+      <tr><td><code>bye</code>, <code>dye</code></td><td><code>true</code> when that year is an estimate. An estimated death year does not release someone born after 1920 from the living rule.</td><td>Optional</td></tr>
+      <tr><td><code>bd</code>, <code>dd</code></td><td>Full date, such as <code>1851-03-02</code> or <code>2 Mar 1851</code></td><td>Optional</td></tr>
+      <tr><td><code>bp</code>, <code>dp</code></td><td>Birth place, death place, as text (see Places below)</td><td>Optional</td></tr>
+      <tr><td><code>father</code>, <code>mother</code></td><td>Ids of the parents</td><td>Optional</td></tr>
+      <tr><td><code>spouse</code>, <code>kids</code></td><td>Lists of ids. Where a child names a parent, or a parent lists a child, the other side is filled in.</td><td>Optional</td></tr>
+      <tr><td><code>occ</code>, <code>my</code></td><td>Occupation; marriage year</td><td>Optional</td></tr>
+      <tr><td><code>route</code></td><td>Places lived, in order: <code>[place, year, estimated]</code>, up to 40</td><td>Optional</td></tr>
+      <tr><td><code>page</code></td><td>The person's own page, a path on your site such as <code>/people/ivan/</code>. It is used only when <code>meta.site</code> names your site.</td><td>Optional</td></tr>
+      <tr><td><code>cx</code></td><td>How many corrections and notes you have recorded about them (a count). It links to their <code>page</code>.</td><td>Optional</td></tr>
+      <tr><td><code>srcs</code></td><td>Sources: <code>{"{ t: title, u: https link }"}</code>, up to 20. Links that are not https are dropped.</td><td>Optional</td></tr>
+      <tr><td><code>surAlso</code></td><td>Other spellings of the surname recorded for them</td><td>Optional</td></tr>
+      <tr><td><code>living</code></td><td><code>true</code> to show the person as a name and family only</td><td>Optional</td></tr>
+      <tr><td><code>meta.title</code></td><td>The name the canvas shows for your tree</td><td>Optional</td></tr>
+      <tr><td><code>meta.site</code></td><td>Your site's address, https only, for example <code>https://family.example.org</code>. Page links and corrections links are built on it.</td><td>Needed for page links</td></tr>
+    </tbody></table></div>
+
+  <h2 class="k-h" id="places">Places <span class="k-count">how a name becomes a flag and a country</span></h2>
+  <p class="k-lede">A place is text. Written with its country (<code>Rijeka, Croatia</code>), it is looked up in the Atlas's own place files, and the canvas draws the flag in force there in the year of the event, as it does for a GEDCOM.
+    A bare name such as <code>Mascali</code> or <code>Melbourne</code> could be anywhere, so a file may also bring the places it has already placed, as Roots &amp; Routes writes them: a list <code>places</code> (or <code>atlas.places</code>) of
+    <code>{"{ n, lat, lon, cn }"}</code>, the name exactly as used in the people, its coordinates, and its country (<code>Italy</code> or <code>IT</code>). Only those four are read. The flag, the rulers and the eras are still looked up in the Atlas, so
+    nothing drawn comes from your file. A place that cannot be found stays as the text you wrote, with no flag, and the person is drawn without a map position.</p>
+
+  <h2 class="k-h" id="route2">Route 2: a listed archive <span class="k-count">by request · one decision each time</span></h2>
+  <p class="k-lede">An archive on the list opens by name from the canvas, with its own colour, page links and corrections marks, and can be compared with a GEDCOM like the eight family archives. It is the Atlas vouching for the site, so each one is a decision.</p>
+  <ul class="k-steps">
+    <li><b>An entry</b> is a host, a name and a colour in an allow-list, plus a change to the page's security policy so the canvas may connect to that host.</li>
+    <li><b>Before one is added,</b> the site must publish a <code>/roots/</code> page in the same format, must leave out living people, and must keep its data public and stable. The Atlas can check the first by reading the file; the other two are the owner's word.</li>
+    <li><b>Not offered:</b> a box where anyone types a web address. That would mean opening the security policy to every site, and letting any page feed the canvas.</li>
+  </ul>
+
+  <h2 class="k-h" id="compare">The two side by side</h2>
+  <div class="scroll"><table class="k-table">
+    <thead><tr><th></th><th>Route 1: tree.json</th><th>Route 2: listed archive</th></tr></thead>
+    <tbody>
+      <tr><td>Who decides</td><td>You</td><td>The Atlas, per archive</td></tr>
+      <tr><td>Privacy</td><td>The file stays in your browser</td><td>The canvas fetches your public <code>/roots/</code> page</td></tr>
+      <tr><td>Page links and corrections</td><td>Yes, if the file carries them and names your site</td><td>Yes</td></tr>
+      <tr><td>Appears as</td><td>Labelled as your file</td><td>Named, with its own colour</td></tr>
+      <tr><td>Security policy</td><td>Unchanged</td><td>One host added per archive</td></tr>
+      <tr><td>Status</td><td>Available</td><td>Not offered yet</td></tr>
+    </tbody></table></div>
+
+  <div class="k-foot">
+    <p><a href={u("/tree-canvas/")}>Open the Tree Canvas</a> · <a href={u("/connect/")}>Connect to the Atlas</a> · <a href={u("/about/")}>About</a></p>
+  </div>
+</Base>

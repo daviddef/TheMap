@@ -1621,7 +1621,7 @@ window.addEventListener("load", async function () {
   function eraFlagsHtml(entry) {
     if (!entry || !entry.gov || !entry.gov.length || !flagEras) return "";
     var from = +entry.from, to = +entry.to, NOW = new Date().getFullYear();
-    var out = [], flew = [];
+    var out = [], flew = [], lead = segFlag(entry), leadHtml = "";
     entry.gov.forEach(function (cc) {
       var slug = FLAG_SLUG[String(cc).toUpperCase()];
       var rows = slug && flagEras[slug + "-flags"];
@@ -1648,6 +1648,15 @@ window.addEventListener("load", async function () {
         return (ea - eb) || ((+a.from) - (+b.from));
       }).slice(-8).forEach(function (e) {
           var svg = art && art[e.id];
+          if (lead && lead.row === e) {
+            /* THE FLAG OF THE ERA, LARGE, AND THE REST FOLDED AWAY. */
+            leadHtml = '<a class="ra-ef-lead" href="' + BASE + esc(flagHref(e.page) || ("flags/" + slug + "-flags/")) + "#" + esc(e.id) + '">' +
+                       '<span class="ra-ef-lf">' + (svg || "") + "</span>" +
+                       '<span class="ra-ef-t"><b>' + esc(e.polity) + "</b>" +
+                       '<span class="ra-ef-d">' + esc(e.dates || e.from) + " \u00b7 " + esc(CNAME[cc] || cc) + "</span></span>" +
+                       '<span class="ra-ef-l" aria-hidden="true">\u2192</span></a>';
+            return;
+          }
           out.push('<li><span class="ra-ef-f' + (svg ? "" : " ra-ef-none") + '">' +
                    (svg || "") + "</span>" +
                    '<span class="ra-ef-t"><b>' + esc(e.polity) + "</b>" +
@@ -1658,7 +1667,7 @@ window.addEventListener("load", async function () {
                    esc(e.id) + '">\u2192</a></li>');
         });
     });
-    if (!out.length) return "";
+    if (!out.length && !leadHtml) return "";
     /* NAME THE STATES, DO NOT CLAIM THE GROUND. The header said «Flags over
        this ground» and that is more than this can know: what is listed is the
        flag history of the states that governed here, taken whole across the
@@ -1668,6 +1677,19 @@ window.addEventListener("load", async function () {
        Senj. So the header names whose flag history this is, and the line
        under it says plainly that not every one flew here. */
     var sig = flew.join("|") + ":" + entry.from + "-" + entry.to + ":" + out.length;
+    /* WHAT FLEW OVER THIS GROUND IN THIS ERA, FIRST: the governing state's flag that covered most of the years, big, with its name and
+       dates. The rest of that state's flag history across the same years (Yugoslavia, a breakaway state's) is one tap away and says
+       plainly that not every one of them flew here. */
+    if (leadHtml) {
+      return '<div class="ra-ef" data-sig="' + esc(sig) + '"><p class="ra-ef-h">' +
+             esc(T("The governing state's flag") + ", " + entry.from + "\u2013" + entry.to) + "</p>" + leadHtml +
+             (out.length
+               ? '<details class="ra-ef-more"><summary>' + esc(T("Other flags of") + " " + flew.join(" \u00b7 ") + " " + T("in these years")) +
+                 " <b>" + out.length + "</b></summary>" +
+                 '<p class="ra-ef-c">' + esc(T("Their whole flag history across these years \u2014 not every one flew over this parish.")) + "</p>" +
+                 "<ul>" + out.join("") + "</ul></details>"
+               : "") + "</div>";
+    }
     return '<div class="ra-ef" data-sig="' + esc(sig) + '"><p class="ra-ef-h">' +
            esc(T("The flags of") + " " + flew.join(" \u00b7 ")) + ", " +
            entry.from + "\u2013" + entry.to + "</p>" +
@@ -1788,14 +1810,20 @@ window.addEventListener("load", async function () {
       var slug = FLAG_SLUG[String(order[k]).toUpperCase()];
       var rows = slug && flagEras[slug + "-flags"], art = slug && eraArt[slug + "-flags"];
       if (!rows || !art) continue;
-      var best = null, bestOv = 0;
+      /* A BREAKAWAY, PUPPET OR PARTISAN FLAG IS NOT THE GOVERNING STATE'S FLAG OF AN ERA, so it only leads when nothing else covers the years
+         (Croatia 1991-2026 leads with the Republic of Croatia, not with the Serbian Krajina that held part of it for four of them). */
+      var best = null, bestOv = 0, oddBest = null, oddOv = 0;
       rows.forEach(function (e) {
         var f = +e.from;
         var t = +e.to || (e.present === true || String(e.present).toLowerCase() === "true" ? NOW : f);
         if (!f || f > to || t < from || !art[e.id]) return;
         var ov = Math.min(t, to) - Math.max(f, from) + 1;
-        if (ov > bestOv || (ov === bestOv && best && f > best.f)) { bestOv = ov; best = { svg: art[e.id], polity: e.polity, f: f }; }
+        var odd = (e.tags || []).some(function (g) { return /breakaway|puppet|partisan/i.test(g.t || ""); });
+        var cand = { svg: art[e.id], polity: e.polity, f: f, row: e, slug: slug, cc: String(order[k]).toUpperCase() };
+        if (odd) { if (ov > oddOv || (ov === oddOv && oddBest && f > oddBest.f)) { oddOv = ov; oddBest = cand; } }
+        else if (ov > bestOv || (ov === bestOv && best && f > best.f)) { bestOv = ov; best = cand; }
       });
+      best = best || oddBest;
       if (best) return best;
     }
     return null;
@@ -10064,7 +10092,16 @@ window.addEventListener("load", async function () {
  :global(.ra-ef-t b) { display: block; font-weight: 600; }
  :global(.ra-ef-d) { display: block; font-family: var(--mono); font-size: 10px;
     color: var(--ink-3); }
- :global(.ra-ef-l) { margin-left: auto; flex: none; text-decoration: none; }
+ :global(.ra-ef-lead) { display: flex; align-items: center; gap: 14px; text-decoration: none; color: inherit; margin: 0 0 8px; }
+  :global(.ra-ef-lf) { flex: none; width: 84px; height: 56px; border: 1px solid var(--rule-strong); border-radius: 3px; overflow: hidden; background: var(--rule); }
+  :global(.ra-ef-lf svg) { width: 100%; height: 100%; display: block; }
+  :global(.ra-ef-lead .ra-ef-t) { font-size: 15px; }
+  :global(.ra-ef-lead:hover .ra-ef-t b), :global(.ra-ef-lead:focus-visible .ra-ef-t b) { text-decoration: underline; }
+  :global(.ra-ef-more) { margin: 4px 0 0; }
+  :global(.ra-ef-more > summary) { cursor: pointer; font-family: var(--sans); font-size: 12.5px; color: var(--ink-2); padding: 4px 0; }
+  :global(.ra-ef-more > summary b) { font-weight: 600; color: var(--ink); }
+  :global(.ra-ef-more > ul) { margin-top: 8px; }
+  :global(.ra-ef-l) { margin-left: auto; flex: none; text-decoration: none; }
   /* ON A PHONE THE BAND SCROLLS RATHER THAN CRUSHES. Nine segments at 38px is
      342px, which a 375px phone just fits and a 320px one does not; scrolling
      sideways keeps every era reachable instead of squeezing the long ones

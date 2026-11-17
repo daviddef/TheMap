@@ -17,6 +17,10 @@ self.onmessage = async e => {
       base = m.base; session = new Session(io, say);
       const out = await session.load(new Uint8Array(m.bytes));
       self.postMessage({ type: 'done', first: true, ...out });
+    } else if (m.cmd === 'loadTree') {
+      base = m.base; session = new Session(io, say);
+      const out = await session.loadTree(new Uint8Array(m.bytes));
+      self.postMessage({ type: 'done', first: true, ...out });
     } else if (m.cmd === 'export' && session) {
       const r = session.export(m.mode);
       self.postMessage({ type: 'exported', mode: m.mode, text: r.text, logText: r.logText, changed: r.changed, stats: r.stats, lines: r.lines, from: r.from });

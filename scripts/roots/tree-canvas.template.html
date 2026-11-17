@@ -1410,7 +1410,7 @@ html:not(.rzopen) #rz{display:none}
     if (es && year != null) for (const e of es) if (e[0] <= year && year < e[1]) era = { label: e[2], from: e[0], to: e[1] };
     return { name, id: g[0] || null, cn: g[1] || '', fi, era };
   }
-  function url(M, p) { return p.page ? 'https://' + M.archives[p.a].host + p.page : ''; }
+  function url(M, p) { return p.page && M.archives[p.a].host ? 'https://' + M.archives[p.a].host + p.page : ''; }
   /* WikiTree's page for the person's surname. Its own search form cannot be filled from a link, so this is the surname index, as the Atlas's own outside links
      are. Never for a living person, a name-only row, or anyone who may be living (no death year, born after 1900): nothing about them leaves the canvas. */
   function wikitreeUrl(p) {
@@ -1432,7 +1432,7 @@ html:not(.rzopen) #rz{display:none}
     return out;
   }
   /* where to read what the archive has recorded about this person: their own page there (it prints the same count), else the archive's corrections page */
-  function corrUrl(M, p) { const a = M.archives[p.a]; if (!(p.cx > 0 && a && a.host) || p.living || p.ghost) return ''; return p.page ? 'https://' + a.host + p.page : 'https://' + a.host + '/corrections/'; }
+  function corrUrl(M, p) { const a = M.archives[p.a]; if (!(p.cx > 0 && a && a.host) || p.living || p.ghost) return ''; return p.page ? 'https://' + a.host + p.page : (a.k === 'you' ? '' : 'https://' + a.host + '/corrections/'); }   /* a visitor's own file knows only the pages it names; the archives have a corrections page */
 
   /* BLOOD RELATIVES of person i: everyone who shares an ancestor with them, reached only through parent and child links (never through a marriage). That is the
      person, their ancestors back to `back` generations (Infinity = every one), and every descendant of any of those. A spouse is blood only if they are
@@ -1944,6 +1944,9 @@ html:not(.rzopen) #rz{display:none}
     const places = [], pidx = new Map(), occs = [], oidx = new Map();
     const P = s => { if (!s) return -1; if (!pidx.has(s)) { pidx.set(s, places.length); places.push(s); } return pidx.get(s); };
     const O = s => { if (!s) return -1; if (!oidx.has(s)) { oidx.set(s, occs.length); occs.push(s); } return oidx.get(s); };
+    /* a tree.json the visitor opened (meta.source): the Atlas's reader has already cut it to the fields below and applied the living rule, so it carries what an archive's tree carries
+       (page link, route, corrections count, full dates) and is still the visitor's own file, never one of the archives. */
+    const rich = !!arch || !!(tree && tree.meta && tree.meta.source === 'tree.json'), fileSite = !arch && rich ? String(tree.meta.site || '') : '';
     let drawn = (tree && tree.people) || [];
     if (arch) drawn = drawn.filter(p => p.living === true || !((p.dy == null || p.dye) && (p.by || 0) > 1920));   /* a `living: true` row is name-only: nothing else of theirs is carried, so there is nothing for the lock to protect */
     /* People the Roots & Routes maps cannot draw (no place, or no year) still have names, dates and relatives, and the canvas needs no place: they are searchable and
@@ -1964,11 +1967,11 @@ html:not(.rzopen) #rz{display:none}
       const hid = !!p.hid;
       /* an archive that publishes a living person's NAME (and nothing else) on their own page sends `living: true`: the canvas draws them as a living card, name and family
          only, with no dates, places, route or records, exactly as the archive prints them. A person the archive does not name is not sent, so is not drawn. */
-      const lv = !!(arch && !hid && p.living === true), blank = hid || lv;
+      const lv = !!(rich && !hid && p.living === true), blank = hid || lv;
       const fl = (p.bye ? 1 : 0) | (p.dye ? 2 : 0) | (p.bpe ? 4 : 0) | (blank ? 8 : 0) | (p.mye ? 16 : 0) | (hid ? 1 : 0) | (p.unplaced ? 64 : 0) | (arch && !blank && p.placeholder === true ? 128 : 0);   /* 128: the archive marks this row a placeholder, a stand-in for a person it does not name (never set on a living card) */
       /* an archive's route: the stops between birth and death; one that only repeats birth then death adds nothing */
       let stops = 0;
-      if (arch && !blank && Array.isArray(p.route)) {
+      if (rich && !blank && Array.isArray(p.route)) {
         const st = p.route.filter(s => s && s[0]).map(s => [P(s[0]), s.length > 1 ? s[1] : null, s.length > 2 && s[2] ? 1 : 0]);
         const two = [P(p.bp), P(p.dp)].filter(x => x >= 0);
         stops = (st.length < 3 && st.map(x => x[0]).join() === two.join()) ? 0 : (st.length ? st : 0);
@@ -1979,9 +1982,9 @@ html:not(.rzopen) #rz{display:none}
         blank ? null : (p.by == null ? null : p.by), P(blank ? null : p.bp), blank ? null : (p.dy == null ? null : p.dy), P(blank ? null : p.dp),
         g(p.father != null ? p.father : (p.unplaced ? null : extraF.get(p.id))), g(p.mother != null ? p.mother : (p.unplaced ? null : extraM.get(p.id))), gr(p.fg), gr(p.mg),
         [...new Set([...(p.spouse || []), ...(p.unplaced ? [] : (extraS.get(p.id) || []))])].map(g).filter(x => x >= 0), (p.kids || []).map(g).filter(x => x >= 0),
-        (arch && !blank && typeof p.page === 'string') ? p.page : '', O(blank ? null : p.occ), fl, arch && Array.isArray(p.surAlso) ? p.surAlso : 0, stops, blank ? 0 : (p.my || 0),
+        (rich && !blank && typeof p.page === 'string') ? p.page : '', O(blank ? null : p.occ), fl, rich && !blank && Array.isArray(p.surAlso) && p.surAlso.length ? p.surAlso : 0, stops, blank ? 0 : (p.my || 0),
         '', blank || typeof p.bd !== 'string' ? '' : p.bd, blank || typeof p.dd !== 'string' ? '' : p.dd,   /* 22, 23: the full dates, when the tree carries them */
-        arch && !blank && Number.isInteger(p.cx) && p.cx > 0 ? p.cx : 0,   /* 24: how many corrections the archive has recorded about them (a count only) */
+        rich && !blank && Number.isInteger(p.cx) && p.cx > 0 ? p.cx : 0,   /* 24: how many corrections the archive has recorded about them (a count only) */
       ];
     });
     /* an archive's names-only spouses (a wife or husband it names but holds no record for): a row with no dates, places or records (fl bit 32), joined by the marriage
@@ -2000,7 +2003,7 @@ html:not(.rzopen) #rz{display:none}
       });
     });
     /* the Atlas's own place records the page already carries: id, country, and the flag each era flew. Only the places this tree uses. */
-    const used = new Set(); src.forEach(p => { if (p.unplaced) return; if (p.bp && !p.hid) used.add(p.bp); if (!p.hid && p.dp) used.add(p.dp); if (arch && !p.hid && Array.isArray(p.route)) p.route.forEach(s => { if (s && s[0]) used.add(s[0]); }); });
+    const used = new Set(); src.forEach(p => { if (p.unplaced) return; if (p.bp && !p.hid) used.add(p.bp); if (!p.hid && p.dp) used.add(p.dp); if (rich && !p.hid && !p.living && Array.isArray(p.route)) p.route.forEach(s => { if (s && s[0]) used.add(s[0]); }); });
     const flags = [], fidx = new Map();
     const A = atlas || {};
     const F = li => {
@@ -2018,13 +2021,13 @@ html:not(.rzopen) #rz{display:none}
     for (const k of Object.keys(A.regions || {})) regionEras[k] = ((A.regions[k] || {}).eras || []).filter(e => e && e.length > 3 && e[3]).map(e => [e[0], e[1], e[3], e[4] || '']);
     /* what the Atlas knows happened where they lived (wars, epidemics, a change of rule): only the events the used places point to, and each person's sources */
     const evUsed = {}; Object.keys(geo).forEach(k => (geo[k][4] || []).forEach(id => { if (A.events && A.events[id]) evUsed[id] = A.events[id]; }));
-    const srcs = {}; drawn.forEach(p => { if (!p.hid && p.srcs && p.srcs.length) srcs[p.id] = p.srcs.map(x => ({ t: String(x.t || '').slice(0, 140), u: /^https?:\/\//i.test(x.u || '') ? x.u : '' })); });
+    const srcs = {}; drawn.forEach(p => { if (!p.hid && !p.living && p.srcs && p.srcs.length) srcs[p.id] = p.srcs.map(x => ({ t: String(x.t || '').slice(0, 140), u: /^https?:\/\//i.test(x.u || '') ? x.u : '' })); });
     const metaTitle = tree && tree.meta && tree.meta.title;
     /* the converter's stock title is the name of the viewer, not of the visitor's tree: call it "Your tree" */
     const name = label || (metaTitle && !/^roots\s*(&|&amp;|and)\s*routes/i.test(String(metaTitle).trim()) ? metaTitle : 'Your tree');
     return {
       built: new Date().toISOString().slice(0, 10), livingRule: 'as chosen on the roots page',
-      archives: [{ k: arch ? arch.key : 'you', name: arch ? arch.name : name, host: arch ? arch.host : '', color: arch ? arch.color : '#D2493A', graded: !!(arch && arch.graded), generated: tree && tree.meta && tree.meta.generated, living: tree && tree.meta && tree.meta.living, n: rows.length, droppedLiving: 0, livingNamed: 0 }],
+      archives: [{ k: arch ? arch.key : 'you', name: arch ? arch.name : name, host: arch ? arch.host : fileSite, color: arch ? arch.color : '#D2493A', graded: !!(arch && arch.graded), generated: tree && tree.meta && tree.meta.generated, living: tree && tree.meta && tree.meta.living, n: rows.length, droppedLiving: 0, livingNamed: 0 }],
       places, occs, people: rows, flags, geo: { '0': geo }, eras: regionEras, events: evUsed, srcs,
     };
   }
@@ -2375,7 +2378,7 @@ function fixOf(p) { const F = fixList(); const l = F && p && !p.ghost ? F.byId[p
 /* a small pencil with the count, when the archive has recorded corrections about this person: a link to the archive's corrections page */
 function cxMark(p, a) {
   const u = TC.corrUrl(M, p); if (!u) return '';
-  return `<a class="cxm" href="${esc(u)}" target="_blank" rel="noopener" data-act="open" title="${p.cx} ${p.cx === 1 ? 'correction or note' : 'corrections and notes'} recorded about ${esc(p.name)} in the ${esc(a.name)} archive. Click to read them on their page.">${icon('pencil', '')}${p.cx}</a>`;
+  return `<a class="cxm" href="${esc(u)}" target="_blank" rel="noopener" data-act="open" title="${p.cx} ${p.cx === 1 ? 'correction or note' : 'corrections and notes'} recorded about ${esc(p.name)} ${a.k === 'you' ? 'in your file' : 'in the ' + esc(a.name) + ' archive'}. Click to read them on their page.">${icon('pencil', '')}${p.cx}</a>`;
 }
 const STANDIN_TIP = 'A stand-in: the archive keeps this place in the tree for a person it does not name (a parent or partner whose name is not known). Shown so the line is not lost; nothing about them is recorded.';
 function cardInner(c) {
@@ -4166,7 +4169,7 @@ function personPanel() {
   const kids = p.ch.length, sps = p.sp.map(s => M.P[s].name);
   const brs = (M.bridgesOf.get(p.i) || []);
   return `<h3>${esc(p.name)}</h3>
-    <div>${link ? `<a class="pill ac" style="--ac:${a.color}" href="${esc(link)}" target="_blank" rel="noopener" title="Open ${esc(p.name)} in the ${esc(a.name)} archive">${esc(a.name)} archive &nearr;</a>` : a.k === 'you' ? (() => { const ln = lineOf(p.i); return ln ? `<span class="pill ac" style="--ac:${ln.col}" title="On the ${esc(ln.names)} line from the marked person's grandparents">${esc(ln.names)} line</span>` : ''; })() : `<span class="pill ac" style="--ac:${a.color}">${esc(a.name)} archive</span>`}<span class="pill">${TC.years(p)}</span>${p.occ ? `<span class="pill">${esc(p.occ)}</span>` : ''}${corrPill(p, a)}</div>
+    <div>${link ? `<a class="pill ac" style="--ac:${a.color}" href="${esc(link)}" target="_blank" rel="noopener" title="${a.k === 'you' ? 'Open ' + esc(p.name) + ' on ' + esc(a.host) : 'Open ' + esc(p.name) + ' in the ' + esc(a.name) + ' archive'}">${a.k === 'you' ? 'Their page on ' + esc(a.host) : esc(a.name) + ' archive'} &nearr;</a>` : a.k === 'you' ? (() => { const ln = lineOf(p.i); return ln ? `<span class="pill ac" style="--ac:${ln.col}" title="On the ${esc(ln.names)} line from the marked person's grandparents">${esc(ln.names)} line</span>` : ''; })() : `<span class="pill ac" style="--ac:${a.color}">${esc(a.name)} archive</span>`}<span class="pill">${TC.years(p)}</span>${p.occ ? `<span class="pill">${esc(p.occ)}</span>` : ''}${corrPill(p, a)}</div>
     ${a.k === 'you' && !p.ghost ? extLinksHTML(p) : ''}
     ${searchLinksHTML(p)}
     ${p.ghost ? `<p class="plines lvn">Named in the archive, but there is no record of their own yet: no dates, no places, no sources. ${p.how ? 'How the name is known: ' + esc(p.how) + '.' : ''}</p>
@@ -4326,7 +4329,7 @@ const fmtWhen = t => { const d = new Date(t), now = new Date(), same = d.toDateS
 function recentHTML() {
   const on = rememberOn();
   return `<div class="mmsep"></div>`
-    + `<button class="mmi" data-gopen="1">${icon('folder', 'lk-icon')}<span><b>Open a GEDCOM file…</b><small>Read in this browser, never uploaded. A new file replaces this tree.</small></span></button>`
+    + `<button class="mmi" data-gopen="1">${icon('folder', 'lk-icon')}<span><b>Open a GEDCOM or tree.json…</b><small>Read in this browser, never uploaded. A new file replaces this tree.</small></span></button>`
     + (on && RECENT.length ? `<div class="mmrec"><b class="mmh">Last used</b>${RECENT.map(r => `<span class="mmr"><button type="button" data-recent="${esc(r.name)}" title="Open ${esc(r.name)} again"><b>${esc(r.name)}</b><small>${[r.people ? r.people.toLocaleString('en') + (r.people === 1 ? ' person' : ' people') : '', r.tree || (r.from ? 'from ' + r.from : ''), fmtBytes(r.size), fmtWhen(r.when)].filter(Boolean).map(esc).join(' · ')}</small>${r.note ? `<small class="mmnote">${esc(r.note)}</small>` : ''}</button><button type="button" class="mmx" data-forget="${esc(r.name)}" aria-label="Forget ${esc(r.name)}" title="Forget this file">${icon('x', 'lk-icon')}</button></span>`).join('')}</div>` : '')
     + `<label class="mmrem"><input type="checkbox" id="mmRem"${on ? ' checked' : ''}><span>Keep the last ${RKEEP} files on this device<small>In this browser only, so they open in one click. Untick to forget them all.</small></span></label>`;
 }
@@ -4428,7 +4431,7 @@ function searchLinksHTML(p) {
 /* the corrections count as one small pill with the words on hover, instead of a paragraph */
 function corrPill(p, a) {
   const u = TC.corrUrl(M, p); if (!u) return '';
-  const tip = `${p.cx} ${p.cx === 1 ? 'correction or note' : 'corrections and notes'} recorded about ${p.name} in the ${a.name} archive. Click to read ${p.cx === 1 ? 'it' : 'them'} on ${p.page ? 'their page' : 'the corrections page'}. Only entries that name this person are counted, so no pill does not mean nothing was corrected.`;
+  const tip = `${p.cx} ${p.cx === 1 ? 'correction or note' : 'corrections and notes'} recorded about ${p.name} ${a.k === 'you' ? 'in your file' : 'in the ' + a.name + ' archive'}. Click to read ${p.cx === 1 ? 'it' : 'them'} on ${p.page ? 'their page' : 'the corrections page'}. Only entries that name this person are counted, so no pill does not mean nothing was corrected.`;
   return `<a class="pill cxp" href="${esc(u)}" target="_blank" rel="noopener" title="${esc(tip)}" aria-label="${esc(tip)}">${icon('pencil', 'lk-icon')}${p.cx} ${p.cx === 1 ? 'correction' : 'corrections'}</a>`;
 }
 function extLinksHTML(p) {
@@ -4620,7 +4623,7 @@ function wireToolbar() {
     $('.top').insertAdjacentHTML('afterbegin',
       '<button class="lk-ibtn" id="bLiv" type="button" title="Hide living people (the names of anyone who may be alive)" aria-label="Hide living people" aria-pressed="' + (QS.get('liv') === '1') + '">' + icon('eyeoff') + '</button>' +
       '<button class="lk-ibtn" id="bOpen" type="button" title="Back to the opening screen: open a GEDCOM file or one of the family archives. Your canvas is kept." aria-label="Back to the opening screen">' + icon('folder') + '</button>' +
-      '<input type="file" id="gedIn" accept=".ged,.gedcom,.txt,text/plain" hidden>');
+      '<input type="file" id="gedIn" accept=".ged,.gedcom,.txt,.json,text/plain,application/json" hidden>');
     const send = async f => {
       if (!f) return;
       if (f.size > 400e6) return toast('That file is over 400 MB, more than this page can hold in memory.', 4000);

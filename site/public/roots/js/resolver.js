@@ -31,6 +31,13 @@ export function addCountryNames(countries) {
   for (const [cc, v] of Object.entries(countries || {})) { const k = norm(v[0]); if (k && !(k in COUNTRY) && !BLOCK.has(k)) COUNTRY[k] = cc; }
 }
 
+/* the two-letter code for a country the way a person writes it ("Italy", "Croatia", "IT"), or null */
+export function isoOfCountry(name) {
+  const t = String(name || '').trim(); if (!t) return null;
+  if (/^[A-Za-z]{2}$/.test(t)) return t.toUpperCase();
+  return COUNTRY[norm(t)] || null;
+}
+
 function haversine(a, b, c, d) {
   const p = Math.PI / 180, x = Math.sin((c - a) * p / 2) ** 2 + Math.cos(a * p) * Math.cos(c * p) * Math.sin((d - b) * p / 2) ** 2;
   return 12742 * Math.asin(Math.sqrt(x));

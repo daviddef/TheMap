@@ -14,7 +14,7 @@
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex">
 <title>Tree Canvas · Record Atlas</title>
-<meta name="description" content="Draw your family tree from a GEDCOM file on one canvas, with the Record Atlas's places, rulers and record collections for each person. Read in your browser, never uploaded.">
+<meta name="description" content="Draw your family tree from a GEDCOM or tree.json file on one canvas, with the Record Atlas's places, rulers and record collections for each person. Read in your browser, never uploaded.">
 <link rel="icon" href="/favicon.svg">
 <link rel="stylesheet" href="/tree-canvas/page.css">
 </head>
@@ -23,10 +23,11 @@
   <h1 id="stTitle">Tree Canvas</h1>
   <p class="stlead">Draw your family tree on one canvas, with the Atlas's places, rulers and record collections for each person. Your file is read in this browser and never uploaded.</p>
   <div class="stbtns">
-    <button type="button" class="stbtn primary" id="stOpen">Open your GEDCOM</button>
+    <button type="button" class="stbtn primary" id="stOpen">Open a GEDCOM or tree.json</button>
     <button type="button" class="stbtn" id="stDemo">Open an invented family example</button>
   </div>
-  <input type="file" id="stFile" accept=".ged,.gedcom,.txt,text/plain" hidden>
+  <input type="file" id="stFile" accept=".ged,.gedcom,.txt,.json,text/plain,application/json" hidden>
+  <p class="stnote">Drag a file onto this page, too. A <b>tree.json</b> is the file a researcher's own Roots &amp; Routes site makes: it brings page links and corrections marks a GEDCOM cannot. <a href="/tree-canvas/publish/">How to make one</a>.</p>
   <section id="stArch" class="strec" aria-labelledby="stArchTitle">
     <h2 id="stArchTitle">Or draw one of the family archives</h2>
     <div class="starch" id="stArchBtns">
@@ -47,7 +48,7 @@
     <p class="stnote">Kept in this browser only, so you can open them again in one click. <button type="button" class="stlink" id="stForget">Forget them all</button></p>
   </section>
 </main>
-<iframe id="cv" title="Tree Canvas, drawn from your GEDCOM" hidden></iframe>
+<iframe id="cv" title="Tree Canvas, drawn from your file" hidden></iframe>
 <p id="msg" role="status" aria-live="polite" hidden></p>
 <noscript><p class="nojs">The Tree Canvas needs JavaScript to read your file in this browser. Nothing is uploaded. <a href="/">Back to Record Atlas</a></p></noscript>
 <script is:inline src="/tree-canvas/app.js" type="module"></script>

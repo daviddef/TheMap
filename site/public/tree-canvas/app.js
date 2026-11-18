@@ -8,6 +8,7 @@ import { parseLink, profileUrl, treeUrl } from '/roots/js/myheritage.js';
 import { personUrl } from '/roots/js/ancestry.js';
 import { loadTrees, saveTreeLink, loadSite, saveSite } from '/roots/js/remember.js';
 import { parseLink as parseFileLink, fetchBytes, fileNameOf } from '/roots/js/openlink.js';
+import * as CS from '/tree-canvas/compare-set.js';   // reading several archives for the paired Compare view
 import * as W from '/tree-canvas/work.js';   // (parseLink above is the MyHeritage one)
 import { reportInto, el, n0 } from '/roots/js/report-view.js';   // the import report, drawn by the same code as /roots/
 import { treeMetrics, metricTiles } from '/roots/js/metrics.js';   // the five counts of the tree views, worked out here
@@ -59,7 +60,7 @@ function say(text, isError) { const m = $('#msg'); m.textContent = text; m.hidde
    encrypted copy that page keeps (public/js/research-file.js carries them; public/js/sync-auto.js saves them). The tree file itself is never in either. The canvas
    (in the iframe) hands its state to this page in memory; this page keeps it, and hands the saved arrangement back when the same tree is opened again. ---- */
 const BACKUP = '/backup/#canvas';
-let cur = null, wt = 0, noteT = 0, syncFailed = false;      // cur: {key, src, label, loadedUpd, plain, dirty, saw, paused, cmp}
+let cur = null, wt = 0, pt = 0, noteT = 0, syncFailed = false;      // cur: {key, src, label, loadedUpd, plain, dirty, saw, paused, cmp}
 const syncState = () => { let st = null; try { st = JSON.parse(localStorage.getItem('ra-sync-v1')); } catch (e) { /* none */ } let c = null; try { c = localStorage.getItem('ra-canvas-sync'); } catch (e) { /* none */ }
   return { on: !!(st && st.phrase), saved: st && st.saved || null, failed: syncFailed, canvas: c }; };
 const keepStatus = () => W.keepStatus(syncState(), cur ? W.get(cur.key) : null);
@@ -107,21 +108,33 @@ function attachKeep() {
   }
   window.RR.work = w;
   window.RR.keep = c ? { status: keepStatus, unpack: (known, bridges) => { const d = w ? W.unpack(w, key, known, bridges) : null; if (d && look) d.look = look; return d; }, href: BACKUP, views: viewsApi } : null;
+  /* Compare in pairs: the visitor's saved pairing choices for this file (hashes), turned back into person keys by the canvas once it knows who is in the comparison */
+  window.RR.pairKeep = cur ? { unpack: known => { const r = W.get(cur.key); return r && r.w.pr ? W.unpackPairing(r.w.pr, cur.key, known) : null; } } : null;
   if (c) { c.saw = false; c.dirty = false; }
 }
 function onWork(plain) {
+  if (cur && cur.cmp && plain && plain.pairing !== undefined) { cur.pairing = plain.pairing; clearTimeout(pt); pt = setTimeout(flushPairing, 1000); return; }   // in Compare only the pairing choices are kept, never the comparison canvas
   if (!cur || cur.cmp || !plain || !Array.isArray(plain.cards)) return;
   cur.plain = plain; cur.dirty = true; if (plain.cards.length) cur.saw = true;
   if (cur.paused || cur.shared) return;
   clearTimeout(wt); wt = setTimeout(flushWork, 1000);
 }
+/* the visitor's pairing choices (Compare in pairs) go into this tree's record beside its canvas arrangement; the arrangement itself is left as it was */
+function flushPairing() {
+  clearTimeout(pt); const c = cur;
+  if (!c || !c.pairing) return;
+  const p = c.pairing; c.pairing = null;
+  if (W.savePairing(c.src, c.label, p)) { document.dispatchEvent(new CustomEvent('ra-progress-changed')); renderKeep(); }
+  else note('This browser would not keep your pairing choices (its storage is blocked or full).', []);
+}
 function flushWork() {
-  clearTimeout(wt); const c = cur;
+  flushPairing(); clearTimeout(wt); const c = cur;
   if (!c || !c.dirty || c.paused || c.shared || !c.plain) return;
   c.dirty = false;
-  if (!c.plain.cards.length) { if (c.saw) { W.remove(c.key); c.loadedUpd = ''; c.saw = false; } }      // cleared on purpose: the saved one goes too (an empty canvas at start-up changes nothing)
+  if (!c.plain.cards.length) { if (c.saw) { const old = W.get(c.key); if (old && old.w.pr) { const r2 = JSON.parse(JSON.stringify(old)); r2.w.c = []; r2.n = 0; r2.upd = new Date().toISOString(); W.put(r2); } else W.remove(c.key); c.loadedUpd = ''; c.saw = false; } }   // a saved pairing outlives a cleared canvas      // cleared on purpose: the saved one goes too (an empty canvas at start-up changes nothing)
   else {
     const rec = W.makeRecord(c.src, c.label, c.plain), old = rec && W.get(rec.k);
+    if (rec && old && old.w.pr) rec.w.pr = old.w.pr;   // the canvas never carries the pairing choices; they stay as they were
     if (old && old.label === rec.label && JSON.stringify(old.w) === JSON.stringify(rec.w)) { c.loadedUpd = old.upd; return; }   // opening a tree and changing nothing is not a new save
     if (rec && W.put(rec)) c.loadedUpd = rec.upd; else { note('This browser would not keep your canvas (its storage is blocked or full).', []); return; }
   }
@@ -208,7 +221,7 @@ async function renderSaved() {
     }
     for (const r of recs) {
       const onDevice = r.src.t === 'file' && !kept.some(k => k.name === r.src.ref);
-      add(r.label || 'A saved canvas', [r.n.toLocaleString('en') + (r.n === 1 ? ' person' : ' people') + ' on the canvas', savedWhere(r), 'saved ' + W.agoText(r.upd), onDevice ? 'open the same file to bring it back' : ''], () => reopenSrc(r.src, kept));
+      add(r.label || 'A saved canvas', [r.n ? r.n.toLocaleString('en') + (r.n === 1 ? ' person' : ' people') + ' on the canvas' : 'your pairing choices (no canvas)', savedWhere(r), 'saved ' + W.agoText(r.upd), onDevice ? 'open the same file to bring it back' : ''], () => reopenSrc(r.src, kept));
     }
   }
   noFiles();
@@ -265,7 +278,8 @@ function start(bytes, name, via, link) {
       else flushWork();
       attachKeep();
       if (curName && m.report && m.report.people) recentMeta(curName, { people: m.report.people.individuals, from: curHead ? curHead.from : '', tree: curHead ? curHead.tree : '' });
-      say(''); mount();
+      say('');
+      { const pw = m.first ? pairsWanted() : null; if (pw) compareWith(pw.ar, null, { resume: true }).then(ok => { if (!ok) mount(); }); else mount(); }
       /* where it came from (a link) and what was left out of a tree.json, in the visitor's words; it clears itself, the canvas keeps the screen */
       const said = [curVia ? 'Loaded from ' + curVia + '. Read in this browser; nothing from it was sent anywhere.' : '', m.kind === 'tree' && m.say && m.say.length ? 'Opened as a tree.json: ' + m.say.join('; ') + '.' : ''].filter(Boolean).join(' ');
       if (said) { say(said); setTimeout(() => say(''), curVia ? 14000 : 9000); }
@@ -301,12 +315,12 @@ function jsonAfter(html, marker) {
   throw new Error('unterminated');
 }
 /* an archive's published roots page: its tree and its Atlas extract, read here (a plain request for a public page; no credentials, no referrer) */
-async function fetchArchive(key) {
+async function fetchArchive(key, signal, o) {
   const a = ARCH[key];
-  const r = await fetch('https://' + a.host + '/roots/', { credentials: 'omit', referrerPolicy: 'no-referrer' });
+  const r = await fetch('https://' + a.host + '/roots/', { credentials: 'omit', referrerPolicy: 'no-referrer', signal });
   if (!r.ok) throw new Error('HTTP ' + r.status);
   const html = await r.text();
-  return { tree: jsonAfter(html, 'const TREE='), atlas: jsonAfter(html, 'const ATLAS='), archive: { key, name: a.name, host: a.host, color: a.color, graded: a.graded }, lines: a.lines ? await fetchLines(a) : null };
+  return { tree: jsonAfter(html, 'const TREE='), atlas: jsonAfter(html, 'const ATLAS='), archive: { key, name: a.name, host: a.host, color: a.color, graded: a.graded }, lines: a.lines && !(o && o.lines === false) ? await fetchLines(a) : null };
 }
 /* an archive's drawing of its research lines (/roots/lines.json), if it publishes one: read here and handed to the canvas in memory, where it is cleaned before use. It is optional,
    so a missing or malformed file is simply no Lines view, never an error. */
@@ -335,20 +349,36 @@ async function openArchive(key) {
   } catch (err) { say('The ' + a.name + ' archive could not be opened just now (' + (err && err.message || 'error') + '). You can open a GEDCOM instead.', true); showStart(); }
 }
 
-/* Compare: the visitor's file beside an archive's tree. The canvas asks (tcCompare: {key, mark}); the archive is read here and the canvas is drawn again with both, keeping the
-   marked person. key null stops comparing. The file never leaves the browser. */
-async function compareWith(key, mark) {
-  if (!window.RR) return;
-  if (key && !ARCH[key]) return;
-  flushWork(); if (cur) cur.cmp = !!key;   // the Compare view is not kept; the file's own canvas comes back when it stops
-  if (!key) { delete window.RR.compare; window.RR.carryMark = mark || null; window.RR.carryTab = 'compare'; attachKeep(); mount(); return; }
-  say('Reading the ' + ARCH[key].name + ' archive…');
-  try {
-    const f = await fetchArchive(key);
-    window.RR.compare = { tree: f.tree, atlas: f.atlas, archive: f.archive }; window.RR.carryMark = mark || null; window.RR.carryTab = 'compare';
-    attachKeep(); say(''); mount();
-  } catch (err) { if (cur) cur.cmp = false; say('The ' + ARCH[key].name + ' archive could not be read just now (' + (err && err.message || 'error') + '). Your canvas is unchanged.', true); setTimeout(() => say(''), 6000); }
+/* Compare: the visitor's file beside one archive, several, or all eight, in pairs. The canvas asks (tcCompare: {keys, mark}); the archives are read here, a few at a time, each with its own
+   time limit (compare-set.js), and the canvas is drawn again with the file and every archive that answered, keeping the marked person. One archive failing never stops the others: the
+   canvas is told which could not be read, and says so. keys empty or null stops comparing. The file never leaves the browser; each archive is a plain request for its own public page. */
+const archCache = new Map();     // archive key -> what was read, for this visit only (never stored)
+async function compareWith(keys, mark, opt) {
+  if (!window.RR) return false;
+  opt = opt || {};
+  const list = CS.cleanKeys(keys, Object.keys(ARCH));
+  flushWork();
+  if (!list.length) {
+    if (cur && cur.cmp) { cur.cmp = false; if (cur.pairing) { cur.pairing.on = false; flushPairing(); } }
+    delete window.RR.compare; delete window.RR.compares; delete window.RR.compareFailed; window.RR.carryMark = mark || null; window.RR.carryTab = 'compare'; attachKeep(); mount(); return true;
+  }
+  say('Reading the ' + (list.length === 1 ? ARCH[list[0]].name + ' archive' : list.length + ' archives') + '…');
+  const res = await CS.loadSet(list, (k, signal) => fetchArchive(k, signal, { lines: false }), { cache: archCache, concurrency: 3, allowed: Object.keys(ARCH), onProgress: (d, n) => { if (n > 1) say('Reading the archives… ' + d + ' of ' + n); } });
+  if (!res.ok.length) {
+    say((list.length === 1 ? 'The ' + ARCH[list[0]].name + ' archive' : 'None of the archives') + ' could not be read just now (' + (res.failed[0] ? res.failed[0].why : 'error') + '). Your canvas is unchanged.', true); setTimeout(() => say(''), 7000); return false;
+  }
+  if (cur) cur.cmp = true;   // the comparison canvas is not kept; the file's own canvas comes back when it stops
+  window.RR.compares = res.ok.map(r => r.value); delete window.RR.compare;
+  window.RR.compareFailed = res.failed.map(f => ({ key: f.key, name: ARCH[f.key].name, why: f.why }));
+  window.RR.carryMark = mark || null; window.RR.carryTab = 'compare';
+  attachKeep(); say(''); mount();
+  if (res.failed.length) note(res.failed.map(f => ARCH[f.key].name).join(', ') + (res.failed.length === 1 ? ' could not be read' : ' could not be read') + ' just now, so ' + (res.ok.length === 1 ? 'only ' + ARCH[res.ok[0].key].name + ' is' : 'the other ' + res.ok.length + ' are') + ' compared. Nothing is assumed about the ones that failed.', [], 16000);
+  else if (opt.resume) note('Your comparison with ' + (res.ok.length === 1 ? ARCH[res.ok[0].key].name : res.ok.length + ' archives') + ' came back, with the choices you made.', [{ label: 'Stop comparing', fn: () => compareWith(null) }], 14000);
+  window.__cmpTiming = { ms: res.ms, ok: res.ok.map(r => [r.key, r.ms, !!r.cached]), failed: res.failed.map(f => [f.key, f.why]) };
+  return true;
 }
+/* a file opened again that was being compared: put the comparison back (the choices are the visitor's own, in this tree's record) */
+function pairsWanted() { const r = cur ? W.get(cur.key) : null, p = r && r.w.pr; return p && p.on && p.ar && p.ar.length ? p : null; }
 addEventListener('message', e => {
   if (e.origin !== location.origin) return;   // only the canvas, which is this site's own page
   const d = e.data || {};
@@ -357,7 +387,8 @@ addEventListener('message', e => {
   if (d.tcSettings) { openSG(); return; }   // the canvas menu's "Settings"
   if (d.tcRestored) { onRestored(d.tcRestored); return; }
   if (d.tcHome) { flushWork(); $('#cv').hidden = true; showStart(); return; }   // the canvas's folder button: back to the opening screen (the canvas keeps its own state)
-  if (d.tcCompare !== undefined && !d.tcOpen) { compareWith(d.tcCompare && d.tcCompare.key, d.tcCompare && d.tcCompare.mark); return; }
+  if (d.tcCompare !== undefined && !d.tcOpen) { const q = d.tcCompare || {}; compareWith(Array.isArray(q.keys) ? q.keys : q.key ? [q.key] : null, q.mark); return; }
+  if (typeof d.tcLookSet === 'string' && ST.LOOKS.includes(d.tcLookSet)) { lookSet(d.tcLookSet); return; }   // the canvas's Look button
   if (d.tcOpen && d.tcOpen.bytes instanceof ArrayBuffer) { example = false; start(d.tcOpen.bytes, d.tcOpen.name); }
   else if (typeof d.tcLiving === 'boolean') setLiving(d.tcLiving);   // the canvas's eye button: the same setting as in Settings
 });
@@ -490,9 +521,22 @@ addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#sg').hidden) {
 $('#sgLiv').onchange = e => setLiving(e.target.checked);
 $('#sgMh').oninput = e => { $('#sgMhSt').textContent = links.set(e.target.value) || (e.target.value.trim() ? '' : 'Off: no link yet.'); };
 $('#sgAnc').onchange = e => { links.setSite(e.target.value); drawSG(); };
+/* the look, worn by the page around the canvas (Ground is dark, the other looks light, Automatic follows the device) and handed to the canvas. One function for the drawer, a setting that
+   arrived from another device, and the canvas's own Look button, so the three cannot disagree. */
+function wearLook(look) {
+  const s = ST.shellScheme(look), r = document.documentElement;
+  if (s) r.setAttribute('data-theme', s); else r.removeAttribute('data-theme');
+  const f = $('#cv'); if (f && f.contentWindow && !f.hidden) f.contentWindow.postMessage({ tcLook: look }, location.origin);
+}
+/* the canvas's Look button asked for the next look: keep it like the drawer does, wear it, and say so if this browser would not keep it */
+function lookSet(look) {
+  sgWriteFailed = !ST.write({ look }).ok; wearLook(look);
+  if (sgWriteFailed) { say('This browser is not letting the page keep the look, so it lasts until you close the page.'); setTimeout(() => say(''), 5000); }
+  if (!$('#sg').hidden) drawSG();
+}
 $('#sgLook').onchange = e => {
   sgWriteFailed = !ST.write({ look: e.target.value }).ok;
-  const f = $('#cv'); if (f && f.contentWindow && !f.hidden) f.contentWindow.postMessage({ tcLook: e.target.value }, location.origin);
+  wearLook(e.target.value);
   drawSG();
 };
 $('#sgRem').onchange = async e => {
@@ -504,7 +548,7 @@ $('#sgRem').onchange = async e => {
 function onSettingsChanged() {
   const e = ST.effective();
   if (e.living !== hide) { if (worker && window.RR) setLiving(e.living); else hide = e.living; }
-  const f = $('#cv'); if (f && f.contentWindow && !f.hidden) f.contentWindow.postMessage({ tcLook: e.look }, location.origin);
+  wearLook(e.look);
   drawLists(); renderSaved(); if (!$('#sg').hidden) drawSG();
 }
 document.addEventListener('ra-settings-changed', onSettingsChanged);

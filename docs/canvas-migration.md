@@ -16,7 +16,7 @@ Written 18 Nov 2026 (phase 0). Read this before moving anything. It is the inven
 
 ## What was found in the code (corrections to the first-pass sorting)
 
-- The canvas **already has** its own "Fix list" tab (`tcFix`, the "!" marks), "Where next", "Research lines" (the archive's own drawing beside the tree), Compare with an archive, the Path and Bloodline tools and a whole-tree look. These are not "to move": R&R's *Fix list* tab is a second, fuller version of one of them (rows grouped by what the reader has to do, with the Atlas's help). The work in phase 4 is to make the canvas's panel show that fuller list, not to port a tab.
+- The canvas **already has** its own "Fix list" tab (`tcFix`, the "!" marks), "Where next", "Research lines" (the archive's own drawing beside the tree), Compare with archives (the file beside one, several or all eight archives, in pairs; see below), the Path and Bloodline tools and a whole-tree look. These are not "to move": R&R's *Fix list* tab is a second, fuller version of one of them (rows grouped by what the reader has to do, with the Atlas's help). The work in phase 4 is to make the canvas's panel show that fuller list, not to port a tab.
 - **The metrics strip is not shared code.** It is computed inside the tree-views template (`scripts/roots/tree-views.template.html`, `renderMetrics()`), so "move it" would have meant a second copy. Phase 1 writes it once as `site/public/roots/js/metrics.js` and a test runs the viewer's own code over the same trees and fails if they ever differ.
 - **Export is GEDCOM-only.** A `tree.json` is not made again (the reader keeps no parsed GEDCOM for it) and an archive's tree is already published. "Your file" says so rather than offer a button that cannot work.
 - **Orphans is already a top-level R&R tab** (the second shell in #65). Whether the canvas needs its own lens for it is a phase 3 question; Your file already shows the count.
@@ -71,6 +71,7 @@ Phase: 0 inventory, 1 Your file, 2 Settings, 3 Tree lenses, 4 Places and the fix
 | Workbench edits (dates, notes, "may be the same person") | Move, later | The canvas's decisions (confirm / unlink) are the same idea; the overlay and its change log become part of Export | 4 | L | Export parity |
 | The "try a big sample" and invented sample | Keep the invented example only | "draw an invented family" on the opening screen | done | n/a | none |
 | Theme and look | Move | Settings drawer, "Look" | 2 | S | none |
+| **Compare with archives** (the file beside one, several or all eight archives, paired a generation to a row) | Already there; this is the first phase 3 lens | The canvas's Compare tab and its paired layout (`pairs.js`, `pairsui.js` in the Tree Canvas); not an R&R piece, so nothing is retired | 3 | built (prototype) | none |
 | Stale-code warning (mixed cached copies) | Retire with `/roots/` | The canvas page stamps its own build | 5 | S | none |
 | The R&R shell itself (`/roots/` pages, `viewer.html`, the tab strip) | Retire last | `/roots/` becomes a short page that links to the canvas; the archives' vendored template is updated last | 5 | M | everything above |
 
@@ -83,6 +84,18 @@ Phase: 0 inventory, 1 Your file, 2 Settings, 3 Tree lenses, 4 Places and the fix
 - **Phase 3: Tree lenses.** A frame in the canvas that shows a view for the current selection (hourglass, fan, atlas map, movements, eras, timeline, surnames). Views the canvas already does are retired after a side-by-side. `/roots/` keeps working.
 - **Phase 4: Places and the fix list.** The canvas's Fix list gains R&R's grouping and Atlas help; places are picked in place; place picks go into Export's "Cleaned" mode.
 - **Phase 5: Retire.** `/roots/` redirects to the canvas page; the archives' vendored template and kit are updated, one archive at a time, with the same checks.
+
+## Compare in pairs, and what it does to phase 3
+
+Compare with archives (the visitor's file beside one archive, several, or all eight, paired person by person, one row to a generation) is a **lens that takes over the canvas's layout**, not one that only annotates the selection. Phase 3 had assumed the second kind. What building it showed the frame needs:
+
+1. **A lens may own the arrangement.** The paired view draws its own cards in its own rows (the engine, `pairs.js`, hands `TC.arrange` one item per pair), so the Arrange button asks the lens first (`prArrange`), the status buttons and chips are an overlay layer (`#pairs`, hooked into `drawEdges` the way the generation bands and Lines mode are), and the usual cards, edges, pan, zoom, selection and minimap are reused unchanged. The hourglass and fan lenses need the same two hooks (a layer, and "who arranges") and can use `TC.arrange` the same way.
+2. **A lens keeps its own choices, as opaque ids, in the per-tree record.** The paired view's choices (which archives, the starting people, accepted and rejected pairings) are one more field of the #63 record (`pr`), hashed like cards, strictly cleaned on the way into the six-word copy, capped at 400 pairings (about 12 KB at the cap, against a 150 KB per-tree limit and the server's 2 MB). The comparison canvas itself is never saved; the file's own arrangement stays as it was. A lens that needs state (a fan's root, a timeline's range) should add a field the same way, not a new store.
+3. **A lens restores itself when the same tree is opened again,** and says so ("Your comparison came back") with a one-click way out.
+4. **A lens's content is also a list.** The Compare tab lists every place as text (a person on each side, the state, the reason), so nothing depends on seeing the drawing.
+5. **What it does not change:** nothing new leaves the device; the archives are read with the same plain, credential-less request as the single-archive compare, a few at a time, and a failure is named, never counted as "no one"; `/roots/` is untouched.
+
+Effect on the plan: the "lens frame" dependency shrinks from a new component to those two hooks plus the per-tree field, which now exist, so the hourglass and fan lenses (M each) lose some of their cost; the order of phase 3 is unchanged. The paired view's counts (agree, to check, only in one) are a candidate for "At a glance" on Your file once a comparison has been run.
 
 ## Decisions needed from David
 

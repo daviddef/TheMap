@@ -27,6 +27,7 @@ export const MAX_VIEWS_PER_TREE = 12;  // for one tree
 export const isViewKey = k => typeof k === 'string' && /^v:[0-9a-z]{1,16}$/.test(k);
 export const LOOKS = ['sticker', 'paper', 'ground', 'lanes', 'countries', 'names'];   // the canvas's looks; a view remembers one
 export const MAX_CARDS = 3000;         // people on one canvas that are kept
+export const MAX_PAIR_DEC = 400;       // accepted / rejected pairings kept per tree (Compare in pairs)
 export const ARCHIVES = ['defranceski', 'booyzen', 'luwinski', 'lerena', 'falco', 'blazevic', 'darcy', 'mazza'];
 
 /* a small string hash (cyrb53): not a secret, an opaque reference that does not spell a name */
@@ -85,6 +86,39 @@ export function unpack(w, key, known, bridges) {
   for (const r of w.c) { const k = back.get(r[0]); if (k) cards.push([k, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8] ? (back.get(r[8]) || '') : '']); }
   const path = w.path && back.get(w.path[0]) && back.get(w.path[1]) ? [back.get(w.path[0]), back.get(w.path[1])] : null;
   return { v: 1, cards, view: w.view, decisions: (w.dec || []).filter(r => bb.has(r[0])).map(r => [bb.get(r[0]), r[1]]), opts: w.opts || {}, path, filter: w.filter || [], look: LOOKS.includes(w.look) ? w.look : '', matched: cards.length, of: w.c.length };
+}
+
+/* ---- Compare in pairs: the visitor's own pairing choices, kept beside the canvas arrangement in the same record (field `pr`) ----
+   p: the canvas's pairing {on, ar:[archive keys], an:[person keys of the starting people], whole, d:[[personKeyA, personKeyB, 'y'|'n']]}. A person is named only by a hash
+   (as above); the archives are named by their public keys (defranceski, booyzen …), which spell no one. Nothing else is kept: not who was compared with whom beyond these choices,
+   not a name, a date or a place. */
+export function packPairing(p, key) {
+  if (!p || typeof p !== 'object') return null;
+  const ar = [...new Set((Array.isArray(p.ar) ? p.ar : []).filter(a => ARCHIVES.includes(a)))].slice(0, ARCHIVES.length);
+  const d = (Array.isArray(p.d) ? p.d : []).filter(r => Array.isArray(r) && r.length === 3 && typeof r[0] === 'string' && typeof r[1] === 'string' && (r[2] === 'y' || r[2] === 'n')).slice(-MAX_PAIR_DEC).map(r => [H(key, r[0]), H(key, r[1]), r[2]]);
+  const an = (Array.isArray(p.an) ? p.an : []).filter(k => typeof k === 'string' && k).slice(0, 9).map(k => H(key, k));
+  if (!p.on && !d.length) return null;
+  return { on: p.on ? 1 : 0, ar, an, whole: p.whole ? 1 : 0, d };
+}
+/* known: the real person keys of the comparison that is open (the file's and each archive's). Anything that matches no one is dropped. */
+export function unpackPairing(pr, key, known) {
+  if (!pr || typeof pr !== 'object') return null;
+  const back = new Map(); for (const k of known || []) back.set(H(key, k), k);
+  return { on: !!pr.on, ar: Array.isArray(pr.ar) ? pr.ar.filter(a => ARCHIVES.includes(a)) : [], whole: !!pr.whole,
+    an: (pr.an || []).map(h => back.get(h)).filter(Boolean),
+    d: (pr.d || []).map(r => [back.get(r[0]), back.get(r[1]), r[2]]).filter(r => r[0] && r[1] && (r[2] === 'y' || r[2] === 'n')) };
+}
+/* Set this tree's pairing choices without touching its canvas arrangement; makes a record (with no cards) if there is none. Returns false if storage would not keep it. */
+export function savePairing(src, label, pairing, st, now) {
+  const s = cleanSrc(src), k = treeKey(s); if (!k) return false;
+  const pr = packPairing(pairing, k), old = get(k, st);
+  if (!old && !pr) return true;
+  if (old && JSON.stringify(old.w.pr || null) === JSON.stringify(pr)) return true;     // nothing changed
+  const rec = old ? JSON.parse(JSON.stringify(old)) : makeRecord(s, label, { cards: [] }, now);
+  if (!rec) return false;
+  if (pr) rec.w.pr = pr; else delete rec.w.pr;
+  rec.upd = new Date(now == null ? Date.now() : now).toISOString();
+  return put(rec, st);
 }
 
 /* ---- records ---- */

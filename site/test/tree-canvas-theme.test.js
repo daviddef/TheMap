@@ -1,0 +1,101 @@
+/* The Tree Canvas's one-click Look button. Three files each hold a copy of the same small rule, because they run in three places (the canvas iframe, the page around it,
+   and a classic script that runs before paint). These tests hold the copies together:
+   - the canvas template's cycle (LOOK_CYCLE) is the shell's CYCLE, in the same order;
+   - the button walks that cycle and comes back to the start; a layout (lanes, countries, names) goes to automatic;
+   - the boot script, which cannot import, paints the same page colour as shellScheme() for every look, and does nothing when storage is blocked;
+   - the button is a plain labelled button, and nothing in the change sends anything new anywhere. */
+import test from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import vm from "node:vm";
+import { fileURLToPath } from "node:url";
+import * as ST from "../public/tree-canvas/settings.js";
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const read = p => fs.readFileSync(path.join(here, p), "utf8");
+const template = read("../../scripts/roots/tree-canvas.template.html");
+const boot = read("../public/tree-canvas/theme-boot.js");
+const page = read("../src/pages/tree-canvas/index.astro");
+const app = read("../public/tree-canvas/app.js");
+
+const templateCycle = () => {
+  const m = /LOOK_CYCLE\s*=\s*(\[[^\]]*\])/.exec(template);
+  assert.ok(m, "the canvas template defines LOOK_CYCLE");
+  return JSON.parse(m[1].replace(/'/g, '"'));
+};
+
+/* run the boot script against a fake page and storage; returns what it set on <html> */
+const runBoot = (store, { blocked = false } = {}) => {
+  const attrs = {};
+  const localStorage = blocked
+    ? { getItem() { throw new DOMException("blocked", "SecurityError"); } }
+    : { getItem: k => (k in store ? store[k] : null) };
+  const document = { documentElement: { setAttribute: (k, v) => { attrs[k] = v; } } };
+  vm.runInNewContext(boot, { localStorage, document, JSON });
+  return attrs;
+};
+
+test("the canvas's cycle is the shell's cycle, in the same order", () => {
+  assert.deepEqual(templateCycle(), ST.CYCLE);
+});
+
+test("the cycle starts at automatic, holds only the three colour looks, and every step is a real look", () => {
+  assert.deepEqual(ST.CYCLE, ["auto", "sticker", "paper", "ground"]);
+  for (const l of ST.CYCLE) assert.ok(ST.LOOKS.includes(l), l + " is a look");
+});
+
+test("one click moves one step and the last step returns to automatic", () => {
+  let cur = "auto";
+  const seen = [cur];
+  for (let i = 0; i < ST.CYCLE.length; i++) { cur = ST.nextLook(cur); seen.push(cur); }
+  assert.deepEqual(seen, ["auto", "sticker", "paper", "ground", "auto"]);
+});
+
+test("a layout chosen in Settings goes to automatic on the next click; an unknown value does too", () => {
+  for (const l of ["lanes", "countries", "names", "nonsense", "", undefined]) assert.equal(ST.nextLook(l), "auto", String(l));
+});
+
+test("the page around the canvas: automatic leaves the device in charge, ground is dark, every other look is light", () => {
+  assert.equal(ST.shellScheme("auto"), null);
+  assert.equal(ST.shellScheme(undefined), null);
+  assert.equal(ST.shellScheme("ground"), "dark");
+  for (const l of ["sticker", "paper", "lanes", "countries", "names"]) assert.equal(ST.shellScheme(l), "light", l);
+});
+
+test("the boot script paints what shellScheme says, for every look, from either place the look is kept", () => {
+  for (const look of ST.LOOKS) {
+    const want = ST.shellScheme(look);
+    const fromSettings = runBoot({ "ra-settings-v1": JSON.stringify({ v: 1, look }) });
+    const fromLoam = runBoot({ loamTheme: look });
+    if (want === null) { assert.deepEqual(fromSettings, {}, look + " (settings)"); assert.deepEqual(fromLoam, {}, look + " (loamTheme)"); }
+    else { assert.equal(fromSettings["data-theme"], want, look + " (settings)"); assert.equal(fromLoam["data-theme"], want, look + " (loamTheme)"); }
+  }
+});
+
+test("the boot script leaves the page alone when nothing is kept, the record is damaged, or storage refuses", () => {
+  assert.deepEqual(runBoot({}), {});
+  assert.deepEqual(runBoot({ "ra-settings-v1": "{not json" }), {});
+  assert.deepEqual(runBoot({ "ra-settings-v1": JSON.stringify({ v: 1, look: "<script>" }) }), {});
+  assert.deepEqual(runBoot({}, { blocked: true }), {});
+});
+
+test("the canvas template has one plain labelled Look button, hidden unless this is the standalone page, and a three-dot More button", () => {
+  assert.equal((template.match(/id="bTheme"/g) || []).length, 1);
+  assert.match(template, /<button[^>]*id="bTheme"[^>]*aria-label="Look"[^>]*hidden/);
+  assert.doesNotMatch(template, /id="bTheme"[^>]*aria-pressed/, "a button that names its own state and the next one does not also claim to be pressed");
+  assert.match(template, /b\.hidden\s*=\s*!SA/, "shown only on the standalone Atlas page");
+  assert.match(template, /set\('#bMore',\s*'more'\)/, "the phone-width More button no longer wears a gear that looks like a sun");
+});
+
+test("the page loads the boot script as its own file (the page's CSP allows no inline script) and before it paints", () => {
+  assert.match(page, /<script is:inline src="\/tree-canvas\/theme-boot\.js"><\/script>/);
+  assert.ok(page.indexOf('<script is:inline src="/tree-canvas/theme-boot.js">') < page.indexOf('<script is:inline src="/tree-canvas/app.js"'), "boot script comes first");
+  assert.doesNotMatch(boot, /\bfetch\b|XMLHttpRequest|sendBeacon|WebSocket/, "the boot script reads storage and nothing else");
+});
+
+test("the page accepts a look only from the canvas, only one it knows, and keeps it through the Settings code", () => {
+  assert.match(app, /tcLookSet/);
+  assert.match(app, /ST\.LOOKS\.includes\(d\.tcLookSet\)/, "an unknown value is ignored");
+  assert.match(app, /ST\.write\(\{\s*look\s*\}\)/, "kept through the same settings record the drawer uses");
+});

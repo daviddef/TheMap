@@ -93,5 +93,6 @@ export const nav = [
 export const footLinks = [
   ["/data/", "Use the data"],
   ["/connect/", "Connect to the Atlas"],
+  ["/support/", "Support the atlas"],
   ["/privacy/", "Privacy"],
 ];

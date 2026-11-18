@@ -200,6 +200,34 @@ export function renameView(key, name, st, now) {
   const d = readStore(st), v = d.items[key]; if (!v || !isViewKey(key)) return false;
   v.name = cleanName(name) || v.name; v.upd = new Date(now == null ? Date.now() : now).toISOString(); return writeStore(d, st);
 }
+/* the visitor's own words about a view, as for a kept file: up to 120 characters, no markup. Empty clears it. Naming and noting is one change (the later `upd` wins on another device). */
+export const cleanNote = n => String(n == null ? '' : n).replace(/<[^>]*>/g, ' ').replace(/[\u0000-\u001f\u007f<>]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
+export function editView(key, patch, st, now) {
+  const d = readStore(st), v = d.items[key]; if (!v || !isViewKey(key) || !patch) return false;
+  if (patch.name != null) v.name = cleanName(patch.name) || v.name;
+  if (patch.note != null) { const t = cleanNote(patch.note); if (t) v.note = t; else delete v.note; }
+  v.upd = new Date(now == null ? Date.now() : now).toISOString(); return writeStore(d, st);
+}
+
+/* ---------------- the opening page's list: one card per tree, its views nested under it ---------------- */
+/* kept: the files kept on this device ({name, when, ...}); recs: list(); views: listViews(). Returns [{id, kind: 'file'|'archive'|'link', ref, kept, canvas, views, last}] newest first.
+   A file's views and canvas are matched to a kept file by its NAME (the same rule as reopening it); a tree whose file is not kept still gets a card, with `kept: null`. */
+export function groupTrees(kept, recs, views) {
+  const g = new Map(), at = (src, label) => {
+    const id = src.t + ':' + src.ref; if (!g.has(id)) g.set(id, { id, kind: src.t, ref: src.ref, label: '', src, kept: null, canvas: null, views: [], last: 0 });
+    const x = g.get(id); if (label && !x.label) x.label = label; return x;
+  };
+  const ms = iso => Date.parse(iso) || 0;
+  for (const k of kept || []) {
+    const x = at(k.url ? { t: 'link', ref: String(k.url).split('#')[0] } : { t: 'file', ref: k.name });   // a file fetched from a link is that link's tree
+    if (!x.kept || (k.when || 0) > (x.kept.when || 0)) x.kept = k; x.last = Math.max(x.last, k.when || 0);
+  }
+  for (const r of recs || []) { if (!r.src) continue; const x = at(r.src, r.label); if (!x.canvas || ms(r.upd) > ms(x.canvas.upd)) x.canvas = r; x.last = Math.max(x.last, ms(r.upd)); }
+  for (const v of views || []) { if (!v.src) continue; const x = at(v.src, v.label); x.views.push(v); x.last = Math.max(x.last, ms(v.upd)); }
+  const out = [...g.values()];
+  for (const x of out) x.views.sort((a, b) => String(b.upd).localeCompare(String(a.upd)));
+  return out.sort((a, b) => b.last - a.last);
+}
 
 /* ---------------- sharing a view as a link ---------------- */
 /* The link carries: a name, where the tree comes from, and the arrangement as salted hashes. Never a name from the tree. It goes in the #fragment, which is not sent to any server. */

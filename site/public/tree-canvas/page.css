@@ -93,19 +93,7 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 /* last used */
 #stRecent { justify-items: stretch; text-align: left; }
 #stRecent h2 { text-align: center; }
-#stRecent #stList { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 #stRecent .stsub { text-align: center; }
-#stRecent, #stRecent > *, #stList li { min-width: 0; }   /* a long file line is cut with an ellipsis inside the row, never pushes the row (and the Fix list button) off a narrow screen */
-#stList li, #yfList li { display: flex; align-items: stretch; gap: 6px; }
-#stList .recopen, #yfList .recopen { flex: 1 1 auto; min-width: 0; text-align: left; padding: 10px 14px; border-radius: 10px; border: 2px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; font: 700 15px/1.2 system-ui, sans-serif; transition: border-color .12s ease; }
-#stList .recopen, #yfList .recopen:hover { border-color: var(--accent); }
-#stList .recopen, #yfList .recopen b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#stList .recopen, #yfList .recopen small { display: block; margin-top: 3px; font: 400 13px/1.2 system-ui, sans-serif; color: var(--soft); }
-#stList .recnote, #yfList .recnote { display: block; margin-top: 4px; font: italic 400 13px/1.25 system-ui, sans-serif; color: var(--ink); white-space: normal; }
-#stList .recx, #yfList .recx { flex: 0 0 auto; width: 38px; border-radius: 10px; border: 2px solid var(--line); background: transparent; color: var(--soft); cursor: pointer; font: 700 15px/1 system-ui, sans-serif; }
-#stList .recx, #yfList .recx:hover { border-color: var(--accent); color: var(--ink); }
-#stList .recfix, #yfList .recfix { width: auto; padding: 0 12px; color: var(--ink); font-size: 13px; white-space: nowrap; }
-#stList .recin, #yfList .recin { flex: 1 1 auto; min-width: 0; padding: 10px 14px; border-radius: 10px; border: 2px solid var(--focus); background: var(--card); color: var(--ink); font: 15px/1.2 system-ui, sans-serif; }
 
 /* Keep your work: one round save button with a few words beside it, linking to Connection & Backup. Green, because it is the "safe" colour on the rest of the site
    (the live dot); light and dark are two sets of tokens. When the six words are on, the disc fills. */
@@ -122,15 +110,6 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 .stkcap b { font: 700 15px/1.2 system-ui, sans-serif; }
 .stkcap small { font: 400 13px/1.35 system-ui, sans-serif; color: var(--soft); }
 
-/* saved canvases: the same rows as "Last used" */
-#stWork { justify-items: stretch; text-align: left; }
-#stWork h2, #stWork .stsub { text-align: center; }
-#stWorkList { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-#stWorkList li, #yfWorkList li { display: flex; }
-#stWorkList .recopen, #yfWorkList .recopen { flex: 1 1 auto; min-width: 0; text-align: left; padding: 10px 14px; border-radius: 10px; border: 2px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; font: 700 15px/1.2 system-ui, sans-serif; transition: border-color .12s ease; }
-#stWorkList .recopen, #yfWorkList .recopen:hover { border-color: var(--keep); }
-#stWorkList .recopen, #yfWorkList .recopen b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#stWorkList .recopen, #yfWorkList .recopen small { display: block; margin-top: 3px; font: 400 13px/1.3 system-ui, sans-serif; color: var(--soft); }
 
 /* the line at the bottom that says a saved canvas came back, or that another device saved a newer one */
 .knote { position: fixed; left: 50%; bottom: 62px; transform: translateX(-50%); z-index: 11; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 10px; max-width: calc(100vw - 32px);
@@ -198,11 +177,6 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 @media (max-width: 560px) { .yfreport dl.kv { grid-template-columns: 1fr; gap: 0; } .yfreport dd { margin-bottom: 8px; } .yfreport table.t { display: block; overflow-x: auto; } }
 
 /* the lists reuse the opening screen's rows; here they sit left-aligned under their own small headings */
-#yfList, #yfWorkList { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-#yfList .recopen b, #yfWorkList .recopen b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#yfList .recopen small, #yfWorkList .recopen small { display: block; margin-top: 3px; font: 400 13px/1.3 system-ui, sans-serif; color: var(--soft); }
-#yfWork[hidden], #yfRecent[hidden], #yfNoFiles[hidden], #yfOut[hidden], #yfBusy[hidden], #yfExpOff[hidden], #yfExpOn[hidden] { display: none; }
-#yfWork, #yfRecent { display: grid; gap: 6px; }
 
 /* the export */
 .yfmodes { display: grid; gap: 8px; margin: 4px 0; padding: 12px 14px; border: 2px solid var(--line); border-radius: 10px; }
@@ -357,3 +331,32 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
   .fx-pitem { display: flex; gap: 8px; margin: 4px 0; break-inside: avoid; } .fx-pbox { flex: none; font-size: 15px; } .fx-pwhy, .fx-ppeople, .fx-pnext, .fx-pinfo { color: #333; }
 }
 @media (max-width: 560px) { #fx { padding: 16px 12px 56px; } #fx h1 { font-size: 30px; } .fxf { flex: 1 1 130px; } .fxf input, .fxf select { min-width: 0; width: 100%; } }
+
+
+/* The list of trees: a card per tree (a kept file, an archive, a link) with what was saved of it nested underneath */
+#stRecent h2, #stRecent .trintro { text-align: center; }
+#stList, #yfList { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+#yfRecent { display: grid; gap: 8px; }
+.trcard, .trview, #stRecent, #stRecent > * { min-width: 0; }
+.trcard { display: grid; gap: 10px; padding: 12px; border: 2px solid var(--line); border-radius: 14px; background: var(--card); color: var(--ink); }
+.trhead, .trview { display: flex; align-items: stretch; gap: 6px; }
+.tropen { flex: 1 1 auto; min-width: 0; text-align: left; padding: 8px 10px; border-radius: 10px; border: 2px solid transparent; background: transparent; color: var(--ink); cursor: pointer; font: 400 14px/1.25 system-ui, sans-serif; transition: border-color .12s ease, background .12s ease; }
+.tropen:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.tropen b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 700 15px/1.2 system-ui, sans-serif; }
+.tropen small { display: block; margin-top: 3px; font: 400 13px/1.3 system-ui, sans-serif; color: var(--soft); }
+.trnote { display: block; margin-top: 4px; font: italic 400 13px/1.25 system-ui, sans-serif; color: var(--ink); white-space: normal; }
+.trside { flex: 0 0 auto; display: flex; align-items: center; gap: 6px; }
+.trbtn { height: 34px; padding: 0 12px; border-radius: 10px; border: 2px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; font: 700 13px/1 system-ui, sans-serif; white-space: nowrap; }
+.trbtn:hover { border-color: var(--accent); }
+.trico { width: 34px; padding: 0; color: var(--soft); font-size: 15px; }
+.trico.trsure { width: auto; padding: 0 10px; border-color: var(--accent); color: var(--ink); }
+.trin { flex: 1 1 auto; min-width: 0; padding: 9px 12px; border-radius: 10px; border: 2px solid var(--focus); background: var(--card); color: var(--ink); font: 15px/1.2 system-ui, sans-serif; }
+.trviews { list-style: none; margin: 0 0 0 10px; padding: 0 0 0 12px; border-left: 3px solid var(--keep, var(--line)); display: grid; gap: 6px; }
+.trview { align-items: center; border: 1px solid var(--line); border-radius: 10px; background: color-mix(in srgb, var(--card) 70%, transparent); }
+.trview .tropen:hover { border-color: var(--keep, var(--accent)); }
+.trview .tropen b { font-size: 14px; }
+.trlast { border-style: dashed; }
+.trform { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 6px; padding: 6px; }
+.trform .trin { flex: 1 1 200px; }
+.tropen:focus-visible, .trbtn:focus-visible, .trin:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+@media (max-width: 480px) { .trhead { flex-wrap: wrap; } .trhead .tropen { flex: 1 1 100%; } .trview { flex-wrap: wrap; } .trview .tropen { flex: 1 1 100%; } .trviews { margin-left: 4px; padding-left: 8px; } .trside { margin-left: auto; } }

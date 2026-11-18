@@ -219,7 +219,7 @@ test("a canvas saved on one device comes back on another from the six words alon
 test("the opening page has the Keep your work button and it goes to Connection & Backup, with the site's own base", () => {
   const html = read("../src/pages/tree-canvas/index.astro");
   assert.match(html, /id="stKeepBtn"[^>]*href=\{u\("\/backup\/#canvas"\)\}/);
-  assert.ok(html.includes("Keep your work") && html.includes('id="stKeepSt"') && html.includes('id="stWork"'));
+  assert.ok(html.includes("Keep your work") && html.includes('id="stKeepSt"') && html.includes('id="stRecent"') && !html.includes('id="stWork"'), "one list of trees: the saved views are nested under their tree, not a list of their own");
   assert.equal(/href="https?:\/\/(www\.)?recordatlas\.org/.test(html.split("---")[2] || html), false, "no hard-coded host");
   assert.ok(html.includes('import { u } from "../../lib/url.js"'));
 });
@@ -240,4 +240,36 @@ test("the page's security policy did not widen, the canvas's own did not change,
   const canvas = read("../../scripts/roots/tree-canvas.template.html");
   assert.ok(canvas.includes("tcWork") && canvas.includes("tcRestored") && canvas.includes("Keep your work"));
   assert.equal(/fetch\([^)]*sync\.recordatlas/.test(canvas), false, "the canvas never talks to the sync server; the page around it does");
+});
+
+test("the opening page's list: a card per tree, its views nested under it, a view can be renamed and noted", async () => {
+  const st = memStore(), F = { t: "file", ref: "family.ged", size: 900, people: 3 }, L = { t: "link", ref: "https://x.example/t.ged#frag" };
+  W.put(W.makeRecord(F, "family.ged", plain(), 1.7e12 + 5), st);
+  W.putView(W.makeView(F, "", vplain(), "Mum's side", 1.7e12 + 9, "v1"), st); W.putView(W.makeView(F, "", vplain(), "Dad's side", 1.7e12 + 7, "v2"), st);
+  W.putView(W.makeView(ARCH, "Defranceski archive", vplain(), "Line", 1.7e12 + 8, "v3"), st);
+  W.putView(W.makeView(L, "", vplain(), "Linked", 1.7e12 + 2, "v4"), st);
+  const kept = [{ name: "family.ged", when: 1.7e12 + 6, people: 3 }, { name: "t.ged", url: "https://x.example/t.ged#frag", when: 1.7e12 + 1 }, { name: "lonely.ged", when: 1.7e12 }];
+  const g = W.groupTrees(kept, W.list(st), W.listViews(st)), by = id => g.find(x => x.id === id);
+  assert.deepEqual(g.map(x => x.id), ["file:family.ged", "archive:defranceski", "link:https://x.example/t.ged", "file:lonely.ged"], "newest first: the file's newest work was a view at +9");
+  assert.deepEqual(by("file:family.ged").views.map(v => v.name), ["Mum's side", "Dad's side"], "its views, newest first, under the kept file");
+  assert.ok(by("file:family.ged").kept && by("file:family.ged").canvas, "the kept file and its last canvas are one card");
+  assert.equal(by("archive:defranceski").kept, null); assert.equal(by("archive:defranceski").label, "Defranceski archive");
+  assert.equal(by("link:https://x.example/t.ged").kept.name, "t.ged", "a file fetched from a link is that link's card, with its views");
+  assert.equal(by("link:https://x.example/t.ged").views.length, 1);
+  assert.equal(by("file:lonely.ged").views.length, 0);
+  assert.equal(W.groupTrees([], [], []).length, 0);
+  assert.equal(W.groupTrees(kept, [], W.listViews(st)).find(x => x.id === "file:family.ged").canvas, null, "no canvas is fine");
+  /* rename and note */
+  assert.equal(W.editView("v:v1", { name: " Mum's  side ", note: "<b>Tennessee</b> branch only" }, st, 1.9e12), true);
+  const v = W.get("v:v1", st); assert.equal(v.name, "Mum's side"); assert.equal(v.note, "Tennessee branch only"); assert.equal(v.upd, new Date(1.9e12).toISOString());
+  assert.equal(W.editView("v:v1", { note: "" }, st, 1.9e12 + 1), true); assert.equal("note" in W.get("v:v1", st), false, "an empty note clears it");
+  assert.equal(W.editView("v:v1", { name: "   " }, st), true); assert.equal(W.get("v:v1", st).name, "Mum's side", "an empty name keeps the old one");
+  assert.equal(W.editView("v:nope", { name: "x" }, st), false); assert.equal(W.editView(W.listViews(st)[0].src.ref, { name: "x" }, st), false);
+  assert.equal(W.cleanNote("x".repeat(300)).length, 120);
+  /* the note rides the six-word copy, cleaned, and is never in a shared link */
+  const w = W.get("v:v2", st); W.editView(w.k, { note: "For Aunt Ann" }, st, 1.9e12 + 2);
+  const n = W.get(w.k, st), cleaned = RF.cleanCanvas({ v: 1, items: { [n.k]: n }, gone: {} }).items[n.k];
+  assert.equal(cleaned.note, "For Aunt Ann"); assert.deepEqual(cleaned, n, "a view with a note passes the cleaning unchanged");
+  assert.equal(JSON.stringify(await W.shareDecode(await W.shareEncode(n))).includes("Aunt Ann"), false, "a shared link carries the view's name, never the note");
+  const odd = JSON.parse(JSON.stringify(n)); odd.note = "<i>x</i>\u0000y"; assert.equal(RF.cleanCanvas({ v: 1, items: { [odd.k]: odd }, gone: {} }).items[odd.k].note, "x y");
 });

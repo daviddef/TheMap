@@ -214,28 +214,7 @@ async function reopenSrc(src, kept) {
   closeYF(true); if ($('#start').hidden) showStart();
   linkMsg('Choose ' + src.ref + ' to bring this back. It is matched by its name, size and number of people.'); $('#stFile').click();
 }
-async function renderSaved() {
-  const recs = W.list(), views = W.listViews();
-  let kept = []; try { kept = rememberOn() ? await recentList() : []; } catch (e) { kept = []; }
-  /* one list, drawn twice: on the opening screen and on the "Your file" page. Named views come first, marked with a star, then each tree's last canvas */
-  for (const [boxId, ulId] of [['stWork', 'stWorkList'], ['yfWork', 'yfWorkList']]) {
-    const box = $('#' + boxId), ul = $('#' + ulId); if (!box || !ul) continue; ul.textContent = ''; box.hidden = !recs.length && !views.length;
-    const add = (title, bits, go) => {
-      const li = document.createElement('li'), b = document.createElement('button'), n = document.createElement('b'), sm = document.createElement('small');
-      b.type = 'button'; b.className = 'recopen'; n.textContent = title; sm.textContent = bits.filter(Boolean).join(' \u00b7 '); b.append(n, sm); b.onclick = go; li.append(b); ul.append(li);
-    };
-    for (const v of views) {
-      const onDevice = v.src.t === 'file' && !kept.some(k => k.name === v.src.ref);
-      add('\u2605 ' + v.name, [v.label || savedWhere(v), v.n.toLocaleString('en') + (v.n === 1 ? ' person' : ' people'), 'saved ' + W.agoText(v.upd), onDevice ? 'open the same file to bring it back' : ''],
-        () => { pend = { tk: v.tk, w: v.w, name: v.name, shared: false }; reopenSrc(v.src, kept); });
-    }
-    for (const r of recs) {
-      const onDevice = r.src.t === 'file' && !kept.some(k => k.name === r.src.ref);
-      add(r.label || 'A saved canvas', [r.n ? r.n.toLocaleString('en') + (r.n === 1 ? ' person' : ' people') + ' on the canvas' : 'your pairing choices (no canvas)', savedWhere(r), 'saved ' + W.agoText(r.upd), onDevice ? 'open the same file to bring it back' : ''], () => reopenSrc(r.src, kept));
-    }
-  }
-  noFiles();
-}
+function renderSaved() { return drawLists(); }   // one list on the opening screen and the file page: drawLists (below) draws the trees and what was saved of each
 document.addEventListener('ra-canvas-changed', () => { checkNewer(); renderSaved(); renderKeep(); });
 document.addEventListener('ra-sync-done', e => { syncFailed = !(e.detail && e.detail.ok); renderKeep(); });
 addEventListener('storage', e => {
@@ -627,44 +606,89 @@ function savedFix() {
   let left = 0; for (const n of names) for (const s of trees[n].sections || []) left += Math.max(0, s.total - s.done - s.asis);
   $('#stFixTxt').textContent = names.length === 1 ? names[0] + ': ' + n0(left) + ' left to fix.' : names.length + ' family trees kept, ' + n0(left) + ' left to fix in all.';
 }
-/* "Last used": the same rows on the opening screen and on the "Your file" page, so there is one list and one place it is kept (this browser's tcRecent) */
+/* THE LIST OF TREES, on the opening screen and on the "Your file" page: one card per tree (a file kept on this device, an archive, or a link), and under each card
+   what was saved of that tree: where the visitor left off, and the named views, each of which can be renamed and given a note. The kept files are this browser's own
+   tcRecent (the same database as "Last used" in the canvas menu); the arrangements are work.js's records. W.groupTrees says which belongs to which. */
 async function drawLists() {
-  const rec = rememberOn() ? await recentList() : [];
-  for (const [boxId, ulId] of [['stRecent', 'stList'], ['yfRecent', 'yfList']]) drawRecent($('#' + boxId), $('#' + ulId), rec);
+  const kept = rememberOn() ? await recentList() : [], groups = W.groupTrees(kept, W.list(), W.listViews());
+  for (const [boxId, ulId] of [['stRecent', 'stList'], ['yfRecent', 'yfList']]) drawTrees($('#' + boxId), $('#' + ulId), groups, kept);
   savedFix(); noFiles();
 }
-function drawRecent(box, ul, rec) {
-  if (!box || !ul) return; ul.textContent = ''; box.hidden = !rec.length;
-  for (const r of rec) {
-    const li = document.createElement('li'), b = document.createElement('button'), x = document.createElement('button'), n = document.createElement('b'), sm = document.createElement('small');
-    b.type = x.type = 'button'; b.className = 'recopen'; x.className = 'recx'; x.textContent = '\u00d7'; x.title = 'Forget ' + r.name; x.setAttribute('aria-label', 'Forget ' + r.name);
-    n.textContent = r.name; sm.textContent = [r.people ? r.people.toLocaleString('en') + (r.people === 1 ? ' person' : ' people') : '', r.tree || (r.from ? 'from ' + r.from : ''), fmtBytes(r.size || 0), fmtWhen(r.when)].filter(Boolean).join(' \u00b7 '); b.append(n, sm); b.title = 'Open ' + r.name + ' again';
-    if (r.note) { const nt = document.createElement('em'); nt.className = 'recnote'; nt.textContent = r.note; b.append(nt); }
-    const ed = document.createElement('button'); ed.type = 'button'; ed.className = 'recx recedit'; ed.textContent = '\u270e'; ed.title = r.note ? 'Edit the note' : 'Add a note'; ed.setAttribute('aria-label', ed.title + ' for ' + r.name);
-    ed.onclick = () => {
-      const inp = document.createElement('input'); inp.type = 'text'; inp.className = 'recin'; inp.maxLength = 80; inp.value = r.note || ''; inp.placeholder = 'A note, e.g. Mum\'s side, from MyHeritage'; inp.setAttribute('aria-label', 'Note for ' + r.name);
-      let fin = false; const save = async keep => { if (fin) return; fin = true; if (keep) await recentMeta(r.name, { note: inp.value.trim() }); drawLists(); };
-      inp.onkeydown = e => { if (e.key === 'Enter') save(true); else if (e.key === 'Escape') save(false); };
-      inp.onblur = () => save(true);
-      b.replaceWith(inp); inp.focus(); inp.select();
-    };
-    /* opening a kept file: the same path for both buttons. "Fix list" opens it straight on the Fix list (as on /roots/), the row itself opens it on the canvas */
-    const go = to => async () => {
-      try { const db = await rdb(), bytes = await rreq(db.transaction('b').objectStore('b').get(r.name)); db.close(); if (!bytes) throw 0; example = false; recentSave(r.name, bytes.slice(0)); start(bytes, r.name, undefined, r.url, to); }
-      catch (e) { say('That file is no longer kept here. Open it again from your device.', true); await recentForget(r.name); drawLists(); }
-    };
-    b.onclick = go(null);
-    x.onclick = async () => { await recentForget(r.name); drawLists(); };
-    li.append(b);
-    if (r.from !== 'tree.json') {   // a tree.json has no GEDCOM to check, so it has no Fix list
-      const fx = document.createElement('button'); fx.type = 'button'; fx.className = 'recx recfix'; fx.textContent = 'Fix list'; fx.title = 'Open ' + r.name + ' straight on its Fix list'; fx.setAttribute('aria-label', 'Open ' + r.name + ' on its Fix list');
-      fx.onclick = go('fix'); li.append(fx);
+const mk = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const btn = (cls, text, title, fn) => { const b = mk('button', cls, text); b.type = 'button'; if (title) { b.title = title; b.setAttribute('aria-label', title); } if (fn) b.onclick = fn; return b; };
+const ppl = n => n.toLocaleString('en') + (n === 1 ? ' person' : ' people');
+function treeTitle(g) {
+  if (g.kept) return g.kept.name;
+  if (g.kind === 'archive') return g.label || 'Archive: ' + g.ref;
+  if (g.kind === 'link') { try { return new URL(g.ref).host; } catch (e) { return String(g.ref).slice(0, 60); } }
+  return g.ref;
+}
+/* open a kept file again, on the canvas or (to === 'fix') straight on its Fix list */
+async function openKept(r, to) {
+  try { const db = await rdb(), bytes = await rreq(db.transaction('b').objectStore('b').get(r.name)); db.close(); if (!bytes) throw 0; example = false; recentSave(r.name, bytes.slice(0)); start(bytes, r.name, undefined, r.url, to); }
+  catch (e) { say('That file is no longer kept here. Open it again from your device.', true); await recentForget(r.name); drawLists(); }
+}
+function drawTrees(box, ul, groups, kept) {
+  if (!box || !ul) return; ul.textContent = ''; box.hidden = !groups.length;
+  const reopen = (g, to) => g.kept ? openKept(g.kept, to) : reopenSrc(g.src, kept);
+  for (const g of groups) {
+    const r = g.kept, card = mk('li', 'trcard'), head = mk('div', 'trhead'), title = treeTitle(g);
+    const main = btn('tropen', '', r ? 'Open ' + r.name + ' again' : 'Open this tree', () => reopen(g, null));
+    const bits = r ? [r.people ? ppl(r.people) : '', r.tree || (r.from ? 'from ' + r.from : ''), fmtBytes(r.size || 0), fmtWhen(r.when)]
+      : [savedWhere({ src: g.src }), g.kind === 'file' ? 'the file is not kept on this device' : ''];
+    main.append(mk('b', null, title), mk('small', null, bits.filter(Boolean).join(' · ')));
+    if (r && r.note) main.append(mk('em', 'trnote', r.note));
+    head.append(main);
+    if (r) {
+      const side = mk('div', 'trside');
+      if (r.from !== 'tree.json') side.append(btn('trbtn', 'Fix list', 'Open ' + r.name + ' straight on its Fix list', () => openKept(r, 'fix')));   // a tree.json has no GEDCOM to check
+      side.append(btn('trbtn trico', '✎', (r.note ? 'Edit the note' : 'Add a note') + ' for ' + r.name, () => {
+        const inp = mk('input', 'trin'); inp.type = 'text'; inp.maxLength = 80; inp.value = r.note || ''; inp.placeholder = 'A note, e.g. Mum\'s side, from MyHeritage'; inp.setAttribute('aria-label', 'Note for ' + r.name);
+        let fin = false; const save = async keep => { if (fin) return; fin = true; if (keep) await recentMeta(r.name, { note: inp.value.trim() }); drawLists(); };
+        inp.onkeydown = e => { if (e.key === 'Enter') save(true); else if (e.key === 'Escape') save(false); };
+        inp.onblur = () => save(true);
+        main.replaceWith(inp); inp.focus(); inp.select();
+      }));
+      side.append(btn('trbtn trico', '×', 'Forget the file ' + r.name + (g.views.length || g.canvas ? ' (the views you saved of it stay)' : ''), async () => { await recentForget(r.name); drawLists(); }));
+      head.append(side);
     }
-    li.append(ed, x); ul.append(li);
+    card.append(head);
+    if (g.canvas || g.views.length) {
+      const vl = mk('ul', 'trviews'), gone = g.kind === 'file' && !r ? 'open the same file to bring it back' : '';
+      if (g.canvas) {
+        const c = g.canvas, row = mk('li', 'trview trlast'), o = btn('tropen', '', 'Open this tree where you left off', () => { pend = null; reopen(g, null); });
+        o.append(mk('b', null, 'Where you left off'), mk('small', null, [c.n ? ppl(c.n) + ' on the canvas' : 'your pairing choices (no canvas)', 'saved ' + W.agoText(c.upd), gone].filter(Boolean).join(' · ')));
+        row.append(o); vl.append(row);
+      }
+      for (const v of g.views) vl.append(viewRow(v, g, reopen, gone));
+      card.append(vl);
+    }
+    ul.append(card);
   }
 }
+/* a named view: open it, rename it and add a note (one small form), or delete it (asks once) */
+function viewRow(v, g, reopen, gone) {
+  const row = mk('li', 'trview'), o = btn('tropen', '', 'Open the view ' + v.name, () => { pend = { tk: v.tk, w: v.w, name: v.name, shared: false }; reopen(g, null); });
+  o.append(mk('b', null, '★ ' + v.name), mk('small', null, [ppl(v.n) + ' on the canvas', 'saved ' + W.agoText(v.upd), gone].filter(Boolean).join(' · ')));
+  if (v.note) o.append(mk('em', 'trnote', v.note));
+  const side = mk('div', 'trside');
+  side.append(btn('trbtn trico', '✎', 'Rename the view ' + v.name + ' or add a note', () => {
+    const f = mk('form', 'trform'), nm = mk('input', 'trin'), nt = mk('input', 'trin');
+    nm.type = nt.type = 'text'; nm.maxLength = 60; nt.maxLength = 120; nm.value = v.name; nt.value = v.note || '';
+    nm.setAttribute('aria-label', 'Name of the view'); nt.setAttribute('aria-label', 'Note for the view'); nt.placeholder = 'A note, e.g. the Tennessee branch only';
+    const ok = btn('trbtn', 'Save', null), no = btn('trbtn', 'Cancel', null, () => drawLists()); ok.type = 'submit';
+    f.append(nm, nt, ok, no); f.onsubmit = e => { e.preventDefault(); if (W.editView(v.k, { name: nm.value, note: nt.value })) document.dispatchEvent(new CustomEvent('ra-progress-changed')); drawLists(); };
+    f.onkeydown = e => { if (e.key === 'Escape') drawLists(); };
+    row.textContent = ''; row.append(f); nm.focus(); nm.select();
+  }));
+  let sure = 0; const del = btn('trbtn trico', '×', 'Delete the view ' + v.name, () => {
+    if (!sure) { sure = 1; del.textContent = 'Delete?'; del.classList.add('trsure'); setTimeout(() => { sure = 0; del.textContent = '×'; del.classList.remove('trsure'); }, 3000); return; }
+    W.remove(v.k); document.dispatchEvent(new CustomEvent('ra-progress-changed')); drawLists();
+  });
+  side.append(del); row.append(o, side); return row;
+}
 /* the file page says so when nothing at all is kept, rather than showing an empty heading */
-function noFiles() { const n = $('#yfNoFiles'); if (n) n.hidden = !($('#yfWork').hidden && $('#yfRecent').hidden); }
+function noFiles() { const n = $('#yfNoFiles'); if (n) n.hidden = !$('#yfRecent').hidden; }
 /* ---- a file from a link. The visitor's own browser asks the other site for the file (nothing goes through this site), after the address has been checked
    (openlink.js: https only, a public name, no sign-in details). The site it came from is shown while the canvas opens. A link on the page's own address
    (/tree-canvas/?url=…) only fills the box: nothing is fetched until the visitor presses Open link. ---- */

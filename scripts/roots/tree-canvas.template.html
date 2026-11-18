@@ -486,6 +486,26 @@ select.lk-input{width:auto;padding:4px 8px}
 #bloodMenu .bmrow .lk-btn{width:100%;justify-content:center}
 #bloodMenu .lk-toggle{margin-top:10px}
 .ph #bloodMenu{top:auto;bottom:calc(var(--dock-h,130px) + 16px);left:8px;right:8px;width:auto}
+/* Saved views */
+#viewsMenu{display:none;position:fixed;top:64px;right:12px;z-index:40;width:320px;max-width:calc(100vw - 24px);box-sizing:border-box;background:var(--lk-card);color:var(--lk-ink);border:2px solid var(--lk-ink);border-radius:16px;box-shadow:0 5px 0 var(--lk-line),0 14px 30px rgba(0,0,0,.18);padding:12px 14px 12px;max-height:calc(100vh - 140px);overflow:auto}
+#viewsMenu.on{display:block}
+#viewsMenu h4{margin:0 0 8px}
+.vwsave{display:flex;gap:8px;margin-bottom:8px}
+.vwsave input,.vwren{flex:1 1 auto;min-width:0;box-sizing:border-box;font:inherit;font-size:13px;font-weight:700;padding:7px 10px;border:2px solid var(--lk-ink);border-radius:10px;background:var(--lk-card);color:var(--lk-ink)}
+.vwsave input:focus,.vwren:focus{outline:none;border-color:var(--lk-accent)}
+ul.vwlist{list-style:none;margin:0 0 6px;padding:0}
+ul.vwlist li{display:flex;align-items:center;gap:4px;padding:3px 0;border-top:1.5px dashed var(--lk-line)}
+.vwopen{all:unset;box-sizing:border-box;flex:1 1 auto;min-width:0;cursor:pointer;padding:5px 6px;border-radius:10px}
+.vwopen:hover,.vwopen:focus-visible{background:color-mix(in srgb,var(--lk-accent) 14%,var(--lk-card))}
+.vwopen b{display:block;font:800 13px/1.2 Nunito,system-ui;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vwopen small{display:block;margin-top:2px;font:600 11px/1.2 Nunito,system-ui;color:var(--lk-soft)}
+.vwi{all:unset;box-sizing:border-box;flex:0 0 auto;width:28px;height:28px;display:grid;place-items:center;border-radius:50%;cursor:pointer;color:var(--lk-soft)}
+.vwi svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}
+.vwi:hover,.vwi:focus-visible{color:var(--lk-accent);background:color-mix(in srgb,var(--lk-accent) 12%,var(--lk-card))}
+.vwi.sure{width:auto;padding:0 9px;border-radius:99px;font:800 11px/28px Nunito,system-ui;color:#fff;background:#c0392b}
+.vwnote{font-size:11.5px;color:var(--lk-soft);margin:8px 0 0}
+.ph #viewsMenu{top:auto;bottom:calc(var(--dock-h,130px) + 16px);left:8px;right:8px;width:auto}
+
 /* the up arrow's "all": which way to go back */
 #backMenu{display:none;position:fixed;z-index:45;width:272px;max-width:calc(100vw - 16px);box-sizing:border-box;background:var(--lk-card);color:var(--lk-ink);border:2px solid var(--lk-ink);border-radius:16px;box-shadow:0 5px 0 var(--lk-line),0 14px 30px rgba(0,0,0,.18);padding:10px 10px 8px}
 #backMenu.on{display:block}
@@ -840,37 +860,40 @@ html:not(.rzopen) #rz{display:none}
 @media (max-width:640px){#linesView{padding-left:16px;padding-right:16px}#linesView .lnst{flex-basis:130px}}
 
 /* ---- Compare in pairs (pairsui.js): the file in black beside each archive's colour, a button between each pair, an empty dashed place where one has no one ---- */
+/* the pair-mode palette: one set of tokens per look, each held at 3:1 or more against its ground (test/test-pair-contrast.js checks it) */
+:root{--pfile:#17191c;--pok:#2a6a28;--pchk:#7a4f00;--pno:#a33a22;--pone:#6b5a44;--psel:#a64f00}
+[data-theme="paper"]{--pone:#554636;--pok:#25601f;--pchk:#6b4300;--pno:#8f2f1a}
+[data-theme="lanes"],[data-theme="countries"]{--pone:#4B5563}
+[data-theme="ground"],[data-theme="dark"]{--pfile:#EDE3D2;--pok:#8cc77f;--pchk:#e6b34d;--pno:#f0907a;--pone:#B8A892;--psel:#f09a3a}
 #pairs{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none}
 #pairs>*{position:absolute;pointer-events:auto}
-#pairs .pslot{box-sizing:border-box;border:2px dashed var(--lk-faint);border-radius:16px;display:grid;place-items:center;color:var(--lk-mute);font:800 12px Nunito,system-ui;text-align:center;background:color-mix(in srgb,var(--lk-card) 55%,transparent);pointer-events:none}
-#pairs .psel{border:3px solid var(--lk-accent);border-radius:22px;pointer-events:none;box-shadow:0 0 0 4px color-mix(in srgb,var(--lk-accent) 22%,transparent)}
+#pairs .pslot{box-sizing:border-box;border:2px dashed var(--pone);border-radius:16px;display:grid;place-items:center;color:var(--lk-mute);font:800 12px Nunito,system-ui;text-align:center;background:color-mix(in srgb,var(--lk-card) 55%,transparent);pointer-events:none}
+#pairs .psel{border:3px solid var(--psel);border-radius:22px;pointer-events:none;box-shadow:0 0 0 4px color-mix(in srgb,var(--psel) 22%,transparent)}
 #pairs .ppill{transform:translate(-50%,-50%);width:34px;min-height:34px;padding:2px 0 3px;border-radius:17px;border:2.5px solid var(--lk-ink);background:var(--lk-card);color:var(--lk-ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;cursor:pointer;font:inherit;box-shadow:0 2px 0 var(--lk-line);z-index:2}
 #pairs .ppill b{font:900 16px/1 Nunito,system-ui}
 #pairs .ppill i{font:800 8.5px/1 Nunito,system-ui;font-style:normal;text-transform:uppercase;letter-spacing:.2px;margin-top:1px}
-#pairs .ppill:hover,#pairs .ppill:focus-visible,#pairs .ppill.on{outline:3px solid var(--lk-accent);outline-offset:2px}
-#pairs .ppill.ok{border-color:var(--ok,#2f8f5b);color:var(--ok,#2f8f5b)}
-#pairs .ppill.chk{border-color:#c98a00;color:#9a6a00;border-style:dashed}
-#pairs .ppill.no{border-color:var(--warn,#d14b34);color:var(--warn,#d14b34);background:color-mix(in srgb,var(--warn,#d14b34) 10%,var(--lk-card))}
-#pairs .ppill.yes{border-style:solid;box-shadow:0 0 0 2px var(--lk-card),0 0 0 4px var(--ok,#2f8f5b)}
-#pairs .ppill.one{border-style:dotted;color:var(--lk-mute);border-color:var(--lk-faint)}
+#pairs .ppill:hover,#pairs .ppill:focus-visible,#pairs .ppill.on{outline:3px solid var(--psel);outline-offset:2px}
+#pairs .ppill.ok{border-color:var(--pok);color:var(--pok)}
+#pairs .ppill.chk{border-color:var(--pchk);color:var(--pchk);border-style:dashed}
+#pairs .ppill.no{border-color:var(--pno);color:var(--pno);background:color-mix(in srgb,var(--pno) 10%,var(--lk-card))}
+#pairs .ppill.yes{border-style:solid;box-shadow:0 0 0 2px var(--lk-card),0 0 0 4px var(--pok)}
+#pairs .ppill.one{border-style:dotted;color:var(--pone);border-color:var(--pone)}
 #pairs .pchips{display:flex;flex-wrap:wrap;gap:3px;z-index:2}
-#pairs .pchip{display:inline-flex;align-items:center;gap:4px;border:1.5px solid var(--bc,var(--lk-faint));background:var(--lk-card);color:var(--lk-ink);border-radius:99px;padding:1px 7px 1px 5px;font:800 10px/1.5 Nunito,system-ui;cursor:pointer;max-width:100%;white-space:nowrap}
+#pairs .pchip{display:inline-flex;align-items:center;gap:4px;border:1.5px solid var(--bc,var(--pone));background:var(--lk-card);color:var(--lk-ink);border-radius:99px;padding:1px 7px 1px 5px;font:800 10px/1.5 Nunito,system-ui;cursor:pointer;max-width:100%;white-space:nowrap}
 #pairs .pchip i{width:8px;height:8px;border-radius:50%;background:var(--bc);flex:none}
 #pairs .pchip.check{border-style:dashed}#pairs .pchip.differs{border-style:dotted;text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--lk-ink) 40%,transparent)}
 #pairs .pchip.maybe{border-style:dashed;color:var(--lk-soft)}#pairs .pchip.maybe i{background:transparent;box-shadow:inset 0 0 0 2px var(--bc)}
-#pairs .pchip:hover,#pairs .pchip:focus-visible{outline:2px solid var(--lk-accent);outline-offset:1px}
+#pairs .pchip:hover,#pairs .pchip:focus-visible{outline:2px solid var(--psel);outline-offset:1px}
 body.pr .card .hd:not(.op),body.pr .card .stops,body.pr .card .brc,body.pr .card .fxb{display:none!important}
-.card.pfile .cb{box-shadow:inset 0 0 0 2px #17191c}
-.card.psel{outline:3px solid var(--lk-accent);outline-offset:3px}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .card.pfile .cb{box-shadow:inset 0 0 0 2px #17191c,0 0 0 1.5px rgba(255,255,255,.5)}}
-:root[data-theme="dark"] .card.pfile .cb,:root[data-theme="ground"] .card.pfile .cb{box-shadow:inset 0 0 0 2px #17191c,0 0 0 1.5px rgba(255,255,255,.5)}
+.card.pfile{--ac:var(--pfile)!important}.card.pfile .cb{box-shadow:inset 0 0 0 2px var(--pfile)}
+.card.psel{outline:3px solid var(--psel);outline-offset:3px}
 #prLegend{position:fixed;left:16px;bottom:calc(var(--dockh,110px) + 22px);z-index:6;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;max-width:min(560px,calc(100vw - 32px));padding:7px 10px;border:2px solid var(--lk-line);border-radius:14px;background:var(--lk-card);color:var(--lk-ink);font:800 11.5px Nunito,system-ui;box-shadow:0 2px 0 var(--lk-line)}
 #prLegend .pk,.prent .pk,.prch label,.prdet .pk{display:inline-flex;align-items:center;gap:5px}
 .pk i,.prch i{width:11px;height:11px;border-radius:3px;background:var(--ac);display:inline-block;flex:none}
 #prLegend small{color:var(--lk-mute);font-weight:700}
 #prLegend .pks{display:inline-flex;gap:8px;color:var(--lk-soft);font-weight:700;flex-wrap:wrap}
-#prLegend .pks b{display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;border:2px solid;font:900 10px/1 Nunito}
-#prLegend .pks b.ok,.cmpchip.ok{color:var(--ok,#2f8f5b);border-color:var(--ok,#2f8f5b)}#prLegend .pks b.chk{color:#9a6a00;border-color:#c98a00;border-style:dashed}#prLegend .pks b.no{color:var(--warn,#d14b34);border-color:var(--warn,#d14b34)}#prLegend .pks b.one{color:var(--lk-mute);border-color:var(--lk-faint);border-style:dotted}
+#prLegend .pks b{font:900 14px/1 Nunito,system-ui;margin-right:2px}
+#prLegend .pks b.ok{color:var(--pok)}#prLegend .pks b.chk{color:var(--pchk)}#prLegend .pks b.no{color:var(--pno)}#prLegend .pks b.one{color:var(--pone)}
 .ph #prLegend{bottom:calc(var(--dockh,96px) + 14px);left:8px;font-size:10.5px}
 .prch{border:2px solid var(--lk-line);border-radius:12px;padding:8px 10px;margin:8px 0}.prch legend{font:800 12px Nunito,system-ui;padding:0 6px}
 .prch label{font:700 13px Nunito,system-ui;padding:4px 2px;cursor:pointer}.prch input{width:18px;height:18px;margin:0 4px 0 0}
@@ -878,10 +901,27 @@ body.pr .card .hd:not(.op),body.pr .card .stops,body.pr .card .brc,body.pr .card
 .prent{border-top:1px dashed var(--lk-line);padding:7px 0;font-size:12.5px}.prent .row{margin-top:5px}.prent.maybe{background:color-mix(in srgb,var(--lk-accent) 7%,transparent);border-radius:8px;padding-left:6px}
 .prdet{border:2px solid var(--lk-line);border-radius:14px;padding:4px 10px 8px;margin:8px 0;background:var(--lk-card)}.prdet h4{margin:6px 0}
 .prlist{list-style:none;margin:6px 0;padding:0;display:flex;flex-direction:column;gap:3px}
-.prrow{display:flex;align-items:center;gap:8px;width:100%;box-sizing:border-box;text-align:left;border:2px solid transparent;border-radius:10px;background:transparent;color:var(--lk-ink);padding:5px 6px;cursor:pointer;font:inherit;font-size:12px;line-height:1.3}
-.prrow:hover,.prrow:focus-visible,.prrow.on{border-color:var(--lk-accent);background:var(--lk-hover)}
-.prrow .pgn{flex:none;width:24px;text-align:center;font:900 11px Nunito;color:var(--lk-mute)}.prrow .prn{flex:1;min-width:0}.prrow .cmpchip{flex:none}
-.pcn.ok{color:var(--ok,#2f8f5b);font-weight:800}.pcn.chk{color:#9a6a00;font-weight:800}.pcn.no{color:var(--warn,#d14b34);font-weight:800}
+.prli{display:flex;align-items:flex-start;gap:6px;border:2px solid transparent;border-radius:10px;padding:4px 6px;cursor:pointer;font-size:12px;line-height:1.35}
+.prli:hover,.prli.on{border-color:var(--psel);background:var(--lk-hover)}
+.prli:focus-within{border-color:var(--psel)}
+.prsel{flex:none;display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:96px;max-width:46%;border:0;background:transparent;color:var(--lk-ink);font:inherit;text-align:left;padding:2px;cursor:pointer;border-radius:6px}
+.prsel:focus-visible{outline:2px solid var(--psel);outline-offset:1px}
+.prsel .pgn{font:900 11px Nunito;color:var(--lk-soft)}
+.prli .prn{flex:1;min-width:0;overflow-wrap:anywhere}
+.prx{color:inherit;text-decoration:underline;text-underline-offset:2px;font-weight:800}.prx:hover,.prx:focus-visible{color:var(--psel)}
+.prdst{font-weight:700;font-size:10.5px;color:var(--lk-soft);white-space:nowrap}
+.prph{display:inline-block;font:700 10.5px/1.3 Nunito,system-ui;color:var(--lk-soft);border-left:3px solid var(--pone);padding-left:5px}
+/* a status is a LABEL: a dot-and-word, no outline, no hover, default cursor. Buttons (Same person, Different people) are the outlined things. */
+.prst{display:inline-flex;align-items:center;gap:4px;font:800 11px/1.3 Nunito,system-ui;cursor:default;white-space:nowrap;user-select:none}
+.prst b{font:900 12px/1 Nunito,system-ui}
+.prst.ok{color:var(--pok)}.prst.chk{color:var(--pchk)}.prst.no{color:var(--pno)}.prst.one{color:var(--pone)}
+.prdet h4{display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px}
+.prent{display:flex;flex-wrap:wrap;align-items:center;gap:3px 8px;min-width:0}
+.prent>a,.prent>.prx{min-width:0;overflow-wrap:anywhere}.prent>small,.prent>.row,.prent>.prnote{flex:1 1 100%}
+.prnote{color:var(--lk-soft)}
+.prwhy,.prhelp{margin:4px 0}
+.lk-linkbtn{border:0;background:none;color:inherit;font:inherit;text-decoration:underline;cursor:pointer;padding:0}
+.pcn.ok{color:var(--pok);font-weight:800}.pcn.chk{color:var(--pchk);font-weight:800}.pcn.no{color:var(--pno);font-weight:800}
 .pralt summary{cursor:pointer;font:800 12px Nunito;margin:6px 0}
 @media (prefers-reduced-motion:reduce){#pairs *{transition:none!important;animation:none!important}}
 html.rm #pairs *{transition:none!important;animation:none!important}
@@ -894,6 +934,7 @@ html.rm #pairs *{transition:none!important;animation:none!important}
 <div class="top">
   <button class="lk-ibtn" id="bRel" title="How are they related? Opens two slots: put one person in each" aria-label="How are they related"></button>
   <button class="lk-ibtn" id="bBlood" title="Bloodline: add blood relatives, remove the rest, or colour them differently" aria-label="Bloodline" aria-haspopup="true" aria-expanded="false"></button>
+  <button class="lk-ibtn" id="bViews" title="Saved views: keep this arrangement under a name, open it again, share it as a link" aria-label="Saved views" aria-haspopup="true" aria-expanded="false"></button>
   <button class="lk-ibtn" id="bGen" title="Generations: numbered bands behind each row (I is the oldest)" aria-label="Generations" aria-pressed="false"></button>
   <button class="lk-ibtn" id="bArrange" title="Arrange: tidy every card on the canvas into one neat family tree" aria-label="Arrange"></button>
   <button class="lk-ibtn" id="bUndo" title="Undo (Ctrl/Cmd Z)" aria-label="Undo"></button>
@@ -2222,23 +2263,59 @@ html.rm #pairs *{transition:none!important;animation:none!important}
   }
   const nameScore = (M, A, B) => { const s = surScore(A, B), g = givenScore(M, A, B); return s === 0 || g === 0 ? 0 : (s + g) / 2; };
 
+
+  /* places: is what one record says about where, consistent with what the other says? A coarser place that CONTAINS the finer one ("United States of America (country only)"
+     against "Memphis") is consistent, not a disagreement; it never counts toward a match, though. 'conflict' only when both are specific and differ, or the countries differ.
+     Returns {how: 'same' | 'coarse' | 'conflict' | 'unknown', note}. The country of a place comes from the Atlas place records the canvas already carries (M.geo), else the last part of "Town, Region, Country". */
+  const COARSE = /\s*\((?:country|region|state|province|county)\s+only\)\s*$/i;
+  const cut = s => { const c = COARSE.test(s || ''), t = fold((s || '').replace(COARSE, '')).replace(/\s+/g, ' ').trim(); return { c, t, parts: t.split(',').map(x => x.trim()).filter(Boolean) }; };
+  function countryOf(M, name) {
+    if (!name) return '';
+    const m = M._cnByName || (M._cnByName = (() => {
+      const out = new Map();
+      (M.placeIdx ? [...M.placeIdx.entries()] : []).forEach(([n, i]) => { for (const a in (M.geo || {})) { const g = M.geo[a] && M.geo[a][String(i)]; if (g && g[1]) { const k = cut(n).t; if (!out.has(k)) out.set(k, fold(g[1])); } } });
+      return out;
+    })());
+    const k = cut(name).t; if (m.has(k)) return m.get(k);
+    const c = cut(name); return c.parts.length > 1 ? c.parts[c.parts.length - 1] : '';
+  }
+  function placeCmp(M, A, B) {
+    if (!A.bp || !B.bp || (A.fl & 4) || (B.fl & 4)) return { how: 'unknown' };   /* an estimated birthplace (fl 4) is not a statement */
+    const a = cut(A.bp), b = cut(B.bp);
+    if (a.t === b.t) return { how: 'same' };
+    if (!a.c && !b.c && (a.t.includes(b.t) || b.t.includes(a.t))) return { how: 'same' };   /* one reads as part of the other: "Memphis" in "Memphis, Tennessee" */
+    const ca = countryOf(M, A.bp), cb = countryOf(M, B.bp);
+    const aC = a.c || (cb && a.t === cb), bC = b.c || (ca && b.t === ca);
+    const who = x => x.a === 0 ? 'your file' : 'the archive';
+    if (aC && !bC) { if (cb && (a.t === cb || b.parts.includes(a.t))) return { how: 'coarse', note: 'places agree (' + who(A) + ' gives only ' + a.t.replace(/\b\w/g, c => c.toUpperCase()) + ', the other is more precise)' }; return cb ? { how: 'conflict' } : { how: 'unknown' }; }
+    if (bC && !aC) { if (ca && (b.t === ca || a.parts.includes(b.t))) return { how: 'coarse', note: 'places agree (' + who(B) + ' gives only ' + b.t.replace(/\b\w/g, c => c.toUpperCase()) + ', the other is more precise)' }; return ca ? { how: 'conflict' } : { how: 'unknown' }; }
+    if (aC && bC) return { how: 'conflict' };
+    return { how: 'conflict' };   /* both specific and different: the same country, another town, or another country */
+  }
+
   /* a pair of records, judged: level 'same' (agree on everything both record), 'check' (alike, but a detail differs), 'differs' (not the same person as recorded) */
   function judge(M, A, B) {
     const notes = [], n = nameScore(M, A, B);
-    const yd = A.by != null && B.by != null ? Math.abs(A.by - B.by) : null;
+    /* an ESTIMATED year (the "~" the reader fills in from relatives: fl bit 1 for birth, 2 for death) is unknown here: it is never an agreement or a disagreement */
+    const est = (p, bit) => !!(p.fl & bit), yr = (p, k, bit) => (p[k] != null && !est(p, bit) ? p[k] : null);
+    const aby = yr(A, 'by', 1), bby = yr(B, 'by', 1), ady = yr(A, 'dy', 2), bdy = yr(B, 'dy', 2);
+    const yd = aby != null && bby != null ? Math.abs(aby - bby) : null;
+    const estNote = (k, bit, label) => { const e = est(A, bit) ? A : est(B, bit) ? B : null; if (e && A[k] != null && B[k] != null && A[k] !== B[k]) notes.push(label + ' ~' + e[k] + ' is an estimate, not compared'); };
     const sexDiffer = A.sex !== 'u' && B.sex !== 'u' && A.sex !== B.sex;
     if (n === 0 || sexDiffer || (yd != null && yd > 8)) {
-      if (n === 0) notes.push('different names'); if (sexDiffer) notes.push('recorded sex differs'); if (yd != null && yd > 8) notes.push('born ' + A.by + ' against ' + B.by);
+      if (n === 0) notes.push('different names'); if (sexDiffer) notes.push('recorded sex differs'); if (yd != null && yd > 8) notes.push('born ' + aby + ' against ' + bby);
       return { level: 'differs', score: 0, notes };
     }
     let level = 'same';
     if (n < 1) { level = 'check'; notes.push('the name is written differently'); }
-    if (yd != null && yd > 0) { level = 'check'; notes.push('born ' + A.by + ' against ' + B.by); }
-    if (A.dy != null && B.dy != null && A.dy !== B.dy) { level = 'check'; notes.push('died ' + A.dy + ' against ' + B.dy); }
-    if (A.bp && B.bp && fold(A.bp) !== fold(B.bp) && !fold(A.bp).includes(fold(B.bp)) && !fold(B.bp).includes(fold(A.bp))) { level = 'check'; notes.push('born at ' + A.bp + ' against ' + B.bp); }
+    if (yd != null && yd > 0) { level = 'check'; notes.push('born ' + aby + ' against ' + bby); } else estNote('by', 1, 'born');
+    if (ady != null && bdy != null && ady !== bdy) { level = 'check'; notes.push('died ' + ady + ' against ' + bdy); } else estNote('dy', 2, 'died');
+    const pc = placeCmp(M, A, B);
+    if (pc.how === 'conflict') { level = 'check'; notes.push('born at ' + A.bp + ' against ' + B.bp); }
+    else if (pc.how === 'coarse') notes.push(pc.note);
     if (A.bd && B.bd && TC.dateText(A.bd) !== TC.dateText(B.bd)) { level = 'check'; notes.push('birth date ' + TC.dateText(A.bd) + ' against ' + TC.dateText(B.bd)); }
     let score = n - (yd || 0) * 0.04 - (level === 'same' ? 0 : 0.05);
-    if (yd === 0) score += 0.1; if (A.bp && B.bp && fold(A.bp) === fold(B.bp)) score += 0.05;
+    if (yd === 0) score += 0.1; if (pc.how === 'same' && fold(A.bp) === fold(B.bp)) score += 0.05;   /* only the same place twice counts for a match: a coarse or missing place never does */
     return { level, score: Math.max(0, Math.min(1.2, score)), notes };
   }
 
@@ -2324,7 +2401,7 @@ html.rm #pairs *{transition:none!important;animation:none!important}
     return { seed: { a: ia, b: ib, judged: judge(M, A, B) }, up: u, down: d, summary: { up: summary(u), down: summary(d) }, depth: { a: depthUp(M, A, 30), b: depthUp(M, B, 30) } };
   }
 
-  const API = { compare, candidates, judge, nameScore, up, down, ancLabel };
+  const API = { compare, candidates, judge, nameScore, placeCmp, up, down, ancLabel };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCC = API;
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -2498,6 +2575,42 @@ html.rm #pairs *{transition:none!important;animation:none!important}
   const RANK = { same: 0, check: 1, differs: 2 };
   const skip = p => !p || p.living || p.ghost || p.standin;
 
+  /* A placeholder entry: a name that is clearly not a person's ("Unknown", "(no name recorded)", "... (not real)", "SWITZERLAND: Surname", a note for investigation). It is kept and shown,
+     labelled, but it never drives a pairing and is never proposed as anyone's match. Only the visitor's own "same person" can join one. */
+  const PH_RE = [/\bnot real\b/i, /\bplaceholders?\b/i, /\bfor investigation\b/i, /no name recorded/i, /^\s*\(.*\)\s*$/, /^\s*\p{Lu}[\p{Lu} .'’-]{2,}:/u, /^\s*\?+\s*$/];
+  const PH_WORD = new Set(['unknown', 'unnamed', 'noname', 'nn', 'no name', 'not known', 'unbekannt', 'sconosciuto', 'nepoznat', 'nepoznato']);
+  const phFold = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z ]/g, '').replace(/\s+/g, ' ').trim();
+  /* ONE pure function, no model needed (so the shared reader can use it too): is this name text not a person's name? name = the whole name as written, given/sur optional. */
+  function isPlaceholderName(name, given, sur) {
+    const nm = String(name || ((given || '') + ' ' + (sur || ''))).trim(), g = phFold(given), sr = phFold(sur);
+    if (!nm) return true;
+    if (PH_RE.some(r => r.test(nm)) || PH_RE.some(r => r.test(given || ''))) return true;
+    return PH_WORD.has(g) || (PH_WORD.has(sr) && !g) || PH_WORD.has(phFold(nm));
+  }
+  const placeholder = p => !!p && !p.living && !p.ghost && !p.standin && (!!(p.fl & 128) || isPlaceholderName(p.name, p.given, p.sur));   /* fl 128: the archive's own tree marks it a placeholder */
+  const phAny = (M, i, j) => placeholder(M.P[i]) || placeholder(M.P[j]);
+
+  /* the status of a place, as a LABEL (not a button): word, symbol, class, a one-line meaning, the longer line for the panel */
+  const STATUS = {
+    same: ['agree', '✓', 'ok', 'the two records agree on everything both record', 'The two records agree on everything both of them record.'],
+    check: ['check', '?', 'chk', 'the two records disagree on a detail', 'The records disagree on a detail (shown below). Look at both, then choose Same person or Different people.'],
+    differs: ['different people', '≠', 'no', 'the two records read as different people', 'These two records read as different people. If you know better, choose Same person.'],
+    'only-a': ['only in your file', '○', 'one', 'no archive records this person here', 'Only your file has someone here. No archive records this person in this place.'],
+    'only-b': ['only in the archive', '○', 'one', 'your file has no one here', 'Only the archive has someone here. Your file has no one in this place.'],
+    empty: ['', '', 'one', '', '']
+  };
+  const cap1 = t => t ? t.charAt(0).toUpperCase() + t.slice(1) : t;
+  function statusInfo(state, notes) {
+    const [word, sym, cls, mean, line] = STATUS[state] || STATUS.empty, ns = (notes || []).filter(Boolean);
+    const tip = word ? cap1(word) + ': ' + mean + '.' + (ns.length ? ' ' + cap1(ns.join('; ')) + '.' : '') : '';
+    return { word, sym, cls, mean, line, tip };
+  }
+  /* a status LABEL: a span, not focusable, with the meaning and the reason in its title and aria-label. Quiet: the stylesheet draws it as a dot-and-word, never as a button. */
+  function statusHtml(state, notes, esc) {
+    const i = statusInfo(state, notes); if (!i.word) return '';
+    return '<span class="prst ' + i.cls + '" role="img" aria-label="' + esc(i.tip) + '" title="' + esc(i.tip) + '"><b aria-hidden="true">' + i.sym + '</b>' + esc(i.word) + '</span>';
+  }
+
   /* a decision about two people, in either order: 'y' (the visitor says they are the same person) or 'n' (different people) */
   const dkey = (M, i, j) => { const a = M.P[i].key, b = M.P[j].key; return (M.P[i].a === 0 || (M.P[j].a !== 0 && a < b)) ? a + ' ~ ' + b : b + ' ~ ' + a; };
   function judgeD(M, i, j, dec) {
@@ -2526,7 +2639,7 @@ html.rm #pairs *{transition:none!important;animation:none!important}
   /* best-first one-to-one matching of two lists of people; accepted pairs ('y') first. Returns [{x, y, j, margin}] and the unmatched on each side. */
   function matchLists(M, xs, ys, dec, keepDiffers) {
     const cand = [];
-    xs.forEach(x => ys.forEach(y => { const A = M.P[x], B = M.P[y]; if (A.by != null && B.by != null && Math.abs(A.by - B.by) > 8 && !dec.get(dkey(M, x, y))) return; const j = judgeD(M, x, y, dec); if (j.level !== 'differs' || (keepDiffers && j.said !== 'n')) cand.push({ x, y, j, forced: j.said === 'y' }); }));
+    xs.forEach(x => ys.forEach(y => { const A = M.P[x], B = M.P[y]; if (placeholder(A) || placeholder(B)) { if (!dec.get(dkey(M, x, y))) return; } if (A.by != null && B.by != null && !(A.fl & 1) && !(B.fl & 1) && Math.abs(A.by - B.by) > 8 && !dec.get(dkey(M, x, y))) return; const j = judgeD(M, x, y, dec); if (j.level !== 'differs' || (keepDiffers && j.said !== 'n')) cand.push({ x, y, j, forced: j.said === 'y' }); }));
     cand.sort((p, q) => (q.forced - p.forced) || (RANK[p.j.level] - RANK[q.j.level]) || (q.j.score - p.j.score) || (p.x - q.x) || (p.y - q.y));
     const ux = new Set(), uy = new Set(), got = [];
     cand.forEach(c => {
@@ -2565,6 +2678,7 @@ html.rm #pairs *{transition:none!important;animation:none!important}
     const evaluate = s => {
       const ents = Object.keys(s.arch).map(Number).sort((x, y) => x - y).map(a => ({ a, e: s.arch[a] }));
       s.notes = s.notes.filter(n => !n.__eval);
+      s.ph = s.f >= 0 && placeholder(M.P[s.f]) ? 'file' : ents.some(x => placeholder(M.P[x.e.i])) ? 'archive' : null;
       if (s.f >= 0) {
         ents.forEach(({ e }) => { const j = judgeD(M, s.f, e.i, dec); e.level = j.level; e.notes = j.notes; e.score = j.score; e.said = j.said || null; if (e.amb && e.level === 'same') { e.level = 'check'; e.notes = e.notes.concat(['another person of the same kind has a similar name and year: the name alone does not settle which is which']); } });
         const best = ents.slice().sort((x, y) => (RANK[x.e.level] - RANK[y.e.level]) || (y.e.score - x.e.score) || (x.a - y.a))[0];
@@ -2615,7 +2729,7 @@ html.rm #pairs *{transition:none!important;animation:none!important}
         const f = fileSide.length ? fileSide[0] : -1, ents = {};
         Object.keys(arch).forEach(a => { if (arch[a].length) ents[a] = arch[a][0]; });
         const sep = [];
-        if (f >= 0) Object.keys(ents).forEach(a => { if (dec.get(dkey(M, f, ents[a])) === 'n') { sep.push([a, ents[a]]); delete ents[a]; } });
+        if (f >= 0) Object.keys(ents).forEach(a => { const dd = dec.get(dkey(M, f, ents[a])); if (dd === 'n' || (dd !== 'y' && phAny(M, f, ents[a]))) { sep.push([a, ents[a]]); delete ents[a]; } });
         place(f, ents);
         sep.forEach(([a, i]) => place(-1, { [a]: i }));
         if (f < 0) {}
@@ -2629,7 +2743,7 @@ html.rm #pairs *{transition:none!important;animation:none!important}
           const used = new Set(r.got.map(g => g.y));
           unm[a] = arch[a].filter(y => !used.has(y) && !owner.has(y));
           /* a file person left without a counterpart who looks like one already paired with someone else: a possible duplicate in the file */
-          r.ux.forEach(x => r.got.forEach(g => { if (g.x !== x) { const j = judgeD(M, x, g.y, dec); if (j.level !== 'differs') { const b = byFile.get(x); if (b && !b.__dup) b.__dup = g.x; } } }));
+          r.ux.forEach(x => r.got.forEach(g => { if (g.x !== x && !phAny(M, x, g.y)) { const j = judgeD(M, x, g.y, dec); if (j.level !== 'differs') { const b = byFile.get(x); if (b && !b.__dup) b.__dup = g.x; } } }));
         });
         /* file people, each with the archives that matched them */
         fileSide.forEach(x => {
@@ -2643,7 +2757,7 @@ html.rm #pairs *{transition:none!important;animation:none!important}
         Object.keys(unm).map(Number).sort((x, y) => x - y).forEach(a => {
           const pool = groups.filter(g => g.e[a] == null);
           const cands = [];
-          unm[a].forEach(y => pool.forEach((g, k) => { const first = g.e[Object.keys(g.e)[0]]; const j = judgeD(M, first, y, dec); if (j.level !== 'differs') cands.push({ y, k, j }); }));
+          unm[a].forEach(y => pool.forEach((g, k) => { const first = g.e[Object.keys(g.e)[0]]; if (phAny(M, first, y) && !dec.get(dkey(M, first, y))) return; const j = judgeD(M, first, y, dec); if (j.level !== 'differs') cands.push({ y, k, j }); }));
           cands.sort((p, q) => (RANK[p.j.level] - RANK[q.j.level]) || (q.j.score - p.j.score) || (p.y - q.y));
           const uy = new Set(), uk = new Set();
           cands.forEach(c => { if (uy.has(c.y) || uk.has(c.k)) return; uy.add(c.y); uk.add(c.k); pool[c.k].e[a] = c.y; });
@@ -2683,7 +2797,7 @@ html.rm #pairs *{transition:none!important;animation:none!important}
         if (a === 0 ? s.f >= 0 : s.arch[a]) return;
         let best = null;
         const take = (i, base) => {
-          const q = M.P[i]; if (!q || q.a !== a || owner.has(i) || skip(q)) return;
+          const q = M.P[i]; if (!q || q.a !== a || owner.has(i) || skip(q) || placeholder(q) || placeholder(M.P[base])) return;
           if (mem.some(m => dec.get(dkey(M, m, i)) === 'n')) return;   /* said no to this person for this place */
           const j = judgeD(M, base, i, dec); if (j.level === 'differs') return;
           if (!best || RANK[j.level] < RANK[best.level] || (RANK[j.level] === RANK[best.level] && j.score > best.score)) best = { a, i, level: j.level === 'same' ? 'check' : j.level, notes: j.notes, score: j.score };
@@ -2704,7 +2818,7 @@ html.rm #pairs *{transition:none!important;animation:none!important}
         p.sp.forEach(x => { const t = owner.get(x); if (t && t !== s) { const k = s.id < t.id ? s.id + '=' + t.id : t.id + '=' + s.id; if (!mseen.has(k)) { mseen.add(k); mates.push({ a: s.id, b: t.id }); } } });
       });
     });
-    const sum = { agree: 0, check: 0, differs: 0, onlyFile: 0, onlyArch: 0, slots: slots.length };
+    const sum = { agree: 0, check: 0, differs: 0, onlyFile: 0, onlyArch: 0, placeholders: slots.filter(x => x.ph).length, slots: slots.length };
     slots.forEach(s => { if (s.state === 'same') sum.agree++; else if (s.state === 'check') sum.check++; else if (s.state === 'differs') sum.differs++; else if (s.state === 'only-a') sum.onlyFile++; else if (s.state === 'only-b') sum.onlyArch++; });
     return { slots, edges, mates, capped, skipped, summary: sum, anchor: A.id, bySlot: new Map(slots.map(s => [s.id, s])), owner, opts: { up: maxUp, down: maxDown, whole, maxSlots } };
   }
@@ -2733,7 +2847,18 @@ html.rm #pairs *{transition:none!important;animation:none!important}
     return { pos: A, cell: SW, W, H, PG, off, stack };
   }
 
-  const API = { pair, layout, alternatives, dkey, judgeD, matchLists };
+  /* colour maths for the pair-mode palette (WCAG relative luminance): a colour is nudged toward black or white until it reads at least `min` against the ground, so no stroke vanishes on a dark or light canvas */
+  const hex2 = h => { h = String(h || '').replace('#', ''); if (h.length === 3) h = h.replace(/./g, c => c + c); const n = parseInt(h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+  const lum = h => { const [r, g, b] = hex2(h).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+  const contrast = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+  function ensure(hex, bg, min) {
+    min = min || 3; if (!/^#[0-9a-f]{3,6}$/i.test(hex || '') || !/^#[0-9a-f]{3,6}$/i.test(bg || '')) return hex;
+    if (contrast(hex, bg) >= min) return hex;
+    const to = lum(bg) < 0.4 ? [255, 255, 255] : [0, 0, 0], c = hex2(hex);
+    for (let t = 0.05; t <= 1.0001; t += 0.05) { const m = c.map((v, i) => Math.round(v + (to[i] - v) * t)), h = '#' + m.map(v => v.toString(16).padStart(2, '0')).join(''); if (contrast(h, bg) >= min) return h; }
+    return lum(bg) < 0.4 ? '#ffffff' : '#000000';
+  }
+  const API = { contrast, ensure, lum, pair, layout, alternatives, dkey, judgeD, matchLists, placeholder, isPlaceholderName, statusInfo, statusHtml };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCP = API;
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
@@ -2766,6 +2891,7 @@ const ICON = {
   up: 'M12 19V6M6 11l6-6 6 6', upall: 'M6 11l6-6 6 6M6 18l6-6 6 6', dn: 'M12 5v13M6 13l6 6 6-6', dnall: 'M6 6l6 6 6-6M6 13l6 6 6-6',
   sp: '<circle cx="9" cy="12" r="4.5"/><circle cx="15.5" cy="12" r="4.5"/>', x: 'M7 7l10 10M17 7L7 17', open: 'M14 4h6v6M20 4l-9 9M18 14v5H5V6h5',
   menu: 'M4 7h16M4 12h16M4 17h16',
+  views: 'M7 4h10v16.5l-5-4-5 4z', link: 'M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1', pencil: 'M4 20l1-4.2L16.2 4.6l3.2 3.2L8.2 19z',
   layers: 'M12 3.5l9 4.8-9 4.8-9-4.8 9-4.8zM3 12.6l9 4.8 9-4.8M3 17l9 4.8 9-4.8', play: 'M8 5.5v13l11-6.5z', pause: 'M8 5v14M16 5v14',
   arrange: 'M9 3.5h6v5H9zM12 8.5V12M6 12h12M6 12v3M18 12v3M3 15.5h6v5H3zM15 15.5h6v5h-6z', relate: 'M4 8h14l-3-3.5M20 16H6l3 3.5', undo: 'M9 14L4 9l5-5M4 9h10a6 6 0 010 12h-4', fit: 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5',
   plus: 'M12 5v14M5 12h14', compass: '<circle cx="12" cy="12" r="8.5"/><path d="M15.6 8.4l-2 5.2-5.2 2 2-5.2z"/>', help: '<circle cx="12" cy="12" r="9"/><path d="M9.4 9.6a2.7 2.7 0 115.1 1.2c-.5 1-2.5 1.6-2.5 3.2M12 17.4v.1"/>', flag: 'M5.5 21V3.5M5.5 4.5h12l-2.8 4.2 2.8 4.2H5.5', star: 'M12 3.6l2.5 5.3 5.8.7-4.3 4 1.1 5.7-5.1-2.9-5.1 2.9 1.1-5.7-4.3-4 5.8-.7z', minus: 'M5 12h14', info: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.6v.2"/>',
@@ -2968,8 +3094,9 @@ function cardInner(c) {
   /* the same person in another archive: a dashed chip in the card's own meta line */
   h += `<button class="hd rl hov" data-act="rel" title="How are they related? Pick this person, then another">${icon('relate', '')}</button>`;
   h += `<button class="hd rm hov" data-act="rm" title="Take off the canvas">${icon('x', '')}</button>`;
-  const link = TC.url(M, p);
+  const link = TC.url(M, p), xl = !link && typeof prExt === 'function' && S.pr ? prExt(p)[0] : null;   /* in the paired Compare the file's person opens on MyHeritage when the Settings link is set */
   if (link) h += `<a class="hd op hov" href="${esc(link)}" target="_blank" rel="noopener" data-act="open" title="Open in the ${esc(a.name)} archive">${icon('open', '')}</a>`;
+  else if (xl) h += `<a class="hd op hov" href="${esc(xl.href)}" target="_blank" rel="noopener noreferrer" data-act="open" title="Open ${esc(p.name)} on ${esc(xl.label)}" aria-label="Open ${esc(p.name)} on ${esc(xl.label)} (new tab)">${icon('open', '')}</a>`;
   /* where the line above stops */
   if (c.up === 1 || c.stopG || (p.f < 0 && p.m < 0)) {
     const sr = TC.stopReason(M, c.i, null);
@@ -4548,14 +4675,28 @@ function wireLines() {
  * proposal the visitor can accept, change or reject, and what they decide is kept (opaque ids only) by the page around the canvas. The panel lists every place as text too.
  *
  * Loaded BEFORE ui.js (which starts the canvas at its end): only function declarations and constants here, and nothing from ui.js is touched until it is called. */
-const PAIRFILE = '#17191c';
+/* the file's identity colour is theme-aware (black on the light looks, a light ink on the dark one: --pfile), and every archive's colour is nudged to read at least 3:1 against the current ground */
+const PAIRFILE = 'var(--pfile)';
 const CMPARCH = [['defranceski', 'Defranceski', '#D2493A'], ['booyzen', 'Booyzen', '#4E9A3E'], ['luwinski', 'Luwinski', '#3A74C9'], ['lerena', 'Lerena', '#8A5CC2'], ['falco', 'Falco', '#D39A12'], ['blazevic', 'Blažević', '#1E9C97'], ['darcy', "D'Arcy", '#C9508F'], ['mazza', 'Mazza', '#8E7B5E']];
 const PR_MAXDEC = 400;
 const PR_ST = { same: ['agree', '✓', 'ok'], check: ['check', '?', 'chk'], differs: ['different people', '≠', 'no'], 'only-a': ['only in your file', '○', 'one'], 'only-b': ['only in the archive', '○', 'one'], empty: ['', '', 'one'] };
 const pairMode = () => M.archives.length >= 2 && M.archives[0].k === 'you';
 const cmpMode = pairMode;
 const cmpAvail = () => SA && (pairMode() || (M.archives.length === 1 && M.archives[0].k === 'you'));
-if (pairMode()) { M.archives[0].color = PAIRFILE; M.archives[0].name = 'Your file'; }
+const prTok = (n, d) => { try { return getComputedStyle(document.documentElement).getPropertyValue(n).trim() || d; } catch (e) { return d; } };
+let prInkKey = '', prInkMap = new Map();
+function prInkOf(a) {
+  const board = prTok('--lk-board', '#F1E8D2'), key = (document.documentElement.getAttribute('data-theme') || '') + board;
+  if (key !== prInkKey) { prInkKey = key; prInkMap = new Map(); }
+  if (!prInkMap.has(a)) prInkMap.set(a, a === 0 ? prTok('--pfile', '#17191c') : TCPe().ensure(TCPe().ensure(M.archives[a]._c0, board, 3), prTok('--lk-card', board), 3));
+  return prInkMap.get(a);
+}
+if (pairMode()) {
+  M.archives[0].name = 'Your file';
+  M.archives.forEach((ar, i) => { ar._c0 = ar.color; Object.defineProperty(ar, 'color', { get: () => prInkOf(i), set: v => { ar._c0 = v; }, enumerable: true, configurable: true }); });
+}
+/* the look changed: the cards' stripes and every line are drawn again in the ink that reads on the new ground */
+function prOnTheme() { if (!S.pr) return; prInkKey = ''; S.cards.forEach(c => { c.el.style.setProperty('--ac', colour(personOf(c).a)); }); if (S.pr.res) drawPairs(); renderLegend(); }
 S.pr = pairMode() ? { an: null, dec: new Map(), whole: false, res: null, lay: null, sel: null, show: new Map(), pick: {}, chooser: false, listAll: false, ms: 0 } : null;
 const prOn = () => !!(S.pr && S.pr.res);
 const TCPe = () => window.TCP;
@@ -4567,6 +4708,17 @@ const prSlotOf = i => S.pr && S.pr.res ? S.pr.res.owner.get(i) || null : null;
 const prArch = a => M.archives[a];
 const prYears = q => TC.years(q);
 const prNm = q => esc(q.name) + ' <small>' + esc(prYears(q)) + (q.bp ? ' · ' + esc(q.bp) : '') + '</small>';
+/* links out, built by the code the Person panel already uses: the file's person on MyHeritage (RR.links, only when the Settings link is set), an archive's person on the archive's own page (TC.url).
+   A living person is never linked, and nothing is shown when the link cannot be built. */
+function prExt(q) {
+  if (!q || q.living || q.ghost || q.standin) return [];
+  if (q.a === 0) { const L = RL(); let u = null; if (L) { try { u = L.url(q.id, q.name); } catch (e) { u = null; } } const h = u && (u.mh || u.tree); return h ? [{ href: h, label: 'MyHeritage' }] : []; }
+  const h = TC.url(M, q); return h ? [{ href: h, label: M.archives[q.a].name + ' archive' }] : [];
+}
+const prExtA = (q, text, cls) => { const x = prExt(q)[0]; return x ? `<a class="${cls || 'prx'}" href="${esc(x.href)}" target="_blank" rel="noopener noreferrer" title="Open ${esc(q.name)} on ${esc(x.label)} (new tab)" aria-label="Open ${esc(q.name)} on ${esc(x.label)} (opens in a new tab)">${text}<span class="prdst"> ${esc(x.label)} &nearr;</span></a>` : ''; };
+const prNameL = q => prExtA(q, esc(q.name)) || esc(q.name);
+const prPH = s => s.ph ? `<span class="prph" title="${s.ph === 'file' ? 'This looks like a placeholder, not a real person. It is kept and shown, but never matched on its own.' : 'The archive entry looks like a placeholder, not a real person. It is shown, but never matched on its own.'}">placeholder entry in ${s.ph === 'file' ? 'your file' : 'the archive'}</span>` : '';
+const prSt = (state, notes) => TCPe().statusHtml(state, notes, esc);
 
 /* ---------- running the engine, drawing the answer ---------- */
 function prRun() {
@@ -4693,7 +4845,7 @@ function prAnchorStep() {
   if (!p || p.ghost) return how + `<p class="plines">Mark a person first: open <b>Person</b> for anyone and press the <b>flag</b> button. Anyone from your file will do (or from an archive).</p>`;
   if (p.living) return how + `<p class="plines lvn">The marked person is living, so they are never compared.</p>`;
   const sides = []; for (let a = 0; a < M.archives.length; a++) if (a !== p.a) sides.push(a);
-  const lists = sides.map(a => ({ a, c: TCC_().candidates(M, p, a, 4) }));
+  const lists = sides.map(a => ({ a, c: TCC_().candidates(M, p, a, 6).filter(x => !TCPe().placeholder(M.P[x.i])).slice(0, 4) }));
   lists.forEach(({ a, c }) => { if (P.pick[a] == null) P.pick[a] = c.length ? c[0].i : -1; else if (P.pick[a] !== -1 && !c.some(x => x.i === P.pick[a])) P.pick[a] = c.length ? c[0].i : -1; });
   const block = ({ a, c }) => `<h4 style="--ac:${esc(prArch(a).color)}">${esc(prArch(a).name)}</h4>
     <ul class="cmpc">${c.map(x => { const q = M.P[x.i]; return `<li><label><input type="radio" name="prp${a}" data-pr-pick="${a}:${x.i}"${P.pick[a] === x.i ? ' checked' : ''}> <span>${prNm(q)}${x.notes.length ? `<br><small>${esc(x.notes.join('; '))}</small>` : ''}</span></label></li>`; }).join('')}
@@ -4706,9 +4858,10 @@ function prAnchorStep() {
 const TCC_ = () => window.TCC;
 function prResult() {
   const P = S.pr, R = P.res, sm = R.summary;
-  const unreadable = R.slots.filter(s => s.more && (s.more.up || s.more.down));
+    const unreadable = R.slots.filter(s => s.more && (s.more.up || s.more.down));
   let h = `<p class="plines"><b>${sm.slots.toLocaleString()}</b> places in the family: <span class="pcn ok">${sm.agree} agree</span>, <span class="pcn chk">${sm.check} to check</span>, <span class="pcn no">${sm.differs} different people</span>, ${sm.onlyFile} only in your file, ${sm.onlyArch} only in an archive.</p>`;
   if (R.capped) h += `<div class="warnbox bad"><b>Showing the nearest ${sm.slots.toLocaleString()} places.</b> ${R.skipped.toLocaleString()} more were left out so the canvas stays quick. Start from someone nearer the top or bottom to see the rest.</div>`;
+  if (sm.placeholders) h += `<p class="plines"><small>${sm.placeholders} ${sm.placeholders === 1 ? 'place holds' : 'places hold'} a placeholder entry (a name that is not a person's). ${sm.placeholders === 1 ? 'It is' : 'They are'} shown and labelled, never matched on their own.</small></p>`;
   const cut = R.slots.filter(s => s.cut).length;
   if (cut) h += `<p class="plines"><small>${cut} ${cut === 1 ? 'place stops' : 'places stop'} at the generation limit (${R.opts.up} up, ${R.opts.down} down); there is more beyond.</small></p>`;
   if (unreadable.length) { const u = unreadable.reduce((t, s) => t + s.more.up + s.more.down, 0); h += `<p class="plines"><small>${u.toLocaleString()} more ${u === 1 ? 'person is' : 'people are'} recorded beyond places where the two records disagree or only one has someone: the walk does not follow a line it cannot pair.</small></p>`; }
@@ -4719,33 +4872,41 @@ function prResult() {
   h += prList();
   return h;
 }
+const PRHELP = '<p class="plines prhelp"><small><b>Same person</b>: you are confirming these two records are one person. <b>Different people</b>: they are not. Nothing is changed in your file or in the archive; your choice is kept on this device.</small></p>';
 const REL = { self: 'Starting person', father: 'Father', mother: 'Mother', child: 'Child', spouse: 'Spouse' };
 function prList() {
   const P = S.pr, R = P.res, L = P.lay;
   const rows = R.slots.slice().sort((a, b) => (a.gen - b.gen) || (L.pos.get(a.id).x - L.pos.get(b.id).x));
   const shown = P.listAll ? rows : rows.slice(0, 120);
-  const li = s => { const [word, sym, cls] = PR_ST[s.state] || PR_ST.empty, a = prShown(s);
-    const fname = s.f >= 0 ? esc(M.P[s.f].name) + ' <small>' + esc(prYears(M.P[s.f])) + '</small>' : '<em>not in your file</em>';
-    const aname = a != null && s.arch[a] ? esc(M.P[s.arch[a].i].name) + ' <small>' + esc(prArch(a).name) + '</small>' : '<em>not in the archive</em>';
-    return `<li><button type="button" class="prrow${P.sel === prSlotName(s) ? ' on' : ''}" data-pr-slot="${esc(prSlotName(s))}"><span class="pgn">${s.gen > 0 ? '+' + s.gen : s.gen}</span><span class="prn">${fname}<br>${aname}</span><span class="cmpchip ${cls}">${esc(word)}</span></button></li>`; };
-  return `<h4>Every place, by generation</h4><ul class="prlist">${shown.map(li).join('')}</ul>${rows.length > shown.length ? `<div class="row"><button class="lk-btn is-small" data-pr-list="1">Show all ${rows.length.toLocaleString()}</button></div>` : ''}`;
+  const li = s => { const a = prShown(s), nm = prSlotName(s), fq = s.f >= 0 ? M.P[s.f] : null, aq = a != null && s.arch[a] ? M.P[s.arch[a].i] : null;
+    const fname = fq ? prNameL(fq) + ' <small>' + esc(prYears(fq)) + '</small>' : '<em>not in your file</em>';
+    const aname = aq ? prNameL(aq) + ' <small>' + esc(prArch(a).name) + '</small>' : '<em>not in the archive</em>';
+    const on = P.sel === nm, gl = s.gen > 0 ? '+' + s.gen : '' + s.gen, pn = s.state === 'only-a' || s.state === 'only-b' ? [] : (s.pnotes || []);
+    const sr = TCPe().statusInfo(s.state, pn);
+    const aria = `${REL[s.rel] || 'Person'}, generation ${gl}: ${fq ? fq.name : 'not in your file'} and ${aq ? aq.name : 'not in the archive'}. ${sr.word}. Show on the canvas`;
+    return `<li class="prli${on ? ' on' : ''}" data-pr-row="${esc(nm)}"><button type="button" class="prsel" data-pr-slot="${esc(nm)}" aria-pressed="${on}" aria-label="${esc(aria)}"><span class="pgn">${gl}</span>${prSt(s.state, pn)}</button><span class="prn">${fname}<br>${aname}${s.ph ? '<br>' + prPH(s) : ''}</span></li>`; };
+  const needHint = !!RL() && rows.some(s => s.f >= 0 && !M.P[s.f].living) && !rows.some(s => s.f >= 0 && prExt(M.P[s.f]).length);
+  return `<h4>Every place, by generation</h4>${needHint ? `<p class="plines"><small>Add your MyHeritage link in <button type="button" class="lk-linkbtn" data-gsettings="1">Settings</button> to link these.</small></p>` : ''}<ul class="prlist">${shown.map(li).join('')}</ul>${rows.length > shown.length ? `<div class="row"><button class="lk-btn is-small" data-pr-list="1">Show all ${rows.length.toLocaleString()}</button></div>` : ''}`;
 }
 function prSlotPanel(s) {
   const P = S.pr, R = P.res, nmk = prSlotName(s);
-  const [word, , cls] = PR_ST[s.state] || PR_ST.empty;
   const gen = s.gen === 0 ? 'the starting generation' : s.gen < 0 ? Math.abs(s.gen) + (Math.abs(s.gen) === 1 ? ' generation up' : ' generations up') : s.gen + (s.gen === 1 ? ' generation down' : ' generations down');
   const dec = (i, j) => P.dec.get(TCPe().dkey(M, i, j));
   const undo = (i, j) => `<button class="lk-btn is-small" data-pr-undo="${i}:${j}">Undo my choice</button>`;
-  let h = `<div class="prdet"><h4>${esc(REL[s.rel] || 'Person')}, ${esc(gen)} <span class="cmpchip ${cls}">${esc(word)}</span></h4>`;
-  h += `<div class="prent file"><span class="pk" style="--ac:${PAIRFILE}"><i></i>Your file</span> ` + (s.f >= 0 ? `<a href="#" data-focus="${esc(M.P[s.f].key)}">${prNm(M.P[s.f])}</a>` : '<em>no one here</em>') + '</div>';
+  const si = TCPe().statusInfo(s.state, s.pnotes);
+  let h = `<div class="prdet"><h4><span>${esc(REL[s.rel] || 'Person')}, ${esc(gen)}</span> ${prSt(s.state, s.pnotes)}</h4>${si.line ? `<p class="plines prwhy">${esc(si.line)}</p>` : ''}${s.ph ? `<p class="plines">${prPH(s)}. It is kept and shown, but it never drives a pairing and is never suggested as a match.</p>` : ''}`;
+  let helped = false; const multi = M.archives.length > 2;
+  h += `<div class="prent file"><span class="pk" style="--ac:${PAIRFILE}"><i></i>Your file</span> ` + (s.f >= 0 ? `<a href="#" data-focus="${esc(M.P[s.f].key)}">${prNm(M.P[s.f])}</a>${prExtA(M.P[s.f], 'Open', 'prx prxo')}` : '<em>no one here</em>') + '</div>';
   Object.keys(s.arch).map(Number).sort((a, b) => a - b).forEach(a => {
     const e = s.arch[a], q = M.P[e.i], ar = prArch(a);
-    const lv = s.f >= 0 ? e.level : null, [lw, , lc] = lv ? PR_ST[lv] : PR_ST['only-b'];
-    h += `<div class="prent"><span class="pk" style="--ac:${esc(ar.color)}"><i></i>${esc(ar.name)}</span> <a href="#" data-focus="${esc(q.key)}">${prNm(q)}</a> ${lv ? `<span class="cmpchip ${lc}">${esc(lw)}</span>` : ''}${a === prShown(s) ? '' : ` <button class="lk-btn is-small" data-pr-showa="${a}" data-pr-k="${esc(nmk)}">Show on canvas</button>`}`;
-    if (e.notes && e.notes.length) h += `<br><small>${esc(e.notes.join('; '))}</small>`;
+    const lv = s.f >= 0 ? e.level : null, show = lv && (multi || lv !== s.state);
+    h += `<div class="prent"><span class="pk" style="--ac:${esc(ar.color)}"><i></i>${esc(ar.name)}</span> <a href="#" data-focus="${esc(q.key)}">${prNm(q)}</a>${prExtA(q, 'Open', 'prx prxo')} ${show ? prSt(lv, e.notes) : ''}${a === prShown(s) ? '' : ` <button class="lk-btn is-small" data-pr-showa="${a}" data-pr-k="${esc(nmk)}">Show on canvas</button>`}`;
+    if (e.notes && e.notes.length) h += `<small class="prnote">${esc(e.notes.join('; '))}</small>`;
     if (s.f >= 0) {
       const d = dec(s.f, e.i);
-      h += `<div class="row">${d === 'y' ? `<small>You said: same person.</small> ${undo(s.f, e.i)}` : d === 'n' ? `<small>You said: different people.</small> ${undo(s.f, e.i)}` : `<button class="lk-btn is-small" data-pr-y="${s.f}:${e.i}">Same person</button><button class="lk-btn is-small" data-pr-n="${s.f}:${e.i}">Different people</button>`}</div>`;
+      if (d === 'y') h += `<div class="row"><small>You said: same person.</small> ${undo(s.f, e.i)}</div>`;
+      else if (d === 'n') h += `<div class="row"><small>You said: different people.</small> ${undo(s.f, e.i)}</div>`;
+      else { h += `<div class="row"><button class="lk-btn is-small" data-pr-y="${s.f}:${e.i}">Same person</button><button class="lk-btn is-small" data-pr-n="${s.f}:${e.i}">Different people</button></div>`; if (!helped) { helped = true; h += PRHELP; } }
     }
     h += '</div>';
   });
@@ -4756,14 +4917,14 @@ function prSlotPanel(s) {
   (s.maybe || []).forEach(m => {
     const q = M.P[m.i], ar = prArch(m.a), ref = s.f >= 0 ? s.f : s.arch[s.primary].i;
     h += `<div class="prent maybe"><span class="pk" style="--ac:${esc(ar.color)}"><i></i>${m.a === 0 ? 'Your file' : esc(ar.name)}</span> <b>maybe</b> <a href="#" data-focus="${esc(q.key)}">${prNm(q)}</a><br><small>${esc(m.notes.join('; ') || 'same name and birth year')}. Not joined.</small>
-      <div class="row"><button class="lk-btn is-small" data-pr-y="${ref}:${m.i}">Same person</button><button class="lk-btn is-small" data-pr-n="${ref}:${m.i}">Not the same</button></div></div>`;
+      <div class="row"><button class="lk-btn is-small" data-pr-y="${ref}:${m.i}">Same person</button><button class="lk-btn is-small" data-pr-n="${ref}:${m.i}">Different people</button></div>${helped ? '' : (helped = true, PRHELP)}</div>`;
   });
   /* the archive's other relatives of the same kind, for a pairing the walk got wrong */
   Object.keys(M.archives).forEach(k => {
     const a = +k; if (a < 1 || s.f < 0) return;
     const alts = TCPe().alternatives(M, R, s, a, P.dec);
     if (!alts.length) return;
-    h += `<details class="pralt"><summary>Someone else in ${esc(prArch(a).name)}</summary><ul class="cmpc">${alts.map(x => { const q = M.P[x.i]; return `<li><span>${prNm(q)}${x.level ? ` <span class="cmpchip ${PR_ST[x.level][2]}">${esc(PR_ST[x.level][0])}</span>` : ''}${x.owned ? '<br><small>already placed elsewhere here</small>' : ''}</span> <button class="lk-btn is-small" data-pr-y="${s.f}:${x.i}">Pair with them</button></li>`; }).join('')}</ul></details>`;
+    h += `<details class="pralt"><summary>Someone else in ${esc(prArch(a).name)}</summary><ul class="cmpc">${alts.map(x => { const q = M.P[x.i]; return `<li><span>${prNm(q)}${x.level ? ' ' + prSt(x.level, []) : ''}${x.owned ? '<br><small>already placed elsewhere here</small>' : ''}</span> <button class="lk-btn is-small" data-pr-y="${s.f}:${x.i}">Same person</button></li>`; }).join('')}</ul></details>`;
   });
   return h + '</div>';
 }
@@ -4819,7 +4980,8 @@ $('#info').addEventListener('click', e => {
   const pk = t.closest('[data-pr-pick]'); if (pk) { const [a, i] = pk.dataset.prPick.split(':').map(Number); P.pick[a] = i; return; }
   if (t.closest('[data-pr-anchor]')) { prStart(); return; }
   const wh = t.closest('[data-pr-whole]'); if (wh) { P.whole = wh.dataset.prWhole === '1'; prRun(); prDraw({ fit: true }); return; }
-  const sl = t.closest('[data-pr-slot]'); if (sl) { P.sel = sl.dataset.prSlot; drawPairs(); renderInfo(); const s = P.res.slots.find(x => prSlotName(x) === P.sel); if (s) { const c = S.cards.get(M.P[s.f >= 0 ? s.f : s.arch[prShown(s)].i].key); if (c) { fit([c], { maxK: 1 }); pulseCard(c); } } return; }
+  if (t.closest('a[href]:not([href="#"])')) return;   /* a link out follows itself */
+  const rw = t.closest('[data-pr-row]'); const sl = t.closest('[data-pr-slot]') || (rw && rw.querySelector('[data-pr-slot]')); if (sl) { P.sel = sl.dataset.prSlot; drawPairs(); renderInfo(); const s = P.res.slots.find(x => prSlotName(x) === P.sel); if (s) { const c = S.cards.get(M.P[s.f >= 0 ? s.f : s.arch[prShown(s)].i].key); if (c) { fit([c], { maxK: 1 }); pulseCard(c); } } return; }
   const y = t.closest('[data-pr-y]'); if (y) { const [i, j] = y.dataset.prY.split(':').map(Number); prDecide(i, j, 'y'); return; }
   const n = t.closest('[data-pr-n]'); if (n) { const [i, j] = n.dataset.prN.split(':').map(Number); prDecide(i, j, 'n'); return; }
   const u = t.closest('[data-pr-undo]'); if (u) { const [i, j] = u.dataset.prUndo.split(':').map(Number); prDecide(i, j, null); return; }
@@ -5028,6 +5190,74 @@ function runSearchMarks() { document.querySelectorAll('#shelf .res').forEach(el 
     openPop(g.dataset.br, e.clientX, e.clientY);
   });
 })();
+/* ---------------- Saved views ----------------
+   A named copy of the canvas as it is: who is on it, where each sits, the zoom and pan, the highlighted path, the options and the look. The page around the canvas
+   keeps them (work.js: in this browser, and in the six-word copy if that is on) and builds the share link; this is the menu. Nothing here holds a name from the tree. */
+const viewsOK = () => { try { const R = window.parent && window.parent.RR; return !!(SA && R && R.keep && R.keep.views); } catch (e) { return false; } };
+const viewsOn = viewsOK;
+const VK = () => { try { return viewsOK() ? window.parent.RR.keep.views : null; } catch (e) { return null; } };
+const curLook = () => document.documentElement.getAttribute('data-theme') || 'sticker';
+function viewsMenu() {
+  const m = $('#viewsMenu'), V = VK(); if (!m) return;
+  if (!V) { m.innerHTML = `<h4>Saved views</h4><p class="plines">Open a family archive, a link or a file and you can save, open and share views of it here.</p>`; return; }
+  const list = V.list();
+  m.innerHTML = `<h4>Saved views</h4>
+    <div class="vwsave"><input id="vwName" maxlength="60" autocomplete="off" placeholder="Name this view" aria-label="Name this view"><button type="button" class="lk-btn is-small is-primary" data-vw="save"${S.cards.size ? '' : ' disabled title="Put someone on the canvas first"'}>Save</button></div>
+    ${list.length ? `<ul class="vwlist">${list.map(v => `<li data-id="${esc(v.id)}"><button type="button" class="vwopen" data-vw="open" title="Open this view"><b>${esc(v.name)}</b><small>${v.n.toLocaleString()} ${v.n === 1 ? 'person' : 'people'} &middot; ${esc(v.ago)}</small></button><button type="button" class="vwi" data-vw="share" title="Copy a link to this view" aria-label="Copy a link to ${esc(v.name)}">${icon('link', '')}</button><button type="button" class="vwi" data-vw="rename" title="Rename" aria-label="Rename ${esc(v.name)}">${icon('pencil', '')}</button><button type="button" class="vwi" data-vw="del" title="Delete this view" aria-label="Delete ${esc(v.name)}">${icon('x', '')}</button></li>`).join('')}</ul>`
+      : `<p class="plines">None yet for this tree. A view keeps who is on the canvas, where they sit, the zoom and the look.</p>`}
+    <p class="plines vwnote">A link to a view carries the layout and the name you typed, never a name from the tree. ${V.status ? esc(V.status()) : ''}</p>`;
+}
+function openViewsMenu(on) {
+  const m = $('#viewsMenu'), b = $('#bViews'); if (!m || !b) return;
+  if (on == null) on = !m.classList.contains('on');
+  if (on) { if (typeof openMainMenu === 'function') openMainMenu(false); openBloodMenu(false); viewsMenu(); }
+  m.classList.toggle('on', on); b.setAttribute('aria-expanded', String(on)); b.classList.toggle('on', on);
+  if (on) { const i = $('#vwName'); if (i && !S.phone) i.focus({ preventScroll: true }); }
+}
+function openView(id) {
+  const V = VK(); if (!V) return;
+  const info = V.list().find(v => v.id === id), d = V.open(id, [...M.byKey.keys()], [...M.bridgeById.keys()]);
+  if (!d || !d.cards.length) { toast('None of the people in that view are in the tree that is open', 3600); return; }
+  snapshot(); clearAll(true);
+  if (d.look) setTheme(d.look);
+  restore(d); S.view = d.view; applyView(); S.path = null; clearPathUi();
+  S.cards.forEach(c => { c.el.classList.remove('pop'); refreshCard(c); });
+  refreshAll(); drawEdges(); save(); syncButtons(); hideHint(); runSearchMarks(); renderInfo(); openViewsMenu(false);
+  if (S._restorePath) { const [a, b] = S._restorePath; S._restorePath = null; showPath(a, b, { quiet: true, noPlace: true }); }
+  toast('Opened ' + (info ? '“' + info.name + '”' : 'the view') + (d.of > d.matched ? ': ' + (d.of - d.matched) + ' of its people are not in this tree. ' : '. ') + 'Undo brings back what was here.', 4200);
+}
+async function shareView(id) {
+  const V = VK(); if (!V) return;
+  try {
+    const r = await V.share(id), say = 'Link copied. It carries the layout and the name, never a name from the tree.' + (r.kind === 'file' ? ' Whoever opens it needs the same file.' : r.kind === 'link' ? ' Whoever opens it is asked before the tree is fetched.' : '');
+    try { await navigator.clipboard.writeText(r.url); toast(say, 5200); }
+    catch (e) { window.prompt('Copy this link', r.url); }
+  } catch (e) { toast('That view could not be made into a link', 3600); }
+}
+document.addEventListener('click', e => {
+  const m = $('#viewsMenu'); if (!m) return;
+  const t = e.target.closest('[data-vw]');
+  if (!t || !m.contains(t)) { if (m.classList.contains('on') && !m.contains(e.target) && !e.target.closest('#bViews')) openViewsMenu(false); return; }
+  const V = VK(), li = t.closest('li'), id = li && li.dataset.id, act = t.dataset.vw;
+  if (!V) return;
+  if (act === 'save') {
+    const r = V.save($('#vwName').value, Object.assign(serialise(), { look: curLook() }));
+    if (r && r.ok) { toast('Saved “' + r.name + '”', 2800); viewsMenu(); } else toast(r && r.err || 'That could not be saved', 4200);
+  } else if (act === 'open') openView(id);
+  else if (act === 'share') shareView(id);
+  else if (act === 'rename') {
+    const cur = V.list().find(v => v.id === id); li.innerHTML = `<input class="vwren" maxlength="60" value="${esc(cur ? cur.name : '')}" aria-label="New name"><button type="button" class="lk-btn is-small is-primary" data-vw="renok">OK</button>`;
+    const i = li.querySelector('input'); i.focus(); i.select(); i.onkeydown = ev => { if (ev.key === 'Enter') li.querySelector('[data-vw="renok"]').click(); else if (ev.key === 'Escape') viewsMenu(); };
+  } else if (act === 'renok') { V.rename(id, li.querySelector('input').value); viewsMenu(); }
+  else if (act === 'del') {
+    if (!t.dataset.sure) { t.dataset.sure = '1'; t.classList.add('sure'); t.textContent = 'Delete?'; setTimeout(() => { if (t.isConnected && t.dataset.sure) viewsMenu(); }, 3500); }
+    else { V.remove(id); viewsMenu(); toast('View deleted', 2200); }
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && $('#viewsMenu') && $('#viewsMenu').classList.contains('on')) openViewsMenu(false);
+  if (e.key === 'Enter' && e.target && e.target.id === 'vwName') { e.preventDefault(); const b = $('#viewsMenu [data-vw="save"]'); if (b && !b.disabled) b.click(); }
+});
 async function addParentsForce(c) { snapshot(); const made = addParents(c, true); await settle(c, made); }
 
 /* ---------------- relate: the pathway ---------------- */
@@ -5392,7 +5622,7 @@ function recentHTML() {
 function openMainMenu(on) {
   const m = $('#mainMenu'), b = $('#bMenu'); if (!m) return;
   if (on == null) on = !m.classList.contains('on');
-  if (on) { openBloodMenu(false); mainMenu(); if (SA) recentLoad(); }
+  if (on) { openBloodMenu(false); openViewsMenu(false); mainMenu(); if (SA) recentLoad(); }
   m.classList.toggle('on', on); b.setAttribute('aria-expanded', String(on)); b.classList.toggle('on', on);
 }
 /* the line key is an overlay in the same corner as the menu, not a tab in the side panel */
@@ -5454,7 +5684,7 @@ function bloodMenu() {
 function openBloodMenu(on) {
   const m = $('#bloodMenu'), b = $('#bBlood'); if (!m) return;
   if (on == null) on = !m.classList.contains('on');
-  if (on) { if (typeof openMainMenu === 'function') openMainMenu(false); bloodMenu(); }
+  if (on) { if (typeof openMainMenu === 'function') openMainMenu(false); openViewsMenu(false); bloodMenu(); }
   m.classList.toggle('on', on); b.setAttribute('aria-expanded', String(on)); b.classList.toggle('on', on || S.blood.tint);
 }
 function setTint(on, ref) {
@@ -5638,6 +5868,7 @@ function setTheme(t) {
     tweenTo(arrangeTargets(cards), 800).then(() => { refreshAll(); drawEdges(); fit(); save(); miniDraw(); toast('Cards are in a column for each country of birth (Undo brings them back)', 3600); });
   }
   try { localStorage.setItem('loamTheme', t); } catch (e) { /* ignore */ }
+  if (typeof prOnTheme === 'function') prOnTheme();
   drawEdges(); miniDraw(); if (typeof drawNames === 'function') drawNames(true); if (S.tab === 'options') renderInfo();
 }
 function initTheme() {
@@ -5651,13 +5882,14 @@ function setPhone() {
 }
 function wireToolbar() {
   const set = (id, name) => { const b = $(id); if (b) b.innerHTML = icon(name); };
+  set('#bViews', 'views'); { const mm = document.createElement('div'); mm.id = 'viewsMenu'; mm.setAttribute('role', 'dialog'); mm.setAttribute('aria-label', 'Saved views'); document.body.appendChild(mm); $('#bViews').onclick = () => openViewsMenu(); if (!viewsOn()) $('#bViews').style.display = 'none'; }
   set('#bBlood', 'blood'); { const mm = document.createElement('div'); mm.id = 'bloodMenu'; mm.setAttribute('role', 'dialog'); mm.setAttribute('aria-label', 'Bloodline'); document.body.appendChild(mm); $('#bBlood').onclick = () => openBloodMenu(); }
   set('#bMenu', 'menu'); { const mm = document.createElement('div'); mm.id = 'mainMenu'; mm.setAttribute('role', 'menu'); mm.setAttribute('aria-label', 'Menu'); document.body.appendChild(mm); $('#bMenu').onclick = () => openMainMenu(); const lc = document.createElement('div'); lc.id = 'legendCard'; lc.setAttribute('role', 'dialog'); lc.setAttribute('aria-label', 'How to read the lines'); document.body.appendChild(lc); }
   set('#bArrange', 'arrange'); set('#bGen', 'layers'); set('#bShelf', 'search'); $('#si').innerHTML = icon('search', ''); set('#bUndo', 'undo'); set('#bFit', 'fit'); set('#bRel', 'relate'); set('#bInfo', 'info'); set('#bClear', 'clear'); set('#bMore', 'gear');
   set('#zIn', 'plus'); set('#zOut', 'minus');
   if (EMBED) addEventListener('message', e => {
   if (e.origin !== location.origin || !e.data) return;
-  if (e.data.tcLook) { const k = e.data.tcLook; if (k === 'auto') { try { localStorage.removeItem('loamTheme'); } catch (x) { /* ignore */ } initTheme(); drawEdges(); miniDraw(); if (typeof drawNames === 'function') drawNames(true); if (S.tab === 'options') renderInfo(); } else setTheme(k); return; }   // the Look was changed in Settings
+  if (e.data.tcLook) { const k = e.data.tcLook; if (k === 'auto') { try { localStorage.removeItem('loamTheme'); } catch (x) { /* ignore */ } initTheme(); if (typeof prOnTheme === 'function') prOnTheme(); drawEdges(); miniDraw(); if (typeof drawNames === 'function') drawNames(true); if (S.tab === 'options') renderInfo(); } else setTheme(k); return; }   // the Look was changed in Settings
   if (e.data.tcKeep) { const mm = $('#mainMenu'); if (mm && mm.classList.contains('on')) mainMenu(); return; }   // the six words were turned on, or a save finished
   if (e.data.tcLinks) { if (S.tab !== 'options') renderInfo(); return; }   // not while the Options box is being typed in: a redraw would take the cursor away
   if (!e.data.tcFix) return; refreshAll(); renderInfo(); syncButtons();
@@ -5857,6 +6089,7 @@ function boot() {
   initTheme(); setPhone(); if (S.phone) S.infoOpen = false; wireToolbar(); wireLines(); renderTabs(); runSearch(); dockH();
   loadMark();
   const d = loadSaved();
+  if (d && d.look) setTheme(d.look);   /* a saved or shared view remembers its look; set before the cards come, as the Countries look re-arranges any that are there */
   const had = restore(d);
   S.cards.forEach(refreshCard);
   applyView(); drawEdges(); hideHint(); syncButtons();

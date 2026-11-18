@@ -862,8 +862,8 @@ html:not(.rzopen) #rz{display:none}
 
 /* ---- Compare in pairs (pairsui.js): the file in black beside each archive's colour, a button between each pair, an empty dashed place where one has no one ---- */
 /* the pair-mode palette: one set of tokens per look, each held at 3:1 or more against its ground (test/test-pair-contrast.js checks it) */
-:root{--pfile:#17191c;--pok:#2a6a28;--pchk:#7a4f00;--pno:#a33a22;--pone:#6b5a44;--psel:#a64f00}
-[data-theme="paper"]{--pone:#554636;--pok:#25601f;--pchk:#6b4300;--pno:#8f2f1a}
+:root{--prdet-bg:color-mix(in srgb,var(--lk-accent) 10%,var(--lk-card));--pfile:#17191c;--pok:#2a6a28;--pchk:#7a4f00;--pno:#a33a22;--pone:#6b5a44;--psel:#a64f00}
+[data-theme="paper"]{--pone:#554636;--pok:#1d5017;--pchk:#6b4300;--pno:#7f2616}
 [data-theme="lanes"],[data-theme="countries"]{--pone:#4B5563}
 [data-theme="ground"],[data-theme="dark"]{--pfile:#EDE3D2;--pok:#8cc77f;--pchk:#e6b34d;--pno:#f0907a;--pone:#B8A892;--psel:#f09a3a}
 #pairs{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none}
@@ -900,7 +900,13 @@ body.pr .card .hd:not(.op),body.pr .card .stops,body.pr .card .brc,body.pr .card
 .prch label{font:700 13px Nunito,system-ui;padding:4px 2px;cursor:pointer}.prch input{width:18px;height:18px;margin:0 4px 0 0}
 .pr-all{display:flex!important;margin-bottom:4px}.pr-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px 10px}
 .prent{border-top:1px dashed var(--lk-line);padding:7px 0;font-size:12.5px}.prent .row{margin-top:5px}.prent.maybe{background:color-mix(in srgb,var(--lk-accent) 7%,transparent);border-radius:8px;padding-left:6px}
-.prdet{border:2px solid var(--lk-line);border-radius:14px;padding:4px 10px 8px;margin:8px 0;background:var(--lk-card)}.prdet h4{margin:6px 0}
+.prdet{border:0;border-left:5px solid var(--pone);border-radius:10px;padding:4px 10px 8px;margin:6px 0 2px;background:var(--prdet-bg);color:var(--lk-ink)}
+.prdet.ok{border-left-color:var(--pok)}.prdet.chk{border-left-color:var(--pchk)}.prdet.no{border-left-color:var(--pno)}
+.prdet small,.prdet .prnote,.prdet .prhelp,.prdet .pryr{color:var(--lk-ink)}
+.prdet .pk,.prdet a{color:inherit}
+.prli.flash{animation:prflash 1.4s ease-out}
+@keyframes prflash{0%{background:var(--prdet-bg)}100%{background:var(--lk-card)}}
+html.rm .prli.flash{animation:none}@media (prefers-reduced-motion:reduce){.prli.flash{animation:none}}.prdet h4{margin:6px 0}
 .prlist{list-style:none;margin:0;padding:0}
 .prgen{margin:6px 0 10px}
 .prgh{position:sticky;top:0;z-index:1;margin:0 0 4px;padding:5px 2px;background:var(--lk-card);color:var(--lk-ink);font:900 12px/1.2 Nunito,system-ui;border-bottom:2px solid var(--lk-line)}
@@ -928,6 +934,8 @@ body.pr .card .hd:not(.op),body.pr .card .stops,body.pr .card .brc,body.pr .card
 /* a status is a LABEL: a dot-and-word, no outline, no hover, default cursor. Buttons (Same person, Different people) are the outlined things. */
 .prst{display:inline-flex;align-items:center;gap:4px;font:800 11px/1.3 Nunito,system-ui;cursor:default;white-space:nowrap;user-select:none}
 .prst b{font:900 12px/1 Nunito,system-ui}
+.emo,.prst.emo b,#prLegend .pks b.emo,#pairs .ppill.chk b{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-weight:400}
+.prq{font:700 11px/1.3 Nunito,system-ui;color:var(--lk-ink);opacity:.8;white-space:nowrap}
 .prst.ok{color:var(--pok)}.prst.chk{color:var(--pchk)}.prst.no{color:var(--pno)}.prst.one{color:var(--pone)}
 .prdet h4{display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px}
 .prent{display:flex;flex-wrap:wrap;align-items:center;gap:3px 8px;min-width:0}
@@ -939,6 +947,56 @@ body.pr .card .hd:not(.op),body.pr .card .stops,body.pr .card .brc,body.pr .card
 .pralt summary{cursor:pointer;font:800 12px Nunito;margin:6px 0}
 @media (prefers-reduced-motion:reduce){#pairs *{transition:none!important;animation:none!important}}
 html.rm #pairs *{transition:none!important;animation:none!important}
+
+/* round icon buttons in the slot panel: shape AND colour carry the state; 44px on a phone */
+.pract{display:inline-flex;align-items:center;gap:10px;margin-left:auto;flex:none}
+.ph .pract{gap:14px}
+.prwho{flex:1 1 0;min-width:0;overflow-wrap:anywhere}
+.prent,.pralt .cmpc li{display:flex;flex-wrap:wrap;align-items:center;gap:3px 8px}
+.pric{position:relative;display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;border:2px solid var(--lk-ink);background:var(--lk-card);color:var(--lk-ink);cursor:pointer;padding:0;font:900 14px/1 Nunito,system-ui;flex:none}
+.pric::after{content:"";position:absolute;inset:-8px}  /* a 44px target without taking 44px of the row */
+.pric b{font:900 15px/1 Nunito,system-ui}
+.pralt .prcount{font:800 11px Nunito,system-ui;color:var(--lk-soft);margin-left:4px}
+.pric:hover{outline:3px solid var(--psel);outline-offset:1px}.pric:focus-visible{outline:3px solid var(--psel);outline-offset:2px}
+.prdc.q{border-style:dotted;border-color:var(--pone);color:var(--pone)}
+.prdc.y{border-color:var(--pok);color:var(--pok);background:color-mix(in srgb,var(--pok) 7%,var(--lk-card))}
+.prdc.n{border-color:var(--pno);color:var(--pno);background:color-mix(in srgb,var(--pno) 7%,var(--lk-card))}
+.prad{border-style:dashed}
+.prcopied{font:800 11px Nunito,system-ui;color:var(--pok);flex:1 1 100%}.prcopied::before{content:"\2713 "}
+.prcopyfb{flex:1 1 100%}.prcopybox{width:100%;box-sizing:border-box;font:12px/1.35 ui-monospace,Menlo,monospace;color:var(--lk-ink);background:var(--lk-paper);border:2px solid var(--lk-line);border-radius:8px;padding:6px;user-select:text;-webkit-user-select:text}
+.prlive{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.prallrow{margin:6px 0}
+/* slimmed Compare panel: status, who, links, the decision; every sentence of explanation behind the (i). Its own file (after style.css) so it is not lost when style.css is edited elsewhere. */
+.prtitle{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}.prtitle h3{flex:1 1 0;min-width:0;margin:0;font-size:17px}
+.prbtns{margin:6px 0;gap:6px}
+.prinfo{border-left:5px solid var(--pone);border-radius:10px;background:var(--prdet-bg);color:var(--lk-ink);padding:2px 10px 4px;margin:4px 0 8px;font-size:12px;line-height:1.35}
+.prinfo[hidden]{display:none}.prinfo p{margin:5px 0}
+.prchips{display:flex;flex-wrap:wrap;gap:3px;margin:4px 0}
+.prchip{white-space:nowrap}
+.prchip{display:inline-flex;align-items:center;gap:4px;border:2px solid var(--lk-line);border-radius:99px;background:var(--lk-card);color:var(--lk-ink);font:800 11px/1 Nunito,system-ui;padding:4px 6px;cursor:pointer;min-height:26px;position:relative}
+.prchip::after{content:"";position:absolute;inset:-6px -2px}
+.prchip b{font:900 13px/1 Nunito,system-ui}.prchip.emo b{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-weight:400;font-size:12px}
+.prchip.ok b{color:var(--pok)}.prchip.no b{color:var(--pno)}
+.prchip.on{border-color:var(--psel);background:color-mix(in srgb,var(--psel) 12%,var(--lk-card))}
+.prchip:disabled{opacity:.55;cursor:default}
+.prchip:hover:not(:disabled),.prchip:focus-visible{outline:2px solid var(--psel);outline-offset:1px}
+.prhint{display:block;margin:2px 0;color:var(--lk-ink);font-size:11px}
+.prbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0}.prbar .lk-btn{padding-left:8px;padding-right:8px}
+.prseg{display:inline-flex;gap:0}.prseg .lk-btn:first-child{border-top-right-radius:0;border-bottom-right-radius:0}.prseg .lk-btn:last-child{border-top-left-radius:0;border-bottom-left-radius:0;margin-left:-2px}
+.prcopyall b{font-weight:900;margin-right:2px}
+/* a collapsed row is ONE line */
+.prsel{flex-wrap:nowrap;gap:6px}
+.prrel{flex:none;width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prst.ic{gap:0}.prst.ic b{font:900 14px/1 Nunito,system-ui}.prst.emo.ic b{font-size:13px}
+.prnm{flex:1 1 0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:800}
+.prnm .pryr{margin-left:3px}
+.prbey{flex:none;font:800 10px Nunito,system-ui;color:var(--lk-soft);border:1.5px solid var(--lk-line);border-radius:99px;padding:0 5px}
+.prsqs{flex:none;display:inline-flex;gap:3px}.prsqs .prsq{margin:0;width:10px;height:10px}
+.prsr{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.prent .prsq{margin-right:5px;vertical-align:-1px}
+.prent.maybe em{font:800 10.5px Nunito,system-ui;color:var(--lk-ink);margin-right:2px}
+.prdup{margin:2px 0}
+.pralt .cmpc{margin:2px 0;gap:2px}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -2191,7 +2249,7 @@ html.rm #pairs *{transition:none!important;animation:none!important}
     for (const pl of (A.places || [])) {
       if (!used.has(pl.n)) continue;
       const eras = (pl.fl || []).map(f => [parseInt(f[0], 10), F(f[1])]).sort((a, b) => a[0] - b[0]);
-      geo[String(P(pl.n))] = [pl.id || null, pl.cn || '', eras, pl.reg || null, pl.ev || []];
+      geo[String(P(pl.n))] = [pl.id || null, pl.cn || '', eras, pl.reg || null, pl.ev || [], pl.lat == null ? null : +pl.lat, pl.lon == null ? null : +pl.lon, pl.kind || null];   /* [5..7]: where the pin is, and whether it is a place (not a country or district), so two names for one place can be told from two places */
     }
     const regionEras = {};
     for (const k of Object.keys(A.regions || {})) regionEras[k] = ((A.regions[k] || {}).eras || []).filter(e => e && e.length > 3 && e[3]).map(e => [e[0], e[1], e[3], e[4] || '']);
@@ -2227,7 +2285,7 @@ html.rm #pairs *{transition:none!important;animation:none!important}
         if (Array.isArray(p[19])) q[19] = p[19].map(s => [mp(s[0]), s[1], s[2]]);
         rows.push(q);
       });
-      const geoB = {}; Object.keys((b.geo && b.geo['0']) || {}).forEach(k => { const g = b.geo['0'][k]; geoB[String(mp(+k))] = [g[0], g[1], (g[2] || []).map(e => [e[0], mf(e[1])]), g[3], g[4]]; });
+      const geoB = {}; Object.keys((b.geo && b.geo['0']) || {}).forEach(k => { const g = b.geo['0'][k]; geoB[String(mp(+k))] = [g[0], g[1], (g[2] || []).map(e => [e[0], mf(e[1])]), g[3], g[4], g[5] == null ? null : g[5], g[6] == null ? null : g[6], g[7] || null]; });
       geo[String(j)] = geoB; archives.push(b.archives[0]);
       eras = Object.assign({}, b.eras || {}, eras); events = Object.assign({}, b.events || {}, events); srcs = Object.assign({}, b.srcs || {}, srcs);
     }
@@ -2294,9 +2352,27 @@ html.rm #pairs *{transition:none!important;animation:none!important}
     const k = cut(name).t; if (m.has(k)) return m.get(k);
     const c = cut(name); return c.parts.length > 1 ? c.parts[c.parts.length - 1] : '';
   }
+  /* the place each record's name resolved to, as ITS archive resolved it: the Atlas place id, and where the pin is. The same words can be two places (Newport, Salisbury) and two names can be one
+     (Port Elizabeth / Gqeberha, Fiume / Rijeka, Salisbury / Harare): the resolved place is compared first, the words only when nothing resolved. */
+  const RES_KM = 3;
+  function resolved(M, P) {
+    const pi = M.placeIdx ? M.placeIdx.get(P.bp) : undefined, g = pi != null && M.geo && M.geo[P.a] ? M.geo[P.a][String(pi)] : null;
+    if (!g) return null;
+    const c = cut(P.bp), spec = !c.c && (g[7] == null || g[7] === 'place') && !/\((?:district|region)\)\s*$/i.test(P.bp || '');
+    return { id: g[0] || null, cn: g[1] || '', lat: spec && g[5] != null ? g[5] : null, lon: spec && g[6] != null ? g[6] : null };
+  }
+  const kmApart = (a, b, c, d) => { const p = Math.PI / 180, x = Math.sin((c - a) * p / 2) ** 2 + Math.cos(a * p) * Math.cos(c * p) * Math.sin((d - b) * p / 2) ** 2; return 12742 * Math.asin(Math.sqrt(x)); };
+  function resolvedCmp(M, A, B) {
+    const ra = resolved(M, A), rb = resolved(M, B); if (!ra || !rb) return null;
+    if (ra.id && rb.id) return ra.id === rb.id ? 'same' : 'differ';
+    if (ra.lat != null && rb.lat != null && ra.cn && ra.cn === rb.cn) return kmApart(ra.lat, ra.lon, rb.lat, rb.lon) <= RES_KM ? 'same' : 'differ';
+    return null;
+  }
   function placeCmp(M, A, B) {
     if (!A.bp || !B.bp || (A.fl & 4) || (B.fl & 4)) return { how: 'unknown' };   /* an estimated birthplace (fl 4) is not a statement */
-    const a = cut(A.bp), b = cut(B.bp);
+    const a = cut(A.bp), b = cut(B.bp), rc = resolvedCmp(M, A, B);
+    if (rc === 'same') { const w = x => x.a === 0 ? 'the file' : 'the archive'; return a.t === b.t ? { how: 'same' } : { how: 'same', same: true, note: 'same place, called ' + A.bp + ' in ' + w(A) + ' and ' + B.bp + ' in ' + w(B) }; }
+    if (rc === 'differ' && a.t === b.t) return { how: 'conflict' };   /* the same words, two different places */
     if (a.t === b.t) return { how: 'same' };
     if (!a.c && !b.c && (a.t.includes(b.t) || b.t.includes(a.t))) return { how: 'same' };   /* one reads as part of the other: "Memphis" in "Memphis, Tennessee" */
     const ca = countryOf(M, A.bp), cb = countryOf(M, B.bp);
@@ -2327,7 +2403,7 @@ html.rm #pairs *{transition:none!important;animation:none!important}
     if (ady != null && bdy != null && ady !== bdy) { level = 'check'; notes.push('died ' + ady + ' against ' + bdy); } else estNote('dy', 2, 'died');
     const pc = placeCmp(M, A, B);
     if (pc.how === 'conflict') { level = 'check'; notes.push('born at ' + A.bp + ' against ' + B.bp); }
-    else if (pc.how === 'coarse') notes.push(pc.note);
+    else if (pc.how === 'coarse' || pc.same) notes.push(pc.note);
     if (A.bd && B.bd && TC.dateText(A.bd) !== TC.dateText(B.bd)) { level = 'check'; notes.push('birth date ' + TC.dateText(A.bd) + ' against ' + TC.dateText(B.bd)); }
     let score = n - (yd || 0) * 0.04 - (level === 'same' ? 0 : 0.05);
     if (yd === 0) score += 0.1; if (pc.how === 'same' && fold(A.bp) === fold(B.bp)) score += 0.05;   /* only the same place twice counts for a match: a coarse or missing place never does */
@@ -2607,24 +2683,31 @@ html.rm #pairs *{transition:none!important;animation:none!important}
 
   /* the status of a place, as a LABEL (not a button): word, symbol, class, a one-line meaning, the longer line for the panel */
   const STATUS = {
-    same: ['agree', '✓', 'ok', 'the two records agree on everything both record', 'The two records agree on everything both of them record.'],
-    check: ['check', '?', 'chk', 'the two records disagree on a detail', 'The records disagree on a detail (shown below). Look at both, then choose Same person or Different people.'],
-    differs: ['different people', '≠', 'no', 'the two records read as different people', 'These two records read as different people. If you know better, choose Same person.'],
-    'only-a': ['only in your file', '○', 'one', 'no archive records this person here', 'Only your file has someone here. No archive records this person in this place.'],
-    'only-b': ['only in the archive', '○', 'one', 'your file has no one here', 'Only the archive has someone here. Your file has no one in this place.'],
+    same: ['agree', '✓', 'ok', 'the two records agree on everything both record', ''],
+    check: ['check', '❓', 'chk', 'the two records disagree on a detail', 'The records disagree on a detail (shown below). Look at both, then tap the circle to decide.', ''],
+    differs: ['different people', '≠', 'no', 'the two records read as different people', 'These two records read as different people. If you know better, tap the circle to mark them the same person.'],
+    'only-a': ['only in your file', '○', 'one', 'no archive records this person here', ''],
+    'only-b': ['only in the archive', '○', 'one', 'your file has no one here', ''],
     empty: ['', '', 'one', '', '']
   };
   const cap1 = t => t ? t.charAt(0).toUpperCase() + t.slice(1) : t;
   function statusInfo(state, notes) {
-    const [word, sym, cls, mean, line] = STATUS[state] || STATUS.empty, ns = (notes || []).filter(Boolean);
+    const [word, sym, cls, mean, line, shown] = STATUS[state] || STATUS.empty, ns = (notes || []).filter(Boolean);
     const tip = word ? cap1(word) + ': ' + mean + '.' + (ns.length ? ' ' + cap1(ns.join('; ')) + '.' : '') : '';
-    return { word, sym, cls, mean, line, tip };
+    return { word, sym, cls, mean, line, tip, shown: shown == null ? word : shown, emoji: sym === '❓' };
   }
   /* a status LABEL: a span, not focusable, with the meaning and the reason in its title and aria-label. Quiet: the stylesheet draws it as a dot-and-word, never as a button. */
   function statusHtml(state, notes, esc) {
     const i = statusInfo(state, notes); if (!i.word) return '';
-    return '<span class="prst ' + i.cls + '" role="img" aria-label="' + esc(i.tip) + '" title="' + esc(i.tip) + '"><b aria-hidden="true">' + i.sym + '</b>' + esc(i.word) + '</span>';
+    return '<span class="prst ' + i.cls + (i.emoji ? ' emo' : '') + '" role="img" aria-label="' + esc(i.tip) + '" title="' + esc(i.tip) + '"><b aria-hidden="true">' + i.sym + '</b>' + esc(i.shown) + '</span>';
   }
+
+  /* the status as ONE glyph, for a collapsed row: the meaning and the reason are in the tooltip and the aria-label, the words live in the filter chips and the (i) */
+  function statusIconHtml(state, notes, esc) {
+    const i = statusInfo(state, notes); if (!i.word) return '';
+    return '<span class="prst ic ' + i.cls + (i.emoji ? ' emo' : '') + '" role="img" aria-label="' + esc(i.tip) + '" title="' + esc(i.tip) + '"><b aria-hidden="true">' + i.sym + '</b></span>';
+  }
+  const byState = (slots, flt) => flt ? slots.filter(s => s.state === flt) : slots;
 
   /* a decision about two people, in either order: 'y' (the visitor says they are the same person) or 'n' (different people) */
   const dkey = (M, i, j) => { const a = M.P[i].key, b = M.P[j].key; return (M.P[i].a === 0 || (M.P[j].a !== 0 && a < b)) ? a + ' ~ ' + b : b + ' ~ ' + a; };
@@ -2886,7 +2969,52 @@ html.rm #pairs *{transition:none!important;animation:none!important}
     const first = shown != null && slot.arch[shown] ? [shown].concat(all.filter(a => a !== shown)) : all;
     return { lines: first.slice(0, max), more: Math.max(0, first.length - max) };
   }
-  const API = { genLabel, groupByGen, archLines, contrast, ensure, lum, pair, layout, alternatives, dkey, judgeD, matchLists, placeholder, isPlaceholderName, statusInfo, statusHtml };
+
+  /* the decision control: ONE tri-state button per pair of records. "?" (not decided, the default: nothing is stored) -> "✓" (same person) -> "≠" (different people) -> back to "?".
+     The tool's own reading (agree / check / ...) is only the status label and never fills this in. The stored form is the existing map: y, n, or no entry. */
+  const DECS = { q: ['?', 'not decided', 'Press to mark same person.', 'y'], y: ['✓', 'same person', 'Press to mark different people.', 'n'], n: ['≠', 'different people', 'Press to clear the decision.', 'q'] };
+  const decKind = d => d === 'y' || d === 'n' ? d : 'q';
+  function decisionInfo(d) {
+    const k = decKind(d), x = DECS[k];
+    return { kind: k, glyph: x[0], now: x[1], aria: 'Decision: ' + x[1] + '. ' + x[2], announce: 'Decision: ' + x[1] + '.', nextKind: x[3], nextValue: x[3] === 'q' ? null : x[3] };
+  }
+
+  /* "not in your file": the archive's person as plain text to add to the visitor's own tree by hand (nothing can be written into MyHeritage). Deceased people only: a living person,
+     a name-only card and a placeholder are never offered. */
+  const yrTxt = (y, est) => y == null ? '' : (est ? 'about ' : '') + y;
+  function personText(M, res, s, q) {
+    const L = ['Name: ' + q.name];
+    const born = [yrTxt(q.by, q.fl & 1), q.bp].filter(Boolean).join(', '), died = [yrTxt(q.dy, q.fl & 2), q.dp].filter(Boolean).join(', ');
+    if (born) L.push('Born: ' + born); if (died) L.push('Died: ' + died);
+    if (q.sex === 'm' || q.sex === 'f') L.push('Sex: ' + (q.sex === 'm' ? 'male' : 'female'));
+    const via = s.via != null && res.bySlot ? res.bySlot.get(s.via) : null, vf = via && via.f >= 0 ? M.P[via.f] : null;
+    const word = { father: 'father', mother: 'mother', child: 'child', spouse: 'spouse' }[s.rel];
+    if (word && vf) L.push('Relationship: ' + word + ' of ' + vf.name + ' (in your file)');
+    const u = TC.url(M, q); L.push('Source: ' + M.archives[q.a].name + ' archive' + (u ? ', ' + u : ''));
+    return L.join('\n');
+  }
+  const offerable = (M, s) => { if (s.f >= 0) return null; const ks = Object.keys(s.arch); if (!ks.length) return null; const q = M.P[s.arch[ks[0]].i]; return q && !q.living && !q.ghost && !q.standin && !placeholder(q) ? q : null; };
+  function addPeople(M, res, opt) {
+    opt = opt || {}; const cap = opt.cap || 100, items = []; let total = 0;
+    res.slots.slice().sort((a, b) => a.gen - b.gen).forEach(s => {
+      let q = offerable(M, s); if (!q) return;
+      const a = opt.shown ? opt.shown(s) : null; if (a != null && s.arch[a]) { const q2 = M.P[s.arch[a].i]; if (q2 && !q2.living && !q2.ghost && !q2.standin && !placeholder(q2)) q = q2; }
+      total++; if (items.length < cap) items.push({ slot: s.id, i: q.i, text: personText(M, res, s, q) });
+    });
+    const head = 'People the archives hold that are not in your file (' + items.length + (total > items.length ? ' of ' + total + ', the first ' + items.length + ' by generation' : '') + '). Add them to your own tree by hand; check each against its source first.';
+    return { items, total, capped: total > items.length, text: head + '\n\n' + items.map(x => x.text).join('\n\n') };
+  }
+
+  /* how far to scroll a list so the row (and its open detail) is in view, and no further. All numbers share one coordinate frame: vt/vb the visible top and bottom,
+     rt/rb the row's, db the bottom of its open detail (or null). 0 = do not scroll; a row that fits is never moved. */
+  function scrollDelta(vt, vb, rt, rb, db, pad) {
+    pad = pad == null ? 8 : pad;
+    if (rt < vt) return rt - vt - pad;
+    const end = Math.max(rb, db == null ? rb : db);
+    if (end <= vb) return 0;
+    return Math.max(0, Math.min(end - vb + pad, rt - vt - pad));
+  }
+  const API = { scrollDelta, decisionInfo, personText, addPeople, offerable, genLabel, groupByGen, archLines, contrast, ensure, lum, pair, layout, alternatives, dkey, judgeD, matchLists, placeholder, isPlaceholderName, statusInfo, statusHtml, statusIconHtml, byState };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCP = API;
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
@@ -4710,7 +4838,7 @@ function wireLines() {
 const PAIRFILE = 'var(--pfile)';
 const CMPARCH = [['defranceski', 'Defranceski', '#D2493A'], ['booyzen', 'Booyzen', '#4E9A3E'], ['luwinski', 'Luwinski', '#3A74C9'], ['lerena', 'Lerena', '#8A5CC2'], ['falco', 'Falco', '#D39A12'], ['blazevic', 'Blažević', '#1E9C97'], ['darcy', "D'Arcy", '#C9508F'], ['mazza', 'Mazza', '#8E7B5E']];
 const PR_MAXDEC = 400;
-const PR_ST = { same: ['agree', '✓', 'ok'], check: ['check', '?', 'chk'], differs: ['different people', '≠', 'no'], 'only-a': ['only in your file', '○', 'one'], 'only-b': ['only in the archive', '○', 'one'], empty: ['', '', 'one'] };
+const PR_ST = { same: ['agree', '✓', 'ok'], check: ['Check: the records disagree on a detail', '❓', 'chk'], differs: ['different people', '≠', 'no'], 'only-a': ['only in your file', '○', 'one'], 'only-b': ['only in the archive', '○', 'one'], empty: ['', '', 'one'] };
 const pairMode = () => M.archives.length >= 2 && M.archives[0].k === 'you';
 const cmpMode = pairMode;
 const cmpAvail = () => SA && (pairMode() || (M.archives.length === 1 && M.archives[0].k === 'you'));
@@ -4787,7 +4915,7 @@ function prCardCls(c) {
 function prOnSelect(keys) {
   const P = S.pr; if (!P || !P.res || keys.length !== 1) return;
   const p = M.byKey.get(keys[0]); if (!p) return; const s = prSlotOf(p.i); if (!s) return;
-  P.sel = prSlotName(s); S.tab = 'compare'; drawPairs();
+  P.sel = prSlotName(s); S.tab = 'compare'; P.reveal = 'smooth'; P.flash = P.sel; drawPairs();
 }
 function prArrange() { if (!prOn()) return false; prRun(); prDraw({ fit: true }); toast('Pairs put back in their generations', 2600); return true; }
 
@@ -4812,11 +4940,11 @@ function drawPairs() {
     const mx = P.lay.stack ? fx + W / 2 : (fx + W + ax) / 2, my = P.lay.stack ? (fy + H + ay) / 2 : fy + H / 2;
     const who = (s.f >= 0 ? M.P[s.f].name : s.primary != null && s.arch[s.primary] ? M.P[s.arch[s.primary].i].name : '');
     const mine = a != null && s.arch[a] && s.arch[a].said === 'y';   /* the visitor accepted this pairing: it says so, and it stays after the page is reloaded */
-    h += `<button type="button" class="ppill ${cls}${sel ? ' on' : ''}${mine ? ' yes' : ''}" data-pr="slot" data-k="${esc(nm)}" style="left:${f1(mx)}px;top:${f1(my)}px" aria-label="${esc(who)}: ${esc(word)}${mine ? ', as you accepted' : ''}. Open the details"><b aria-hidden="true">${sym}</b><i>${esc(mine ? 'yours' : st === 'same' ? 'agree' : st === 'check' ? 'check' : st === 'differs' ? 'differ' : 'only')}</i></button>`;
+    h += `<button type="button" class="ppill ${cls}${sel ? ' on' : ''}${mine ? ' yes' : ''}" data-pr="slot" data-k="${esc(nm)}" style="left:${f1(mx)}px;top:${f1(my)}px" aria-label="${esc(who)}: ${esc(word)}${mine ? ', as you accepted' : ''}. Open the details"><b aria-hidden="true">${sym}</b>${st === 'check' && !mine ? '' : `<i>${esc(mine ? 'yours' : st === 'same' ? 'agree' : st === 'differs' ? 'differ' : 'only')}</i>`}</button>`;
     /* chips under the archive's card: the other archives that record this place, and suggestions */
     const chips = [];
     s.chips.forEach(c => { if (c.a === a) return; const ar = prArch(c.a), lv = c.level;
-      chips.push(`<button type="button" class="pchip ${lv}" style="--bc:${esc(ar.color)}" data-pr="show" data-k="${esc(nm)}" data-a="${c.a}" title="${esc(ar.name)} ${lv === 'same' ? 'records this person too' : lv === 'check' ? 'has someone here to check' : 'has a different person here'}${c.notes.length ? ': ' + esc(c.notes.join('; ')) : ''}. Click to show them."><i></i>${esc(ar.name)}${lv === 'same' ? '' : lv === 'check' ? ' ?' : ' ≠'}</button>`); });
+      chips.push(`<button type="button" class="pchip ${lv}" style="--bc:${esc(ar.color)}" data-pr="show" data-k="${esc(nm)}" data-a="${c.a}" title="${esc(ar.name)} ${lv === 'same' ? 'records this person too' : lv === 'check' ? 'Check: the records disagree on a detail, so someone here may be a different person' : 'has a different person here'}${c.notes.length ? ': ' + esc(c.notes.join('; ')) : ''}. Click to show them."><i></i>${esc(ar.name)}${lv === 'same' ? '' : ''}</button>`); });
     if (s.primary != null && a != null && a !== s.primary && s.arch[s.primary]) { const ar = prArch(s.primary); chips.unshift(`<button type="button" class="pchip ${s.arch[s.primary].level || 'same'}" style="--bc:${esc(ar.color)}" data-pr="show" data-k="${esc(nm)}" data-a="${s.primary}" title="Show ${esc(ar.name)}'s entry again"><i></i>${esc(ar.name)}</button>`); }
     (s.maybe || []).slice(0, 3).forEach(m => { const ar = prArch(m.a);
       chips.push(`<button type="button" class="pchip maybe" style="--bc:${esc(ar.color)}" data-pr="slot" data-k="${esc(nm)}" title="${esc(M.P[m.i].name)} ${esc(prYears(M.P[m.i]))} in ${esc(ar.name)} may be the same person (${esc(m.notes.join('; ') || 'same name and year')}). Not joined: open the details to accept or dismiss."><i></i>maybe ${m.a === 0 ? 'in your file' : esc(ar.name)}</button>`); });
@@ -4830,7 +4958,7 @@ function wirePairs(host) {
     const b = e.target.closest('[data-pr]'); if (!b) return; e.stopPropagation();
     const P = S.pr, k = b.dataset.k;
     if (b.dataset.pr === 'show') { P.show.set(k, +b.dataset.a); P.sel = k; prDraw(); return; }
-    P.sel = k; S.tab = 'compare'; S.infoOpen = true; $('#info').classList.add('on');
+    P.sel = k; P.reveal = 'smooth'; P.flash = k; S.tab = 'compare'; S.infoOpen = true; $('#info').classList.add('on');
     drawPairs(); renderInfo(); syncButtons();
     const s = P.res.slots.find(x => prSlotName(x) === k); if (s) { const c = S.cards.get(M.P[s.f >= 0 ? s.f : s.arch[prShown(s)].i].key); if (c) ensureVisible([c]); }
   });
@@ -4843,7 +4971,7 @@ function renderLegend() {
   const P = S.pr, n = new Array(M.archives.length).fill(0);
   P.res.slots.forEach(s => { if (s.f >= 0) n[0]++; Object.keys(s.arch).forEach(a => n[a]++); });
   el.innerHTML = M.archives.map((a, i) => `<span class="pk" style="--ac:${esc(a.color)}"><i></i>${esc(a.name)} <small>${n[i].toLocaleString()}</small></span>`).join('')
-    + `<span class="pks"><b class="ok">✓</b> agree <b class="chk">?</b> check <b class="no">≠</b> different <b class="one">○</b> only in one</span>`;
+    + `<span class="pks"><b class="ok">✓</b> agree <b class="chk emo">❓</b> records disagree <b class="no">≠</b> different <b class="one">○</b> only in one</span>`;
 }
 
 /* ---------- the Compare panel ---------- */
@@ -4862,8 +4990,8 @@ function pairsPanel() {
   const P = S.pr;
   if (!P) return `<h3>Compare with archives</h3><p class="plines">Set your file beside one archive, several, or all eight, side by side in pairs, a generation to a row. Mark a person (&#9873;) first: the pairing starts from them.</p>` + prChooser([]);
   const n = M.archives.length - 1, fail = (RRP && RRP.compareFailed) || [];
-  let h = `<h3>Your file beside ${n === 1 ? 'the ' + esc(M.archives[1].name) + ' archive' : n + ' archives'}</h3>
-    <div class="row"><button class="lk-btn is-small" data-pr-chg="1">Change archives</button><button class="lk-btn is-small" data-cmp-off="1">Stop comparing</button></div>`;
+  let h = `<div class="prtitle"><h3>Your file beside ${n === 1 ? 'the ' + esc(M.archives[1].name) + ' archive' : n + ' archives'}</h3>${prInfoBtn()}</div>
+    <div class="row prbtns"><button class="lk-btn is-small" data-pr-chg="1">Change archives</button><button class="lk-btn is-small" data-cmp-off="1">Stop comparing</button></div>${prInfoBox()}`;
   if (fail.length) h += `<div class="warnbox bad"><b>Could not be read just now:</b> ${fail.map(f => esc(f.name || f.key)).join(', ')}. The rest are compared; the ones that failed are not counted as having no one. Try again with <b>Change archives</b>.</div>`;
   const emptyA = M.archives.slice(1).filter(a => !a.n);
   if (emptyA.length) h += `<p class="plines"><small>${emptyA.map(a => esc(a.name)).join(', ')} ${emptyA.length === 1 ? 'has' : 'have'} no people published to compare.</small></p>`;
@@ -4888,90 +5016,106 @@ function prAnchorStep() {
     <p class="plines"><small>A match is your call: the canvas only ranks the candidates by name and birth year. You can change any pairing afterwards.</small></p>`;
 }
 const TCC_ = () => window.TCC;
+/* the one place every sentence of explanation lives: behind the (i) at the top, closed until asked */
+const prInfoBtn = () => { const on = !!(S.pr && S.pr.info); return `<button type="button" class="pric prinfo" data-pr-info="1" aria-expanded="${on}" aria-controls="prinfo" aria-label="How this works" title="How this works"><b aria-hidden="true">i</b></button>`; };
+function prInfoBox() {
+  const P = S.pr; if (!P || !P.info) return '<div id="prinfo" class="prinfo" hidden></div>';
+  const R = P.res, sm = R && R.summary, parts = [];
+  parts.push('<p><b>What to do.</b> Press a place in the list, or a round button on the canvas, to see why two records were paired. The details open under the place you pick. Tap the circle beside a person: <b>✓</b> same person, <b>≠</b> different people, <b>?</b> not decided. Nothing is changed in your file or the archive; your choice is kept on this device.</p>');
+  parts.push('<p><b>The marks.</b> <b>✓</b> the two records agree on everything both record. <b>❓</b> the records disagree on a detail (the detail is written under the person). <b>≠</b> they read as different people. <b>○</b> only one side has someone here. A coloured square is a source: black is your file.</p>');
+  parts.push('<p><b>Direct line</b> is the starting person’s ancestors, and their children and spouses and below. <b>Whole family</b> adds every recorded relative of each paired person: siblings, their children and spouses.</p>');
+  parts.push('<p><b>Someone else in an archive</b> lists the archive’s other relatives of the same kind, for a pairing that looks wrong. One that is already used at another place here is marked on hover.</p>');
+  parts.push('<p><b>Copy missing.</b> Living people are never included. MyHeritage cannot be written to from here, so this is plain text to add by hand' + (R && prAddAll().capped ? '; only the first 100 by generation are copied' : '') + '.</p>');
+  if (R) {
+    const un = R.slots.filter(x => x.more && (x.more.up || x.more.down)).reduce((t, x) => t + x.more.up + x.more.down, 0), cut = R.slots.filter(x => x.cut).length;
+    if (un) parts.push('<p>' + un.toLocaleString() + ' more ' + (un === 1 ? 'person is' : 'people are') + ' recorded beyond places where the records disagree or only one side has someone: the walk does not follow a line it cannot pair.</p>');
+    if (cut) parts.push('<p>' + cut + (cut === 1 ? ' place stops' : ' places stop') + ' at the generation limit (' + R.opts.up + ' up, ' + R.opts.down + ' down); there is more beyond.</p>');
+    if (sm.placeholders) parts.push('<p>' + sm.placeholders + (sm.placeholders === 1 ? ' place holds' : ' places hold') + ' a placeholder entry (a name that is not a person’s). It is shown and labelled, never matched on its own.</p>');
+    parts.push('<p>Worked out in ' + P.ms + ' ms, here in this browser. Your file stays in this browser.</p>');
+  }
+  return `<div id="prinfo" class="prinfo" role="region" aria-label="How Compare works">${parts.join('')}</div>`;
+}
+const PR_FLT = [['same', '✓', 'ok', 'agree', 'agree'], ['check', '❓', 'chk emo', 'disagree on a detail', 'disagree'], ['differs', '≠', 'no', 'different people', 'different'], ['only-a', '', 'one', 'only in your file', 'only yours'], ['only-b', '', 'one', 'only in the archive', 'only archive']];
+function prCounts(sm) {
+  const c = { same: sm.agree, check: sm.check, differs: sm.differs, 'only-a': sm.onlyFile, 'only-b': sm.onlyArch }, f = S.pr.flt;
+  return `<div class="prchips" role="group" aria-label="Show only">${PR_FLT.map(([k, g, cls, word, short]) => `<button type="button" class="prchip ${cls}${f === k ? ' on' : ''}" data-pr-flt="${k}" aria-pressed="${f === k}"${c[k] || f === k ? '' : ' disabled'} aria-label="${c[k]} ${esc(word)}${f === k ? '. Showing only these; press to show all' : '. Show only these'}" title="${c[k]} ${esc(word)}"><b aria-hidden="true">${g}</b> <span>${g ? '' : esc(short) + ' '}${c[k]}</span></button>`).join('')}</div>`;
+}
 function prResult() {
   const P = S.pr, R = P.res, sm = R.summary;
-    const unreadable = R.slots.filter(s => s.more && (s.more.up || s.more.down));
-  let h = `<p class="plines"><b>${sm.slots.toLocaleString()}</b> places in the family: <span class="pcn ok">${sm.agree} agree</span>, <span class="pcn chk">${sm.check} to check</span>, <span class="pcn no">${sm.differs} different people</span>, ${sm.onlyFile} only in your file, ${sm.onlyArch} only in an archive.</p>`;
-  if (R.capped) h += `<div class="warnbox bad"><b>Showing the nearest ${sm.slots.toLocaleString()} places.</b> ${R.skipped.toLocaleString()} more were left out so the canvas stays quick. Start from someone nearer the top or bottom to see the rest.</div>`;
-  if (sm.placeholders) h += `<p class="plines"><small>${sm.placeholders} ${sm.placeholders === 1 ? 'place holds' : 'places hold'} a placeholder entry (a name that is not a person's). ${sm.placeholders === 1 ? 'It is' : 'They are'} shown and labelled, never matched on their own.</small></p>`;
-  const cut = R.slots.filter(s => s.cut).length;
-  if (cut) h += `<p class="plines"><small>${cut} ${cut === 1 ? 'place stops' : 'places stop'} at the generation limit (${R.opts.up} up, ${R.opts.down} down); there is more beyond.</small></p>`;
-  if (unreadable.length) { const u = unreadable.reduce((t, s) => t + s.more.up + s.more.down, 0); h += `<p class="plines"><small>${u.toLocaleString()} more ${u === 1 ? 'person is' : 'people are'} recorded beyond places where the two records disagree or only one has someone: the walk does not follow a line it cannot pair.</small></p>`; }
-  h += `<div class="row"><button class="lk-btn is-small${P.whole ? '' : ' on'}" data-pr-whole="0" aria-pressed="${!P.whole}">Direct line</button><button class="lk-btn is-small${P.whole ? ' on' : ''}" data-pr-whole="1" aria-pressed="${P.whole}">Whole family</button></div>
-    <p class="plines"><small>${P.whole ? 'Every recorded relative of each paired person: siblings, their children and spouses.' : 'The marked person’s ancestors, and their children and spouses and below.'} Worked out in ${P.ms} ms, here in this browser.</small></p>`;
-  const s = P.sel ? R.slots.find(x => prSlotName(x) === P.sel) : null;
-  if (s) h += prSlotPanel(s); else h += '<p class="plines"><small>Press a round button on the canvas (✓ ? ≠ ○), or a place below, to see why two records were paired and to change it.</small></p>';
+  const an = R.slots.find(x => x.anchor), anq = an ? (an.f >= 0 ? M.P[an.f] : an.arch[an.primary] ? M.P[an.arch[an.primary].i] : null) : null;
+  let h = anq ? `<p class="plines prstart">Starting from <b>${esc(anq.name)}</b> <small>${esc(prYears(anq))}</small></p>` : '';
+  h += prCounts(sm);
+  const needHint = !!RL() && R.slots.some(s => s.f >= 0 && !M.P[s.f].living) && !R.slots.some(s => s.f >= 0 && prExt(M.P[s.f]).length);
+  if (needHint) h += `<small class="prhint"><button type="button" class="lk-linkbtn" data-gsettings="1">Add your MyHeritage link</button> to link these.</small>`;
+  if (R.capped) h += `<div class="warnbox bad"><b>Showing the nearest ${sm.slots.toLocaleString()} places.</b> ${R.skipped.toLocaleString()} more were left out so the canvas stays quick.</div>`;
+  const ad = prAddAll();
+  h += `<div class="row prbar"><span class="prseg" role="group" aria-label="Who to show"><button class="lk-btn is-small${P.whole ? '' : ' on'}" data-pr-whole="0" aria-pressed="${!P.whole}">Direct line</button><button class="lk-btn is-small${P.whole ? ' on' : ''}" data-pr-whole="1" aria-pressed="${P.whole}">Whole family</button></span>${ad.total ? `<button type="button" class="lk-btn is-small prcopyall" data-pr-copy="*all" title="Copy details of the ${ad.total.toLocaleString()} ${ad.total === 1 ? 'person' : 'people'} not in your file${ad.capped ? ' (the first ' + ad.items.length + ')' : ''}" aria-label="Copy details of the ${ad.total.toLocaleString()} ${ad.total === 1 ? 'person' : 'people'} not in your file${ad.capped ? ', the first ' + ad.items.length : ''}"><b aria-hidden="true">+</b> Copy ${ad.capped ? ad.items.length : ad.total} missing</button>` : ''}</div>${ad.total ? prCopied('*all') : ''}`;
   h += prList();
   return h;
 }
-const PRHELP = '<p class="plines prhelp"><small><b>Same person</b>: you are confirming these two records are one person. <b>Different people</b>: they are not. Nothing is changed in your file or in the archive; your choice is kept on this device.</small></p>';
 const REL = { self: 'Starting person', father: 'Father', mother: 'Mother', child: 'Child', spouse: 'Spouse' };
 function prList() {
   const P = S.pr, R = P.res, L = P.lay, many = M.archives.length > 2;
-  const rows = R.slots.slice().sort((a, b) => (a.gen - b.gen) || (L.pos.get(a.id).x - L.pos.get(b.id).x));
+  const rows = TCPe().byState(R.slots, P.flt).slice().sort((a, b) => (a.gen - b.gen) || (L.pos.get(a.id).x - L.pos.get(b.id).x));
   const shown = P.listAll ? rows : rows.slice(0, 120);
-  /* one aligned line: a fixed label column (colour + who), the name (breaks at spaces, ellipsis when long), years under it, then the link out under both */
-  const side = (label, colour, q, tiny) => {
-    const nm = esc(q.name), sq = `<i class="prsq" style="--ac:${esc(colour)}" title="${esc(label)}"></i>`, src = tiny ? ` <small class="prsrc">${esc(label)}</small>` : '';
-    const inner = `${sq}${nm}`, x = prExt(q)[0];
-    const who = x ? prExtA(q, inner + src) : `<span class="prx0">${inner}${src}</span>`;
-    return `<div class="prside">${who} <small class="pryr">${esc(prYears(q))}</small></div>`;
-  };
   const li = s => {
-    const a = prShown(s), nm = prSlotName(s), fq = s.f >= 0 ? M.P[s.f] : null;
+    const nm = prSlotName(s), fq = s.f >= 0 ? M.P[s.f] : null, aq = s.arch[prShown(s)] ? M.P[s.arch[prShown(s)].i] : null, q = fq || aq;
     const on = P.sel === nm, pn = s.state === 'only-a' || s.state === 'only-b' ? [] : (s.pnotes || []);
-    const sr = TCPe().statusInfo(s.state, pn), al = TCPe().archLines(s, a, 2), gl = s.gen > 0 ? '+' + s.gen : '' + s.gen;
-    const aria = `${REL[s.rel] || 'Person'}, ${TCPe().genLabel(s.gen)}: ${fq ? fq.name : 'not in your file'} and ${al.lines.length ? al.lines.map(x => M.P[s.arch[x].i].name).join(', ') : 'no one in the archives'}. ${sr.word}. Show on the canvas`;
-    const miss = [];
-    if (!fq) miss.push('not in your file');
-    if (!al.lines.length) miss.push(many ? 'not in any archive' : 'not in the archive');
-    let h = `<li class="prli${on ? ' on' : ''}" data-pr-row="${esc(nm)}"><button type="button" class="prsel" data-pr-slot="${esc(nm)}" aria-pressed="${on}" aria-label="${esc(aria)}"><span class="prrel">${esc(REL[s.rel] || 'Person')}</span>${prSt(s.state, pn)}${s.ph ? prPH(s) : ''}${miss.length ? `<span class="prmiss">${esc(s.state === 'only-a' || s.state === 'only-b' ? miss.join(', ') : miss.join(', '))}</span>` : ''}</button>`;
-    if (fq) h += side('Your file', PAIRFILE, fq, false);
-    al.lines.forEach(x => { h += side(prArch(x).name, prArch(x).color, M.P[s.arch[x].i], many); });
-    if (al.more) h += `<div class="prmore">+${al.more} more ${al.more === 1 ? 'archive' : 'archives'} (open the place)</div>`;
+    const sr = TCPe().statusInfo(s.state, pn), who = [];
+    if (fq) who.push(['Your file', PAIRFILE]);
+    Object.keys(s.arch).map(Number).sort((x, y) => x - y).forEach(x => who.push([prArch(x).name, prArch(x).color]));
+    const aria = `${REL[s.rel] || 'Person'}, ${TCPe().genLabel(s.gen)}: ${q ? q.name : ''}. ${sr.tip || sr.word}. In: ${who.map(w => w[0]).join(', ')}. ${on ? 'Close' : 'Open'} the details`;
+    const bey = s.more ? (s.more.up || 0) + (s.more.down || 0) : 0;
+    let h = `<li class="prli${on ? ' on' : ''}" data-pr-row="${esc(nm)}"><button type="button" class="prsel" data-pr-slot="${esc(nm)}" aria-expanded="${on}"${on ? ` aria-controls="prd-${esc(s.id)}"` : ''} aria-label="${esc(aria)}"><span class="prrel" title="${esc(REL[s.rel] || 'Person')}">${esc(s.rel === 'self' ? 'Start' : REL[s.rel] || 'Person')}</span>${TCPe().statusIconHtml(s.state, pn, esc)}<span class="prnm">${q ? esc(q.name) : ''} <small class="pryr">${q ? esc(prYears(q)) : ''}</small></span>${s.ph ? prPH(s) : ''}${bey ? `<span class="prbey" title="${bey} more recorded beyond here">+${bey} beyond</span>` : ''}<span class="prsqs" aria-hidden="true">${who.map(w => `<i class="prsq" style="--ac:${esc(w[1])}" title="${esc(w[0])}"></i>`).join('')}</span></button>`;
+    if (on) h += prSlotPanel(s);
     return h + '</li>';
   };
-  const needHint = !!RL() && rows.some(s => s.f >= 0 && !M.P[s.f].living) && !rows.some(s => s.f >= 0 && prExt(M.P[s.f]).length);
   const groups = TCPe().groupByGen(shown);
-  return `<h4>Every place, by generation</h4>${needHint ? `<p class="plines"><small>Add your MyHeritage link in <button type="button" class="lk-linkbtn" data-gsettings="1">Settings</button> to link these.</small></p>` : ''}${groups.map(g => `<section class="prgen"><h5 class="prgh">${esc(g.label)} <small>${g.rows.length}</small></h5><ul class="prlist">${g.rows.map(li).join('')}</ul></section>`).join('')}${rows.length > shown.length ? `<div class="row"><button class="lk-btn is-small" data-pr-list="1">Show all ${rows.length.toLocaleString()}</button></div>` : ''}`;
+  return `${groups.map(g => `<section class="prgen"><h5 class="prgh">${esc(g.label)} <small>${g.rows.length}</small></h5><ul class="prlist">${g.rows.map(li).join('')}</ul></section>`).join('')}${rows.length > shown.length ? `<div class="row"><button class="lk-btn is-small" data-pr-list="1">Show all ${rows.length.toLocaleString()}</button></div>` : ''}`;
 }
+
+/* the round icon buttons of the slot panel (the canvas's own round-button look: ✓ ? ≠ ○) */
+const prDC = (i, j) => { const d = S.pr.dec.get(TCPe().dkey(M, i, j)), x = TCPe().decisionInfo(d); return `<button type="button" class="pric prdc ${x.kind}" data-pr-dc="${i}:${j}" aria-label="${esc(x.aria)}" title="${esc(x.aria)}"><b aria-hidden="true">${x.glyph}</b></button>`; };
+const prLoc = (a, k) => `<button type="button" class="pric prrd" data-pr-showa="${a}" data-pr-k="${esc(k)}" aria-label="Show on canvas" title="Show on canvas"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="5.2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg></button>`;
+const prAdd = k => `<button type="button" class="pric prad" data-pr-copy="${esc(k)}" aria-label="Copy details to add to your tree" title="Copy details to add to your tree"><b aria-hidden="true">+</b></button>`;
+function prLive(msg) { let el = document.getElementById('prLive'); if (!el) { el = document.createElement('div'); el.id = 'prLive'; el.className = 'prlive'; el.setAttribute('aria-live', 'polite'); el.setAttribute('role', 'status'); document.body.appendChild(el); } el.textContent = ''; setTimeout(() => { el.textContent = msg; }, 30); }
+/* copy: the clipboard when the page may use it, else a box with the text already selected */
+function prCopy(text, key) {
+  const P = S.pr, done = ok => { P.copied = { k: key, ok, text: ok ? null : text }; renderInfo(); if (ok) { prLive('Copied'); clearTimeout(P._ct); P._ct = setTimeout(() => { P.copied = null; renderInfo(); }, 3200); } else setTimeout(() => { const t = $('#info .prcopybox'); if (t) { t.focus(); t.select(); } }, 60); };
+  try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(() => done(true), () => done(false)); return; } } catch (e) { /* blocked */ }
+  done(false);
+}
+const prCopied = k => { const c = S.pr && S.pr.copied; if (!c || c.k !== k) return ''; return c.ok ? '<span class="prcopied">Copied</span>' : `<div class="prcopyfb"><small>Your browser would not copy for us. The text is selected: press Ctrl+C (or ⌘C).</small><textarea class="prcopybox" readonly rows="7" aria-label="Details to add to your tree">${esc(c.text)}</textarea></div>`; };
+const prAddAll = () => TCPe().addPeople(M, S.pr.res, { shown: prShown, cap: 100 });
+/* "Someone else in <archive>" is open unless this person closed it; the choice is kept for the session */
+const PR_ALT = {};   /* in memory only: the pairing UI keeps nothing in the browser itself */
+const prAltOpen = a => PR_ALT[a] !== false;
+function prAltSet(a, open) { PR_ALT[a] = !!open; }
+/* the opened place: the row above IS the heading. One line per source (square, name, years and place, the round buttons at the right); a note only where it differs. */
 function prSlotPanel(s) {
-  const P = S.pr, R = P.res, nmk = prSlotName(s);
-  const gen = s.gen === 0 ? 'the starting generation' : s.gen < 0 ? Math.abs(s.gen) + (Math.abs(s.gen) === 1 ? ' generation up' : ' generations up') : s.gen + (s.gen === 1 ? ' generation down' : ' generations down');
-  const dec = (i, j) => P.dec.get(TCPe().dkey(M, i, j));
-  const undo = (i, j) => `<button class="lk-btn is-small" data-pr-undo="${i}:${j}">Undo my choice</button>`;
-  const si = TCPe().statusInfo(s.state, s.pnotes);
-  let h = `<div class="prdet"><h4><span>${esc(REL[s.rel] || 'Person')}, ${esc(gen)}</span> ${prSt(s.state, s.pnotes)}</h4>${si.line ? `<p class="plines prwhy">${esc(si.line)}</p>` : ''}${s.ph ? `<p class="plines">${prPH(s)}. It is kept and shown, but it never drives a pairing and is never suggested as a match.</p>` : ''}`;
-  let helped = false; const multi = M.archives.length > 2;
-  h += `<div class="prent file"><span class="pk" style="--ac:${PAIRFILE}"><i></i>Your file</span> ` + (s.f >= 0 ? prNameLink(M.P[s.f]) : '<em>no one here</em>') + '</div>';
+  const P = S.pr, R = P.res, nmk = prSlotName(s), si = TCPe().statusInfo(s.state, s.pnotes);
+  const sq = (label, colour) => `<i class="prsq" style="--ac:${esc(colour)}" aria-hidden="true"></i><span class="prsr">${esc(label)}:</span>`;
+  let h = `<div class="prdet ${esc(si.cls)}" id="prd-${esc(s.id)}" role="region" aria-label="Details: ${esc(REL[s.rel] || 'Person')}, ${esc(TCPe().genLabel(s.gen))}">`;
+  if (s.f >= 0) h += `<div class="prent file"><span class="prwho">${sq('Your file', PAIRFILE)} ${prNameLink(M.P[s.f])}</span></div>`;
   Object.keys(s.arch).map(Number).sort((a, b) => a - b).forEach(a => {
-    const e = s.arch[a], q = M.P[e.i], ar = prArch(a);
-    const lv = s.f >= 0 ? e.level : null, show = lv && (multi || lv !== s.state);
-    h += `<div class="prent"><span class="pk" style="--ac:${esc(ar.color)}"><i></i>${esc(ar.name)}</span> ${prNameLink(q)} ${show ? prSt(lv, e.notes) : ''}${a === prShown(s) ? '' : ` <button class="lk-btn is-small" data-pr-showa="${a}" data-pr-k="${esc(nmk)}">Show on canvas</button>`}`;
-    if (e.notes && e.notes.length) h += `<small class="prnote">${esc(e.notes.join('; '))}</small>`;
-    if (s.f >= 0) {
-      const d = dec(s.f, e.i);
-      if (d === 'y') h += `<div class="row"><small>You said: same person.</small> ${undo(s.f, e.i)}</div>`;
-      else if (d === 'n') h += `<div class="row"><small>You said: different people.</small> ${undo(s.f, e.i)}</div>`;
-      else { h += `<div class="row"><button class="lk-btn is-small" data-pr-y="${s.f}:${e.i}">Same person</button><button class="lk-btn is-small" data-pr-n="${s.f}:${e.i}">Different people</button></div>`; if (!helped) { helped = true; h += PRHELP; } }
-    }
+    const e = s.arch[a], q = M.P[e.i], ar = prArch(a), offer = s.f < 0 && a === prShown(s) && TCPe().offerable(M, s);
+    h += `<div class="prent"><span class="prwho">${sq(ar.name, ar.color)} ${prNameLink(q)}</span><span class="pract">${a === prShown(s) ? '' : prLoc(a, nmk)}${s.f >= 0 ? prDC(s.f, e.i) : ''}${offer ? prAdd(nmk) : ''}</span>`;
+    if (s.f >= 0 && e.level !== 'same' && e.notes && e.notes.length) h += `<small class="prnote">${esc(e.notes.join('; '))}</small>`;
+    if (offer) h += prCopied(nmk);
     h += '</div>';
   });
-  if (!Object.keys(s.arch).length && s.f >= 0) h += `<p class="plines"><small>No archive has a counterpart for this person in the place the walk looked.</small></p>`;
-  if (s.dup != null) h += `<p class="plines"><small>This looks like <a href="#" data-focus="${esc(M.P[s.dup].key)}">${esc(M.P[s.dup].name)}</a> in your file again: a possible duplicate entry. Nothing was merged.</small></p>`;
-  if (s.more && (s.more.up || s.more.down)) h += `<p class="plines"><small>${s.more.up ? s.more.up + ' recorded above' : ''}${s.more.up && s.more.down ? ', ' : ''}${s.more.down ? s.more.down + ' below' : ''} (not followed: the two records are not paired here).</small></p>`;
+  if (s.dup != null) h += `<p class="plines prdup"><small>Possibly <a href="#" data-focus="${esc(M.P[s.dup].key)}">${esc(M.P[s.dup].name)}</a> in your file again.</small></p>`;
   /* suggestions: someone in an archive (or the file) who may be the same person, not joined */
   (s.maybe || []).forEach(m => {
     const q = M.P[m.i], ar = prArch(m.a), ref = s.f >= 0 ? s.f : s.arch[s.primary].i;
-    h += `<div class="prent maybe"><span class="pk" style="--ac:${esc(ar.color)}"><i></i>${m.a === 0 ? 'Your file' : esc(ar.name)}</span> <b>maybe</b> <a href="#" data-focus="${esc(q.key)}">${prNm(q)}</a><br><small>${esc(m.notes.join('; ') || 'same name and birth year')}. Not joined.</small>
-      <div class="row"><button class="lk-btn is-small" data-pr-y="${ref}:${m.i}">Same person</button><button class="lk-btn is-small" data-pr-n="${ref}:${m.i}">Different people</button></div>${helped ? '' : (helped = true, PRHELP)}</div>`;
+    h += `<div class="prent maybe" title="${esc((m.notes.join('; ') || 'same name and birth year') + '. Not joined.')}"><span class="prwho">${sq(m.a === 0 ? 'Your file' : ar.name, m.a === 0 ? PAIRFILE : ar.color)} <em>maybe</em> <a href="#" data-focus="${esc(q.key)}">${prNm(q)}</a></span><span class="pract">${prDC(ref, m.i)}</span></div>`;
   });
-  /* the archive's other relatives of the same kind, for a pairing the walk got wrong */
+  /* the archive's other relatives of the same kind, for a pairing the walk got wrong: one line each */
   Object.keys(M.archives).forEach(k => {
     const a = +k; if (a < 1 || s.f < 0) return;
     const alts = TCPe().alternatives(M, R, s, a, P.dec);
     if (!alts.length) return;
-    h += `<details class="pralt"><summary>Someone else in ${esc(prArch(a).name)}</summary><ul class="cmpc">${alts.map(x => { const q = M.P[x.i]; return `<li><span>${prNm(q)}${x.level ? ' ' + prSt(x.level, []) : ''}${x.owned ? '<br><small>already placed elsewhere here</small>' : ''}</span> <button class="lk-btn is-small" data-pr-y="${s.f}:${x.i}">Same person</button></li>`; }).join('')}</ul></details>`;
+    h += `<details class="pralt" data-pr-alt="${a}"${prAltOpen(a) ? ' open' : ''}><summary>Someone else in ${esc(prArch(a).name)} <small class="prcount">${alts.length}</small></summary><ul class="cmpc">${alts.map(x => `<li${x.owned ? ' title="Already placed elsewhere here"' : ''}><span class="prwho">${prNm(M.P[x.i])}</span><span class="pract">${prDC(s.f, x.i)}</span></li>`).join('')}</ul></details>`;
   });
   return h + '</div>';
 }
@@ -5016,6 +5160,31 @@ function prBoot() {
   } catch (e) { /* nothing restored: the visitor starts again */ }
 }
 
+/* ---------- keeping the list steady ---------- */
+const prFocusRow = k => { const b = $('#info [data-pr-slot="' + k + '"]'); if (b) b.focus({ preventScroll: true }); };
+/* after the panel is drawn: put the scroll back where it was, then (only when asked) bring the open row into view by the least amount */
+function prPostRender(prev, focus) {
+  const P = S.pr; if (!P || S.tab !== 'compare') return;
+  const ib = $('#info .ib'); if (!ib) return;
+  if (prev != null) ib.scrollTop = prev;
+  if (focus) { const el = ib.querySelector('[' + focus[0] + '="' + focus[1] + '"]'); if (el) el.focus({ preventScroll: true }); }   /* the control that had focus keeps it, even though the panel was drawn again */
+  const rq = P.reveal; P.reveal = null;
+  const li = P.sel ? ib.querySelector('.prli.on') : null;
+  if (li && rq) {
+    const v = ib.getBoundingClientRect(), r = li.getBoundingClientRect(), det = li.querySelector('.prdet'), d = det ? det.getBoundingClientRect() : null;
+    const dy = TCPe().scrollDelta(v.top, v.bottom, r.top, r.bottom, d ? d.bottom : null, 8);
+    if (dy) ib.scrollBy({ top: dy, behavior: rq === 'smooth' && !matchMedia('(prefers-reduced-motion:reduce)').matches ? 'smooth' : 'auto' });
+  }
+  if (li && P.flash === P.sel) { li.classList.add('flash'); P.flash = null; }
+}
+$('#info').addEventListener('toggle', e => { const d = e.target; if (d && d.matches && d.matches('details[data-pr-alt]')) prAltSet(+d.dataset.prAlt, d.open); }, true);
+$('#info').addEventListener('keydown', e => {
+  const P = S.pr; if (e.key !== 'Escape' || !P || !e.target.closest) return;
+  if (P.info && e.target.closest('#prinfo, [data-pr-info]')) { P.info = false; renderInfo(); const b = $('#info [data-pr-info]'); if (b) b.focus({ preventScroll: true }); e.stopPropagation(); return; }
+  if (!P.sel) return;
+  const k = P.sel; P.sel = null; drawPairs(); renderInfo(); prFocusRow(k); e.stopPropagation();
+});
+
 /* ---------- clicks in the panel ---------- */
 $('#info').addEventListener('click', e => {
   const P = S.pr, t = e.target;
@@ -5024,14 +5193,16 @@ $('#info').addEventListener('click', e => {
   if (t.closest('[data-pr-go]')) { const keys = [...document.querySelectorAll('#info [data-pr-ar]')].filter(c => c.checked).map(c => c.dataset.prAr); if (!keys.length) { toast('Tick at least one archive', 2600); return; } cmpAsk(keys); return; }
   if (!P) return;
   if (t.closest('[data-pr-chg]')) { P.chooser = !P.chooser; renderInfo(); return; }
+  if (t.closest('[data-pr-info]')) { P.info = !P.info; renderInfo(); const b = $('#info [data-pr-info]'); if (b) b.focus({ preventScroll: true }); prLive(P.info ? 'Explanation shown' : 'Explanation hidden'); return; }
+  const fl = t.closest('[data-pr-flt]'); if (fl) { if (fl.disabled) return; const k = fl.dataset.prFlt; P.flt = P.flt === k ? null : k; renderInfo(); const b = $('#info [data-pr-flt="' + k + '"]'); if (b) b.focus({ preventScroll: true }); prLive(P.flt ? 'Showing only these' : 'Showing all'); return; }
   const pk = t.closest('[data-pr-pick]'); if (pk) { const [a, i] = pk.dataset.prPick.split(':').map(Number); P.pick[a] = i; return; }
   if (t.closest('[data-pr-anchor]')) { prStart(); return; }
   const wh = t.closest('[data-pr-whole]'); if (wh) { P.whole = wh.dataset.prWhole === '1'; prRun(); prDraw({ fit: true }); return; }
   if (t.closest('a[href]:not([href="#"])')) return;   /* a link out follows itself */
-  const rw = t.closest('[data-pr-row]'); const sl = t.closest('[data-pr-slot]') || (rw && rw.querySelector('[data-pr-slot]')); if (sl) { P.sel = sl.dataset.prSlot; drawPairs(); renderInfo(); const s = P.res.slots.find(x => prSlotName(x) === P.sel); if (s) { const c = S.cards.get(M.P[s.f >= 0 ? s.f : s.arch[prShown(s)].i].key); if (c) { fit([c], { maxK: 1 }); pulseCard(c); } } return; }
-  const y = t.closest('[data-pr-y]'); if (y) { const [i, j] = y.dataset.prY.split(':').map(Number); prDecide(i, j, 'y'); return; }
-  const n = t.closest('[data-pr-n]'); if (n) { const [i, j] = n.dataset.prN.split(':').map(Number); prDecide(i, j, 'n'); return; }
-  const u = t.closest('[data-pr-undo]'); if (u) { const [i, j] = u.dataset.prUndo.split(':').map(Number); prDecide(i, j, null); return; }
+  const inDet = !!t.closest('.prdet'), rw = inDet ? null : t.closest('[data-pr-row]'); const sl = inDet ? null : (t.closest('[data-pr-slot]') || (rw && rw.querySelector('[data-pr-slot]')));
+  if (sl) { const k = sl.dataset.prSlot, open = P.sel !== k; P.sel = open ? k : null; P.reveal = 'auto'; drawPairs(); renderInfo(); prFocusRow(k); const s = open ? P.res.slots.find(x => prSlotName(x) === k) : null; if (s) { const c = S.cards.get(M.P[s.f >= 0 ? s.f : s.arch[prShown(s)].i].key); if (c) { fit([c], { maxK: 1 }); pulseCard(c); } } return; }
+  const dc = t.closest('[data-pr-dc]'); if (dc) { const [i, j] = dc.dataset.prDc.split(':').map(Number), x = TCPe().decisionInfo(P.dec.get(TCPe().dkey(M, i, j))); prDecide(i, j, x.nextValue); const nx = TCPe().decisionInfo(x.nextValue); prLive(nx.announce); const again = $('#info [data-pr-dc="' + i + ':' + j + '"]'); if (again) again.focus(); return; }
+  const cp = t.closest('[data-pr-copy]'); if (cp) { const k = cp.dataset.prCopy; if (k === '*all') { prCopy(prAddAll().text, '*all'); return; } const s = P.res.slots.find(x => prSlotName(x) === k), q = s && TCPe().offerable(M, s); if (q) { const a = prShown(s), qq = s.arch[a] ? M.P[s.arch[a].i] : q; prCopy(TCPe().personText(M, P.res, s, qq), k); } return; }
   const sa = t.closest('[data-pr-showa]'); if (sa) { P.show.set(sa.dataset.prK, +sa.dataset.prShowa); prDraw(); return; }
   if (t.closest('[data-pr-list]')) { P.listAll = true; renderInfo(); return; }
 }, true);
@@ -5801,10 +5972,13 @@ function optionsPanel() {
     <div class="row"><button class="lk-btn is-small is-danger" data-do="clear">Clear the canvas</button></div>`;
 }
 function renderInfo() {
+  const prevScroll = S.pr && S.tab === 'compare' && $('#info .ib') ? $('#info .ib').scrollTop : null;
+  const prevFocus = (() => { const a = document.activeElement, inf = $('#info'); if (!(S.pr && S.tab === 'compare' && a && inf && inf.contains(a))) return null; for (const k of ['data-pr-dc', 'data-pr-slot', 'data-pr-copy', 'data-pr-showa']) { const v = a.getAttribute(k); if (v) return [k, v]; } return null; })();   /* the paired Compare list keeps its place when it is drawn again */
   const el = $('#info'), tabs = [['person', 'Person'], ['sources', 'Sources'], ['next', 'Where next'], ['ai', 'AI prompt'], ...(fixList() ? [['fix', 'Fix list' + (fixList().people ? ' (' + fixList().people.toLocaleString() + ')' : '')]] : []), ...(cmpAvail() ? [['compare', 'Compare']] : []), ['path', 'Path'], ...(S.tab === 'options' ? [['options', 'Options']] : [])];
   const body = S.tab === 'person' ? personPanel() : S.tab === 'sources' ? sourcesPanel() : S.tab === 'next' ? nextPanel() : S.tab === 'ai' ? aipPanel() : S.tab === 'fix' ? fixPanel() : S.tab === 'compare' ? comparePanel() : S.tab === 'path' ? pathPanel() : optionsPanel();
   el.innerHTML = `<div class="ih">${tabs.map(([k, n]) => `<button class="lk-tab${S.tab === k ? ' on' : ''}" data-tab="${k}">${n}${k === 'path' && S.path ? ' &bull;' : ''}</button>`).join('')}<span style="flex:1"></span><button class="lk-tab" data-tab="close" title="Close panel" aria-label="Close panel">&times;</button></div><div class="ib">${body}</div>`;
   if (S.infoOpen !== false) el.classList.add('on');
+  if (typeof prPostRender === 'function') prPostRender(prevScroll, prevFocus);
   { const ih = el.querySelector('.ih'), on = ih && ih.querySelector('.lk-tab.on'); if (on) { const l = on.offsetLeft - 8, r = on.offsetLeft + on.offsetWidth + 8; if (l < ih.scrollLeft) ih.scrollLeft = l; else if (r > ih.scrollLeft + ih.clientWidth) ih.scrollLeft = r - ih.clientWidth; } tabEdges(ih); }
   const li = $('#lkIn'); if (li && RL()) li.oninput = () => { const st = RL().set(li.value); const n = $('#lkSt'); if (n) n.innerHTML = '<small>' + esc(st || (li.value.trim() ? '' : 'Off: no link yet.')) + '</small>'; };
   const ls = $('#lkAnc'); if (ls && RL()) ls.onchange = () => RL().setSite(ls.value);

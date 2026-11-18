@@ -934,6 +934,7 @@ html.rm .prli.flash{animation:none}@media (prefers-reduced-motion:reduce){.prli.
 /* a status is a LABEL: a dot-and-word, no outline, no hover, default cursor. Buttons (Same person, Different people) are the outlined things. */
 .prst{display:inline-flex;align-items:center;gap:4px;font:800 11px/1.3 Nunito,system-ui;cursor:default;white-space:nowrap;user-select:none}
 .prst b{font:900 12px/1 Nunito,system-ui}
+.emo,.prst.emo b,#prLegend .pks b.emo,#pairs .ppill.chk b{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-weight:400}
 .prst.ok{color:var(--pok)}.prst.chk{color:var(--pchk)}.prst.no{color:var(--pno)}.prst.one{color:var(--pone)}
 .prdet h4{display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px}
 .prent{display:flex;flex-wrap:wrap;align-items:center;gap:3px 8px;min-width:0}
@@ -2633,7 +2634,7 @@ html.rm #pairs *{transition:none!important;animation:none!important}
   /* the status of a place, as a LABEL (not a button): word, symbol, class, a one-line meaning, the longer line for the panel */
   const STATUS = {
     same: ['agree', '✓', 'ok', 'the two records agree on everything both record', ''],
-    check: ['check', '?', 'chk', 'the two records disagree on a detail', 'The records disagree on a detail (shown below). Look at both, then tap the circle to decide.'],
+    check: ['check', '❓', 'chk', 'the two records disagree on a detail', '❓ means the records disagree on a detail (shown below). Look at both, then tap the circle to decide.', ''],
     differs: ['different people', '≠', 'no', 'the two records read as different people', 'These two records read as different people. If you know better, tap the circle to mark them the same person.'],
     'only-a': ['only in your file', '○', 'one', 'no archive records this person here', ''],
     'only-b': ['only in the archive', '○', 'one', 'your file has no one here', ''],
@@ -2641,14 +2642,14 @@ html.rm #pairs *{transition:none!important;animation:none!important}
   };
   const cap1 = t => t ? t.charAt(0).toUpperCase() + t.slice(1) : t;
   function statusInfo(state, notes) {
-    const [word, sym, cls, mean, line] = STATUS[state] || STATUS.empty, ns = (notes || []).filter(Boolean);
+    const [word, sym, cls, mean, line, shown] = STATUS[state] || STATUS.empty, ns = (notes || []).filter(Boolean);
     const tip = word ? cap1(word) + ': ' + mean + '.' + (ns.length ? ' ' + cap1(ns.join('; ')) + '.' : '') : '';
-    return { word, sym, cls, mean, line, tip };
+    return { word, sym, cls, mean, line, tip, shown: shown == null ? word : shown, emoji: sym === '❓' };
   }
   /* a status LABEL: a span, not focusable, with the meaning and the reason in its title and aria-label. Quiet: the stylesheet draws it as a dot-and-word, never as a button. */
   function statusHtml(state, notes, esc) {
     const i = statusInfo(state, notes); if (!i.word) return '';
-    return '<span class="prst ' + i.cls + '" role="img" aria-label="' + esc(i.tip) + '" title="' + esc(i.tip) + '"><b aria-hidden="true">' + i.sym + '</b>' + esc(i.word) + '</span>';
+    return '<span class="prst ' + i.cls + (i.emoji ? ' emo' : '') + '" role="img" aria-label="' + esc(i.tip) + '" title="' + esc(i.tip) + '"><b aria-hidden="true">' + i.sym + '</b>' + esc(i.shown) + '</span>';
   }
 
   /* a decision about two people, in either order: 'y' (the visitor says they are the same person) or 'n' (different people) */
@@ -4780,7 +4781,7 @@ function wireLines() {
 const PAIRFILE = 'var(--pfile)';
 const CMPARCH = [['defranceski', 'Defranceski', '#D2493A'], ['booyzen', 'Booyzen', '#4E9A3E'], ['luwinski', 'Luwinski', '#3A74C9'], ['lerena', 'Lerena', '#8A5CC2'], ['falco', 'Falco', '#D39A12'], ['blazevic', 'Blažević', '#1E9C97'], ['darcy', "D'Arcy", '#C9508F'], ['mazza', 'Mazza', '#8E7B5E']];
 const PR_MAXDEC = 400;
-const PR_ST = { same: ['agree', '✓', 'ok'], check: ['check', '?', 'chk'], differs: ['different people', '≠', 'no'], 'only-a': ['only in your file', '○', 'one'], 'only-b': ['only in the archive', '○', 'one'], empty: ['', '', 'one'] };
+const PR_ST = { same: ['agree', '✓', 'ok'], check: ['Check: the records disagree on a detail', '❓', 'chk'], differs: ['different people', '≠', 'no'], 'only-a': ['only in your file', '○', 'one'], 'only-b': ['only in the archive', '○', 'one'], empty: ['', '', 'one'] };
 const pairMode = () => M.archives.length >= 2 && M.archives[0].k === 'you';
 const cmpMode = pairMode;
 const cmpAvail = () => SA && (pairMode() || (M.archives.length === 1 && M.archives[0].k === 'you'));
@@ -4882,11 +4883,11 @@ function drawPairs() {
     const mx = P.lay.stack ? fx + W / 2 : (fx + W + ax) / 2, my = P.lay.stack ? (fy + H + ay) / 2 : fy + H / 2;
     const who = (s.f >= 0 ? M.P[s.f].name : s.primary != null && s.arch[s.primary] ? M.P[s.arch[s.primary].i].name : '');
     const mine = a != null && s.arch[a] && s.arch[a].said === 'y';   /* the visitor accepted this pairing: it says so, and it stays after the page is reloaded */
-    h += `<button type="button" class="ppill ${cls}${sel ? ' on' : ''}${mine ? ' yes' : ''}" data-pr="slot" data-k="${esc(nm)}" style="left:${f1(mx)}px;top:${f1(my)}px" aria-label="${esc(who)}: ${esc(word)}${mine ? ', as you accepted' : ''}. Open the details"><b aria-hidden="true">${sym}</b><i>${esc(mine ? 'yours' : st === 'same' ? 'agree' : st === 'check' ? 'check' : st === 'differs' ? 'differ' : 'only')}</i></button>`;
+    h += `<button type="button" class="ppill ${cls}${sel ? ' on' : ''}${mine ? ' yes' : ''}" data-pr="slot" data-k="${esc(nm)}" style="left:${f1(mx)}px;top:${f1(my)}px" aria-label="${esc(who)}: ${esc(word)}${mine ? ', as you accepted' : ''}. Open the details"><b aria-hidden="true">${sym}</b>${st === 'check' && !mine ? '' : `<i>${esc(mine ? 'yours' : st === 'same' ? 'agree' : st === 'differs' ? 'differ' : 'only')}</i>`}</button>`;
     /* chips under the archive's card: the other archives that record this place, and suggestions */
     const chips = [];
     s.chips.forEach(c => { if (c.a === a) return; const ar = prArch(c.a), lv = c.level;
-      chips.push(`<button type="button" class="pchip ${lv}" style="--bc:${esc(ar.color)}" data-pr="show" data-k="${esc(nm)}" data-a="${c.a}" title="${esc(ar.name)} ${lv === 'same' ? 'records this person too' : lv === 'check' ? 'has someone here to check' : 'has a different person here'}${c.notes.length ? ': ' + esc(c.notes.join('; ')) : ''}. Click to show them."><i></i>${esc(ar.name)}${lv === 'same' ? '' : lv === 'check' ? ' ?' : ' ≠'}</button>`); });
+      chips.push(`<button type="button" class="pchip ${lv}" style="--bc:${esc(ar.color)}" data-pr="show" data-k="${esc(nm)}" data-a="${c.a}" title="${esc(ar.name)} ${lv === 'same' ? 'records this person too' : lv === 'check' ? 'Check: the records disagree on a detail, so someone here may be a different person' : 'has a different person here'}${c.notes.length ? ': ' + esc(c.notes.join('; ')) : ''}. Click to show them."><i></i>${esc(ar.name)}${lv === 'same' ? '' : lv === 'check' ? ' ❓' : ' ≠'}</button>`); });
     if (s.primary != null && a != null && a !== s.primary && s.arch[s.primary]) { const ar = prArch(s.primary); chips.unshift(`<button type="button" class="pchip ${s.arch[s.primary].level || 'same'}" style="--bc:${esc(ar.color)}" data-pr="show" data-k="${esc(nm)}" data-a="${s.primary}" title="Show ${esc(ar.name)}'s entry again"><i></i>${esc(ar.name)}</button>`); }
     (s.maybe || []).slice(0, 3).forEach(m => { const ar = prArch(m.a);
       chips.push(`<button type="button" class="pchip maybe" style="--bc:${esc(ar.color)}" data-pr="slot" data-k="${esc(nm)}" title="${esc(M.P[m.i].name)} ${esc(prYears(M.P[m.i]))} in ${esc(ar.name)} may be the same person (${esc(m.notes.join('; ') || 'same name and year')}). Not joined: open the details to accept or dismiss."><i></i>maybe ${m.a === 0 ? 'in your file' : esc(ar.name)}</button>`); });
@@ -4913,7 +4914,7 @@ function renderLegend() {
   const P = S.pr, n = new Array(M.archives.length).fill(0);
   P.res.slots.forEach(s => { if (s.f >= 0) n[0]++; Object.keys(s.arch).forEach(a => n[a]++); });
   el.innerHTML = M.archives.map((a, i) => `<span class="pk" style="--ac:${esc(a.color)}"><i></i>${esc(a.name)} <small>${n[i].toLocaleString()}</small></span>`).join('')
-    + `<span class="pks"><b class="ok">✓</b> agree <b class="chk">?</b> check <b class="no">≠</b> different <b class="one">○</b> only in one</span>`;
+    + `<span class="pks"><b class="ok">✓</b> agree <b class="chk emo">❓</b> records disagree <b class="no">≠</b> different <b class="one">○</b> only in one</span>`;
 }
 
 /* ---------- the Compare panel ---------- */
@@ -4963,7 +4964,7 @@ function prResult() {
     const unreadable = R.slots.filter(s => s.more && (s.more.up || s.more.down));
   const an = R.slots.find(x => x.anchor), anq = an ? (an.f >= 0 ? M.P[an.f] : an.arch[an.primary] ? M.P[an.arch[an.primary].i] : null) : null;
   let h = anq ? `<p class="plines prstart">Starting from <b>${esc(anq.name)}</b> <small>${esc(prYears(anq))}</small></p>` : '';
-  h += `<p class="plines"><b>${sm.slots.toLocaleString()}</b> places in the family: <span class="pcn ok">${sm.agree} agree</span>, <span class="pcn chk">${sm.check} to check</span>, <span class="pcn no">${sm.differs} different people</span>, ${sm.onlyFile} only in your file, ${sm.onlyArch} only in an archive.</p>`;
+  h += `<p class="plines"><b>${sm.slots.toLocaleString()}</b> places in the family: <span class="pcn ok">${sm.agree} agree</span>, <span class="pcn chk">${sm.check} <span class="emo" role="img" aria-label="to check">❓</span> (disagree on a detail)</span>, <span class="pcn no">${sm.differs} different people</span>, ${sm.onlyFile} only in your file, ${sm.onlyArch} only in an archive.</p>`;
   if (R.capped) h += `<div class="warnbox bad"><b>Showing the nearest ${sm.slots.toLocaleString()} places.</b> ${R.skipped.toLocaleString()} more were left out so the canvas stays quick. Start from someone nearer the top or bottom to see the rest.</div>`;
   if (sm.placeholders) h += `<p class="plines"><small>${sm.placeholders} ${sm.placeholders === 1 ? 'place holds' : 'places hold'} a placeholder entry (a name that is not a person's). ${sm.placeholders === 1 ? 'It is' : 'They are'} shown and labelled, never matched on their own.</small></p>`;
   { const ad = prAddAll(); if (ad.total) h += `<div class="row prallrow"><button type="button" class="lk-btn is-small" data-pr-copy="*all" title="Copy their details as plain text, to add to your tree by hand">Copy all ${ad.total.toLocaleString()} ${ad.total === 1 ? 'person' : 'people'} not in your file${ad.capped ? ' (first ' + ad.items.length + ')' : ''}</button> ${prCopied('*all')}</div>${ad.capped ? `<p class="plines"><small>Only the first ${ad.items.length} by generation are copied; ${ad.total - ad.items.length} more are left out so the text stays usable.</small></p>` : ''}<p class="plines"><small>Living people are never included. MyHeritage cannot be written to from here, so this is plain text to add by hand.</small></p>`; }

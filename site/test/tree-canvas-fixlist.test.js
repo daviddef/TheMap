@@ -7,7 +7,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { create, hashKey, mergeRows, wOf, fileTextOf, rowsFrom, parseRows } from "../public/roots/js/decisions.js";
 import { issuesByPerson, GROUPS } from "../public/roots/js/checklist.js";
-import { buildModel, rrView, createState, tally, visible, personIndex, peopleOf, toOpen, copyActions, cmpKey, cmpSections, hay, MAX_CMP, PAGE, BATCH, PRIORITY, levelOf, arranged, rowSort } from "../public/tree-canvas/fixlist.js";
+import { buildModel, rrView, createState, tally, visible, personIndex, peopleOf, toOpen, copyActions, cmpKey, cmpSections, hay, MAX_CMP, PAGE, BATCH, PRIORITY, levelOf, arranged, rowSort, nameMatcher, catalogueChoices, foldWords } from "../public/tree-canvas/fixlist.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const read = p => fs.readFileSync(path.join(here, "..", p), "utf8");
@@ -316,4 +316,42 @@ test("blocker 1: a kept file has a Fix list button that opens it on the Fix list
   assert.match(app, /const trees = rememberOn\(\) \? \(fixes\.all\(\) \|\| \{\}\) : \{\}/, "follows the keep-files switch, reads the summary the Fix list already keeps");
   assert.match(app, /s\.total - s\.done - s\.asis/, "left to fix: the same sum /roots/ makes");
   assert.doesNotMatch(app.slice(app.indexOf("function savedFix")), /setItem\(/, "the line stores nothing");
+});
+
+/* ---- research names ---- */
+const CAT = [
+  { id: "defranceschi", name: "Defranceschi", a: ["Defranceschi"], m: [["Defranceschi", "same"], ["Defranceski", "same"], ["Defrančeski", "same"], ["di Franceschi", "attested"], ["Dafranceschi", "lead"], ["Franceschi", "case-by-case"]] },
+  { id: "adamic", name: "Adamich", a: ["blazevic"], m: [["Adamic", "same"]] },
+  { id: "grah", name: "Grah", a: ["Blažević"], m: [["Grah", "same"], ["Grach", "lead"]] },
+  { id: "darcy", name: "D'Arcy", a: ["darcy"], m: [["Darcy", "same"], ["D'Arcy", "same"]] },
+];
+test("a research name stands for every spelling the Atlas lists as that name, and for the unconfirmed leads, but not for a form that is sometimes someone else's", () => {
+  const c = catalogueChoices(CAT), n = c.names.find(x => x.id === "defranceschi");
+  assert.deepEqual(n.forms.slice().sort(), ["Dafranceschi", "Defranceschi", "Defranceski", "Defrančeski", "di Franceschi"].sort());
+  assert.ok(!n.forms.includes("Franceschi"), "case-by-case is left out: it would pull in every other family");
+});
+test("an archive is one choice however its name is spelled in the catalogue, and holds all of its names", () => {
+  const c = catalogueChoices(CAT), b = c.archives.find(x => x.key === "blazevic");
+  assert.equal(b.label, "Blažević", "the spelling with its accent is the label");
+  assert.deepEqual(b.names, ["Adamich", "Grah"]); assert.ok(b.forms.includes("Adamic") && b.forms.includes("Grach"));
+  assert.deepEqual(c.archives.map(a => a.label), ["Blažević", "darcy", "Defranceschi"], "A to Z");
+  assert.deepEqual(c.names.map(x => x.name), ["Adamich", "D'Arcy", "Defranceschi", "Grah"], "names A to Z");
+});
+test("the name match is whole words, any typography, accents folded: Defranceschi is found in De Franceschi and Defrančeski, never inside another word", () => {
+  const f = nameMatcher(catalogueChoices(CAT).names.find(x => x.id === "defranceschi").forms), hit = name => f({ key: "years" }, { id: "I1", name });
+  for (const n of ["Anne De Franceschi", "Josephus de-Franceschi", "Mi di Franceschi", "Ante Defrančeski", "DEFRANCESKI", "Defranceschi, Ante"]) assert.ok(hit(n), n);
+  for (const n of ["Amadifranceschi", "Anne Defranceschino", "Franceschi", "Maria Krosnjak"]) assert.ok(!hit(n), n);
+  assert.deepEqual(foldWords("D\u2019Arcy"), ["d", "arcy"]); assert.ok(nameMatcher(["D'Arcy"])({ key: "x" }, { id: 1, name: "Darcy Jones" }), "D'Arcy and Darcy are one name");
+  assert.equal(nameMatcher([]), null); assert.equal(nameMatcher(["", "  "]), null);
+});
+test("the Fix list shows only the rows that name the pick, and a group is found by anyone in it, not only the few it lists", () => {
+  const s = { key: "apart", items: [
+    { key: "a|1", size: 40, people: [{ id: "I1", name: "Anna Smith" }], sur: ["Smith", "Defranceski"] },   // the surname is not among the people the row lists
+    { key: "a|2", size: 2, people: [{ id: "I2", name: "Bob Jones" }], sur: ["Jones"] },
+  ] }, st = createState(null);
+  const names = nameMatcher(["Defranceschi", "Defranceski"]);
+  assert.deepEqual(visible(s, st, { mode: "open", names }).map(i => i.key), ["a|1"]);
+  assert.equal(visible(s, st, { mode: "open" }).length, 2, "no pick: every row");
+  const sec2 = { key: "years", items: [{ key: "y|1", id: "I3", name: "Ante Defranceski", kind: "none" }, { key: "y|2", id: "I4", name: "Zed Other", kind: "none" }] };
+  assert.deepEqual(toOpen([sec2], st, { names }).map(p => p.id), ["I3"], "Open next 10 people follows the pick too");
 });

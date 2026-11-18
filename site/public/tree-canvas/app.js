@@ -737,6 +737,7 @@ const fxw = createWorkspace({
   capInfo: rows => (window.raResearchFile && window.raResearchFile.capInfo ? window.raResearchFile.capInfo(rows) : null),   // the six-word code is only on the page when the six words are on
   show: keys => { closeFX(); toCanvas({ tcShow: keys }); }, openSettings: () => openSG(),
   onCount: open => toCanvas({ tcFixCount: open }),
+  catalogue: () => fetch(new URL('data/surname-catalogue.json', base)).then(r => r.ok ? r.json() : null).catch(() => null),   // the Atlas's spelling families, with their archives
 });
 function askFix() { if (worker && lastM && lastM.kind !== 'tree') worker.postMessage({ cmd: 'checklist', living: !hide, ancestry: ancSite }); }
 /* the list changed (a new fix list from the reader, or Compare found something): rebuild the model, and tell the canvas (a full refresh when the rows themselves changed) */

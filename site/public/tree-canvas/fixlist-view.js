@@ -4,7 +4,7 @@
 
    BIG LISTS. A file can have thousands of rows. Only the section headers are drawn at first; a section's rows are drawn when it is opened, one page (100) at a time, and only
    the section that changed is redrawn when a row is ticked. Counts come from one pass over the rows (tally), never from the page. */
-import { buildModel, tally, visible, toOpen, rrView, createState, arranged, PRIORITY, ORDERS, ROW_SORTS, BATCH, PAGE } from './fixlist.js';
+import { buildModel, tally, visible, toOpen, rrView, createState, arranged, catalogueChoices, nameMatcher, PRIORITY, ORDERS, ROW_SORTS, BATCH, PAGE } from './fixlist.js';
 import { rowEl, mk, FX_ICON } from './fixlist-rows.js';
 import { checklistText, checklistCsv, describe } from '../roots/js/checklist.js';
 import { rowsFrom, fileTextOf, parseRows, summarise } from '../roots/js/decisions.js';
@@ -21,6 +21,8 @@ export function createWorkspace(cfg) {
   let m = null, cmp = null, salt = '', model = buildModel(null, null, ''), mode = 'open', groupFilter = '', q = '', personId = null, personName = '', loaded = null, collapse = false;
   let order = keep('ra-fix-order') in ORDERS ? keep('ra-fix-order') : 'priority', rowsHow = keep('ra-fix-rows') in ROW_SORTS ? keep('ra-fix-rows') : 'useful';
   let autoOpen = false;
+  /* RESEARCH NAMES: the visitor picks the names (or an archive's names) their research is about; rows that name anyone with any spelling of them are all that is shown. picks: 'n:<family id>' or 'a:<archive>' -> {label, forms} */
+  let choices = null, nameTest = null, catAsked = false; const picks = new Map();
   const open = new Map(), shown = new Map(), opened = new Set(), listeners = [];
   let tl = null, sumTimer = 0;
   const st = createState(cfg.dec, { saved: () => { drawKeep(); document.dispatchEvent(new CustomEvent('ra-progress-changed')); } });
@@ -38,7 +40,7 @@ export function createWorkspace(cfg) {
     cfg.onCount && cfg.onCount(tl.open);
     keepSummary();
   }
-  const rules = () => ({ q, mode, personId, rows: rowsHow });
+  const rules = () => ({ q, mode, personId, rows: rowsHow, names: nameTest });
 
   /* ---- the top: counts, progress, hints ---- */
   function paintTop() {
@@ -101,7 +103,7 @@ export function createWorkspace(cfg) {
     const items = visible(s, st, rules()), cap = shown.get(s.key) || PAGE;
     const left = s.items.filter(i => st.isAsIs(i.key) && !st.isDone(i.key)).length;
     if (left && mode !== 'asis') { const b = mk(doc, 'button', 'fx-link', n0(left) + ' left as is: show them again'); b.type = 'button'; b.onclick = () => { st.setMany(s.items.filter(i => st.isAsIs(i.key)).map(i => i.key), 'a', false); st.flush(); open.set(s.key, true); paintCounts(); drawSection(s); }; body.append(b); }
-    if (!items.length) body.append(mk(doc, 'p', 'fx-small', mode === 'open' && !q && personId == null ? 'Nothing left to do here.' : 'No rows match.'));
+    if (!items.length) body.append(mk(doc, 'p', 'fx-small', mode === 'open' && !q && personId == null && !nameTest ? 'Nothing left to do here.' : 'No rows match.'));
     const frag = doc.createDocumentFragment();
     for (const i of items.slice(0, cap)) frag.append(rowEl(doc, ctx, s, i));
     body.append(frag);
@@ -158,7 +160,7 @@ export function createWorkspace(cfg) {
     /* a section opens on its own when it is the first with something to do, or when a search or a person narrows the list to it */
     const lay = arranged(model, tl, order);
     if (!open.size) { const first = lay.flatMap(x => x.secs).find(s => tl.sec[s.key].open > 0); if (first) open.set(first.key, true); }
-    const narrow = q || personId != null;
+    const narrow = q || personId != null || nameTest;
     for (const { g, secs } of lay) {
       if (groupFilter && g.key !== groupFilter) continue;
       const x = tl.grp[g.key], head = mk(doc, 'div', 'fx-ghead'), h = mk(doc, 'h2', 'fx-group'); h.id = 'fx-grp-' + g.key; const gt = mk(doc, 'span', 'fx-tick', '✓'); gt.hidden = !(x.total > 0 && x.open === 0);
@@ -167,11 +169,11 @@ export function createWorkspace(cfg) {
       head.append(h); if (x.total && g.key !== 'compare') head.append(openAllBar(g, secs));
       box.append(head, mk(doc, 'p', 'fx-gh', g.how));
       for (const s of secs) {
-        if (narrow) { const hits = visible(s, st, { q, mode: 'all', personId }).length; if (!hits) continue; if (autoOpen) open.set(s.key, true); }
+        if (narrow) { const hits = visible(s, st, { q, mode: 'all', personId, names: nameTest }).length; if (!hits) continue; if (autoOpen) open.set(s.key, true); }
         box.append(sectionEl(s));
       }
     }
-    autoOpen = false;
+    autoOpen = false; if (picks.size) drawChips();
     if (!box.firstChild) box.append(mk(doc, 'p', 'fx-small', model.total ? 'Nothing matches that. Clear the search or the filters.' : (m || model.hasCmp ? 'Nothing to fix.' : '')));
   }
   function keepSummary() {
@@ -224,7 +226,7 @@ export function createWorkspace(cfg) {
       p.append(mk(doc, 'h2', null, g.title), mk(doc, 'p', 'fx-small', g.how));
       for (const s of secs) {
         p.append(mk(doc, 'h3', null, s.title + ' (' + s.items.length + ')'));
-        for (const i of visible(s, st, { q, mode: 'open' })) {
+        for (const i of visible(s, st, { q, mode: 'open', names: nameTest })) {
           const d = describe(s, i), row = mk(doc, 'div', 'fx-pitem'), main = mk(doc, 'div'); row.append(mk(doc, 'span', 'fx-pbox', '☐')); main.append(mk(doc, 'b', null, d.head));
           if (d.why) main.append(mk(doc, 'div', 'fx-pwhy', d.why)); if (d.people) main.append(mk(doc, 'div', 'fx-ppeople', d.people));
           if (d.next) { const n = mk(doc, 'div', 'fx-pnext'); n.append(mk(doc, 'b', null, 'Next step '), d.next); main.append(n); }
@@ -239,13 +241,55 @@ export function createWorkspace(cfg) {
   }
 
   function setPerson(id, name) { personId = id == null ? null : String(id); personName = name || ''; shown.clear(); open.clear(); autoOpen = true; draw(); }
+  /* ---- research names ---- */
+  const NAMEKEY = 'ra-fix-names';
+  function setNames() { nameTest = nameMatcher([...picks.values()].flatMap(p => p.forms)); }
+  function saveNames() { keep(NAMEKEY, JSON.stringify([...picks.keys()])); }
+  function pickFor(v) {
+    if (!choices) return null;
+    if (v.startsWith('a:')) { const a = choices.archives.find(x => 'a:' + x.key === v); return a ? { label: a.label + ' (all its names)', forms: a.forms } : null; }
+    const n = choices.names.find(x => 'n:' + x.id === v); return n ? { label: n.name, forms: n.forms } : null;
+  }
+  function fillNames() {
+    const sel = $('#fx-name'); if (!sel) return; sel.textContent = '';
+    if (!choices || !(choices.names.length || choices.archives.length)) { sel.append(new Option('Names are not available', '')); sel.disabled = true; return; }
+    sel.disabled = false; sel.append(new Option('Pick a name or an archive…', ''));
+    const ga = doc.createElement('optgroup'); ga.label = 'An archive: all of its names';
+    for (const a of choices.archives) ga.append(new Option(a.label + ' · ' + a.names.length + (a.names.length === 1 ? ' name' : ' names'), 'a:' + a.key));
+    const gn = doc.createElement('optgroup'); gn.label = 'A research name';
+    for (const n of choices.names) gn.append(new Option(n.name + (n.archiveLabels.length ? ' · ' + n.archiveLabels.join(', ') : ''), 'n:' + n.id));
+    if (ga.children.length) sel.append(ga); sel.append(gn);
+  }
+  /* what is picked, as chips that each take one pick back; and how many rows the picks leave */
+  function drawChips() {
+    const c = $('#fx-names'); if (!c) return; c.textContent = ''; c.hidden = !picks.size; if (!picks.size) return;
+    for (const [k, p] of picks) {
+      const chip = mk(doc, 'span', 'fxchip'), x = mk(doc, 'button', null, '✕'); x.type = 'button'; x.setAttribute('aria-label', 'Stop filtering by ' + p.label);
+      chip.title = 'Spellings counted: ' + p.forms.slice(0, 40).join(', ') + (p.forms.length > 40 ? ' and ' + (p.forms.length - 40) + ' more' : '');
+      x.onclick = () => { picks.delete(k); saveNames(); setNames(); shown.clear(); draw(); drawChips(); };
+      chip.append(mk(doc, 'b', null, p.label), mk(doc, 'span', 'fx-small', n0(p.forms.length) + (p.forms.length === 1 ? ' spelling' : ' spellings')), x); c.append(chip);
+    }
+    let rows = 0, secs = 0; for (const s of model.sections) { const n = visible(s, st, { q, mode, personId, names: nameTest }).length; rows += n; if (n) secs++; }
+    c.append(mk(doc, 'span', 'fx-small', 'Showing ' + n0(rows) + (rows === 1 ? ' row' : ' rows') + (rows ? ' in ' + n0(secs) + (secs === 1 ? ' section' : ' sections') : '') + ' that name them, in any spelling the Atlas lists.'));
+  }
+  function loadChoices() {
+    if (catAsked || !cfg.catalogue) return; catAsked = true;
+    cfg.catalogue().then(cat => {
+      choices = cat ? catalogueChoices(cat) : null; fillNames();
+      let saved = []; try { saved = JSON.parse(keep(NAMEKEY) || '[]'); } catch (e) { saved = []; }
+      for (const k of Array.isArray(saved) ? saved : []) { const p = typeof k === 'string' ? pickFor(k) : null; if (p) picks.set(k, p); }
+      setNames(); drawChips(); if (picks.size && !$('#fx-body').closest('[hidden]')) { shown.clear(); draw(); }
+    });
+  }
+  const nameSel = $('#fx-name');
+  if (nameSel) nameSel.onchange = e => { const v = e.target.value; e.target.value = ''; const p = v && pickFor(v); if (!p) return; picks.set(v, p); saveNames(); setNames(); shown.clear(); autoOpen = true; draw(); drawChips(); };
   function fillGroups() { const s = $('#fx-grp'); s.textContent = ''; s.append(new Option('Every group', '')); for (const { g } of arranged(model, tl, order)) s.append(new Option(g.title, g.key)); s.value = groupFilter; }
   return {
     setData, setPerson, st, ctx, draw, paintCounts,
     model: () => model, tally: () => (tl = tl || tally(model, st)), onChange: f => listeners.push(f),
     refresh() { fillGroups(); draw(); },
     /* the page is about to be shown: fill the group list, and show everyone or only one person's rows */
-    present(person) { fillGroups(); if (person) setPerson(person.id, person.name); else { personId = null; personName = ''; open.clear(); autoOpen = false; draw(); } },
+    present(person) { loadChoices(); fillGroups(); if (person) setPerson(person.id, person.name); else { personId = null; personName = ''; open.clear(); autoOpen = false; draw(); } },
     changed() { paintCounts(); keepSummary(); listeners.forEach(f => f()); },
     clearFilters() { q = ''; $('#fx-q').value = ''; mode = 'open'; $('#fx-mode').value = 'open'; groupFilter = ''; personId = null; personName = ''; },
   };

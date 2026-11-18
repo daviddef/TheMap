@@ -13,10 +13,19 @@
    strict checking of anything that arrives from outside is research-file.js's cleanCanvas, and test/tree-canvas-work.test.js proves a record made here passes it
    unchanged. Everything touching storage is in try/catch: blocked storage means nothing is kept, and the page says so.
 
+   NAMED VIEWS are kept in the same store, as records of their own: key `v:<id>`, the arrangement as above plus a name the visitor typed, the look (one of the six),
+   and `tk`, the key of the tree they belong to. So they ride the same copy, the same merge (the later change wins, a deletion is dated) and the same strict cleaning.
+   A view can also be SHARED as a link: the same arrangement (the people as salted hashes, never a name) plus the tree's source, packed into the link's #fragment,
+   which a browser never sends to a server. Whoever opens it needs the tree: an archive opens by itself, a link or a file is asked for first.
+
    Pure functions, no DOM: tested in node. */
 
 export const KEY = 'ra-canvas-v1';
 export const MAX_ITEMS = 12;           // trees kept; the oldest is dropped past this
+export const MAX_VIEWS = 40;           // named views kept in all, and
+export const MAX_VIEWS_PER_TREE = 12;  // for one tree
+export const isViewKey = k => typeof k === 'string' && /^v:[0-9a-z]{1,16}$/.test(k);
+export const LOOKS = ['sticker', 'paper', 'ground', 'lanes', 'countries', 'names'];   // the canvas's looks; a view remembers one
 export const MAX_CARDS = 3000;         // people on one canvas that are kept
 export const ARCHIVES = ['defranceski', 'booyzen', 'luwinski', 'lerena', 'falco', 'blazevic', 'darcy', 'mazza'];
 
@@ -64,6 +73,7 @@ export function pack(plain, key) {
     dec: (Array.isArray(p.decisions) ? p.decisions : []).slice(0, 500).filter(r => typeof r[1] === 'string').map(r => [H(key, r[0]), String(r[1]).slice(0, 16)]),
     opts: { stopAtNotProven: !!(p.opts && p.opts.stopAtNotProven), suggested: !(p.opts && p.opts.suggested === false), gens: !!(p.opts && p.opts.gens) },
     filter: (Array.isArray(p.filter) ? p.filter : []).filter(i => Number.isInteger(i) && i >= 0 && i < 9).slice(0, 9),
+    ...(LOOKS.includes(p.look) ? { look: p.look } : {}),
   };
 }
 /* known: the real person keys of the tree that is open; bridges: the real bridge ids. Returns the canvas's own serialise() shape, or null. `matched`: how many people were found. */
@@ -74,7 +84,7 @@ export function unpack(w, key, known, bridges) {
   const cards = [];
   for (const r of w.c) { const k = back.get(r[0]); if (k) cards.push([k, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8] ? (back.get(r[8]) || '') : '']); }
   const path = w.path && back.get(w.path[0]) && back.get(w.path[1]) ? [back.get(w.path[0]), back.get(w.path[1])] : null;
-  return { v: 1, cards, view: w.view, decisions: (w.dec || []).filter(r => bb.has(r[0])).map(r => [bb.get(r[0]), r[1]]), opts: w.opts || {}, path, filter: w.filter || [], matched: cards.length, of: w.c.length };
+  return { v: 1, cards, view: w.view, decisions: (w.dec || []).filter(r => bb.has(r[0])).map(r => [bb.get(r[0]), r[1]]), opts: w.opts || {}, path, filter: w.filter || [], look: LOOKS.includes(w.look) ? w.look : '', matched: cards.length, of: w.c.length };
 }
 
 /* ---- records ---- */
@@ -97,12 +107,13 @@ function writeStore(d, st) {
   try {
     const s = st === undefined ? (typeof localStorage !== 'undefined' ? localStorage : null) : st; if (!s) return false;
     const keys = Object.keys(d.items).sort((a, b) => String(d.items[b].upd).localeCompare(String(d.items[a].upd)));
-    keys.slice(MAX_ITEMS).forEach(k => { delete d.items[k]; });      // the oldest go; no tombstone, so another device's copy of it is not deleted by this
+    keys.filter(k => !isViewKey(k)).slice(MAX_ITEMS).forEach(k => { delete d.items[k]; });      // the oldest go; no tombstone, so another device's copy of it is not deleted by this
+    keys.filter(isViewKey).slice(MAX_VIEWS).forEach(k => { delete d.items[k]; });
     s.setItem(KEY, JSON.stringify(d)); return true;
   } catch (e) { return false; }
 }
 export const get = (key, st) => readStore(st).items[key] || null;
-export function list(st) { const d = readStore(st); return Object.keys(d.items).map(k => d.items[k]).sort((a, b) => String(b.upd).localeCompare(String(a.upd))); }
+export function list(st) { const d = readStore(st); return Object.keys(d.items).filter(k => !isViewKey(k)).map(k => d.items[k]).sort((a, b) => String(b.upd).localeCompare(String(a.upd))); }
 /* false when the browser would not keep it (storage blocked or full) */
 export function put(rec, st) { const d = readStore(st); d.items[rec.k] = rec; if (d.gone[rec.k] && d.gone[rec.k] < rec.upd) delete d.gone[rec.k]; return writeStore(d, st); }
 /* forget a tree's canvas; the deletion is dated so a copy from another device that is older than it does not bring it back */
@@ -124,4 +135,81 @@ export function keepStatus(sync, rec, now) {
   if (sync.canvas === 'left-out') return { on: true, text: 'Your six words are on, but your saved canvases are too large to keep online. They are still saved in this browser.' };
   if (!sync.saved || (rec && rec.upd > sync.saved)) return { on: true, text: 'Saving with your six words…' };
   return { on: true, text: 'Saved with your six words · ' + agoText(sync.saved, now) + (sync.canvas === 'capped' ? '. The newest canvases fit; older ones stay in this browser.' : '') };
+}
+
+
+/* ---------------- named views ---------------- */
+export const newViewId = () => Array.from({ length: 8 }, () => Math.floor(Math.random() * 36).toString(36)).join('');
+export const cleanName = n => String(n == null ? '' : n).replace(/<[^>]*>/g, ' ').replace(/[\u0000-\u001f\u007f<>]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60);
+/* a view of the canvas as it is now: plain is the canvas's serialise() plus {look}. null when the tree has no key (the invented example) or there is nothing on the canvas. */
+export function makeView(src, label, plain, name, now, id) {
+  const s = cleanSrc(src), tk = treeKey(s); if (!tk) return null;
+  const w = pack(plain, tk); if (!w.c.length) return null;
+  const vid = id || newViewId();
+  return { k: 'v:' + vid, tk, name: cleanName(name) || 'My view', label: String(label || '').slice(0, 120), src: s, upd: new Date(now == null ? Date.now() : now).toISOString(), n: w.c.length, w };
+}
+/* a view's id from its key */
+export const viewId = k => String(k).slice(2);
+/* newest first; `tk` narrows to one tree */
+export function listViews(st, tk) {
+  const d = readStore(st);
+  return Object.keys(d.items).filter(isViewKey).map(k => d.items[k]).filter(v => !tk || v.tk === tk).sort((a, b) => String(b.upd).localeCompare(String(a.upd)));
+}
+/* true when kept; 'full' when the tree already has MAX_VIEWS_PER_TREE (replacing one of its own is always fine); false when the browser would not keep it */
+export function putView(v, st) {
+  const d = readStore(st);
+  if (!d.items[v.k] && Object.keys(d.items).filter(k => isViewKey(k) && d.items[k].tk === v.tk).length >= MAX_VIEWS_PER_TREE) return 'full';
+  d.items[v.k] = v; if (d.gone[v.k] && d.gone[v.k] < v.upd) delete d.gone[v.k];
+  return writeStore(d, st) ? true : false;
+}
+export function renameView(key, name, st, now) {
+  const d = readStore(st), v = d.items[key]; if (!v || !isViewKey(key)) return false;
+  v.name = cleanName(name) || v.name; v.upd = new Date(now == null ? Date.now() : now).toISOString(); return writeStore(d, st);
+}
+
+/* ---------------- sharing a view as a link ---------------- */
+/* The link carries: a name, where the tree comes from, and the arrangement as salted hashes. Never a name from the tree. It goes in the #fragment, which is not sent to any server. */
+const ID_RE = /^[0-9a-z]{1,16}$/;
+/* any `w` from outside (a link, a copy) made safe: the same rules as public/js/research-file.js's cleanCanvasItem, for a record that has already been packed */
+export function normW(w) {
+  if (!w || w.v !== 1 || !Array.isArray(w.c)) return null;
+  const c = [];
+  for (const r of w.c.slice(0, MAX_CARDS)) {
+    if (!Array.isArray(r) || typeof r[0] !== 'string' || !ID_RE.test(r[0])) continue;
+    c.push([r[0], Math.round(clip(r[1], 1e6)), Math.round(clip(r[2], 1e6)), r[3] ? 1 : 0, r[4] | 0, r[5] | 0, r[6] | 0, r[7] ? 1 : 0, typeof r[8] === 'string' && ID_RE.test(r[8]) ? r[8] : '']);
+  }
+  const v = w.view || {}, o = w.opts || {}, ok = x => typeof x === 'string' && ID_RE.test(x);
+  return {
+    v: 1, c, view: { x: Math.round(clip(v.x, 1e6)), y: Math.round(clip(v.y, 1e6)), k: Math.max(0.05, Math.min(8, fin(v.k) || 1)) },
+    path: Array.isArray(w.path) && w.path.length === 2 && ok(w.path[0]) && ok(w.path[1]) ? [w.path[0], w.path[1]] : null,
+    dec: (Array.isArray(w.dec) ? w.dec : []).slice(0, 500).filter(r => Array.isArray(r) && ok(r[0]) && typeof r[1] === 'string').map(r => [r[0], r[1].slice(0, 16)]),
+    opts: { stopAtNotProven: !!o.stopAtNotProven, suggested: o.suggested !== false, gens: !!o.gens },
+    filter: (Array.isArray(w.filter) ? w.filter : []).filter(i => Number.isInteger(i) && i >= 0 && i < 9).slice(0, 9),
+    ...(LOOKS.includes(w.look) ? { look: w.look } : {}),
+  };
+}
+const b64u = bytes => { let s = ''; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+const unb64u = t => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')); const b = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) b[i] = s.charCodeAt(i); return b; };
+async function pipe(bytes, stream, limit) {
+  const out = new Blob([bytes]).stream().pipeThrough(stream), rd = out.getReader(), parts = []; let n = 0;
+  for (;;) { const { done, value } = await rd.read(); if (done) break; n += value.length; if (n > limit) { try { await rd.cancel(); } catch (e) { /* done */ } throw new Error('too large'); } parts.push(value); }
+  const all = new Uint8Array(n); let o = 0; for (const p of parts) { all.set(p, o); o += p.length; } return all;
+}
+export const SHARE_MAX_DECODED = 600000;   // a link that unpacks to more than this is refused
+export async function shareEncode(view) {
+  const text = JSON.stringify({ v: 1, n: view.name, s: cleanSrc(view.src), w: view.w }), raw = new TextEncoder().encode(text);
+  if (typeof CompressionStream === 'function') { try { return 'z' + b64u(await pipe(raw, new CompressionStream('deflate-raw'), SHARE_MAX_DECODED)); } catch (e) { /* plain below */ } }
+  return 'j' + b64u(raw);
+}
+/* {name, src, tk, w} or null. Never throws: whatever arrives in a link is untrusted. */
+export async function shareDecode(code) {
+  try {
+    if (typeof code !== 'string' || code.length < 3 || code.length > 400000 || !/^[zj][A-Za-z0-9_-]+$/.test(code)) return null;
+    const bytes = unb64u(code.slice(1));
+    const raw = code[0] === 'z' ? await pipe(bytes, new DecompressionStream('deflate-raw'), SHARE_MAX_DECODED) : bytes;
+    if (raw.length > SHARE_MAX_DECODED) return null;
+    const d = JSON.parse(new TextDecoder().decode(raw)); if (!d || d.v !== 1) return null;
+    const src = cleanSrc(d.s), tk = treeKey(src), w = normW(d.w); if (!src || !tk || !w || !w.c.length) return null;
+    return { name: cleanName(d.n) || 'A shared view', src, tk, w };
+  } catch (e) { return null; }
 }

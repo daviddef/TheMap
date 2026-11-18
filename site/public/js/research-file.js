@@ -16,7 +16,7 @@
    Pure functions at the top (tested in node: test/research-file.test.js); the browser glue is at the bottom. */
 (function (root) {
   "use strict";
-  var KEY_DEC = "ra-fix-decisions-v1", KEY_BACKUP = "ra-backup-v1", KEY_MYA = "ra-areas-v1", KEY_GED = "ra-gedcom-names-v1", KEY_STORIES = "ra-stories-v1", KEY_CANVAS = "ra-canvas-v1";
+  var KEY_DEC = "ra-fix-decisions-v1", KEY_BACKUP = "ra-backup-v1", KEY_MYA = "ra-areas-v1", KEY_GED = "ra-gedcom-names-v1", KEY_STORIES = "ra-stories-v1", KEY_CANVAS = "ra-canvas-v1", KEY_SETTINGS = "ra-settings-v1";
   var DAY = 86400000;
 
   function today(now) { return new Date(now || Date.now()).toISOString().slice(0, 10); }
@@ -69,6 +69,8 @@
     if (cv && (Object.keys(cv.items).length || Object.keys(cv.gone).length)) out.canvas = cv;
     var st = cleanSites(extras.sites);
     if (st) out.sites = st;
+    var se = cleanSettings(extras.settings);
+    if (se) out.settings = se;
     return out;
   }
   var GED_MAX = 20;
@@ -90,6 +92,26 @@
       if (n) out.mhTrees = t;
     }
     return Object.keys(out).length ? out : null;
+  }
+  /* The Tree Canvas's device settings (public/tree-canvas/settings.js says what each is): three short choices and nothing else. living 1 = hide the names of people who
+     may be alive; look = one of a short list; remember 1 = keep the last files on this device. A key is present only if it was chosen. Anything else is dropped, so a hand-edited
+     file cannot carry text in. This is the page's cleaning rule written again for this classic script; test/tree-canvas-settings.test.js checks the two agree. */
+  var LOOKS = ["auto", "sticker", "paper", "ground", "lanes", "countries", "names"];
+  function cleanSettings(x) {
+    if (!x || typeof x !== "object" || Array.isArray(x) || x.v !== 1) return null;
+    var out = { v: 1 };
+    if (x.living === 0 || x.living === 1) out.living = x.living;
+    if (LOOKS.indexOf(x.look) >= 0) out.look = x.look;
+    if (x.remember === 0 || x.remember === 1) out.remember = x.remember;
+    return Object.keys(out).length > 1 ? out : null;
+  }
+  /* A setting from another device only FILLS a choice this device has not made; it never replaces one. `mine` is what this device has chosen (the keys present), `theirs` what arrived.
+     Returns the keys to add. In particular the living filter can never be switched off from another device. */
+  function settingsToFill(mine, theirs) {
+    var t = cleanSettings(theirs), m = mine || {}, add = {};
+    if (!t) return add;
+    ["living", "look", "remember"].forEach(function (k) { if (t[k] !== undefined && m[k] === undefined) add[k] = t[k]; });
+    return add;
   }
   /* Areas and views by id, the later `upd` winning; a deletion (gone[id]) removes an item last updated before it. */
   function mergeMya(mine, theirs) {
@@ -241,7 +263,7 @@
     } else if (d && d.decisions) decisions = d.decisions;
     if (!d || !d.marks || typeof d.marks !== "object") throw new Error("not a Record Atlas research file");
     var mya = d.areas || d.views || d.gone ? { v: 1, areas: d.areas || {}, views: d.views || {}, gone: d.gone || {} } : null;
-    return { progress: d, decisions: decisions, mya: mya, gedcoms: Array.isArray(d.gedcoms) ? d.gedcoms : null, stories: d.stories && typeof d.stories === "object" ? d.stories : null, sites: cleanSites(d.sites), canvas: cleanCanvas(d.canvas), kind: d.kind || (d.lines ? "export" : "old export") };
+    return { progress: d, decisions: decisions, mya: mya, gedcoms: Array.isArray(d.gedcoms) ? d.gedcoms : null, stories: d.stories && typeof d.stories === "object" ? d.stories : null, sites: cleanSites(d.sites), settings: cleanSettings(d.settings), canvas: cleanCanvas(d.canvas), kind: d.kind || (d.lines ? "export" : "old export") };
   }
 
   /* Union of two decision tables: a row decided on either device stays decided; the later date wins a tie. */
@@ -310,7 +332,8 @@
   var api = { hash: hash, sigOf: sigOf, buildBackup: buildBackup, buildPack: buildPack, summary: summary, parseAny: parseAny,
               mergeDecisions: mergeDecisions, mergeMya: mergeMya, mergeGedcoms: mergeGedcoms, status: status, encodeLink: encodeLink, decodeLink: decodeLink, LINK_MAX: LINK_MAX,
               KEY_DEC: KEY_DEC, KEY_BACKUP: KEY_BACKUP, KEY_MYA: KEY_MYA, KEY_GED: KEY_GED, KEY_STORIES: KEY_STORIES, KEY_CANVAS: KEY_CANVAS, cleanSites: cleanSites,
-              cleanCanvas: cleanCanvas, mergeCanvas: mergeCanvas, capCanvas: capCanvas, CANVAS_TOTAL_CHARS: CANVAS_TOTAL_CHARS };
+              cleanCanvas: cleanCanvas, mergeCanvas: mergeCanvas, capCanvas: capCanvas, CANVAS_TOTAL_CHARS: CANVAS_TOTAL_CHARS,
+              KEY_SETTINGS: KEY_SETTINGS, cleanSettings: cleanSettings, settingsToFill: settingsToFill };
 
   /* ---- the browser glue -------------------------------------------------------------------------------------------- */
   if (typeof window !== "undefined" && window.raProgress) {
@@ -319,6 +342,14 @@
     var progress = function () { return JSON.parse(P.toJSON()); };
     var decisions = function () { var d = readJSON(KEY_DEC); return d && d.rows ? d.rows : {}; };
     var rawGet = function (k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } };
+    /* what this device has chosen for the canvas: the record, then the two keys the canvas's older menu wrote (loamTheme, tcRemember). Only keys that were chosen are present. */
+    var chosenSettings = function () {
+      var rec = cleanSettings(readJSON(KEY_SETTINGS)) || {}, out = {};
+      ["living", "look", "remember"].forEach(function (k) { if (rec[k] !== undefined) out[k] = rec[k]; });
+      if (out.look === undefined) { var t = rawGet("loamTheme"); if (LOOKS.indexOf(t) > 0) out.look = t; }
+      if (out.remember === undefined) { var r = rawGet("tcRemember"); if (r === "0" || r === "1") out.remember = +r; }
+      return out;
+    };
     var KEY_MH = "recordatlas.roots.myheritage-link", KEY_ANC = "recordatlas.roots.ancestry-site", KEY_TREES = "recordatlas.roots.myheritage-trees";
     var hasWork_ = function () { return Object.keys(P.all()).length > 0; };
     /* the stories, through the store's own cleaner (stories.js) when this page loads it, else as stored */
@@ -332,7 +363,7 @@
     };
     /* opts.canvas false leaves the Tree Canvas's saved work out (the six-word save retries that way if the server says the copy is too large) */
     api.exportAll = function (opts) {
-      var c = api.current(), file = buildBackup(c.progress, c.decisions, undefined, { mya: readJSON(KEY_MYA), gedcoms: readJSON(KEY_GED), stories: stories(), canvas: opts && opts.canvas === false ? null : readJSON(KEY_CANVAS), sites: { mh: rawGet(KEY_MH), anc: rawGet(KEY_ANC), mhTrees: readJSON(KEY_TREES) } }), name = "record-atlas-research-" + today() + ".json";
+      var c = api.current(), file = buildBackup(c.progress, c.decisions, undefined, { mya: readJSON(KEY_MYA), gedcoms: readJSON(KEY_GED), stories: stories(), canvas: opts && opts.canvas === false ? null : readJSON(KEY_CANVAS), sites: { mh: rawGet(KEY_MH), anc: rawGet(KEY_ANC), mhTrees: readJSON(KEY_TREES) }, settings: (function () { var c = chosenSettings(); c.v = 1; return c; })() }), name = "record-atlas-research-" + today() + ".json";
       return { file: file, name: name, text: JSON.stringify(file, null, 1) };
     };
     api.importText = function (text) {
@@ -375,7 +406,22 @@
           }
         } catch (e) { /* storage blocked */ }
       }
-      return { marks: n, decisions: nd, areas: na, gedcoms: ng, stories: ns, canvases: nc, kind: got.kind };
+      /* a setting from another device fills a choice this device has not made and never replaces one (so the living filter cannot be switched off from elsewhere) */
+      var nset = 0;
+      if (got.settings) {
+        try {
+          var add = settingsToFill(chosenSettings(), got.settings), keys = Object.keys(add);
+          if (keys.length) {
+            var rec = cleanSettings(readJSON(KEY_SETTINGS)) || { v: 1 };
+            keys.forEach(function (k) { rec[k] = add[k]; });
+            localStorage.setItem(KEY_SETTINGS, JSON.stringify(rec)); nset = keys.length;
+            if (add.look !== undefined) { if (add.look !== "auto") localStorage.setItem("loamTheme", add.look); else localStorage.removeItem("loamTheme"); }   // the keys the canvas reads on its own
+            if (add.remember !== undefined) localStorage.setItem("tcRemember", String(add.remember));
+            if (typeof document !== "undefined") document.dispatchEvent(new CustomEvent("ra-settings-changed"));
+          }
+        } catch (e) { nset = 0; /* storage blocked */ }
+      }
+      return { marks: n, decisions: nd, areas: na, gedcoms: ng, stories: ns, canvases: nc, settings: nset, kind: got.kind };
     };
     api.pack = function (opts) { return buildPack(progress(), opts); };
     /* THE NAMES OF THE GEDCOM FILES LAST USED, read from the Roots & Routes page's own browser store (database roots-recent) and kept as a

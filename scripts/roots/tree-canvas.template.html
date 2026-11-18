@@ -4610,17 +4610,22 @@ function mainMenu() {
   const m = $('#mainMenu');
   const cur = document.documentElement.getAttribute('data-theme') || 'sticker';
   const item = (k, ic, t, sub) => `<button class="mmi${(k === 'lines' ? $('#linesView') && $('#linesView').classList.contains('on') : k === 'legend' ? $('#legendCard') && $('#legendCard').classList.contains('on') : S.tab === k && S.infoOpen !== false && $('#info').classList.contains('on')) ? ' on' : ''}" data-mm="${k}">${icon(ic, 'lk-icon')}<span><b>${t}</b><small>${sub}</small></span></button>`;
-  m.innerHTML = `<div class="mmlook">${icon('theme', 'lk-icon')}<span><b>Look</b><span class="mmchips" role="group" aria-label="Look">${THEMES.map(k => `<button type="button" class="mmchip${k === cur ? ' on' : ''}" data-look="${k}" aria-pressed="${k === cur}">${THEME_NAME[k] || (k[0].toUpperCase() + k.slice(1))}</button>`).join('')}</span></span></div>`
+  m.innerHTML = (SA ? '' : `<div class="mmlook">${icon('theme', 'lk-icon')}<span><b>Look</b><span class="mmchips" role="group" aria-label="Look">${THEMES.map(k => `<button type="button" class="mmchip${k === cur ? ' on' : ''}" data-look="${k}" aria-pressed="${k === cur}">${THEME_NAME[k] || (k[0].toUpperCase() + k.slice(1))}</button>`).join('')}</span></span></div>`)
     + item('legend', 'info', 'How to read the lines', 'What the line colours, patterns and seals mean')
     + (linesAvail() ? item('lines', 'lines', 'Research lines', 'The archive\'s own drawing of its families and the roads they took, beside your tree') : '')
     + (cmpAvail() ? item('compare', 'layers', 'Compare with an archive', cmpMode() ? 'Your file beside ' + M.archives[1].name + ', from a marked person' : 'Set your file beside one of the family archives') : '')
-    + item('options', 'gear', 'Options', 'Links to MyHeritage and Ancestry, how paths are judged, your file')
-    + (SA ? yourFileHTML() + keepHTML() + recentHTML() : '');
+    + item('options', 'gear', 'Options', SA ? 'How paths are judged, clear the canvas' : 'Links to MyHeritage and Ancestry, how paths are judged, your file')
+    + (SA ? yourFileHTML() + settingsHTML() + keepHTML() + recentHTML() : '');
 }
 /* ---------- Your file (standalone page only): the import report, the counts, what is kept on this device and the export are a page of the page around the canvas (public/tree-canvas/app.js);
    this only asks for it. ---------- */
 function yourFileHTML() {
   return `<div class="mmsep"></div><button class="mmi" data-gfile="1">${icon('info', 'lk-icon')}<span><b>Your file</b><small>What was read, the numbers, saved files, export</small></span></button>`;
+}
+/* ---------- Settings (standalone page only): living people, the links to MyHeritage and Ancestry, the Look and remembering files are changed in ONE place, the Settings drawer of the page around the canvas.
+   The canvas only asks for it and, when the drawer changes the Look, is told (tcLook). ---------- */
+function settingsHTML() {
+  return `<button class="mmi" data-gsettings="1">${icon('theme', 'lk-icon')}<span><b>Settings</b><small>Living people, links to MyHeritage and Ancestry, the look, remembering files</small></span></button>`;
 }
 /* ---------- Keep your work (standalone page only): the page around the canvas keeps where the cards sit, per tree, in this browser, and in the six-word copy when it is on. The link goes to
    Connection & Backup, where the six words are made; nothing is built twice. ---------- */
@@ -4666,8 +4671,7 @@ function recentHTML() {
   const on = rememberOn();
   return `<div class="mmsep"></div>`
     + `<button class="mmi" data-gopen="1">${icon('folder', 'lk-icon')}<span><b>Open a GEDCOM or tree.json…</b><small>Read in this browser, never uploaded. A new file replaces this tree.</small></span></button>`
-    + (on && RECENT.length ? `<div class="mmrec"><b class="mmh">Last used</b>${RECENT.map(r => `<span class="mmr"><button type="button" data-recent="${esc(r.name)}" title="Open ${esc(r.name)} again"><b>${esc(r.name)}</b><small>${[r.people ? r.people.toLocaleString('en') + (r.people === 1 ? ' person' : ' people') : '', r.tree || (r.from ? 'from ' + r.from : ''), fmtBytes(r.size), fmtWhen(r.when)].filter(Boolean).map(esc).join(' · ')}</small>${r.note ? `<small class="mmnote">${esc(r.note)}</small>` : ''}</button><button type="button" class="mmx" data-forget="${esc(r.name)}" aria-label="Forget ${esc(r.name)}" title="Forget this file">${icon('x', 'lk-icon')}</button></span>`).join('')}</div>` : '')
-    + `<label class="mmrem"><input type="checkbox" id="mmRem"${on ? ' checked' : ''}><span>Keep the last ${RKEEP} files on this device<small>In this browser only, so they open in one click. Untick to forget them all.</small></span></label>`;
+    + (on && RECENT.length ? `<div class="mmrec"><b class="mmh">Last used</b>${RECENT.map(r => `<span class="mmr"><button type="button" data-recent="${esc(r.name)}" title="Open ${esc(r.name)} again"><b>${esc(r.name)}</b><small>${[r.people ? r.people.toLocaleString('en') + (r.people === 1 ? ' person' : ' people') : '', r.tree || (r.from ? 'from ' + r.from : ''), fmtBytes(r.size), fmtWhen(r.when)].filter(Boolean).map(esc).join(' · ')}</small>${r.note ? `<small class="mmnote">${esc(r.note)}</small>` : ''}</button><button type="button" class="mmx" data-forget="${esc(r.name)}" aria-label="Forget ${esc(r.name)}" title="Forget this file">${icon('x', 'lk-icon')}</button></span>`).join('')}</div>` : '');   /* whether to keep the last files is a setting: it is changed in Settings, in one place */
 }
 function openMainMenu(on) {
   const m = $('#mainMenu'), b = $('#bMenu'); if (!m) return;
@@ -4693,6 +4697,7 @@ document.addEventListener('click', e => {
   const m = $('#mainMenu'); if (!m) return;
   if (e.target.closest('[data-lgx]')) { openLegend(false); return; }
   const gf = e.target.closest('[data-gfile]'); if (gf && m.contains(gf)) { openMainMenu(false); parent.postMessage({ tcYourFile: true }, location.origin); return; }
+  const gs = e.target.closest('[data-gsettings]'); if (gs && m.contains(gs)) { openMainMenu(false); parent.postMessage({ tcSettings: true }, location.origin); return; }
   const go = e.target.closest('[data-gopen]'); if (go && m.contains(go)) { openMainMenu(false); const gi = $('#gedIn'); if (gi) gi.click(); return; }
   const rc = e.target.closest('[data-recent]'); if (rc && m.contains(rc)) { openMainMenu(false); recentOpen(rc.dataset.recent); return; }
   const fg = e.target.closest('[data-forget]'); if (fg && m.contains(fg)) { recentForget(fg.dataset.forget); return; }
@@ -4788,13 +4793,17 @@ function linksOptionsHTML() {
     <p class="plines" id="lkSt"><small>${esc(g.note || (g.mh ? 'Links are on.' : 'Off: no link yet.'))}</small></p>
     ${g.anc ? `<p class="plines"><small>This is an Ancestry export (tree ${esc(String(g.ancTree))}), so every person already links into it. Site: </small><select id="lkAnc" class="lk-input" aria-label="Ancestry site">${sites.map(x => `<option value="${x}"${x === g.ancSite ? ' selected' : ''}>ancestry.${x}</option>`).join('')}</select></p>` : ''}`;
 }
+/* in the standalone page these are changed in Settings, so there is one place for each */
+function settingsPointerHTML() {
+  return `<h4>Links, look and living people</h4><p class="plines"><small>The links back to MyHeritage and Ancestry, the look of the canvas, and hiding living people are changed in Settings, so each is in one place.</small></p>
+    <div class="row"><button class="lk-btn is-small" data-gsettings="1">Open Settings</button></div>`;
+}
 function optionsPanel() {
   const t = (id, on, b, i) => `<button class="lk-toggle${on ? ' on' : ''}" role="switch" aria-checked="${on}" data-opt="${id}"><span class="stx"><b>${b}</b><i>${i}</i></span><span class="knob"></span></button>`;
   const th = document.documentElement.getAttribute('data-theme');
   return `<h3>Options</h3><div class="opt">${t('suggested', S.opts.suggested, 'Pathways may use suggested matches', 'A suggested same-person bridge costs more than a real link, and is labelled “suggested”.')}</div>
     <div class="opt">${t('stopNP', S.opts.stopAtNotProven, 'All the way back stops at not-proven links', 'Off: it follows grade-0 (index entry only) links too, drawn dashed. On: it stops there and says so.')}</div>
-    ${linksOptionsHTML()}
-    <h4>Look</h4><div class="row">${[['sticker', 'Sticker'], ['paper', 'Paper'], ['ground', 'Ground (dark)']].map(([k, n]) => `<button class="lk-btn is-small${th === k ? ' on' : ''}" data-theme="${k}">${n}</button>`).join('')}</div>
+    ${SA ? settingsPointerHTML() : linksOptionsHTML() + `<h4>Look</h4><div class="row">${[['sticker', 'Sticker'], ['paper', 'Paper'], ['ground', 'Ground (dark)']].map(([k, n]) => `<button class="lk-btn is-small${th === k ? ' on' : ''}" data-theme="${k}">${n}</button>`).join('')}</div>`}
     <h4>${EMBED ? 'Your file' : 'This build'}</h4>${EMBED ? `<p style="color:var(--lk-soft);font-weight:700">${M.P.length.toLocaleString()} people, read in this browser. ${M.P.filter(p => p.fl & 64).length ? M.P.filter(p => p.fl & 64).length.toLocaleString() + (M.P.filter(p => p.fl & 64).length === 1 ? ' is' : ' are') + ' not on the Roots &amp; Routes maps (no place the Atlas could use) but ' + (M.P.filter(p => p.fl & 64).length === 1 ? 'is' : 'are') + ' here. ' : ''}Nothing leaves this browser.</p>` : ''}<p style="color:var(--lk-soft);font-weight:700"${EMBED ? ' hidden' : ''}>${M.P.length.toLocaleString()} people from ${NA} archives, corpus built ${esc(M.built)}. ${M.bridgeGroups} candidate same-person groups, ${M.bridges.length} cross-archive pairs, none merged. Living people are not in the data. Stored only in this browser.</p>
     <div class="row"><button class="lk-btn is-small is-danger" data-do="clear">Clear the canvas</button></div>`;
 }
@@ -4822,6 +4831,7 @@ $('#info').addEventListener('click', e => {
   const go = e.target.closest('[data-tab-go]'); if (go) { e.preventDefault(); S.tab = go.dataset.tabGo; renderInfo(); return; }
   const tab = e.target.closest('[data-tab]');
   if (tab) { if (tab.dataset.tab === 'close') { S.infoOpen = false; $('#info').classList.remove('on'); syncButtons(); return; } S.tab = tab.dataset.tab; renderInfo(); return; }
+  if (e.target.closest('[data-gsettings]')) { parent.postMessage({ tcSettings: true }, location.origin); return; }
   const opt = e.target.closest('[data-opt]');
   if (opt) { const o = opt.dataset.opt; if (o === 'suggested') S.opts.suggested = !S.opts.suggested; if (o === 'stopNP') S.opts.stopAtNotProven = !S.opts.stopAtNotProven; save(); if (S.path && o === 'suggested') showPath(S.path.a, S.path.b, { noPlace: true }); else renderInfo(); return; }
   const th = e.target.closest('#info [data-theme]'); if (th) { setTheme(th.dataset.theme); return; }
@@ -4934,6 +4944,7 @@ function wireToolbar() {
   set('#zIn', 'plus'); set('#zOut', 'minus');
   if (EMBED) addEventListener('message', e => {
   if (e.origin !== location.origin || !e.data) return;
+  if (e.data.tcLook) { const k = e.data.tcLook; if (k === 'auto') { try { localStorage.removeItem('loamTheme'); } catch (x) { /* ignore */ } initTheme(); drawEdges(); miniDraw(); if (typeof drawNames === 'function') drawNames(true); if (S.tab === 'options') renderInfo(); } else setTheme(k); return; }   // the Look was changed in Settings
   if (e.data.tcKeep) { const mm = $('#mainMenu'); if (mm && mm.classList.contains('on')) mainMenu(); return; }   // the six words were turned on, or a save finished
   if (e.data.tcLinks) { if (S.tab !== 'options') renderInfo(); return; }   // not while the Options box is being typed in: a redraw would take the cursor away
   if (!e.data.tcFix) return; refreshAll(); renderInfo(); syncButtons();

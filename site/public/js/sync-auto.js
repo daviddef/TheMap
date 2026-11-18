@@ -17,7 +17,7 @@
   "use strict";
   var KEY = "ra-sync-v1", FP = "ra-sync-fp", NOTE = "ra-sync-note";
   var WATCH = ["ra-progress-v1", "ra-fix-decisions-v1", "ra-areas-v1", "ra-gedcom-names-v1", "ra-stories-v1", "ra-canvas-v1",
-    "recordatlas.roots.myheritage-link", "recordatlas.roots.ancestry-site", "recordatlas.roots.myheritage-trees"];
+    "recordatlas.roots.myheritage-link", "recordatlas.roots.ancestry-site", "recordatlas.roots.myheritage-trees", "ra-settings-v1"];
   var QUIET_MS = 15000, WATCH_MS = 20000, PULL_MS = 60000;
 
   /* A small, stable fingerprint of a list of strings (FNV-1a over everything, with the lengths). Not security: a change detector. */

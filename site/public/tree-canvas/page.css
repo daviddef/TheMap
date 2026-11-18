@@ -14,9 +14,9 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 
 /* The page the canvas opens on, before any tree. One type scale (13 / 15 / 17 / 40), two radii (10 / 16), cream ground, orange accent, and the canvas's own
    motif: cards joined by connectors. Colours are tokens so the dark theme is one block. */
-#start, #yf { --ink: #2b2118; --soft: #6a5a45; --card: #fff7e8; --line: #cdbf9f; --accent: #d9822b; --accent-ink: #fff; --focus: #2b6cb0; --err: #a5342a; --shadow: rgba(43, 33, 24, .14); }
+#start, #yf, #sg { --ink: #2b2118; --soft: #6a5a45; --card: #fff7e8; --line: #cdbf9f; --accent: #d9822b; --accent-ink: #fff; --focus: #2b6cb0; --err: #a5342a; --shadow: rgba(43, 33, 24, .14); }
 @media (prefers-color-scheme: dark) {
-  #start, #yf { --ink: #f3e9d6; --soft: #c9bda5; --card: #2b2620; --line: #4a4034; --accent-ink: #1d1a16; --focus: #7db4f0; --err: #f08a80; --shadow: rgba(0, 0, 0, .4); }
+  #start, #yf, #sg { --ink: #f3e9d6; --soft: #c9bda5; --card: #2b2620; --line: #4a4034; --accent-ink: #1d1a16; --focus: #7db4f0; --err: #f08a80; --shadow: rgba(0, 0, 0, .4); }
 }
 #start[hidden] { display: none; }
 #start { position: fixed; inset: 0; display: flex; overflow: auto; padding: 28px 16px 40px; color: var(--ink); }
@@ -61,7 +61,7 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 .stbtn.primary:hover { filter: brightness(1.06); }
 @media (prefers-reduced-motion: no-preference) { .stbtn:hover, .stchip:hover { transform: translateY(-1px); } }
 .stbtn:disabled { opacity: .6; cursor: progress; }
-.stbtn:focus-visible, .stchip:focus-visible, .stlink:focus-visible, #start a:focus-visible, #start summary:focus-visible, #start input:focus-visible, .recopen:focus-visible, .recx:focus-visible, #yf button:focus-visible, #yf a:focus-visible, #yf input:focus-visible, #yf summary:focus-visible, #yf h1:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.stbtn:focus-visible, .stchip:focus-visible, .stlink:focus-visible, #start a:focus-visible, #start summary:focus-visible, #start input:focus-visible, .recopen:focus-visible, .recx:focus-visible, #yf button:focus-visible, #yf a:focus-visible, #yf input:focus-visible, #yf summary:focus-visible, #yf h1:focus-visible, #sg button:focus-visible, #sg input:focus-visible, #sg select:focus-visible, #sg summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 
 /* the link door */
 .stlinkrow { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -102,8 +102,8 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 
 /* Keep your work: one round save button with a few words beside it, linking to Connection & Backup. Green, because it is the "safe" colour on the rest of the site
    (the live dot); light and dark are two sets of tokens. When the six words are on, the disc fills. */
-#start, #yf { --keep: #3f8f4a; --keep-fill: #e3f2e0; --keep-ink: #2c6a36; }
-@media (prefers-color-scheme: dark) { #start, #yf { --keep: #6fbf73; --keep-fill: #22331f; --keep-ink: #bfe8b9; } }
+#start, #yf, #sg { --keep: #3f8f4a; --keep-fill: #e3f2e0; --keep-ink: #2c6a36; }
+@media (prefers-color-scheme: dark) { #start, #yf, #sg { --keep: #6fbf73; --keep-fill: #22331f; --keep-ink: #bfe8b9; } }
 .stkeep { justify-self: center; display: flex; align-items: center; gap: 14px; max-width: 100%; padding: 6px 14px 6px 6px; border-radius: 999px; text-decoration: none !important; color: var(--ink); transition: transform .12s ease, background .12s ease; }
 .stkeep:hover { background: color-mix(in srgb, var(--keep) 10%, transparent); color: var(--ink) !important; }
 .stdisc { flex: none; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; border: 3px solid var(--keep); background: var(--keep-fill); color: var(--keep-ink); transition: transform .15s ease, background .15s ease, color .15s ease; }
@@ -201,3 +201,32 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 .yfmodes input { margin-top: 3px; flex: none; }
 .yfdl { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
 #yf .stmsg { font-size: 13px; line-height: 1.4; color: var(--soft); }
+
+/* Settings: a drawer from the right over whatever is open (the opening screen, the canvas or Your file). A page of its own on a phone. */
+#sg[hidden] { display: none; }
+#sg { position: fixed; inset: 0; z-index: 30; color: var(--ink); display: flex; justify-content: flex-end; }
+.sgback { position: absolute; inset: 0; background: rgba(29, 26, 22, .45); }
+.sgpanel { position: relative; width: min(440px, 100%); height: 100%; overflow: auto; background: #efe6d2; padding: 20px 20px 48px; display: grid; gap: 20px; align-content: start; box-shadow: -8px 0 24px var(--shadow); }
+@media (prefers-color-scheme: dark) { .sgpanel { background: #1d1a16; } }
+@media (prefers-reduced-motion: no-preference) { .sgpanel { animation: sgin .18s ease-out; } @keyframes sgin { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } } }
+.sghead { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+#sg h2 { margin: 0; font: 400 30px/1.05 "Lilita One", system-ui, sans-serif; letter-spacing: .01em; }
+#sg h2:focus { outline: none; }
+#sg h3 { margin: 0 0 8px; font: 700 17px/1.2 system-ui, sans-serif; }
+#sg p { margin: 0; }
+#sg .stsub { font-size: 13px; line-height: 1.45; color: var(--soft); }
+.sgsec { display: grid; gap: 8px; align-content: start; padding-top: 16px; border-top: 2px dotted var(--line); }
+.sgsec:first-of-type { border-top: 0; padding-top: 0; }
+.sgsw { display: flex; gap: 12px; align-items: flex-start; cursor: pointer; }
+.sgsw input { margin: 3px 0 0; flex: none; width: 18px; height: 18px; accent-color: var(--accent); }
+.sgsw b { display: block; font: 700 15px/1.3 system-ui, sans-serif; }
+.sgsw small { display: block; margin-top: 3px; font: 400 13px/1.4 system-ui, sans-serif; color: var(--soft); }
+.sglab { font: 700 13px/1 system-ui, sans-serif; margin-top: 4px; }
+.sginput { width: 100%; box-sizing: border-box; font: 400 15px/1.3 system-ui, sans-serif; padding: 10px 12px; border-radius: 10px; border: 2px solid var(--line); background: var(--card); color: var(--ink); }
+.sginput:disabled { opacity: .6; }
+.sgwhat { font-size: 13px; line-height: 1.45; color: var(--soft); }
+.sgwhat summary { cursor: pointer; font-weight: 700; color: var(--ink); }
+.sgwhat p { margin-top: 6px; }
+.stsettings { text-align: center; font-size: 13px; line-height: 1.45; }
+.stsettings .stlink { font-weight: 700; font-size: 15px; }
+@media (max-width: 560px) { .sgpanel { width: 100%; box-shadow: none; } }

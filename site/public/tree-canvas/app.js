@@ -11,11 +11,12 @@ import { parseLink as parseFileLink, fetchBytes, fileNameOf } from '/roots/js/op
 import * as W from '/tree-canvas/work.js';   // (parseLink above is the MyHeritage one)
 import { reportInto, el, n0 } from '/roots/js/report-view.js';   // the import report, drawn by the same code as /roots/
 import { treeMetrics, metricTiles } from '/roots/js/metrics.js';   // the five counts of the tree views, worked out here
+import * as ST from '/tree-canvas/settings.js';   // the Settings drawer's choices, kept on this device
 
 const $ = s => document.querySelector(s);
 const base = new URL('/roots/', location.href).href;   // the reader fetches its place files relative to this, as it does on /roots/
 const STAMP = Date.now();                              // a fresh canvas each time the page is opened, never an old cached copy
-let worker = null, hide = false, example = false;
+let worker = null, hide = ST.effective().living, example = false;   // hide: the living filter, from what this device chose (today's default, nothing chosen, is to show them as the file gives them)
 let lastM = null;   // the reader's last 'done' message (its report and timings), for the "Your file" page; null for an archive, which is published already read
 
 /* The Atlas's own name catalogues, for the canvas's search by any form of a name and its panel of name forms: two static files from this site, the same for
@@ -160,6 +161,7 @@ document.addEventListener('ra-canvas-changed', () => { checkNewer(); renderSaved
 document.addEventListener('ra-sync-done', e => { syncFailed = !(e.detail && e.detail.ok); renderKeep(); });
 addEventListener('storage', e => {
   if (e.key === 'ra-canvas-v1') { checkNewer(); renderSaved(); }
+  if (e.key === ST.KEY) onSettingsChanged();   // another tab changed a setting
   if (e.key === 'ra-sync-v1') { document.dispatchEvent(new CustomEvent('ra-conn-refresh')); renderKeep(); }   // the six words were turned on (or off) in another tab: conn.js then loads the sync
 });
 addEventListener('pagehide', flushWork);
@@ -169,7 +171,7 @@ function mount() {
   const old = $('#cv'), f = document.createElement('iframe');
   f.id = 'cv'; f.title = old.title;
   f.src = '/roots/canvas.html?sa=1&v=' + STAMP + (hide ? '&liv=1' : '') + (example ? '&ex=1' : '');
-  f.hidden = false; old.replaceWith(f); if (!$('#yf').hidden) f.inert = true;
+  f.hidden = false; old.replaceWith(f); if (!$('#yf').hidden || !$('#sg').hidden) f.inert = true;
 }
 
 let curName = null, curHead = null, curVia = null;   // curVia: the site a file was fetched from, when it came from a link
@@ -202,7 +204,7 @@ function start(bytes, name, via, link) {
       const prevMh = mhFile; mhFile = m.mh || null; anc = m.anc || null;
       if (!prevMh || !mhFile || prevMh.guid !== mhFile.guid) { mhc = null; mhText = ''; mhNote = ''; applyTreeLink(); }   // a different tree: start from what is remembered or known for it
       window.RR = { tree: m.tree, atlas: m.atlas, loadNames, links };
-      lastM = m; if (!$('#yf').hidden) drawYF();
+      lastM = m; if (!$('#yf').hidden) drawYF(); if (!$('#sg').hidden) drawSG(true);
       if (m.first || !cur) { const ppl = m.report && m.report.people && m.report.people.individuals | 0; setCur(example ? null : curLink ? { t: 'link', ref: curLink } : curName ? { t: 'file', ref: curName, size: curSize, people: ppl } : null, curLink ? W.linkLabel(curLink) : curName); }
       else flushWork();
       attachKeep();
@@ -296,14 +298,12 @@ addEventListener('message', e => {
   const d = e.data || {};
   if (d.tcWork) { onWork(d.tcWork); return; }
   if (d.tcYourFile) { openYF(); return; }   // the canvas menu's "Your file"
+  if (d.tcSettings) { openSG(); return; }   // the canvas menu's "Settings"
   if (d.tcRestored) { onRestored(d.tcRestored); return; }
   if (d.tcHome) { flushWork(); $('#cv').hidden = true; showStart(); return; }   // the canvas's folder button: back to the opening screen (the canvas keeps its own state)
   if (d.tcCompare !== undefined && !d.tcOpen) { compareWith(d.tcCompare && d.tcCompare.key, d.tcCompare && d.tcCompare.mark); return; }
   if (d.tcOpen && d.tcOpen.bytes instanceof ArrayBuffer) { example = false; start(d.tcOpen.bytes, d.tcOpen.name); }
-  else if (typeof d.tcLiving === 'boolean') {
-    hide = d.tcLiving;
-    if (worker) { say(hide ? 'Hiding living people…' : 'Showing everyone…'); worker.postMessage({ cmd: 'living', hide }); }
-  }
+  else if (typeof d.tcLiving === 'boolean') setLiving(d.tcLiving);   // the canvas's eye button: the same setting as in Settings
 });
 
 /* ---- "Your file": what was read, the numbers, what is kept on this device, and the export, in one place. It is a page over the canvas (the canvas stays loaded underneath, with its
@@ -377,6 +377,81 @@ function renderCurrent() {
 }
 $('#stCurBack').onclick = () => { $('#start').hidden = true; const f = $('#cv'); if (f) { f.hidden = false; try { f.focus(); } catch (e) { /* ok */ } } };
 $('#stCurFile').onclick = () => openYF();
+
+/* ---- Settings: one drawer for what is chosen about the page and the device. Living people, the two links back to MyHeritage and Ancestry, the look of the canvas, and whether the last files are
+   kept. Each is changed here and nowhere else (the canvas's own menu and Options only point here; its eye button is the same living setting, a quick switch). The choices are kept on this device
+   (settings.js) and, when the six words are on, go into the same encrypted copy (research-file.js carries them: three short choices, no names, and a choice made on another device only fills
+   one this device has not made). The two links are kept as before (remember.js) and were already in that copy. Nothing here is sent anywhere. ---- */
+let sgFrom = null, sgWas = null, sgWriteFailed = false;
+function storageOk() { try { localStorage.setItem('ra-probe', '1'); localStorage.removeItem('ra-probe'); return true; } catch (e) { return false; } }
+/* the living filter, as one function for the eye button and the drawer: remember the choice, and apply it to the file that is open */
+function setLiving(on) {
+  hide = !!on; sgWriteFailed = !ST.write({ living: hide ? 1 : 0 }).ok;
+  if (worker) { say(hide ? 'Hiding living people…' : 'Showing everyone…'); worker.postMessage({ cmd: 'living', hide }); }
+  if (!$('#sg').hidden) drawSG();
+}
+function livingNote() {
+  const a = window.RR && window.RR.archive;
+  if (a) return 'The ' + a.name + ' archive’s tree is published with its living people already left out, so this changes nothing for it. It applies to the next GEDCOM you open.';
+  if (!window.RR || !lastM) return 'It applies when you open a GEDCOM.';
+  if (lastM.kind === 'tree') return 'This file is a tree.json, which already shows its living people by family and relationship only, so this changes nothing for it. It applies to the next GEDCOM you open.';
+  const n = lastM.report && lastM.report.people && lastM.report.people.living | 0;
+  return n ? n.toLocaleString('en') + (n === 1 ? ' person in this file is' : ' people in this file are') + ' possibly living (an estimate: see What “living” means here). ' + (hide ? 'They are drawn without a name.' : 'They are shown as the file gives them.') : 'Nobody in this file is possibly living.';
+}
+function drawSG(open) {
+  const e = ST.effective(), L = links.get();
+  $('#sgLiv').checked = hide; $('#sgLivNote').textContent = livingNote();
+  const mh = $('#sgMh'), can = !!(window.RR && window.RR.links);
+  mh.disabled = !can;
+  if (open || mh !== document.activeElement) mh.value = can ? L.text : '';
+  $('#sgMhSt').textContent = !can ? 'Open a file first: the link belongs to one tree, and is kept for it on this device.' : (L.note || (L.mh ? 'Links are on.' : 'Off: no link yet.'));
+  const sel = $('#sgAnc'); if (open || sel !== document.activeElement) sel.value = L.ancSite;
+  $('#sgAncSt').textContent = L.anc ? 'This file is an Ancestry export (tree ' + L.ancTree + '), so every person already links into it on ancestry.' + L.ancSite + '. Nothing is sent.' : 'Used for the “Open on Ancestry” links of an Ancestry export; not needed for other files.';
+  const lk = $('#sgLook'); if (open || lk !== document.activeElement) lk.value = e.look;
+  $('#sgRem').checked = e.remember;
+  const ok = storageOk() && !sgWriteFailed;
+  $('#sgStore').textContent = ok ? '' : 'This browser is not letting the page keep settings, so your choices last until you close the page.';
+  $('#sgSync').textContent = syncState().on ? 'The six words are on, so these choices go into your encrypted copy: three short choices, no names and nothing from your tree. A choice already made on another device is never replaced.' : 'These choices stay in this browser. If you turn on the six words (Connection & Backup), they travel with your copy as three short choices, with no names and nothing from your tree.';
+}
+function openSG() {
+  sgFrom = document.activeElement; sgWriteFailed = false;
+  drawSG(true);
+  sgWas = { cv: $('#cv').inert, yf: $('#yf').inert, start: $('#start').inert };
+  $('#sg').hidden = false; $('#cv').inert = $('#yf').inert = $('#start').inert = true;
+  $('#sgTitle').focus();
+}
+function closeSG() {
+  const g = $('#sg'); if (g.hidden) return;
+  g.hidden = true; const w = sgWas || {}; $('#cv').inert = !!w.cv; $('#yf').inert = !!w.yf; $('#start').inert = !!w.start;
+  const back = sgFrom && sgFrom !== document.body && sgFrom.isConnected && !sgFrom.closest('[hidden]') ? sgFrom : null;
+  if (back) { try { back.focus(); } catch (e) { /* nothing to give focus back to */ } }
+  else { const f = $('#cv'); if (f && !f.hidden) { try { f.focus(); } catch (e) { /* ok */ } } }
+  sgFrom = null;
+}
+$('#sgClose').onclick = $('#sgBack').onclick = () => closeSG();
+$('#stSettings').onclick = $('#yfSettings').onclick = () => openSG();
+addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#sg').hidden) { e.preventDefault(); e.stopPropagation(); closeSG(); } }, true);   // before the Your file page's own Escape
+$('#sgLiv').onchange = e => setLiving(e.target.checked);
+$('#sgMh').oninput = e => { $('#sgMhSt').textContent = links.set(e.target.value) || (e.target.value.trim() ? '' : 'Off: no link yet.'); };
+$('#sgAnc').onchange = e => { links.setSite(e.target.value); drawSG(); };
+$('#sgLook').onchange = e => {
+  sgWriteFailed = !ST.write({ look: e.target.value }).ok;
+  const f = $('#cv'); if (f && f.contentWindow && !f.hidden) f.contentWindow.postMessage({ tcLook: e.target.value }, location.origin);
+  drawSG();
+};
+$('#sgRem').onchange = async e => {
+  sgWriteFailed = !ST.write({ remember: e.target.checked ? 1 : 0 }).ok;
+  if (!e.target.checked) await recentForget();   // as before: turning it off forgets the files kept now
+  drawLists(); drawSG();
+};
+/* a setting arrived from the six-word copy, or was changed in another tab: take it up. The living filter only ever goes towards hiding here, because a copy only fills a choice not made on this device. */
+function onSettingsChanged() {
+  const e = ST.effective();
+  if (e.living !== hide) { if (worker && window.RR) setLiving(e.living); else hide = e.living; }
+  const f = $('#cv'); if (f && f.contentWindow && !f.hidden) f.contentWindow.postMessage({ tcLook: e.look }, location.origin);
+  drawLists(); renderSaved(); if (!$('#sg').hidden) drawSG();
+}
+document.addEventListener('ra-settings-changed', onSettingsChanged);
 
 /* ---- the page it opens on: nothing is read until the visitor chooses. Two buttons, and the files used before (kept in this browser's own storage by the canvas
    too: the same database, so "Last used" in the canvas menu and here are one list). Nothing is sent anywhere. ---- */

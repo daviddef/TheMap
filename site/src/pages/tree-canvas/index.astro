@@ -94,6 +94,8 @@ import { u } from "../../lib/url.js";
       <p class="stsub">Kept in this browser only. <button type="button" class="stlink" id="stForget">Forget them all</button></p>
     </section>
 
+    <p class="stsettings"><button type="button" class="stlink" id="stSettings">Settings</button> <span class="stsub">living people, links to MyHeritage and Ancestry, the look, remembering files</span></p>
+
     <details class="sthelp" id="stHelp">
       <summary>About these files and links</summary>
       <p><b>GEDCOM</b> is the industry standard: almost every genealogy program and website can export one. <b>tree.json</b> is our own format, made up for Record Atlas and read by nothing else. It is what a researcher's Roots &amp; Routes site makes, and it carries page links and corrections marks a GEDCOM cannot. <a href="/tree-canvas/publish/#format">The tree.json format, field by field</a>. <a href="/examples/README.md">About the example files</a>.</p>
@@ -108,6 +110,7 @@ import { u } from "../../lib/url.js";
       <button type="button" class="stbtn" id="yfBack">← Back to the canvas</button>
       <h1 id="yfTitle" tabindex="-1">Your file</h1>
       <p class="stsub" id="yfWhat"></p>
+      <p class="stsub"><button type="button" class="stlink" id="yfSettings">Settings</button>: living people, links, the look, remembering files.</p>
     </header>
 
     <section class="yfsec" aria-labelledby="yfGlanceT">
@@ -166,6 +169,55 @@ import { u } from "../../lib/url.js";
     </section>
   </div>
 </main>
+<aside id="sg" hidden role="dialog" aria-modal="true" aria-labelledby="sgTitle">
+  <div class="sgback" id="sgBack"></div>
+  <div class="sgpanel">
+    <header class="sghead">
+      <h2 id="sgTitle" tabindex="-1">Settings</h2>
+      <button type="button" class="stbtn primary" id="sgClose">Done</button>
+    </header>
+
+    <section class="sgsec" aria-labelledby="sgLivT">
+      <h3 id="sgLivT">Living people</h3>
+      <label class="sgsw"><input type="checkbox" id="sgLiv"><span><b>Hide the names of people who may be alive</b><small>When a GEDCOM is read, anyone who may be alive is drawn without a name and with a birth year rounded to the decade. They stay in the tree so it stays connected.</small></span></label>
+      <p class="stsub" id="sgLivNote" role="status"></p>
+      <details class="sgwhat"><summary>What “living” means here</summary>
+        <p>A person counts as possibly living when the file records no death or burial for them and either gives no birth year or a birth within the last 110 years. That is the same rule as Roots &amp; Routes, and it errs towards treating someone as alive.</p>
+        <p>The “Shareable” export hides living people whatever this is set to. A family archive’s published tree already leaves them out, and a tree.json already shows them by family and relationship only.</p>
+        <p>If you have not chosen, they are shown as your file gives them, as before: your file is read in this browser and never uploaded.</p>
+      </details>
+    </section>
+
+    <section class="sgsec" aria-labelledby="sgLinkT">
+      <h3 id="sgLinkT">Links back to your tree</h3>
+      <p class="stsub">Paste a profile or tree link for any one person from your MyHeritage tree. Everyone in this file then gets an “Open on MyHeritage” button. Nothing is sent.</p>
+      <label class="sglab" for="sgMh">MyHeritage link</label>
+      <input type="text" id="sgMh" class="sginput" autocomplete="off" spellcheck="false" placeholder="https://www.myheritage.com/profile-…">
+      <p class="stsub" id="sgMhSt" role="status"></p>
+      <label class="sglab" for="sgAnc">Ancestry site</label>
+      <select id="sgAnc" class="sginput"><option value="com.au">ancestry.com.au</option><option value="com">ancestry.com</option><option value="co.uk">ancestry.co.uk</option><option value="ca">ancestry.ca</option></select>
+      <p class="stsub" id="sgAncSt"></p>
+    </section>
+
+    <section class="sgsec" aria-labelledby="sgLookT">
+      <h3 id="sgLookT">Look of the canvas</h3>
+      <label class="sglab" for="sgLook">Look</label>
+      <select id="sgLook" class="sginput">
+        <option value="auto">Automatic: light or dark to suit this device</option>
+        <option value="sticker">Sticker</option><option value="paper">Paper</option><option value="ground">Ground (dark)</option>
+        <option value="lanes">Lanes</option><option value="countries">Countries</option><option value="names">Names</option>
+      </select>
+    </section>
+
+    <section class="sgsec" aria-labelledby="sgFilesT">
+      <h3 id="sgFilesT">Files on this device</h3>
+      <label class="sgsw"><input type="checkbox" id="sgRem"><span><b>Keep the last 3 files on this device</b><small>In this browser only, so they open again in one click. Unticking forgets the ones kept now.</small></span></label>
+    </section>
+
+    <p class="stsub" id="sgStore" role="status"></p>
+    <p class="stsub" id="sgSync"></p>
+  </div>
+</aside>
 <p id="msg" role="status" aria-live="polite" hidden></p>
 <div id="keepNote" class="knote" role="status" aria-live="polite" hidden><span id="knText"></span><span id="knBtns"></span><button type="button" id="knX" class="knx" aria-label="Dismiss">×</button></div>
 <noscript><p class="nojs">The Tree Canvas needs JavaScript to read your file in this browser. Nothing is uploaded. <a href="/">Back to Record Atlas</a></p></noscript>

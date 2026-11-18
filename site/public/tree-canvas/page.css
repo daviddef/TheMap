@@ -234,6 +234,11 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 /* the sticker look itself: every word in the canvas's fonts, 2px outlines, a hard ledge underneath, pills for buttons that lift on hover and press down */
 #fx *:not(.fx-pid) { font-family: var(--fx-body); }
 #fx h1#fxTitle { font-family: var(--fx-display); }
+/* a neighbour-based suggestion (likely.js): a chip on the candidate, highlighted, and one quiet line of counts. Copy only. */
+#fx .fx-cand.likely { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+#fx .fx-likelychip { font: 800 10.5px/1 system-ui, sans-serif; letter-spacing: .04em; text-transform: uppercase; padding: 3px 6px; border-radius: 99px; background: var(--accent); color: var(--accent-ink); flex: none; }
+#fx .fx-likelynote { font-size: 12.5px; margin: 4px 0 2px; max-width: 70ch; }
+#fx .fx-likelynote.quiet { font-style: italic; opacity: .85; }
 #fx .stbtn, #fx .fx-openall, #fx .fx-cand, #fx .fx-add { border: 2px solid var(--line); border-radius: 99px; box-shadow: 0 2px 0 var(--line); font-weight: 800; transition: transform .12s ease, box-shadow .12s ease, border-color .15s ease, color .15s ease; }
 #fx .stbtn { font-size: 13px; padding: 8px 16px; } #fx .stbtn:first-child { font-size: 14px; }
 #fx .stbtn:hover, #fx .fx-openall:hover:not(:disabled), #fx .fx-cand:hover, #fx .fx-add:hover { transform: translateY(-1px); border-color: var(--accent); }
@@ -264,7 +269,7 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 .fxbar { flex: 1 1 260px; height: 12px; border-radius: 999px; background: color-mix(in srgb, var(--card) 70%, var(--line)); border: 1.5px solid var(--line); overflow: hidden; }
 .fxbar i { display: block; height: 100%; width: 0; background: var(--keep); border-radius: 999px; transition: width .25s ease; }
 @media (prefers-reduced-motion: reduce) { .fxbar i { transition: none; } }
-#fx-prog { font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; }
+#fx-prog, #fxp-prog { font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; }
 .fxtools { display: flex; flex-wrap: wrap; align-items: end; gap: 10px 14px; padding: 12px 14px; border: 2px solid var(--line); border-radius: 12px; background: var(--card); }
 .fxf { display: grid; gap: 3px; font-size: 12px; font-weight: 700; color: var(--soft); }
 .fxf input, .fxf select { font: 400 14px/1.2 system-ui, sans-serif; padding: 8px 10px; border: 2px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); min-width: 150px; }
@@ -281,7 +286,18 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 .fxwho { flex-basis: 100%; font-size: 13.5px; font-weight: 700; }
 .fxkeep { display: grid; gap: 8px; padding: 12px 14px; border: 2px dotted var(--line); border-radius: 12px; }
 .fxsaved.saved { color: var(--keep-ink); font-weight: 700; }
-#fx-body { display: grid; gap: 4px; }
+#fx-body, #fxp-body { display: grid; gap: 4px; }
+/* the two lists, People and Places, are tabs of one page: one pane shows at a time, each with its own progress, filters and rows */
+.fxpane { display: grid; gap: 18px; } .fxpane[hidden] { display: none; }
+.fxtabs { display: flex; flex-wrap: wrap; gap: 8px; }
+#fx .fxtab { display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px; border: 2px solid var(--line); border-radius: 99px; background: transparent; color: var(--soft); box-shadow: 0 2px 0 var(--line); font: 800 14px/1.2 var(--fx-body); cursor: pointer; transition: transform .12s ease, border-color .15s ease, color .15s ease; }
+#fx .fxtab:hover { border-color: var(--accent); color: var(--ink); transform: translateY(-1px); }
+#fx .fxtab[aria-selected="true"] { background: var(--card); color: var(--ink); border-color: var(--accent); }
+.fxtn { min-width: 22px; padding: 1px 7px; border-radius: 99px; background: var(--accent); color: var(--accent-ink); font: 800 12px/1.5 system-ui, sans-serif; font-variant-numeric: tabular-nums; text-align: center; }
+@media (prefers-reduced-motion: reduce) { #fx .fxtab:hover { transform: none; } }
+/* a Places row: each candidate is one copy button with its size and place beside it */
+#fx .fx-cands .fx-cand small { font-size: 11.5px; font-weight: 600; }
+
 /* a group is a quiet heading line (title, count, "n of N done") with its "Open next 10 people" control at the right of the SAME line */
 .fx-ghead { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 4px 16px; margin: 26px 0 0; padding-bottom: 5px; border-bottom: 1.5px solid var(--line); }
 .fx-group { margin: 0; font: 800 13px/1.3 system-ui, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--soft); display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; }

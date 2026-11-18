@@ -4,64 +4,93 @@
 
    BIG LISTS. A file can have thousands of rows. Only the section headers are drawn at first; a section's rows are drawn when it is opened, one page (100) at a time, and only
    the section that changed is redrawn when a row is ticked. Counts come from one pass over the rows (tally), never from the page. */
-import { buildModel, tally, visible, toOpen, rrView, createState, arranged, catalogueChoices, nameMatcher, PRIORITY, ORDERS, ROW_SORTS, BATCH, PAGE } from './fixlist.js';
+import { buildModel, tally, visible, toOpen, rrView, createState, arranged, catalogueChoices, nameMatcher, PRIORITY, PLACES, ORDERS, ROW_SORTS, BATCH, PAGE } from './fixlist.js';
+import { NEEDS } from '../roots/js/placereview.js';
 import { rowEl, mk, FX_ICON } from './fixlist-rows.js';
 import { checklistText, checklistCsv, describe } from '../roots/js/checklist.js';
 import { rowsFrom, fileTextOf, parseRows, summarise } from '../roots/js/decisions.js';
 
 const n0 = n => Number(n).toLocaleString('en');
-const PRIO_N = Object.keys(PRIORITY).length;   // sections ranked (see PRIORITY in fixlist.js)
+const PRIO_N = Object.keys(PRIORITY).length, PLACE_N = Object.keys(PLACES.table).length;   // sections ranked (see PRIORITY and PLACE_PRIORITY in fixlist.js)
 const today = () => new Date().toISOString().slice(0, 10);
 /* the two sort choices are remembered on this device only (a convenience: nothing else reads them); the page works without storage */
 const keep = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { /* private window or blocked storage */ } return null; };
 
-/* cfg: { root, dec (the store), fixes (the My research summary store), links, show(keys), openSettings(), fileName(), syncOn(), livingHidden() (the canvas's living lock), capInfo(rows) (what the six-word copy leaves out, or null where that copy is not in play), onCount(open), onLists(), doc } */
+/* TWO LISTS, ONE PAGE: cfg.kind 'places' makes the Places tab's workspace (placereview.js rows), cfg.pfx the prefix its element ids use ('fxp'), so the two panes can sit in one document
+   from one piece of markup. The People workspace also owns the shared "keeping" section (cfg.keepRoot) and is told of the other with addPeer, so that saving, loading and forgetting
+   decisions cover both lists.
+
+   cfg: { root, dec (the store), fixes (the My research summary store), links, show(keys), openSettings(), fileName(), syncOn(), livingHidden() (the canvas's living lock), capInfo(rows) (what the six-word copy leaves out, or null where that copy is not in play), onCount(open), onLists(), doc } */
 export function createWorkspace(cfg) {
-  const root = cfg.root, doc = root.ownerDocument, $ = s => root.querySelector(s);
-  let m = null, cmp = null, salt = '', model = buildModel(null, null, ''), mode = 'open', groupFilter = '', q = '', personId = null, personName = '', loaded = null, collapse = false;
-  let order = keep('ra-fix-order') in ORDERS ? keep('ra-fix-order') : 'priority', rowsHow = keep('ra-fix-rows') in ROW_SORTS ? keep('ra-fix-rows') : 'useful';
+  const root = cfg.root, doc = root.ownerDocument, PL = cfg.kind === 'places', pfx = cfg.pfx || 'fx', KIND = PL ? PLACES : null;
+  const pid = id => pfx + id.slice(2);                                                   // 'fx-sec-x' -> 'fxp-sec-x' for the Places pane
+  const $ = s => root.querySelector(pfx === 'fx' ? s : s.replace(/#fx-/g, '#' + pfx + '-'));
+  const byId = id => root.querySelector('#' + pid(id));
+  const keepRoot = cfg.keepRoot || root, $k = s => keepRoot.querySelector(s), peers = [];
+  let m = null, cmp = null, salt = '', model = buildModel(null, null, '', KIND), mode = 'open', groupFilter = '', q = '', personId = null, personName = '', loaded = null, collapse = false;
+  const OK = PL ? 'ra-fixp-order' : 'ra-fix-order', RK = PL ? 'ra-fixp-rows' : 'ra-fix-rows';
+  let order = keep(OK) in ORDERS ? keep(OK) : 'priority', rowsHow = keep(RK) in ROW_SORTS ? keep(RK) : 'useful';
   let autoOpen = false;
   /* RESEARCH NAMES: the visitor picks the names (or an archive's names) their research is about; rows that name anyone with any spelling of them are all that is shown. picks: 'n:<family id>' or 'a:<archive>' -> {label, forms} */
   let choices = null, nameTest = null, catAsked = false; const picks = new Map();
+  const prioN = PL ? PLACE_N : PRIO_N;
   const open = new Map(), shown = new Map(), opened = new Set(), listeners = [];
   let tl = null, sumTimer = 0;
   const st = createState(cfg.dec, { saved: () => { drawKeep(); document.dispatchEvent(new CustomEvent('ra-progress-changed')); } });
   const ctx = {
     st, get links() { return cfg.links(); }, show: keys => cfg.show(keys), collapseNotes: () => collapse,
     onChange(s, i, row, kind) { st.flush(); after(s, i, row, kind); },
+    /* the Places tab's "Try a nearby spelling": the reader's answer comes back through suggested() */
+    suggest: PL && cfg.suggest ? i => { asked.set(i.raw, i); cfg.suggest(i.raw); } : undefined,
   };
+  const asked = new Map();
   Object.defineProperty(ctx, 'fileName', { get: () => (cfg.fileName && cfg.fileName()) || '' });
+
+  /* the Places pane is cloned from the People pane's markup: take out what only makes sense for people, and say its own words */
+  if (PL) {
+    const nm = $('#fx-name'); if (nm) nm.closest('label').remove();
+    for (const sel of ['#fx-names', '#fx-who']) { const e = $(sel); if (e) e.remove(); }
+    const q0 = $('#fx-q'); q0.placeholder = 'a place, a person, a candidate'; q0.previousElementSibling.textContent = 'Search by place or name';
+    $('#fx-empty').textContent = 'Nothing to review: every place in this file was found exactly.';
+    const fl = $('#fx-fold').closest('label'), lk = doc.createElement('label'); lk.className = 'fxck'; lk.innerHTML = '<input type="checkbox" id="' + pfx + '-likely"><span>Has a likely candidate</span>'; fl.after(lk);
+  }
 
   /* ---- loading ---- */
   function setData(msg, cmpRaw, saltKey) {
     m = msg || null; cmp = cmpRaw || null; salt = saltKey || '';
-    model = buildModel(m, cmp, salt); st.load(model, loaded); tl = tally(model, st);
+    model = buildModel(m, cmp, salt, KIND); st.load(model, loaded); tl = tally(model, st);
     if (!$('#fx-body').closest('[hidden]')) draw(); else paintTop();
-    cfg.onCount && cfg.onCount(tl.open);
+    badge();
     keepSummary();
   }
-  const rules = () => ({ q, mode, personId, rows: rowsHow, names: nameTest });
+  /* the count the tab and the canvas's badge show: rows still to do (the Places tab counts the four kinds of text a visitor can act on, as Roots & Routes' own badge does) */
+  const badge = () => { tl = tl || tally(model, st); cfg.onCount && cfg.onCount(PL ? NEEDS.reduce((n, k) => n + (tl.sec[k] ? tl.sec[k].open : 0), 0) : tl.open); };
+  let likelyOnly = false;   // the Places tab's "Has a likely candidate" filter
+  const rules = () => ({ q, mode, personId, rows: rowsHow, names: nameTest, likely: likelyOnly });
 
   /* ---- the top: counts, progress, hints ---- */
   function paintTop() {
     tl = tl || tally(model, st);
     const done = tl.handled, total = tl.total, pct = total ? Math.round(100 * done / total) : 100;
     const bar = $('#fx-bar'); bar.setAttribute('aria-valuenow', String(pct)); bar.setAttribute('aria-valuetext', n0(done) + ' of ' + n0(total) + ' done'); bar.firstElementChild.style.width = pct + '%';
-    $('#fx-prog').textContent = total ? n0(done) + ' of ' + n0(total) + ' done · ' + n0(tl.open) + ' to do' : 'Nothing to fix';
+    $('#fx-prog').textContent = total ? n0(done) + ' of ' + n0(total) + ' done · ' + n0(tl.open) + ' to do' : (PL ? 'Nothing to review' : 'Nothing to fix');
     const hasMh = !!(cfg.links() && cfg.links().get && cfg.links().get().mh), anc = !!(cfg.links() && cfg.links().get && cfg.links().get().anc);
     $('#fx-hint').hidden = hasMh || anc || !total;
     /* one plain line: are living people in this list or not? It is the canvas's own living lock (Settings), the same one that decided whether the reader put them in */
     const lv = $('#fx-living'); lv.hidden = !m;
     if (m) lv.firstElementChild.textContent = cfg.livingHidden && cfg.livingHidden() ? 'Living people are left out of this list.' : 'Living people are included in this list.';
-    $('#fx-sub').textContent = !m && !model.hasCmp ? 'The fix list is made from a GEDCOM. Open one and it is worked out here, in this browser; nothing is sent.'
+    if (PL) $('#fx-sub').textContent = !m ? 'The places are read from a GEDCOM. Open one and they are worked out here, in this browser; nothing is sent.'
+      : 'The places in ' + (cfg.fileName() || 'your file') + ' that the Atlas could not settle exactly, as a list to work down. Copy a candidate, open the person in your own tree, correct the text there, then open the file again: a row that has been fixed is gone.';
+    else $('#fx-sub').textContent = !m && !model.hasCmp ? 'The fix list is made from a GEDCOM. Open one and it is worked out here, in this browser; nothing is sent.'
       : 'Made in your browser from ' + (cfg.fileName() || 'your file') + (model.main ? ' · ' + n0(model.main) + ' people in the main tree' : '') + '. Fix things in your own tree program, then open the file again: a row that has been fixed is gone.';
     drawKeep();
-    const f = $('#fx-who'); f.hidden = personId == null; if (personId != null) { f.firstElementChild.textContent = 'Only rows that name ' + (personName || 'this person'); }
+    const f = $('#fx-who'); if (f) f.hidden = personId == null; if (f && personId != null) { f.firstElementChild.textContent = 'Only rows that name ' + (personName || 'this person'); }
     $('#fx-empty').hidden = !!total || !m && !model.hasCmp;
   }
   function drawKeep() {
-    const on = cfg.dec.isOn() && cfg.dec.available(), box = $('#fx-keepon'); box.checked = cfg.dec.isOn(); box.disabled = !cfg.dec.available();
-    const k = cfg.dec.count(), t = $('#fx-saved'); t.classList.toggle('saved', on);
+    if (PL) return cfg.drawKeep && cfg.drawKeep();   // the keeping section is the People workspace's
+    const on = cfg.dec.isOn() && cfg.dec.available(), box = $k('#fx-keepon'); box.checked = cfg.dec.isOn(); box.disabled = !cfg.dec.available();
+    const k = cfg.dec.count(), t = $k('#fx-saved'); t.classList.toggle('saved', on);
     /* the six-word copy carries 15,000 rows at most (research-file.js says which are dropped); say so when this device holds more, and that they stay here */
     const cap = on && cfg.capInfo ? cfg.capInfo(cfg.dec.rows()) : null, over = cap ? cap.decisions : 0, capSay = over ? ' ' + n0(over) + (over === 1 ? ' decision is' : ' decisions are') + ' beyond the ' + n0(cap.kept) + ' the six words can carry; ' + (over === 1 ? 'it stays' : 'they stay') + ' on this device.' : '';
     t.textContent = !cfg.dec.available() ? 'This browser has no storage for it (a private window?). Save the decisions to a file instead.'
@@ -75,17 +104,17 @@ export function createWorkspace(cfg) {
   function paintCounts() {
     tl = tally(model, st); paintTop();
     for (const s of model.sections) {
-      const x = tl.sec[s.key], el = doc.getElementById('fx-sec-' + s.key); if (!el) continue;
+      const x = tl.sec[s.key], el = byId('fx-sec-' + s.key); if (!el) continue;
       const c = el.querySelector('.fx-sc'); if (c) { c.textContent = progress(x); c.title = progress(x) + ' done'; }
       const bar = el.querySelector('.fx-mini i'); if (bar) bar.style.width = (x.total ? Math.round(100 * (x.done + x.asis) / x.total) : 0) + '%';
       const ok = x.open === 0; el.classList.toggle('sec-done', ok); const t = el.querySelector('summary .fx-tick'); if (t) t.hidden = !ok;
     }
     for (const g of model.groups) {
-      const el = doc.getElementById('fx-grp-' + g.key); if (!el) continue; const x = tl.grp[g.key], ok = x.total > 0 && x.open === 0;
+      const el = byId('fx-grp-' + g.key); if (!el) continue; const x = tl.grp[g.key], ok = x.total > 0 && x.open === 0;
       el.classList.toggle('group-done', ok); el.querySelector('.fx-tick').hidden = !ok; el.querySelector('.fx-gc').textContent = n0(x.total - x.open) + ' of ' + n0(x.total) + ' done';
-      const b = doc.getElementById('fx-gact-' + g.key); if (b && b._paint) b._paint();
+      const b = byId('fx-gact-' + g.key); if (b && b._paint) b._paint();
     }
-    cfg.onCount && cfg.onCount(tl.open);
+    badge();
   }
   /* a tick greys the row where it is (so an accidental one can be taken back); "left as is" takes it off the list, or, in a filter that shows it, redraws it */
   function after(s, i, row, kind) {
@@ -98,7 +127,7 @@ export function createWorkspace(cfg) {
     keepSummary(); listeners.forEach(f => f());
   }
   function drawSection(s, el) {
-    const d = el || doc.getElementById('fx-sec-' + s.key); if (!d) return; const body = d.querySelector('.fx-sbody'); body.textContent = '';
+    const d = el || byId('fx-sec-' + s.key); if (!d) return; const body = d.querySelector('.fx-sbody'); body.textContent = '';
     if (!s.items.length) { body.append(mk(doc, 'p', 'fx-small', s.cmp ? 'Nothing from the comparison yet.' : 'Nothing to do here.')); return; }
     const items = visible(s, st, rules()), cap = shown.get(s.key) || PAGE;
     const left = s.items.filter(i => st.isAsIs(i.key) && !st.isDone(i.key)).length;
@@ -112,7 +141,7 @@ export function createWorkspace(cfg) {
   }
   /* one section is ONE line, in the same columns for every section: [chevron] title | how many | progress (bar and "1 of 37") | (i) | priority. Its rows open under it. */
   function sectionEl(s) {
-    const d = mk(doc, 'details', 'fx-sec fx-sec-' + s.key); d.id = 'fx-sec-' + s.key;
+    const d = mk(doc, 'details', 'fx-sec fx-sec-' + s.key); d.id = pid('fx-sec-' + s.key);
     const x = tl.sec[s.key], sum = mk(doc, 'summary'), tk = mk(doc, 'span', 'fx-tick', '✓'); tk.title = 'Done: nothing left to do here'; tk.hidden = true;
     const title = mk(doc, 'span', 'fx-st'); title.append(tk, mk(doc, 'b', null, s.title));
     const cnt = mk(doc, 'span', 'fx-n', n0(s.items.length)); cnt.title = n0(s.items.length) + (s.items.length === 1 ? ' row' : ' rows');
@@ -120,7 +149,7 @@ export function createWorkspace(cfg) {
     const c = mk(doc, 'span', 'fx-sc', progress(x)); c.title = progress(x) + ' done'; pg.append(mini, c);
     const how = mk(doc, 'div', 'fx-how'); how.hidden = true;
     how.append(mk(doc, 'p', 'fx-small', s.how));
-    if (s.why) { const pp = mk(doc, 'p', 'fx-small fx-prwhy'); pp.append(mk(doc, 'b', null, s.level + ' priority (' + s.rank + ' of ' + PRIO_N + '). '), s.why); how.append(pp); }
+    if (s.why) { const pp = mk(doc, 'p', 'fx-small fx-prwhy'); pp.append(mk(doc, 'b', null, s.level + ' priority (' + s.rank + ' of ' + prioN + '). '), s.why); how.append(pp); }
     const info = mk(doc, 'button', 'fx-ib', null); info.type = 'button'; info.innerHTML = FX_ICON.info; info.title = 'What is this list, and why this priority?'; info.setAttribute('aria-label', 'What is this list, and why is it ' + s.level.toLowerCase() + ' priority? ' + s.title); info.setAttribute('aria-expanded', 'false');
     /* the explanation lives inside the <details>, so a closed section hides it: opening it is part of the click (an empty section opens to just the explanation) */
     info.onclick = e => { e.preventDefault(); e.stopPropagation(); const show = how.hidden || !d.open; how.hidden = !show; if (show && !d.open) d.open = true; info.setAttribute('aria-expanded', String(show)); };
@@ -136,7 +165,7 @@ export function createWorkspace(cfg) {
   /* OPEN ALL, A BATCH AT A TIME (Roots & Routes' own rule): every person on the rows still to do in a group, each in its own tab on the tree site, ten at a time. */
   function openAllBar(g, secs) {
     const bar = mk(doc, 'div', 'fx-gact'), b = mk(doc, 'button', 'fx-openall'), say = mk(doc, 'span', 'fx-small fx-muted');
-    b.type = 'button'; bar.append(say, b); bar.id = 'fx-gact-' + g.key;
+    b.type = 'button'; bar.append(say, b); bar.id = pid('fx-gact-' + g.key);
     const urlOf = p => { const L = cfg.links(), u = L && L.url ? L.url(p.id, p.name) : null; return u ? (u.mh || u.anc || '') : ''; };
     const paint = () => {
       const todo = toOpen(secs, st, rules()), left = todo.filter(p => !opened.has(p.id) && urlOf(p)), usable = todo.some(urlOf), n = left.length;
@@ -164,13 +193,13 @@ export function createWorkspace(cfg) {
     const narrow = q || personId != null || nameTest;
     for (const { g, secs } of lay) {
       if (groupFilter && g.key !== groupFilter) continue;
-      const x = tl.grp[g.key], head = mk(doc, 'div', 'fx-ghead'), h = mk(doc, 'h2', 'fx-group'); h.id = 'fx-grp-' + g.key; const gt = mk(doc, 'span', 'fx-tick', '✓'); gt.hidden = !(x.total > 0 && x.open === 0);
+      const x = tl.grp[g.key], head = mk(doc, 'div', 'fx-ghead'), h = mk(doc, 'h2', 'fx-group'); h.id = pid('fx-grp-' + g.key); const gt = mk(doc, 'span', 'fx-tick', '✓'); gt.hidden = !(x.total > 0 && x.open === 0);
       h.append(gt, mk(doc, 'span', null, g.title), mk(doc, 'span', 'fx-gn', n0(x.total)), mk(doc, 'span', 'fx-gc', n0(x.total - x.open) + ' of ' + n0(x.total) + ' done'));
       h.classList.toggle('group-done', !gt.hidden);
       head.append(h); if (x.total && g.key !== 'compare') head.append(openAllBar(g, secs));
       box.append(head, mk(doc, 'p', 'fx-gh', g.how));
       for (const s of secs) {
-        if (narrow) { const hits = visible(s, st, { q, mode: 'all', personId, names: nameTest }).length; if (!hits) continue; if (autoOpen) open.set(s.key, true); }
+        if (narrow) { const hits = visible(s, st, { q, mode: 'all', personId, names: nameTest, likely: likelyOnly }).length; if (!hits) continue; if (autoOpen) open.set(s.key, true); }
         box.append(sectionEl(s));
       }
     }
@@ -178,6 +207,7 @@ export function createWorkspace(cfg) {
     if (!box.firstChild) box.append(mk(doc, 'p', 'fx-small', model.total ? 'Nothing matches that. Clear the search or the filters.' : (m || model.hasCmp ? 'Nothing to fix.' : '')));
   }
   function keepSummary() {
+    if (PL) return;   // the "My research" summary is of the People list's sections
     clearTimeout(sumTimer);
     sumTimer = setTimeout(() => { if (m && cfg.fileName() && cfg.dec.isOn()) cfg.fixes.put(summarise(rrView(model), st.asIs, st.ticked, cfg.fileName())); }, 600);
   }
@@ -190,31 +220,36 @@ export function createWorkspace(cfg) {
   const ordSel = $('#fx-order'), rowSel = $('#fx-rows');
   for (const [k, t] of Object.entries(ORDERS)) ordSel.append(new Option(t, k)); ordSel.value = order;
   for (const [k, t] of Object.entries(ROW_SORTS)) rowSel.append(new Option(t, k)); rowSel.value = rowsHow;
-  ordSel.onchange = e => { order = e.target.value; keep('ra-fix-order', order); draw(); };
-  rowSel.onchange = e => { rowsHow = e.target.value; keep('ra-fix-rows', rowsHow); shown.clear(); draw(); };
+  ordSel.onchange = e => { order = e.target.value; keep(OK, order); draw(); };
+  rowSel.onchange = e => { rowsHow = e.target.value; keep(RK, rowsHow); shown.clear(); draw(); };
+  if (PL) $('#fx-likely').onchange = e => { likelyOnly = e.target.checked; shown.clear(); draw(); };
   $('#fx-fold').onchange = e => { collapse = e.target.checked; for (const d of root.querySelectorAll('.fx-notes')) d.open = !collapse; };
   $('#fx-expand').onclick = () => { for (const s of model.sections) if (s.items.length) open.set(s.key, true); draw(); };
   $('#fx-collapse').onclick = () => { open.clear(); for (const s of model.sections) open.set(s.key, false); draw(); };
-  $('#fx-whoX').onclick = () => setPerson(null);
+  const wx = $('#fx-whoX'); if (wx) wx.onclick = () => setPerson(null);
   const sb = $('#fx-settings'); if (sb) sb.onclick = () => cfg.openSettings();
   const sl = $('#fx-living-set'); if (sl) sl.onclick = () => cfg.openSettings();
-  doc.addEventListener('ra-sync-done', () => drawKeep());   // the six-word code loads a moment after the page: say so once it is there
-  $('#fx-keepon').onchange = e => {
-    const on = e.target.checked; cfg.dec.setOn(on); cfg.dec.optOut(!on);
-    if (!on) cfg.fixes.forget(); else { st.flush(); cfg.dec.putMany([...st.asIs].map(k => [k, 'a', true]).concat([...st.ticked].map(k => [k, 'd', true]))); keepSummary(); }
-    drawKeep();
-  };
-  $('#fx-save').onclick = () => download('fix-decisions-' + today() + '.json', fileTextOf(rowsFrom(st.asIs, st.ticked)), 'application/json');
-  $('#fx-load').onclick = () => $('#fx-file').click();
-  $('#fx-file').onchange = async e => {
-    const f = e.target.files[0]; e.target.value = ''; if (!f) return;
-    try { const text = await f.text(); loaded = parseRows(text); if (cfg.dec.isOn()) cfg.dec.load(text); const n = st.load(model, loaded); tl = tally(model, st); draw(); cfg.onCount && cfg.onCount(tl.open); $('#fx-saved').textContent = n0(n) + ' earlier decisions re-applied from the file.'; }
-    catch (x) { $('#fx-saved').textContent = 'That is not a decisions file.'; }
-  };
-  $('#fx-forget').onclick = () => { cfg.dec.forget(); cfg.fixes.forget(); loaded = null; st.ticked.clear(); st.asIs.clear(); tl = tally(model, st); draw(); cfg.onCount && cfg.onCount(tl.open); };
-  $('#fx-txt').onclick = () => m && download('fix-list.txt', checklistText(rrView(model), today()), 'text/plain;charset=utf-8');
-  $('#fx-csv').onclick = () => m && download('fix-list.csv', '﻿' + checklistCsv(rrView(model)), 'text/csv;charset=utf-8');
-  $('#fx-pdf').onclick = () => m && toPdf();
+  /* the keeping section (the switch, save, load, forget) belongs to the People workspace and covers both lists: the other one is a peer */
+  const all = () => [{ asIs: st.asIs, ticked: st.ticked }, ...peers.map(p => p.sets())];
+  if (!PL) {
+    doc.addEventListener('ra-sync-done', () => drawKeep());   // the six-word code loads a moment after the page: say so once it is there
+    $k('#fx-keepon').onchange = e => {
+      const on = e.target.checked; cfg.dec.setOn(on); cfg.dec.optOut(!on);
+      if (!on) cfg.fixes.forget(); else { st.flush(); peers.forEach(p => p.flush()); cfg.dec.putMany(all().flatMap(x => [...x.asIs].map(k => [k, 'a', true]).concat([...x.ticked].map(k => [k, 'd', true])))); keepSummary(); }
+      drawKeep();
+    };
+    $k('#fx-save').onclick = () => download('fix-decisions-' + today() + '.json', fileTextOf(rowsFrom(new Set(all().flatMap(x => [...x.asIs])), new Set(all().flatMap(x => [...x.ticked])))), 'application/json');
+    $k('#fx-load').onclick = () => $k('#fx-file').click();
+    $k('#fx-file').onchange = async e => {
+      const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+      try { const text = await f.text(); loaded = parseRows(text); if (cfg.dec.isOn()) cfg.dec.load(text); let n = st.load(model, loaded); tl = tally(model, st); draw(); badge(); for (const p of peers) n += p.reapply(loaded); $k('#fx-saved').textContent = n0(n) + ' earlier decisions re-applied from the file.'; }
+      catch (x) { $k('#fx-saved').textContent = 'That is not a decisions file.'; }
+    };
+    $k('#fx-forget').onclick = () => { cfg.dec.forget(); cfg.fixes.forget(); loaded = null; st.ticked.clear(); st.asIs.clear(); tl = tally(model, st); draw(); badge(); peers.forEach(p => p.reset()); };
+    $k('#fx-txt').onclick = () => m && download('fix-list.txt', checklistText(rrView(model), today()), 'text/plain;charset=utf-8');
+    $k('#fx-csv').onclick = () => m && download('fix-list.csv', '﻿' + checklistCsv(rrView(model)), 'text/csv;charset=utf-8');
+    $k('#fx-pdf').onclick = () => m && toPdf();
+  }
   function download(name, text, type) { const u = URL.createObjectURL(new Blob([text], { type })), a = doc.createElement('a'); a.href = u; a.download = name; doc.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 4000); }
   /* The PDF is the browser's own "Save as PDF" over a print-ready copy of the list, built here from the same rows. Nothing is uploaded. */
   function toPdf() {
@@ -227,7 +262,7 @@ export function createWorkspace(cfg) {
       p.append(mk(doc, 'h2', null, g.title), mk(doc, 'p', 'fx-small', g.how));
       for (const s of secs) {
         p.append(mk(doc, 'h3', null, s.title + ' (' + s.items.length + ')'));
-        for (const i of visible(s, st, { q, mode: 'open', names: nameTest })) {
+        for (const i of visible(s, st, { q, mode: 'open', names: nameTest, likely: likelyOnly })) {
           const d = describe(s, i), row = mk(doc, 'div', 'fx-pitem'), main = mk(doc, 'div'); row.append(mk(doc, 'span', 'fx-pbox', '☐')); main.append(mk(doc, 'b', null, d.head));
           if (d.why) main.append(mk(doc, 'div', 'fx-pwhy', d.why)); if (d.people) main.append(mk(doc, 'div', 'fx-ppeople', d.people));
           if (d.next) { const n = mk(doc, 'div', 'fx-pnext'); n.append(mk(doc, 'b', null, 'Next step '), d.next); main.append(n); }
@@ -270,7 +305,7 @@ export function createWorkspace(cfg) {
       x.onclick = () => { picks.delete(k); saveNames(); setNames(); shown.clear(); draw(); drawChips(); };
       chip.append(mk(doc, 'b', null, p.label), mk(doc, 'span', 'fx-small', n0(p.forms.length) + (p.forms.length === 1 ? ' spelling' : ' spellings')), x); c.append(chip);
     }
-    let rows = 0, secs = 0; for (const s of model.sections) { const n = visible(s, st, { q, mode, personId, names: nameTest }).length; rows += n; if (n) secs++; }
+    let rows = 0, secs = 0; for (const s of model.sections) { const n = visible(s, st, { q, mode, personId, names: nameTest, likely: likelyOnly }).length; rows += n; if (n) secs++; }
     c.append(mk(doc, 'span', 'fx-small', 'Showing ' + n0(rows) + (rows === 1 ? ' row' : ' rows') + (rows ? ' in ' + n0(secs) + (secs === 1 ? ' section' : ' sections') : '') + ' that name them, in any spelling the Atlas lists.'));
   }
   function loadChoices() {
@@ -285,13 +320,34 @@ export function createWorkspace(cfg) {
   const nameSel = $('#fx-name');
   if (nameSel) nameSel.onchange = e => { const v = e.target.value; e.target.value = ''; const p = v && pickFor(v); if (!p) return; picks.set(v, p); saveNames(); setNames(); shown.clear(); autoOpen = true; draw(); drawChips(); };
   function fillGroups() { const s = $('#fx-grp'); s.textContent = ''; s.append(new Option('Every group', '')); for (const { g } of arranged(model, tl, order)) s.append(new Option(g.title, g.key)); s.value = groupFilter; }
+  /* the reader's nearby spellings for a text (a place that was not found), as rows to copy */
+  function suggested(msg) {
+    const i = asked.get(msg.raw); if (!i) return; asked.delete(msg.raw);
+    i.sugg = (msg.rows || []).map((c, n) => ({ n: c.n, region: c.region || null, k: c.k, label: (msg.labels && msg.labels[n]) || c.n }));
+    const hit = model.byKey.get(i.key); if (hit) drawSection(hit.s);
+  }
   return {
-    setData, setPerson, st, ctx, draw, paintCounts,
+    setData, setPerson, st, ctx, draw, paintCounts, suggested,
+    /* the other list's side of the shared keeping section (see addPeer in the People workspace) */
+    addPeer: w => peers.push(w), sets: () => ({ asIs: st.asIs, ticked: st.ticked }), flush: () => st.flush(),
+    reset() { st.ticked.clear(); st.asIs.clear(); tl = tally(model, st); draw(); badge(); },
+    /* the other list was used (a tick or "left as is" on a row both lists have, keyed alike): take its state for those rows. Nothing is read or written in the store: it already holds them. */
+    adopt(o) {
+      const ok = o.model().byKey; let n = 0;
+      for (const k of model.byKey.keys()) {
+        if (!ok.has(k)) continue; const d = o.st.isDone(k), a = o.st.isAsIs(k);
+        if (d !== st.isDone(k) || a !== st.isAsIs(k)) { if (d) st.ticked.add(k); else st.ticked.delete(k); if (a) st.asIs.add(k); else st.asIs.delete(k); n++; }
+      }
+      if (n) { tl = tally(model, st); badge(); }
+      return n;
+    },
+    reapply(rows) { const n = st.load(model, rows); tl = tally(model, st); draw(); badge(); return n; },
+    drawKeep,
     model: () => model, tally: () => (tl = tl || tally(model, st)), onChange: f => listeners.push(f),
     refresh() { fillGroups(); draw(); },
     /* the page is about to be shown: fill the group list, and show everyone or only one person's rows */
     present(person) { loadChoices(); fillGroups(); if (person) setPerson(person.id, person.name); else { personId = null; personName = ''; open.clear(); autoOpen = false; draw(); } },
     changed() { paintCounts(); keepSummary(); listeners.forEach(f => f()); },
-    clearFilters() { q = ''; $('#fx-q').value = ''; mode = 'open'; $('#fx-mode').value = 'open'; groupFilter = ''; personId = null; personName = ''; },
+    clearFilters() { q = ''; $('#fx-q').value = ''; mode = 'open'; $('#fx-mode').value = 'open'; groupFilter = ''; personId = null; personName = ''; likelyOnly = false; if (PL) $('#fx-likely').checked = false; },
   };
 }

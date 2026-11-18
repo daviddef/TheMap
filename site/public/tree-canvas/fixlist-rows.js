@@ -96,16 +96,18 @@ export function qMark(doc, reason) {
   e.title = t; e.setAttribute('role', 'img'); e.setAttribute('aria-label', t); return e;
 }
 
-/* ctx: { st (the decisions), links, show(keys), onChange(s, i), fileName, collapseNotes(), compact } */
+/* ctx: { st (the decisions), links, show(keys), onChange(s, i), fileName, collapseNotes(), compact; for a Places row also suggest(i) } */
 export function rowEl(doc, ctx, s, i) {
   const st = ctx.st, row = mk(doc, 'div', 'fx-row' + (ctx.compact ? ' compact' : '')), cb = mk(doc, 'input'); cb.type = 'checkbox';
   const done = st.isDone(i.key), asis = !done && st.isAsIs(i.key);
   cb.checked = done; row.classList.toggle('done', done); row.classList.toggle('asis', asis);
   const body = mk(doc, 'div', 'fx-body'), head = mk(doc, 'div', 'fx-head'), note = mk(doc, 'div', 'fx-note');
   const evs = n => n + ' event' + (n === 1 ? '' : 's');
-  const cpL = a => { const b = mk(doc, 'button', 'fx-cand'); b.type = 'button'; b.innerHTML = ICON.copy + '<span></span>'; b.lastChild.textContent = a.label; b.title = a.title; b.setAttribute('aria-label', a.title); b.onclick = function () { copyText(doc, a.text, this); }; return b; };
+  const cpL = a => { const b = mk(doc, 'button', 'fx-cand' + (a.likely ? ' likely' : '')); b.type = 'button'; b.innerHTML = ICON.copy + '<span></span>'; b.lastChild.textContent = a.label; if (a.likely) b.prepend(mk(doc, 'b', 'fx-likelychip', 'Likely')); b.title = a.title; b.setAttribute('aria-label', a.title); b.onclick = function () { copyText(doc, a.text, this); }; return b; };
   let label = '';
-  if (s.key === 'places' || s.key === 'check') {
+  if (s.place) {
+    label = i.raw; placeBody(doc, ctx, s, i, head, body, cpL);
+  } else if (s.key === 'places' || s.key === 'check') {
     label = i.raw + ' to ' + i.to;
     const swap = mk(doc, 'span', 'fx-swap'); swap.append(mk(doc, 'span', 'fx-was', i.raw), mk(doc, 'span', 'fx-arrow', '→'), mk(doc, 'b', 'fx-now', i.to));
     const acts = mk(doc, 'span', 'fx-acts2'); copyActions(s, i).forEach(a => acts.append(cpL(a))); head.append(swap, acts);
@@ -115,7 +117,8 @@ export function rowEl(doc, ctx, s, i) {
     label = i.raw; head.append(mk(doc, 'span', 'fx-was plain', i.raw)); body.append(head);
     const cs = mk(doc, 'div', 'fx-cands');
     if (i.cands.length) { cs.append(mk(doc, 'span', 'fx-muted', 'Could be: ')); copyActions(s, i).forEach(a => cs.append(cpL(a))); } else cs.append(mk(doc, 'span', 'fx-muted', 'No candidate found: look it up by hand.'));
-    body.append(cs, mk(doc, 'div', 'fx-evs', evs(i.count)), plist(doc, ctx, i.people, i.count));
+    body.append(cs); const ln = likelyNote(doc, i); if (ln) body.append(ln);
+    body.append(mk(doc, 'div', 'fx-evs', evs(i.count)), plist(doc, ctx, i.people, i.count));
   } else if (s.key === 'dupes') {
     label = 'Possibly the same person: ' + i.an + ' and ' + i.bn; head.append(mk(doc, 'b', null, 'Possibly the same person')); note.textContent = i.note + (i.ap || i.bp ? ' · ' + (i.ap || '—') + ' / ' + (i.bp || '—') : '');
     body.append(head, note, plist(doc, ctx, [{ name: i.an, id: i.a }, { name: i.bn, id: i.b }], 2));
@@ -169,4 +172,37 @@ export function rowEl(doc, ctx, s, i) {
   }
   cb.onchange = () => { st.set(i.key, 'd', cb.checked); row.classList.toggle('done', cb.checked); ctx.onChange(s, i, row, 'd'); };
   row.append(cb, body); return row;
+}
+
+/* the one line under a row's candidates about the neighbour suggestion (likely.js): its true counts when there is one, a quiet line when the neighbours do not point anywhere. A suggestion, never a finding. */
+function likelyNote(doc, i) {
+  if (i.likely) return mk(doc, 'div', 'fx-likelynote fx-muted', 'Suggestion only: ' + i.likely.reason);
+  if (i.noNeighbours) return mk(doc, 'div', 'fx-likelynote fx-muted quiet', 'No clear neighbours: where the people who use this text and their relatives are recorded does not point to one of these.');
+  return null;
+}
+
+/* ---- the Places tab's row: a place text, the Atlas's candidates for it (each to copy), who and what uses it. A list to work down in the visitor's own tree: nothing here edits or chooses. ---- */
+const NS = (v, p, q) => Math.abs(v).toFixed(2) + (v < 0 ? '°' + p : '°' + q);
+const candDetail = c => (c.p ? 'pop. ' + Number(c.p).toLocaleString('en') + ' · ' : '') + NS(c.y, 'S', 'N') + ' ' + NS(c.x, 'W', 'E');
+function placeBody(doc, ctx, s, i, head, body, cpL) {
+  head.append(mk(doc, 'span', 'fx-was plain', i.raw));
+  const acts = mk(doc, 'span', 'fx-acts2'); acts.append(cpL({ label: 'Copy text', title: 'Copy the place text as the file writes it, to search for it in your tree: ' + i.raw, text: i.raw })); head.append(acts);
+  body.append(head);
+  const cs = mk(doc, 'div', 'fx-cands');
+  if (i.cands.length) {
+    cs.append(mk(doc, 'span', 'fx-muted', 'Could be: '));
+    const L = i.likely ? i.likely.idx : -1, order = i.cands.map((c, n) => n); if (L > 0) { order.splice(L, 1); order.unshift(L); }
+    for (const n of order) { const c = i.cands[n], b = cpL({ label: c.label, title: 'Copy “' + c.label + '”', text: c.label, likely: n === L }); b.lastChild.append(' ', mk(doc, 'small', 'fx-muted', candDetail(c))); cs.append(b); }
+  } else if (s.key === 'not-found') cs.append(mk(doc, 'span', 'fx-muted', 'No candidate found: look it up by hand. '));
+  else if (i.iso) cs.append(mk(doc, 'span', 'fx-muted', 'Country read as ' + i.iso));
+  if (s.key === 'not-found' && ctx.suggest) {
+    if (i.sugg && i.sugg.length) { cs.append(mk(doc, 'span', 'fx-muted', 'A nearby spelling: ')); for (const c of i.sugg) cs.append(cpL({ label: c.label, title: 'Copy “' + c.label + '”', text: c.label })); }
+    else if (i.sugg) cs.append(mk(doc, 'span', 'fx-muted', 'No spelling one letter away in that country.'));
+    else { const g = mk(doc, 'button', 'fx-link', 'Try a nearby spelling'); g.type = 'button'; g.onclick = () => { g.disabled = true; g.textContent = 'Looking…'; ctx.suggest(i); }; cs.append(g); }
+  }
+  if (cs.childNodes.length) body.append(cs);
+  const ln = likelyNote(doc, i); if (ln) body.append(ln);
+  const evs = i.events || i.count || 0, shown = i.people.length;
+  body.append(mk(doc, 'div', 'fx-evs', evs + (evs === 1 ? ' event' : ' events')));
+  if (shown) { const w = plist(doc, ctx, i.people, shown); if (evs > shown) w.append(mk(doc, 'small', 'fx-muted', 'and ' + (evs - shown) + ' more events')); body.append(w); }
 }

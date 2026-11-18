@@ -53,7 +53,13 @@ function applyTreeLink() {
   });
 }
 
-function say(text, isError) { const m = $('#msg'); m.textContent = text; m.hidden = !text; m.classList.toggle('err', !!isError); }
+/* a progress message goes to the tree-growing loading screen (public/js/load-tree.js) when it is there; an empty one lets that screen finish, and an error replaces it with the plain red line */
+function say(text, isError) {
+  const m = $('#msg'), L = window.RALoad;
+  if (L && text && !isError && L.wants(text)) { m.hidden = true; L.say(text); return; }
+  if (L) { if (isError) L.off(); else L.hide(); }
+  m.textContent = text; m.hidden = !text; m.classList.toggle('err', !!isError);
+}
 
 /* ---- keeping the visitor's work. Per tree (the link it was opened from, the archive, or the file's name, size and people), the canvas's arrangement is kept in this
    browser (work.js says what, and why it holds no name) and, when the visitor has turned on the six words on the Connection & Backup page, the same records go into the

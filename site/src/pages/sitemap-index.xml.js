@@ -86,7 +86,7 @@ export function urlsFor(set) {
             /* The lookup that answers for the 922,645 names with no page of
                their own. One URL, not 922,645 doorways. */
             ["surname/", "0.8"],
-            ["privacy/", "0.3"]];
+            ["support/", "0.4"], ["privacy/", "0.3"]];
   }
   /* ONLY PLACES WITH SOMETHING OF THEIR OWN (index-rules.js); the rest keep their page, marked noindex, follow. */
   if (set === "places") return full.places.filter(placeIndexable).map((p) => [`place/${p.id}/`, "0.6"]);

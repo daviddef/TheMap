@@ -19,18 +19,18 @@ let worker = null, last = null, shown = { review: 0 };
 let openTo = null;   // the tab to land on after the next load: «Fix list» on a kept file goes straight there, not through the whole tree
 const base = new URL('./', location.href).href;
 
-function show(id) { for (const s of ['start', 'busy', 'work']) $('#' + s).hidden = s !== id; document.body.classList.toggle('loaded', id === 'work'); }
-function fail(msg) { const e = $('#err'); e.textContent = msg; e.hidden = false; show('start'); }
+function show(id) { if (window.RALoad && id !== 'busy') RALoad.hide(); for (const s of ['start', 'busy', 'work']) $('#' + s).hidden = s !== id; document.body.classList.toggle('loaded', id === 'work'); }
+function fail(msg) { if (window.RALoad) RALoad.off(); const e = $('#err'); e.textContent = msg; e.hidden = false; show('start'); }
 
 function start(bytes, name) {
   curBytes = bytes.slice(0); curName = name || null; $('#keep').hidden = !curName; $('#keep').textContent = 'Keep on this device';
   if (curName) keepAuto();
-  $('#err').hidden = true; show('busy'); $('#busymsg').textContent = 'Starting…';
+  $('#err').hidden = true; show('busy'); $('#busymsg').textContent = 'Starting…'; if (window.RALoad) RALoad.say('Starting…');
   if (worker) worker.terminate();
   worker = new Worker('js/worker.js', { type: 'module' });
   worker.onmessage = e => {
     const m = e.data;
-    if (m.type === 'progress') $('#busymsg').textContent = m.msg + '…';
+    if (m.type === 'progress') { $('#busymsg').textContent = m.msg + '…'; if (window.RALoad) RALoad.say(m.msg + '…'); }
     else if (m.type === 'error') fail('Sorry, that file could not be read: ' + m.msg);
     else if (m.type === 'done') done(m);
     else if (m.type === 'exported') exported(m);
@@ -151,7 +151,7 @@ function rowEl(it) {
   r.append(raw, c); return r;
 }
 
-function pick(raw, cand) { $('#busymsg').textContent = 'Redrawing…'; worker.postMessage({ cmd: 'pick', raw, cand }); show('busy'); }
+function pick(raw, cand) { $('#busymsg').textContent = 'Redrawing…'; if (window.RALoad) RALoad.say('Redrawing…'); worker.postMessage({ cmd: 'pick', raw, cand }); show('busy'); }
 
 document.addEventListener('click', e => { const g = e.target.closest && e.target.closest('[data-goto]'); if (g) tab(g.dataset.goto); });
 

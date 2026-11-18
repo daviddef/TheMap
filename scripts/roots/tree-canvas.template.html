@@ -900,17 +900,30 @@ body.pr .card .hd:not(.op),body.pr .card .stops,body.pr .card .brc,body.pr .card
 .pr-all{display:flex!important;margin-bottom:4px}.pr-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px 10px}
 .prent{border-top:1px dashed var(--lk-line);padding:7px 0;font-size:12.5px}.prent .row{margin-top:5px}.prent.maybe{background:color-mix(in srgb,var(--lk-accent) 7%,transparent);border-radius:8px;padding-left:6px}
 .prdet{border:2px solid var(--lk-line);border-radius:14px;padding:4px 10px 8px;margin:8px 0;background:var(--lk-card)}.prdet h4{margin:6px 0}
-.prlist{list-style:none;margin:6px 0;padding:0;display:flex;flex-direction:column;gap:3px}
-.prli{display:flex;align-items:flex-start;gap:6px;border:2px solid transparent;border-radius:10px;padding:4px 6px;cursor:pointer;font-size:12px;line-height:1.35}
-.prli:hover,.prli.on{border-color:var(--psel);background:var(--lk-hover)}
+.prlist{list-style:none;margin:0;padding:0}
+.prgen{margin:6px 0 10px}
+.prgh{position:sticky;top:0;z-index:1;margin:0 0 4px;padding:5px 2px;background:var(--lk-card);color:var(--lk-ink);font:900 12px/1.2 Nunito,system-ui;border-bottom:2px solid var(--lk-line)}
+.prgh small{color:var(--lk-soft);font-weight:700;margin-left:4px}
+.prlist{display:flex;flex-direction:column;gap:6px}
+.prli{display:grid;grid-template-columns:minmax(0,1fr);gap:3px;border:2px solid var(--lk-line);border-radius:12px;padding:6px 8px;cursor:pointer;background:var(--lk-card);font-size:12px;line-height:1.3}
+.prli:hover{border-color:var(--pone)}
+.prli.on{border-color:var(--psel);box-shadow:0 0 0 2px color-mix(in srgb,var(--psel) 25%,transparent)}
 .prli:focus-within{border-color:var(--psel)}
-.prsel{flex:none;display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:96px;max-width:46%;border:0;background:transparent;color:var(--lk-ink);font:inherit;text-align:left;padding:2px;cursor:pointer;border-radius:6px}
-.prsel:focus-visible{outline:2px solid var(--psel);outline-offset:1px}
-.prsel .pgn{font:900 11px Nunito;color:var(--lk-soft)}
-.prli .prn{flex:1;min-width:0;overflow-wrap:anywhere}
+.prsel{display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px;width:100%;border:0;background:transparent;color:var(--lk-ink);font:inherit;text-align:left;padding:2px 0 4px;cursor:pointer;border-radius:6px}
+.prsel:focus-visible{outline:2px solid var(--psel);outline-offset:2px}
+.prrel{font:800 10.5px Nunito,system-ui;color:var(--lk-soft);text-transform:uppercase;letter-spacing:.3px}
+.prside{display:grid;grid-template-columns:78px minmax(0,1fr);gap:0 8px;align-items:start;min-height:34px}
+.prlab{display:flex;align-items:center;gap:5px;font:800 11px/1.3 Nunito,system-ui;color:var(--lk-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-top:1px}
+.prlab i{width:10px;height:10px;border-radius:3px;background:var(--ac);flex:none}
+.prname{display:flex;flex-direction:column;min-width:0}
+.prnm{font-weight:800;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:break-word;word-break:normal;hyphens:manual}
+.prside.none .prnm{font-weight:600;color:var(--lk-soft);font-style:italic}
+.pryr{font-variant-numeric:tabular-nums;color:var(--lk-soft);font-size:10.5px}
+.prlk{font-size:10.5px;width:max-content;max-width:100%}
+.prmore{font-size:10.5px;color:var(--lk-soft);padding-left:86px}
 .prx{color:inherit;text-decoration:underline;text-underline-offset:2px;font-weight:800}.prx:hover,.prx:focus-visible{color:var(--psel)}
 .prdst{font-weight:700;font-size:10.5px;color:var(--lk-soft);white-space:nowrap}
-.prph{display:inline-block;font:700 10.5px/1.3 Nunito,system-ui;color:var(--lk-soft);border-left:3px solid var(--pone);padding-left:5px}
+.prph{display:inline-block;margin:0;font:700 10.5px/1.3 Nunito,system-ui;color:var(--lk-soft);border-left:3px solid var(--pone);padding-left:5px}
 /* a status is a LABEL: a dot-and-word, no outline, no hover, default cursor. Buttons (Same person, Different people) are the outlined things. */
 .prst{display:inline-flex;align-items:center;gap:4px;font:800 11px/1.3 Nunito,system-ui;cursor:default;white-space:nowrap;user-select:none}
 .prst b{font:900 12px/1 Nunito,system-ui}
@@ -2858,7 +2871,20 @@ html.rm #pairs *{transition:none!important;animation:none!important}
     for (let t = 0.05; t <= 1.0001; t += 0.05) { const m = c.map((v, i) => Math.round(v + (to[i] - v) * t)), h = '#' + m.map(v => v.toString(16).padStart(2, '0')).join(''); if (contrast(h, bg) >= min) return h; }
     return lum(bg) < 0.4 ? '#ffffff' : '#000000';
   }
-  const API = { contrast, ensure, lum, pair, layout, alternatives, dkey, judgeD, matchLists, placeholder, isPlaceholderName, statusInfo, statusHtml };
+  /* the list of places, grouped by generation (oldest first), each group headed in words; each row's archive lines are capped (the rest is "+N more") so rows keep a steady shape */
+  const genLabel = g => g === 0 ? 'Starting generation' : g < 0 ? (-g) + (g === -1 ? ' generation up' : ' generations up') : g + (g === 1 ? ' generation down' : ' generations down');
+  function groupByGen(rows) {
+    const out = [];
+    rows.forEach(r => { let g = out[out.length - 1]; if (!g || g.gen !== r.gen) { g = { gen: r.gen, label: genLabel(r.gen), rows: [] }; out.push(g); } g.rows.push(r); });
+    return out;
+  }
+  function archLines(slot, shown, max) {
+    max = max || 2;
+    const all = Object.keys(slot.arch).map(Number).sort((x, y) => x - y);
+    const first = shown != null && slot.arch[shown] ? [shown].concat(all.filter(a => a !== shown)) : all;
+    return { lines: first.slice(0, max), more: Math.max(0, first.length - max) };
+  }
+  const API = { genLabel, groupByGen, archLines, contrast, ensure, lum, pair, layout, alternatives, dkey, judgeD, matchLists, placeholder, isPlaceholderName, statusInfo, statusHtml };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCP = API;
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
@@ -4875,18 +4901,30 @@ function prResult() {
 const PRHELP = '<p class="plines prhelp"><small><b>Same person</b>: you are confirming these two records are one person. <b>Different people</b>: they are not. Nothing is changed in your file or in the archive; your choice is kept on this device.</small></p>';
 const REL = { self: 'Starting person', father: 'Father', mother: 'Mother', child: 'Child', spouse: 'Spouse' };
 function prList() {
-  const P = S.pr, R = P.res, L = P.lay;
+  const P = S.pr, R = P.res, L = P.lay, many = M.archives.length > 2;
   const rows = R.slots.slice().sort((a, b) => (a.gen - b.gen) || (L.pos.get(a.id).x - L.pos.get(b.id).x));
   const shown = P.listAll ? rows : rows.slice(0, 120);
-  const li = s => { const a = prShown(s), nm = prSlotName(s), fq = s.f >= 0 ? M.P[s.f] : null, aq = a != null && s.arch[a] ? M.P[s.arch[a].i] : null;
-    const fname = fq ? prNameL(fq) + ' <small>' + esc(prYears(fq)) + '</small>' : '<em>not in your file</em>';
-    const aname = aq ? prNameL(aq) + ' <small>' + esc(prArch(a).name) + '</small>' : '<em>not in the archive</em>';
-    const on = P.sel === nm, gl = s.gen > 0 ? '+' + s.gen : '' + s.gen, pn = s.state === 'only-a' || s.state === 'only-b' ? [] : (s.pnotes || []);
-    const sr = TCPe().statusInfo(s.state, pn);
-    const aria = `${REL[s.rel] || 'Person'}, generation ${gl}: ${fq ? fq.name : 'not in your file'} and ${aq ? aq.name : 'not in the archive'}. ${sr.word}. Show on the canvas`;
-    return `<li class="prli${on ? ' on' : ''}" data-pr-row="${esc(nm)}"><button type="button" class="prsel" data-pr-slot="${esc(nm)}" aria-pressed="${on}" aria-label="${esc(aria)}"><span class="pgn">${gl}</span>${prSt(s.state, pn)}</button><span class="prn">${fname}<br>${aname}${s.ph ? '<br>' + prPH(s) : ''}</span></li>`; };
+  /* one aligned line: a fixed label column (colour + who), the name (breaks at spaces, ellipsis when long), years under it, then the link out under both */
+  const side = (label, colour, q, none) => {
+    if (!q) return `<div class="prside none"><span class="prlab"><i style="--ac:${esc(colour)}"></i>${esc(label)}</span><span class="prname"><span class="prnm">${esc(none)}</span></span></div>`;
+    const x = prExt(q)[0], nm = esc(q.name);
+    return `<div class="prside"><span class="prlab" title="${esc(label)}"><i style="--ac:${esc(colour)}"></i>${esc(label)}</span><span class="prname"><span class="prnm" title="${nm}">${nm}</span><small class="pryr">${esc(prYears(q))}</small>${x ? `<a class="prx prlk" href="${esc(x.href)}" target="_blank" rel="noopener noreferrer" title="Open ${nm} on ${esc(x.label)} (new tab)" aria-label="Open ${nm} on ${esc(x.label)} (opens in a new tab)">${esc(x.label)} &nearr;</a>` : ''}</span></div>`;
+  };
+  const li = s => {
+    const a = prShown(s), nm = prSlotName(s), fq = s.f >= 0 ? M.P[s.f] : null;
+    const on = P.sel === nm, pn = s.state === 'only-a' || s.state === 'only-b' ? [] : (s.pnotes || []);
+    const sr = TCPe().statusInfo(s.state, pn), al = TCPe().archLines(s, a, 2), gl = s.gen > 0 ? '+' + s.gen : '' + s.gen;
+    const aria = `${REL[s.rel] || 'Person'}, ${TCPe().genLabel(s.gen)}: ${fq ? fq.name : 'not in your file'} and ${al.lines.length ? al.lines.map(x => M.P[s.arch[x].i].name).join(', ') : 'no one in the archives'}. ${sr.word}. Show on the canvas`;
+    let h = `<li class="prli${on ? ' on' : ''}" data-pr-row="${esc(nm)}"><button type="button" class="prsel" data-pr-slot="${esc(nm)}" aria-pressed="${on}" aria-label="${esc(aria)}"><span class="prrel">${esc(REL[s.rel] || 'Person')}</span>${prSt(s.state, pn)}${s.ph ? prPH(s) : ''}</button>`;
+    h += side('Your file', PAIRFILE, fq, 'not in your file');
+    if (al.lines.length) al.lines.forEach(x => { h += side(prArch(x).name, prArch(x).color, M.P[s.arch[x].i]); });
+    else h += side(many ? 'Archives' : prArch(1).name, many ? 'var(--pone)' : prArch(1).color, null, many ? 'not in any archive' : 'not in the archive');
+    if (al.more) h += `<div class="prmore">+${al.more} more ${al.more === 1 ? 'archive' : 'archives'} (open the place)</div>`;
+    return h + '</li>';
+  };
   const needHint = !!RL() && rows.some(s => s.f >= 0 && !M.P[s.f].living) && !rows.some(s => s.f >= 0 && prExt(M.P[s.f]).length);
-  return `<h4>Every place, by generation</h4>${needHint ? `<p class="plines"><small>Add your MyHeritage link in <button type="button" class="lk-linkbtn" data-gsettings="1">Settings</button> to link these.</small></p>` : ''}<ul class="prlist">${shown.map(li).join('')}</ul>${rows.length > shown.length ? `<div class="row"><button class="lk-btn is-small" data-pr-list="1">Show all ${rows.length.toLocaleString()}</button></div>` : ''}`;
+  const groups = TCPe().groupByGen(shown);
+  return `<h4>Every place, by generation</h4>${needHint ? `<p class="plines"><small>Add your MyHeritage link in <button type="button" class="lk-linkbtn" data-gsettings="1">Settings</button> to link these.</small></p>` : ''}${groups.map(g => `<section class="prgen"><h5 class="prgh">${esc(g.label)} <small>${g.rows.length}</small></h5><ul class="prlist">${g.rows.map(li).join('')}</ul></section>`).join('')}${rows.length > shown.length ? `<div class="row"><button class="lk-btn is-small" data-pr-list="1">Show all ${rows.length.toLocaleString()}</button></div>` : ''}`;
 }
 function prSlotPanel(s) {
   const P = S.pr, R = P.res, nmk = prSlotName(s);

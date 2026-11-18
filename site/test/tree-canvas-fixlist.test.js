@@ -317,3 +317,11 @@ test("blocker 1: a kept file has a Fix list button that opens it on the Fix list
   assert.match(app, /s\.total - s\.done - s\.asis/, "left to fix: the same sum /roots/ makes");
   assert.doesNotMatch(app.slice(app.indexOf("function savedFix")), /setItem\(/, "the line stores nothing");
 });
+
+test("the (i) on a Fix list section opens the section, because its explanation sits inside the closed <details>", () => {
+  const v = read("public/tree-canvas/fixlist-view.js");
+  const m = /info\.onclick = e => \{([^\n]*)\};/.exec(v);
+  assert.ok(m, "the (i) has a click handler");
+  assert.match(m[1], /d\.open = true/, "a closed section is opened, or the explanation stays hidden and the click does nothing");
+  assert.match(m[1], /how\.hidden = !show/);
+});

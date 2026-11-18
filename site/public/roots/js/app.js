@@ -68,7 +68,8 @@ const STAMP = Date.now();                                                    // 
 function mountViewer() {
   const old = $('#viewer'), f = document.createElement('iframe');
   let h = ''; try { h = old.contentWindow.location.hash || ''; } catch (e) { /* not loaded yet */ }      // the viewer keeps who is in focus and which view is open in its address
-  f.id = 'viewer'; f.title = old.title; f.src = 'viewer.html?v=' + STAMP + h; old.replaceWith(f); f.onload = pushMh;
+  f.id = 'viewer'; f.title = old.title; f.src = 'viewer.html?v=' + STAMP + '&shell=1' + h; old.replaceWith(f); f.onload = pushMh;   // shell=1: this page draws Orphans as its own tab, so the viewer drops its in-page one
+  viewerLive = false; $('#orcount').textContent = ''; $('.tabs [data-tab=orphans]').title = ORTITLE;
 }
 function pushMh() { try { $('#viewer').contentWindow.postMessage({ mh: mhc && mhc.site ? { site: mhc.site, tree: mhc.tree, slug: mhc.treeSlug } : null }, '*'); } catch (e) { /* not loaded yet */ } }
 
@@ -141,6 +142,16 @@ function report(m) {
 /* The Atlas map in the viewer can send us a place text: "Fix this text" opens Places to review filtered to it, "Copy" copies it. Only messages from our own viewer are heard. */
 window.addEventListener('message', e => {
   const v = $('#viewer'); if (!v || e.source !== v.contentWindow || !e.data) return;
+  if (e.data.type === 'ra-roots-view') {
+    viewerLive = true;
+    const n = +e.data.orphans || 0, c = +e.data.clusters || 0; $('#orcount').textContent = n ? n0(n) : '';
+    $('.tabs [data-tab=orphans]').title = n || c ? n0(n) + ' orphan records · ' + n0(c) + ' detached ' + (c === 1 ? 'family' : 'families') + ' · where to start looking' : ORTITLE;
+    const showing = e.data.view === 'orphans';
+    if (wantView) { const w = wantView; wantView = null; if ((w === 'orphans') !== showing) { try { v.contentWindow.postMessage({ raView: w }, '*'); } catch (x) { /* gone */ } } return; }   // the first report of a new viewer: it may be on the other view
+    const sel = $('.tabs [aria-selected=true]')?.dataset.tab;   // the viewer changed view itself: keep the tab in step, say nothing back
+    if (sel === 'tree' && showing) tab('orphans', true); else if (sel === 'orphans' && !showing) tab('tree', true);
+    return;
+  }
   if (typeof e.data.fixplace === 'string') { $('#rfilter').value = e.data.fixplace; tab('review'); drawReview(reviewItems, e.data.fixplace); $('#rfilter').scrollIntoView({ block: 'nearest' }); }
   else if (typeof e.data.copytxt === 'string') { try { navigator.clipboard.writeText(e.data.copytxt); } catch (x) { /* clipboard refused */ } }
 });
@@ -240,12 +251,23 @@ function mountCanvas() {
   const old = $('#canvasv'), f = document.createElement('iframe');
   f.id = 'canvasv'; f.title = old.title; f.src = 'canvas.html?v=' + STAMP; old.replaceWith(f); canvasFor = window.RR;
 }
-function tab(name) {
-  document.body.classList.toggle('wide', name === 'tree' || name === 'canvas');   // the tree uses the whole window; the lists keep a readable width
+/* «Orphans» and «Tree views» are two tabs of ONE viewer, so who is in focus and every other choice carries across: Orphans only opens the viewer's Orphans view, and Tree
+   views goes back to the view that was open before. The viewer is told with a message (it stores nothing here), and tells us back which view it is showing, so a tile or
+   link inside it that opens Orphans moves the tab too. A request made before a new viewer has loaded waits for its first report. */
+const ORTITLE = 'Records joined to no one, small families outside every tree, and where to start looking';
+let viewerLive = false, wantView = null;
+function viewerView(want) {
+  const v = $('#viewer'); wantView = want;
+  if (viewerLive && v && v.contentWindow) { try { v.contentWindow.postMessage({ raView: want }, '*'); wantView = null; } catch (x) { /* not reachable yet: the first report will send it */ } }
+}
+function tab(name, fromViewer) {
+  const panel = name === 'orphans' ? 'tree' : name;   // Orphans has no panel of its own: it is the viewer's Orphans view
+  document.body.classList.toggle('wide', panel === 'tree' || panel === 'canvas');   // the tree uses the whole window; the lists keep a readable width
   for (const b of $$('.tabs button')) b.setAttribute('aria-selected', String(b.dataset.tab === name));
-  for (const p of $$('.panel')) p.hidden = p.id !== 'p-' + name;
+  for (const p of $$('.panel')) p.hidden = p.id !== 'p-' + panel;
   if (name === 'canvas') mountCanvas();
   if (name === 'fix' && worker) askFix();
+  if ((name === 'orphans' || name === 'tree') && !fromViewer) viewerView(name === 'orphans' ? 'orphans' : 'tree');
 }
 $$('.tabs button').forEach(b => b.onclick = () => tab(b.dataset.tab));
 $('#rfilter').oninput = e => last && drawReview(last.review, e.target.value);

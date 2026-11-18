@@ -534,3 +534,32 @@ test("MyHeritage: the tree is read from the file's header, and a link is remembe
   } finally { delete globalThis.localStorage; }
   const app = fs.readFileSync(R + "js/app.js", "utf8"); assert.match(app, /applyTreeLink\(\)/); assert.match(app, /saveTreeLink\(/); assert.match(app, /cpL\('New'/); assert.match(app, /cpL\('Old'/);
 });
+
+test("Orphans is a tab of the Atlas's own Roots & Routes page; the viewer drops its in-page tab only when framed with shell=1", () => {
+  const page = fs.readFileSync(path.join(here, "../src/pages/roots/index.astro"), "utf8");
+  const app = fs.readFileSync(R + "js/app.js", "utf8");
+  const tpl = fs.readFileSync(path.join(here, "../../scripts/roots/tree-views.template.html"), "utf8");
+  // the tab: after Tree views, same markup and badge as Places to review and Fix list
+  const tabs = [...page.matchAll(/data-tab="([a-z]+)"/g)].map(m => m[1]);
+  assert.deepEqual(tabs, ["canvas", "tree", "orphans", "report", "review", "fix", "export"], "Orphans sits straight after Tree views");
+  assert.match(page, /data-tab="orphans"[^>]*>Orphans <span id="orcount" class="count"><\/span><\/button>/, "a count badge in the same style as the others");
+  // it is the viewer's Orphans view, not a second viewer: one panel, one frame
+  assert.match(app, /const panel = name === 'orphans' \? 'tree' : name;/);
+  assert.match(app, /'viewer\.html\?v=' \+ STAMP \+ '&shell=1'/, "the page tells the viewer it is the shell");
+  assert.match(app, /\{ raView: want \}/); assert.match(app, /e\.data\.type === 'ra-roots-view'/);
+  assert.doesNotMatch(page, /id="p-orphans"/, "no second panel");
+  // the viewer: the in-page tab is hidden ONLY under the shell flag, which a framed archive page never sets
+  assert.match(tpl, /\.inshell \.tab\[data-view="orphans"\]\{display:none!important\}/);
+  assert.match(tpl, /const SHELL=\/\[\?&\]shell=1\(&\|\$\)\/\.test\(location\.search\)&&parent!==window;/, "the flag is read from the query, and only when framed");
+  assert.match(tpl, /if\(SHELL\)RROOT\.classList\.add\('inshell'\)/);
+  assert.match(tpl, /<button class="tab" role="tab" data-view="orphans" title="Orphans and where to start">/, "the in-page tab stays in the file for every archive");
+  assert.match(tpl, /const VIEWS=\[[^\]]*'orphans'/, "#orphans is still a view, so an old link opens it");
+  // old links: the address is the viewer's state and still names the view first
+  assert.match(tpl, /st\.view=VIEWS\.includes\(v0\)\?v0:DEF\.view/);
+  assert.match(tpl, /data-goto="orphans" data-okind=/, "the tiles and Kinship's «see where to start» link still open it");
+  // the numbers are the view's own tiles, sent to the page, never recomputed there
+  assert.match(tpl, /SHN\.orph=orph;SHN\.clus=nClus;/); assert.match(tpl, /orphans:SHN\.orph,clusters:SHN\.clus/);
+  // a viewer with no shell flag says nothing to its parent about views
+  assert.match(tpl, /if\(SHELL\)try\{parent\.postMessage\(\{type:'ra-roots-view'/);
+  assert.match(tpl, /if\(SHELL&&typeof e\.data\.raView==='string'\)/, "and listens for nothing from it");
+});

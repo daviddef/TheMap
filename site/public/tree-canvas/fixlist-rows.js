@@ -14,6 +14,7 @@ const ICON = {
   target: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5.2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>',
   plus: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
   open: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
+  tag: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12.5V4.5h8l8.5 8.5-8 8z"/><path d="M8 8.5v.01"/></svg>',
 };
 export const FX_ICON = ICON;
 const MAXP = 3;
@@ -45,7 +46,10 @@ export function personLine(doc, ctx, p, o) {
   o = o || {};
   const li = mk(doc, 'li', 'fx-p'), pn = mk(doc, 'span', 'fx-pn'), u = o.archive ? null : (ctx.links && p.id != null && !p.gone ? ctx.links.url(p.id, p.name) : null);
   const href = o.href || (u && (u.mh || u.anc)) || '';
-  if (href) { const a = link(doc, p.name || '(no name)', href, (o.archive ? 'Open in the ' + o.archive + ' archive' : u && u.mh ? 'Open on MyHeritage' : 'Open on Ancestry') + ' (a new tab)'); a.className = 'fx-name'; pn.append(a); }
+  /* THE NAME IS ONE LINK, to the tree site when the Settings link is set; the Atlas's pages for the name never go away: with a link set they are their own two icons beside the
+     others (the surname's page and the given name's page), without one they are the name's own words, as on Roots & Routes. An archive row's name is the archive's page. */
+  let atlas = null;
+  if (href) { const a = link(doc, p.name || '(no name)', href, (o.archive ? 'Open in the ' + o.archive + ' archive' : u && u.mh ? 'Open on MyHeritage' : 'Open on Ancestry') + ' (a new tab)'); a.className = 'fx-name'; pn.append(a); if (!o.archive && p.nl && p.name) atlas = p.nl; }
   else if (p.nl && p.name) pn.append(...nameNodes(doc, p.name, p.nl));
   else pn.textContent = p.name || '(no name)';
   li.append(pn);
@@ -55,6 +59,7 @@ export function personLine(doc, ctx, p, o) {
   else if (p.ev || p.by) { li.append(mk(doc, 'span', 'fx-ev', p.ev || 'Born')); const yr = p.ev ? p.date : p.by; if (yr) li.append(mk(doc, 'span', 'fx-yr', String(yr))); }
   const acts = mk(doc, 'span', 'fx-acts');
   if (o.copyName !== false && p.name && !o.archive) acts.append(ibtn(doc, 'copy', 'Copy the name', function () { copyText(doc, p.name, this); }));
+  if (atlas) for (const [k, what] of [['sur', 'surname'], ['given', 'given name']]) { const l = atlas[k], h = l && okHref(l.u); if (h) acts.append(ilink(doc, 'tag', 'The Atlas\'s page for the ' + what + ' ' + l.t + ' (a new tab)', h)); }
   if (u && u.tree) acts.append(ilink(doc, 'tree', 'Open this person in the tree on MyHeritage (a new tab)', u.tree));
   if (u && u.mh && u.anc) acts.append(ilink(doc, 'open', 'Open this person on Ancestry (a new tab)', u.anc));
   const key = o.key || (p.id != null && !p.gone && !o.archive ? 'you:' + p.id : '');

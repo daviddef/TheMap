@@ -257,8 +257,9 @@ let curName = null, curHead = null, curVia = null;   // curVia: the site a file 
 /* A Roots & Routes tree.json is JSON; a GEDCOM never starts with a brace. Told apart by the first character, not the name, so a renamed file still opens. */
 const isTreeJson = bytes => { try { return /^\uFEFF?\s*\{/.test(new TextDecoder('utf-8').decode(new Uint8Array(bytes, 0, Math.min(64, bytes.byteLength)))); } catch (e) { return false; } };
 let curLink = null, curSize = 0;   // the address a file was fetched from (if it was), and the file's size
-function start(bytes, name, via, link) {
-  closeYF(true); closeFX(true); lastM = null; fixMsg = null; cmpFix = null;
+let openTo = null;   // the page to land on once the file is read: 'fix' is the "Fix list" button on a kept file (as on /roots/); it opens the Fix list as soon as the reader has made it
+function start(bytes, name, via, link, to) {
+  closeYF(true); closeFX(true); lastM = null; fixMsg = null; cmpFix = null; openTo = to || null;
   const json = isTreeJson(bytes);
   curName = name || null; curVia = via || null; curLink = link || null; curSize = bytes.byteLength; curHead = name && !json ? headInfo(bytes) : (json ? { from: 'tree.json', tree: '' } : null);
   if (curVia && curHead) curHead = { ...curHead, from: curVia };   // the last-used list says where a file came from
@@ -272,6 +273,7 @@ function start(bytes, name, via, link) {
       if (!window.RR) return;
       fixMsg = m; try { window.RR.fix = issuesByPerson(m); } catch (e) { window.RR.fix = null; }
       fixRefresh(true);
+      if (openTo === 'fix') { openTo = null; openFX(null); }
     }
     else if (m.type === 'exported') exported(m);
     else if (m.type === 'error') {
@@ -287,6 +289,7 @@ function start(bytes, name, via, link) {
       if (m.first || !cur) { const ppl = m.report && m.report.people && m.report.people.individuals | 0; setCur(example ? null : curLink ? { t: 'link', ref: curLink } : curName ? { t: 'file', ref: curName, size: curSize, people: ppl } : null, curLink ? W.linkLabel(curLink) : curName); }
       else flushWork();
       attachKeep();
+      if (m.kind === 'tree') openTo = null;   // a tree.json has no GEDCOM to check, so no Fix list to land on
       if (curName && m.report && m.report.people) recentMeta(curName, { people: m.report.people.individuals, from: curHead ? curHead.from : '', tree: curHead ? curHead.tree : '' });
       say('');
       { const pw = m.first ? pairsWanted() : null; if (pw) compareWith(pw.ar, null, { resume: true }).then(ok => { if (!ok) mount(); }); else mount(); }
@@ -613,13 +616,21 @@ async function recentForget(name) {
 const fmtBytes = n => n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + ' MB' : Math.max(1, Math.round(n / 1e3)) + ' KB';
 const fmtWhen = t => { const d = new Date(t), same = d.toDateString() === new Date().toDateString(); return same ? 'today ' + d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : d.toLocaleDateString([], { day: 'numeric', month: 'short' }); };
 async function showStart() {
-  say(''); $('#start').hidden = false; renderKeep(); renderSaved(); renderCurrent(); await drawLists();
+  say(''); $('#start').hidden = false; renderKeep(); renderSaved(); renderCurrent(); savedFix(); await drawLists();
+}
+/* THE SAVED FIX LIST, WITHOUT OPENING A FILE (the same line /roots/ shows). The summary the Fix list keeps for My research (fixes: counts per kind of fix, never a name) says what is left to do;
+   nothing new is stored. It follows the "Keep the last files" switch like the kept files beside it, so with that off nothing here is read. */
+function savedFix() {
+  const box = $('#stFixSaved'); if (!box) return;
+  const trees = rememberOn() ? (fixes.all() || {}) : {}, names = Object.keys(trees); box.hidden = !names.length; if (!names.length) return;
+  let left = 0; for (const n of names) for (const s of trees[n].sections || []) left += Math.max(0, s.total - s.done - s.asis);
+  $('#stFixTxt').textContent = names.length === 1 ? names[0] + ': ' + n0(left) + ' left to fix.' : names.length + ' family trees kept, ' + n0(left) + ' left to fix in all.';
 }
 /* "Last used": the same rows on the opening screen and on the "Your file" page, so there is one list and one place it is kept (this browser's tcRecent) */
 async function drawLists() {
   const rec = rememberOn() ? await recentList() : [];
   for (const [boxId, ulId] of [['stRecent', 'stList'], ['yfRecent', 'yfList']]) drawRecent($('#' + boxId), $('#' + ulId), rec);
-  noFiles();
+  savedFix(); noFiles();
 }
 function drawRecent(box, ul, rec) {
   if (!box || !ul) return; ul.textContent = ''; box.hidden = !rec.length;
@@ -636,12 +647,19 @@ function drawRecent(box, ul, rec) {
       inp.onblur = () => save(true);
       b.replaceWith(inp); inp.focus(); inp.select();
     };
-    b.onclick = async () => {
-      try { const db = await rdb(), bytes = await rreq(db.transaction('b').objectStore('b').get(r.name)); db.close(); if (!bytes) throw 0; example = false; recentSave(r.name, bytes.slice(0)); start(bytes, r.name, undefined, r.url); }
+    /* opening a kept file: the same path for both buttons. "Fix list" opens it straight on the Fix list (as on /roots/), the row itself opens it on the canvas */
+    const go = to => async () => {
+      try { const db = await rdb(), bytes = await rreq(db.transaction('b').objectStore('b').get(r.name)); db.close(); if (!bytes) throw 0; example = false; recentSave(r.name, bytes.slice(0)); start(bytes, r.name, undefined, r.url, to); }
       catch (e) { say('That file is no longer kept here. Open it again from your device.', true); await recentForget(r.name); drawLists(); }
     };
+    b.onclick = go(null);
     x.onclick = async () => { await recentForget(r.name); drawLists(); };
-    li.append(b, ed, x); ul.append(li);
+    li.append(b);
+    if (r.from !== 'tree.json') {   // a tree.json has no GEDCOM to check, so it has no Fix list
+      const fx = document.createElement('button'); fx.type = 'button'; fx.className = 'recx recfix'; fx.textContent = 'Fix list'; fx.title = 'Open ' + r.name + ' straight on its Fix list'; fx.setAttribute('aria-label', 'Open ' + r.name + ' on its Fix list');
+      fx.onclick = go('fix'); li.append(fx);
+    }
+    li.append(ed, x); ul.append(li);
   }
 }
 /* the file page says so when nothing at all is kept, rather than showing an empty heading */
@@ -690,7 +708,8 @@ let fixMsg = null, cmpFix = null, fxFrom = null, fxWas = null, pIdx = null, pIdx
 dec.autoOn();   // keeping starts on, on this device only, unless the visitor has switched it off (decisions.js says why)
 const toCanvas = msg => { const f = $('#cv'); if (f && f.contentWindow && !f.hidden) f.contentWindow.postMessage(msg, location.origin); };
 const fxw = createWorkspace({
-  root: $('#fx'), dec, fixes, links: () => links, fileName: () => curName || '', syncOn: () => syncState().on,
+  root: $('#fx'), dec, fixes, links: () => links, fileName: () => curName || '', syncOn: () => syncState().on, livingHidden: () => hide,
+  capInfo: rows => (window.raResearchFile && window.raResearchFile.capInfo ? window.raResearchFile.capInfo(rows) : null),   // the six-word code is only on the page when the six words are on
   show: keys => { closeFX(); toCanvas({ tcShow: keys }); }, openSettings: () => openSG(),
   onCount: open => toCanvas({ tcFixCount: open }),
 });

@@ -95,6 +95,7 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 #stRecent h2 { text-align: center; }
 #stRecent #stList { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 #stRecent .stsub { text-align: center; }
+#stRecent, #stRecent > *, #stList li { min-width: 0; }   /* a long file line is cut with an ellipsis inside the row, never pushes the row (and the Fix list button) off a narrow screen */
 #stList li, #yfList li { display: flex; align-items: stretch; gap: 6px; }
 #stList .recopen, #yfList .recopen { flex: 1 1 auto; min-width: 0; text-align: left; padding: 10px 14px; border-radius: 10px; border: 2px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; font: 700 15px/1.2 system-ui, sans-serif; transition: border-color .12s ease; }
 #stList .recopen, #yfList .recopen:hover { border-color: var(--accent); }
@@ -103,6 +104,7 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 #stList .recnote, #yfList .recnote { display: block; margin-top: 4px; font: italic 400 13px/1.25 system-ui, sans-serif; color: var(--ink); white-space: normal; }
 #stList .recx, #yfList .recx { flex: 0 0 auto; width: 38px; border-radius: 10px; border: 2px solid var(--line); background: transparent; color: var(--soft); cursor: pointer; font: 700 15px/1 system-ui, sans-serif; }
 #stList .recx, #yfList .recx:hover { border-color: var(--accent); color: var(--ink); }
+#stList .recfix, #yfList .recfix { width: auto; padding: 0 12px; color: var(--ink); font-size: 13px; white-space: nowrap; }
 #stList .recin, #yfList .recin { flex: 1 1 auto; min-width: 0; padding: 10px 14px; border-radius: 10px; border: 2px solid var(--focus); background: var(--card); color: var(--ink); font: 15px/1.2 system-ui, sans-serif; }
 
 /* Keep your work: one round save button with a few words beside it, linking to Connection & Backup. Green, because it is the "safe" colour on the rest of the site

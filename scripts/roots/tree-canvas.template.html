@@ -905,22 +905,22 @@ body.pr .card .hd:not(.op),body.pr .card .stops,body.pr .card .brc,body.pr .card
 .prgh{position:sticky;top:0;z-index:1;margin:0 0 4px;padding:5px 2px;background:var(--lk-card);color:var(--lk-ink);font:900 12px/1.2 Nunito,system-ui;border-bottom:2px solid var(--lk-line)}
 .prgh small{color:var(--lk-soft);font-weight:700;margin-left:4px}
 .prlist{display:flex;flex-direction:column;gap:6px}
-.prli{display:grid;grid-template-columns:minmax(0,1fr);gap:3px;border:2px solid var(--lk-line);border-radius:12px;padding:6px 8px;cursor:pointer;background:var(--lk-card);font-size:12px;line-height:1.3}
+.prli{display:block;border:2px solid var(--lk-line);border-radius:12px;padding:3px 8px 5px;cursor:pointer;background:var(--lk-card);font-size:12px;line-height:1.3}
 .prli:hover{border-color:var(--pone)}
 .prli.on{border-color:var(--psel);box-shadow:0 0 0 2px color-mix(in srgb,var(--psel) 25%,transparent)}
 .prli:focus-within{border-color:var(--psel)}
-.prsel{display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px;width:100%;border:0;background:transparent;color:var(--lk-ink);font:inherit;text-align:left;padding:2px 0 4px;cursor:pointer;border-radius:6px}
+.prsel{display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px;width:100%;border:0;background:transparent;color:var(--lk-ink);font:inherit;text-align:left;padding:1px 0 3px;cursor:pointer;border-radius:6px}
 .prsel:focus-visible{outline:2px solid var(--psel);outline-offset:2px}
 .prrel{font:800 10.5px Nunito,system-ui;color:var(--lk-soft);text-transform:uppercase;letter-spacing:.3px}
-.prside{display:grid;grid-template-columns:78px minmax(0,1fr);gap:0 8px;align-items:start;min-height:34px}
-.prlab{display:flex;align-items:center;gap:5px;font:800 11px/1.3 Nunito,system-ui;color:var(--lk-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-top:1px}
-.prlab i{width:10px;height:10px;border-radius:3px;background:var(--ac);flex:none}
-.prname{display:flex;flex-direction:column;min-width:0}
-.prnm{font-weight:800;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:break-word;word-break:normal;hyphens:manual}
-.prside.none .prnm{font-weight:600;color:var(--lk-soft);font-style:italic}
-.pryr{font-variant-numeric:tabular-nums;color:var(--lk-soft);font-size:10.5px}
-.prlk{font-size:10.5px;width:max-content;max-width:100%}
-.prmore{font-size:10.5px;color:var(--lk-soft);padding-left:86px}
+.prside{padding-left:17px;text-indent:-17px;margin:1px 0;overflow-wrap:break-word;word-break:normal}
+.prsq{display:inline-block;width:11px;height:11px;border-radius:3px;background:var(--ac);margin-right:6px;vertical-align:-1px;text-indent:0}
+.prside .prx,.prside .prx0{font-weight:800;color:var(--lk-ink)}
+.prside .prx{text-decoration:underline;text-underline-offset:2px}.prside .prx:hover,.prside .prx:focus-visible{color:var(--psel)}
+.prarr{font-weight:700;color:var(--lk-soft)}
+.prsrc{font-weight:700;font-size:10.5px;color:var(--lk-soft);margin-left:3px}
+.pryr{font-variant-numeric:tabular-nums;color:var(--lk-soft);font-size:10.5px;white-space:nowrap}
+.prmiss{font:600 11px Nunito,system-ui;font-style:italic;color:var(--lk-soft)}
+.prmore{font-size:10.5px;color:var(--lk-soft);padding-left:17px}
 .prx{color:inherit;text-decoration:underline;text-underline-offset:2px;font-weight:800}.prx:hover,.prx:focus-visible{color:var(--psel)}
 .prdst{font-weight:700;font-size:10.5px;color:var(--lk-soft);white-space:nowrap}
 .prph{display:inline-block;margin:0;font:700 10.5px/1.3 Nunito,system-ui;color:var(--lk-soft);border-left:3px solid var(--pone);padding-left:5px}
@@ -4741,8 +4741,9 @@ function prExt(q) {
   if (q.a === 0) { const L = RL(); let u = null; if (L) { try { u = L.url(q.id, q.name); } catch (e) { u = null; } } const h = u && (u.mh || u.tree); return h ? [{ href: h, label: 'MyHeritage' }] : []; }
   const h = TC.url(M, q); return h ? [{ href: h, label: M.archives[q.a].name + ' archive' }] : [];
 }
-const prExtA = (q, text, cls) => { const x = prExt(q)[0]; return x ? `<a class="${cls || 'prx'}" href="${esc(x.href)}" target="_blank" rel="noopener noreferrer" title="Open ${esc(q.name)} on ${esc(x.label)} (new tab)" aria-label="Open ${esc(q.name)} on ${esc(x.label)} (opens in a new tab)">${text}<span class="prdst"> ${esc(x.label)} &nearr;</span></a>` : ''; };
-const prNameL = q => prExtA(q, esc(q.name)) || esc(q.name);
+const prExtA = (q, text, cls) => { const x = prExt(q)[0]; if (!x) return ''; const lab = esc(q.name) + (q.a === 0 ? ' on MyHeritage' : ' in the ' + esc(M.archives[q.a].name) + ' archive') + ' (opens in a new tab)'; return `<a class="${cls || 'prx'}" href="${esc(x.href)}" target="_blank" rel="noopener noreferrer" title="${lab}" aria-label="${lab}">${text}<span class="prarr" aria-hidden="true"> &nearr;</span></a>`; };
+/* a name in the slot panel: ONE link out when the destination can be built, else the in-canvas focus link */
+const prNameLink = q => prExtA(q, prNm(q)) || `<a href="#" data-focus="${esc(q.key)}">${prNm(q)}</a>`;
 const prPH = s => s.ph ? `<span class="prph" title="${s.ph === 'file' ? 'This looks like a placeholder, not a real person. It is kept and shown, but never matched on its own.' : 'The archive entry looks like a placeholder, not a real person. It is shown, but never matched on its own.'}">placeholder entry in ${s.ph === 'file' ? 'your file' : 'the archive'}</span>` : '';
 const prSt = (state, notes) => TCPe().statusHtml(state, notes, esc);
 
@@ -4905,20 +4906,23 @@ function prList() {
   const rows = R.slots.slice().sort((a, b) => (a.gen - b.gen) || (L.pos.get(a.id).x - L.pos.get(b.id).x));
   const shown = P.listAll ? rows : rows.slice(0, 120);
   /* one aligned line: a fixed label column (colour + who), the name (breaks at spaces, ellipsis when long), years under it, then the link out under both */
-  const side = (label, colour, q, none) => {
-    if (!q) return `<div class="prside none"><span class="prlab"><i style="--ac:${esc(colour)}"></i>${esc(label)}</span><span class="prname"><span class="prnm">${esc(none)}</span></span></div>`;
-    const x = prExt(q)[0], nm = esc(q.name);
-    return `<div class="prside"><span class="prlab" title="${esc(label)}"><i style="--ac:${esc(colour)}"></i>${esc(label)}</span><span class="prname"><span class="prnm" title="${nm}">${nm}</span><small class="pryr">${esc(prYears(q))}</small>${x ? `<a class="prx prlk" href="${esc(x.href)}" target="_blank" rel="noopener noreferrer" title="Open ${nm} on ${esc(x.label)} (new tab)" aria-label="Open ${nm} on ${esc(x.label)} (opens in a new tab)">${esc(x.label)} &nearr;</a>` : ''}</span></div>`;
+  const side = (label, colour, q, tiny) => {
+    const nm = esc(q.name), sq = `<i class="prsq" style="--ac:${esc(colour)}" title="${esc(label)}"></i>`, src = tiny ? ` <small class="prsrc">${esc(label)}</small>` : '';
+    const inner = `${sq}${nm}`, x = prExt(q)[0];
+    const who = x ? prExtA(q, inner + src) : `<span class="prx0">${inner}${src}</span>`;
+    return `<div class="prside">${who} <small class="pryr">${esc(prYears(q))}</small></div>`;
   };
   const li = s => {
     const a = prShown(s), nm = prSlotName(s), fq = s.f >= 0 ? M.P[s.f] : null;
     const on = P.sel === nm, pn = s.state === 'only-a' || s.state === 'only-b' ? [] : (s.pnotes || []);
     const sr = TCPe().statusInfo(s.state, pn), al = TCPe().archLines(s, a, 2), gl = s.gen > 0 ? '+' + s.gen : '' + s.gen;
     const aria = `${REL[s.rel] || 'Person'}, ${TCPe().genLabel(s.gen)}: ${fq ? fq.name : 'not in your file'} and ${al.lines.length ? al.lines.map(x => M.P[s.arch[x].i].name).join(', ') : 'no one in the archives'}. ${sr.word}. Show on the canvas`;
-    let h = `<li class="prli${on ? ' on' : ''}" data-pr-row="${esc(nm)}"><button type="button" class="prsel" data-pr-slot="${esc(nm)}" aria-pressed="${on}" aria-label="${esc(aria)}"><span class="prrel">${esc(REL[s.rel] || 'Person')}</span>${prSt(s.state, pn)}${s.ph ? prPH(s) : ''}</button>`;
-    h += side('Your file', PAIRFILE, fq, 'not in your file');
-    if (al.lines.length) al.lines.forEach(x => { h += side(prArch(x).name, prArch(x).color, M.P[s.arch[x].i]); });
-    else h += side(many ? 'Archives' : prArch(1).name, many ? 'var(--pone)' : prArch(1).color, null, many ? 'not in any archive' : 'not in the archive');
+    const miss = [];
+    if (!fq) miss.push('not in your file');
+    if (!al.lines.length) miss.push(many ? 'not in any archive' : 'not in the archive');
+    let h = `<li class="prli${on ? ' on' : ''}" data-pr-row="${esc(nm)}"><button type="button" class="prsel" data-pr-slot="${esc(nm)}" aria-pressed="${on}" aria-label="${esc(aria)}"><span class="prrel">${esc(REL[s.rel] || 'Person')}</span>${prSt(s.state, pn)}${s.ph ? prPH(s) : ''}${miss.length ? `<span class="prmiss">${esc(s.state === 'only-a' || s.state === 'only-b' ? miss.join(', ') : miss.join(', '))}</span>` : ''}</button>`;
+    if (fq) h += side('Your file', PAIRFILE, fq, false);
+    al.lines.forEach(x => { h += side(prArch(x).name, prArch(x).color, M.P[s.arch[x].i], many); });
     if (al.more) h += `<div class="prmore">+${al.more} more ${al.more === 1 ? 'archive' : 'archives'} (open the place)</div>`;
     return h + '</li>';
   };
@@ -4934,11 +4938,11 @@ function prSlotPanel(s) {
   const si = TCPe().statusInfo(s.state, s.pnotes);
   let h = `<div class="prdet"><h4><span>${esc(REL[s.rel] || 'Person')}, ${esc(gen)}</span> ${prSt(s.state, s.pnotes)}</h4>${si.line ? `<p class="plines prwhy">${esc(si.line)}</p>` : ''}${s.ph ? `<p class="plines">${prPH(s)}. It is kept and shown, but it never drives a pairing and is never suggested as a match.</p>` : ''}`;
   let helped = false; const multi = M.archives.length > 2;
-  h += `<div class="prent file"><span class="pk" style="--ac:${PAIRFILE}"><i></i>Your file</span> ` + (s.f >= 0 ? `<a href="#" data-focus="${esc(M.P[s.f].key)}">${prNm(M.P[s.f])}</a>${prExtA(M.P[s.f], 'Open', 'prx prxo')}` : '<em>no one here</em>') + '</div>';
+  h += `<div class="prent file"><span class="pk" style="--ac:${PAIRFILE}"><i></i>Your file</span> ` + (s.f >= 0 ? prNameLink(M.P[s.f]) : '<em>no one here</em>') + '</div>';
   Object.keys(s.arch).map(Number).sort((a, b) => a - b).forEach(a => {
     const e = s.arch[a], q = M.P[e.i], ar = prArch(a);
     const lv = s.f >= 0 ? e.level : null, show = lv && (multi || lv !== s.state);
-    h += `<div class="prent"><span class="pk" style="--ac:${esc(ar.color)}"><i></i>${esc(ar.name)}</span> <a href="#" data-focus="${esc(q.key)}">${prNm(q)}</a>${prExtA(q, 'Open', 'prx prxo')} ${show ? prSt(lv, e.notes) : ''}${a === prShown(s) ? '' : ` <button class="lk-btn is-small" data-pr-showa="${a}" data-pr-k="${esc(nmk)}">Show on canvas</button>`}`;
+    h += `<div class="prent"><span class="pk" style="--ac:${esc(ar.color)}"><i></i>${esc(ar.name)}</span> ${prNameLink(q)} ${show ? prSt(lv, e.notes) : ''}${a === prShown(s) ? '' : ` <button class="lk-btn is-small" data-pr-showa="${a}" data-pr-k="${esc(nmk)}">Show on canvas</button>`}`;
     if (e.notes && e.notes.length) h += `<small class="prnote">${esc(e.notes.join('; '))}</small>`;
     if (s.f >= 0) {
       const d = dec(s.f, e.i);

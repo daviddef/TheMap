@@ -498,8 +498,11 @@ select.lk-input{width:auto;padding:4px 8px}
 #backMenu .bmo[disabled]{opacity:.45;cursor:not-allowed}
 /* the Sources tab */
 .srtiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 10px}
-.srt{border:2px solid var(--lk-line);border-radius:12px;background:var(--lk-card);padding:7px 4px;text-align:center}
-.srt b{display:block;font:400 22px/1 "Lilita One",system-ui}.srt span{display:block;margin-top:3px;font:800 10px/1.15 Nunito,system-ui;color:var(--lk-soft)}
+.srt{all:unset;box-sizing:border-box;cursor:pointer;border:2px solid var(--lk-line);border-radius:12px;background:var(--lk-card);padding:8px 4px;text-align:center;min-height:58px;display:flex;flex-direction:column;justify-content:center}
+.srt:hover,.srt:focus-visible{border-color:var(--lk-accent)}
+.srt b{display:block;font:400 22px/1 "Lilita One",system-ui}.srt span{display:block;margin-top:4px;font:800 10.5px/1 Nunito,system-ui;color:var(--lk-soft);white-space:nowrap}
+.srn{flex:0 0 auto;min-width:20px;height:20px;border-radius:50%;background:var(--lk-accent);color:var(--lk-on-accent,#fff);font:800 11px/20px Nunito,system-ui;text-align:center}
+.srgo{margin:8px 0 12px}.srgo-h{margin:0 0 2px;font-size:13px}.srgo-h small{color:var(--lk-soft);font-weight:700}
 .sr-hi{font-size:13px;line-height:1.45}
 ul.srx{list-style:none;margin:4px 0 8px;padding:0}
 ul.srx li{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;padding:6px 0;border-bottom:1.5px dashed var(--lk-line);font-weight:700;font-size:12.5px;line-height:1.35}
@@ -3435,7 +3438,7 @@ function planFor(p) {
   if (st.state === 'loading') {
     loadPlanData(F).then(data => { st.plan = TCR.plan(F, data); st.state = 'ready'; })
       .catch(e => { st.state = 'error'; st.err = String(e && e.message || e); })
-      .then(() => { if ((S.tab === 'next' || S.tab === 'ai') && [...S.sel][0] === p.key) renderInfo(); });
+      .then(() => { if ((S.tab === 'next' || S.tab === 'ai' || S.tab === 'sources') && [...S.sel][0] === p.key) renderInfo(); });
   }
   return st;
 }
@@ -4533,7 +4536,7 @@ function lifeHTML(p) {
 }
 function srcsHTML(p) {
   const s = (M.srcs && M.srcs[p.id]) || []; if (!s.length || p.living) return '';
-  return `<h4>Sources (${s.length})</h4><p class="plines srmore"><a href="#" data-tab-go="sources">See everything the archives hold on this person</a></p><ul class="srcs">${s.map(x => `<li>${x.u ? `<a href="${esc(x.u)}" target="_blank" rel="noopener">${esc(x.t)} &nearr;</a>` : esc(x.t)}</li>`).join('')}</ul>`;
+  return `<h4>Sources (${s.length})</h4><p class="plines srmore"><a href="#" data-tab-go="sources">See everything the archives hold on this person</a></p><ul class="srcs">${s.map((x, n) => `<li><span class="srn">${n + 1}</span> ${x.u ? `<a href="${esc(x.u)}" target="_blank" rel="noopener">${esc(x.t)} &nearr;</a>` : esc(x.t)}</li>`).join('')}</ul>`;
 }
 /* The Sources tab: everything this canvas can show about where a person's facts come from, gathered from what is already on the page (no request is made,
    and nothing about a person goes anywhere). It says what each thing IS: a source the tree cites, how well a family link is held up, a page the archive
@@ -4565,27 +4568,44 @@ function sourcesPanel() {
   if (p.f >= 0) link.push(['Father', p.f, p.fg]);
   if (p.m >= 0) link.push(['Mother', p.m, p.mg]);
   const kidsByLevel = {}; p.ch.forEach(e => { const L = lv(e.g).label; kidsByLevel[L] = (kidsByLevel[L] || 0) + 1; });
-  const parts = [];
-  const tile = (n, w) => `<div class="srt"><b>${n}</b><span>${w}</span></div>`;
-  parts.push(`<div class="srtiles">${tile(cited.length, cited.length === 1 ? 'source cited' : 'sources cited')}${tile(link.length + p.ch.length, 'family links held up')}${tile(fx.length + (p.cx > 0 ? p.cx : 0), 'corrections and fixes')}</div>`);
-  /* the welcome: what there is, said plainly, and what is not here */
+  const nCorr = fx.length + (p.cx > 0 ? p.cx : 0), parts = [];
+  /* three tiles, always one line of label: a click scrolls to that part */
+  const tile = (n, w, id) => `<button type="button" class="srt" data-srgo="${id}"><b>${n}</b><span>${w}</span></button>`;
+  parts.push(`<div class="srtiles">${tile(cited.length, 'sources', 'sr-src')}${tile(link.length + p.ch.length, 'family links', 'sr-links')}${tile(nCorr, 'corrections', 'sr-corr')}</div>`);
   const bits = [];
   bits.push(cited.length ? `${cited.length} source${cited.length === 1 ? '' : 's'} cited` : 'no source cited yet');
   if (link.length || p.ch.length) bits.push('their family links graded');
   if (brs.length) bits.push(`${brs.length} possible match${brs.length === 1 ? '' : 'es'} in another archive`);
-  parts.push(`<p class="plines sr-hi">Here is where <b>${esc(given)}</b> is held up in ${a.k === 'you' ? 'your file' : 'the ' + esc(a.name) + ' archive'}: ${bits.join(', ')}. Everything below is read from the tree and the archives, nothing is guessed. ${cited.length ? '' : 'The <a href="#" data-tab-go="next">Where next</a> tab says where the first source is likely to be.'}</p>`);
-  if (cited.length) parts.push(`<h4>Sources the tree cites</h4><ul class="srx">${cited.map(x => { const K = srcKind(x.u, x.t); return `<li><span class="srk">${esc(K.k)}</span>${x.u ? `<a href="${esc(x.u)}" target="_blank" rel="noopener">${esc(x.t)} &nearr;</a>` : esc(x.t)}${K.h && K.k === 'Website' ? ` <small>${esc(K.h)}</small>` : ''}</li>`; }).join('')}</ul>`);
-  else parts.push(`<h4>Sources the tree cites</h4><p class="plines">None yet for this person. A source is a record or page the tree names as the reason for a fact, such as a baptism, a census or a grave.</p>`);
+  parts.push(`<p class="plines sr-hi">Here is where <b>${esc(given)}</b> is held up in ${a.k === 'you' ? 'your file' : 'the ' + esc(a.name) + ' archive'}: ${bits.join(', ')}. Everything below is read from the tree and the archives, nothing is guessed.</p>`);
+  /* the sources are numbered 1, 2, ...: the same numbers as the list on the Person tab */
+  if (cited.length) parts.push(`<h4 id="sr-src">Sources the tree cites (${cited.length})</h4><ul class="srx">${cited.map((x, n) => { const K = srcKind(x.u, x.t); return `<li><span class="srn">${n + 1}</span><span class="srk">${esc(K.k)}</span>${x.u ? `<a href="${esc(x.u)}" target="_blank" rel="noopener">${esc(x.t)} &nearr;</a>` : esc(x.t)}${K.h && K.k === 'Website' ? ` <small>${esc(K.h)}</small>` : ''}</li>`; }).join('')}</ul>`);
+  else parts.push(`<h4 id="sr-src">Sources the tree cites (0)</h4><p class="plines">None yet for this person. A source is a record or page the tree names as the reason for a fact, such as a baptism, a census or a grave.</p>`);
   if (link.length || p.ch.length) {
-    parts.push(`<h4>How the family links are held up</h4><ul class="srx srl">${link.map(([w, q, g]) => `<li><span class="srk">${w}</span>${plinkHTML(q)}${chip(g)}</li>`).join('')}${p.ch.length ? `<li><span class="srk">Children</span><span>${p.ch.length}: ${Object.entries(kidsByLevel).map(([k, n]) => n + ' ' + k.toLowerCase()).join(', ')}</span></li>` : ''}</ul>
-      <p class="plines sr-key"><b>Definite</b> is read from a register, <b>Supported</b> is household or tree evidence, <b>Not proven</b> is an index entry only.</p>`);
+    parts.push(`<h4 id="sr-links">How the family links are held up</h4><ul class="srx srl">${link.map(([w, q, g]) => `<li><span class="srk">${w}</span>${plinkHTML(q)}${chip(g)}</li>`).join('')}${p.ch.length ? `<li><span class="srk">Children</span><span>${p.ch.length}: ${Object.entries(kidsByLevel).map(([k, n]) => n + ' ' + k.toLowerCase()).join(', ')}</span></li>` : ''}</ul>
+      <p class="plines sr-key"><b>Definite</b>: the archive marks the link as read from a register entry. The tree does not say which register, so the archive's page and the records below are where to look. <b>Supported</b>: household or tree evidence. <b>Not proven</b>: an index entry only.</p>`);
   }
-  if (page || corr) parts.push(`<h4>The archive's own pages</h4><ul class="srx">${page ? `<li><span class="srk">Page</span><a href="${esc(page)}" target="_blank" rel="noopener">${esc(p.name)} in the ${esc(a.name)} archive &nearr;</a></li>` : ''}${corr ? `<li><span class="srk">Corrections</span><a href="${esc(corr)}" target="_blank" rel="noopener">${p.cx} ${p.cx === 1 ? 'correction or note' : 'corrections and notes'} recorded &nearr;</a></li>` : ''}</ul>`);
+  if (page) parts.push(`<h4>The archive's own page</h4><ul class="srx"><li><span class="srk">Page</span><a href="${esc(page)}" target="_blank" rel="noopener">${esc(p.name)} in the ${esc(a.name)} archive &nearr;</a></li></ul>`);
   if (brs.length) parts.push(`<h4>The same person in another archive</h4><ul class="srx">${brs.map(b => { const o = M.P[TC.bridgeOther(b, p.i)], st = TC.bridgeState(M, b); return `<li><span class="srk">${st === 'confirmed' ? 'Confirmed' : 'Possible'}</span>${plinkHTML(o.i)}<small>${esc(M.archives[o.a].name)} archive &middot; ${esc(TC.bridgeNotes(b).join(', '))}</small></li>`; }).join('')}</ul>`);
-  if (fx.length) parts.push(`<h4>On your fix list</h4><ul class="srx">${fx.slice(0, 6).map(i => `<li><span class="srk">Fix</span><span>${esc(i.head || i.t)}</span></li>`).join('')}</ul><p class="plines"><a href="#" data-tab-go="fix">${fx.length === 1 ? 'See how to fix it' : 'See all ' + fx.length + ' and how to fix them'}</a></p>`);
-  const pl = [p.bp && 'born in ' + p.bp, p.dp && 'died in ' + p.dp].filter(Boolean).join(', ');
-  parts.push(`<h4>Where to look for more</h4><p class="plines">The volumes, registers and archives for ${pl ? esc(pl) : 'the places in their life'}, with what each costs to read, are in <a href="#" data-tab-go="next">Where next</a>. What researchers have already searched is kept by place and family in the Atlas, never by person${AT.base != null ? `, and is on <a href="/my-research/" target="_blank" rel="noopener">My research</a>` : ''}.</p>`);
+  if (nCorr) parts.push(`<h4 id="sr-corr">Corrections and fixes (${nCorr})</h4><ul class="srx">${p.cx > 0 && corr ? `<li><span class="srk">Archive</span><a href="${esc(corr)}" target="_blank" rel="noopener">${p.cx} ${p.cx === 1 ? 'correction or note' : 'corrections and notes'} the ${esc(a.name)} archive has recorded about them: read them on its page &nearr;</a></li>` : ''}${fx.slice(0, 6).map(i => `<li><span class="srk">Fix list</span><span>${esc(i.head || i.t)}</span></li>`).join('')}</ul>${fx.length ? `<p class="plines"><a href="#" data-tab-go="fix">${fx.length === 1 ? 'See how to fix it' : 'See all ' + fx.length + ' and how to fix them'}</a></p>` : ''}`);
+  /* real places to go: the collections the Record Atlas holds for the places and years of their life, each a link, by the order of work (death, marriage, birth) */
+  parts.push(`<h4 id="sr-go">Records you can open</h4>` + goHTML(p));
   return `<h3>${esc(p.name)}</h3>` + parts.join('');
+}
+/* the plan Where-next builds, shown here as the few collections that matter most for each event: free ones first, each a link that opens the collection */
+function goHTML(p) {
+  const st = planFor(p), plan = st.plan;
+  if (st.state === 'loading') return `<p class="nx-small">Reading the Record Atlas for the places in their life…</p>`;
+  if (st.state !== 'ready' || !plan || !plan.steps.length) return `<p class="plines">${st.state === 'ready' ? 'No place or year is recorded for this person, so there is nothing to point at yet. A birth year and place is the first thing to find.' : 'The Record Atlas cannot be read from here, so open <a href="#" data-tab-go="next">Where next</a> for a link to each place.'}</p>`;
+  const rank = { free: 0, index: 1, mixed: 2, account: 3, paid: 4 };
+  const pick = list => list.slice().sort((x, y) => (rank[x.access] ?? 5) - (rank[y.access] ?? 5)).slice(0, 3);
+  const steps = plan.steps.filter(s => s.sources.length || s.fs.length).map(s => {
+    const when = yr(s.year, s.est), where = s.where && s.where.name ? esc(s.where.name) : 'place not recorded';
+    const more = Math.max(0, s.sources.length + s.fs.length + (s.more || 0) - 3);
+    return `<div class="srgo"><p class="srgo-h"><b>${esc(s.title)}</b> <small>${esc(when)} &middot; ${where}</small></p>
+      <ul class="nx-src">${pick(s.sources).map(srcHTML).join('')}${s.sources.length < 3 ? s.fs.slice(0, 3 - s.sources.length).map(f => `<li>${alink(f.href, f.t)} <small>FamilySearch &middot; ${f.from}&ndash;${f.to}</small></li>`).join('') : ''}</ul>
+      ${more ? `<p class="nx-small">and ${more} more for ${where}: <a href="#" data-tab-go="next">Where next</a></p>` : ''}</div>`;
+  });
+  return steps.length ? steps.join('') + `<p class="plines sr-key">Read live from the Record Atlas. Only place ids were asked for; no name or date left this page. What researchers have already searched is kept by place and family, never by person${AT.base != null ? `, and is on <a href="/my-research/" target="_blank" rel="noopener">My research</a>` : ''}.</p>` : `<p class="plines">The Atlas lists no collection for the places in their life yet. <a href="#" data-tab-go="next">Where next</a> has the neighbouring places and what the records were filed under.</p>`;
 }
 function personPanel() {
   const keys = [...S.sel];
@@ -4937,6 +4957,7 @@ function tabEdges(ih) { if (!ih) return; ih.classList.toggle('mr', ih.scrollLeft
   info.addEventListener('click', e => { if (Date.now() - dragged < 250 && e.target.closest('.ih')) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
 })();
 $('#info').addEventListener('click', e => {
+  const sg = e.target.closest('[data-srgo]'); if (sg) { const t = $('#' + sg.dataset.srgo); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
   const go = e.target.closest('[data-tab-go]'); if (go) { e.preventDefault(); S.tab = go.dataset.tabGo; renderInfo(); return; }
   const tab = e.target.closest('[data-tab]');
   if (tab) { if (tab.dataset.tab === 'close') { S.infoOpen = false; $('#info').classList.remove('on'); syncButtons(); return; } S.tab = tab.dataset.tab; renderInfo(); return; }

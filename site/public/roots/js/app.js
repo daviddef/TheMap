@@ -359,6 +359,9 @@ function fixRow(s, i) {
     head.append(el('b', null, 'Possibly the same person')); body.append(head, note);
     note.textContent = i.note + (i.ap || i.bp ? ' · ' + (i.ap || '—') + ' / ' + (i.bp || '—') : '');
     body.append(plist([{ name: i.an, id: i.a }, { name: i.bn, id: i.b }], 2));
+  } else if (s.key === 'viaph') {
+    head.append(el('b', null, i.size + (i.size === 1 ? ' person' : ' people') + ' joined to the main tree only through ' + (i.via || []).join(', ') + (i.viaN > (i.via || []).length ? ' and ' + (i.viaN - i.via.length) + ' more' : ''))); body.append(head, plist(i.people, i.size));
+    note.textContent = 'The link to the main tree runs through a placeholder with no real name. Name that person, or find who they were, and the link becomes real.'; body.append(note);
   } else if (s.key === 'apart') {
     head.append(el('b', null, i.size + (i.size === 1 ? ' person' : ' people') + ' not connected to the main tree')); body.append(head, plist(i.people, i.size));
     /* WHY, because «he is in my tree» is the first thing anyone says: this list is about the FILE, not the tree online. */
@@ -405,7 +408,7 @@ function fixTab() {
   const n = fix ? fix.sections.reduce((t, s) => t + s.items.filter(i => !asIs.has(i.key) && !ticked.has(i.key)).length, 0) : 0;
   c.textContent = n ? n0(n) : ''; c.title = n ? n0(n) + ' fixes left to do' : '';
 }
-const hay = (s, i) => (s.key === 'names' ? i.name + ' ' + i.kin : s.key === 'dupes' ? i.an + ' ' + i.bn : s.key === 'apart' ? i.people.map(p => p.name).join(' ') : (i.raw || '') + ' ' + (i.name || '') + ' ' + (i.country ? i.country + ' ' + i.label : '') + ' ' + (i.reasons ? i.reasons.map(r => r.text).join(' ') : '') + ' ' + (i.people ? i.people.map(p => p.name).join(' ') : '')).toLowerCase();
+const hay = (s, i) => (s.key === 'names' ? i.name + ' ' + i.kin : s.key === 'dupes' ? i.an + ' ' + i.bn : (s.key === 'apart' || s.key === 'viaph') ? i.people.map(p => p.name).join(' ') : (i.raw || '') + ' ' + (i.name || '') + ' ' + (i.country ? i.country + ' ' + i.label : '') + ' ' + (i.reasons ? i.reasons.map(r => r.text).join(' ') : '') + ' ' + (i.people ? i.people.map(p => p.name).join(' ') : '')).toLowerCase();
 /* OPEN ALL, A BATCH AT A TIME. "Open all for the fixes group, so I don't have to do one at a time": every person on the rows still to do in a group,
    opened on the tree site in new tabs. Ten at a time, because a browser lets a page open a handful of tabs from one click and some hundreds
    of them would bury the machine; the button says how many are left and each press opens the next ten. A person who is on several rows is

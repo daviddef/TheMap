@@ -148,7 +148,7 @@
      { v:1, items: { treeKey: { k, label, src, upd, n, w } }, gone: { treeKey: ISO } }. See public/tree-canvas/work.js for what a record holds and why it
      holds no name. Everything arriving here (a file, the six-word copy, a hand-edited export) is checked field by field, and anything else is dropped. */
   var CANVAS_ARCH = ["defranceski", "booyzen", "luwinski", "lerena", "falco", "blazevic", "darcy", "mazza"];
-  var CANVAS_MAX_ITEMS = 12, CANVAS_MAX_CARDS = 3000, CANVAS_ITEM_CHARS = 150000, CANVAS_TOTAL_CHARS = 360000;
+  var CANVAS_MAX_PAIR_DEC = 400, CANVAS_MAX_ITEMS = 12, CANVAS_MAX_CARDS = 3000, CANVAS_ITEM_CHARS = 150000, CANVAS_TOTAL_CHARS = 360000;
   var ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
   function num(n, lim) { return typeof n === "number" && isFinite(n) ? Math.max(-lim, Math.min(lim, n)) : 0; }
   function id(s) { return typeof s === "string" && /^[0-9a-z]{1,16}$/.test(s) ? s : null; }
@@ -165,13 +165,23 @@
       if (!Array.isArray(r) || !id(r[0])) return;
       c.push([r[0], Math.round(num(r[1], 1e6)), Math.round(num(r[2], 1e6)), r[3] ? 1 : 0, r[4] | 0, r[5] | 0, r[6] | 0, r[7] ? 1 : 0, id(r[8]) || ""]);
     });
-    var v = w.view || {}, o = w.opts || {};
+    var v = w.view || {}, o = w.opts || {}, pr = null;
+    /* Compare in pairs: which archives, the starting people (hashes) and the visitor's accepted / rejected pairings (hash pairs) */
+    if (w.pr && typeof w.pr === "object") {
+      var P = w.pr, seenA = {};
+      pr = { on: P.on ? 1 : 0,
+        ar: (Array.isArray(P.ar) ? P.ar : []).filter(function (a) { if (CANVAS_ARCH.indexOf(a) < 0 || seenA[a]) return false; seenA[a] = 1; return true; }),
+        an: (Array.isArray(P.an) ? P.an : []).filter(id).slice(0, 9),
+        whole: P.whole ? 1 : 0,
+        d: (Array.isArray(P.d) ? P.d : []).filter(function (r) { return Array.isArray(r) && id(r[0]) && id(r[1]) && (r[2] === "y" || r[2] === "n"); }).slice(0, CANVAS_MAX_PAIR_DEC).map(function (r) { return [r[0], r[1], r[2]]; }) };
+    }
     var out = { k: it.k, label: typeof it.label === "string" ? it.label.replace(/[\u0000-\u001f]/g, " ").slice(0, 120) : "", src: src, upd: it.upd, n: c.length,
       w: { v: 1, c: c, view: { x: Math.round(num(v.x, 1e6)), y: Math.round(num(v.y, 1e6)), k: Math.max(0.05, Math.min(8, num(v.k, 8) || 1)) },
         path: Array.isArray(w.path) && w.path.length === 2 && id(w.path[0]) && id(w.path[1]) ? [w.path[0], w.path[1]] : null,
         dec: (Array.isArray(w.dec) ? w.dec : []).slice(0, 500).filter(function (r) { return Array.isArray(r) && id(r[0]) && typeof r[1] === "string"; }).map(function (r) { return [r[0], r[1].slice(0, 16)]; }),
         opts: { stopAtNotProven: !!o.stopAtNotProven, suggested: o.suggested !== false, gens: !!o.gens },
         filter: (Array.isArray(w.filter) ? w.filter : []).filter(function (i) { return Number.isInteger(i) && i >= 0 && i < 9; }).slice(0, 9) } };
+    if (pr) out.w.pr = pr;
     return JSON.stringify(out).length <= CANVAS_ITEM_CHARS ? out : null;
   }
   function cleanCanvas(x) {

@@ -8012,7 +8012,7 @@ window.addEventListener("load", async function () {
       h.push('<details class="ra-area-g" ' + (k !== "none" || g.length <= 40 ? "open" : "") + '><summary><i style="background:' + RC_COL[k] + '"></i>' + RC_LAB[k] + " <b>" + nfl(g.length) + "</b></summary><ul>");
       g.slice(0, 400).forEach(function (p) {
         var nv = (p.v || 0) || (p.c || 0);
-        h.push('<li><button type="button" class="ra-area-p" data-open="' + esc(p.i) + '"><i' + (k === "busy" ? ' class="pz"' : "") + ' style="background:' + RC_COL[k] + '"></i><span>' + esc(p.n) + "</span>" +
+        h.push('<li' + (nv >= 10 ? ' class="ra-area-big"' : "") + '><button type="button" class="ra-area-p" data-open="' + esc(p.i) + '"><i' + (k === "busy" ? ' class="pz"' : "") + ' style="background:' + RC_COL[k] + '"></i><span>' + esc(p.n) + "</span>" +
                '<small>' + (CNAME[p.cc] || p.cc || "") + (nv ? " · " + nfl(nv) + " vol" : " · no volumes") + "</small></button>" +
                '<div class="ra-area-v" data-vols="' + esc(p.i) + '"></div></li>');
       });
@@ -10441,8 +10441,19 @@ window.addEventListener("load", async function () {
   :global(.ra-rc-dots i:nth-child(2)) { background: #E08A12; }
   :global(.ra-rc-dots i:nth-child(3)) { background: #A9B2B7; }
   :global(.ra-rc-tog.on .ra-rc-dots i) { box-shadow: 0 0 0 1.5px var(--accent); }
-    /* The panel is a four-column grid for a place; the area list takes the whole width, not one column of it. */
-  :global(.ra-area) { grid-column: 1 / -1; max-width: 760px; }
+    /* The panel is a four-column grid for a place; the area list takes the whole width, not one column of it. It used to stop at 760px, which
+       left half the page empty and made a long list a long scroll. It now fills the same frame as the map above it, and the places of each
+       group flow in TWO columns (down the first, then down the second, so each group still reads A to Z). `columns: 2 25rem` is two columns
+       only when two 25rem columns fit: a phone, a narrow window, and the full-screen sidebar all stay one column, with no breakpoint to
+       get wrong. A place is never split from its heading or its first book; a place with ten books or more (.ra-area-big) takes the whole
+       width and lays its own books out in two columns, so one long place does not leave a hole in a column. */
+  :global(.ra-area) { grid-column: 1 / -1; }
+  :global(.ra-area-g > ul) { columns: 2 25rem; column-gap: 36px; }
+  :global(.ra-area-g > ul > li) { break-inside: avoid; }
+  :global(.ra-area-g > ul > li.at-sub), :global(.ra-area-g > ul > li.ra-area-big) { column-span: all; }
+  :global(.ra-area-p), :global(.ra-area-v > details > summary) { break-after: avoid; }
+  :global(.ra-area-big .ra-vl) { columns: 2 24rem; column-gap: 36px; }
+  :global(.ra-area-big .ra-vl > li) { break-inside: avoid; }
 
   /* ---- saved views and areas ---- */
   .ra-bar-views .ra-cats-wrap { min-width: 0; }

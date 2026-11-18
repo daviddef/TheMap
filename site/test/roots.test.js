@@ -541,7 +541,7 @@ test("Orphans is a tab of the Atlas's own Roots & Routes page; the viewer drops 
   const tpl = fs.readFileSync(path.join(here, "../../scripts/roots/tree-views.template.html"), "utf8");
   // the tab: after Tree views, same markup and badge as Places to review and Fix list
   const tabs = [...page.matchAll(/data-tab="([a-z]+)"/g)].map(m => m[1]);
-  assert.deepEqual(tabs, ["canvas", "tree", "orphans", "report", "review", "fix", "export"], "Orphans sits straight after Tree views");
+  assert.deepEqual(tabs, ["canvas", "tree", "orphans", "report", "review", "fix"], "Orphans sits straight after Tree views; there is no Export tab (it is the Tree Canvas's Your file)");
   assert.match(page, /data-tab="orphans"[^>]*>Orphans <span id="orcount" class="count"><\/span><\/button>/, "a count badge in the same style as the others");
   // it is the viewer's Orphans view, not a second viewer: one panel, one frame
   assert.match(app, /const panel = name === 'orphans' \? 'tree' : name;/);

@@ -34,7 +34,11 @@ self.onmessage = async e => {
       try { self.postMessage({ type: 'checklist', ...session.checklist({ living: m.living, ancestry: m.ancestry }) }); }
       catch (err) { self.postMessage({ type: 'checklist-failed', msg: String(err && err.message || err), stack: String(err && err.stack || '') }); }
     } else if (m.cmd === 'suggest' && session) {
-      self.postMessage({ type: 'suggested', raw: m.raw, rows: session.suggest(m.raw) });
+      { const rows = session.suggest(m.raw); self.postMessage({ type: 'suggested', raw: m.raw, rows, labels: rows.map(r => session.placeLabel(r)) }); }
+    } else if (m.cmd === 'places' && session) {
+      /* the Tree Canvas's Places tab (placereview.js); asked for in the background like the checklist, so a problem in it must not take the page down */
+      try { self.postMessage({ type: 'places', ...session.places({ living: m.living, ancestry: m.ancestry }) }); }
+      catch (err) { self.postMessage({ type: 'places-failed', msg: String(err && err.message || err), stack: String(err && err.stack || '') }); }
     } else if (m.cmd === 'pick' && session) {
       session.pick(m.raw, m.cand);
       self.postMessage({ type: 'done', first: false, ...(await session.draw()) });

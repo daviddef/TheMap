@@ -31,14 +31,11 @@ export function isPlaceholderName(name, given, sur) {
 }
 const isPlaceholder = p => !!p && !p.liv && isPlaceholderName('', p.given, p.sur);
 
-export function buildChecklist(env) {
-  const { parsed, P, est, dest, merges, resolve, label } = env, living = env.living !== false;
-  const shown = p => (p.liv && !living ? 'Living person' : name(p));
-  const keep = p => living || !p.liv;
+/* Every event that names a place, grouped by the place text exactly as the file writes it: raw -> { count, people: [{ id, name, ev, date }] }. `shown(p)` is the
+   name to give a person, `keep(p)` leaves one out (a living person, when they are hidden). Shared by the fix list and the canvas's Places tab (placereview.js). */
+export function eventsByPlace(parsed, P, shown, keep) {
   const idOf = x => x.replace(/@/g, '');
-
-  /* ---- every event with a place, per person ---- */
-  const byRaw = new Map();                                              // raw text -> { count, people: [...] }
+  const byRaw = new Map();
   const add = (raw, p, ev, date) => {
     let g = byRaw.get(raw); if (!g) byRaw.set(raw, g = { count: 0, people: [] });
     g.count++; g.people.push({ id: p.id, name: shown(p), ev, date: date || '' });
@@ -57,6 +54,17 @@ export function buildChecklist(env) {
       if (own.length) visit(r, own);
     }
   }
+  return byRaw;
+}
+
+export function buildChecklist(env) {
+  const { parsed, P, est, dest, merges, resolve, label } = env, living = env.living !== false;
+  const shown = p => (p.liv && !living ? 'Living person' : name(p));
+  const keep = p => living || !p.liv;
+  const idOf = x => x.replace(/@/g, '');
+
+  /* ---- every event with a place, per person ---- */
+  const byRaw = env.byRaw || eventsByPlace(parsed, P, shown, keep);     // raw text -> { count, people: [...] } (the session may hand over the walk it already made)
 
   /* A suggested form is a FIX only when it loses nothing and is the same name spelled differently: the town matches (diacritics, a typo) and any
      region the text gives matches too. A different town or region name may be the historical one (Port Elizabeth, Natal), so it is only
@@ -83,10 +91,16 @@ export function buildChecklist(env) {
       if (sure && c.fix) places.push({ key: 'p|' + raw, raw, to: c.to, count: g.count, people: g.people });
       else check.push({ key: 'c|' + raw, raw, to: c.to, tier: r.tier, why: sure ? 'a different name: it may be the historical name, so check it against the date' : 'a probable match, not a certain one', count: g.count, people: g.people });
     } else if (['ambiguous', 'review-skipped-part', 'review-other-country', 'not-found'].includes(r.tier)) {
-      decide.push({ key: 'd|' + raw, raw, tier: r.tier, count: g.count, cands: (r.cands || []).slice(0, 5).map(label), candPlaces: (r.cands || []).slice(0, 5).map(c => ({ n: c.n, k: c.k, y: c.y, x: c.x })), people: g.people });
+      decide.push({ key: 'd|' + raw, raw, tier: r.tier, count: g.count, cands: (r.cands || []).slice(0, 5).map(label), candPlaces: (r.cands || []).slice(0, 5).map(c => ({ n: c.n, k: c.k, y: c.y, x: c.x, region: c.region || null })), people: g.people });
     }
   }
   for (const a of [places, check, decide]) a.sort((x, y) => az(x.raw, y.raw));
+  /* a LIKELY candidate for a text that could be several places, from where the people who use it and their relatives are firmly recorded (likely.js). A suggestion, never a
+     finding: the row carries `likely: { idx, reason }` (idx into cands) or `noNeighbours: true`, and the candidates themselves stay as they were, in the same order. */
+  if (env.likely) for (const i of decide) {
+    const L = env.likely.likely(i.raw, i.candPlaces); if (!L) continue;
+    if (L.idx !== undefined) i.likely = { idx: L.idx, reason: L.reason }; else i.noNeighbours = true;
+  }
 
   /* ---- years ---- */
   const years = [];

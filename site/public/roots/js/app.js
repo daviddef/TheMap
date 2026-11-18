@@ -33,7 +33,6 @@ function start(bytes, name) {
     if (m.type === 'progress') { $('#busymsg').textContent = m.msg + '…'; if (window.RALoad) RALoad.say(m.msg + '…'); }
     else if (m.type === 'error') fail('Sorry, that file could not be read: ' + m.msg);
     else if (m.type === 'done') done(m);
-    else if (m.type === 'exported') exported(m);
     else if (m.type === 'who') mhWho(m);
     else if (m.type === 'checklist') fixlist(m);
     else if (m.type === 'checklist-failed') { if (window.console) console.error('fix list', m.msg, m.stack); if (!document.getElementById('p-fix').hidden) $('#fsecs').textContent = 'The fix list could not be made for this file: ' + m.msg; }
@@ -155,24 +154,11 @@ function pick(raw, cand) { $('#busymsg').textContent = 'Redrawing…'; if (windo
 
 document.addEventListener('click', e => { const g = e.target.closest && e.target.closest('[data-goto]'); if (g) tab(g.dataset.goto); });
 
-/* ---------- export ---------- */
-let xurls = [];
-$('#xgo').onclick = () => {
-  if (!worker) return; $('#xbusy').hidden = false; $('#xgo').disabled = true; $('#xout').hidden = true;
-  worker.postMessage({ cmd: 'export', mode: document.querySelector('input[name=xm]:checked').value });
-};
-function exported(m) {
-  for (const u of xurls) URL.revokeObjectURL(u); xurls = [];
-  const f = URL.createObjectURL(new Blob([m.text], { type: 'text/plain;charset=utf-8' })), l = URL.createObjectURL(new Blob([m.logText], { type: 'text/plain;charset=utf-8' }));
-  xurls.push(f, l);
-  const a = $('#xfile'), b = $('#xlog'); a.href = f; a.download = 'tree-' + m.mode + '.ged'; b.href = l; b.download = 'tree-' + m.mode + '-change-log.txt';
-  const s = m.stats, bits = [];
-  if (s.coords) bits.push(n0(s.coords) + ' places given coordinates'); if (s.applied) bits.push(n0(s.applied) + ' place texts replaced');
-  if (s.redacted) bits.push(n0(s.redacted) + ' living people reduced to a bare record');
-  if (s.textRedacted) bits.push(n0(s.textRedacted) + ' lines with a living name changed'); if (s.recoded) bits.push(n0(s.recoded) + ' lines re-read from Windows-1252 to UTF-8');
-  $('#xsum').textContent = m.changed ? 'Made: ' + n0(m.from) + ' lines became ' + n0(m.lines) + '. ' + bits.join('; ') + '.' : 'No changes: the file is the same as the one you gave us.';
-  $('#xout').hidden = false; $('#xbusy').hidden = true; $('#xgo').disabled = false;
-}
+/* ---------- the old Export tab ---------- */
+/* The Export tab was removed on 19 Nov 2026: exporting lives in the Tree Canvas's "Your file" page. An old link ending #export lands on the Import report (once a file
+   is open) with one line saying where it went. */
+function exportMoved() { const old = location.hash === '#export'; $('#exportmoved').hidden = !old; if (old) openTo = 'report'; }
+exportMoved(); addEventListener('hashchange', exportMoved);
 
 /* ---------- tabs and the file ---------- */
 /* The Tree Canvas (canvas.html) is mounted the first time its tab is shown for a given file, and again for a new file: it reads the tree from

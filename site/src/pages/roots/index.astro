@@ -53,6 +53,7 @@ const here = Astro.url.pathname;
 </header>
 
 <main>
+<p id="exportmoved" class="small moved" role="status" hidden>Exporting your GEDCOM has moved. Open your file in the <a href="../tree-canvas/">Tree Canvas</a> and choose <b>Your file</b> from its menu: the same four ways to export are there.</p>
 <section id="start">
   <div class="promise" role="note">
     <h2>Your file never leaves this computer</h2>
@@ -62,7 +63,7 @@ const here = Astro.url.pathname;
       <li>This page has no analytics, no cookies and no third-party scripts, and the browser is told not to let it contact any other site.</li>
       <li>To place your people it downloads the Atlas's own place files for the countries your tree mentions. Our server can see which countries were asked for; it never sees your file or a name from it.</li>
       <li>In the Tree canvas, "Where to from here" asks our server for the Atlas's own record of each place in that person's life, the powers that ruled it and the places near it. Our server can see which places were asked for, and when; it never sees a name, a date or your file. Nothing is kept on this device by the canvas.</li>
-      <li>People who may be alive are shown on your own screen. The shareable export leaves them out, and you can hide them with one tick.</li>
+      <li>People who may be alive are shown on your own screen. The shareable export (in the Tree Canvas, under Your file) leaves them out, and you can hide them with one tick.</li>
     </ul>
   </div>
 
@@ -110,7 +111,6 @@ const here = Astro.url.pathname;
       <button role="tab" data-tab="report">Import report</button>
       <button role="tab" data-tab="review">Places to review <span id="rcount" class="count"></span></button>
       <button role="tab" data-tab="fix">Fix list <span id="fxcount" class="count"></span></button>
-      <button role="tab" data-tab="export">Export</button>
     </nav>
     <button id="keep" class="link" title="Keep this file in this browser so you can reopen it with one click. It stays on this device. The last few files are kept automatically unless you untick the box on the start screen.">Keep on this device</button>
     <button id="again" class="link">Open another file</button>
@@ -124,6 +124,7 @@ const here = Astro.url.pathname;
       <input id="rfilter" type="search" placeholder="Filter places" aria-label="Filter places">
       <span id="rnote" class="small"></span>
     </div>
+    <p class="small">Places you pick here redraw your tree on this page only. The “Cleaned” export, which wrote picks into a downloaded file, is gone: exporting lives in the <a href="../tree-canvas/">Tree Canvas</a> under Your file. Places to review is moving to the canvas’s Fix list as a cleanup checklist: copy the suggestion, open the person in your own tree program and fix it there.</p>
     <div id="rlist"></div>
   </div>
   <div id="p-fix" class="panel" hidden>
@@ -153,25 +154,6 @@ const here = Astro.url.pathname;
     </div>
     <p class="small">What is kept for matching is a scrambled fingerprint of each row, with the day (not encryption), so the same tree finds its decisions again. For <a href="../my-research/#fixes">My research</a> a short summary is kept too: the file name, how many fixes are left of each kind, and the place texts as typed in your file. People are only counted, never named. All of it stays in this browser; switching the box off, or “Forget”, removes it.</p>
     <div id="fsecs"></div>
-  </div>
-  <div id="p-export" class="panel" hidden>
-    <h2>Export your GEDCOM, improved</h2>
-    <p>Your own file, line for line, with only the changes you choose. Nothing is dropped or rewritten without being listed in a change log, and
-    nothing leaves this page: the new file is made here and saved by your browser.</p>
-    <fieldset id="xmode" class="xmodes">
-      <legend>What to change</legend>
-      <label><input type="radio" name="xm" value="enriched" checked> <b>Enriched</b> · adds coordinates and an Atlas id under each place that was matched exactly or that you picked. No existing line is changed. The safest choice.</label>
-      <label><input type="radio" name="xm" value="cleaned"> <b>Cleaned</b> · as enriched, and the places you picked on the review screen replace the old place text (the old text is kept beside it).</label>
-      <label><input type="radio" name="xm" value="shareable"> <b>Shareable</b> · as cleaned, and living people are reduced to a bare “Living” record, their family events removed, so you can send it to a relative. Read the change log: a living person named in a way we cannot recognise stays.</label>
-      <label><input type="radio" name="xm" value="faithful"> <b>No changes</b> · your file again, as it was.</label>
-    </fieldset>
-    <p><button id="xgo" class="btn">Make the file</button> <span id="xbusy" hidden>Working…</span></p>
-    <div id="xout" hidden>
-      <p id="xsum"></p>
-      <p><a id="xfile" class="btn" download>Download the GEDCOM</a> <a id="xlog" class="link" download>Download the change log</a></p>
-    </div>
-    <p class="small">Programs differ. Putting the new file into Ancestry, MyHeritage or Family Tree Maker usually makes a new tree rather than updating the old one, and
-    they may ignore the coordinates. This has been checked only by reading the new file back here, not yet in another program.</p>
   </div>
 </section>
 

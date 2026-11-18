@@ -159,6 +159,7 @@ export function makeEnricher(env) {
     dates: 'Open both people and compare the source behind each date. One is usually a typo, a different person, or an estimate written as fact.',
     suspect: 'Open the person and test each reason against its source. If the file is right, press “Leave as is”.',
     dupes: 'Compare parents, places and sources. Merge in your own tree only if they agree; if not, keep them apart and note why.',
+    viaph: 'Find out who the unknown person is: a parent, spouse or child, named in a record. Until then this group hangs off a placeholder.',
     apart: 'Look for a parent, spouse or child who joins this group to the main tree: the first named person is the place to start.',
   };
 
@@ -184,7 +185,7 @@ export function makeEnricher(env) {
       } else if (s.key === 'dupes') {
         const a = P.get(i.a), b = P.get(i.b); i.info = [];
         if (a && b) { i.info.push(...searchLine([a, b])); i.info.push(...nameLines(a).filter(x => x.k === 'Surname')); for (const p of [a, b]) if (p.bpRaw) i.info.push(...placeLines(p.bpRaw, p.by === null ? [] : [p.by], { short: true }).slice(0, 1).map(x => ({ ...x, k: shown(p) + ' born at' }))); }
-      } else if (s.key === 'apart') i.info = [];
+      } else if (s.key === 'apart' || s.key === 'viaph') i.info = [];
       else if (i.id && P.get(i.id)) {
         const p = P.get(i.id); i.nl = nameLinks(p);
         i.info = personLines(p, { noRecords: s.key === 'leads' });         // a lead's collections are already in its row

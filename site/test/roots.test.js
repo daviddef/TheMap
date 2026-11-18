@@ -300,7 +300,7 @@ test("fix list: places, years, impossible dates, duplicates and loose groups, as
     "0 @F1@ FAM", "1 HUSB @I2@", "1 WIFE @I7@", "1 CHIL @I3@", "0 TRLR"].join("\n") + "\n";
   const s = new Session(io); await s.load(enc(g));
   const c = s.checklist({ living: true }), by = k => c.sections.find(x => x.key === k).items;
-  assert.deepEqual(c.sections.map(x => x.key), ["places", "check", "ages", "decide", "years", "names", "leads", "dates", "suspect", "dupes", "apart"]);
+  assert.deepEqual(c.sections.map(x => x.key), ["places", "check", "ages", "decide", "years", "names", "leads", "dates", "suspect", "dupes", "apart", "viaph"]);
   assert.ok(by("names").some(i => i.id === "I7" && i.kind === "none" && /spouse Bob Beta/.test(i.kin)), "an unnamed person is listed with the family around them");
   assert.ok(by("dates").some(i => i.id === "I1" && /before being born/.test(i.note)), "death before birth");
   assert.ok(by("dates").some(i => i.id === "I3" && /father was only 5 years older/.test(i.note)), "a child 5 years after the father");
@@ -313,7 +313,7 @@ test("fix list: places, years, impossible dates, duplicates and loose groups, as
   const s2 = new Session(io); await s2.load(enc(makeSample())); const pl = s2.checklist().sections[0].items;
   for (const i of [...pl, ...s2.checklist().sections[1].items]) assert.ok(i.to.split(",").length >= i.raw.split(",").length, "a suggested place never has fewer parts than the text it replaces: " + i.raw + " -> " + i.to);
   const pe = s2.checklist().sections; assert.ok(!pe[0].items.some(i => /Port Elizabeth/.test(i.raw)), "a different (historical) name is never offered as a plain fix");
-  const hidden = s.checklist({ living: false }); assert.ok(hidden.sections.length === 11);
+  const hidden = s.checklist({ living: false }); assert.ok(hidden.sections.length === 12);
 });
 
 test("consistency checks: whole-life logic, stacked reasons, nothing guessed, and living people named only when shown", async () => {
@@ -562,4 +562,28 @@ test("Orphans is a tab of the Atlas's own Roots & Routes page; the viewer drops 
   // a viewer with no shell flag says nothing to its parent about views
   assert.match(tpl, /if\(SHELL\)try\{parent\.postMessage\(\{type:'ra-roots-view'/);
   assert.match(tpl, /if\(SHELL&&typeof e\.data\.raView==='string'\)/, "and listens for nothing from it");
+});
+
+/* ---- the two "not connected" checks: truly apart, and joined only through an unknown person ---- */
+test("a person under an Unknown parent is in the main tree (not an orphan), and is listed as joined only through the unknown person", async () => {
+  const R = "../public/roots/";
+  const { buildChecklist, isPlaceholderName } = await import(R + "js/checklist.js");
+  const mk = (id, given, sur, o = {}) => ({ id, given, sur, sex: "u", by: 1900, dy: null, bpRaw: "", dpRaw: "", resi: [], srcs: [], father: null, mother: null, spouse: [], kids: [], gone: 0, liv: false, deathKnown: true, ...o });
+  const P = new Map();
+  /* the main tree: a, b, c in a line. u = "Unknown Grach", a placeholder with no year, whose child d has a child e (the walk the map's own clearing used to break: d.father is null).
+     The map clears d.father because u is not drawn; u.kids still holds d. */
+  P.set("a", mk("a", "Ann", "Main", { kids: ["b"] })); P.set("b", mk("b", "Bob", "Main", { father: "a", kids: ["c", "u"] })); P.set("c", mk("c", "Cy", "Main", { father: "b" }));
+  P.set("u", mk("u", "Unknown", "Grach", { by: null, father: "b", kids: ["d"] }));
+  P.set("d", mk("d", "Dora", "Grach", { father: null, kids: ["e"] }));            // father cleared, as buildTree does
+  P.set("e", mk("e", "Eve", "Grach", { father: "d" }));
+  /* a group with no link to anyone */
+  P.set("x", mk("x", "Xavier", "Lone", { kids: ["y"] })); P.set("y", mk("y", "Yara", "Lone", { father: "x" }));
+  const c = buildChecklist({ parsed: { nodes: [] }, P, est: new Set(), dest: new Set(), merges: [], resolve: () => null, label: p => p.n, living: true });
+  const by = k => c.sections.find(s => s.key === k).items;
+  assert.equal(c.main, 6, "a to e and the unknown person are one tree");
+  assert.deepEqual(by("apart").map(i => i.people.map(p => p.id).sort()), [["x", "y"]], "only the group with no link at all is an orphan group");
+  const v = by("viaph"); assert.equal(v.length, 1, "one group hangs off the unknown person");
+  assert.deepEqual(v[0].people.map(p => p.id).sort(), ["d", "e"]); assert.deepEqual(v[0].via, ["Unknown Grach"]);
+  for (const n of [["Unknown", "Grach"], ["Unknown", ""], ["Grah's for Investigation (not real)", ""], ["", ""]]) assert.ok(isPlaceholderName("", ...n), JSON.stringify(n) + " is a placeholder");
+  for (const n of [["Maria", "Krosnjak"], ["Antonius", "Grah"]]) assert.ok(!isPlaceholderName("", ...n), JSON.stringify(n) + " is a person");
 });

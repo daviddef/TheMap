@@ -8,7 +8,8 @@
      leads      people with no parents, born where the Atlas lists record collections
      dates      dates that do not add up (born after death, a parent too young or too old, a child born after a parent died)
      dupes      people who may be one person entered twice
-     apart      groups of people not joined to the main tree
+     apart      groups of people with no link at all to the main tree
+     viaph      groups joined to the main tree only through a placeholder (an unknown person)
    No DOM, no network. It reads the session; it changes nothing. */
 import { get } from './gedcom.js';
 
@@ -17,6 +18,19 @@ const SAMPLE = 8, name = p => ((p.given || '') + ' ' + (p.sur || '')).trim() || 
 const az = (a, b) => a.localeCompare(b, 'en');
 
 /* env: { parsed, P, est, dest, merges, resolve(raw) -> {tier, place, cands} | null, label(place) -> string, living: bool } */
+/* A placeholder entry: a name that is clearly not a person's ("Unknown", "(no name recorded)", "... (not real)", a note for investigation). The SAME rule as isPlaceholderName in the
+   Tree Canvas (scripts/roots/tree-canvas.template.html), which the Compare tab uses; test/roots.test.js checks the two agree on a list of names. */
+const PH_RE = [/\bnot real\b/i, /\bplaceholders?\b/i, /\bfor investigation\b/i, /no name recorded/i, /^\s*\(.*\)\s*$/, /^\s*\p{Lu}[\p{Lu} .'’-]{2,}:/u, /^\s*\?+\s*$/];
+const PH_WORD = new Set(['unknown', 'unnamed', 'noname', 'nn', 'no name', 'not known', 'unbekannt', 'sconosciuto', 'nepoznat', 'nepoznato']);
+const phFold = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z ]/g, '').replace(/\s+/g, ' ').trim();
+export function isPlaceholderName(name, given, sur) {
+  const nm = String(name || ((given || '') + ' ' + (sur || ''))).trim(), g = phFold(given), sr = phFold(sur);
+  if (!nm) return true;
+  if (PH_RE.some(r => r.test(nm)) || PH_RE.some(r => r.test(given || ''))) return true;
+  return PH_WORD.has(g) || (PH_WORD.has(sr) && !g) || PH_WORD.has(phFold(nm));
+}
+const isPlaceholder = p => !!p && !p.liv && isPlaceholderName('', p.given, p.sur);
+
 export function buildChecklist(env) {
   const { parsed, P, est, dest, merges, resolve, label } = env, living = env.living !== false;
   const shown = p => (p.liv && !living ? 'Living person' : name(p));
@@ -122,18 +136,43 @@ export function buildChecklist(env) {
   });
 
   /* ---- groups not joined to the main tree ---- */
-  const seen = new Set(), comps = [];
-  for (const p of P.values()) {
-    if (seen.has(p.id)) continue;
-    const comp = [], q = [p.id]; seen.add(p.id);
-    while (q.length) { const id = q.pop(), x = P.get(id); comp.push(x); for (const n of [x.father, x.mother, ...x.spouse, ...x.kids]) if (n && P.has(n) && !seen.has(n)) { seen.add(n); q.push(n); } }
-    comps.push(comp);
+  /* Links are followed BOTH ways from each person's own lists. buildTree (the map) clears p.father / p.mother when that parent is not drawn (no birth year, or no place), and the
+     placeholders in a MyHeritage tree ("Unknown Grach") have neither, so following only father and mother upward made everyone below an Unknown parent look cut off from the tree
+     they are in. spouse and kids are never cleared, so each link is also read from the parent's side. */
+  const nbr = new Map();
+  for (const x of P.values()) for (const n of [x.father, x.mother, ...x.spouse, ...x.kids]) if (n && P.has(n) && n !== x.id) {
+    (nbr.get(x.id) || nbr.set(x.id, new Set()).get(x.id)).add(n); (nbr.get(n) || nbr.set(n, new Set()).get(n)).add(x.id);
   }
-  comps.sort((a, b) => b.length - a.length);
-  const apart = comps.slice(1).map(c => c.filter(keep)).filter(c => c.length).map(c => {
+  const groupsOf = skip => {
+    const seen = new Set(), out = [];
+    for (const p of P.values()) {
+      if (seen.has(p.id) || skip(p)) continue;
+      const comp = [], q = [p.id]; seen.add(p.id);
+      while (q.length) { const id = q.pop(); comp.push(P.get(id)); for (const n of nbr.get(id) || []) if (!seen.has(n) && !skip(P.get(n))) { seen.add(n); q.push(n); } }
+      out.push(comp);
+    }
+    return out.sort((a, b) => b.length - a.length);
+  };
+  const comps = groupsOf(() => false);
+  const asItem = (c, pre, extra) => {
     const s = c.slice().sort((a, b) => az(name(a), name(b)));
-    return { key: 'a|' + s[0].id, size: c.length, gone: c.reduce((n, p) => n + (p.gone || 0), 0), people: s.slice(0, SAMPLE).map(p => ({ id: p.id, name: shown(p), by: p.by })), first: shown(s[0]) };
-  }).sort((a, b) => az(a.first, b.first));
+    return { key: pre + s[0].id, size: c.length, gone: c.reduce((n, p) => n + (p.gone || 0), 0), people: s.slice(0, SAMPLE).map(p => ({ id: p.id, name: shown(p), by: p.by })), first: shown(s[0]), ...extra };
+  };
+  /* TRULY apart: no link of any kind to the main tree, not even through an unknown person */
+  const apart = comps.slice(1).map(c => c.filter(keep)).filter(c => c.length).map(c => asItem(c, 'a|')).sort((a, b) => az(a.first, b.first));
+  /* joined only THROUGH a placeholder ("Unknown", "(not real)", no name): in the main tree, but take the placeholders away and the group falls off it */
+  const main = new Set(comps.length ? comps[0].map(p => p.id) : []);
+  const viaph = [];
+  if (comps.length) {
+    const noPh = groupsOf(p => isPlaceholder(p));
+    for (const c of noPh.slice(1)) {
+      if (!c.every(p => main.has(p.id))) continue;                    // a group with no link at all is already listed above
+      const ks = c.filter(keep); if (!ks.length) continue;
+      const via = new Map(); for (const p of c) for (const n of nbr.get(p.id) || []) { const x = P.get(n); if (isPlaceholder(x)) via.set(x.id, name(x) === x.id ? 'a person with no name (' + x.id + ')' : name(x)); }
+      viaph.push(asItem(ks, 'v|', { via: [...via.values()].slice(0, 4), viaN: via.size }));
+    }
+    viaph.sort((a, b) => az(a.first, b.first));
+  }
 
   const out = {
     main: comps.length ? comps[0].length : 0,
@@ -145,7 +184,8 @@ export function buildChecklist(env) {
       { key: 'names', title: 'People without a full name', how: 'The file gives no name, or only a given name or a surname. The family around them is shown so you can tell who they are.', items: names },
       { key: 'dates', title: 'Dates that do not add up', how: 'Recorded years only. Each one is a place to look for a typo or a wrong person.', items: dates },
       { key: 'dupes', title: 'Maybe the same person', how: 'Same name, same sex, births within two years, not related to each other. Check before merging; MyHeritage and others keep a merge tool.', items: dupes },
-      { key: 'apart', title: 'Groups not joined to the main tree', how: 'Each group has no link to the largest tree. Finding one parent or spouse joins it.', items: apart },
+      { key: 'apart', title: 'Groups not joined to the main tree', how: 'Each group has no link of any kind to the largest tree, not even through an unknown person. Finding one parent or spouse joins it.', items: apart },
+      { key: 'viaph', title: 'Joined only through an unknown person', how: 'These people are in the main tree, but only through a placeholder (“Unknown”, “not real”, no name). Name the unknown person, or find who they were, and the link is real.', items: viaph },
     ],
   };
   out.counts = Object.fromEntries(out.sections.map(s => [s.key, s.items.length]));
@@ -158,7 +198,7 @@ export const GROUPS = [
   { key: 'choose', title: 'Choose a place', sections: ['decide'], how: 'The text could be several places, or none the gazetteer knows. Someone has to choose.' },
   { key: 'find', title: 'Find what is missing', sections: ['years', 'names', 'leads'], how: 'A year, a name or a parent is not in the file. These are research tasks, with the Atlas’s help on where to start.' },
   { key: 'verify', title: 'Check a date or a life', sections: ['dates', 'suspect'], how: 'Something recorded does not add up. Each is a place to look for a typo or a wrong person, not a verdict.' },
-  { key: 'join', title: 'Merge or connect people', sections: ['dupes', 'apart'], how: 'Records that may be one person, and groups with no link to the main tree.' },
+  { key: 'join', title: 'Merge or connect people', sections: ['dupes', 'apart', 'viaph'], how: 'Records that may be one person, groups with no link to the main tree, and groups joined only through an unknown person.' },
 ];
 /* Puts the sections in group order and marks each with its group. A section key no group names is kept, last. */
 export function arrange(out) {
@@ -187,6 +227,7 @@ export function describe(s, i) {
   else if (s.key === 'ages') { head = i.country + ' written for ' + span(i.from, i.to) + ', when it was ' + i.label; people = i.count + (i.count === 1 ? ' event' : ' events') + ': ' + i.people.map(x => x.name + ' (' + x.id + ')').join('; ') + (i.n > i.people.length ? '; and ' + (i.n - i.people.length) + ' more' : ''); }
   else if (s.key === 'leads') { head = i.name + ' (' + i.id + ', born ' + i.born + ' at ' + i.place + ')'; why = 'No parents in the file'; people = i.cols.map(x => x.title + (x.url ? ' ' + x.url : '')).join(' | '); }
   else if (s.key === 'dupes') { head = i.an + ' (' + i.a + ') and ' + i.bn + ' (' + i.b + ')'; why = i.note; }
+  else if (s.key === 'viaph') { head = i.size + (i.size === 1 ? ' person' : ' people') + ' joined to the main tree only through ' + (i.via || []).join(', ') + (i.viaN > (i.via || []).length ? ' and ' + (i.viaN - i.via.length) + ' more' : ''); people = i.people.map(p => p.name + ' (' + p.id + (p.by ? ', b. ' + p.by : '') + ')').join('; ') + (i.size > i.people.length ? '; and ' + (i.size - i.people.length) + ' more' : ''); }
   else if (s.key === 'apart') { head = i.size + (i.size === 1 ? ' person' : ' people') + ' not joined to the main tree'; people = i.people.map(p => p.name + ' (' + p.id + (p.by ? ', b. ' + p.by : '') + ')').join('; ') + (i.size > i.people.length ? '; and ' + (i.size - i.people.length) + ' more' : ''); }
   return { head, why, next: i.next || '', info: i.info || [], people };
 }
@@ -229,7 +270,7 @@ export function checklistCsv(c) {
     else if (s.key === 'ages') for (const x of i.people) row(s.title, x.name, x.id, '', i.from + '–' + i.to, '', i.country + ' written; then ' + i.label);
     else if (s.key === 'leads') row(s.title, i.name, i.id, 'Birth', i.born, i.place, i.cols.map(x => x.title + (x.url ? ' ' + x.url : '')).join(' | '));
     else if (s.key === 'dupes') row(s.title, i.an + ' / ' + i.bn, i.a + ' / ' + i.b, '', '', '', i.note);
-    else if (s.key === 'apart') for (const p of i.people) row(s.title, p.name, p.id, '', '', '', 'group of ' + i.size);
+    else if (s.key === 'apart' || s.key === 'viaph') for (const p of i.people) row(s.title, p.name, p.id, '', '', '', 'group of ' + i.size);
   }
   return rows.map(r => r.map(cell).join(',')).join('\r\n') + '\r\n';
 }

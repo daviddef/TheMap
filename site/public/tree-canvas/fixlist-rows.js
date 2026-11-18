@@ -119,6 +119,9 @@ export function rowEl(doc, ctx, s, i) {
   } else if (s.key === 'dupes') {
     label = 'Possibly the same person: ' + i.an + ' and ' + i.bn; head.append(mk(doc, 'b', null, 'Possibly the same person')); note.textContent = i.note + (i.ap || i.bp ? ' · ' + (i.ap || '—') + ' / ' + (i.bp || '—') : '');
     body.append(head, note, plist(doc, ctx, [{ name: i.an, id: i.a }, { name: i.bn, id: i.b }], 2));
+  } else if (s.key === 'viaph') {
+    label = i.size + ' people joined only through an unknown person'; head.append(mk(doc, 'b', null, i.size + (i.size === 1 ? ' person' : ' people') + ' joined to the main tree only through ' + (i.via || []).join(', ') + (i.viaN > (i.via || []).length ? ' and ' + (i.viaN - i.via.length) + ' more' : ''))); body.append(head, plist(doc, ctx, i.people, i.size));
+    note.textContent = 'In ' + (ctx.fileName || 'the file you loaded') + ' ' + (i.size === 1 ? 'this person is' : 'these people are') + ' linked to the main tree, but the link runs through a placeholder with no real name. Name that person, or find who they were, and the link becomes real.'; body.append(note);
   } else if (s.key === 'apart') {
     label = i.size + ' people not connected to the main tree'; head.append(mk(doc, 'b', null, i.size + (i.size === 1 ? ' person' : ' people') + ' not connected to the main tree')); body.append(head, plist(doc, ctx, i.people, i.size));
     note.textContent = (i.gone ? 'The file names ' + i.gone + ' relative' + (i.gone === 1 ? '' : 's') + ' of these people who ' + (i.gone === 1 ? 'is' : 'are') + ' not in it, so it may be a partial export.'

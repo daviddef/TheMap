@@ -217,7 +217,7 @@ test("the Roots & Routes page's own Fix tab is untouched", () => {
 
 /* ---- priority and order ---- */
 test("every section the reader or Compare can make has a rank, and the ranks are 1..N once each", () => {
-  const keys = ["places", "check", "decide", "years", "names", "leads", "dates", "suspect", "ages", "dupes", "apart", "cmpmiss", "cmpdiff"];
+  const keys = ["places", "check", "decide", "years", "names", "leads", "dates", "suspect", "ages", "dupes", "apart", "viaph", "cmpmiss", "cmpdiff"];
   for (const k of keys) assert.ok(PRIORITY[k] && PRIORITY[k].why.length > 20, k + " has a rank and a reason");
   assert.deepEqual(Object.values(PRIORITY).map(p => p.rank).sort((a, b) => a - b), keys.map((_, i) => i + 1));
 });
@@ -226,7 +226,7 @@ test("the rule: orphans and duplicates first, a birth year above today's country
   assert.ok(r("apart") < r("dupes") && r("dupes") < r("years"));
   assert.ok(r("years") < r("ages") && r("years") < r("places") && r("years") < r("decide"));
   assert.ok(r("ages") === Math.max(...Object.values(PRIORITY).map(p => p.rank)), "country on an older date is last");
-  assert.equal(levelOf(r("apart")), "High"); assert.equal(levelOf(r("years")), "High"); assert.equal(levelOf(r("dates")), "Medium"); assert.equal(levelOf(r("ages")), "Low");
+  assert.equal(levelOf(r("apart")), "High"); assert.equal(levelOf(r("years")), "High"); assert.equal(levelOf(r("viaph")), "Medium"); assert.equal(levelOf(r("dates")), "Medium"); assert.equal(levelOf(r("cmpmiss")), "Medium"); assert.equal(levelOf(r("ages")), "Low");
   const m = buildModel(fixture(3), null, "t"); for (const s of m.sections) assert.ok(s.rank && s.level && s.why, s.key + " carries its priority");
 });
 test("order: priority puts the groups by their best section and keeps each group together; list order is Roots & Routes'; most-to-do follows the counts", () => {

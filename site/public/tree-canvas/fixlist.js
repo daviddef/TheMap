@@ -54,18 +54,19 @@ export const PRIORITY = {
   apart:   { rank: 1,  why: 'Each group here is cut off from the main tree. Finding one parent or spouse joins a whole branch at once, and every other check then works on it.' },
   dupes:   { rank: 2,  why: 'A merge removes duplicate work, and often clears the false “not joined” groups that two copies of one person cause.' },
   years:   { rank: 3,  why: 'A birth year puts the person on the map and in the timeline, and most other checks (dates, places in period, duplicates) need it.' },
-  decide:  { rank: 4,  why: 'Only you can choose. Until a place is chosen its events cannot go on the map, and one choice covers every event that uses the same text.' },
-  dates:   { rank: 5,  why: 'A date that does not add up is usually a typo or a wrong person, and a wrong date spreads into every check that uses it.' },
-  suspect: { rank: 6,  why: 'A life that does not add up may have two people joined into one. Worth looking at early, but each is a judgement, not a sure fault.' },
-  cmpdiff: { rank: 7,  why: 'An archive and your file disagree about someone already in your tree. One of the two is wrong.' },
-  places:  { rank: 8,  why: 'A sure correction: one paste fixes every event that uses the same text. Quick, but it changes a spelling, not what you know.' },
-  cmpmiss: { rank: 9,  why: 'People an archive holds that your file lacks. They grow the tree, but each needs checking against its source before it is added.' },
-  check:   { rank: 10, why: 'Suggestions, not fixes: the Atlas is not certain, so each needs a look at the date and source first.' },
-  names:   { rank: 11, why: 'A missing name makes a person hard to recognise, but the family around them is usually enough to carry on with.' },
-  leads:   { rank: 12, why: 'A research idea (a record collection to try), not a fault in the file.' },
-  ages:    { rank: 13, why: 'Often fine: it is how people name a place today. The maps already draw the flag of the day, so this is the lowest-value change.' },
+  viaph:   { rank: 4,  why: 'These people are in the tree, but only through an unknown person, so the link is not real yet. Naming that one person makes a whole branch certain.' },
+  decide:  { rank: 5,  why: 'Only you can choose. Until a place is chosen its events cannot go on the map, and one choice covers every event that uses the same text.' },
+  dates:   { rank: 6,  why: 'A date that does not add up is usually a typo or a wrong person, and a wrong date spreads into every check that uses it.' },
+  suspect: { rank: 7,  why: 'A life that does not add up may have two people joined into one. Worth looking at early, but each is a judgement, not a sure fault.' },
+  cmpdiff: { rank: 8,  why: 'An archive and your file disagree about someone already in your tree. One of the two is wrong.' },
+  places:  { rank: 9,  why: 'A sure correction: one paste fixes every event that uses the same text. Quick, but it changes a spelling, not what you know.' },
+  cmpmiss: { rank: 10,  why: 'People an archive holds that your file lacks. They grow the tree, but each needs checking against its source before it is added.' },
+  check:   { rank: 11, why: 'Suggestions, not fixes: the Atlas is not certain, so each needs a look at the date and source first.' },
+  names:   { rank: 12, why: 'A missing name makes a person hard to recognise, but the family around them is usually enough to carry on with.' },
+  leads:   { rank: 13, why: 'A research idea (a record collection to try), not a fault in the file.' },
+  ages:    { rank: 14, why: 'Often fine: it is how people name a place today. The maps already draw the flag of the day, so this is the lowest-value change.' },
 };
-export const LEVEL_AT = { High: 3, Medium: 9 };   // rank <= 3 High, <= 9 Medium, else Low
+export const LEVEL_AT = { High: 3, Medium: 10 };   // rank <= 3 High, <= 10 Medium, else Low
 export const levelOf = rank => rank <= LEVEL_AT.High ? 'High' : rank <= LEVEL_AT.Medium ? 'Medium' : 'Low';
 export const prioOf = key => { const p = PRIORITY[key] || { rank: 99, why: '' }; return { rank: p.rank, level: levelOf(p.rank), why: p.why }; };
 export const ORDERS = { priority: 'Priority', list: 'List order', most: 'Most to do' };
@@ -89,7 +90,7 @@ export function arranged(model, tl, order) {
 const year = v => { if (v == null) return null; const m = String(v).match(/\d{4}/); return m ? +m[0] : null; };
 const USEFUL = {
   places: i => -(i.count || 0), check: i => -(i.count || 0), decide: i => -(i.count || 0), ages: i => -(i.count || 0),
-  suspect: i => -(i.reasons ? i.reasons.length : 0), apart: i => -(i.size || 0),
+  suspect: i => -(i.reasons ? i.reasons.length : 0), apart: i => -(i.size || 0), viaph: i => -(i.size || 0),
   names: i => year(i.born), dates: i => year(i.born), leads: i => year(i.born),
   dupes: i => { const a = year(i.ay), b = year(i.by); return a == null ? b : b == null ? a : Math.min(a, b); },
   years: i => (i.kind === 'estimated' ? year(i.hint) : null), cmpmiss: i => year(i.yrs),
@@ -135,7 +136,7 @@ export function peopleOf(s, i) {
 const HAY = new WeakMap();
 export function hay(s, i) {
   let h = HAY.get(i); if (h !== undefined) return h;
-  h = (s.key === 'names' ? i.name + ' ' + i.kin : s.key === 'dupes' ? i.an + ' ' + i.bn : s.key === 'apart' ? i.people.map(p => p.name).join(' ')
+  h = (s.key === 'names' ? i.name + ' ' + i.kin : s.key === 'dupes' ? i.an + ' ' + i.bn : (s.key === 'apart' || s.key === 'viaph') ? i.people.map(p => p.name).join(' ') + ' ' + (i.via || []).join(' ')
     : s.key === 'cmpmiss' ? i.name + ' ' + i.relName + ' ' + i.archive + ' ' + i.yrs : s.key === 'cmpdiff' ? i.fname + ' ' + i.aname + ' ' + i.reason + ' ' + i.archive
     : (i.raw || '') + ' ' + (i.name || '') + ' ' + (i.country ? i.country + ' ' + i.label : '') + ' ' + (i.reasons ? i.reasons.map(r => r.text).join(' ') : '') + ' ' + (i.people ? i.people.map(p => p.name).join(' ') : '')).toLowerCase();
   HAY.set(i, h); return h;

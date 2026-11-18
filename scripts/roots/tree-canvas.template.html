@@ -214,13 +214,12 @@ button{font-family:inherit}
 .card.dim .cb{opacity:.38;filter:saturate(.5)}
 .card.onpath .cb{border-color:var(--lk-accent);box-shadow:0 3px 0 var(--lk-accent),0 0 0 5px var(--lk-accent-soft)}
 .card.endpt .cb{box-shadow:0 3px 0 var(--lk-accent),0 0 0 5px var(--lk-accent)}
-.card .stopx{position:absolute;left:50%;top:calc(100% + 6px);transform:translateX(-50%);z-index:4;pointer-events:auto;outline:none}
-.card .stopx.up{top:auto;bottom:calc(100% + 6px)}
-.card .stopx .stx{display:grid;place-items:center;width:34px;height:22px;border-radius:8px;border:1.5px dashed var(--lk-faint);background:var(--lk-card);color:#d24b1f;cursor:help}
+.card .stopx{position:absolute;left:50%;bottom:calc(100% + 2px);transform:translateX(-50%);z-index:4;pointer-events:auto;outline:none;display:flex;flex-direction:column;align-items:center}
+.card .stopx::after{content:"";width:2px;height:12px;background:var(--lk-faint)}
+.card .stopx .stx{display:grid;place-items:center;width:56px;height:30px;border-radius:10px;border:2px dashed var(--lk-faint);background:var(--lk-card);color:#d24b1f;cursor:help}
 .card .stopx .stx svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:3.2;stroke-linecap:round}
 .card .stopx:hover .stx,.card .stopx:focus-visible .stx{border-color:#d24b1f;border-style:solid}
-.card .stopx-tip{display:none;position:absolute;left:50%;transform:translateX(-50%);top:100%;padding-top:6px;width:max-content;max-width:230px}
-.card .stopx.up .stopx-tip{top:auto;bottom:100%;padding-top:0;padding-bottom:6px}
+.card .stopx-tip{display:none;position:absolute;left:50%;transform:translateX(-50%);bottom:100%;padding-bottom:6px;width:max-content;max-width:230px}
 .card .stopx:hover .stopx-tip,.card .stopx:focus-within .stopx-tip{display:block}
 .card .stopx-bubble{display:block;font:800 11px/1.3 Nunito,system-ui;color:var(--lk-soft);background:var(--lk-card);border:1.5px solid var(--lk-line);border-radius:10px;padding:5px 10px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.18)}
 .card .stopx-bubble button{all:unset;cursor:pointer;color:var(--lk-accent);font-weight:800;text-decoration:underline}
@@ -3367,7 +3366,7 @@ function cardInner(c) {
     } else if (c.stopG) note = `<b>stops here</b> &middot; the next link is index-entry only (not proven)<br><button data-act="upforce">follow it anyway</button>`;
     /* it sits above the card when a child is drawn below it: below, it would cover the line down to that child */
     /* a small parent-shaped marker with a red cross instead of a box of words: the reason (and the way round it) is what you read when you point at it or tab to it */
-    if (note) h += `<div class="stopx${p.ch.some(e => cardOfPerson(e.c)) ? ' up' : ''}" tabindex="0" role="group" aria-label="${esc('Stops here: ' + (sr.stops ? sr.text : 'the next link is index-entry only (not proven)'))}"><span class="stx" aria-hidden="true">${icon('x', '')}</span><span class="stopx-tip"><span class="stopx-bubble">${note}</span></span></div>`;
+    if (note) h += `<div class="stopx" tabindex="0" role="group" aria-label="${esc('Stops here: ' + (sr.stops ? sr.text : 'the next link is index-entry only (not proven)'))}"><span class="stx" aria-hidden="true">${icon('x', '')}</span><span class="stopx-tip"><span class="stopx-bubble">${note}</span></span></div>`;
   }
   return h;
 }

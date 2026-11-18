@@ -75,6 +75,33 @@ import ResearchSync from "../components/ResearchSync.astro";
       <script is:inline defer src={u("/js/sync-count.js")}></script>
     </section>
 
+    <section class="bk-card" id="canvas">
+      <h2>Your Tree Canvas <small>saved in this browser, and carried by the same six words</small></h2>
+      <p class="cap" data-th>The <a href={u("/tree-canvas/")}>Tree Canvas</a> keeps your work by itself. Each tree you open, whether from a link, a file on your device or one of the family archives, gets its own saved canvas in this browser, and it comes back when you open the same tree again. There is nothing to press.</p>
+      <div class="bk-two">
+        <div>
+          <h3>What is kept</h3>
+          <ul class="cap">
+            <li data-th>Which people are on the canvas, and where each card sits.</li>
+            <li data-th>The view (where you have panned and zoomed to) and the path you were looking at.</li>
+            <li data-th>Where the tree came from: the link you opened it from, the name of the file, or the archive.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>What is not kept</h3>
+          <ul class="cap">
+            <li data-th><b>The family file itself is never uploaded</b>, here or online. No names, dates or places leave your device. A person is remembered only by a short code made from the file&rsquo;s own number for them.</li>
+            <li data-th>A file from your device has to be opened again. It is matched by its name, size and number of people, and your canvas is laid out as you left it.</li>
+          </ul>
+        </div>
+      </div>
+      <h3>On your other devices</h3>
+      <p class="cap" data-th>Turn on <a href="#online">Keep a copy online</a> above and your canvases ride along in the same encrypted copy, with the <b>same six words</b> as your research: no email, no account. It is encrypted in this browser before it leaves, our server cannot read it, and <b>whoever has the six words can open it</b>. On a new device, restore with the six words, then open the Tree Canvas: your saved canvases are listed on its first page. A link reopens by itself; a file asks you to open it again. If another device saved a newer canvas for the tree you have open, the canvas says so and asks before it changes anything. The newest twelve are kept; if your canvases are too large for the online copy, they stay in this browser and the canvas tells you.</p>
+      <h3>Start fresh</h3>
+      <p class="cap" data-th>When a saved canvas comes back, the Tree Canvas shows a <b>Start fresh</b> button. It removes that tree&rsquo;s saved canvas here and, if the six words are on, from the online copy. Clearing this browser&rsquo;s site data removes everything saved here.</p>
+      <p class="bk-go"><a href={u("/tree-canvas/")}>Open the Tree Canvas</a></p>
+    </section>
+
     <section class="bk-card" id="share">
       <h2><span class="bk-n">3</span> Share what you have found <small>with a cousin or fellow researcher</small></h2>
       <div id="mr-share">
@@ -105,14 +132,15 @@ import ResearchSync from "../components/ResearchSync.astro";
 
     <section class="bk-card" id="kept">
       <h2>What is kept with your research</h2>
-      <p class="bk-sub">The file and the six-word copy carry all of this. Nothing is about a person except a MyHeritage link, if you pasted one.</p>
+      <p class="bk-sub">The file and the six-word copy carry all of this. Nothing is about a person except a MyHeritage link, if you pasted one, and the short codes a saved canvas uses to remember which cards you placed.</p>
       <ul class="bk-kept">
         <li><b id="bk-k-marks">0</b> marks across <b id="bk-k-lines">0</b> family lines, with notes</li>
         <li><b id="bk-k-areas">0</b> saved map areas and <b id="bk-k-views">0</b> saved views <span class="bk-note">(shapes and positions only)</span></li>
         <li><span data-th>GEDCOM file <em>names</em></span> <span class="bk-note">(never the files)</span>
           <ul id="bk-k-ged" class="bk-ged"></ul></li>
         <li>MyHeritage link and Ancestry site: <span id="bk-k-sites" class="bk-note">none set</span></li>
-        <li class="bk-no">Not kept: search history.</li>
+        <li><b id="bk-k-canvas">0</b> saved Tree Canvases <span class="bk-note">(where the cards sit, and the link or file name each came from; <a href="#canvas">more</a>)</span></li>
+        <li class="bk-no">Not kept: search history, and never the family files themselves.</li>
       </ul>
     </section>
 
@@ -182,7 +210,7 @@ import ResearchSync from "../components/ResearchSync.astro";
       }
       function paintKept() {
         var cur = RF.current(), f = RF.exportAll().file, sm = RF.summary(f);
-        $("bk-k-marks").textContent = sm.volumes; $("bk-k-lines").textContent = sm.lines; $("bk-k-areas").textContent = sm.areas; $("bk-k-views").textContent = sm.views;
+        $("bk-k-marks").textContent = sm.volumes; $("bk-k-lines").textContent = sm.lines; $("bk-k-areas").textContent = sm.areas; $("bk-k-views").textContent = sm.views; $("bk-k-canvas").textContent = sm.canvases;
         var ss = f.sites || {}, parts = [];
         if (ss.mh) parts.push(T("link to a MyHeritage profile")); if (ss.anc) parts.push("ancestry." + ss.anc);
         $("bk-k-sites").textContent = parts.length ? parts.join(", ") : T("none set");
@@ -424,6 +452,12 @@ import ResearchSync from "../components/ResearchSync.astro";
   .bk-card :global(#sy) { margin: 0; }
   .bk-card :global(#sy > .mrh) { display: none; }
   .bk-card :global(#sy > .cap:first-of-type) { margin-top: 4px; }
+
+  /* Your Tree Canvas */
+  .bk-two { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 0 28px; }
+  .bk-card h3 { margin: 14px 0 2px; font: 700 14px/1.3 var(--sans); }
+  .bk-two ul { margin: 4px 0 0; padding-left: 1.2em; }
+  .bk-go { margin: 14px 0 0; font: 600 14px/1.3 var(--sans); }
 
   .bk :global(.mrbtns) { display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; margin: 14px 0 0; }
   .bk :global(.mrbtns button), .bk :global(#sy button) { font-family: var(--sans); font-size: 14px; padding: 9px 14px;

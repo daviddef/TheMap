@@ -16,7 +16,7 @@
    Pure functions at the top (tested in node: test/research-file.test.js); the browser glue is at the bottom. */
 (function (root) {
   "use strict";
-  var KEY_DEC = "ra-fix-decisions-v1", KEY_BACKUP = "ra-backup-v1", KEY_MYA = "ra-areas-v1", KEY_GED = "ra-gedcom-names-v1", KEY_STORIES = "ra-stories-v1";
+  var KEY_DEC = "ra-fix-decisions-v1", KEY_BACKUP = "ra-backup-v1", KEY_MYA = "ra-areas-v1", KEY_GED = "ra-gedcom-names-v1", KEY_STORIES = "ra-stories-v1", KEY_CANVAS = "ra-canvas-v1";
   var DAY = 86400000;
 
   function today(now) { return new Date(now || Date.now()).toISOString().slice(0, 10); }
@@ -63,6 +63,10 @@
     var sty = extras.stories;
     if (sty && (Object.keys(sty.stories || {}).length || Object.keys(sty.gone || {}).length)) out.stories = clone(sty);
     if (extras.gedcoms && extras.gedcoms.length) out.gedcoms = clone(extras.gedcoms.slice(0, GED_MAX));
+    /* THE TREE CANVAS'S SAVED WORK (public/tree-canvas/work.js), cleaned and capped. Each record is where a tree came from (a link, a file's name, an archive's
+       key) and an arrangement: which people are on the canvas as short hashes of the file's own ids, where each sits, the view and the path. Never the tree. */
+    var cv = capCanvas(cleanCanvas(extras.canvas));
+    if (cv && (Object.keys(cv.items).length || Object.keys(cv.gone).length)) out.canvas = cv;
     var st = cleanSites(extras.sites);
     if (st) out.sites = st;
     return out;
@@ -118,6 +122,71 @@
     return Object.keys(by).map(function (k) { return by[k]; }).sort(function (a, b) { return String(b.saved).localeCompare(String(a.saved)); }).slice(0, GED_MAX);
   }
 
+  /* ---- the Tree Canvas's saved work ------------------------------------------------------------------------------------------------------
+     { v:1, items: { treeKey: { k, label, src, upd, n, w } }, gone: { treeKey: ISO } }. See public/tree-canvas/work.js for what a record holds and why it
+     holds no name. Everything arriving here (a file, the six-word copy, a hand-edited export) is checked field by field, and anything else is dropped. */
+  var CANVAS_ARCH = ["defranceski", "booyzen", "luwinski", "lerena", "falco", "blazevic", "darcy", "mazza"];
+  var CANVAS_MAX_ITEMS = 12, CANVAS_MAX_CARDS = 3000, CANVAS_ITEM_CHARS = 150000, CANVAS_TOTAL_CHARS = 360000;
+  var ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
+  function num(n, lim) { return typeof n === "number" && isFinite(n) ? Math.max(-lim, Math.min(lim, n)) : 0; }
+  function id(s) { return typeof s === "string" && /^[0-9a-z]{1,16}$/.test(s) ? s : null; }
+  function cleanCanvasItem(it) {
+    if (!it || typeof it !== "object" || typeof it.k !== "string" || it.k.length > 2300 || typeof it.upd !== "string" || !ISO.test(it.upd)) return null;
+    var s = it.src, src = null;
+    if (s && s.t === "link" && typeof s.ref === "string" && /^https:\/\/[^\s#<>"'\\]{4,2000}$/.test(s.ref) && it.k === "l:" + s.ref) src = { t: "link", ref: s.ref };
+    else if (s && s.t === "archive" && CANVAS_ARCH.indexOf(s.ref) >= 0 && it.k === "a:" + s.ref) src = { t: "archive", ref: s.ref };
+    else if (s && s.t === "file" && typeof s.ref === "string" && s.ref && s.ref.length <= 200 && it.k === "f:" + s.ref + "|" + (s.size | 0) + "|" + (s.people | 0)) src = { t: "file", ref: s.ref, size: s.size | 0, people: s.people | 0 };
+    if (!src) return null;
+    var w = it.w; if (!w || w.v !== 1 || !Array.isArray(w.c)) return null;
+    var c = [];
+    w.c.slice(0, CANVAS_MAX_CARDS).forEach(function (r) {
+      if (!Array.isArray(r) || !id(r[0])) return;
+      c.push([r[0], Math.round(num(r[1], 1e6)), Math.round(num(r[2], 1e6)), r[3] ? 1 : 0, r[4] | 0, r[5] | 0, r[6] | 0, r[7] ? 1 : 0, id(r[8]) || ""]);
+    });
+    var v = w.view || {}, o = w.opts || {};
+    var out = { k: it.k, label: typeof it.label === "string" ? it.label.replace(/[\u0000-\u001f]/g, " ").slice(0, 120) : "", src: src, upd: it.upd, n: c.length,
+      w: { v: 1, c: c, view: { x: Math.round(num(v.x, 1e6)), y: Math.round(num(v.y, 1e6)), k: Math.max(0.05, Math.min(8, num(v.k, 8) || 1)) },
+        path: Array.isArray(w.path) && w.path.length === 2 && id(w.path[0]) && id(w.path[1]) ? [w.path[0], w.path[1]] : null,
+        dec: (Array.isArray(w.dec) ? w.dec : []).slice(0, 500).filter(function (r) { return Array.isArray(r) && id(r[0]) && typeof r[1] === "string"; }).map(function (r) { return [r[0], r[1].slice(0, 16)]; }),
+        opts: { stopAtNotProven: !!o.stopAtNotProven, suggested: o.suggested !== false, gens: !!o.gens },
+        filter: (Array.isArray(w.filter) ? w.filter : []).filter(function (i) { return Number.isInteger(i) && i >= 0 && i < 9; }).slice(0, 9) } };
+    return JSON.stringify(out).length <= CANVAS_ITEM_CHARS ? out : null;
+  }
+  function cleanCanvas(x) {
+    if (!x || typeof x !== "object" || x.v !== 1 || !x.items || typeof x.items !== "object") return null;
+    var out = { v: 1, items: {}, gone: {} };
+    Object.keys(x.items).forEach(function (k) { var c = cleanCanvasItem(x.items[k]); if (c && c.k === k) out.items[k] = c; });
+    var g = x.gone && typeof x.gone === "object" ? x.gone : {};
+    Object.keys(g).slice(0, 200).forEach(function (k) { if (k.length <= 2300 && typeof g[k] === "string" && ISO.test(g[k])) out.gone[k] = g[k]; });
+    return out;
+  }
+  /* by tree, the later `upd` winning; a deletion removes a record last changed before it. The newest CANVAS_MAX_ITEMS are kept. */
+  function mergeCanvas(mine, theirs) {
+    var a = cleanCanvas(mine) || { items: {}, gone: {} }, b = cleanCanvas(theirs) || { items: {}, gone: {} }, out = { v: 1, items: {}, gone: {} };
+    Object.keys(a.items).concat(Object.keys(b.items)).forEach(function (k) {
+      var x = a.items[k], y = b.items[k];
+      out.items[k] = clone(!x ? y : !y ? x : (y.upd > x.upd ? y : x));
+    });
+    [a.gone, b.gone].forEach(function (g) { Object.keys(g).forEach(function (k) { if (!out.gone[k] || g[k] > out.gone[k]) out.gone[k] = g[k]; }); });
+    Object.keys(out.gone).forEach(function (k) { if (out.items[k] && out.gone[k] >= out.items[k].upd) delete out.items[k]; });
+    var ks = Object.keys(out.items).sort(function (p, q) { return out.items[q].upd.localeCompare(out.items[p].upd); });
+    ks.slice(CANVAS_MAX_ITEMS).forEach(function (k) { delete out.items[k]; });
+    return out;
+  }
+  /* The six-word copy has a ceiling (the server refuses more than 2 MB), so the canvas section is capped: the newest records first, until the next would
+     pass the limit. What did not fit is named in `skipped`, so the page can say so; those stay in this browser. */
+  function capCanvas(c) {
+    if (!c) return null;
+    var out = { v: 1, items: {}, gone: c.gone || {} }, used = 0, skipped = [];
+    Object.keys(c.items).sort(function (p, q) { return c.items[q].upd.localeCompare(c.items[p].upd); }).forEach(function (k) {
+      var n = JSON.stringify(c.items[k]).length;
+      if (used + n > CANVAS_TOTAL_CHARS) { skipped.push(k); return; }
+      used += n; out.items[k] = c.items[k];
+    });
+    Object.defineProperty(out, "skipped", { value: skipped, enumerable: false });
+    return out;
+  }
+
   /* A pack: everything, or one family line. Notes only if asked. Never the decisions. */
   function buildPack(progress, opts, now) {
     opts = opts || {};
@@ -158,7 +227,7 @@
     });
     return { lines: Object.keys(file.lines || {}).length, volumes: marks.length, notes: notes, pages: pages,
              decisions: Object.keys(file.decisions || {}).length, areas: Object.keys(file.areas || {}).length,
-             views: Object.keys(file.views || {}).length, gedcoms: (file.gedcoms || []).length, stories: file.stories ? Object.keys(file.stories.stories || {}).length : 0, sites: file.sites ? Object.keys(file.sites).length : 0 };
+             views: Object.keys(file.views || {}).length, gedcoms: (file.gedcoms || []).length, stories: file.stories ? Object.keys(file.stories.stories || {}).length : 0, sites: file.sites ? Object.keys(file.sites).length : 0, canvases: file.canvas && file.canvas.items ? Object.keys(file.canvas.items).length : 0 };
   }
 
   /* A file from anywhere: an export, a pack, the published sessions file, or what save-browser-storage.js downloaded. */
@@ -172,7 +241,7 @@
     } else if (d && d.decisions) decisions = d.decisions;
     if (!d || !d.marks || typeof d.marks !== "object") throw new Error("not a Record Atlas research file");
     var mya = d.areas || d.views || d.gone ? { v: 1, areas: d.areas || {}, views: d.views || {}, gone: d.gone || {} } : null;
-    return { progress: d, decisions: decisions, mya: mya, gedcoms: Array.isArray(d.gedcoms) ? d.gedcoms : null, stories: d.stories && typeof d.stories === "object" ? d.stories : null, sites: cleanSites(d.sites), kind: d.kind || (d.lines ? "export" : "old export") };
+    return { progress: d, decisions: decisions, mya: mya, gedcoms: Array.isArray(d.gedcoms) ? d.gedcoms : null, stories: d.stories && typeof d.stories === "object" ? d.stories : null, sites: cleanSites(d.sites), canvas: cleanCanvas(d.canvas), kind: d.kind || (d.lines ? "export" : "old export") };
   }
 
   /* Union of two decision tables: a row decided on either device stays decided; the later date wins a tie. */
@@ -240,7 +309,8 @@
 
   var api = { hash: hash, sigOf: sigOf, buildBackup: buildBackup, buildPack: buildPack, summary: summary, parseAny: parseAny,
               mergeDecisions: mergeDecisions, mergeMya: mergeMya, mergeGedcoms: mergeGedcoms, status: status, encodeLink: encodeLink, decodeLink: decodeLink, LINK_MAX: LINK_MAX,
-              KEY_DEC: KEY_DEC, KEY_BACKUP: KEY_BACKUP, KEY_MYA: KEY_MYA, KEY_GED: KEY_GED, KEY_STORIES: KEY_STORIES, cleanSites: cleanSites };
+              KEY_DEC: KEY_DEC, KEY_BACKUP: KEY_BACKUP, KEY_MYA: KEY_MYA, KEY_GED: KEY_GED, KEY_STORIES: KEY_STORIES, KEY_CANVAS: KEY_CANVAS, cleanSites: cleanSites,
+              cleanCanvas: cleanCanvas, mergeCanvas: mergeCanvas, capCanvas: capCanvas, CANVAS_TOTAL_CHARS: CANVAS_TOTAL_CHARS };
 
   /* ---- the browser glue -------------------------------------------------------------------------------------------- */
   if (typeof window !== "undefined" && window.raProgress) {
@@ -260,8 +330,9 @@
     api.noteBackup = function (how) {
       try { localStorage.setItem(KEY_BACKUP, JSON.stringify({ at: new Date().toISOString(), how: how })); } catch (e) { /* storage blocked: the page still says what it did */ }
     };
-    api.exportAll = function () {
-      var c = api.current(), file = buildBackup(c.progress, c.decisions, undefined, { mya: readJSON(KEY_MYA), gedcoms: readJSON(KEY_GED), stories: stories(), sites: { mh: rawGet(KEY_MH), anc: rawGet(KEY_ANC), mhTrees: readJSON(KEY_TREES) } }), name = "record-atlas-research-" + today() + ".json";
+    /* opts.canvas false leaves the Tree Canvas's saved work out (the six-word save retries that way if the server says the copy is too large) */
+    api.exportAll = function (opts) {
+      var c = api.current(), file = buildBackup(c.progress, c.decisions, undefined, { mya: readJSON(KEY_MYA), gedcoms: readJSON(KEY_GED), stories: stories(), canvas: opts && opts.canvas === false ? null : readJSON(KEY_CANVAS), sites: { mh: rawGet(KEY_MH), anc: rawGet(KEY_ANC), mhTrees: readJSON(KEY_TREES) } }), name = "record-atlas-research-" + today() + ".json";
       return { file: file, name: name, text: JSON.stringify(file, null, 1) };
     };
     api.importText = function (text) {
@@ -271,7 +342,15 @@
         cur.rows = mergeDecisions(cur.rows, got.decisions); nd = Object.keys(got.decisions).length;
         try { localStorage.setItem(KEY_DEC, JSON.stringify(cur)); } catch (e) { nd = 0; }
       }
-      var na = 0, ng = 0, ns = 0;
+      var na = 0, ng = 0, ns = 0, nc = 0;
+      if (got.canvas && Object.keys(got.canvas.items).length + Object.keys(got.canvas.gone).length) {
+        /* the Tree Canvas's saved work: by tree, the later change wins, so another device's newer arrangement arrives and an older one does not replace this one */
+        var before = JSON.stringify(readJSON(KEY_CANVAS) || {}), cmg = mergeCanvas(readJSON(KEY_CANVAS), got.canvas);
+        try {
+          localStorage.setItem(KEY_CANVAS, JSON.stringify(cmg)); nc = Object.keys(got.canvas.items).length;
+          if (JSON.stringify(cmg) !== before && typeof document !== "undefined") document.dispatchEvent(new CustomEvent("ra-canvas-changed"));
+        } catch (e) { nc = 0; }
+      }
       if (got.stories) {
         /* merged like the map's saves: add what is new, never drop what is here; cleaned first so a hand-edited file cannot put markup in */
         var Sx = root.raStories;
@@ -296,7 +375,7 @@
           }
         } catch (e) { /* storage blocked */ }
       }
-      return { marks: n, decisions: nd, areas: na, gedcoms: ng, stories: ns, kind: got.kind };
+      return { marks: n, decisions: nd, areas: na, gedcoms: ng, stories: ns, canvases: nc, kind: got.kind };
     };
     api.pack = function (opts) { return buildPack(progress(), opts); };
     /* THE NAMES OF THE GEDCOM FILES LAST USED, read from the Roots & Routes page's own browser store (database roots-recent) and kept as a

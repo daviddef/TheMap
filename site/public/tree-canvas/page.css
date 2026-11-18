@@ -100,6 +100,41 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 #stList .recx:hover { border-color: var(--accent); color: var(--ink); }
 #stList .recin { flex: 1 1 auto; min-width: 0; padding: 10px 14px; border-radius: 10px; border: 2px solid var(--focus); background: var(--card); color: var(--ink); font: 15px/1.2 system-ui, sans-serif; }
 
+/* Keep your work: one round save button with a few words beside it, linking to Connection & Backup. Green, because it is the "safe" colour on the rest of the site
+   (the live dot); light and dark are two sets of tokens. When the six words are on, the disc fills. */
+#start { --keep: #3f8f4a; --keep-fill: #e3f2e0; --keep-ink: #2c6a36; }
+@media (prefers-color-scheme: dark) { #start { --keep: #6fbf73; --keep-fill: #22331f; --keep-ink: #bfe8b9; } }
+.stkeep { justify-self: center; display: flex; align-items: center; gap: 14px; max-width: 100%; padding: 6px 14px 6px 6px; border-radius: 999px; text-decoration: none !important; color: var(--ink); transition: transform .12s ease, background .12s ease; }
+.stkeep:hover { background: color-mix(in srgb, var(--keep) 10%, transparent); color: var(--ink) !important; }
+.stdisc { flex: none; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; border: 3px solid var(--keep); background: var(--keep-fill); color: var(--keep-ink); transition: transform .15s ease, background .15s ease, color .15s ease; }
+.stkeep.on .stdisc { background: var(--keep); color: var(--accent-ink); }
+@media (prefers-reduced-motion: no-preference) { .stkeep:hover .stdisc { transform: scale(1.06) rotate(-4deg); } }
+.stkeep:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.stkcap { display: grid; gap: 2px; text-align: left; min-width: 0; }
+.stkcap b { font: 700 15px/1.2 system-ui, sans-serif; }
+.stkcap small { font: 400 13px/1.35 system-ui, sans-serif; color: var(--soft); }
+
+/* saved canvases: the same rows as "Last used" */
+#stWork { justify-items: stretch; text-align: left; }
+#stWork h2, #stWork .stsub { text-align: center; }
+#stWorkList { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+#stWorkList li { display: flex; }
+#stWorkList .recopen { flex: 1 1 auto; min-width: 0; text-align: left; padding: 10px 14px; border-radius: 10px; border: 2px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; font: 700 15px/1.2 system-ui, sans-serif; transition: border-color .12s ease; }
+#stWorkList .recopen:hover { border-color: var(--keep); }
+#stWorkList .recopen b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#stWorkList .recopen small { display: block; margin-top: 3px; font: 400 13px/1.3 system-ui, sans-serif; color: var(--soft); }
+
+/* the line at the bottom that says a saved canvas came back, or that another device saved a newer one */
+.knote { position: fixed; left: 50%; bottom: 62px; transform: translateX(-50%); z-index: 11; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 10px; max-width: calc(100vw - 32px);
+  padding: 9px 12px 9px 16px; border-radius: 16px; background: #2b2118; color: #fff7e8; box-shadow: 0 2px 10px rgba(0, 0, 0, .25); font-size: 14px; line-height: 1.35; }
+.knote[hidden] { display: none; }
+.knote #knBtns { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.knote button { font: 700 13px/1 system-ui, sans-serif; padding: 7px 12px; border-radius: 999px; border: 2px solid #fff7e8; background: transparent; color: #fff7e8; cursor: pointer; }
+.knote button:hover { background: #fff7e8; color: #2b2118; }
+.knote .knx { border-color: transparent; padding: 5px 9px; font-size: 16px; }
+.knote button:focus-visible { outline: 3px solid #7db4f0; outline-offset: 2px; }
+@media (prefers-color-scheme: dark) { .knote { background: #f3e9d6; color: #1d1a16; } .knote button { border-color: #1d1a16; color: #1d1a16; } .knote button:hover { background: #1d1a16; color: #f3e9d6; } }
+
 /* the small print, folded away */
 .sthelp { font-size: 13px; line-height: 1.5; color: var(--soft); border-top: 2px dotted var(--line); padding-top: 12px; }
 .sthelp summary { cursor: pointer; font-weight: 700; }

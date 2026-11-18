@@ -5066,6 +5066,11 @@ function prOnSelect(keys) {
 function prArrange() { if (!prOn()) return false; prRun(); prDraw({ fit: true }); toast('Pairs put back in their generations', 2600); return true; }
 
 /* ---------- the overlay: status buttons, empty places, chips ---------- */
+/* Living people are never compared. When the archive holds a LIVING entry with this person's first name and surname, the empty place says so, instead of "not in the archive" beside a card that plainly is. */
+const prLivingTwin = p => {
+  const t = s => TC.fold(s || '').split(' ').filter(Boolean), a = t(p.name); if (a.length < 2) return null;
+  return M.P.find(q => { if (q.a < 1 || !q.living || q.ghost) return false; const b = t(q.name); return b.length > 1 && b[0] === a[0] && b[b.length - 1] === a[a.length - 1]; }) || null;
+};
 function drawPairs() {
   const P = S.pr; let host = $('#pairs');
   if (!P || !P.res) { if (host) host.innerHTML = ''; document.body.classList.remove('pr'); return; }
@@ -5081,7 +5086,8 @@ function drawPairs() {
     const fx = cF ? cF.x : cA.x - off.dx, fy = cF ? cF.y : cA.y - off.dy, ax = cA ? cA.x : cF.x + off.dx, ay = cA ? cA.y : cF.y + off.dy;
     if (sel) h += `<div class="psel" style="left:${f1(Math.min(fx, ax) - 6)}px;top:${f1(Math.min(fy, ay) - 6)}px;width:${f1(Math.abs(ax - fx) + W + 12)}px;height:${f1(Math.abs(ay - fy) + H + 12)}px"></div>`;
     if (!cF) h += `<div class="pslot" style="left:${f1(fx)}px;top:${f1(fy)}px;width:${W}px;height:${H}px"><span>not in your file</span></div>`;
-    if (!cA) h += `<div class="pslot" style="left:${f1(ax)}px;top:${f1(ay)}px;width:${W}px;height:${H}px"><span>${s.primary == null ? 'not in the archive' : 'not shown'}</span></div>`;
+    if (!cA) { const lv = s.primary == null && cF && s.f >= 0 ? prLivingTwin(M.P[s.f]) : null;
+      h += `<div class="pslot" style="left:${f1(ax)}px;top:${f1(ay)}px;width:${W}px;height:${H}px"${lv ? ' title="The archive lists a living person of this name. Living people are never compared, so nothing is matched or checked here."' : ''}><span>${s.primary == null ? (lv ? 'a living person of this name is in the archive: not compared' : 'not in the archive') : 'not shown'}</span></div>`; }
     /* the button between: where the two cards meet */
     const mx = P.lay.stack ? fx + W / 2 : (fx + W + ax) / 2, my = P.lay.stack ? (fy + H + ay) / 2 : fy + H / 2;
     const who = (s.f >= 0 ? M.P[s.f].name : s.primary != null && s.arch[s.primary] ? M.P[s.arch[s.primary].i].name : '');

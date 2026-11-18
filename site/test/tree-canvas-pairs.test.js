@@ -177,3 +177,15 @@ test("the Compare page code does not widen what leaves the browser", () => {
   assert.ok(!/localStorage|sessionStorage|indexedDB/.test(pairsUi.slice(pairsUi.indexOf("const PAIRFILE"), pairsUi.indexOf("const PAIRFILE") + 30000).split("function prBoot")[0]), "the pairing UI keeps nothing itself: the page around it does, hashed");
   assert.ok(/connect-src 'self'; form-action/.test(read("../../scripts/build-roots-data.py")), "the canvas frame's CSP is unchanged: it reads this site only");
 });
+
+test("compare: a living archive person of the same name is named in the empty place, never compared", () => {
+  const i = TPL.indexOf("const prLivingTwin"), j = TPL.indexOf("};\n", i) + 3;
+  assert.ok(i > 0, "the helper is in the page");
+  const fold = s => String(s || "").normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  const M = { P: [{ a: 0, name: "David Ivan Defranceski" }, { a: 1, name: "David Defranceski", living: true }, { a: 1, name: "David Smith", living: true }, { a: 2, name: "Anna Kalanj" }] };
+  const twin = new Function("TC", "M", TPL.slice(i, j) + "; return prLivingTwin;")({ fold }, M);
+  assert.equal(twin(M.P[0]), M.P[1], "first name and surname match a living archive entry");
+  assert.equal(twin(M.P[3]), null, "no living entry of that name");
+  assert.equal(twin({ name: "David" }), null, "a single word is not enough to name anyone");
+  assert.match(TPL, /a living person of this name is in the archive: not compared/);
+});

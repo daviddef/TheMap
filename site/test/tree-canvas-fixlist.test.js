@@ -262,3 +262,58 @@ test("the page: the Order and Rows controls, remembered in localStorage inside a
   assert.match(v, /fx-gact[^']*'[^]*head\.append\(h\); if \(x\.total && g\.key !== 'compare'\) head\.append\(openAllBar/, "the Open next control sits in the group's own header line");
   const css = read("public/tree-canvas/page.css"); assert.match(css, /\.fx-sec > summary \{[^}]*grid-template-columns/); assert.doesNotMatch(css, /\.fx-sec \{[^}]*border: 2px/);
 });
+
+/* ---- the four blockers from the comparison with Roots & Routes: the kept-file door, Atlas links kept, the living line, the cap message ---- */
+class Fake {
+  constructor(tag) { this.tag = tag; this.childNodes = []; this.attrs = {}; this.classList = { add() {}, remove() {}, contains: () => false, toggle() {} }; this.className = ""; this.textContent = ""; }
+  append(...c) { for (const x of c) this.childNodes.push(typeof x === "string" ? { text: x } : x); }
+  setAttribute(k, v) { this.attrs[k] = v; }
+  all(f, out = []) { for (const c of this.childNodes) if (c instanceof Fake) { if (f(c)) out.push(c); c.all(f, out); } return out; }
+}
+const fakeDoc = { createElement: t => new Fake(t) };
+const person = { id: "I1", name: "Ann Test", nl: { given: { t: "Ann", u: "/your-name/?n=Ann" }, sur: { t: "Test", u: "/surname/test/" } } };
+test("blocker 2: with a MyHeritage link set the name links to MyHeritage AND the Atlas's name pages stay as their own links; without one the name's words are the Atlas links", async () => {
+  const { personLine } = await import("../public/tree-canvas/fixlist-rows.js");
+  const withMh = personLine(fakeDoc, { links: { url: () => ({ mh: "https://www.myheritage.com/x", tree: "https://www.myheritage.com/t", anc: "" }) } }, person);
+  const hrefs = withMh.all(e => e.tag === "a").map(a => a.href);
+  assert.ok(hrefs.includes("https://www.myheritage.com/x"), "the name is the MyHeritage profile link");
+  assert.ok(hrefs.includes("https://recordatlas.org/surname/test/") && hrefs.includes("https://recordatlas.org/your-name/?n=Ann"), "the surname and given-name pages are still linked: " + hrefs.join(" "));
+  assert.equal(withMh.all(e => e.tag === "a" && e.className === "fx-name").length, 1, "one name link");
+  const none = personLine(fakeDoc, { links: { url: () => null } }, person);
+  assert.deepEqual(none.all(e => e.tag === "a").map(a => a.href), ["https://recordatlas.org/your-name/?n=Ann", "https://recordatlas.org/surname/test/"], "no tree link: the name's own words are the Atlas links, as before");
+  const arch = personLine(fakeDoc, { links: { url: () => ({ mh: "https://www.myheritage.com/x" }) } }, { name: "A B", nl: person.nl }, { archive: "Falco", href: "https://falco.defranceski.com/p/1/" });
+  assert.deepEqual(arch.all(e => e.tag === "a").map(a => a.href), ["https://falco.defranceski.com/p/1/"], "an archive row is the archive's page, unchanged");
+});
+test("blocker 3: one plain line says whether living people are included, from the canvas's living lock, with a way to Settings", () => {
+  assert.match(html, /id="fx-living" hidden><span><\/span> <button type="button" class="stlink" id="fx-living-set">/);
+  const v = read("public/tree-canvas/fixlist-view.js");
+  assert.match(v, /Living people are left out of this list\./); assert.match(v, /Living people are included in this list\./);
+  assert.match(v, /cfg\.livingHidden && cfg\.livingHidden\(\)/); assert.match(v, /#fx-living-set/);
+  assert.match(app, /livingHidden: \(\) => hide/, "the lock is the page's own `hide`, the one that asked the reader for the list (askFix: living: !hide)");
+  assert.match(app, /cmd: 'checklist', living: !hide/);
+});
+test("blocker 4: the cap says how many decisions it leaves out of the six-word copy, and changes nothing else", () => {
+  const rowsOf = (live, undone) => { const o = {}; for (let i = 0; i < live; i++) o["d" + i] = { d: 1, t: "2026-11-01", w: 1e12 + i }; for (let i = 0; i < undone; i++) o["u" + i] = { t: "2026-11-01", w: 1e12 + i }; return o; };
+  assert.deepEqual(RF.capInfo(rowsOf(5, 2), 10), { kept: 7, decisions: 0, undone: 0 }, "under the cap: nothing left out");
+  assert.deepEqual(RF.capInfo(rowsOf(12, 3), 10), { kept: 10, decisions: 2, undone: 3 }, "tombstones go first, then the oldest decisions");
+  assert.deepEqual(RF.capInfo(rowsOf(4, 9), 10), { kept: 10, decisions: 0, undone: 3 }, "only undone ticks left out: no decision is dropped");
+  const out = RF.capDecisions(rowsOf(12, 3), 10); assert.equal(Object.keys(out).length, 10);
+  assert.ok(!("d0" in out) && !("d1" in out) && "d2" in out && "d11" in out, "the two oldest decisions are the ones left out");
+  assert.deepEqual(Object.keys(RF.capDecisions(rowsOf(3, 0))).length, 3);
+  const big = rowsOf(RF.MAX_DECISIONS + 300, 0); assert.equal(RF.MAX_DECISIONS, 15000);
+  assert.deepEqual(RF.capInfo(big), { kept: 15000, decisions: 300, undone: 0 });
+  assert.equal(Object.keys(RF.buildBackup({ v: 1, active: null, lines: {}, marks: {} }, big).decisions).length, 15000, "the cap itself is unchanged");
+  const v = read("public/tree-canvas/fixlist-view.js");
+  assert.match(v, /beyond the ' \+ n0\(cap\.kept\) \+ ' the six words can carry/); assert.match(v, /stay' : 'stays|they stay/); assert.match(app, /capInfo: rows =>/);
+  assert.match(read("public/js/research-file.js"), /WHAT IS DROPPED, AND WHAT THAT MEANS/, "what is dropped is written down where the cap is");
+});
+test("blocker 1: a kept file has a Fix list button that opens it on the Fix list, and the start screen shows the saved fix line", () => {
+  assert.match(html, /id="stFixSaved"[^>]*hidden/); assert.match(html, /id="stFixTxt"/); assert.match(html, /\/my-research\/#fixes/);
+  assert.match(app, /btn\('trbtn', 'Fix list'[^]*openKept\(r, 'fix'\)/); assert.match(app, /reopen\(g, null\)/); assert.match(app, /g\.kept \? openKept\(g\.kept, to\)/, "the card opens its kept file; the Fix list button opens it on the Fix list");
+  assert.match(app, /function start\(bytes, name, via, link, to\)[^]*openTo = to \|\| null/);
+  assert.match(app, /fixRefresh\(true\);\n\s*if \(openTo === 'fix'\) \{ openTo = null; openFX\(null\); \}/, "the Fix list opens when the reader's list arrives");
+  assert.match(app, /if \(r\.from !== 'tree\.json'\)/, "a tree.json has no Fix list");
+  assert.match(app, /const trees = rememberOn\(\) \? \(fixes\.all\(\) \|\| \{\}\) : \{\}/, "follows the keep-files switch, reads the summary the Fix list already keeps");
+  assert.match(app, /s\.total - s\.done - s\.asis/, "left to fix: the same sum /roots/ makes");
+  assert.doesNotMatch(app.slice(app.indexOf("function savedFix")), /setItem\(/, "the line stores nothing");
+});

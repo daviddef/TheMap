@@ -15,7 +15,7 @@ const today = () => new Date().toISOString().slice(0, 10);
 /* the two sort choices are remembered on this device only (a convenience: nothing else reads them); the page works without storage */
 const keep = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { /* private window or blocked storage */ } return null; };
 
-/* cfg: { root, dec (the store), fixes (the My research summary store), links, show(keys), openSettings(), fileName(), syncOn(), onCount(open), onLists(), doc } */
+/* cfg: { root, dec (the store), fixes (the My research summary store), links, show(keys), openSettings(), fileName(), syncOn(), livingHidden() (the canvas's living lock), capInfo(rows) (what the six-word copy leaves out, or null where that copy is not in play), onCount(open), onLists(), doc } */
 export function createWorkspace(cfg) {
   const root = cfg.root, doc = root.ownerDocument, $ = s => root.querySelector(s);
   let m = null, cmp = null, salt = '', model = buildModel(null, null, ''), mode = 'open', groupFilter = '', q = '', personId = null, personName = '', loaded = null, collapse = false;
@@ -48,6 +48,9 @@ export function createWorkspace(cfg) {
     $('#fx-prog').textContent = total ? n0(done) + ' of ' + n0(total) + ' done · ' + n0(tl.open) + ' to do' : 'Nothing to fix';
     const hasMh = !!(cfg.links() && cfg.links().get && cfg.links().get().mh), anc = !!(cfg.links() && cfg.links().get && cfg.links().get().anc);
     $('#fx-hint').hidden = hasMh || anc || !total;
+    /* one plain line: are living people in this list or not? It is the canvas's own living lock (Settings), the same one that decided whether the reader put them in */
+    const lv = $('#fx-living'); lv.hidden = !m;
+    if (m) lv.firstElementChild.textContent = cfg.livingHidden && cfg.livingHidden() ? 'Living people are left out of this list.' : 'Living people are included in this list.';
     $('#fx-sub').textContent = !m && !model.hasCmp ? 'The fix list is made from a GEDCOM. Open one and it is worked out here, in this browser; nothing is sent.'
       : 'Made in your browser from ' + (cfg.fileName() || 'your file') + (model.main ? ' · ' + n0(model.main) + ' people in the main tree' : '') + '. Fix things in your own tree program, then open the file again: a row that has been fixed is gone.';
     drawKeep();
@@ -57,8 +60,10 @@ export function createWorkspace(cfg) {
   function drawKeep() {
     const on = cfg.dec.isOn() && cfg.dec.available(), box = $('#fx-keepon'); box.checked = cfg.dec.isOn(); box.disabled = !cfg.dec.available();
     const k = cfg.dec.count(), t = $('#fx-saved'); t.classList.toggle('saved', on);
+    /* the six-word copy carries 15,000 rows at most (research-file.js says which are dropped); say so when this device holds more, and that they stay here */
+    const cap = on && cfg.capInfo ? cfg.capInfo(cfg.dec.rows()) : null, over = cap ? cap.decisions : 0, capSay = over ? ' ' + n0(over) + (over === 1 ? ' decision is' : ' decisions are') + ' beyond the ' + n0(cap.kept) + ' the six words can carry; ' + (over === 1 ? 'it stays' : 'they stay') + ' on this device.' : '';
     t.textContent = !cfg.dec.available() ? 'This browser has no storage for it (a private window?). Save the decisions to a file instead.'
-      : on ? '✓ Saved on this device: ' + n0(k) + (k === 1 ? ' decision' : ' decisions') + (st.pending() ? ' (saving…)' : '') + '. ' + (cfg.syncOn() ? 'With your six words on, they are also copied to your encrypted copy within about half a minute, and an untick travels too.' : 'Turn on the six words (Connection & Backup) to keep them on every device.')
+      : on ? '✓ Saved on this device: ' + n0(k) + (k === 1 ? ' decision' : ' decisions') + (st.pending() ? ' (saving…)' : '') + '. ' + (cfg.syncOn() ? 'With your six words on, they are also copied to your encrypted copy within about half a minute, and an untick travels too.' : 'Turn on the six words (Connection & Backup) to keep them on every device.') + capSay
         : k ? n0(k) + ' decisions are stored on this device; turn this on to keep new ones too.' : 'Not kept: ticks and "left as is" are lost when you close the page.';
   }
 
@@ -189,6 +194,8 @@ export function createWorkspace(cfg) {
   $('#fx-collapse').onclick = () => { open.clear(); for (const s of model.sections) open.set(s.key, false); draw(); };
   $('#fx-whoX').onclick = () => setPerson(null);
   const sb = $('#fx-settings'); if (sb) sb.onclick = () => cfg.openSettings();
+  const sl = $('#fx-living-set'); if (sl) sl.onclick = () => cfg.openSettings();
+  doc.addEventListener('ra-sync-done', () => drawKeep());   // the six-word code loads a moment after the page: say so once it is there
   $('#fx-keepon').onchange = e => {
     const on = e.target.checked; cfg.dec.setOn(on); cfg.dec.optOut(!on);
     if (!on) cfg.fixes.forget(); else { st.flush(); cfg.dec.putMany([...st.asIs].map(k => [k, 'a', true]).concat([...st.ticked].map(k => [k, 'd', true]))); keepSummary(); }

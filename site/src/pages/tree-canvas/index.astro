@@ -12,7 +12,7 @@ import { u } from "../../lib/url.js";
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' https: https://archive.defranceski.com https://booyzen.defranceski.com https://luwinski.defranceski.com https://lerena.defranceski.com https://falco.defranceski.com https://blazevic.defranceski.com https://darcy.defranceski.com https://mazza.defranceski.com; worker-src 'self'; frame-src 'self'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' https: https://archive.defranceski.com https://booyzen.defranceski.com https://luwinski.defranceski.com https://lerena.defranceski.com https://falco.defranceski.com https://blazevic.defranceski.com https://darcy.defranceski.com https://mazza.defranceski.com; font-src 'self'; worker-src 'self'; frame-src 'self'; form-action 'none'; base-uri 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex">
 <title>Tree Canvas · Record Atlas</title>
@@ -84,16 +84,17 @@ import { u } from "../../lib/url.js";
       </a>
     </section>
 
-    <section id="stWork" class="stplain" hidden aria-labelledby="stWorkTitle">
-      <h2 id="stWorkTitle">Your saved views and canvases</h2>
-      <ul id="stWorkList" class="stlist"></ul>
-      <p class="stsub">Only where the cards sit is kept, never the file. A file from your device is matched when you open it again.</p>
+    <section id="stFixSaved" class="stplain" hidden aria-labelledby="stFixTitle">
+      <h2 id="stFixTitle">Your saved fix list</h2>
+      <p id="stFixTxt"></p>
+      <p class="stsub">Only counts and the place text as typed are kept, never a name. Open the file again to work on it, or <a href={u("/my-research/#fixes")}>see it in My research</a>.</p>
     </section>
 
     <section id="stRecent" class="stplain" hidden aria-labelledby="stRecTitle">
-      <h2 id="stRecTitle">Last used</h2>
+      <h2 id="stRecTitle">Your trees</h2>
+      <p class="stsub trintro">Each tree you opened, with the views you saved of it underneath. Rename a view or add a note with the pencil, as for a file.</p>
       <ul id="stList"></ul>
-      <p class="stsub">Kept in this browser only. <button type="button" class="stlink" id="stForget">Forget them all</button></p>
+      <p class="stsub">Kept in this browser only. For a view, only where the cards sit is kept, never the file. A file from your device is matched when you open it again. <button type="button" class="stlink" id="stForget">Forget the kept files</button></p>
     </section>
 
     <p class="stsettings"><button type="button" class="stlink" id="stSettings">Settings</button> <span class="stsub">living people, links to MyHeritage and Ancestry, the look, remembering files</span></p>
@@ -137,14 +138,9 @@ import { u } from "../../lib/url.js";
 
     <section class="yfsec" aria-labelledby="yfFilesT">
       <h2 id="yfFilesT">Files and canvases on this device</h2>
-      <div id="yfWork" hidden>
-        <h3>Saved views and canvases</h3>
-        <ul id="yfWorkList" class="stlist"></ul>
-      </div>
       <div id="yfRecent" hidden>
-        <h3>Last used</h3>
         <ul id="yfList"></ul>
-        <p class="stsub">Kept in this browser only. <button type="button" class="stlink" id="yfForget">Forget them all</button></p>
+        <p class="stsub">Kept in this browser only. A view keeps only where the cards sit, never the file. <button type="button" class="stlink" id="yfForget">Forget the kept files</button></p>
       </div>
       <p class="stsub" id="yfNoFiles" hidden>Nothing is kept on this device yet.</p>
     </section>
@@ -179,6 +175,7 @@ import { u } from "../../lib/url.js";
       <p class="stsub" id="fx-sub"></p>
       <div class="fxprog"><div class="fxbar" id="fx-bar" role="progressbar" aria-label="Fix list progress" aria-valuemin="0" aria-valuemax="100"><i></i></div><span id="fx-prog" role="status"></span></div>
       <p class="stsub" id="fx-hint" hidden>Names are plain text for now. Add your MyHeritage tree link in <button type="button" class="stlink" id="fx-settings">Settings</button> and each person in your file becomes a link to their profile.</p>
+      <p class="stsub" id="fx-living" hidden><span></span> <button type="button" class="stlink" id="fx-living-set">Change this in Settings</button></p>
     </header>
 
     <section class="fxtools" aria-label="Filter the fix list">

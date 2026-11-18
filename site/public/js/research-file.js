@@ -47,17 +47,35 @@
   function hasWork(b) { return b && ((b.done && b.done.length) || b.state || b.note); }
 
   /* THE FIX-IT DECISIONS ARE CAPPED at MAX_DECISIONS rows (about 50 bytes each, so well under the server's 2 MB with everything else): past that the OLDEST
-     changes are left out of the copy that is saved online or written to a file; every one stays on this device. Tombstones (an undone tick) go first. */
+     changes are left out of the copy that is saved online or written to a file; every one stays on this device. Tombstones (an undone tick) go first.
+
+     WHAT IS DROPPED, AND WHAT THAT MEANS (the Fix list says so on screen, from capInfo below). Rows are ranked live decisions before tombstones, then newest change first
+     (by `w`, else by the day), and the first MAX_DECISIONS are carried. So the rows left behind are, in this order: undone ticks (the tombstones: another device then
+     does not learn of the untick, and a tick it still holds can stay), then the oldest ticks and "left as is". A row left behind is not lost: it stays in this browser's
+     store and is counted and shown there as before; it is only missing from the six-word copy and from a research file, so a new device would not see it.
+     The cap and the merge rules are not changed by saying so. `max` is for the tests only; nothing passes it. */
   var MAX_DECISIONS = 15000;
-  function capDecisions(rows) {
-    var keys = Object.keys(rows);
-    if (keys.length <= MAX_DECISIONS) return clone(rows);
-    keys.sort(function (p, q) {
+  function rankedKeys(rows) {
+    return Object.keys(rows).sort(function (p, q) {
       var tp = rows[p].a || rows[p].d ? 1 : 0, tq = rows[q].a || rows[q].d ? 1 : 0;
       return tq - tp || wOf(rows[q]) - wOf(rows[p]) || (p < q ? -1 : 1);
     });
-    var out = {}; keys.slice(0, MAX_DECISIONS).forEach(function (k) { out[k] = clone(rows[k]); });
+  }
+  function capDecisions(rows, max) {
+    max = max || MAX_DECISIONS;
+    var keys = Object.keys(rows);
+    if (keys.length <= max) return clone(rows);
+    var out = {}; rankedKeys(rows).slice(0, max).forEach(function (k) { out[k] = clone(rows[k]); });
     return out;
+  }
+  /* what the cap leaves out of the copy for these rows: {kept, decisions (ticks and "left as is" left out), undone (undone ticks left out)}; all 0 under the cap */
+  function capInfo(rows, max) {
+    max = max || MAX_DECISIONS;
+    var left = { kept: 0, decisions: 0, undone: 0 }, keys = rows ? Object.keys(rows) : [];
+    left.kept = Math.min(keys.length, max);
+    if (keys.length <= max) return left;
+    rankedKeys(rows).slice(max).forEach(function (k) { if (rows[k].a || rows[k].d) left.decisions++; else left.undone++; });
+    return left;
   }
 
   /* The whole backup: every line, every mark, and the fix-it decisions if there are any. */
@@ -204,6 +222,7 @@
     if (isView) {
       out.tk = cs.tk; out.name = typeof it.name === "string" ? it.name.replace(/<[^>]*>/g, " ").replace(/[\u0000-\u001f\u007f<>]/g, " ").replace(/\s+/g, " ").trim().slice(0, 60) : "";
       if (!out.name) out.name = "My view";
+      if (typeof it.note === "string") { var nt = it.note.replace(/<[^>]*>/g, " ").replace(/[\u0000-\u001f\u007f<>]/g, " ").replace(/\s+/g, " ").trim().slice(0, 120); if (nt) out.note = nt; }
       if (CANVAS_LOOKS.indexOf(w.look) >= 0) out.w.look = w.look;
     }
     return JSON.stringify(out).length <= CANVAS_ITEM_CHARS ? out : null;
@@ -373,7 +392,7 @@
   var LINK_MAX = 6000;     // characters of address: beyond this, browsers and mail clients start to cut links, so the file is the way
 
   var api = { hash: hash, sigOf: sigOf, buildBackup: buildBackup, buildPack: buildPack, summary: summary, parseAny: parseAny,
-              mergeDecisions: mergeDecisions, MAX_DECISIONS: MAX_DECISIONS, mergeMya: mergeMya, mergeGedcoms: mergeGedcoms, status: status, encodeLink: encodeLink, decodeLink: decodeLink, LINK_MAX: LINK_MAX,
+              mergeDecisions: mergeDecisions, MAX_DECISIONS: MAX_DECISIONS, capDecisions: capDecisions, capInfo: capInfo, mergeMya: mergeMya, mergeGedcoms: mergeGedcoms, status: status, encodeLink: encodeLink, decodeLink: decodeLink, LINK_MAX: LINK_MAX,
               KEY_DEC: KEY_DEC, KEY_BACKUP: KEY_BACKUP, KEY_MYA: KEY_MYA, KEY_GED: KEY_GED, KEY_STORIES: KEY_STORIES, KEY_CANVAS: KEY_CANVAS, cleanSites: cleanSites,
               cleanCanvas: cleanCanvas, mergeCanvas: mergeCanvas, capCanvas: capCanvas, CANVAS_TOTAL_CHARS: CANVAS_TOTAL_CHARS,
               KEY_SETTINGS: KEY_SETTINGS, cleanSettings: cleanSettings, settingsToFill: settingsToFill };

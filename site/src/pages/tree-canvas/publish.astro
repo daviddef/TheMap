@@ -68,7 +68,7 @@ import { u } from "../../lib/url.js";
   <ul class="k-steps">
     <li><b>An entry</b> is a host, a name and a colour in an allow-list, plus a change to the page's security policy so the canvas may connect to that host.</li>
     <li><b>Before one is added,</b> the site must publish a <code>/roots/</code> page in the same format, must leave out living people, and must keep its data public and stable. The Atlas can check the first by reading the file; the other two are the owner's word.</li>
-    <li><b>Not offered:</b> a box where anyone types a web address. That would mean opening the security policy to every site, and letting any page feed the canvas.</li>
+    <li><b>Not offered for a listed archive:</b> a site cannot become a listed archive by typing its address. What is offered is Route 1 from a link: the first screen of the Tree Canvas has a box for the https address of a public GEDCOM or tree.json (a link of the form <code>/tree-canvas/?url=…</code> only fills that box; nothing is fetched until you press Open link). The page around the canvas fetches the file in your browser, never the canvas itself, and the security policy of that one page now lets it read an https address; the canvas and the rest of the site are unchanged. The limits: https only; a public website (no sign-in details, port, bare IP address or local name); the site must allow other websites to read the file (an <code>Access-Control-Allow-Origin</code> header, which GitHub's raw files and GitHub Pages send); 100 MB at most; nothing passes through Record Atlas; and the site it came from is named when the canvas opens. The file is treated exactly like one you opened yourself: labelled as your file, with the living rule applied.</li>
   </ul>
 
   <h2 class="k-h" id="compare">The two side by side</h2>
@@ -79,7 +79,7 @@ import { u } from "../../lib/url.js";
       <tr><td>Privacy</td><td>The file stays in your browser</td><td>The canvas fetches your public <code>/roots/</code> page</td></tr>
       <tr><td>Page links and corrections</td><td>Yes, if the file carries them and names your site</td><td>Yes</td></tr>
       <tr><td>Appears as</td><td>Labelled as your file</td><td>Named, with its own colour</td></tr>
-      <tr><td>Security policy</td><td>Unchanged</td><td>One host added per archive</td></tr>
+      <tr><td>Security policy</td><td>Unchanged for a file you drop; the opening page may read any https link you paste</td><td>One host added per archive</td></tr>
       <tr><td>Status</td><td>Available</td><td>Not offered yet</td></tr>
     </tbody></table></div>
 

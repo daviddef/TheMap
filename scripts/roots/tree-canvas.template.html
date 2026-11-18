@@ -251,6 +251,7 @@ button{font-family:inherit}
 .tabs .lk-tab.off{opacity:.45}.tabs .lk-tab.off i{background:transparent;box-shadow:inset 0 0 0 2px var(--ac)}
 .shelf{display:flex;gap:8px;overflow-x:auto;padding:10px 6px 8px;scrollbar-width:none;min-height:84px;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 14px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 14px),transparent 100%)}
 .shelf::-webkit-scrollbar{display:none}
+.shelf .none .rs-l{font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;margin-right:6px}.shelf .none .link-quiet{background:none;border:0;padding:0 6px;font:inherit;font-size:12px;color:var(--lk-faint);text-decoration:underline;cursor:pointer}.shelf .none .link-quiet:hover{color:var(--lk-ink)}
 .shelf .none{padding:14px 12px;color:var(--lk-faint);font-weight:700;font-size:13.5px;line-height:1.9;white-space:nowrap}
 .res{position:relative;flex:0 0 236px;height:70px;border-radius:16px;border:2px solid transparent;background:transparent;padding:6px 8px 6px 18px;text-align:left;cursor:grab;color:var(--lk-ink);
   transition:transform .18s cubic-bezier(.3,1.7,.5,1),background .15s;touch-action:pan-x;overflow:hidden}
@@ -409,7 +410,7 @@ button{font-family:inherit}
 .card .sib{position:absolute;right:-8px;top:-9px;z-index:3;width:19px;height:19px;border-radius:50%;border:2px solid var(--lk-card);background:var(--lk-mute);color:#fff;font:900 12px/1 Nunito,system-ui;display:grid;place-items:center;cursor:help}
 
 /* the fix list: a "!" on a card, and the tab */
-.card .fxb{position:absolute;left:-9px;top:-10px;z-index:3;width:21px;height:21px;border-radius:50%;border:2px solid var(--lk-card);background:#d24b1f;color:#fff;font:900 13px/1 Nunito,system-ui;padding:0;cursor:pointer;display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.card .fxb{position:absolute;left:-9px;bottom:-10px;z-index:3;width:21px;height:21px;border-radius:50%;border:2px solid var(--lk-card);background:#d24b1f;color:#fff;font:900 13px/1 Nunito,system-ui;padding:0;cursor:pointer;display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.3)}
 .card .fxb:hover,.card .fxb:focus-visible{transform:scale(1.15)}
 b.fxb.on{display:inline-grid;width:17px;height:17px;border-radius:50%;background:#d24b1f;color:#fff;font:900 11px/1 Nunito,system-ui;place-items:center;vertical-align:-3px}
 .fxi{margin:8px 0;padding:8px 10px;border-radius:10px;background:var(--lk-accent-soft);border-left:4px solid #d24b1f}
@@ -5082,6 +5083,23 @@ function shelfArm() {
     if (!shelfToldOnce) { shelfToldOnce = true; toast('Search tucked away. The eye button brings it back.', 3200); }
   }, 10000);
 }
+/* THE LAST PEOPLE YOU BROUGHT ONTO THE CANVAS FROM THE SEARCH (replaces the old "Try ..." examples). Kept in memory for this visit; kept on this device only while
+   Remember is ticked (the same switch as recent files), because the names come from the visitor's own file. A name that finds no one in the tree now open is not shown. */
+const RS_KEY = 'tcRecentPeople', RS_MAX = 6;
+let rsMem = null;
+function rsLoad() {
+  if (rsMem) return rsMem;
+  rsMem = [];
+  try { if (localStorage.getItem('tcRemember') !== '0') { const a = JSON.parse(localStorage.getItem(RS_KEY) || '[]'); if (Array.isArray(a)) rsMem = a.filter(x => typeof x === 'string' && x).slice(0, RS_MAX); } } catch (e) { /* ignore */ }
+  return rsMem;
+}
+function rsSave() { try { if (localStorage.getItem('tcRemember') !== '0') localStorage.setItem(RS_KEY, JSON.stringify(rsMem)); else localStorage.removeItem(RS_KEY); } catch (e) { /* ignore */ } }
+function recentSearches() { return rsLoad().filter(n => { try { return TC.search(M, n, { archives: S.filter.size ? S.filter : undefined, limit: 1 }).list.length > 0; } catch (e) { return false; } }); }
+function recentAdd(name) {
+  const n = String(name || '').trim(); if (!n) return;
+  rsMem = [n, ...rsLoad().filter(x => x.toLowerCase() !== n.toLowerCase())].slice(0, RS_MAX); rsSave();
+}
+function recentClear() { rsMem = []; try { localStorage.removeItem(RS_KEY); } catch (e) { /* ignore */ } }
 function runSearch() {
   const q = $('#q').value;
   if (q.trim()) shelfArm();
@@ -5089,8 +5107,8 @@ function runSearch() {
   lastResults = r.list;
   const sh = $('#shelf');
   if (!q.trim()) {
-    sh.innerHTML = `<div class="none">Type a name to find anyone in all ${NA} archives, then click or drag them onto the canvas. Try
-      <button class="lk-btn is-small" data-ex="sestan">Šestan</button> <button class="lk-btn is-small" data-ex="catherine tersia">Catherine Tersia</button> <button class="lk-btn is-small" data-ex="de franceschi">de Franceschi</button> <button class="lk-btn is-small" data-ex="brailey">Brailey</button></div>`;
+    const rc = recentSearches();
+    sh.innerHTML = `<div class="none">${rc.length ? `<span class="rs-l">Recent</span> ${rc.map(n => `<button class="lk-btn is-small" data-ex="${esc(n)}">${esc(n)}</button>`).join(' ')} <button class="link-quiet" data-rsclear="1" title="Forget these searches">Clear</button>` : `Search any name across ${NA === 1 ? 'your file' : 'all ' + NA + ' archives'}, then click or drag the person onto the canvas.`}</div>`;
     return;
   }
   sh.innerHTML = r.list.length ? r.list.map(p => resHTML(p, r.via && r.via.get(p.i))).join('') + (r.total > r.list.length ? `<div class="none">+${r.total - r.list.length} more: type more of the name</div>` : '')
@@ -5100,6 +5118,7 @@ function runSearch() {
 function addFromResult(p, pt) {
   shelfArm();
   const i = p.i !== undefined ? p.i : p;
+  if (M.P[i] && M.P[i].name) recentAdd(M.P[i].name);
   const rel = S.relateFrom, wasEmpty = !S.cards.size;
   const c = pt ? dropPerson(i, pt.x, pt.y) : (() => { const v = viewCentre(); const sel = [...S.sel].map(k => S.cards.get(k)).filter(Boolean)[0]; return dropPerson(i, sel ? sel.x + W / 2 + W + 60 : v.x, sel ? sel.y + H / 2 + 30 : v.y); })();
   refreshAll();
@@ -5142,7 +5161,7 @@ function runSearchMarks() { document.querySelectorAll('#shelf .res').forEach(el 
     else addFromResult(i);
   });
   window.addEventListener('pointercancel', () => { if (d && d.ghost) d.ghost.remove(); d = null; $('#stage').classList.remove('dropok'); $('#rz').classList.remove('over'); });
-  $('#shelf').addEventListener('click', e => { const b = e.target.closest('[data-ex]'); if (b) { $('#q').value = b.dataset.ex; runSearch(); } });
+  $('#shelf').addEventListener('click', e => { if (e.target.closest('[data-rsclear]')) { recentClear(); runSearch(); return; } const b = e.target.closest('[data-ex]'); if (b) { $('#q').value = b.dataset.ex; runSearch(); } });
   $('#tabs').addEventListener('click', e => {
     const b = e.target.closest('.lk-tab[data-a]'); if (!b) return;
     if (b.dataset.a === 'all') S.filter = S.filter.size === NA ? new Set() : new Set(M.archives.map((_, i) => i));
@@ -5701,7 +5720,7 @@ document.addEventListener('click', e => {
   if (m.classList.contains('on') && !m.contains(e.target) && !e.target.closest('#bMenu')) openMainMenu(false);
   const c = $('#legendCard'); if (c && c.classList.contains('on') && !c.contains(e.target) && !e.target.closest('[data-do="legend"]')) openLegend(false);
 });
-document.addEventListener('change', e => { const c = e.target; if (!c || c.id !== 'mmRem') return; try { localStorage.setItem('tcRemember', c.checked ? '1' : '0'); } catch (x) { /* ignore */ } if (!c.checked) recentForget(); else mainMenu(); });
+document.addEventListener('change', e => { const c = e.target; if (!c || c.id !== 'mmRem') return; try { localStorage.setItem('tcRemember', c.checked ? '1' : '0'); } catch (x) { /* ignore */ } if (!c.checked) { recentForget(); try { localStorage.removeItem(RS_KEY); } catch (x) { /* ignore */ } } else mainMenu(); });
 addEventListener('keydown', e => { if (e.key !== 'Escape') return; if ($('#mainMenu') && $('#mainMenu').classList.contains('on')) openMainMenu(false); else if ($('#legendCard') && $('#legendCard').classList.contains('on')) openLegend(false); });
 
 /* ---------- the Bloodline menu: add blood relatives / take away the rest / colour the rest ---------- */

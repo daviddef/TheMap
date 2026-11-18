@@ -122,7 +122,8 @@ export function createWorkspace(cfg) {
     how.append(mk(doc, 'p', 'fx-small', s.how));
     if (s.why) { const pp = mk(doc, 'p', 'fx-small fx-prwhy'); pp.append(mk(doc, 'b', null, s.level + ' priority (' + s.rank + ' of ' + PRIO_N + '). '), s.why); how.append(pp); }
     const info = mk(doc, 'button', 'fx-ib', null); info.type = 'button'; info.innerHTML = FX_ICON.info; info.title = 'What is this list, and why this priority?'; info.setAttribute('aria-label', 'What is this list, and why is it ' + s.level.toLowerCase() + ' priority? ' + s.title); info.setAttribute('aria-expanded', 'false');
-    info.onclick = e => { e.preventDefault(); e.stopPropagation(); how.hidden = !how.hidden; info.setAttribute('aria-expanded', String(!how.hidden)); };
+    /* the explanation lives inside the <details>, so a closed section hides it: opening it is part of the click (an empty section opens to just the explanation) */
+    info.onclick = e => { e.preventDefault(); e.stopPropagation(); const show = how.hidden || !d.open; how.hidden = !show; if (show && !d.open) d.open = true; info.setAttribute('aria-expanded', String(show)); };
     const chip = mk(doc, 'span', 'fx-pr fx-pr-' + s.level.toLowerCase(), s.level); chip.title = s.level + ' priority: ' + (s.why || '');
     sum.append(title, cnt, pg, info, chip); d.append(sum, how, mk(doc, 'div', 'fx-sbody'));
     if (!s.items.length) d.classList.add('fx-empty');

@@ -420,6 +420,11 @@ button{font-family:inherit}
 /* the fix list: a "!" on a card, and the tab */
 .card .fxb{position:absolute;left:-9px;bottom:-10px;z-index:3;width:21px;height:21px;border-radius:50%;border:2px solid var(--lk-card);background:#d24b1f;color:#fff;font:900 13px/1 Nunito,system-ui;padding:0;cursor:pointer;display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.3)}
 .card .fxb:hover,.card .fxb:focus-visible{transform:scale(1.15)}
+/* possible duplicates: a count at the bottom right of the card (the fix-list "!" is at the bottom left) */
+.card .dpb{position:absolute;right:-9px;bottom:-10px;z-index:3;min-width:21px;height:21px;padding:0 5px;box-sizing:border-box;border-radius:11px;border:2px solid var(--lk-card);background:#8a5cc2;color:#fff;font:900 12px/1 Nunito,system-ui;cursor:pointer;display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.card .dpb:hover,.card .dpb:focus-visible{transform:scale(1.15)}
+#pop .dupr{margin-top:8px;padding-top:7px;border-top:1px solid rgba(255,255,255,.18)}
+#pop .dupr .row{margin-top:5px}
 b.fxb.on{display:inline-grid;width:17px;height:17px;border-radius:50%;background:#d24b1f;color:#fff;font:900 11px/1 Nunito,system-ui;place-items:center;vertical-align:-3px}
 .fxi{margin:8px 0;padding:8px 10px;border-radius:10px;background:var(--lk-accent-soft);border-left:4px solid #d24b1f}
 .fxt{font:900 10.5px/1.3 Nunito,system-ui;text-transform:uppercase;letter-spacing:.05em;color:var(--lk-soft)}.fxt span{text-transform:none;letter-spacing:0}
@@ -893,7 +898,7 @@ html:not(.rzopen) #rz{display:none}
 #pairs .pchip.check{border-style:dashed}#pairs .pchip.differs{border-style:dotted;text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--lk-ink) 40%,transparent)}
 #pairs .pchip.maybe{border-style:dashed;color:var(--lk-soft)}#pairs .pchip.maybe i{background:transparent;box-shadow:inset 0 0 0 2px var(--bc)}
 #pairs .pchip:hover,#pairs .pchip:focus-visible{outline:2px solid var(--psel);outline-offset:1px}
-body.pr .card .hd:not(.op),body.pr .card .stopx,body.pr .card .brc,body.pr .card .fxb{display:none!important}
+body.pr .card .hd:not(.op),body.pr .card .stopx,body.pr .card .brc,body.pr .card .fxb,body.pr .card .dpb{display:none!important}
 .card.pfile{--ac:var(--pfile)!important}.card.pfile .cb{box-shadow:inset 0 0 0 2px var(--pfile)}
 .card.psel{outline:3px solid var(--psel);outline-offset:3px}
 #prLegend{position:fixed;left:16px;bottom:calc(var(--dockh,110px) + 22px);z-index:6;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;max-width:min(560px,calc(100vw - 32px));padding:7px 10px;border:2px solid var(--lk-line);border-radius:14px;background:var(--lk-card);color:var(--lk-ink);font:800 11.5px Nunito,system-ui;box-shadow:0 2px 0 var(--lk-line)}
@@ -1469,6 +1474,55 @@ html.rm #pairs *{transition:none!important;animation:none!important}
   }
   const bridgeDoubtful = br => br.sig.death === 'conflict' || br.sig.place === 'differ' || br.sig.crowded || br.sig.sex === 'differ';
 
+  /* ---------------- possible duplicates inside ONE archive ----------------
+   * Two records of one archive that may be one person written twice (Antonio and Antonius, both born 1825 at Gracisce): the same surname (or one family of the Atlas's surname
+   * catalogue), the same given name (or one family of its given-name catalogue), the same birth year. The bridges above only join DIFFERENT archives, so this is the case nothing else
+   * shows. Never merged, never a finding: a card carries a count and the list says why each is there. Worked out the first time it is asked for, and again when the catalogue arrives. */
+  function dupKeys(M, p) {
+    if (p._dk && p._dkN === M.N) return p._dk;
+    const N = M.N, given = new Set(), sur = new Set();
+    const g = fold(p.given).split(' ')[0], s0 = squash(p.sur);
+    if (g) { given.add(g); if (N) for (const fam of (N.gnIdx.get(g) || [])) for (const [, fs] of N.gn[fam].langs) for (const f of fs) if (f[1] !== 'l') given.add(fold(f[0]).split(' ')[0]); }
+    if (s0) { sur.add(s0); if (N) for (const fam of (N.snIdx.get(s0) || [])) for (const f of N.sn[fam].forms) if (f[1] !== 'l') sur.add(squash(f[0])); }
+    p._dk = { given, sur, g, s0 }; p._dkN = M.N;
+    return p._dk;
+  }
+  const dupOk = p => !p.living && !p.ghost && !p.standin && p.by != null && !!fold(p.given) && !!squash(p.sur);
+  function buildDupes(M) {
+    const byYear = new Map();
+    M.P.forEach(p => { if (!dupOk(p)) return; const k = p.a + '|' + p.by; (byYear.get(k) || byYear.set(k, []).get(k)).push(p.i); });
+    const of = new Map(), push = (i, d) => (of.get(i) || of.set(i, []).get(i)).push(d);
+    for (const ids of byYear.values()) {
+      if (ids.length < 2) continue;
+      for (let x = 0; x < ids.length; x++) for (let y = x + 1; y < ids.length; y++) {
+        const A = M.P[ids[x]], B = M.P[ids[y]];
+        if (A.sex !== 'u' && B.sex !== 'u' && A.sex !== B.sex) continue;
+        if (A.dy != null && B.dy != null && Math.abs(A.dy - B.dy) > 2) continue;
+        if (A.f === B.i || A.m === B.i || B.f === A.i || B.m === A.i || A.sp.includes(B.i)) continue;   /* a parent, a child or a spouse is not a duplicate */
+        const ka = dupKeys(M, A), kb = dupKeys(M, B);
+        const gExact = !!ka.g && ka.g === kb.g, gFam = !gExact && [...ka.given].some(t => kb.given.has(t));
+        const sExact = ka.s0 === kb.s0, sFam = !sExact && [...ka.sur].some(t => kb.sur.has(t));
+        if (!(gExact || gFam) || !(sExact || sFam)) continue;
+        const notes = ['same birth year'];
+        notes.push(gExact ? 'same given name' : 'one given name in the Atlas catalogue (' + A.given.split(' ')[0] + ' / ' + B.given.split(' ')[0] + ')');
+        notes.push(sExact ? 'same surname' : 'one surname in the Atlas catalogue');
+        if (A.bp && B.bp) notes.push(fold(A.bp) === fold(B.bp) ? 'same birthplace' : 'birthplaces differ');
+        if (A.dy != null && B.dy != null) notes.push(A.dy === B.dy ? 'same death year' : 'death years within 2');
+        const doubtful = !!(A.bp && B.bp && fold(A.bp) !== fold(B.bp)) || (A.f >= 0 && B.f >= 0 && A.f !== B.f) || (A.m >= 0 && B.m >= 0 && A.m !== B.m);
+        if (A.f >= 0 && B.f >= 0 && A.f !== B.f) notes.push('different fathers');
+        if (A.m >= 0 && B.m >= 0 && A.m !== B.m) notes.push('different mothers');
+        push(A.i, { i: B.i, notes, doubtful }); push(B.i, { i: A.i, notes, doubtful });
+      }
+    }
+    M._dups = of; M._dupsN = M.N;
+    return of;
+  }
+  /* the possible duplicates of person i, each { i, notes[], doubtful }; empty when none */
+  function dupsOf(M, i) {
+    if (!M._dups || M._dupsN !== M.N) buildDupes(M);
+    return M._dups.get(i) || [];
+  }
+
   /* ---------------- edges around a person ---------------- */
   function parentLinks(M, p) {
     const out = [];
@@ -1958,7 +2012,7 @@ html.rm #pairs *{transition:none!important;animation:none!important}
     const N = [...nodes.values()].map(n => ({ ...n, depth: depth.get(n.key), parent: parent.get(n.key) || null }));
     return { root: rk, nodes: N, edges: E, desc: D, people: mem.size, ancestors: gen.size, scope: scope === 'all' ? 'all' : blood ? 'blood' : 'anc' };
   }
-  const API = { nameTree, playSet, playSteps, family, lifeEvents, eraChanges, lines, arrange, bloodSet, fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful,
+  const API = { nameTree, playSet, playSteps, family, lifeEvents, eraChanges, lines, arrange, bloodSet, fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful, dupsOf,
     placeAt, dateText, neighbours, edgeCost, parentLinks, ancestorStats, stopReason, otherSideHasParents, evidenceSummary, years, url, corrUrl, wikitreeUrl, searchLinks, levelOfGrade, LEVELS, playSteps, kinshipOps, opsOf, reverseOps, bloodTerm, siblingKind, archivesOnPath, ord };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TC = API;
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -3335,6 +3389,8 @@ function cardInner(c) {
   if (p.standin) h += `<span class="sib" title="${esc(STANDIN_TIP)}" aria-label="Stand-in for an unnamed person">?</span>`;
   if (c.key === S.mark) h += `<span class="mkb" title="The marked person: the canvas shows how everyone you select is related to them">&#9873;</span>`;
   { const fx = fixOf(p); if (fx) h += `<button class="fxb" data-act="fixes" title="${fx.length} ${fx.length === 1 ? 'thing' : 'things'} on your fix list for ${esc(p.name)}: click to see what and how to fix it" aria-label="${fx.length} on the fix list">!</button>` ;  }
+  /* possible duplicates in an ARCHIVE (logic.js dupsOf): a count at the bottom right; a click lists them. Not on the visitor's own file: its duplicates are on the Fix list ("Maybe the same person") and its "!" */
+  { const ds = a.k === 'you' ? [] : TC.dupsOf(M, c.i); if (ds.length) h += `<button class="dpb" data-act="dups" title="${ds.length} possible ${ds.length === 1 ? 'duplicate' : 'duplicates'} of ${esc(p.name)} in this archive: the same surname, given name and birth year. Click to see ${ds.length === 1 ? 'it' : 'them'}. Nothing is merged." aria-label="${ds.length} possible ${ds.length === 1 ? 'duplicate' : 'duplicates'}">${ds.length}</button>`; }
   /* ancestors */
   const parentCards = [p.f, p.m].filter(q => q >= 0 && !cardOfPerson(q));
   if (parentCards.length) {
@@ -5501,6 +5557,7 @@ function runSearchMarks() { document.querySelectorAll('#shelf .res').forEach(el 
     else if (act === 'br') doBridge(c, b.dataset.b);
     else if (act === 'fixes') { select([c.key]); S.tab = 'fix'; S.infoOpen = true; renderInfo(); syncButtons(); }
     else if (act === 'brs') { select([c.key]); S.tab = 'person'; renderInfo(); }
+    else if (act === 'dups') openDups(c, e.clientX, e.clientY);
     else if (act === 'rm') { snapshot(); removeCard(c); if (S.path && (S.path.nodeKeys.has(c.key))) { S.path = null; clearPathUi(); } refreshAll(); drawEdges(); hideHint(); save(); runSearchMarks(); renderInfo(); }
     else if (act === 'rel') startRelate(c.key);
   });
@@ -6156,10 +6213,33 @@ function openPop(id, x, y) {
   if (!S.phone) { pop.style.left = Math.max(8, Math.min(innerWidth - w - 8, x - w / 2)) + 'px'; pop.style.top = Math.max(60, Math.min(innerHeight - h - 8, y + 18)) + 'px'; }
 }
 function closePop() { $('#pop').classList.remove('on'); }
+/* the possible duplicates of a card's person (logic.js dupsOf): who they are and why each was listed. Nothing is merged, and nothing here is a finding. */
+function openDups(c, x, y) {
+  const p = personOf(c), ds = TC.dupsOf(M, c.i), pop = $('#pop'); if (!ds.length) return;
+  const ps = o => o.f >= 0 || o.m >= 0 ? 'parents: ' + [o.f, o.m].filter(q => q >= 0).map(q => esc(M.P[q].name)).join(' and ') : 'no parents recorded';
+  const line = o => `<b>${esc(o.name)}</b> ${TC.years(o)}${o.bp ? ' &middot; ' + esc(o.bp) : ''}<br><span class="x">${ps(o)}</span>`;
+  pop.innerHTML = `<h5>${ds.length === 1 ? 'A possible duplicate' : ds.length + ' possible duplicates'}</h5>
+    <div>${line(p)}</div>` + ds.map(d => { const o = M.P[d.i], lk = TC.url(M, o);
+      return `<div class="dupr">${line(o)}<br><span class="x">${esc(d.notes.join(' · '))}.</span>${d.doubtful ? ' <b style="color:#F2B665">Check: something disagrees.</b>' : ''}
+        <div class="row"><button class="lk-btn is-small is-primary" data-dup="${o.i}">${cardOfPerson(o.i) ? 'Show on canvas' : 'Add beside'}</button>${lk ? `<a class="lk-btn is-small" href="${esc(lk)}" target="_blank" rel="noopener">Open in the archive</a>` : ''}</div></div>`; }).join('') +
+    `<p class="x" style="margin:8px 0 6px">The same surname, given name and birth year in one archive is a lead, not a finding. Nothing is merged either way.</p>
+    <div class="row"><button class="lk-btn is-small" data-d="x">Close</button></div>`;
+  pop.classList.add('on'); pop._id = null; pop._dupFrom = c.key;
+  const w = 290, h = pop.offsetHeight;
+  if (!S.phone) { pop.style.left = Math.max(8, Math.min(innerWidth - w - 8, x - w / 2)) + 'px'; pop.style.top = Math.max(60, Math.min(innerHeight - h - 8, y + 18)) + 'px'; }
+}
+$('#pop').addEventListener('click', async e => {
+  const b = e.target.closest('[data-dup]'); if (!b) return;
+  const c = S.cards.get($('#pop')._dupFrom), j = Number(b.dataset.dup); closePop(); if (!c) return;
+  const have = cardOfPerson(j);
+  if (have) { select([have.key]); fit([have], { maxK: 1 }); return; }
+  snapshot(); const made = [spawn(j, c, W + 70, 0)]; await settle(c, made, 'A possible duplicate, not merged');
+});
 $('#pop').addEventListener('click', e => {
   const b = e.target.closest('[data-d]'); if (!b) return; const id = $('#pop')._id;
   if (b.dataset.d === 'x') closePop(); else decide(id, b.dataset.d === 'suggested' ? null : b.dataset.d);
 });
+
 
 /* ---------------- toolbar, themes, phone ---------------- */
 function dockH() { const d = $('.dock'); document.documentElement.style.setProperty('--dock-h', (document.documentElement.classList.contains('shelfoff') ? 0 : d.offsetHeight) + 'px'); }

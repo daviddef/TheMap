@@ -355,3 +355,11 @@ test("the Fix list shows only the rows that name the pick, and a group is found 
   const sec2 = { key: "years", items: [{ key: "y|1", id: "I3", name: "Ante Defranceski", kind: "none" }, { key: "y|2", id: "I4", name: "Zed Other", kind: "none" }] };
   assert.deepEqual(toOpen([sec2], st, { names }).map(p => p.id), ["I3"], "Open next 10 people follows the pick too");
 });
+
+test("the (i) on a Fix list section opens the section, because its explanation sits inside the closed <details>", () => {
+  const v = read("public/tree-canvas/fixlist-view.js");
+  const m = /info\.onclick = e => \{([^\n]*)\};/.exec(v);
+  assert.ok(m, "the (i) has a click handler");
+  assert.match(m[1], /d\.open = true/, "a closed section is opened, or the explanation stays hidden and the click does nothing");
+  assert.match(m[1], /how\.hidden = !show/);
+});

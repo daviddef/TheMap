@@ -8,16 +8,21 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 #msg.err { background: #a8361f; }
 .nojs { position: fixed; inset: auto 16px 16px 16px; margin: 0; padding: 12px 16px; background: #fff7e8; border-radius: 10px; }
 @media (prefers-color-scheme: dark) {
-  html, body, #cv { background: #1d1a16; color: #f3e9d6; }
-  .nojs { background: #2b2620; }
+  :root:not([data-theme="light"]), :root:not([data-theme="light"]) body, :root:not([data-theme="light"]) #cv { background: #1d1a16; color: #f3e9d6; }
+  :root:not([data-theme="light"]) .nojs { background: #2b2620; }
 }
+:root[data-theme="dark"], :root[data-theme="dark"] body, :root[data-theme="dark"] #cv { background: #1d1a16; color: #f3e9d6; }
+:root[data-theme="dark"] .nojs { background: #2b2620; }
+:root[data-theme="dark"] { color-scheme: dark; }
+:root[data-theme="light"] { color-scheme: light; }
 
 /* The page the canvas opens on, before any tree. One type scale (13 / 15 / 17 / 40), two radii (10 / 16), cream ground, orange accent, and the canvas's own
    motif: cards joined by connectors. Colours are tokens so the dark theme is one block. */
 #start, #yf, #sg { --ink: #2b2118; --soft: #6a5a45; --card: #fff7e8; --line: #cdbf9f; --accent: #d9822b; --accent-ink: #fff; --focus: #2b6cb0; --err: #a5342a; --shadow: rgba(43, 33, 24, .14); }
 @media (prefers-color-scheme: dark) {
-  #start, #yf, #sg { --ink: #f3e9d6; --soft: #c9bda5; --card: #2b2620; --line: #4a4034; --accent-ink: #1d1a16; --focus: #7db4f0; --err: #f08a80; --shadow: rgba(0, 0, 0, .4); }
+  :root:not([data-theme="light"]) #start, :root:not([data-theme="light"]) #yf, :root:not([data-theme="light"]) #sg { --ink: #f3e9d6; --soft: #c9bda5; --card: #2b2620; --line: #4a4034; --accent-ink: #1d1a16; --focus: #7db4f0; --err: #f08a80; --shadow: rgba(0, 0, 0, .4); }
 }
+:root[data-theme="dark"] #start, :root[data-theme="dark"] #yf, :root[data-theme="dark"] #sg { --ink: #f3e9d6; --soft: #c9bda5; --card: #2b2620; --line: #4a4034; --accent-ink: #1d1a16; --focus: #7db4f0; --err: #f08a80; --shadow: rgba(0, 0, 0, .4); }
 #start[hidden] { display: none; }
 #start { position: fixed; inset: 0; display: flex; overflow: auto; padding: 28px 16px 40px; color: var(--ink); }
 .stwrap { width: min(560px, 100%); margin: auto; display: grid; gap: 16px; }
@@ -103,7 +108,8 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 /* Keep your work: one round save button with a few words beside it, linking to Connection & Backup. Green, because it is the "safe" colour on the rest of the site
    (the live dot); light and dark are two sets of tokens. When the six words are on, the disc fills. */
 #start, #yf, #sg { --keep: #3f8f4a; --keep-fill: #e3f2e0; --keep-ink: #2c6a36; }
-@media (prefers-color-scheme: dark) { #start, #yf, #sg { --keep: #6fbf73; --keep-fill: #22331f; --keep-ink: #bfe8b9; } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #start, :root:not([data-theme="light"]) #yf, :root:not([data-theme="light"]) #sg { --keep: #6fbf73; --keep-fill: #22331f; --keep-ink: #bfe8b9; } }
+:root[data-theme="dark"] #start, :root[data-theme="dark"] #yf, :root[data-theme="dark"] #sg { --keep: #6fbf73; --keep-fill: #22331f; --keep-ink: #bfe8b9; }
 .stkeep { justify-self: center; display: flex; align-items: center; gap: 14px; max-width: 100%; padding: 6px 14px 6px 6px; border-radius: 999px; text-decoration: none !important; color: var(--ink); transition: transform .12s ease, background .12s ease; }
 .stkeep:hover { background: color-mix(in srgb, var(--keep) 10%, transparent); color: var(--ink) !important; }
 .stdisc { flex: none; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; border: 3px solid var(--keep); background: var(--keep-fill); color: var(--keep-ink); transition: transform .15s ease, background .15s ease, color .15s ease; }
@@ -133,7 +139,8 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 .knote button:hover { background: #fff7e8; color: #2b2118; }
 .knote .knx { border-color: transparent; padding: 5px 9px; font-size: 16px; }
 .knote button:focus-visible { outline: 3px solid #7db4f0; outline-offset: 2px; }
-@media (prefers-color-scheme: dark) { .knote { background: #f3e9d6; color: #1d1a16; } .knote button { border-color: #1d1a16; color: #1d1a16; } .knote button:hover { background: #1d1a16; color: #f3e9d6; } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .knote { background: #f3e9d6; color: #1d1a16; } :root:not([data-theme="light"]) .knote button { border-color: #1d1a16; color: #1d1a16; } :root:not([data-theme="light"]) .knote button:hover { background: #1d1a16; color: #f3e9d6; } }
+:root[data-theme="dark"] .knote { background: #f3e9d6; color: #1d1a16; } :root[data-theme="dark"] .knote button { border-color: #1d1a16; color: #1d1a16; } :root[data-theme="dark"] .knote button:hover { background: #1d1a16; color: #f3e9d6; }
 
 /* the small print, folded away */
 .sthelp { font-size: 13px; line-height: 1.5; color: var(--soft); border-top: 2px dotted var(--line); padding-top: 12px; }
@@ -152,7 +159,8 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
    plain sections, one column, the same tokens as the opening screen. */
 #yf[hidden] { display: none; }
 #yf { position: fixed; inset: 0; z-index: 20; overflow: auto; background: #efe6d2; color: var(--ink); padding: 24px 16px 56px; }
-@media (prefers-color-scheme: dark) { #yf { background: #1d1a16; } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #yf { background: #1d1a16; } }
+:root[data-theme="dark"] #yf { background: #1d1a16; }
 .yfwrap { width: min(780px, 100%); margin: 0 auto; display: grid; gap: 28px; }
 .yfhead { display: grid; gap: 8px; justify-items: start; }
 #yf h1 { margin: 0; font: 400 36px/1.05 "Lilita One", system-ui, sans-serif; letter-spacing: .01em; }
@@ -207,7 +215,8 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 #sg { position: fixed; inset: 0; z-index: 30; color: var(--ink); display: flex; justify-content: flex-end; }
 .sgback { position: absolute; inset: 0; background: rgba(29, 26, 22, .45); }
 .sgpanel { position: relative; width: min(440px, 100%); height: 100%; overflow: auto; background: #efe6d2; padding: 20px 20px 48px; display: grid; gap: 20px; align-content: start; box-shadow: -8px 0 24px var(--shadow); }
-@media (prefers-color-scheme: dark) { .sgpanel { background: #1d1a16; } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .sgpanel { background: #1d1a16; } }
+:root[data-theme="dark"] .sgpanel { background: #1d1a16; }
 @media (prefers-reduced-motion: no-preference) { .sgpanel { animation: sgin .18s ease-out; } @keyframes sgin { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } } }
 .sghead { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 #sg h2 { margin: 0; font: 400 30px/1.05 "Lilita One", system-ui, sans-serif; letter-spacing: .01em; }

@@ -1,5 +1,7 @@
 # Example files for the Tree Canvas
 
+Two formats: **GEDCOM** is the industry standard, which almost every genealogy program can export. **tree.json** is our own format, made up for Record Atlas and read by nothing else; its contract (every field the reader takes) is at https://recordatlas.org/tree-canvas/publish/#format .
+
 These two files are public on purpose. They are here so anyone can try the Tree Canvas at
 https://recordatlas.org/tree-canvas/ and test opening a file from a link, for example:
 

@@ -967,6 +967,68 @@ html.rm #pairs *{transition:none!important;animation:none!important}
 .prcopyfb{flex:1 1 100%}.prcopybox{width:100%;box-sizing:border-box;font:12px/1.35 ui-monospace,Menlo,monospace;color:var(--lk-ink);background:var(--lk-paper);border:2px solid var(--lk-line);border-radius:8px;padding:6px;user-select:text;-webkit-user-select:text}
 .prlive{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 .prallrow{margin:6px 0}
+
+/* ---------- the Fix button and the Fix list tab's rows (the rows are the Fix list page's own: fixrows.css, copied here whole) ---------- */
+#bFix[hidden]{display:none}
+#bFix{position:relative}
+#bFix .fxn{position:absolute;right:-5px;top:-6px;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:#d24b1f;color:#fff;border:2px solid var(--lk-card);font:900 11px/15px Nunito,system-ui;text-align:center;box-sizing:border-box;pointer-events:none}
+#bFix .fxn[hidden]{display:none}
+#info{--fx-ink:var(--lk-ink);--fx-soft:var(--lk-soft);--fx-line:var(--lk-line);--fx-card:var(--lk-card);--fx-accent:var(--lk-accent);--fx-ok:#3f8f4a;--fx-warn:#d24b1f;--fx-focus:var(--lk-accent)}
+[data-theme="ground"] #info{--fx-ok:#6fbf73;--fx-warn:#f08a6a}
+#info .fxnone{font-weight:800}
+#info .fx-person{margin:6px 0}
+/* The Fix list's rows (fixlist-rows.js), drawn on the Tree Canvas page and inside the canvas's side panel. ONE file, copied into the canvas build (a test checks the copies agree).
+   Everything is in --fx-* variables, set by the host: the page sets them on #fx, the canvas on #info. The fallbacks are the light colours. */
+.fx-row{--c-ink:var(--fx-ink,#2b2118);--c-soft:var(--fx-soft,#6a5a45);--c-line:var(--fx-line,#cdbf9f);--c-card:var(--fx-card,#fff7e8);--c-accent:var(--fx-accent,#d9822b);--c-ok:var(--fx-ok,#3f8f4a);--c-okfill:var(--fx-okfill,#e3f2e0);--c-focus:var(--fx-focus,#2b6cb0);--c-warn:var(--fx-warn,#d24b1f);
+  display:flex;align-items:flex-start;gap:10px;margin:8px 0;padding:10px 12px;border:1.5px solid var(--c-line);border-radius:10px;background:var(--c-card);color:var(--c-ink);font:400 14px/1.45 system-ui,sans-serif;text-align:left}
+.fx-row>input[type=checkbox]{flex:none;width:20px;height:20px;margin:2px 0 0;accent-color:var(--c-ok);cursor:pointer}
+.fx-row .fx-body{flex:1;min-width:0;display:grid;gap:5px}
+.fx-row.done{background:color-mix(in srgb,var(--c-card) 80%,var(--c-line));border-style:dashed}
+.fx-row.done .fx-body{opacity:.62;filter:grayscale(1)}
+.fx-row.done .fx-body::before{content:"✓ Done";font:800 11px/1.2 system-ui,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:var(--c-ok)}
+.fx-row.asis{border-style:dotted}.fx-row.asis .fx-body{opacity:.7}
+.fx-row.compact{padding:8px 9px;gap:8px;font-size:13px;margin:6px 0}
+.fx-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.fx-head>.fx-leave{margin-left:auto}
+.fx-swap{display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;min-width:0;overflow-wrap:anywhere}
+.fx-was{text-decoration:line-through;color:var(--c-soft)}.fx-was.plain{text-decoration:none;color:var(--c-ink);font-weight:700}
+.fx-arrow{color:var(--c-soft)}.fx-now{font-weight:800}
+.fx-acts2{display:inline-flex;flex-wrap:wrap;gap:6px}
+.fx-note,.fx-evs,.fx-next{margin:0;font-size:13px;color:var(--c-soft)}
+.fx-next{color:var(--c-ink)}.fx-next b{color:var(--c-warn)}
+.fx-small{font-size:13px;color:var(--c-soft)}.fx-muted{color:var(--c-soft)}
+.fx-reason{font-weight:700}
+.fx-q{display:inline-block;font-size:16px;line-height:1;cursor:help}
+.fx-pl{list-style:none;margin:0;padding:0;display:grid;gap:3px}.fx-pl.solo{display:inline-grid}
+.fx-p{display:grid;grid-template-columns:minmax(0,15em) 4.6em 5.4em 7.5em minmax(0,1fr);grid-template-areas:"n i e y a";align-items:center;column-gap:10px;min-width:0}
+.fx-pl.solo{display:grid}.fx-pl.solo .fx-p{grid-template-columns:auto auto auto auto auto;justify-content:start}
+.fx-pn{grid-area:n;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}.fx-pn a,.fx-p a.fx-name{color:inherit;text-decoration:underline;text-underline-offset:2px}.fx-pn a:hover{color:var(--c-accent)}
+.fx-pid{grid-area:i;font:700 11px/1 ui-monospace,Menlo,monospace;color:var(--c-soft);text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fx-ev{grid-area:e;font:700 12px/1.3 system-ui,sans-serif;color:var(--c-soft);white-space:nowrap}
+.fx-yr{grid-area:y;font:700 12px/1.3 system-ui,sans-serif;font-variant-numeric:tabular-nums;color:var(--c-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fx-ev.wide{grid-area:e/e/y/y;grid-column:3/5;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.fx-acts{grid-area:a;display:inline-flex;gap:4px;justify-self:end}
+.fx-row.compact .fx-p{grid-template-columns:4.2em 4.6em minmax(0,1fr) auto;grid-template-areas:"n n n a" "i e y y";row-gap:1px}
+.fx-row.compact .fx-ev.wide{grid-column:2/4}
+@media (max-width:700px){.fx-p{grid-template-columns:4.2em 4.6em minmax(0,1fr) auto;grid-template-areas:"n n n a" "i e y y";row-gap:1px}.fx-ev.wide{grid-column:2/4}}
+.fx-ib{display:inline-grid;place-items:center;width:26px;height:26px;padding:0;border:1.5px solid var(--c-line);border-radius:50%;background:transparent;color:var(--c-soft);cursor:pointer}
+.fx-ib svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.fx-ib:hover{color:var(--c-accent);border-color:var(--c-accent)}.fx-ib.ok{color:var(--c-ok);border-color:var(--c-ok)}
+.fx-cand,.fx-add,.fx-leave,.fx-link,.fx-openall{font:700 12.5px/1.2 system-ui,sans-serif;cursor:pointer}
+.fx-cand,.fx-add{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border:1.5px solid var(--c-line);border-radius:999px;background:transparent;color:var(--c-ink);max-width:100%}
+.fx-cand svg,.fx-add svg{width:13px;height:13px;flex:none;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.fx-cand span,.fx-add span{overflow-wrap:anywhere;text-align:left}
+.fx-cand:hover,.fx-add:hover{border-color:var(--c-accent);color:var(--c-accent)}.fx-cand.ok,.fx-add.ok{border-color:var(--c-ok);color:var(--c-ok)}
+.fx-leave,.fx-link{padding:2px 4px;border:0;background:transparent;color:var(--c-soft);text-decoration:underline;text-underline-offset:2px}
+.fx-leave:hover,.fx-link:hover{color:var(--c-accent)}
+.fx-cands{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.fx-reasons{margin:0;padding-left:18px;color:var(--c-soft);font-size:13px}.fx-reasons a{color:var(--c-ink)}
+.fx-notes{font-size:13px}.fx-notes>summary{cursor:pointer;color:var(--c-soft)}
+.fx-atl{margin:4px 0 0;padding-left:18px;color:var(--c-soft)}.fx-atl li.none{font-style:italic}.fx-atl a{color:var(--c-ink)}
+.fx-row button:focus-visible,.fx-row a:focus-visible,.fx-row input:focus-visible,.fx-row summary:focus-visible{outline:3px solid var(--c-focus);outline-offset:2px}
+@media (max-width:480px){.fx-row{padding:9px 8px;gap:8px}.fx-acts{margin-left:0}.fx-head>.fx-leave{margin-left:0}}
+.fx-row [hidden]{display:none!important}
+
 /* slimmed Compare panel: status, who, links, the decision; every sentence of explanation behind the (i). Its own file (after style.css) so it is not lost when style.css is edited elsewhere. */
 .prtitle{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}.prtitle h3{flex:1 1 0;min-width:0;margin:0;font-size:17px}
 .prbtns{margin:6px 0;gap:6px}
@@ -1013,6 +1075,7 @@ html.rm #pairs *{transition:none!important;animation:none!important}
   <button class="lk-ibtn" id="bUndo" title="Undo (Ctrl/Cmd Z)" aria-label="Undo"></button>
   <button class="lk-ibtn" id="bInfo" title="Side panel: person, where next, path" aria-label="Panel"></button>
   <button class="lk-ibtn xtra" id="bClear" title="Clear the canvas (Undo brings it back)" aria-label="Clear"></button>
+  <button class="lk-ibtn" id="bFix" title="Fix list" aria-label="Fix list" hidden></button>
   <button class="lk-ibtn" id="bTheme" title="Look" aria-label="Look" hidden></button>
   <button class="lk-ibtn" id="bMenu" title="Menu: how to read the lines, options" aria-label="Menu" aria-haspopup="true" aria-expanded="false"></button>
   <button class="lk-ibtn" id="bMore" title="More" aria-label="More" style="display:none"></button>
@@ -3006,6 +3069,27 @@ html.rm #pairs *{transition:none!important;animation:none!important}
     return { items, total, capped: total > items.length, text: head + '\n\n' + items.map(x => x.text).join('\n\n') };
   }
 
+  /* The walk's findings as rows for the Fix list page, the two groups only the canvas can make:
+       missing   people an archive holds in a place where the visitor's file has no one (deceased only: the same people addPeople offers), with how they are related to someone in the file;
+       differs   a person in both whose two records disagree on a detail ('check'), with the reason in the engine's own words ("died 1859 against 1854").
+     Plain data, no DOM. It names people (it is handed to the page in memory, which draws it); nothing here is stored: the page keeps only a decision, under a key it makes from `ak` (and `fid`, `reason`). */
+  function fixItems(M, res, opt) {
+    opt = opt || {}; const cap = opt.cap || 600, missing = [], differs = [];
+    res.slots.slice().sort((a, b) => a.gen - b.gen).forEach(s => {
+      if (s.f < 0) {
+        let q = offerable(M, s); if (!q) return;
+        const a = opt.shown ? opt.shown(s) : null; if (a != null && s.arch[a]) { const q2 = M.P[s.arch[a].i]; if (q2 && !q2.living && !q2.ghost && !q2.standin && !placeholder(q2)) q = q2; }
+        const via = s.via != null && res.bySlot ? res.bySlot.get(s.via) : null, vf = via && via.f >= 0 && !skip(M.P[via.f]) ? M.P[via.f] : null;
+        if (missing.length < cap) missing.push({ ak: q.key, name: q.name, yrs: TC.years(q), place: q.bp || '', archive: M.archives[q.a].name, url: TC.url(M, q) || '', rel: vf && ['father', 'mother', 'child', 'spouse'].includes(s.rel) ? s.rel : '', relName: vf ? vf.name : '', relId: vf ? String(vf.id) : '', relKey: vf ? vf.key : '', text: personText(M, res, s, q) });
+      } else if (s.state === 'check' && s.primary != null && s.arch[s.primary]) {
+        const f = M.P[s.f], q = M.P[s.arch[s.primary].i];
+        if (skip(f) || skip(q) || placeholder(f) || placeholder(q)) return;
+        if (differs.length < cap) differs.push({ fid: String(f.id), fkey: f.key, fname: f.name, fyrs: TC.years(f), ak: q.key, aname: q.name, ayrs: TC.years(q), archive: M.archives[q.a].name, url: TC.url(M, q) || '', reason: (s.pnotes || []).filter(Boolean).join('; ') || 'the two records disagree on a detail' });
+      }
+    });
+    return { missing, differs };
+  }
+
   /* how far to scroll a list so the row (and its open detail) is in view, and no further. All numbers share one coordinate frame: vt/vb the visible top and bottom,
      rt/rb the row's, db the bottom of its open detail (or null). 0 = do not scroll; a row that fits is never moved. */
   function scrollDelta(vt, vb, rt, rb, db, pad) {
@@ -3015,7 +3099,7 @@ html.rm #pairs *{transition:none!important;animation:none!important}
     if (end <= vb) return 0;
     return Math.max(0, Math.min(end - vb + pad, rt - vt - pad));
   }
-  const API = { scrollDelta, decisionInfo, personText, addPeople, offerable, genLabel, groupByGen, archLines, contrast, ensure, lum, pair, layout, alternatives, dkey, judgeD, matchLists, placeholder, isPlaceholderName, statusInfo, statusHtml, statusIconHtml, byState };
+  const API = { scrollDelta, decisionInfo, personText, addPeople, fixItems, offerable, genLabel, groupByGen, archLines, contrast, ensure, lum, pair, layout, alternatives, dkey, judgeD, matchLists, placeholder, isPlaceholderName, statusInfo, statusHtml, statusIconHtml, byState };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCP = API;
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
@@ -3055,6 +3139,7 @@ const ICON = {
   search: '<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/>', theme: '<circle cx="12" cy="12" r="8"/><path d="M12 4v16"/><path d="M12 4a8 8 0 010 16z" fill="currentColor"/>',
   sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M18.7 5.3l-1.8 1.8M7.1 16.9l-1.8 1.8"/>',
   moon: 'M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z',
+  fix: '<path d="M3.5 6.5l1.6 1.6 2.9-3.2M3.5 12.5l1.6 1.6 2.9-3.2M3.5 18.5l1.6 1.6 2.9-3.2"/><path d="M11 6.5h10M11 12.5h10M11 18.5h10"/>',
   more: '<circle cx="5" cy="12" r="1.7" fill="currentColor"/><circle cx="12" cy="12" r="1.7" fill="currentColor"/><circle cx="19" cy="12" r="1.7" fill="currentColor"/>',
   clear: 'M4 7h16M9.5 7V4.5h5V7M6 7l1 13h10l1-13M10 11v5.5M14 11v5.5', save: 'M5 3h11l4 4v12a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2zM7 3v5h8V3M7 21v-7h10v7', gear: '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>',
   map: 'M4 6l5-2 6 2 5-2v14l-5 2-6-2-5 2zM9 4v14M15 6v14',
@@ -3208,7 +3293,13 @@ function buildFlagSprite() {
 /* The visitor's own fix list (EMBED only): the Roots & Routes page, or the standalone page, builds it from their file and hands it over in memory as
    window.parent.RR.fix = { byId: { personId: [issue] }, total, people }. Nothing here is stored or sent. */
 function fixList() { if (!EMBED) return null; try { const F = window.parent.RR && window.parent.RR.fix; return F && F.byId ? F : null; } catch (e) { return null; } }
-function fixOf(p) { const F = fixList(); const l = F && p && !p.ghost ? F.byId[p.id] : null; return l && l.length ? l : null; }
+/* The Fix list page's own state (decisions, rows for one person): handed over in memory by the page around the canvas as window.parent.RR.fixApi, the standalone page only. */
+function fixApi() { if (!EMBED) return null; try { return window.parent.RR && window.parent.RR.fixApi || null; } catch (e) { return null; } }
+/* the rows still to do for a file person: one that is ticked "done" or "left as is" on the Fix list is no longer on a card's "!" */
+function fixOf(p) {
+  const F = fixList(), a = p && M.archives[p.a]; const l = F && p && !p.ghost && a && a.k === 'you' ? F.byId[p.id] : null; if (!l || !l.length) return null;
+  const A = fixApi(), o = A ? l.filter(x => !x.key || A.isOpen(x.key)) : l; return o.length ? o : null;
+}
 /* a small pencil with the count, when the archive has recorded corrections about this person: a link to the archive's corrections page */
 function cxMark(p, a) {
   const u = TC.corrUrl(M, p); if (!u) return '';
@@ -4158,60 +4249,39 @@ async function copyPlan() {
   try { await navigator.clipboard.writeText(planText(p, st)); toast('Copied: paste it into a note or print it for the reading room'); } catch (e) { toast('Could not copy here'); }
 }
 
-/* ---------- the Fix list tab (the visitor's own file only: window.parent.RR.fix, see fixList() in core.js) ----------
-   A "!" on a card means this person is on the fix list the Roots & Routes page makes from the same file. The tab says what is wrong and how to fix it,
-   in the visitor's own tree program: the canvas never changes the file. */
-const fixUrl = u => /^https?:\/\//i.test(u) ? u : (/^\/[^/]/.test(u) ? 'https://recordatlas.org' + u : '');
-function fixIssueHTML(it) {
-  const info = (it.info || []).map(x => `<li><b>${esc(x.k)}:</b> ${esc(x.t)}${(x.l || []).map(l => { const u = fixUrl(l.u); return u ? ` <a href="${esc(u)}" target="_blank" rel="noopener">${esc(l.t)}</a>` : ''; }).join('')}</li>`).join('');
-  return `<div class="fxi"><div class="fxt">${esc(it.t)}${it.ev ? ` &middot; <span>${esc(it.ev)}${it.date ? ' ' + esc(it.date) : ''}</span>` : ''}</div>
-    <div class="fxh">${esc(it.head)}</div>${it.why ? `<div class="fxw">${esc(it.why)}</div>` : ''}
-    <div class="fxn"><b>How to fix it</b> ${esc(it.next || it.how || 'Check this against your sources, then correct it in your own tree.')}</div>${info ? `<ul class="fxl">${info}</ul>` : ''}</div>`;
-}
-/* the whole list, for when nobody is selected: the same issues the cards' "!" marks come from, grouped by kind, each with the people it touches (a click drops them on the canvas) */
-const FIX_SHOW = 25;
-function fixGroups(F) {
-  if (F._g) return F._g;
-  const kinds = new Map();
-  for (const id of Object.keys(F.byId || {})) {
-    for (const it of F.byId[id]) {
-      let K = kinds.get(it.k); if (!K) kinds.set(it.k, K = { t: it.t, items: new Map(), n: 0 });
-      const key = it.head + '|' + (it.ev || '') + '|' + (it.date || ''); let I = K.items.get(key);
-      if (!I) { K.items.set(key, I = { it, ids: [] }); K.n++; }
-      I.ids.push(id);
-    }
-  }
-  return F._g = [...kinds.values()].sort((a, b) => b.n - a.n);
-}
-function fixAllHTML(F) {
-  const nm = id => { const q = M.byKey.get('you:' + id); return q ? q : null; };
-  return fixGroups(F).map((K, gi) => {
-    const items = [...K.items.values()].slice(0, FIX_SHOW).map(I => {
-      const ppl = I.ids.map(nm).filter(Boolean);
-      const chips = ppl.slice(0, 6).map(q => `<a href="#" data-focus="${esc(q.key)}">${esc(q.name || 'Living person')}</a>`).join(', ');
-      return (ppl.length ? `<div class="fxp">${chips}${ppl.length > 6 ? ' and ' + (ppl.length - 6) + ' more' : ''}</div>` : '') + fixIssueHTML(I.it);
-    }).join('');
-    const more = K.n > FIX_SHOW ? `<p class="plines fxs">${(K.n - FIX_SHOW).toLocaleString()} more of this kind: the Roots &amp; Routes page lists every one.</p>` : '';
-    return `<details class="fxk"${gi === 0 ? ' open' : ''}><summary><b>${esc(K.t)}</b> <span>${K.n.toLocaleString()}</span></summary>${items}${more}</details>`;
-  }).join('');
-}
+/* ---------- the Fix list tab: ONE PERSON'S rows (the visitor's own file only: window.parent.RR.fix and RR.fixApi, see fixList() and fixApi() in core.js) ----------
+   A "!" on a card means that person has something still to do on the fix list. This tab lists those rows for the person selected, with the same row (checkbox, plain sentence, links,
+   next step) as the full Fix list page, which the round Fix button opens and which holds everything: the page is drawn by the page around the canvas, and so is each row here (fixApi.personRows),
+   so a tick made here is the same decision, in the same store, as one made there. The canvas never changes the file: fix things in your own tree program, then load the file again. */
+const FIXTXT = 'Fix things in your own tree program, then open the file again: a row that has been fixed is gone.';
 function fixPanel() {
-  const F = fixList();
-  if (!F) return `<h3>Fix list</h3><p class="plines">The fix list is still being made from your file. It will appear here in a moment.</p>`;
-  const note = `<p class="plines fxs">A <b class="fxb on">!</b> on a card means that person is on the fix list the Roots &amp; Routes page makes from your file. This canvas only shows it: fix things in your own tree program, then load the file again. Long place rows name only a sample of their people here; the list and its spreadsheet hold every one.</p>`;
+  const F = fixList(), A = fixApi();
+  if (!F || !A) return `<h3>Fix list</h3><p class="plines">The fix list is still being made from your file. It will appear here in a moment.</p>`;
+  const full = (id, name, label) => `<p class="plines"><button type="button" class="lk-btn is-small" data-fx-open="${esc(id == null ? '' : id)}" data-fx-name="${esc(name || '')}">${esc(label)}</button></p>`;
   const keys = [...S.sel];
-  if (keys.length === 1) {
-    const p = M.byKey.get(keys[0]), l = fixOf(p);
-    if (!l) return `<h3>${esc(p.name)}</h3><p class="plines">${p.ghost ? 'Named in the archive only, so there is nothing to check.' : 'Nothing on the fix list for this person.'}</p>${note}`;
-    return `<h3>${esc(p.name)}</h3><p class="plines"><b>${l.length}</b> ${l.length === 1 ? 'thing' : 'things'} on the fix list for this person.</p>${l.map(fixIssueHTML).join('')}${note}`;
+  if (!keys.length) return `<h3>Fix list</h3><p class="plines">This tab is for the person you select: what is still to fix about them. Select a person on the canvas.</p>
+    <p class="plines"><b>${A.open().toLocaleString()}</b> ${A.open() === 1 ? 'thing is' : 'things are'} still to do in the whole file.</p>${full(null, '', 'Open the full Fix list')}<p class="plines fxs">${FIXTXT}</p>`;
+  if (keys.length > 1) {
+    const rows = keys.map(k => M.byKey.get(k)).filter(Boolean).map(p => ({ p, n: fixOf(p) ? fixOf(p).length : 0 }));
+    return `<h3>Fix list</h3><p class="plines">${keys.length} people are selected. This tab shows one person at a time: pick one.</p><ul class="fxl people">${rows.slice(0, 40).map(x => `<li data-focus="${esc(x.p.key)}"><b>${esc(x.p.name)}</b> <span>${x.n ? x.n + ' still to do' : 'nothing to fix'}</span></li>`).join('')}</ul>${full(null, '', 'Open the full Fix list')}`;
   }
-  const here = [...S.cards.values()].map(c => ({ c, p: personOf(c), l: fixOf(personOf(c)) })).filter(x => x.l);
-  const by = new Map(); here.forEach(x => x.l.forEach(i => by.set(i.t, (by.get(i.t) || 0) + 1)));
-  const sec = [...by].sort((a, b) => b[1] - a[1]).map(([t, n]) => `<li>${esc(t)} <b>${n}</b></li>`).join('');
-  return `<h3>Fix list</h3><p class="plines">Your file has <b>${F.total.toLocaleString()}</b> things to fix, touching <b>${F.people.toLocaleString()}</b> people.${S.cards.size ? ` On this canvas: <b>${here.length}</b> of ${S.cards.size} ${S.cards.size === 1 ? 'person' : 'people'}.` : ' Click a name below to put them on the canvas.'}</p>
-    ${here.length ? `<ul class="fxl people">${here.map(x => `<li data-focus="${esc(x.p.key)}"><b>${esc(x.p.name)}</b> <span>${x.l.length} to fix &middot; ${esc([...new Set(x.l.map(i => i.t))].join(', '))}</span></li>`).join('')}</ul>` : ''}
-    ${sec ? `<h4>On this canvas, by kind</h4><ul class="fxl">${sec}</ul>` : ''}
-    <h4>Everything on the list</h4>${fixAllHTML(F)}${note}`;
+  const p = M.byKey.get(keys[0]), a = p && M.archives[p.a];
+  if (!p) return `<h3>Fix list</h3><p class="plines">Select a person.</p>`;
+  if (p.ghost) return `<h3>${esc(p.name)}</h3><p class="plines">Named in the archive only, so there is nothing to check.</p>${full(null, '', 'Open the full Fix list')}`;
+  if (!a || a.k !== 'you') return `<h3>${esc(p.name)}</h3><p class="plines">This person is from the ${esc(a ? a.name : 'archive')} archive. The fix list is about your own file: select someone from it.</p>${full(null, '', 'Open the full Fix list')}`;
+  const c = A.forPerson(p.id), nm = p.name || 'this person';
+  const head = !c.total ? `<p class="plines fxnone">Nothing to fix for ${esc(nm)}.</p>`
+    : !c.open ? `<p class="plines fxnone">Nothing left to fix for ${esc(nm)}: ${c.done ? c.done + ' done' : ''}${c.done && c.asis ? ' and ' : ''}${c.asis ? c.asis + ' left as is' : ''}.</p>`
+    : `<p class="plines"><b>${c.open}</b> ${c.open === 1 ? 'thing' : 'things'} still to do for this person${c.done || c.asis ? ` (${[c.done ? c.done + ' done' : '', c.asis ? c.asis + ' left as is' : ''].filter(Boolean).join(', ')})` : ''}.</p>`;
+  const tog = c.done + c.asis > 0 && c.total ? `<p class="plines"><button type="button" class="lk-btn is-small" data-fx-all="1" aria-pressed="${!!S.fixAll}">${S.fixAll ? 'Show only what is still to do' : 'Show done and left-as-is too (' + (c.done + c.asis) + ')'}</button></p>` : '';
+  return `<h3>${esc(nm)}</h3>${head}${tog}<div id="fxHost" data-id="${esc(p.id)}"></div>${full(p.id, nm, 'Open the full Fix list for ' + nm)}${full(null, '', 'Open the full Fix list')}<p class="plines fxs">${FIXTXT}</p>`;
+}
+/* after the panel is drawn: the rows themselves (the page around the canvas builds them in this document), and the buttons */
+function fixMount() {
+  const host = $('#fxHost'), A = fixApi();
+  if (host && A) host.append(A.personRows(document, host.dataset.id, { all: !!S.fixAll, onChange: () => { fixTabLabel(); const q = $('#info .plines b'); if (q && A.forPerson(host.dataset.id)) { const c = A.forPerson(host.dataset.id); if (!c.open) renderInfo(); else q.textContent = String(c.open); } } }));
+  document.querySelectorAll('#info [data-fx-open]').forEach(b => { b.onclick = () => { const id = b.dataset.fxOpen; try { window.parent.postMessage({ tcFixList: id ? { person: id, name: b.dataset.fxName || '' } : true }, location.origin); } catch (e) { /* no page around */ } }; });
+  const t = document.querySelector('#info [data-fx-all]'); if (t) t.onclick = () => { S.fixAll = !S.fixAll; renderInfo(); };
 }
 
 /* prompt.js — the "AI prompt" tab: for the selected person, one complete brief to hand to an AI that has never seen the Record Atlas.
@@ -4889,7 +4959,18 @@ function prRun() {
   P.lay = TCPe().layout(P.res, { W, H, stack: S.phone });
   P.ms = Math.round(performance.now() - t0);
   if (P.sel && !P.res.slots.some(s => prSlotName(s) === P.sel)) P.sel = null;
+  prFixPost();
 }
+/* what this walk found between the file and the archives goes to the Fix list page (in memory): people missing from the file, and details that differ. Only on the standalone page, and only when it changed. */
+let prFixLast = '';
+function prFixPost() {
+  if (!SA || !S.pr || !S.pr.res) return;
+  let it; try { it = TCPe().fixItems(M, S.pr.res, { shown: prShown, cap: 600 }); } catch (e) { return; }
+  const j = JSON.stringify(it); if (j === prFixLast) return; prFixLast = j;
+  try { window.parent.postMessage({ tcFixCompare: it }, location.origin); } catch (e) { /* no page around */ }
+}
+/* Compare was stopped: the Fix list page drops its two groups */
+function prFixClear() { if (!SA || !prFixLast) return; prFixLast = ''; try { window.parent.postMessage({ tcFixCompare: null }, location.origin); } catch (e) { /* no page around */ } }
 function prDraw(opt) {
   const P = S.pr; if (!P || !P.res) return;
   opt = opt || {};
@@ -5993,11 +6074,12 @@ function optionsPanel() {
 function renderInfo() {
   const prevScroll = S.pr && S.tab === 'compare' && $('#info .ib') ? $('#info .ib').scrollTop : null;
   const prevFocus = (() => { const a = document.activeElement, inf = $('#info'); if (!(S.pr && S.tab === 'compare' && a && inf && inf.contains(a))) return null; for (const k of ['data-pr-dc', 'data-pr-slot', 'data-pr-copy', 'data-pr-showa']) { const v = a.getAttribute(k); if (v) return [k, v]; } return null; })();   /* the paired Compare list keeps its place when it is drawn again */
-  const el = $('#info'), tabs = [['person', 'Person'], ['sources', 'Sources'], ['next', 'Where next'], ['ai', 'AI prompt'], ...(fixList() ? [['fix', 'Fix list' + (fixList().people ? ' (' + fixList().people.toLocaleString() + ')' : '')]] : []), ...(cmpAvail() ? [['compare', 'Compare']] : []), ['path', 'Path'], ...(S.tab === 'options' ? [['options', 'Options']] : [])];
+  const el = $('#info'), tabs = [['person', 'Person'], ['sources', 'Sources'], ['next', 'Where next'], ['ai', 'AI prompt'], ...(fixList() ? [['fix', 'Fix list' + fixTabN()]] : []), ...(cmpAvail() ? [['compare', 'Compare']] : []), ['path', 'Path'], ...(S.tab === 'options' ? [['options', 'Options']] : [])];
   const body = S.tab === 'person' ? personPanel() : S.tab === 'sources' ? sourcesPanel() : S.tab === 'next' ? nextPanel() : S.tab === 'ai' ? aipPanel() : S.tab === 'fix' ? fixPanel() : S.tab === 'compare' ? comparePanel() : S.tab === 'path' ? pathPanel() : optionsPanel();
   el.innerHTML = `<div class="ih">${tabs.map(([k, n]) => `<button class="lk-tab${S.tab === k ? ' on' : ''}" data-tab="${k}">${n}${k === 'path' && S.path ? ' &bull;' : ''}</button>`).join('')}<span style="flex:1"></span><button class="lk-tab" data-tab="close" title="Close panel" aria-label="Close panel">&times;</button></div><div class="ib">${body}</div>`;
   if (S.infoOpen !== false) el.classList.add('on');
   if (typeof prPostRender === 'function') prPostRender(prevScroll, prevFocus);
+  if (S.tab === 'fix') fixMount();
   { const ih = el.querySelector('.ih'), on = ih && ih.querySelector('.lk-tab.on'); if (on) { const l = on.offsetLeft - 8, r = on.offsetLeft + on.offsetWidth + 8; if (l < ih.scrollLeft) ih.scrollLeft = l; else if (r > ih.scrollLeft + ih.clientWidth) ih.scrollLeft = r - ih.clientWidth; } tabEdges(ih); }
   const li = $('#lkIn'); if (li && RL()) li.oninput = () => { const st = RL().set(li.value); const n = $('#lkSt'); if (n) n.innerHTML = '<small>' + esc(st || (li.value.trim() ? '' : 'Off: no link yet.')) + '</small>'; };
   const ls = $('#lkAnc'); if (ls && RL()) ls.onchange = () => RL().setSite(ls.value);
@@ -6123,6 +6205,25 @@ const LOOK_CYCLE = ['auto', 'sticker', 'paper', 'ground'];
 const LOOK_WORD = { auto: 'Automatic', sticker: 'Sticker (light)', paper: 'Paper (light)', ground: 'Ground (dark)', lanes: 'Lanes', countries: 'Countries', names: 'Names' };
 function lookChosen() { if (S.lookChosen) return S.lookChosen; let t = null; try { t = localStorage.getItem('loamTheme'); } catch (e) { /* storage blocked */ } return THEMES.includes(t) ? t : 'auto'; }
 const lookNext = c => { const i = LOOK_CYCLE.indexOf(c); return i < 0 ? 'auto' : LOOK_CYCLE[(i + 1) % LOOK_CYCLE.length]; };
+/* the round Fix button: how many rows are still to do, from the Fix list page (fixApi); the number is a badge, the words are in its label */
+let fixT = 0;
+function fixBtn() {
+  const b = $('#bFix'); if (!b || b.hidden) return;
+  const A = fixApi(), ready = !!(A && A.ready()), n = ready ? A.open() : 0, t = b.querySelector('.fxn');
+  if (t) { t.textContent = n > 9999 ? Math.floor(n / 1000) + 'k' : n.toLocaleString(); t.hidden = !n; }
+  const txt = !ready ? 'Fix list: opens the page of everything to fix (made from a GEDCOM file)' : n ? 'Fix list: ' + n.toLocaleString() + ' still to do' : 'Fix list: nothing left to do';
+  b.title = txt; b.setAttribute('aria-label', txt); b.classList.toggle('on', !!n);
+}
+/* the Fix list tab's own number: the rows still to do for the one person selected (the tab is about that person, not the whole file) */
+function fixTabN() { if (S.sel.size !== 1) return ''; const p = M.byKey.get([...S.sel][0]), A = fixApi(); if (!p || !A || !fixOf(p)) return ''; const n = fixOf(p).length; return ' (' + n.toLocaleString() + ')'; }
+function fixTabLabel() { const t = document.querySelector('#info [data-tab="fix"]'); if (t) t.textContent = 'Fix list' + fixTabN(); }
+/* put a person on the canvas (or find them there) and select them: "Show on canvas" from the Fix list page */
+function fixShow(keys) {
+  const k = String(keys[0] || ''), c = S.cards.get(k);
+  if (c) { select([k]); fit([c], { maxK: 1 }); pulseCard(c); return; }
+  const p = M.byKey.get(k); if (!p) return; const v = viewCentre(); dropPerson(p.i, v.x, v.y);
+  const c2 = S.cards.get(k); if (c2) { select([k]); fit([c2], { maxK: 1 }); pulseCard(c2); }
+}
 function lookBtn() {
   const b = $('#bTheme'); if (!b || b.hidden) return;
   const c = lookChosen(), n = lookNext(c), txt = 'Look: ' + LOOK_WORD[c] + '. Click for ' + LOOK_WORD[n] + '.';
@@ -6140,13 +6241,16 @@ function wireToolbar() {
   set('#bMenu', 'menu'); { const mm = document.createElement('div'); mm.id = 'mainMenu'; mm.setAttribute('role', 'menu'); mm.setAttribute('aria-label', 'Menu'); document.body.appendChild(mm); $('#bMenu').onclick = () => openMainMenu(); const lc = document.createElement('div'); lc.id = 'legendCard'; lc.setAttribute('role', 'dialog'); lc.setAttribute('aria-label', 'How to read the lines'); document.body.appendChild(lc); }
   set('#bArrange', 'arrange'); set('#bGen', 'layers'); set('#bShelf', 'search'); $('#si').innerHTML = icon('search', ''); set('#bUndo', 'undo'); set('#bFit', 'fit'); set('#bRel', 'relate'); set('#bInfo', 'info'); set('#bClear', 'clear'); set('#bMore', 'more');
   set('#zIn', 'plus'); set('#zOut', 'minus');
+  { const b = $('#bFix'); if (b) { b.hidden = !SA; b.innerHTML = icon('fix') + '<span class="fxn" aria-hidden="true"></span>'; fixBtn(); b.onclick = () => { try { window.parent.postMessage({ tcFixList: true }, location.origin); } catch (e) { /* no page around */ } }; } }
   { const b = $('#bTheme'); if (b) { b.hidden = !SA; lookBtn(); b.onclick = () => { const n = lookNext(lookChosen()); S.lookChosen = n; lookBtn(); try { window.parent.postMessage({ tcLookSet: n }, location.origin); } catch (e) { /* no page around */ } }; } }
   if (EMBED) addEventListener('message', e => {
   if (e.origin !== location.origin || !e.data) return;
   if (e.data.tcLook) { const k = e.data.tcLook; if (k === 'auto') { try { localStorage.removeItem('loamTheme'); } catch (x) { /* ignore */ } initTheme(); if (typeof prOnTheme === 'function') prOnTheme(); drawEdges(); miniDraw(); if (typeof drawNames === 'function') drawNames(true); if (S.tab === 'options') renderInfo(); } else setTheme(k); return; }   // the Look was changed in Settings
   if (e.data.tcKeep) { const mm = $('#mainMenu'); if (mm && mm.classList.contains('on')) mainMenu(); return; }   // the six words were turned on, or a save finished
   if (e.data.tcLinks) { if (S.tab !== 'options') renderInfo(); return; }   // not while the Options box is being typed in: a redraw would take the cursor away
-  if (!e.data.tcFix) return; refreshAll(); renderInfo(); syncButtons();
+  if (e.data.tcFixCount !== undefined) { fixBtn(); clearTimeout(fixT); fixT = setTimeout(() => { refreshAll(); if (S.tab === 'fix') fixTabLabel(); }, 120); return; }   // a tick or "left as is" on the Fix list page: the badge, the "!" marks, the tab's number
+  if (Array.isArray(e.data.tcShow)) { fixShow(e.data.tcShow); return; }   // "Show on canvas" on the Fix list page
+  if (!e.data.tcFix) return; refreshAll(); renderInfo(); syncButtons(); fixBtn();
 });
   $('#bShelf').onclick = () => { clearTimeout(shelfT); const h = document.documentElement.classList; h.toggle('shelfoff'); $('#bShelf').setAttribute('aria-pressed', String(!h.contains('shelfoff'))); dockH(); };
   $('#bUndo').onclick = undo;

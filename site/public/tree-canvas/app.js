@@ -13,6 +13,10 @@ import * as W from '/tree-canvas/work.js';   // (parseLink above is the MyHerita
 import { reportInto, el, n0 } from '/roots/js/report-view.js';   // the import report, drawn by the same code as /roots/
 import { treeMetrics, metricTiles } from '/roots/js/metrics.js';   // the five counts of the tree views, worked out here
 import * as ST from '/tree-canvas/settings.js';   // the Settings drawer's choices, kept on this device
+import { store as dec, fixes } from '/roots/js/decisions.js';   // the Fix list's decisions: the same store, and the same keys, as Roots & Routes
+import { createWorkspace } from '/tree-canvas/fixlist-view.js';   // the full Fix list page
+import { rowEl, mk as fxMk } from '/tree-canvas/fixlist-rows.js';   // the Fix list's row, drawn here and, for one person, in the canvas's side panel
+import { personIndex } from '/tree-canvas/fixlist.js';
 
 const $ = s => document.querySelector(s);
 const base = new URL('/roots/', location.href).href;   // the reader fetches its place files relative to this, as it does on /roots/
@@ -30,7 +34,7 @@ const loadNames = () => namesP || (namesP = Promise.all(['/given-names.json', '/
    profile or tree link gives the site code and tree number. An Ancestry export needs nothing pasted. Plain links; the page sends nothing. */
 let mhc = null, mhFile = null, anc = null, mhText = '', mhNote = '', ancSite = loadSite();
 const knownP = fetch(new URL('known-sites.json', base)).then(r => r.ok ? r.json() : {}).catch(() => ({}));
-const tellCanvas = () => { const f = $('#cv'); if (f && f.contentWindow) f.contentWindow.postMessage({ tcLinks: 1 }, location.origin); };
+const tellCanvas = () => { const f = $('#cv'); if (f && f.contentWindow) f.contentWindow.postMessage({ tcLinks: 1 }, location.origin); if (typeof fxw !== 'undefined' && !$('#fx').hidden) fxw.draw(); };
 const links = {
   get: () => ({ mh: !!mhc, mhFile: !!mhFile, text: mhText, note: mhNote, anc: !!anc, ancTree: anc ? anc.tree : '', ancSite }),
   url: (id, name) => { const p = profileUrl(mhc, id, name), t = treeUrl(mhc, id), a = personUrl(anc, id, ancSite); return p || a ? { mh: p, tree: t, anc: a } : null; },
@@ -40,7 +44,7 @@ const links = {
     else { mhc = c; mhNote = 'Links are on (tree ' + c.tree + '). Open one or two people to check they are the right ones. The link is remembered for this tree on this device only; nothing is sent.'; if (mhFile) saveTreeLink(mhFile.guid, t); }
     tellCanvas(); return mhNote;
   },
-  setSite(v) { ancSite = v; saveSite(v); tellCanvas(); },
+  setSite(v) { ancSite = v; saveSite(v); tellCanvas(); askFix(); },   // the Atlas's help on an Ancestry export is worded for the site chosen
 };
 function applyTreeLink() {
   if (!mhFile) return; const guid = mhFile.guid, mine = loadTrees();
@@ -246,7 +250,7 @@ function mount() {
   const old = $('#cv'), f = document.createElement('iframe');
   f.id = 'cv'; f.title = old.title;
   f.src = '/roots/canvas.html?sa=1&v=' + STAMP + (hide ? '&liv=1' : '') + (example ? '&ex=1' : '');
-  f.hidden = false; old.replaceWith(f); if (!$('#yf').hidden || !$('#sg').hidden) f.inert = true;
+  f.hidden = false; old.replaceWith(f); if (!$('#yf').hidden || !$('#sg').hidden || !$('#fx').hidden) f.inert = true;
 }
 
 let curName = null, curHead = null, curVia = null;   // curVia: the site a file was fetched from, when it came from a link
@@ -254,7 +258,7 @@ let curName = null, curHead = null, curVia = null;   // curVia: the site a file 
 const isTreeJson = bytes => { try { return /^\uFEFF?\s*\{/.test(new TextDecoder('utf-8').decode(new Uint8Array(bytes, 0, Math.min(64, bytes.byteLength)))); } catch (e) { return false; } };
 let curLink = null, curSize = 0;   // the address a file was fetched from (if it was), and the file's size
 function start(bytes, name, via, link) {
-  closeYF(true); lastM = null;
+  closeYF(true); closeFX(true); lastM = null; fixMsg = null; cmpFix = null;
   const json = isTreeJson(bytes);
   curName = name || null; curVia = via || null; curLink = link || null; curSize = bytes.byteLength; curHead = name && !json ? headInfo(bytes) : (json ? { from: 'tree.json', tree: '' } : null);
   if (curVia && curHead) curHead = { ...curHead, from: curVia };   // the last-used list says where a file came from
@@ -266,8 +270,8 @@ function start(bytes, name, via, link) {
     if (m.type === 'progress') say(m.msg + '…');
     else if (m.type === 'checklist') {
       if (!window.RR) return;
-      try { window.RR.fix = issuesByPerson(m); } catch (e) { window.RR.fix = null; }
-      const f = $('#cv'); if (f && f.contentWindow) f.contentWindow.postMessage({ tcFix: 1 }, location.origin);
+      fixMsg = m; try { window.RR.fix = issuesByPerson(m); } catch (e) { window.RR.fix = null; }
+      fixRefresh(true);
     }
     else if (m.type === 'exported') exported(m);
     else if (m.type === 'error') {
@@ -278,7 +282,7 @@ function start(bytes, name, via, link) {
       if (m.first && hide && m.kind !== 'tree') { say('Hiding living people…'); worker.postMessage({ cmd: 'living', hide: true }); return; }   // keep the choice for the next file (a tree.json already shows its living people by name and family only)
       const prevMh = mhFile; mhFile = m.mh || null; anc = m.anc || null;
       if (!prevMh || !mhFile || prevMh.guid !== mhFile.guid) { mhc = null; mhText = ''; mhNote = ''; applyTreeLink(); }   // a different tree: start from what is remembered or known for it
-      window.RR = { tree: m.tree, atlas: m.atlas, loadNames, links };
+      window.RR = { tree: m.tree, atlas: m.atlas, loadNames, links, fixApi };
       lastM = m; if (!$('#yf').hidden) drawYF(); if (!$('#sg').hidden) drawSG(true);
       if (m.first || !cur) { const ppl = m.report && m.report.people && m.report.people.individuals | 0; setCur(example ? null : curLink ? { t: 'link', ref: curLink } : curName ? { t: 'file', ref: curName, size: curSize, people: ppl } : null, curLink ? W.linkLabel(curLink) : curName); }
       else flushWork();
@@ -289,7 +293,7 @@ function start(bytes, name, via, link) {
       /* where it came from (a link) and what was left out of a tree.json, in the visitor's words; it clears itself, the canvas keeps the screen */
       const said = [curVia ? 'Loaded from ' + curVia + '. Read in this browser; nothing from it was sent anywhere.' : '', m.kind === 'tree' && m.say && m.say.length ? 'Opened as a tree.json: ' + m.say.join('; ') + '.' : ''].filter(Boolean).join(' ');
       if (said) { say(said); setTimeout(() => say(''), curVia ? 14000 : 9000); }
-      if (m.kind !== 'tree') worker.postMessage({ cmd: 'checklist', living: !hide, ancestry: 'com' });   // the fix list, for the "!" marks; it follows a moment after the canvas is drawn (a tree.json has no GEDCOM to check)
+      if (m.kind !== 'tree') askFix();   // the fix list, for the "!" marks and the Fix list page; it follows a moment after the canvas is drawn (a tree.json has no GEDCOM to check)
     }
   };
   worker.onerror = e => { say('The reader crashed: ' + (e.message || 'unknown error'), true); if (!window.RR) showStart(); };
@@ -340,13 +344,14 @@ async function fetchLines(a) {
 }
 async function openArchive(key) {
   const a = ARCH[key]; if (!a) return;
-  closeYF(true); lastM = null;
+  closeYF(true); closeFX(true); lastM = null;
   curName = null; curHead = null; example = false;
   $('#start').hidden = true; say('Opening the ' + a.name + ' archive…');
   try {
     const f = await fetchArchive(key);
     mhFile = null; mhc = null; anc = null;
-    window.RR = { tree: f.tree, atlas: f.atlas, loadNames, links, archive: f.archive };
+    window.RR = { tree: f.tree, atlas: f.atlas, loadNames, links, archive: f.archive, fixApi };
+    fixMsg = null; cmpFix = null; fixRefresh(false);
     setCur({ t: 'archive', ref: key }, a.name + ' archive'); attachKeep();
     if (f.lines) { window.RR.lines = f.lines; window.RR.linesArch = key; }
     /* ?p=<slug>: an archive's link to one person's page; the canvas puts that person on and selects them (only a plain slug is passed on) */
@@ -366,6 +371,7 @@ async function compareWith(keys, mark, opt) {
   flushWork();
   if (!list.length) {
     if (cur && cur.cmp) { cur.cmp = false; if (cur.pairing) { cur.pairing.on = false; flushPairing(); } }
+    cmpFix = null; fixRefresh(false);
     delete window.RR.compare; delete window.RR.compares; delete window.RR.compareFailed; window.RR.carryMark = mark || null; window.RR.carryTab = 'compare'; attachKeep(); mount(); return true;
   }
   say('Reading the ' + (list.length === 1 ? ARCH[list[0]].name + ' archive' : list.length + ' archives') + '…');
@@ -390,6 +396,8 @@ addEventListener('message', e => {
   const d = e.data || {};
   if (d.tcWork) { onWork(d.tcWork); return; }
   if (d.tcYourFile) { openYF(); return; }   // the canvas menu's "Your file"
+  if (d.tcFixList !== undefined) { const q = d.tcFixList && typeof d.tcFixList === 'object' ? d.tcFixList : {}; openFX(q.person != null ? { id: String(q.person).slice(0, 120), name: String(q.name || '').slice(0, 200) } : null); return; }   // the Fix button, or "Open the full Fix list"
+  if (d.tcFixCompare !== undefined) { cmpFix = d.tcFixCompare && typeof d.tcFixCompare === 'object' ? d.tcFixCompare : null; fixRefresh(false); return; }   // what the Compare view found, in memory only
   if (d.tcSettings) { openSG(); return; }   // the canvas menu's "Settings"
   if (d.tcRestored) { onRestored(d.tcRestored); return; }
   if (d.tcHome) { flushWork(); $('#cv').hidden = true; showStart(); return; }   // the canvas's folder button: back to the opening screen (the canvas keeps its own state)
@@ -509,13 +517,13 @@ function drawSG(open) {
 function openSG() {
   sgFrom = document.activeElement; sgWriteFailed = false;
   drawSG(true);
-  sgWas = { cv: $('#cv').inert, yf: $('#yf').inert, start: $('#start').inert };
-  $('#sg').hidden = false; $('#cv').inert = $('#yf').inert = $('#start').inert = true;
+  sgWas = { cv: $('#cv').inert, yf: $('#yf').inert, start: $('#start').inert, fx: $('#fx').inert };
+  $('#sg').hidden = false; $('#cv').inert = $('#yf').inert = $('#start').inert = $('#fx').inert = true;
   $('#sgTitle').focus();
 }
 function closeSG() {
   const g = $('#sg'); if (g.hidden) return;
-  g.hidden = true; const w = sgWas || {}; $('#cv').inert = !!w.cv; $('#yf').inert = !!w.yf; $('#start').inert = !!w.start;
+  g.hidden = true; const w = sgWas || {}; $('#cv').inert = !!w.cv; $('#yf').inert = !!w.yf; $('#start').inert = !!w.start; $('#fx').inert = !!w.fx;
   const back = sgFrom && sgFrom !== document.body && sgFrom.isConnected && !sgFrom.closest('[hidden]') ? sgFrom : null;
   if (back) { try { back.focus(); } catch (e) { /* nothing to give focus back to */ } }
   else { const f = $('#cv'); if (f && !f.hidden) { try { f.focus(); } catch (e) { /* ok */ } } }
@@ -673,6 +681,63 @@ const dragging = on => $('#stDrop').classList.toggle('over', on);
 for (const ev of ['dragenter', 'dragover']) addEventListener(ev, e => { if ($('#start').hidden) return; e.preventDefault(); dragging(!!e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files')); });
 addEventListener('dragleave', e => { if (!e.relatedTarget) dragging(false); });
 addEventListener('drop', e => { dragging(false); if ($('#start').hidden) return; e.preventDefault(); const f = e.dataTransfer && e.dataTransfer.files[0]; if (f) f.arrayBuffer().then(b => { example = false; recentSave(f.name, b.slice(0)); start(b, f.name); }); });
+
+/* ---- the Fix list: everything to fix, as a checklist, over the canvas ("Your file" and Settings are pages over it the same way). The rows are Roots & Routes' own (the worker's `checklist`),
+   plus, while Compare is on, what the Compare view found between the file and the archives (the canvas hands that over in memory: tcFixCompare). A tick or a "left as is" is kept under the
+   same keys, in the same store, as /roots/ keeps them (decisions.js), so the two pages agree and, with the six words on, so do the devices. The canvas's side panel draws one person's own
+   rows with the same row (fixApi.personRows). Nothing here is sent anywhere. ---- */
+let fixMsg = null, cmpFix = null, fxFrom = null, fxWas = null, pIdx = null, pIdxFor = null;
+dec.autoOn();   // keeping starts on, on this device only, unless the visitor has switched it off (decisions.js says why)
+const toCanvas = msg => { const f = $('#cv'); if (f && f.contentWindow && !f.hidden) f.contentWindow.postMessage(msg, location.origin); };
+const fxw = createWorkspace({
+  root: $('#fx'), dec, fixes, links: () => links, fileName: () => curName || '', syncOn: () => syncState().on,
+  show: keys => { closeFX(); toCanvas({ tcShow: keys }); }, openSettings: () => openSG(),
+  onCount: open => toCanvas({ tcFixCount: open }),
+});
+function askFix() { if (worker && lastM && lastM.kind !== 'tree') worker.postMessage({ cmd: 'checklist', living: !hide, ancestry: ancSite }); }
+/* the list changed (a new fix list from the reader, or Compare found something): rebuild the model, and tell the canvas (a full refresh when the rows themselves changed) */
+function fixRefresh(rows) { fxw.setData(fixMsg, cmpFix, cur ? cur.key : ''); pIdx = null; toCanvas(rows ? { tcFix: 1 } : { tcFixCount: fxw.tally().open }); }
+/* what the canvas's side panel asks: counts for a person and their rows, drawn into the canvas's own document with the same row component */
+const fixApi = {
+  ready: () => !!(fixMsg || cmpFix),
+  open: () => fxw.tally().open,
+  isOpen: key => fxw.st.isOpen(key),
+  forPerson(id) {
+    if (!pIdx || pIdxFor !== fxw.model()) { pIdx = personIndex(fxw.model()); pIdxFor = fxw.model(); }
+    let open = 0, done = 0, asis = 0; const l = pIdx.get(String(id)) || [];
+    for (const x of l) { if (fxw.st.isDone(x.i.key)) done++; else if (fxw.st.isAsIs(x.i.key)) asis++; else open++; }
+    return { open, done, asis, total: l.length, rows: l };
+  },
+  /* rows for one person: the ones still to do, or all of them */
+  personRows(doc, id, o) {
+    o = o || {}; const f = fixApi.forPerson(id), box = fxMk(doc, 'div', 'fx-person');
+    const ctx = Object.create(fxw.ctx, {
+      compact: { value: true }, collapseNotes: { value: () => true },
+      show: { value: keys => toCanvas({ tcShow: keys }) },
+      onChange: { value: (s, i, row, kind) => { fxw.st.flush(); fxw.changed(); if (kind === 'a' && row && row.isConnected) { if (o.all) row.replaceWith(rowEl(doc, ctx, s, i)); else row.remove(); } if (o.onChange) o.onChange(s, i, row, kind); } },
+    });
+    for (const x of f.rows) if (o.all || fxw.st.isOpen(x.i.key)) box.append(rowEl(doc, ctx, x.s, x.i));
+    return box;
+  },
+};
+function openFX(person) {
+  if (!window.RR) return;
+  const f = $('#fx'); fxFrom = document.activeElement;
+  fxw.present(person);
+  fxWas = { cv: $('#cv').inert, yf: $('#yf').inert, start: $('#start').inert };
+  f.hidden = false; $('#cv').inert = $('#yf').inert = $('#start').inert = true;
+  $('#fx-back').textContent = $('#cv').hidden ? '← Back' : '← Back to the canvas';
+  f.scrollTop = 0; $('#fxTitle').focus();
+}
+function closeFX(quiet) {
+  const f = $('#fx'); if (!f || f.hidden) return;
+  f.hidden = true; fxw.st.flush(); const w = fxWas || {}; $('#cv').inert = !!w.cv; $('#yf').inert = !!w.yf; $('#start').inert = !!w.start;
+  if (!quiet) { const c = $('#cv'); if (c && !c.hidden) { try { c.focus(); } catch (e) { /* no focus to give */ } } else if (fxFrom && fxFrom.isConnected) { try { fxFrom.focus(); } catch (e) { /* ok */ } } }
+}
+$('#fx-back').onclick = () => closeFX();
+addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#fx').hidden && $('#sg').hidden) { e.preventDefault(); closeFX(); } });
+addEventListener('pagehide', () => fxw.st.flush());
+
 {
   /* from an archive: its icon sends ?archive=<key>; failing that, the page the visitor came from (some browsers send only its origin, which is enough) */
   let want = new URLSearchParams(location.search).get('archive');

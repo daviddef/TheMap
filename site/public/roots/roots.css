@@ -89,9 +89,12 @@ a.btn[aria-disabled=true]{opacity:.45;pointer-events:none}
 .frow .swap{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 8px;font-size:1.05em}.frow .arrow{opacity:.55}.frow .now{font-weight:700}.frow .was.plain{text-decoration:none;font-weight:700;opacity:1}
 .fnote{font-size:.86em;opacity:.75;margin:2px 0 0}.fcount{font-size:.8em;text-transform:uppercase;letter-spacing:.06em;opacity:.6;margin:8px 0 2px}
 .fpl{list-style:none;margin:2px 0 4px;padding:0 0 0 12px;border-left:2px solid var(--line,#d8d4c8)}
-.fp{display:grid;grid-template-columns:minmax(9em,17em) 5em minmax(7em,13em) auto;justify-content:start;align-items:center;gap:8px;padding:3px 0;font-size:.92em}
-.fp.solo{display:flex;flex-wrap:wrap;gap:8px;padding:0;font-size:1em}
-.fp .pn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pid{font-family:ui-monospace,monospace;font-size:.82em;opacity:.65}
+.fp{display:grid;grid-template-columns:minmax(0,15em) 4.6em 5em 5.5em minmax(2em,1fr);max-width:52em;align-items:center;column-gap:10px;row-gap:0;padding:3px 0;font-size:.92em}
+/* every row uses the same fixed columns (name | record number | event | year | icons), so references and dates line up down the page; a missing cell leaves its column empty */
+.fp>.pn{grid-column:1}.fp>.pid{grid-column:2}.fp>.chip{grid-column:3}.fp>.yr{grid-column:4}.fp>.acts{grid-column:5;justify-self:end}
+.fp.solo{display:flex;flex-wrap:wrap;gap:8px;padding:0;font-size:1em;max-width:none}
+.fp .pn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pid{font-family:ui-monospace,Menlo,monospace;font-size:.82em;opacity:.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fp .yr{font-variant-numeric:tabular-nums;white-space:nowrap}
 .chip{font-size:.82em;background:rgba(0,0,0,.05);border-radius:10px;padding:1px 8px;justify-self:start;white-space:nowrap}
 .acts{display:inline-flex;gap:4px}
 .ib{display:inline-flex;align-items:center;justify-content:center;width:28px;height:26px;border:1px solid var(--rule,#d8d4c8);border-radius:6px;background:none;color:var(--atlas,#1f6272);cursor:pointer;padding:0;text-decoration:none}
@@ -99,7 +102,7 @@ a.btn[aria-disabled=true]{opacity:.45;pointer-events:none}
 .cands{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px}
 .cand{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--rule,#d8d4c8);border-radius:14px;background:none;padding:3px 10px;cursor:pointer;font:inherit;color:inherit}.cand:hover{background:rgba(0,0,0,.05)}.cand svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .more{margin-left:8px}.muted{opacity:.6}
-@media(max-width:700px){.fp{grid-template-columns:1fr auto}.fp .pid,.fp .chip{grid-column:1}}
+@media(max-width:700px){.fp{grid-template-columns:4.6em 5em minmax(0,1fr) auto;column-gap:8px}.fp>.pn{grid-column:1/4;grid-row:1}.fp>.acts{grid-column:4;grid-row:1}.fp>.pid{grid-column:1;grid-row:2}.fp>.chip{grid-column:2;grid-row:2}.fp>.yr{grid-column:3;grid-row:2}}
 
 /* tabs as one segmented control; counts as small badges */
 .tabs{gap:2px;background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:3px;margin-left:0}

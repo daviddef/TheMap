@@ -278,7 +278,8 @@ function pline(p, o = {}) {
   const li = el('li', 'fp');
   const pn = el('b', 'pn'); if (p.nl && p.name) pn.append(...nameNodes(p.name, p.nl)); else pn.textContent = p.name || '(no name)';
   li.append(pn, el('span', 'pid', p.id));
-  const ev = p.ev ? p.ev + (p.date ? ' ' + p.date : '') : (p.by ? 'b. ' + p.by : ''); if (ev) li.append(el('span', 'chip', ev));
+  /* the event and its year are separate cells, so the years line up in a column */
+  const ev = p.ev || (p.by ? 'Born' : ''), yr = p.ev ? p.date : p.by; if (ev) li.append(el('span', 'chip', ev)); if (yr) li.append(el('span', 'yr', String(yr)));
   const acts = el('span', 'acts');
   if (o.copyName !== false && p.name) acts.append(ib('copy', 'Copy name', function () { copy(p.name, this); }));
   const pu = profileUrl(mhc, p.id, p.name), tu = treeUrl(mhc, p.id);

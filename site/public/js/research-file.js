@@ -46,10 +46,24 @@
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
   function hasWork(b) { return b && ((b.done && b.done.length) || b.state || b.note); }
 
+  /* THE FIX-IT DECISIONS ARE CAPPED at MAX_DECISIONS rows (about 50 bytes each, so well under the server's 2 MB with everything else): past that the OLDEST
+     changes are left out of the copy that is saved online or written to a file; every one stays on this device. Tombstones (an undone tick) go first. */
+  var MAX_DECISIONS = 15000;
+  function capDecisions(rows) {
+    var keys = Object.keys(rows);
+    if (keys.length <= MAX_DECISIONS) return clone(rows);
+    keys.sort(function (p, q) {
+      var tp = rows[p].a || rows[p].d ? 1 : 0, tq = rows[q].a || rows[q].d ? 1 : 0;
+      return tq - tp || wOf(rows[q]) - wOf(rows[p]) || (p < q ? -1 : 1);
+    });
+    var out = {}; keys.slice(0, MAX_DECISIONS).forEach(function (k) { out[k] = clone(rows[k]); });
+    return out;
+  }
+
   /* The whole backup: every line, every mark, and the fix-it decisions if there are any. */
   function buildBackup(progress, decisions, now, extras) {
     var out = { v: 2, kind: "record-atlas-research", exported: today(now), lines: clone(progress.lines || {}), active: progress.active, marks: clone(progress.marks || {}) };
-    if (decisions && Object.keys(decisions).length) out.decisions = clone(decisions);
+    if (decisions && Object.keys(decisions).length) out.decisions = capDecisions(decisions);
     /* THE MAP'S OWN SAVES, ADDITIVE AND OPTIONAL. Named areas (corners only) and saved views (a centre and a zoom), the deletions that keep a
        delete from being undone by another device, and the NAMES (never the contents) of the GEDCOM files last used in Roots & Routes, so a new
        device can say which files to add again. Nothing about a person: a file name is whatever the reader called the file. */
@@ -288,11 +302,19 @@
   }
 
   /* Union of two decision tables: a row decided on either device stays decided; the later date wins a tie. */
+  /* a row's last-change moment: `w` if it has one, else the day it names (see roots/js/decisions.js, "LAST WRITE WINS") */
+  function wOf(r) { return (r && (r.w || (r.t ? Date.parse(r.t) || 0 : 0))) || 0; }
   function mergeDecisions(mine, theirs) {
     var out = clone(mine || {});
     Object.keys(theirs || {}).forEach(function (h) {
       var a = out[h], b = theirs[h];
       if (!a) { out[h] = clone(b); return; }
+      if (a.w || b.w) {                                    // either side has a timestamp: the later change wins whole, so an untick travels
+        var x = wOf(a), y = wOf(b);
+        if (y > x) out[h] = clone(b);
+        else if (y === x) { if (b.a) a.a = 1; if (b.d) a.d = 1; if (b.t && (!a.t || b.t > a.t)) a.t = b.t; }
+        return;
+      }
       if (b.a) a.a = 1; if (b.d) a.d = 1;
       if (b.t && (!a.t || b.t > a.t)) a.t = b.t;
     });
@@ -351,7 +373,7 @@
   var LINK_MAX = 6000;     // characters of address: beyond this, browsers and mail clients start to cut links, so the file is the way
 
   var api = { hash: hash, sigOf: sigOf, buildBackup: buildBackup, buildPack: buildPack, summary: summary, parseAny: parseAny,
-              mergeDecisions: mergeDecisions, mergeMya: mergeMya, mergeGedcoms: mergeGedcoms, status: status, encodeLink: encodeLink, decodeLink: decodeLink, LINK_MAX: LINK_MAX,
+              mergeDecisions: mergeDecisions, MAX_DECISIONS: MAX_DECISIONS, mergeMya: mergeMya, mergeGedcoms: mergeGedcoms, status: status, encodeLink: encodeLink, decodeLink: decodeLink, LINK_MAX: LINK_MAX,
               KEY_DEC: KEY_DEC, KEY_BACKUP: KEY_BACKUP, KEY_MYA: KEY_MYA, KEY_GED: KEY_GED, KEY_STORIES: KEY_STORIES, KEY_CANVAS: KEY_CANVAS, cleanSites: cleanSites,
               cleanCanvas: cleanCanvas, mergeCanvas: mergeCanvas, capCanvas: capCanvas, CANVAS_TOTAL_CHARS: CANVAS_TOTAL_CHARS,
               KEY_SETTINGS: KEY_SETTINGS, cleanSettings: cleanSettings, settingsToFill: settingsToFill };

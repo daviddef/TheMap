@@ -15,6 +15,12 @@
 
    Decisions: a = left as is, d = ticked done. `t` is the day it was decided.
 
+   LAST WRITE WINS (added with the Tree Canvas's Fix list). A row may also carry `w`, the moment (ms since 1970) of its last change, and an
+   UNDONE row is kept as a small tombstone `{ t, w }` (no a, no d) for 90 days instead of being deleted, so that taking a tick back on one device
+   is also taken back on the others: when two copies of a row meet and either has a `w`, the later `w` wins whole. Rows with no `w` (every row
+   made before this, and any made by a client that does not know it) still merge the old way, a decision on either device stays. A tombstone
+   reads as "no decision" everywhere (get, count, summarise). A row written with an explicit `when` day (the tests, a file import) carries no `w`.
+
    THE SUMMARY ON "MY RESEARCH". The hashes above are unreadable on purpose, so by themselves they cannot show anything on another
    page. While the same switch is on, a plain SUMMARY of each fix list is kept too, so /my-research/ can list the tree as research
    still to do: the file's name, the day, per kind of fix how many there are, how many are done or left as is, and, for the three
@@ -37,11 +43,22 @@ export const hashKey = key => cyrb53('ra-fix|' + key);
 const fresh = () => ({ v: 1, on: false, rows: {} });
 const day = () => new Date().toISOString().slice(0, 10);
 
-/* a row decided on either device stays decided; the later day wins */
+/* when a row was last changed, as a number: its `w`, else the start of the day it names, else 0 */
+export const wOf = r => (r && (r.w || (r.t ? Date.parse(r.t) || 0 : 0))) || 0;
+const live = r => (r && (r.a || r.d) ? (({ w, ...rest }) => rest)(r) : null);   // a tombstone is no decision, and `w` is the store's own business
+const TOMB_DAYS = 90;
+/* Two copies of the rows. If neither row has a `w`: a row decided on either device stays decided, the later day wins (the original rule).
+   If either has one: the later change wins whole, so an untick travels; the same moment keeps both. */
 export function mergeRows(mine, theirs) {
   const out = JSON.parse(JSON.stringify(mine || {}));
   for (const [h, b] of Object.entries(theirs || {})) {
     const a = out[h]; if (!a) { out[h] = { ...b }; continue; }
+    if (a.w || b.w) {
+      const x = wOf(a), y = wOf(b);
+      if (y > x) out[h] = { ...b };
+      else if (y === x) { if (b.a) a.a = 1; if (b.d) a.d = 1; if (b.t && (!a.t || b.t > a.t)) a.t = b.t; }
+      continue;
+    }
     if (b.a) a.a = 1; if (b.d) a.d = 1; if (b.t && (!a.t || b.t > a.t)) a.t = b.t;
   }
   return out;
@@ -85,17 +102,26 @@ export function create(storage) {
       } catch { return false; }
     },
     optOut(yes) { try { if (yes) storage.setItem(OPTOUT, '1'); else storage.removeItem(OPTOUT); } catch { /* nothing to remember */ } },
-    /* Recorded only while it is on. Returns whether it was kept. */
-    put(key, kind, yes, when) {
+    /* Recorded only while it is on. Returns whether it was kept. With no `when` the row is stamped (`w`) and an undone row becomes a tombstone. */
+    put(key, kind, yes, when) { return this.putMany([[key, kind, yes]], when); },
+    /* Many at once, one read and one write: "tick everything in this group" must not parse and write the whole store once per row. */
+    putMany(list, when) {
       const d = read(); if (!d.on) return false;
-      const h = hashKey(key), r = d.rows[h] || {};
-      if (yes) r[kind] = 1; else delete r[kind];
-      if (!r.a && !r.d) delete d.rows[h]; else { r.t = when || day(); d.rows[h] = r; }
+      const stamp = when ? 0 : Date.now(), old = stamp - TOMB_DAYS * 864e5;
+      for (const [key, kind, yes] of list) {
+        const h = hashKey(key), had = d.rows[h], r = had ? { ...had } : {};
+        if (yes) r[kind] = 1; else delete r[kind];
+        if (!r.a && !r.d) { if (stamp && had) d.rows[h] = { t: day(), w: stamp }; else delete d.rows[h]; }
+        else { r.t = when || day(); if (stamp) r.w = stamp; else delete r.w; d.rows[h] = r; }
+      }
+      if (stamp) for (const h of Object.keys(d.rows)) { const r = d.rows[h]; if (!r.a && !r.d && (r.w || 0) < old) delete d.rows[h]; }
       return write(d);
     },
     /* Read whether or not it is on: decisions loaded from a file still apply. */
-    get(key) { return read().rows[hashKey(key)] || null; },
-    count: () => Object.keys(read().rows).length,
+    get(key) { return live(read().rows[hashKey(key)]); },
+    /* every row at once, for a page that looks up thousands of keys (get() parses the whole store each time) */
+    rows: () => read().rows,
+    count: () => Object.values(read().rows).filter(r => r.a || r.d).length,
     forget() { const on = read().on; try { storage.removeItem(KEY); } catch { /* nothing to forget */ } if (on) { const d = fresh(); d.on = true; write(d); } },
     fileText: () => fileTextOf(read().rows),
     /* Merge a decisions file, or the `decisions` of a research file, into what is kept. Returns the number of rows read. */

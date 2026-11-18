@@ -273,8 +273,11 @@ $('#stFile').onchange = async e => {
 $('#stDemo').onclick = () => { example = true; start(new TextEncoder().encode(makeSample()).buffer); };   // the invented family is only built when asked for
 document.querySelectorAll('#stArchBtns button').forEach(b => { b.onclick = () => openArchive(b.dataset.k); });
 $('#stForget').onclick = async () => { await recentForget(); showStart(); };
-for (const ev of ['dragenter', 'dragover']) addEventListener(ev, e => { if (!$('#start').hidden) e.preventDefault(); });
-addEventListener('drop', e => { if ($('#start').hidden) return; e.preventDefault(); const f = e.dataTransfer && e.dataTransfer.files[0]; if (f) f.arrayBuffer().then(b => { example = false; recentSave(f.name, b.slice(0)); start(b, f.name); }); });
+/* the drop zone lights up while a file is dragged over the page (a class only; the drop itself is handled below) */
+const dragging = on => $('#stDrop').classList.toggle('over', on);
+for (const ev of ['dragenter', 'dragover']) addEventListener(ev, e => { if ($('#start').hidden) return; e.preventDefault(); dragging(!!e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files')); });
+addEventListener('dragleave', e => { if (!e.relatedTarget) dragging(false); });
+addEventListener('drop', e => { dragging(false); if ($('#start').hidden) return; e.preventDefault(); const f = e.dataTransfer && e.dataTransfer.files[0]; if (f) f.arrayBuffer().then(b => { example = false; recentSave(f.name, b.slice(0)); start(b, f.name); }); });
 {
   /* from an archive: its icon sends ?archive=<key>; failing that, the page the visitor came from (some browsers send only its origin, which is enough) */
   let want = new URLSearchParams(location.search).get('archive');

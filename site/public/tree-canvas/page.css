@@ -12,43 +12,97 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
   .nojs { background: #2b2620; }
 }
 
-/* the page the canvas opens on, before any tree: two buttons and the files used before */
-#start[hidden] { display: none; }
-#start { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px 16px; text-align: center; overflow: auto; }
-#start h1 { margin: 0; font: 400 clamp(34px, 6vw, 52px)/1.05 "Lilita One", system-ui, sans-serif; letter-spacing: .01em; }
-#start .stlead { margin: 0; max-width: 34em; color: #6a5a45; }
-.stbtns { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 6px; }
-.stbtn { font: 700 16px/1 system-ui, sans-serif; padding: 14px 22px; border-radius: 14px; border: 2px solid #cdbf9f; background: #fff7e8; color: #2b2118; cursor: pointer; }
-.stbtn.primary { background: #d9822b; border-color: #d9822b; color: #fff; }
-.stbtn:hover { filter: brightness(.96); } .stbtn:focus-visible, .stlink:focus-visible, .strec button:focus-visible { outline: 3px solid #2b6cb0; outline-offset: 2px; }
-.strec { width: min(440px, 100%); margin-top: 10px; text-align: left; }
-.strec h2 { margin: 0 0 6px; font: 700 12px/1 system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #6a5a45; }
-.strec ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.strec li { display: flex; align-items: stretch; gap: 6px; }
-.strec li .recopen { flex: 1 1 auto; min-width: 0; text-align: left; padding: 10px 14px; border-radius: 12px; border: 2px solid #cdbf9f; background: #fff7e8; color: #2b2118; cursor: pointer; font: 700 15px/1.2 system-ui, sans-serif; }
-.strec li .recopen small { display: block; margin-top: 3px; font: 400 12px/1.2 system-ui, sans-serif; color: #6a5a45; }
-.strec li .recopen b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.strec li .recx { flex: 0 0 auto; width: 38px; border-radius: 12px; border: 2px solid #cdbf9f; background: transparent; color: #6a5a45; cursor: pointer; font: 700 16px/1 system-ui, sans-serif; }
-.starch { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
-.stbtn.small { padding: 9px 14px; font-size: 14px; border-radius: 10px; }
-#stArch { text-align: center; }
-.stnote { margin: 10px 0 0; font-size: 12.5px; color: #6a5a45; }
-.stlink { background: none; border: 0; padding: 0; color: inherit; text-decoration: underline; cursor: pointer; font: inherit; }
+/* The page the canvas opens on, before any tree. One type scale (13 / 15 / 17 / 40), two radii (10 / 16), cream ground, orange accent, and the canvas's own
+   motif: cards joined by connectors. Colours are tokens so the dark theme is one block. */
+#start { --ink: #2b2118; --soft: #6a5a45; --card: #fff7e8; --line: #cdbf9f; --accent: #d9822b; --accent-ink: #fff; --focus: #2b6cb0; --err: #a5342a; --shadow: rgba(43, 33, 24, .14); }
 @media (prefers-color-scheme: dark) {
-  #start .stlead, .strec h2, .stnote, .strec li .recopen small, .strec li .recx { color: #c9bda5; }
-  .stbtn, .strec li .recopen { background: #2b2620; border-color: #4a4034; color: #f3e9d6; }
-  .stbtn.primary { background: #d9822b; border-color: #d9822b; color: #1d1a16; }
-  .strec li .recx { border-color: #4a4034; }
+  #start { --ink: #f3e9d6; --soft: #c9bda5; --card: #2b2620; --line: #4a4034; --accent-ink: #1d1a16; --focus: #7db4f0; --err: #f08a80; --shadow: rgba(0, 0, 0, .4); }
 }
-.strec li .recnote { display: block; margin-top: 4px; font: italic 400 13px/1.25 system-ui, sans-serif; color: #2b2118; white-space: normal; }
-.strec li .recin { flex: 1 1 auto; min-width: 0; padding: 10px 14px; border-radius: 12px; border: 2px solid #2b6cb0; background: #fff7e8; color: #2b2118; font: 15px/1.2 system-ui, sans-serif; }
-@media (prefers-color-scheme: dark) { .strec li .recnote, .strec li .recin { color: #f3e9d6; } .strec li .recin { background: #2b2620; } }
+#start[hidden] { display: none; }
+#start { position: fixed; inset: 0; display: flex; overflow: auto; padding: 28px 16px 40px; color: var(--ink); }
+.stwrap { width: min(560px, 100%); margin: auto; display: grid; gap: 16px; }
+#start h1, #start h2, #start p { margin: 0; }
+.sthead { display: grid; justify-items: center; gap: 8px; text-align: center; margin-bottom: 4px; }
+#start h1 { font: 400 40px/1.05 "Lilita One", system-ui, sans-serif; letter-spacing: .01em; }
+#start .stlead { max-width: 30em; font-size: 15px; line-height: 1.45; color: var(--soft); }
 
-.stlinkrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
-.stlinkin { flex: 1 1 220px; min-width: 0; padding: 9px 12px; border-radius: 10px; border: 2px solid #cdbf9f; background: #fff7e8; color: #2b2118; font: 14px/1.2 system-ui, sans-serif; }
-.stlinkin:focus-visible { outline: 3px solid #2b6cb0; outline-offset: 2px; }
-.stvh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.stmsg.err { color: #a5342a; font-weight: 600; }
+/* the little tree: three cards and their connectors; the connectors draw themselves once */
+.sttree { display: block; }
+.stnode { fill: var(--card); stroke: var(--line); stroke-width: 2; }
+.stnode.c0 { stroke: var(--accent); }
+.stcon { fill: none; stroke: var(--line); stroke-width: 2; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .stcon { animation: stdraw .9s .15s ease-out backwards; }
+  .stnode { animation: stpop .45s ease-out backwards; } .stnode.c1 { animation-delay: .5s; } .stnode.c2 { animation-delay: .65s; }
+  @keyframes stdraw { from { stroke-dashoffset: 1; } }
+  @keyframes stpop { from { opacity: 0; transform: translateY(4px); } }
+}
+
+/* the doors */
+.stcard { background: var(--card); border: 2px solid var(--line); border-radius: 16px; padding: 18px 20px; display: grid; gap: 10px; transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+.stcard:hover, .stcard:focus-within { border-color: var(--accent); }
+@media (prefers-reduced-motion: no-preference) { .stcard:hover, .stcard:focus-within { transform: translateY(-2px); box-shadow: 0 6px 18px var(--shadow); } }
+#start h2 { font: 700 17px/1.2 system-ui, sans-serif; }
+#start .stsub { font-size: 13px; line-height: 1.45; color: var(--soft); }
+#start a, .stlink { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.stlink { background: none; border: 0; padding: 0; cursor: pointer; font: inherit; }
+.stlink:hover, #start a:hover { color: var(--accent); }
+
+/* the drop zone: dashed, and it wakes up when a file is dragged anywhere over the page */
+.stdrop { border-style: dashed; justify-items: start; }
+.stdrop.over { border-color: var(--accent); border-style: solid; background: color-mix(in srgb, var(--accent) 14%, var(--card)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 30%, transparent); }
+.stdrop.over h2::after { content: "\a0\2014\a0let go to open it"; color: var(--accent); }
+@media (prefers-reduced-motion: no-preference) { .stdrop.over { transform: scale(1.015); } }
+
+/* buttons: one primary (orange), the rest quiet */
+.stbtn { font: 700 15px/1 system-ui, sans-serif; padding: 12px 20px; border-radius: 10px; border: 2px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; transition: transform .12s ease, filter .12s ease, border-color .12s ease; }
+.stbtn:hover { border-color: var(--accent); }
+.stbtn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.stbtn.primary:hover { filter: brightness(1.06); }
+@media (prefers-reduced-motion: no-preference) { .stbtn:hover, .stchip:hover { transform: translateY(-1px); } }
 .stbtn:disabled { opacity: .6; cursor: progress; }
-@media (prefers-color-scheme: dark) { .stlinkin { background: #2b2620; border-color: #4a4034; color: #f3e9d6; } .stmsg.err { color: #f08a80; } }
-.stex .stbtn { margin: 0 2px; vertical-align: baseline; }
+.stbtn:focus-visible, .stchip:focus-visible, .stlink:focus-visible, #start a:focus-visible, #start summary:focus-visible, #start input:focus-visible, .recopen:focus-visible, .recx:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* the link door */
+.stlinkrow { display: flex; flex-wrap: wrap; gap: 8px; }
+.stlinkin { flex: 1 1 220px; min-width: 0; padding: 11px 12px; border-radius: 10px; border: 2px solid var(--line); background: var(--card); color: var(--ink); font: 15px/1.2 system-ui, sans-serif; }
+.stvh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+#start .stmsg { font-size: 13px; line-height: 1.4; color: var(--soft); }
+#start .stmsg[hidden] { display: none; }
+#start .stmsg.err { color: var(--err); font-weight: 600; }
+#start .stex { font-size: 13px; color: var(--soft); }
+
+/* the archives: small chips, each with its own colour */
+.stplain { display: grid; gap: 10px; justify-items: center; text-align: center; }
+.stplain[hidden] { display: none; }
+.stplain h2 { font-size: 15px; color: var(--soft); }
+.starch { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; width: 100%; }
+.stchip { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 12px; border-radius: 10px; border: 2px solid var(--line); background: var(--card); color: var(--ink); font: 700 13px/1.1 system-ui, sans-serif; cursor: pointer; transition: transform .12s ease, border-color .12s ease; }
+.stchip::before { content: ""; flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+.stchip:hover { border-color: var(--accent); }
+.stchip[data-k="defranceski"]::before { background: #D2493A; } .stchip[data-k="booyzen"]::before { background: #4E9A3E; }
+.stchip[data-k="luwinski"]::before { background: #3A74C9; } .stchip[data-k="lerena"]::before { background: #8A5CC2; }
+.stchip[data-k="falco"]::before { background: #D39A12; } .stchip[data-k="blazevic"]::before { background: #1E9C97; }
+.stchip[data-k="darcy"]::before { background: #C9508F; } .stchip[data-k="mazza"]::before { background: #8E7B5E; }
+
+/* last used */
+#stRecent { justify-items: stretch; text-align: left; }
+#stRecent h2 { text-align: center; }
+#stRecent #stList { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+#stRecent .stsub { text-align: center; }
+#stList li { display: flex; align-items: stretch; gap: 6px; }
+#stList .recopen { flex: 1 1 auto; min-width: 0; text-align: left; padding: 10px 14px; border-radius: 10px; border: 2px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; font: 700 15px/1.2 system-ui, sans-serif; transition: border-color .12s ease; }
+#stList .recopen:hover { border-color: var(--accent); }
+#stList .recopen b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#stList .recopen small { display: block; margin-top: 3px; font: 400 13px/1.2 system-ui, sans-serif; color: var(--soft); }
+#stList .recnote { display: block; margin-top: 4px; font: italic 400 13px/1.25 system-ui, sans-serif; color: var(--ink); white-space: normal; }
+#stList .recx { flex: 0 0 auto; width: 38px; border-radius: 10px; border: 2px solid var(--line); background: transparent; color: var(--soft); cursor: pointer; font: 700 15px/1 system-ui, sans-serif; }
+#stList .recx:hover { border-color: var(--accent); color: var(--ink); }
+#stList .recin { flex: 1 1 auto; min-width: 0; padding: 10px 14px; border-radius: 10px; border: 2px solid var(--focus); background: var(--card); color: var(--ink); font: 15px/1.2 system-ui, sans-serif; }
+
+/* the small print, folded away */
+.sthelp { font-size: 13px; line-height: 1.5; color: var(--soft); border-top: 2px dotted var(--line); padding-top: 12px; }
+.sthelp summary { cursor: pointer; font-weight: 700; }
+.sthelp p { margin-top: 8px; }
+
+@media (max-width: 480px) { #start { padding-top: 20px; } #start h1 { font-size: 34px; } .stcard { padding: 16px; } .stlinkrow .stbtn { flex: 1 1 100%; } }

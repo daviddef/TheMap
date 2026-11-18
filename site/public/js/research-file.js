@@ -148,17 +148,22 @@
      { v:1, items: { treeKey: { k, label, src, upd, n, w } }, gone: { treeKey: ISO } }. See public/tree-canvas/work.js for what a record holds and why it
      holds no name. Everything arriving here (a file, the six-word copy, a hand-edited export) is checked field by field, and anything else is dropped. */
   var CANVAS_ARCH = ["defranceski", "booyzen", "luwinski", "lerena", "falco", "blazevic", "darcy", "mazza"];
-  var CANVAS_MAX_PAIR_DEC = 400, CANVAS_MAX_ITEMS = 12, CANVAS_MAX_CARDS = 3000, CANVAS_ITEM_CHARS = 150000, CANVAS_TOTAL_CHARS = 360000;
+  var CANVAS_MAX_PAIR_DEC = 400, CANVAS_MAX_ITEMS = 12, CANVAS_MAX_VIEWS = 40, CANVAS_LOOKS = ["sticker", "paper", "ground", "lanes", "countries", "names"], CANVAS_MAX_CARDS = 3000, CANVAS_ITEM_CHARS = 150000, CANVAS_TOTAL_CHARS = 360000;
   var ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
   function num(n, lim) { return typeof n === "number" && isFinite(n) ? Math.max(-lim, Math.min(lim, n)) : 0; }
   function id(s) { return typeof s === "string" && /^[0-9a-z]{1,16}$/.test(s) ? s : null; }
+  var VIEW_KEY = /^v:[0-9a-z]{1,16}$/;
+  function canvasSrc(s) {   /* a source, and the key of the tree it names; null if it is neither */
+    if (s && s.t === "link" && typeof s.ref === "string" && /^https:\/\/[^\s#<>"'\\]{4,2000}$/.test(s.ref)) return { src: { t: "link", ref: s.ref }, tk: "l:" + s.ref };
+    if (s && s.t === "archive" && CANVAS_ARCH.indexOf(s.ref) >= 0) return { src: { t: "archive", ref: s.ref }, tk: "a:" + s.ref };
+    if (s && s.t === "file" && typeof s.ref === "string" && s.ref && s.ref.length <= 200) return { src: { t: "file", ref: s.ref, size: s.size | 0, people: s.people | 0 }, tk: "f:" + s.ref + "|" + (s.size | 0) + "|" + (s.people | 0) };
+    return null;
+  }
+  /* a record is a tree's arrangement (key = the tree's key) or a NAMED VIEW (key v:<id>, with the tree's key in tk, a name, and a look) */
   function cleanCanvasItem(it) {
     if (!it || typeof it !== "object" || typeof it.k !== "string" || it.k.length > 2300 || typeof it.upd !== "string" || !ISO.test(it.upd)) return null;
-    var s = it.src, src = null;
-    if (s && s.t === "link" && typeof s.ref === "string" && /^https:\/\/[^\s#<>"'\\]{4,2000}$/.test(s.ref) && it.k === "l:" + s.ref) src = { t: "link", ref: s.ref };
-    else if (s && s.t === "archive" && CANVAS_ARCH.indexOf(s.ref) >= 0 && it.k === "a:" + s.ref) src = { t: "archive", ref: s.ref };
-    else if (s && s.t === "file" && typeof s.ref === "string" && s.ref && s.ref.length <= 200 && it.k === "f:" + s.ref + "|" + (s.size | 0) + "|" + (s.people | 0)) src = { t: "file", ref: s.ref, size: s.size | 0, people: s.people | 0 };
-    if (!src) return null;
+    var isView = VIEW_KEY.test(it.k), cs = canvasSrc(it.src), src = cs && cs.src;
+    if (!src || (isView ? it.tk !== cs.tk : it.k !== cs.tk)) return null;
     var w = it.w; if (!w || w.v !== 1 || !Array.isArray(w.c)) return null;
     var c = [];
     w.c.slice(0, CANVAS_MAX_CARDS).forEach(function (r) {
@@ -182,6 +187,11 @@
         opts: { stopAtNotProven: !!o.stopAtNotProven, suggested: o.suggested !== false, gens: !!o.gens },
         filter: (Array.isArray(w.filter) ? w.filter : []).filter(function (i) { return Number.isInteger(i) && i >= 0 && i < 9; }).slice(0, 9) } };
     if (pr) out.w.pr = pr;
+    if (isView) {
+      out.tk = cs.tk; out.name = typeof it.name === "string" ? it.name.replace(/<[^>]*>/g, " ").replace(/[\u0000-\u001f\u007f<>]/g, " ").replace(/\s+/g, " ").trim().slice(0, 60) : "";
+      if (!out.name) out.name = "My view";
+      if (CANVAS_LOOKS.indexOf(w.look) >= 0) out.w.look = w.look;
+    }
     return JSON.stringify(out).length <= CANVAS_ITEM_CHARS ? out : null;
   }
   function cleanCanvas(x) {
@@ -202,7 +212,8 @@
     [a.gone, b.gone].forEach(function (g) { Object.keys(g).forEach(function (k) { if (!out.gone[k] || g[k] > out.gone[k]) out.gone[k] = g[k]; }); });
     Object.keys(out.gone).forEach(function (k) { if (out.items[k] && out.gone[k] >= out.items[k].upd) delete out.items[k]; });
     var ks = Object.keys(out.items).sort(function (p, q) { return out.items[q].upd.localeCompare(out.items[p].upd); });
-    ks.slice(CANVAS_MAX_ITEMS).forEach(function (k) { delete out.items[k]; });
+    ks.filter(function (k) { return !VIEW_KEY.test(k); }).slice(CANVAS_MAX_ITEMS).forEach(function (k) { delete out.items[k]; });
+    ks.filter(function (k) { return VIEW_KEY.test(k); }).slice(CANVAS_MAX_VIEWS).forEach(function (k) { delete out.items[k]; });
     return out;
   }
   /* The six-word copy has a ceiling (the server refuses more than 2 MB), so the canvas section is capped: the newest records first, until the next would

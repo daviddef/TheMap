@@ -121,6 +121,77 @@ test("the six-word copy has a ceiling, so the canvas section is capped, newest f
   assert.ok(Object.keys(cap.items).every(k => !cap.skipped.includes(k)) && cap.items["l:https://x.example/t11"], "the newest is in, the oldest are the ones left out");
 });
 
+/* ---- named views and share links ---- */
+const ARCH = { t: "archive", ref: "defranceski" };
+const vplain = (n = 3) => ({ ...plain(n), look: "paper" });
+
+test("a named view is a record of its own: the arrangement, a name and a look, with no name from the tree, and it is kept apart from the tree's last canvas", () => {
+  const st = memStore(), v = W.makeView(ARCH, "Defranceski archive", vplain(), "  Nonna <b>and</b>\nher line ", Date.parse("2026-11-18T10:00:00Z"), "abc123");
+  assert.equal(v.k, "v:abc123"); assert.equal(v.tk, "a:defranceski"); assert.equal(v.name, "Nonna and her line"); assert.equal(v.n, 3); assert.equal(v.w.look, "paper");
+  const text = JSON.stringify(v); for (const n of NAMES) assert.equal(text.includes(n), false, n); assert.equal(text.includes("defranceski:"), false);
+  assert.equal(W.putView(v, st), true);
+  assert.equal(W.list(st).length, 0, "a view is not one of the trees' canvases");
+  assert.equal(W.listViews(st).length, 1); assert.equal(W.listViews(st, "a:booyzen").length, 0); assert.equal(W.listViews(st, "a:defranceski")[0].name, v.name);
+  const d = W.unpack(W.listViews(st)[0].w, "a:defranceski", known(), bridges()); assert.equal(d.cards.length, 3); assert.equal(d.look, "paper"); assert.deepEqual(d.view, { x: -50, y: 12, k: 0.8 });
+  assert.equal(W.unpack(v.w, "a:booyzen", known(), bridges()).cards.length, 0, "another tree's key matches nobody");
+  assert.equal(W.makeView({ t: "archive", ref: "nobody" }, "", vplain(), "x"), null); assert.equal(W.makeView(ARCH, "", { cards: [] }, "x"), null, "an empty canvas is not a view");
+  assert.equal(W.pack(plain(), "a:x").look, undefined, "a tree's own record carries no look: it is unchanged");
+  assert.equal(W.pack({ ...plain(), look: "evil" }, "a:x").look, undefined);
+});
+
+test("a tree keeps twelve views, forty in all; rename and delete work and a deletion is dated", () => {
+  const st = memStore();
+  for (let i = 0; i < 12; i++) assert.equal(W.putView(W.makeView(ARCH, "", vplain(), "v" + i, 1.7e12 + i * 1000, "id" + i), st), true);
+  assert.equal(W.putView(W.makeView(ARCH, "", vplain(), "one too many", 1.8e12, "idx"), st), "full");
+  const again = W.makeView(ARCH, "", vplain(), "v3 again", 1.8e12, "id3"); assert.equal(W.putView(again, st), true, "replacing one's own is fine"); assert.equal(W.listViews(st).length, 12);
+  assert.equal(W.putView(W.makeView({ t: "archive", ref: "mazza" }, "", vplain(), "other tree", 1.8e12, "mz1"), st), true);
+  assert.equal(W.renameView("v:id1", "  Renamed ", st, 1.9e12), true); assert.equal(W.get("v:id1", st).name, "Renamed"); assert.equal(W.listViews(st)[0].name, "Renamed", "the newest change is first");
+  W.remove("v:id1", st, 2e12); assert.equal(W.get("v:id1", st), null); assert.ok(W.readStore(st).gone["v:id1"]);
+  const many = memStore(); for (let i = 0; i < 4; i++) for (let j = 0; j < 12; j++) W.putView(W.makeView({ t: "link", ref: "https://x.example/t" + i }, "", vplain(), "n", 1.7e12 + i * 1e6 + j, "k" + i + "x" + j), many);
+  assert.equal(W.listViews(many).length, 40, "forty views in all, the oldest dropped");
+});
+
+test("views pass the six-word copy's cleaning and merge like canvases: later change wins, a deletion stays, extras are dropped, the tree's twelve are not crowded out", () => {
+  const v = W.makeView(ARCH, "Defranceski archive", vplain(), "Line", 1.7e12, "abc"), mk = o => ({ v: 1, items: { [o.k]: o }, gone: {} });
+  assert.deepEqual(RF.cleanCanvas(mk(v)).items[v.k], v, "a view made here passes unchanged");
+  const odd = JSON.parse(JSON.stringify(v)); odd.name = "<img src=x>\u0000Line"; odd.evil = "Anna"; odd.w.look = "neon"; const c = RF.cleanCanvas(mk(odd)).items[v.k];
+  assert.equal(c.name, "Line"); assert.equal("evil" in c, false); assert.equal("look" in c.w, false);
+  for (const bad of [{ ...v, tk: "a:booyzen" }, { ...v, k: "v:UPPER" }, { ...v, tk: undefined }, { ...v, src: { t: "link", ref: "http://x.example/y" } }]) assert.deepEqual(RF.cleanCanvas(mk(bad)).items, {});
+  const old = { ...v, upd: "2026-01-01T00:00:00.000Z" }, newer = { ...v, name: "Newer", upd: "2026-02-01T00:00:00.000Z" };
+  assert.equal(RF.mergeCanvas(mk(old), mk(newer)).items[v.k].name, "Newer");
+  const del = { v: 1, items: {}, gone: { [v.k]: "2026-03-01T00:00:00.000Z" } }; assert.equal(RF.mergeCanvas(mk(newer), del).items[v.k], undefined);
+  const mix = { v: 1, items: {}, gone: {} };
+  for (let i = 0; i < 12; i++) { const r = W.makeRecord({ t: "link", ref: "https://x.example/m" + i }, "m", plain(), 1.7e12 + i); mix.items[r.k] = r; }
+  for (let i = 0; i < 45; i++) { const r = W.makeView({ t: "link", ref: "https://x.example/m" + (i % 12) }, "m", vplain(), "n", 1.8e12 + i, "q" + i); mix.items[r.k] = r; }
+  const m = RF.mergeCanvas(mix, null), keys = Object.keys(m.items);
+  assert.equal(keys.filter(k => k.startsWith("v:")).length, 40); assert.equal(keys.filter(k => !k.startsWith("v:")).length, 12, "views do not push the trees out");
+});
+
+test("a share link carries the layout, the name and the source and nothing from the tree, survives the round trip, and refuses anything damaged or oversize", async () => {
+  const v = W.makeView(ARCH, "Defranceski archive", vplain(), "Our line", 1.7e12, "abc"), code = await W.shareEncode(v);
+  assert.match(code, /^[zj][A-Za-z0-9_-]+$/, "safe in a #fragment"); for (const n of NAMES) assert.equal(code.includes(n), false);
+  const back = await W.shareDecode(code); assert.equal(back.name, "Our line"); assert.equal(back.tk, "a:defranceski"); assert.deepEqual(back.src, ARCH); assert.deepEqual(back.w, v.w);
+  assert.equal(W.unpack(back.w, back.tk, known(), bridges()).cards.length, 3, "the person on the other side, with the same tree, gets the same people");
+  assert.equal(W.unpack(back.w, back.tk, ["defranceski:not-in-the-tree"], []).cards.length, 0);
+  const plainCode = "j" + Buffer.from(JSON.stringify({ v: 1, n: "x", s: ARCH, w: v.w })).toString("base64url"); assert.equal((await W.shareDecode(plainCode)).name, "x", "an uncompressed link is read too");
+  for (const bad of ["", "z", "x123", "zAAAA", "j" + Buffer.from("{}").toString("base64url"), "j" + Buffer.from(JSON.stringify({ v: 1, n: "x", s: { t: "link", ref: "http://x.example/y" }, w: v.w })).toString("base64url"),
+    "j" + Buffer.from(JSON.stringify({ v: 1, n: "x", s: ARCH, w: { v: 1, c: [] } })).toString("base64url"), "j" + "A".repeat(10), 5, null, "z" + "A".repeat(500000)]) assert.equal(await W.shareDecode(bad), null, String(bad).slice(0, 30));
+  const odd = JSON.parse(JSON.stringify(v.w)); odd.c[0][1] = 1e12; odd.view.k = 999; odd.look = "evil"; odd.zz = "Anna";
+  const o = await W.shareDecode("j" + Buffer.from(JSON.stringify({ v: 1, n: "<b>Hi</b>", s: ARCH, w: odd })).toString("base64url"));
+  assert.equal(o.w.c[0][1], 1e6); assert.equal(o.w.view.k, 8); assert.equal("look" in o.w, false); assert.equal("zz" in o.w, false); assert.equal(o.name, "Hi");
+  const bomb = Buffer.from(await new Response(new Blob(["A".repeat(2e6)]).stream().pipeThrough(new CompressionStream("deflate-raw"))).arrayBuffer()).toString("base64url");
+  assert.equal(await W.shareDecode("z" + bomb), null, "a link that unpacks to more than the limit is refused");
+});
+
+test("the page hands the canvas the views API, takes a shared link out of the address bar, and never writes a shared view over the visitor's own canvas", () => {
+  const app = read("../public/tree-canvas/app.js");
+  assert.match(app, /views: viewsApi/); assert.match(app, /history\.replaceState\(null, '', location\.pathname \+ location\.search\)/);
+  assert.match(app, /if \(cur\.paused \|\| cur\.shared\) return;/); assert.match(app, /c\.paused \|\| c\.shared/);
+  assert.match(app, /Nothing has been fetched: press Open link/, "a link tree is not fetched without a press, as before");
+  const cv = read("../../scripts/roots/tree-canvas.template.html");
+  assert.match(cv, /id="bViews"/); assert.match(cv, /if \(d && d\.look\) setTheme\(d\.look\)/);
+});
+
 /* ---- through the real server code, in memory ---- */
 function fakeR2() {
   const m = new Map(); let n = 0;

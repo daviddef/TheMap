@@ -76,11 +76,44 @@ function setCur(src, label) {
   cur = key ? { key, src: W.cleanSrc(src), label: label || '', loadedUpd: (W.get(key) || {}).upd || '', plain: null, dirty: false, saw: false, paused: false, cmp: false } : null;
 }
 /* what the canvas is handed when it is drawn: this tree's saved arrangement (if any) and a few words for its menu. The Compare view is not kept. */
+/* A view waiting for its tree to open: {tk, w, name, shared}. It comes from a saved view picked on the opening screen, or from a shared link (shared: true).
+   When the tree that opens is the one it names, the canvas is handed this arrangement instead of the last autosave. A SHARED view is never written over
+   the visitor's own canvas for that tree: editing it changes nothing that is kept until they choose "Save to my views" or "Keep working here". */
+let pend = null;
+const viewsApi = {
+  list: () => cur ? W.listViews(undefined, cur.key).map(v => ({ id: W.viewId(v.k), name: v.name, n: v.n, upd: v.upd, ago: W.agoText(v.upd) })) : [],
+  status: () => keepStatus().text,
+  save(name, plain) {
+    if (!cur || cur.cmp) return { err: 'Open a tree first.' };
+    const nm = W.cleanName(name) || 'View ' + (W.listViews(undefined, cur.key).length + 1), v = W.makeView(cur.src, cur.label, plain, nm);
+    if (!v) return { err: 'There is nothing on the canvas to save.' };
+    const r = W.putView(v);
+    if (r === 'full') return { err: 'A tree can keep ' + W.MAX_VIEWS_PER_TREE + ' views. Delete one to save another.' };
+    if (!r) return { err: 'This browser would not keep the view (its storage is blocked or full).' };
+    document.dispatchEvent(new CustomEvent('ra-progress-changed')); renderSaved();
+    return { ok: true, id: W.viewId(v.k), name: v.name };
+  },
+  open(id, known, bridges) {
+    const v = cur && W.listViews(undefined, cur.key).find(x => W.viewId(x.k) === id); if (!v) return null;
+    return W.unpack(v.w, cur.key, known, bridges);
+  },
+  rename(id, name) { const ok = W.renameView('v:' + id, name); if (ok) { document.dispatchEvent(new CustomEvent('ra-progress-changed')); renderSaved(); } return ok; },
+  remove(id) { W.remove('v:' + id); document.dispatchEvent(new CustomEvent('ra-progress-changed')); renderSaved(); },
+  async share(id) {
+    const v = W.get('v:' + id); if (!v) throw new Error('gone');
+    return { url: location.origin + location.pathname + '#view=' + await W.shareEncode(v), kind: v.src.t };
+  },
+};
 function attachKeep() {
   if (!window.RR) return;
   const c = cur && !cur.cmp ? cur : null, rec = c ? W.get(c.key) : null, key = c ? c.key : null;
-  window.RR.work = rec ? rec.w : null;
-  window.RR.keep = c ? { status: keepStatus, unpack: (known, bridges) => rec ? W.unpack(rec.w, key, known, bridges) : null, href: BACKUP } : null;
+  let w = rec ? rec.w : null, look = '';
+  if (c) {
+    if (pend && pend.tk === c.key) { w = pend.w; look = pend.w.look || ''; c.shared = pend.shared ? { name: pend.name, w: pend.w } : null; c.opened = pend.shared ? '' : pend.name; pend = null; }
+    else { c.shared = null; c.opened = ''; }
+  }
+  window.RR.work = w;
+  window.RR.keep = c ? { status: keepStatus, unpack: (known, bridges) => { const d = w ? W.unpack(w, key, known, bridges) : null; if (d && look) d.look = look; return d; }, href: BACKUP, views: viewsApi } : null;
   /* Compare in pairs: the visitor's saved pairing choices for this file (hashes), turned back into person keys by the canvas once it knows who is in the comparison */
   window.RR.pairKeep = cur ? { unpack: known => { const r = W.get(cur.key); return r && r.w.pr ? W.unpackPairing(r.w.pr, cur.key, known) : null; } } : null;
   if (c) { c.saw = false; c.dirty = false; }
@@ -89,7 +122,7 @@ function onWork(plain) {
   if (cur && cur.cmp && plain && plain.pairing !== undefined) { cur.pairing = plain.pairing; clearTimeout(pt); pt = setTimeout(flushPairing, 1000); return; }   // in Compare only the pairing choices are kept, never the comparison canvas
   if (!cur || cur.cmp || !plain || !Array.isArray(plain.cards)) return;
   cur.plain = plain; cur.dirty = true; if (plain.cards.length) cur.saw = true;
-  if (cur.paused) return;
+  if (cur.paused || cur.shared) return;
   clearTimeout(wt); wt = setTimeout(flushWork, 1000);
 }
 /* the visitor's pairing choices (Compare in pairs) go into this tree's record beside its canvas arrangement; the arrangement itself is left as it was */
@@ -102,7 +135,7 @@ function flushPairing() {
 }
 function flushWork() {
   flushPairing(); clearTimeout(wt); const c = cur;
-  if (!c || !c.dirty || c.paused || !c.plain) return;
+  if (!c || !c.dirty || c.paused || c.shared || !c.plain) return;
   c.dirty = false;
   if (!c.plain.cards.length) { if (c.saw) { const old = W.get(c.key); if (old && old.w.pr) { const r2 = JSON.parse(JSON.stringify(old)); r2.w.c = []; r2.n = 0; r2.upd = new Date().toISOString(); W.put(r2); } else W.remove(c.key); c.loadedUpd = ''; c.saw = false; } }   // a saved pairing outlives a cleared canvas      // cleared on purpose: the saved one goes too (an empty canvas at start-up changes nothing)
   else {
@@ -129,7 +162,24 @@ function startFresh() {
   note('Started fresh. The saved canvas for this tree was removed' + (syncState().on ? ', and from your six-word copy' : '') + '.', [], 9000);
   document.dispatchEvent(new CustomEvent('ra-progress-changed')); renderKeep();
 }
+function sharedNote() {
+  const sh = cur && cur.shared; if (!sh) return;
+  note('This is a shared view, \u201c' + sh.name + '\u201d. Nothing you change here is kept unless you choose.', [
+    { label: 'Save to my views', fn: saveShared },
+    { label: 'Keep working here', fn: () => { cur.shared = null; cur.dirty = !!cur.plain; flushWork(); note('This canvas is now yours: it is kept in this browser like any other.', [], 7000); } }], 60000);
+}
+function saveShared() {
+  const sh = cur && cur.shared; if (!sh) return;
+  /* what is on the canvas now if anything was changed, else the arrangement as it arrived */
+  const rec = (cur.plain && cur.plain.cards.length ? W.makeView(cur.src, cur.label, cur.plain, sh.name) : null)
+    || { k: 'v:' + W.newViewId(), tk: cur.key, name: W.cleanName(sh.name) || 'A shared view', label: cur.label || '', src: cur.src, upd: new Date().toISOString(), n: sh.w.c.length, w: sh.w };
+  const r = W.putView(rec);
+  note(r === true ? 'Saved \u201c' + rec.name + '\u201d to your views for this tree.' : r === 'full' ? 'A tree can keep ' + W.MAX_VIEWS_PER_TREE + ' views. Delete one to save another.' : 'This browser would not keep it (its storage is blocked or full).', [], 8000);
+  if (r === true) { document.dispatchEvent(new CustomEvent('ra-progress-changed')); renderSaved(); }
+}
 function onRestored(r) {
+  if (cur && cur.shared && r && r.n > 0) { cur.saw = true; sharedNote(); return; }
+  if (cur && cur.opened && r && r.n > 0) { cur.saw = true; note('Opened your view \u201c' + cur.opened + '\u201d: ' + r.n.toLocaleString('en') + (r.n === 1 ? ' person' : ' people') + ', as you saved it.', [], 9000); cur.opened = ''; return; }
   if (!cur || cur.cmp || !r || !(r.of > 0)) return;
   if (r.n > 0) { cur.saw = true; note('Your saved canvas came back: ' + r.n.toLocaleString('en') + (r.n === 1 ? ' person' : ' people') + ', where you left them.', [{ label: 'Start fresh', fn: startFresh }], 20000); }
   else note('You have a saved canvas for this tree, but none of its people are in this file, so nothing was brought back. It is kept; nothing was changed.', [], 14000);
@@ -151,27 +201,33 @@ function renderKeep() {
   const f = $('#cv'); if (f && f.contentWindow && !f.hidden) f.contentWindow.postMessage({ tcKeep: 1 }, location.origin);
 }
 function savedWhere(r) { return r.src.t === 'link' ? 'from a link' : r.src.t === 'archive' ? 'an archive' : 'from a file on this device'; }
+/* open the tree a saved canvas or view came from: an archive and a link by themselves (a link only fills the box until the visitor presses Open link, as for any link), a file from this device's recent files or by asking for it */
+async function reopenSrc(src, kept) {
+  if (src.t === 'archive') return openArchive(src.ref);
+  if (src.t === 'link') { $('#stUrl').value = src.ref; return openLink(src.ref); }
+  const k = (kept || []).find(x => x.name === src.ref);
+  if (k) { try { const db = await rdb(), bytes = await rreq(db.transaction('b').objectStore('b').get(k.name)); db.close(); if (bytes) { example = false; start(bytes, k.name); return; } } catch (e) { /* fall through to the picker */ } }
+  closeYF(true); if ($('#start').hidden) showStart();
+  linkMsg('Choose ' + src.ref + ' to bring this back. It is matched by its name, size and number of people.'); $('#stFile').click();
+}
 async function renderSaved() {
-  const recs = W.list();
+  const recs = W.list(), views = W.listViews();
   let kept = []; try { kept = rememberOn() ? await recentList() : []; } catch (e) { kept = []; }
-  /* one list, drawn twice: on the opening screen and on the "Your file" page */
+  /* one list, drawn twice: on the opening screen and on the "Your file" page. Named views come first, marked with a star, then each tree's last canvas */
   for (const [boxId, ulId] of [['stWork', 'stWorkList'], ['yfWork', 'yfWorkList']]) {
-    const box = $('#' + boxId), ul = $('#' + ulId); if (!box || !ul) continue; ul.textContent = ''; box.hidden = !recs.length;
-    for (const r of recs) {
+    const box = $('#' + boxId), ul = $('#' + ulId); if (!box || !ul) continue; ul.textContent = ''; box.hidden = !recs.length && !views.length;
+    const add = (title, bits, go) => {
       const li = document.createElement('li'), b = document.createElement('button'), n = document.createElement('b'), sm = document.createElement('small');
-      b.type = 'button'; b.className = 'recopen'; n.textContent = r.label || 'A saved canvas';
+      b.type = 'button'; b.className = 'recopen'; n.textContent = title; sm.textContent = bits.filter(Boolean).join(' \u00b7 '); b.append(n, sm); b.onclick = go; li.append(b); ul.append(li);
+    };
+    for (const v of views) {
+      const onDevice = v.src.t === 'file' && !kept.some(k => k.name === v.src.ref);
+      add('\u2605 ' + v.name, [v.label || savedWhere(v), v.n.toLocaleString('en') + (v.n === 1 ? ' person' : ' people'), 'saved ' + W.agoText(v.upd), onDevice ? 'open the same file to bring it back' : ''],
+        () => { pend = { tk: v.tk, w: v.w, name: v.name, shared: false }; reopenSrc(v.src, kept); });
+    }
+    for (const r of recs) {
       const onDevice = r.src.t === 'file' && !kept.some(k => k.name === r.src.ref);
-      sm.textContent = [r.n ? r.n.toLocaleString('en') + (r.n === 1 ? ' person' : ' people') + ' on the canvas' : 'your pairing choices (no canvas)', savedWhere(r), 'saved ' + W.agoText(r.upd), onDevice ? 'open the same file to bring it back' : ''].filter(Boolean).join(' \u00b7 ');
-      b.append(n, sm);
-      b.onclick = async () => {
-        if (r.src.t === 'archive') return openArchive(r.src.ref);
-        if (r.src.t === 'link') { $('#stUrl').value = r.src.ref; return openLink(r.src.ref); }
-        const k = kept.find(x => x.name === r.src.ref);
-        if (k) { try { const db = await rdb(), bytes = await rreq(db.transaction('b').objectStore('b').get(k.name)); db.close(); if (bytes) { example = false; start(bytes, k.name); return; } } catch (e) { /* fall through to the picker */ } }
-        closeYF(true); if ($('#start').hidden) showStart();
-        linkMsg('Choose ' + r.src.ref + ' to bring this canvas back. It is matched by its name, size and number of people.'); $('#stFile').click();
-      };
-      li.append(b); ul.append(li);
+      add(r.label || 'A saved canvas', [r.n ? r.n.toLocaleString('en') + (r.n === 1 ? ' person' : ' people') + ' on the canvas' : 'your pairing choices (no canvas)', savedWhere(r), 'saved ' + W.agoText(r.upd), onDevice ? 'open the same file to bring it back' : ''], () => reopenSrc(r.src, kept));
     }
   }
   noFiles();
@@ -622,7 +678,22 @@ addEventListener('drop', e => { dragging(false); if ($('#start').hidden) return;
   let want = new URLSearchParams(location.search).get('archive');
   if (!ARCH[want]) { want = null; try { const h = new URL(document.referrer).hostname; want = Object.keys(ARCH).find(k => ARCH[k].host === h) || null; } catch (e) { /* no referrer */ } }
   const asked = new URLSearchParams(location.search).get('url');
-  if (asked) {
+  const sharedCode = (location.hash.match(/^#view=([A-Za-z0-9_-]{3,400000})$/) || [])[1];
+  if (sharedCode) {
+    /* a shared view: its fragment never reached a server. Read it, take it out of the address bar, and ask for the tree it was made from */
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ignore */ }
+    W.shareDecode(sharedCode).then(sv => {
+      if (!sv) { showStart(); return linkMsg('That shared link could not be read. It may be cut short: ask for it again.', true); }
+      pend = { tk: sv.tk, w: sv.w, name: sv.name, shared: true };
+      if (sv.src.t === 'archive') return openArchive(sv.src.ref);
+      showStart();
+      if (sv.src.t === 'link') {
+        $('#stUrl').value = sv.src.ref; const p = parseFileLink(sv.src.ref);
+        linkMsg('A shared view, \u201c' + sv.name + '\u201d, is waiting. It was made from the tree at ' + (p.ok ? p.host : 'a link') + '. Nothing has been fetched: press Open link to see it.', !p.ok);
+        $('#stGo').focus();
+      } else linkMsg('A shared view, \u201c' + sv.name + '\u201d, was made on a file called ' + sv.src.ref + ' (' + (sv.src.people || 0).toLocaleString('en') + ' people). Choose that same file to see it. It is matched by name, size and number of people.');
+    });
+  } else if (asked) {
     showStart(); const box = $('#stUrl'); box.value = asked.slice(0, 2000); const p = parseFileLink(box.value);
     linkMsg(p.ok ? 'This page was opened with a link to a file on ' + p.host + '. Nothing has been fetched yet: press Open link if you want it.' : p.error, !p.ok);
     $('#stGo').focus();

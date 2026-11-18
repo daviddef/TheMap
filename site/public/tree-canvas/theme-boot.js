@@ -8,5 +8,6 @@
     if (rec && rec.v === 1 && typeof rec.look === 'string') look = rec.look;
     if (!look) look = localStorage.getItem('loamTheme');
     if (LOOKS.indexOf(look) >= 0) document.documentElement.setAttribute('data-theme', look === 'ground' ? 'dark' : 'light');
+    if (look === 'sticker' || look === 'paper' || look === 'ground') document.documentElement.setAttribute('data-look', look);   /* the Fix list wears the canvas's own palette */
   } catch (e) { /* storage blocked: the device decides */ }
 })();

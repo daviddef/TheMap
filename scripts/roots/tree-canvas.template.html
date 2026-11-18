@@ -214,8 +214,16 @@ button{font-family:inherit}
 .card.dim .cb{opacity:.38;filter:saturate(.5)}
 .card.onpath .cb{border-color:var(--lk-accent);box-shadow:0 3px 0 var(--lk-accent),0 0 0 5px var(--lk-accent-soft)}
 .card.endpt .cb{box-shadow:0 3px 0 var(--lk-accent),0 0 0 5px var(--lk-accent)}
-.card .stops{position:absolute;left:14px;right:6px;top:calc(100% + 6px);font:800 10.5px/1.25 Nunito,system-ui;color:var(--lk-soft);background:var(--lk-card);border:1.5px dashed var(--lk-faint);border-radius:10px;padding:3px 8px;text-align:center;pointer-events:auto}
-.card .stops button{all:unset;cursor:pointer;color:var(--lk-accent);font-weight:800;text-decoration:underline}
+.card .stopx{position:absolute;left:50%;bottom:calc(100% + 2px);transform:translateX(-50%);z-index:4;pointer-events:auto;outline:none;display:flex;flex-direction:column;align-items:center}
+.card .stopx::after{content:"";width:2px;height:12px;background:var(--lk-faint)}
+.card .stopx .stx{display:grid;place-items:center;width:56px;height:30px;border-radius:10px;border:2px dashed var(--lk-faint);background:var(--lk-card);color:#d24b1f;cursor:help}
+.card .stopx .stx svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:3.2;stroke-linecap:round}
+.card .stopx:hover .stx,.card .stopx:focus-visible .stx{border-color:#d24b1f;border-style:solid}
+.card .stopx-tip{display:none;position:absolute;left:50%;transform:translateX(-50%);bottom:100%;padding-bottom:6px;width:max-content;max-width:230px}
+.card .stopx:hover .stopx-tip,.card .stopx:focus-within .stopx-tip{display:block}
+.card .stopx-bubble{display:block;font:800 11px/1.3 Nunito,system-ui;color:var(--lk-soft);background:var(--lk-card);border:1.5px solid var(--lk-line);border-radius:10px;padding:5px 10px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.card .stopx-bubble button{all:unset;cursor:pointer;color:var(--lk-accent);font-weight:800;text-decoration:underline}
+.card:focus-within{z-index:5}
 /* handles: Loam's small round "+" pills, on the card's edges */
 .hd{position:absolute;z-index:3;display:flex;align-items:center;gap:3px;height:24px;min-width:24px;padding:0 8px;border-radius:99px;border:1.5px solid var(--lk-line);background:var(--lk-card);color:var(--lk-soft);
   font:800 11px/1 Nunito,system-ui;cursor:pointer;box-shadow:0 1.5px 0 var(--lk-line);transition:transform .12s,border-color .15s,color .15s,opacity .15s;white-space:nowrap}
@@ -437,7 +445,6 @@ a.pill.ac{text-decoration:none;cursor:pointer}a.pill.ac:hover,a.pill.ac:focus-vi
 #info .row.one{flex-wrap:nowrap;gap:5px}#info .row.one .lk-btn{flex:1 1 auto;min-width:0;padding-left:7px;padding-right:7px;font-size:12px;white-space:nowrap;justify-content:center}
 #info .row.one .lk-icon{width:13px;height:13px}
 
-.card .stops.up{top:auto;bottom:calc(100% + 6px)}
 
 /* the empty drop zones: centred, and a wrapped line is balanced (the right-hand padding is only needed once a person is in, for the remove button) */
 #rz .rzs.empty{justify-content:center;text-align:center;padding:4px 10px;text-wrap:balance;line-height:1.25}
@@ -886,7 +893,7 @@ html:not(.rzopen) #rz{display:none}
 #pairs .pchip.check{border-style:dashed}#pairs .pchip.differs{border-style:dotted;text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--lk-ink) 40%,transparent)}
 #pairs .pchip.maybe{border-style:dashed;color:var(--lk-soft)}#pairs .pchip.maybe i{background:transparent;box-shadow:inset 0 0 0 2px var(--bc)}
 #pairs .pchip:hover,#pairs .pchip:focus-visible{outline:2px solid var(--psel);outline-offset:1px}
-body.pr .card .hd:not(.op),body.pr .card .stops,body.pr .card .brc,body.pr .card .fxb{display:none!important}
+body.pr .card .hd:not(.op),body.pr .card .stopx,body.pr .card .brc,body.pr .card .fxb{display:none!important}
 .card.pfile{--ac:var(--pfile)!important}.card.pfile .cb{box-shadow:inset 0 0 0 2px var(--pfile)}
 .card.psel{outline:3px solid var(--psel);outline-offset:3px}
 #prLegend{position:fixed;left:16px;bottom:calc(var(--dockh,110px) + 22px);z-index:6;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;max-width:min(560px,calc(100vw - 32px));padding:7px 10px;border:2px solid var(--lk-line);border-radius:14px;background:var(--lk-card);color:var(--lk-ink);font:800 11.5px Nunito,system-ui;box-shadow:0 2px 0 var(--lk-line)}
@@ -3357,8 +3364,9 @@ function cardInner(c) {
       const other = TC.otherSideHasParents(M, c.i).filter(q => !cardOfPerson(q.i));
       if (other.length) note += `<br><button data-act="br" data-b="${esc(M.bridgesOf.get(c.i).find(b => TC.bridgeOther(b, c.i) === other[0].i).id)}">${esc(M.archives[other[0].a].name)} has parents</button>`;
     } else if (c.stopG) note = `<b>stops here</b> &middot; the next link is index-entry only (not proven)<br><button data-act="upforce">follow it anyway</button>`;
-    /* the note says the line above stops, so it sits above the card when a child is drawn below it: below, it would cover the line down to that child */
-    if (note) h += `<div class="stops${p.ch.some(e => cardOfPerson(e.c)) ? ' up' : ''}">${note}</div>`;
+    /* it sits above the card when a child is drawn below it: below, it would cover the line down to that child */
+    /* a small parent-shaped marker with a red cross instead of a box of words: the reason (and the way round it) is what you read when you point at it or tab to it */
+    if (note) h += `<div class="stopx" tabindex="0" role="group" aria-label="${esc('Stops here: ' + (sr.stops ? sr.text : 'the next link is index-entry only (not proven)'))}"><span class="stx" aria-hidden="true">${icon('x', '')}</span><span class="stopx-tip"><span class="stopx-bubble">${note}</span></span></div>`;
   }
   return h;
 }

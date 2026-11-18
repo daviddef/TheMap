@@ -376,6 +376,8 @@ html.embed header.top,html.embed #metrics,html.embed nav.tabs,html.embed .atlasb
 html.profile .layout{grid-template-columns:minmax(0,1fr)}
 html.profile .layout>div:first-child,html.profile #ctrls{display:none!important}
 html.embed body{background:transparent}
+/* Inside the Atlas's own page (it frames this file with ?shell=1) Orphans is a tab of that page, so the in-page tab is not drawn twice. Never set anywhere else. */
+.inshell .tab[data-view="orphans"]{display:none!important}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -933,6 +935,10 @@ const EMB=/(^|&)(embed|profile)=1(&|$)/.test(location.hash.slice(1)),PROF=/(^|&)
 const RROOT=document.getElementById('rr')||document.documentElement;   // a site-built page scopes the viewer under #rr; the Atlas viewer is the document
 if(EMB)RROOT.classList.add('embed');
 if(PROF)RROOT.classList.add('profile');
+const SHELL=/[?&]shell=1(&|$)/.test(location.search)&&parent!==window;   // the Atlas's Roots & Routes page frames this file with ?shell=1; no archive does
+if(SHELL)RROOT.classList.add('inshell');
+let LASTV='hourglass';   // the last view that was not Orphans, so the shell's «Tree views» tab can go back to it
+const SHN={orph:0,clus:0};   // the Orphans view's own two numbers, for the shell's tab badge
 const DEF=Object.assign({},st);
 const HASHKEYS={p:'focus',b:'kb',card:'card',o:'orient',up:'up',down:'down',gens:'gens',mg:'mgroup',mv:'mview',ms:'mscope',y:'year',lg:'lgroup',ls:'lscope',tl:'tline',es:'escope',ok:'okind',map:'mapscope',mc:'mcolor',cty:'cty',ln:'line',am:'amode',as:'ascope',pl:'apl',av:'aview',sc:'scol',ss:'ssize',sd:'sdepth',sn:'sn'};
 function applyHash(){
@@ -1014,7 +1020,10 @@ function pick(id,e){
   go(id);
 }
 let MH=null;   // {site,tree,slug} sent by the page around us (the visitor pasted one MyHeritage link); nothing is sent anywhere
-addEventListener('message',e=>{if(e.source!==parent||!e.data||!('mh' in e.data))return;MH=e.data.mh;if(typeof renderPanel==='function'&&P&&P[st.focus])renderPanel()});
+addEventListener('message',e=>{if(e.source!==parent||!e.data)return;
+  /* the shell's Orphans and Tree views tabs share this one viewer: they only choose which view is open */
+  if(SHELL&&typeof e.data.raView==='string'){if(e.data.raView==='orphans'){if(e.data.okind&&okinds[e.data.okind])st.okind=e.data.okind;else if(st.okind==='orph'&&!SHN.orph&&SHN.clus)st.okind='clus';st.view='orphans';render()}else if(st.view==='orphans'){st.view=LASTV;render()}return}
+  if(!('mh' in e.data))return;MH=e.data.mh;if(typeof renderPanel==='function'&&P&&P[st.focus])renderPanel()});
 const mhLinks=p=>{const m=/^I(\d{1,6})$/.exec(p.id);if(!MH||!m)return '';const n=MH.tree*1e6+ +m[1],sl=(nm(p)||'person').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60)||'person';
   const a=(u,t,i)=>' <a class="btn ibtn" href="'+u+'" target="_blank" rel="noopener noreferrer" title="'+t+'" aria-label="'+t+'">'+ICO[i]+'</a>';
   return a('https://www.myheritage.com/profile-'+MH.site+'-'+n+'/'+sl,'Open this profile on MyHeritage','person')+a('https://www.myheritage.com/family-trees/'+(MH.slug||'tree')+'/'+MH.site+'?rootIndividualID='+n+'&familyTreeID='+MH.tree,'Open this person in the tree on MyHeritage','tree')};
@@ -2049,6 +2058,7 @@ const inKind=(p,k)=>k==='orph'?p._orph:k==='clus'?p._clus:p._dead;
 function renderMetrics(){
   const tot=list.length,main=list.filter(p=>p._main).length,orph=list.filter(p=>p._orph).length;
   const clus=list.filter(p=>p._clus),nClus=new Set(clus.map(p=>p._comp)).size,dead=list.filter(p=>p._dead).length,liv=list.filter(living).length;
+  SHN.orph=orph;SHN.clus=nClus;
   const places=new Set(list.map(p=>p.bp)),inAt=[...places].filter(n=>PL[n].id).length;
   const T=(n,l,s,k)=>'<button class="mt" '+(k?'data-goto="orphans" data-okind="'+k+'"':'data-goto="map"')+'><b>'+n.toLocaleString('en')+'</b><span>'+l+'</span><small>'+s+'</small></button>';
   $('#metrics').innerHTML=
@@ -2271,6 +2281,8 @@ function render(){
   (({hourglass:renderHG,fan:renderFan,map:renderMap,movements:renderMove,lanes:renderLanes,timeline:renderTL,atlasmap:renderAtlas,surnames:renderSurnames,eras:renderEras,orphans:renderOrphans,kinship:renderKin})[st.view]||EXT.views[st.view])();
   requestAnimationFrame(()=>$$('.swipe').forEach(edges));
   writeHash();
+  if(st.view!=='orphans')LASTV=st.view;
+  if(SHELL)try{parent.postMessage({type:'ra-roots-view',view:st.view,okind:st.okind,orphans:SHN.orph,clusters:SHN.clus},'*')}catch(x){}
   if(PROF&&parent!==window)requestAnimationFrame(()=>parent.postMessage({type:'ra-roots-height',h:Math.ceil(document.documentElement.scrollHeight)},'*'));
 }
 ['click','change','keyup','input'].forEach(ev=>document.addEventListener(ev,()=>setTimeout(writeHash,0)));

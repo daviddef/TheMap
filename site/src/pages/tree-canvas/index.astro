@@ -10,7 +10,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://archive.defranceski.com https://booyzen.defranceski.com https://luwinski.defranceski.com https://lerena.defranceski.com https://falco.defranceski.com https://blazevic.defranceski.com https://darcy.defranceski.com https://mazza.defranceski.com; worker-src 'self'; frame-src 'self'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' https: https://archive.defranceski.com https://booyzen.defranceski.com https://luwinski.defranceski.com https://lerena.defranceski.com https://falco.defranceski.com https://blazevic.defranceski.com https://darcy.defranceski.com https://mazza.defranceski.com; worker-src 'self'; frame-src 'self'; form-action 'none'; base-uri 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex">
 <title>Tree Canvas · Record Atlas</title>
@@ -27,7 +27,21 @@
     <button type="button" class="stbtn" id="stDemo">Open an invented family example</button>
   </div>
   <input type="file" id="stFile" accept=".ged,.gedcom,.txt,.json,text/plain,application/json" hidden>
-  <p class="stnote">Drag a file onto this page, too. A <b>tree.json</b> is the file a researcher's own Roots &amp; Routes site makes: it brings page links and corrections marks a GEDCOM cannot. <a href="/tree-canvas/publish/">How to make one</a>.</p>
+  <p class="stnote">Drag a file onto this page, too. <b>GEDCOM</b> is the industry standard: almost every genealogy program and website can export one. <b>tree.json</b> is our own format, made up for Record Atlas and read by nothing else: it is what a researcher's Roots &amp; Routes site makes, and it carries page links and corrections marks a GEDCOM cannot. <a href="/tree-canvas/publish/#format">The tree.json format, field by field</a>.</p>
+  <section id="stLink" class="strec" aria-labelledby="stLinkTitle">
+    <h2 id="stLinkTitle">Or open a file from a link</h2>
+    <div class="stlinkrow">
+      <label for="stUrl" class="stvh">Web address of a public GEDCOM or tree.json</label>
+      <input type="url" id="stUrl" class="stlinkin" inputmode="url" autocomplete="off" spellcheck="false" maxlength="2000" placeholder="https://raw.githubusercontent.com/you/family/main/tree.json">
+      <button type="button" class="stbtn small" id="stGo">Open link</button>
+    </div>
+    <p id="stLinkMsg" class="stnote stmsg" role="status" aria-live="polite" hidden></p>
+    <p class="stnote stex">Try an invented example, opened from a link on this site:
+      <button type="button" class="stbtn small" data-ex="/examples/example-family.ged">a GEDCOM (industry standard)</button>
+      <button type="button" class="stbtn small" data-ex="/examples/example-family.tree.json">a tree.json (our own format)</button>
+      (<a href="/examples/README.md">about these files</a>)</p>
+    <p class="stnote">Your browser fetches the file straight from that site, so that site can see the request; nothing from your tree is sent to it, and nothing passes through Record Atlas. https links only, up to 100 MB. The site must allow other sites to read the file (GitHub's raw files and GitHub Pages do). For a file on GitHub, paste the page address or the Raw one.</p>
+  </section>
   <section id="stArch" class="strec" aria-labelledby="stArchTitle">
     <h2 id="stArchTitle">Or draw one of the family archives</h2>
     <div class="starch" id="stArchBtns">

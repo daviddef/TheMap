@@ -22,6 +22,15 @@ import { u } from "../../lib/url.js";
     <p><a href={u("/tree-canvas/")}>Open the Tree Canvas</a> · <a href={u("/tree-canvas/example-tree.json")} download>Download an invented example file</a> to try it now.</p>
   </div>
 
+  <h2 class="k-h" id="formats">Two file formats <span class="k-count">one is the industry standard, one is ours</span></h2>
+  <div class="scroll"><table class="k-table">
+    <thead><tr><th></th><th>GEDCOM</th><th>tree.json</th></tr></thead>
+    <tbody>
+      <tr><td>Whose format</td><td>The industry standard. Almost every genealogy program and website can export one.</td><td><b>Ours.</b> Made up for Record Atlas and its Roots &amp; Routes tool. No other program reads or writes it, and it is not a standard.</td></tr>
+      <tr><td>What it carries</td><td>People, dates, places, families, sources</td><td>The same, plus a page link for each person, a corrections count, the route a person travelled and a living flag</td></tr>
+      <tr><td>Where it is described</td><td>The GEDCOM specification, published outside Record Atlas</td><td><a href="#format">The file format on this page</a>, which is the contract the reader enforces</td></tr>
+    </tbody></table></div>
+
   <h2 class="k-h" id="route1">Route 1: drop a tree.json <span class="k-count">open to anyone · available now</span></h2>
   <p class="k-lede">If you build a Roots &amp; Routes tree for your own site, it already makes a <code>tree.json</code>. Open the folder button on the canvas, or drag the file onto the page, as you would a
     GEDCOM. The canvas tells the two apart by what is inside, not by the file name.</p>
@@ -32,8 +41,8 @@ import { u } from "../../lib/url.js";
     <li><b>Anyone who may be alive is left as a name and a family.</b> This is applied to every file before anything is drawn, whatever the file says: a person marked <code>living</code>, or with no death year (or only an estimated one) and born after 1920, keeps their name and their family links, and loses dates, places, page link, sources and occupation. A careless export cannot put a living person's details on the canvas. The canvas says how many it did this to.</li>
   </ul>
 
-  <h2 class="k-h" id="format">The file format <span class="k-count">what the reader takes, and nothing more</span></h2>
-  <p class="k-lede">The top level is an object with <code>meta</code> and <code>people</code> (a list), and optionally <code>places</code>. Each person is an object. Anything not in the table is ignored. Text is cut to a safe length, years must be whole numbers from 1000 to 2100, and a link to someone who is not in the file is dropped and counted.</p>
+  <h2 class="k-h" id="format">The tree.json format <span class="k-count">our own format · what the reader takes, and nothing more</span></h2>
+  <p class="k-lede"><b>tree.json is Record Atlas's own format, not an industry standard.</b> This table is its contract: the reader (<a href="https://github.com/daviddef/TheMap/blob/main/site/public/roots/js/treejson.js" rel="noopener">treejson.js</a>) takes what is listed here and ignores the rest, and a test (<code>scripts/test-tree-json.mjs</code>) checks the reader against it. The top level is an object with <code>meta</code> and <code>people</code> (a list), and optionally <code>places</code>. Each person is an object. Anything not in the table is ignored. Text is cut to a safe length, years must be whole numbers from 1000 to 2100, and a link to someone who is not in the file is dropped and counted.</p>
   <div class="scroll"><table class="k-table">
     <thead><tr><th>Field</th><th>Meaning</th><th>Needed</th></tr></thead>
     <tbody>
@@ -68,7 +77,7 @@ import { u } from "../../lib/url.js";
   <ul class="k-steps">
     <li><b>An entry</b> is a host, a name and a colour in an allow-list, plus a change to the page's security policy so the canvas may connect to that host.</li>
     <li><b>Before one is added,</b> the site must publish a <code>/roots/</code> page in the same format, must leave out living people, and must keep its data public and stable. The Atlas can check the first by reading the file; the other two are the owner's word.</li>
-    <li><b>Not offered:</b> a box where anyone types a web address. That would mean opening the security policy to every site, and letting any page feed the canvas.</li>
+    <li><b>Not offered for a listed archive:</b> a site cannot become a listed archive by typing its address. What is offered is Route 1 from a link: the first screen of the Tree Canvas has a box for the https address of a public GEDCOM or tree.json (a link of the form <code>/tree-canvas/?url=…</code> only fills that box; nothing is fetched until you press Open link). The page around the canvas fetches the file in your browser, never the canvas itself, and the security policy of that one page now lets it read an https address; the canvas and the rest of the site are unchanged. The limits: https only; a public website (no sign-in details, port, bare IP address or local name); the site must allow other websites to read the file (an <code>Access-Control-Allow-Origin</code> header, which GitHub's raw files and GitHub Pages send); 100 MB at most; nothing passes through Record Atlas; and the site it came from is named when the canvas opens. The file is treated exactly like one you opened yourself: labelled as your file, with the living rule applied.</li>
   </ul>
 
   <h2 class="k-h" id="compare">The two side by side</h2>
@@ -79,7 +88,7 @@ import { u } from "../../lib/url.js";
       <tr><td>Privacy</td><td>The file stays in your browser</td><td>The canvas fetches your public <code>/roots/</code> page</td></tr>
       <tr><td>Page links and corrections</td><td>Yes, if the file carries them and names your site</td><td>Yes</td></tr>
       <tr><td>Appears as</td><td>Labelled as your file</td><td>Named, with its own colour</td></tr>
-      <tr><td>Security policy</td><td>Unchanged</td><td>One host added per archive</td></tr>
+      <tr><td>Security policy</td><td>Unchanged for a file you drop; the opening page may read any https link you paste</td><td>One host added per archive</td></tr>
       <tr><td>Status</td><td>Available</td><td>Not offered yet</td></tr>
     </tbody></table></div>
 

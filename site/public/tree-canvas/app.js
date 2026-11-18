@@ -7,6 +7,7 @@ import { issuesByPerson } from '/roots/js/checklist.js';
 import { parseLink, profileUrl, treeUrl } from '/roots/js/myheritage.js';
 import { personUrl } from '/roots/js/ancestry.js';
 import { loadTrees, saveTreeLink, loadSite, saveSite } from '/roots/js/remember.js';
+import { parseLink as parseFileLink, fetchBytes, fileNameOf } from '/roots/js/openlink.js';   // (parseLink above is the MyHeritage one)
 
 const $ = s => document.querySelector(s);
 const base = new URL('/roots/', location.href).href;   // the reader fetches its place files relative to this, as it does on /roots/
@@ -55,12 +56,13 @@ function mount() {
   f.hidden = false; old.replaceWith(f);
 }
 
-let curName = null, curHead = null;
+let curName = null, curHead = null, curVia = null;   // curVia: the site a file was fetched from, when it came from a link
 /* A Roots & Routes tree.json is JSON; a GEDCOM never starts with a brace. Told apart by the first character, not the name, so a renamed file still opens. */
 const isTreeJson = bytes => { try { return /^\uFEFF?\s*\{/.test(new TextDecoder('utf-8').decode(new Uint8Array(bytes, 0, Math.min(64, bytes.byteLength)))); } catch (e) { return false; } };
-function start(bytes, name) {
+function start(bytes, name, via) {
   const json = isTreeJson(bytes);
-  curName = name || null; curHead = name && !json ? headInfo(bytes) : (json ? { from: 'tree.json', tree: '' } : null);
+  curName = name || null; curVia = via || null; curHead = name && !json ? headInfo(bytes) : (json ? { from: 'tree.json', tree: '' } : null);
+  if (curVia && curHead) curHead = { ...curHead, from: curVia };   // the last-used list says where a file came from
   $('#start').hidden = true; say('Reading your file…');
   if (worker) worker.terminate();
   worker = new Worker('/roots/js/worker.js', { type: 'module' });
@@ -80,8 +82,10 @@ function start(bytes, name) {
       window.RR = { tree: m.tree, atlas: m.atlas, loadNames, links };
       if (curName && m.report && m.report.people) recentMeta(curName, { people: m.report.people.individuals, from: curHead ? curHead.from : '', tree: curHead ? curHead.tree : '' });
       say(''); mount();
-      if (m.kind === 'tree') { if (m.say && m.say.length) { say('Opened as a tree.json: ' + m.say.join('; ') + '.'); setTimeout(() => say(''), 9000); } }   // what was left out, in the visitor's words
-      else worker.postMessage({ cmd: 'checklist', living: !hide, ancestry: 'com' });   // the fix list, for the "!" marks; it follows a moment after the canvas is drawn (a tree.json has no GEDCOM to check)
+      /* where it came from (a link) and what was left out of a tree.json, in the visitor's words; it clears itself, the canvas keeps the screen */
+      const said = [curVia ? 'Loaded from ' + curVia + '. Read in this browser; nothing from it was sent anywhere.' : '', m.kind === 'tree' && m.say && m.say.length ? 'Opened as a tree.json: ' + m.say.join('; ') + '.' : ''].filter(Boolean).join(' ');
+      if (said) { say(said); setTimeout(() => say(''), curVia ? 14000 : 9000); }
+      if (m.kind !== 'tree') worker.postMessage({ cmd: 'checklist', living: !hide, ancestry: 'com' });   // the fix list, for the "!" marks; it follows a moment after the canvas is drawn (a tree.json has no GEDCOM to check)
     }
   };
   worker.onerror = e => { say('The reader crashed: ' + (e.message || 'unknown error'), true); if (!window.RR) showStart(); };
@@ -240,6 +244,27 @@ async function showStart() {
     li.append(b, ed, x); ul.append(li);
   }
 }
+/* ---- a file from a link. The visitor's own browser asks the other site for the file (nothing goes through this site), after the address has been checked
+   (openlink.js: https only, a public name, no sign-in details). The site it came from is shown while the canvas opens. A link on the page's own address
+   (/tree-canvas/?url=…) only fills the box: nothing is fetched until the visitor presses Open link. ---- */
+const linkMsg = (t, err) => { const m = $('#stLinkMsg'); m.textContent = t || ''; m.hidden = !t; m.classList.toggle('err', !!err); };
+async function openLink(text, own) {   // own: the page's own example files, allowed by origin
+  const opt = own ? { origin: location.origin } : {}, p = parseFileLink(text, opt);
+  if (!p.ok) return linkMsg(p.error, true);
+  const go = $('#stGo'); go.disabled = true; go.textContent = 'Opening…'; linkMsg('Asking ' + p.host + ' for the file…');
+  try {
+    const r = await fetchBytes(p.url, opt);
+    if (!r.ok) return linkMsg(r.error, true);
+    example = false; linkMsg('');
+    const name = fileNameOf(p.url, p.host), via = r.finalHost && r.finalHost !== r.host ? r.host + ' (via ' + r.finalHost + ')' : r.host;
+    recentSave(name, r.bytes.slice(0)); start(r.bytes, name, via);
+  } catch (e) { linkMsg('That link could not be opened: ' + String(e && e.message || e).slice(0, 160), true); }
+  finally { go.disabled = false; go.textContent = 'Open link'; }
+}
+$('#stGo').onclick = () => openLink($('#stUrl').value);
+document.querySelectorAll('#stLink [data-ex]').forEach(b => { b.onclick = () => openLink(new URL(b.dataset.ex, location.origin).href, true); });
+$('#stUrl').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); openLink($('#stUrl').value); } };
+$('#stUrl').oninput = () => { const p = $('#stUrl').value.trim() ? parseFileLink($('#stUrl').value) : null; linkMsg(p && p.ok && p.note ? p.note : '', false); };
 $('#stOpen').onclick = () => $('#stFile').click();
 $('#stFile').onchange = async e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
@@ -254,5 +279,10 @@ addEventListener('drop', e => { if ($('#start').hidden) return; e.preventDefault
   /* from an archive: its icon sends ?archive=<key>; failing that, the page the visitor came from (some browsers send only its origin, which is enough) */
   let want = new URLSearchParams(location.search).get('archive');
   if (!ARCH[want]) { want = null; try { const h = new URL(document.referrer).hostname; want = Object.keys(ARCH).find(k => ARCH[k].host === h) || null; } catch (e) { /* no referrer */ } }
-  if (want) openArchive(want); else showStart();
+  const asked = new URLSearchParams(location.search).get('url');
+  if (asked) {
+    showStart(); const box = $('#stUrl'); box.value = asked.slice(0, 2000); const p = parseFileLink(box.value);
+    linkMsg(p.ok ? 'This page was opened with a link to a file on ' + p.host + '. Nothing has been fetched yet: press Open link if you want it.' : p.error, !p.ok);
+    $('#stGo').focus();
+  } else if (want) openArchive(want); else showStart();
 }

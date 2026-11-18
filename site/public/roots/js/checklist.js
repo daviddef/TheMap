@@ -244,7 +244,7 @@ export function issuesByPerson(c) {
     const g = (c.groups || GROUPS).find(x => x.sections.includes(s.key));
     for (const i of s.items) {
       const d = describe(s, i); total++;
-      const base = { k: s.key, t: s.title, g: g ? g.key : 'other', gt: g ? g.title : '', how: s.how || (g && g.how) || '', head: d.head, why: d.why, next: d.next, info: d.info, more: d.people };
+      const base = { key: i.key, sk: s.key, k: s.key, t: s.title, g: g ? g.key : 'other', gt: g ? g.title : '', how: s.how || (g && g.how) || '', head: d.head, why: d.why, next: d.next, info: d.info, more: d.people };
       const add = (id, ev, date) => { if (id == null) return; const k = String(id); (byId[k] = byId[k] || []).push({ ...base, ev: ev || '', date: date || '' }); };
       if (s.key === 'dupes') { add(i.a); add(i.b); }
       else if (Array.isArray(i.people)) { const seen = new Set(); for (const x of i.people) if (!seen.has(x.id)) { seen.add(x.id); add(x.id, x.ev, x.date); } }

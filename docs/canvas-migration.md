@@ -36,7 +36,7 @@ Phase: 0 inventory, 1 Your file, 2 Settings, 3 Tree lenses, 4 Places and the fix
 | **Tree views** tab (the 12 views, metrics strip) | Move the value (see the views table) | Lenses on the canvas's selection; the metrics strip becomes "At a glance" on Your file | 1 and 3 | M + L | metrics.js, a lens frame |
 | **Import report** tab | Move | "What was read" on Your file, drawn by the same code | 1 | S | report-view.js |
 | **Places to review** tab (1,500+ rows on a real file) | Move, later | The canvas's Fix list panel, as a "Places" group, picked place by place on the selected person's branch first | 4 | L | Fix list parity, decisions store |
-| **Fix list** tab | Move, later | The canvas's Fix list tab shows R&R's grouped rows and Atlas help | 4 | L | enrich.js, consistency.js in the canvas |
+| **Fix list** tab | Prototype built (PR open, not merged) | A round Fix icon in the canvas toolbar opens a full Fix list workspace over the canvas (a checklist of everything to fix: every R&R section and group with the same counts, plus Compare's "Missing from your file" and "Details differ"), with a fixed priority order; the side panel's Fix tab shows only the focused person's rows | 4 | L | enrich.js, consistency.js in the canvas |
 | **Export** tab | Move | "Export your GEDCOM" on Your file (the four modes, R&R's wording, GEDCOM only) | 1 | S | none |
 
 ### The twelve tree views
@@ -65,7 +65,7 @@ Phase: 0 inventory, 1 Your file, 2 Settings, 3 Tree lenses, 4 Places and the fix
 | Hide living people (`#hideliving`) | Move | Settings drawer, one switch, same semantics (`living` command to the reader) | 2 | S | Your file |
 | MyHeritage link, Ancestry site (`applyTreeLink`, `links`) | Move | Settings drawer (the canvas already owns the same `links` object); already travels in the six-word copy under `sites` | 2 | S | none |
 | Saved files ("kept on this device") | Move | One list on Your file and on the opening screen | 1 | S | none |
-| "Remember my decisions on this device" (`ra-fix-decisions-v1`) | Move, later | With the Fix list in phase 4; its own opt-in stays | 4 | M | Fix list |
+| "Remember my decisions on this device" (`ra-fix-decisions-v1`) | Prototype built | The Fix list workspace reads and writes the same store and keys as R&R, so a tick on one page shows on the other and the six words carry it; rows now carry a write time (last write wins, so an untick travels) | 4 | M | Fix list |
 | Research file export and import | Already on Connection & Backup | Link from Your file ("Keep your work"); no copy | 1 | S | none |
 | Offer places back to the Atlas (`contribute.js`) | Move, later | A step on the Places group, opt-in item by item as today | 4 | M | Places group |
 | Workbench edits (dates, notes, "may be the same person") | Move, later | The canvas's decisions (confirm / unlink) are the same idea; the overlay and its change log become part of Export | 4 | L | Export parity |
@@ -83,6 +83,7 @@ Phase: 0 inventory, 1 Your file, 2 Settings, 3 Tree lenses, 4 Places and the fix
   *As built (PR B):* the drawer is page-level, opened from the canvas menu, the opening screen and Your file. Living people is one switch with the reader's own rule explained (`/roots/`'s: no death recorded and born within 110 years, or no birth year); its default is unchanged (shown as the file gives them) and a chosen "hide" is remembered. The MyHeritage link and Ancestry site use the same `links` object as before and already travelled in the copy (`sites`). Look and "keep the last 3 files" were the canvas's own; the canvas's menu chips, Options box and tick are gone on the standalone page only (an archive's embedded canvas keeps them), leaving the eye button as the quick switch for the same living setting. Kept on this device as `ra-settings-v1` (written through to the canvas's older `loamTheme` and `tcRemember` keys, so earlier choices are honoured) and carried in the six-word copy as a `settings` section of three enumerated values; a value from another device only fills a choice this device has not made.
 - **Phase 3: Tree lenses.** A frame in the canvas that shows a view for the current selection (hourglass, fan, atlas map, movements, eras, timeline, surnames). Views the canvas already does are retired after a side-by-side. `/roots/` keeps working.
 - **Phase 4: Places and the fix list.** The canvas's Fix list gains R&R's grouping and Atlas help; places are picked in place; place picks go into Export's "Cleaned" mode.
+  - *Built so far (a prototype, PR open):* the full Fix list workspace (checklist, filters, paging, "Open next 10 people", saved decisions, a priority order with a High / Medium / Low chip, an Order and a Rows sort), the per-person Fix tab, and aligned person rows (also on /roots/). Not yet: places picked in place, and place picks in Export's "Cleaned" mode.
 - **Phase 5: Retire.** `/roots/` redirects to the canvas page; the archives' vendored template and kit are updated, one archive at a time, with the same checks.
 
 ## Compare in pairs, and what it does to phase 3

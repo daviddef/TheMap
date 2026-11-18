@@ -1,0 +1,51 @@
+/* The Fix list's rows (fixlist-rows.js), drawn on the Tree Canvas page and inside the canvas's side panel. ONE file, copied into the canvas build (a test checks the copies agree).
+   Everything is in --fx-* variables, set by the host: the page sets them on #fx, the canvas on #info. The fallbacks are the light colours. */
+.fx-row{--c-ink:var(--fx-ink,#2b2118);--c-soft:var(--fx-soft,#6a5a45);--c-line:var(--fx-line,#cdbf9f);--c-card:var(--fx-card,#fff7e8);--c-accent:var(--fx-accent,#d9822b);--c-ok:var(--fx-ok,#3f8f4a);--c-okfill:var(--fx-okfill,#e3f2e0);--c-focus:var(--fx-focus,#2b6cb0);--c-warn:var(--fx-warn,#d24b1f);
+  display:flex;align-items:flex-start;gap:10px;margin:8px 0;padding:10px 12px;border:1.5px solid var(--c-line);border-radius:10px;background:var(--c-card);color:var(--c-ink);font:400 14px/1.45 system-ui,sans-serif;text-align:left}
+.fx-row>input[type=checkbox]{flex:none;width:20px;height:20px;margin:2px 0 0;accent-color:var(--c-ok);cursor:pointer}
+.fx-row .fx-body{flex:1;min-width:0;display:grid;gap:5px}
+.fx-row.done{background:color-mix(in srgb,var(--c-card) 80%,var(--c-line));border-style:dashed}
+.fx-row.done .fx-body{opacity:.62;filter:grayscale(1)}
+.fx-row.done .fx-body::before{content:"✓ Done";font:800 11px/1.2 system-ui,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:var(--c-ok)}
+.fx-row.asis{border-style:dotted}.fx-row.asis .fx-body{opacity:.7}
+.fx-row.compact{padding:8px 9px;gap:8px;font-size:13px;margin:6px 0}
+.fx-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.fx-head>.fx-leave{margin-left:auto}
+.fx-swap{display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;min-width:0;overflow-wrap:anywhere}
+.fx-was{text-decoration:line-through;color:var(--c-soft)}.fx-was.plain{text-decoration:none;color:var(--c-ink);font-weight:700}
+.fx-arrow{color:var(--c-soft)}.fx-now{font-weight:800}
+.fx-acts2{display:inline-flex;flex-wrap:wrap;gap:6px}
+.fx-note,.fx-evs,.fx-next{margin:0;font-size:13px;color:var(--c-soft)}
+.fx-next{color:var(--c-ink)}.fx-next b{color:var(--c-warn)}
+.fx-small{font-size:13px;color:var(--c-soft)}.fx-muted{color:var(--c-soft)}
+.fx-reason{font-weight:700}
+.fx-q{display:inline-block;font-size:16px;line-height:1;cursor:help}
+.fx-pl{list-style:none;margin:0;padding:0;display:grid;gap:3px}.fx-pl.solo{display:inline-grid}
+.fx-p{display:grid;grid-template-columns:minmax(0,15em) 4.6em 5.4em 7.5em minmax(0,1fr);grid-template-areas:"n i e y a";align-items:center;column-gap:10px;min-width:0}
+.fx-pl.solo{display:grid}.fx-pl.solo .fx-p{grid-template-columns:auto auto auto auto auto;justify-content:start}
+.fx-pn{grid-area:n;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}.fx-pn a,.fx-p a.fx-name{color:inherit;text-decoration:underline;text-underline-offset:2px}.fx-pn a:hover{color:var(--c-accent)}
+.fx-pid{grid-area:i;font:700 11px/1 ui-monospace,Menlo,monospace;color:var(--c-soft);text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fx-ev{grid-area:e;font:700 12px/1.3 system-ui,sans-serif;color:var(--c-soft);white-space:nowrap}
+.fx-yr{grid-area:y;font:700 12px/1.3 system-ui,sans-serif;font-variant-numeric:tabular-nums;color:var(--c-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fx-ev.wide{grid-area:e/e/y/y;grid-column:3/5;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.fx-acts{grid-area:a;display:inline-flex;gap:4px;justify-self:end}
+.fx-row.compact .fx-p{grid-template-columns:4.2em 4.6em minmax(0,1fr) auto;grid-template-areas:"n n n a" "i e y y";row-gap:1px}
+.fx-row.compact .fx-ev.wide{grid-column:2/4}
+@media (max-width:700px){.fx-p{grid-template-columns:4.2em 4.6em minmax(0,1fr) auto;grid-template-areas:"n n n a" "i e y y";row-gap:1px}.fx-ev.wide{grid-column:2/4}}
+.fx-ib{display:inline-grid;place-items:center;width:26px;height:26px;padding:0;border:1.5px solid var(--c-line);border-radius:50%;background:transparent;color:var(--c-soft);cursor:pointer}
+.fx-ib svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.fx-ib:hover{color:var(--c-accent);border-color:var(--c-accent)}.fx-ib.ok{color:var(--c-ok);border-color:var(--c-ok)}
+.fx-cand,.fx-add,.fx-leave,.fx-link,.fx-openall{font:700 12.5px/1.2 system-ui,sans-serif;cursor:pointer}
+.fx-cand,.fx-add{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border:1.5px solid var(--c-line);border-radius:999px;background:transparent;color:var(--c-ink);max-width:100%}
+.fx-cand svg,.fx-add svg{width:13px;height:13px;flex:none;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.fx-cand span,.fx-add span{overflow-wrap:anywhere;text-align:left}
+.fx-cand:hover,.fx-add:hover{border-color:var(--c-accent);color:var(--c-accent)}.fx-cand.ok,.fx-add.ok{border-color:var(--c-ok);color:var(--c-ok)}
+.fx-leave,.fx-link{padding:2px 4px;border:0;background:transparent;color:var(--c-soft);text-decoration:underline;text-underline-offset:2px}
+.fx-leave:hover,.fx-link:hover{color:var(--c-accent)}
+.fx-cands{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.fx-reasons{margin:0;padding-left:18px;color:var(--c-soft);font-size:13px}.fx-reasons a{color:var(--c-ink)}
+.fx-notes{font-size:13px}.fx-notes>summary{cursor:pointer;color:var(--c-soft)}
+.fx-atl{margin:4px 0 0;padding-left:18px;color:var(--c-soft)}.fx-atl li.none{font-style:italic}.fx-atl a{color:var(--c-ink)}
+.fx-row button:focus-visible,.fx-row a:focus-visible,.fx-row input:focus-visible,.fx-row summary:focus-visible{outline:3px solid var(--c-focus);outline-offset:2px}
+@media (max-width:480px){.fx-row{padding:9px 8px;gap:8px}.fx-acts{margin-left:0}.fx-head>.fx-leave{margin-left:0}}
+.fx-row [hidden]{display:none!important}

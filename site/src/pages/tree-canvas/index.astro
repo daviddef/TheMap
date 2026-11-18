@@ -19,6 +19,7 @@ import { u } from "../../lib/url.js";
 <meta name="description" content="Draw your family tree from a GEDCOM or tree.json file on one canvas, with the Record Atlas's places, rulers and record collections for each person. Read in your browser, never uploaded.">
 <link rel="icon" href="/favicon.svg">
 <link rel="stylesheet" href="/tree-canvas/page.css">
+<link rel="stylesheet" href="/tree-canvas/fixrows.css">
 <script is:inline src="/tree-canvas/theme-boot.js"></script>
 </head>
 <body>
@@ -168,6 +169,41 @@ import { u } from "../../lib/url.js";
       </div>
       <p class="stsub" id="yfExpOff" hidden></p>
     </section>
+  </div>
+</main>
+<main id="fx" hidden aria-labelledby="fxTitle">
+  <div class="fxwrap">
+    <header class="fxhead">
+      <button type="button" class="stbtn" id="fx-back">← Back to the canvas</button>
+      <h1 id="fxTitle" tabindex="-1">Fix list</h1>
+      <p class="stsub" id="fx-sub"></p>
+      <div class="fxprog"><div class="fxbar" id="fx-bar" role="progressbar" aria-label="Fix list progress" aria-valuemin="0" aria-valuemax="100"><i></i></div><span id="fx-prog" role="status"></span></div>
+      <p class="stsub" id="fx-hint" hidden>Names are plain text for now. Add your MyHeritage tree link in <button type="button" class="stlink" id="fx-settings">Settings</button> and each person in your file becomes a link to their profile.</p>
+    </header>
+
+    <section class="fxtools" aria-label="Filter the fix list">
+      <label class="fxf fxq"><span>Search by name</span><input type="search" id="fx-q" autocomplete="off" spellcheck="false" placeholder="a name, a place, a reason"></label>
+      <label class="fxf"><span>Show</span><select id="fx-mode"><option value="open">Still to do</option><option value="done">Done</option><option value="asis">Left as is</option><option value="all">Everything</option></select></label>
+      <label class="fxf"><span>Group</span><select id="fx-grp"><option value="">Every group</option></select></label>
+      <label class="fxf"><span>Order</span><select id="fx-order"></select></label>
+      <label class="fxf"><span>Rows</span><select id="fx-rows"></select></label>
+      <div class="fxbtns"><button type="button" class="stbtn" id="fx-expand">Open all sections</button><button type="button" class="stbtn" id="fx-collapse">Close all</button></div>
+      <label class="fxck"><input type="checkbox" id="fx-fold"><span>Fold the Atlas notes</span></label>
+      <p class="fxwho" id="fx-who" hidden><span></span> <button type="button" class="stlink" id="fx-whoX">Show everyone</button></p>
+    </section>
+
+    <section class="fxkeep" aria-label="Keeping your decisions">
+      <label class="fxck"><input type="checkbox" id="fx-keepon"><span><b>Remember my decisions on this device</b></span></label>
+      <p class="stsub fxsaved" id="fx-saved" role="status"></p>
+      <div class="fxbtns">
+        <button type="button" class="stbtn" id="fx-save">Save decisions to a file</button><button type="button" class="stbtn" id="fx-load">Load decisions from a file</button><button type="button" class="stbtn" id="fx-forget">Forget them</button>
+        <button type="button" class="stbtn" id="fx-txt">Text</button><button type="button" class="stbtn" id="fx-csv">Spreadsheet</button><button type="button" class="stbtn" id="fx-pdf">PDF</button>
+        <input type="file" id="fx-file" accept=".json,application/json" hidden>
+      </div>
+    </section>
+
+    <p class="stsub" id="fx-empty" hidden>Nothing to fix: the reader found nothing in this file that needs a correction.</p>
+    <div id="fx-body"></div>
   </div>
 </main>
 <aside id="sg" hidden role="dialog" aria-modal="true" aria-labelledby="sgTitle">

@@ -34,6 +34,12 @@ import { u } from "../../lib/url.js";
       <p class="stlead">Draw a family tree on one canvas, with the Atlas's places and records for each person. Your file is read in this browser and never uploaded.</p>
     </header>
 
+    <section id="stCur" class="stcard stcur" hidden aria-labelledby="stCurTitle">
+      <h2 id="stCurTitle">Your file is open</h2>
+      <p class="stsub" id="stCurWhat"></p>
+      <div class="stcurbtns"><button type="button" class="stbtn primary" id="stCurBack">Back to the canvas</button><button type="button" class="stbtn" id="stCurFile">Your file: numbers, report, export</button></div>
+    </section>
+
     <section id="stDrop" class="stcard stdrop" aria-labelledby="stDropTitle">
       <h2 id="stDropTitle">Open a file</h2>
       <p class="stsub">Drop it anywhere on this page, or choose it from your device. A <b>GEDCOM</b> (the industry standard) or a <b>tree.json</b> (our own format; <a href="/tree-canvas/publish/#format">what is in it</a>).</p>
@@ -96,6 +102,70 @@ import { u } from "../../lib/url.js";
   </div>
 </main>
 <iframe id="cv" title="Tree Canvas, drawn from your file" hidden></iframe>
+<main id="yf" hidden aria-labelledby="yfTitle">
+  <div class="yfwrap">
+    <header class="yfhead">
+      <button type="button" class="stbtn" id="yfBack">← Back to the canvas</button>
+      <h1 id="yfTitle" tabindex="-1">Your file</h1>
+      <p class="stsub" id="yfWhat"></p>
+    </header>
+
+    <section class="yfsec" aria-labelledby="yfGlanceT">
+      <h2 id="yfGlanceT">At a glance</h2>
+      <div class="yfmet" id="yfMetrics"></div>
+      <p class="stsub" id="yfMetNote"></p>
+    </section>
+
+    <section class="yfsec" aria-labelledby="yfRepT">
+      <h2 id="yfRepT">What was read</h2>
+      <div id="yfReport" class="yfreport"></div>
+    </section>
+
+    <section class="yfsec" aria-labelledby="yfKeepT">
+      <h2 id="yfKeepT">Keeping your work</h2>
+      <a id="yfKeepBtn" class="stkeep" href={u("/backup/#canvas")} target="_blank" rel="noopener" aria-describedby="yfKeepSt">
+        <span class="stdisc" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M5 3h11l4 4v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M7 3v5h8V3M7 21v-7h10v7"/></svg></span>
+        <span class="stkcap"><b>Keep your work</b><small id="yfKeepSt">Saved in this browser. Six words keep it on every device: no email, no account.</small></span>
+      </a>
+      <p class="stsub">Where the cards sit, per tree. Never the file itself.</p>
+    </section>
+
+    <section class="yfsec" aria-labelledby="yfFilesT">
+      <h2 id="yfFilesT">Files and canvases on this device</h2>
+      <div id="yfWork" hidden>
+        <h3>Saved canvases</h3>
+        <ul id="yfWorkList" class="stlist"></ul>
+      </div>
+      <div id="yfRecent" hidden>
+        <h3>Last used</h3>
+        <ul id="yfList"></ul>
+        <p class="stsub">Kept in this browser only. <button type="button" class="stlink" id="yfForget">Forget them all</button></p>
+      </div>
+      <p class="stsub" id="yfNoFiles" hidden>Nothing is kept on this device yet.</p>
+    </section>
+
+    <section class="yfsec" id="yfExp" aria-labelledby="yfExpT">
+      <h2 id="yfExpT">Export your GEDCOM, improved</h2>
+      <div id="yfExpOn">
+        <p class="stsub">Your own file, line for line, with only the changes you choose. Nothing is dropped or rewritten without being listed in a change log, and nothing leaves this page: the new file is made here and saved by your browser.</p>
+        <fieldset id="yfMode" class="yfmodes">
+          <legend>What to change</legend>
+          <label><input type="radio" name="yfxm" value="enriched" checked> <span><b>Enriched</b> · adds coordinates and an Atlas id under each place that was matched exactly or that you picked. No existing line is changed. The safest choice.</span></label>
+          <label><input type="radio" name="yfxm" value="cleaned"> <span><b>Cleaned</b> · as enriched, and the places you picked on the review screen replace the old place text (the old text is kept beside it).</span></label>
+          <label><input type="radio" name="yfxm" value="shareable"> <span><b>Shareable</b> · as cleaned, and living people are reduced to a bare “Living” record, their family events removed, so you can send it to a relative. Read the change log: a living person named in a way we cannot recognise stays.</span></label>
+          <label><input type="radio" name="yfxm" value="faithful"> <span><b>No changes</b> · your file again, as it was.</span></label>
+        </fieldset>
+        <p class="stsub">Places are picked on the Places to review screen in Roots &amp; Routes, which this page does not have yet. Until you pick any there, Cleaned changes nothing more than Enriched.</p>
+        <p><button type="button" class="stbtn primary" id="yfGo">Make the file</button> <span id="yfBusy" class="stsub" hidden>Working…</span></p>
+        <div id="yfOut" hidden>
+          <p id="yfSum" class="stmsg" role="status"></p>
+          <p class="yfdl"><a id="yfFile" class="stbtn" download>Download the GEDCOM</a> <a id="yfLog" download>Download the change log</a></p>
+        </div>
+      </div>
+      <p class="stsub" id="yfExpOff" hidden></p>
+    </section>
+  </div>
+</main>
 <p id="msg" role="status" aria-live="polite" hidden></p>
 <div id="keepNote" class="knote" role="status" aria-live="polite" hidden><span id="knText"></span><span id="knBtns"></span><button type="button" id="knX" class="knx" aria-label="Dismiss">×</button></div>
 <noscript><p class="nojs">The Tree Canvas needs JavaScript to read your file in this browser. Nothing is uploaded. <a href="/">Back to Record Atlas</a></p></noscript>

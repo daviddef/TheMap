@@ -222,6 +222,7 @@
     if (isView) {
       out.tk = cs.tk; out.name = typeof it.name === "string" ? it.name.replace(/<[^>]*>/g, " ").replace(/[\u0000-\u001f\u007f<>]/g, " ").replace(/\s+/g, " ").trim().slice(0, 60) : "";
       if (!out.name) out.name = "My view";
+      if (typeof it.note === "string") { var nt = it.note.replace(/<[^>]*>/g, " ").replace(/[\u0000-\u001f\u007f<>]/g, " ").replace(/\s+/g, " ").trim().slice(0, 120); if (nt) out.note = nt; }
       if (CANVAS_LOOKS.indexOf(w.look) >= 0) out.w.look = w.look;
     }
     return JSON.stringify(out).length <= CANVAS_ITEM_CHARS ? out : null;

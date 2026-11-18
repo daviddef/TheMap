@@ -309,7 +309,7 @@ test("blocker 4: the cap says how many decisions it leaves out of the six-word c
 });
 test("blocker 1: a kept file has a Fix list button that opens it on the Fix list, and the start screen shows the saved fix line", () => {
   assert.match(html, /id="stFixSaved"[^>]*hidden/); assert.match(html, /id="stFixTxt"/); assert.match(html, /\/my-research\/#fixes/);
-  assert.match(app, /fx\.textContent = 'Fix list'/); assert.match(app, /fx\.onclick = go\('fix'\)/); assert.match(app, /b\.onclick = go\(null\)/);
+  assert.match(app, /btn\('trbtn', 'Fix list'[^]*openKept\(r, 'fix'\)/); assert.match(app, /reopen\(g, null\)/); assert.match(app, /g\.kept \? openKept\(g\.kept, to\)/, "the card opens its kept file; the Fix list button opens it on the Fix list");
   assert.match(app, /function start\(bytes, name, via, link, to\)[^]*openTo = to \|\| null/);
   assert.match(app, /fixRefresh\(true\);\n\s*if \(openTo === 'fix'\) \{ openTo = null; openFX\(null\); \}/, "the Fix list opens when the reader's list arrives");
   assert.match(app, /if \(r\.from !== 'tree\.json'\)/, "a tree.json has no Fix list");

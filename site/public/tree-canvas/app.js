@@ -332,6 +332,7 @@ addEventListener('message', e => {
   if (d.tcRestored) { onRestored(d.tcRestored); return; }
   if (d.tcHome) { flushWork(); $('#cv').hidden = true; showStart(); return; }   // the canvas's folder button: back to the opening screen (the canvas keeps its own state)
   if (d.tcCompare !== undefined && !d.tcOpen) { const q = d.tcCompare || {}; compareWith(Array.isArray(q.keys) ? q.keys : q.key ? [q.key] : null, q.mark); return; }
+  if (typeof d.tcLookSet === 'string' && ST.LOOKS.includes(d.tcLookSet)) { lookSet(d.tcLookSet); return; }   // the canvas's Look button
   if (d.tcOpen && d.tcOpen.bytes instanceof ArrayBuffer) { example = false; start(d.tcOpen.bytes, d.tcOpen.name); }
   else if (typeof d.tcLiving === 'boolean') setLiving(d.tcLiving);   // the canvas's eye button: the same setting as in Settings
 });
@@ -464,9 +465,22 @@ addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#sg').hidden) {
 $('#sgLiv').onchange = e => setLiving(e.target.checked);
 $('#sgMh').oninput = e => { $('#sgMhSt').textContent = links.set(e.target.value) || (e.target.value.trim() ? '' : 'Off: no link yet.'); };
 $('#sgAnc').onchange = e => { links.setSite(e.target.value); drawSG(); };
+/* the look, worn by the page around the canvas (Ground is dark, the other looks light, Automatic follows the device) and handed to the canvas. One function for the drawer, a setting that
+   arrived from another device, and the canvas's own Look button, so the three cannot disagree. */
+function wearLook(look) {
+  const s = ST.shellScheme(look), r = document.documentElement;
+  if (s) r.setAttribute('data-theme', s); else r.removeAttribute('data-theme');
+  const f = $('#cv'); if (f && f.contentWindow && !f.hidden) f.contentWindow.postMessage({ tcLook: look }, location.origin);
+}
+/* the canvas's Look button asked for the next look: keep it like the drawer does, wear it, and say so if this browser would not keep it */
+function lookSet(look) {
+  sgWriteFailed = !ST.write({ look }).ok; wearLook(look);
+  if (sgWriteFailed) { say('This browser is not letting the page keep the look, so it lasts until you close the page.'); setTimeout(() => say(''), 5000); }
+  if (!$('#sg').hidden) drawSG();
+}
 $('#sgLook').onchange = e => {
   sgWriteFailed = !ST.write({ look: e.target.value }).ok;
-  const f = $('#cv'); if (f && f.contentWindow && !f.hidden) f.contentWindow.postMessage({ tcLook: e.target.value }, location.origin);
+  wearLook(e.target.value);
   drawSG();
 };
 $('#sgRem').onchange = async e => {
@@ -478,7 +492,7 @@ $('#sgRem').onchange = async e => {
 function onSettingsChanged() {
   const e = ST.effective();
   if (e.living !== hide) { if (worker && window.RR) setLiving(e.living); else hide = e.living; }
-  const f = $('#cv'); if (f && f.contentWindow && !f.hidden) f.contentWindow.postMessage({ tcLook: e.look }, location.origin);
+  wearLook(e.look);
   drawLists(); renderSaved(); if (!$('#sg').hidden) drawSG();
 }
 document.addEventListener('ra-settings-changed', onSettingsChanged);

@@ -1,9 +1,11 @@
 ---
+import { u } from "../../lib/url.js";
 /* The Tree Canvas on its own: recordatlas.org/tree-canvas/. The same canvas that is the first tab of Roots & Routes, with "brought to you by Record
    Atlas" in its title and an "Open GEDCOM" button on the right. It is not the Base layout (which carries a counter, an ad slot and Google Fonts) for
    the same reason /roots/ is not: the file never leaves the device, and the meta CSP below is the browser enforcing that. The page around the
    canvas (public/tree-canvas/app.js) reads the file with the roots page's own reader (public/roots/js/worker.js) and hands the tree to the canvas
-   in memory, as /roots/ does; nothing is stored. */
+   in memory, as /roots/ does. What is kept is where the cards sit, per tree (public/tree-canvas/work.js): in this browser, and in the six-word copy if the visitor turned it
+   on at Connection & Backup. Never the file. */
 ---
 <!doctype html>
 <html lang="en">
@@ -67,6 +69,19 @@
       <p class="stsub">Each family archive's published tree, with its living people left out. Or <button type="button" class="stlink" id="stDemo">draw an invented family</button> to see how it works.</p>
     </section>
 
+    <section id="stKeep" class="stplain" aria-labelledby="stKeepTitle">
+      <a id="stKeepBtn" class="stkeep" href={u("/backup/#canvas")} target="_blank" rel="noopener" aria-describedby="stKeepSt">
+        <span class="stdisc" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M5 3h11l4 4v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M7 3v5h8V3M7 21v-7h10v7"/></svg></span>
+        <span class="stkcap"><b id="stKeepTitle">Keep your work</b><small id="stKeepSt">Saved in this browser. Six words keep it on every device: no email, no account.</small></span>
+      </a>
+    </section>
+
+    <section id="stWork" class="stplain" hidden aria-labelledby="stWorkTitle">
+      <h2 id="stWorkTitle">Your saved canvases</h2>
+      <ul id="stWorkList" class="stlist"></ul>
+      <p class="stsub">Only where the cards sit is kept, never the file. A file from your device is matched when you open it again.</p>
+    </section>
+
     <section id="stRecent" class="stplain" hidden aria-labelledby="stRecTitle">
       <h2 id="stRecTitle">Last used</h2>
       <ul id="stList"></ul>
@@ -82,7 +97,9 @@
 </main>
 <iframe id="cv" title="Tree Canvas, drawn from your file" hidden></iframe>
 <p id="msg" role="status" aria-live="polite" hidden></p>
+<div id="keepNote" class="knote" role="status" aria-live="polite" hidden><span id="knText"></span><span id="knBtns"></span><button type="button" id="knX" class="knx" aria-label="Dismiss">×</button></div>
 <noscript><p class="nojs">The Tree Canvas needs JavaScript to read your file in this browser. Nothing is uploaded. <a href="/">Back to Record Atlas</a></p></noscript>
+<script is:inline src="/js/conn.js"></script>
 <script is:inline src="/tree-canvas/app.js" type="module"></script>
 </body>
 </html>

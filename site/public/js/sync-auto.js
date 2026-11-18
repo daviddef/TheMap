@@ -16,7 +16,7 @@
 (function (root) {
   "use strict";
   var KEY = "ra-sync-v1", FP = "ra-sync-fp", NOTE = "ra-sync-note";
-  var WATCH = ["ra-progress-v1", "ra-fix-decisions-v1", "ra-areas-v1", "ra-gedcom-names-v1", "ra-stories-v1",
+  var WATCH = ["ra-progress-v1", "ra-fix-decisions-v1", "ra-areas-v1", "ra-gedcom-names-v1", "ra-stories-v1", "ra-canvas-v1",
     "recordatlas.roots.myheritage-link", "recordatlas.roots.ancestry-site", "recordatlas.roots.myheritage-trees"];
   var QUIET_MS = 15000, WATCH_MS = 20000, PULL_MS = 60000;
 
@@ -70,16 +70,28 @@
           document.dispatchEvent(new CustomEvent("ra-progress-changed"));
         }
         if (!p.push) { wr(FP, now()); backoff = 0; done({ ok: true, saved: false, merged: merged }); return; }
-        var out = RF.exportAll();
-        return SY.push(k, out.text, opts).then(function (r2) {
+        var out = RF.exportAll(), left = false;
+        /* The server refuses a copy over 2 MB. The Tree Canvas's saved work is the part we added, so if the copy is too large it is the part that is left out
+           (it stays in this browser) and the research is saved as before; the Tree Canvas says so. */
+        return SY.push(k, out.text, opts).catch(function (e) {
+          if (!/too large/i.test(e && e.message || "") || !out.file.canvas) throw e;
+          left = true; return SY.push(k, RF.exportAll({ canvas: false }).text, opts);
+        }).then(function (r2) {
           var cur = state() || st; cur.saved = r2.saved; wr(KEY, JSON.stringify(cur)); wr(FP, now()); RF.noteBackup("sync");
-          document.dispatchEvent(new CustomEvent("ra-conn-refresh")); backoff = 0; done({ ok: true, saved: true, merged: merged });
+          var cn = canvasNote(out.file, left); wr("ra-canvas-sync", cn);
+          document.dispatchEvent(new CustomEvent("ra-conn-refresh")); backoff = 0; done({ ok: true, saved: true, merged: merged, canvas: cn });
         });
       });
     }).catch(function (e) { backoff = Math.min((backoff || 30000) * 2, 600000); done({ ok: false, message: e && e.message || "Could not reach the online copy." }); })
       .then(function () { busy = false; });
   }
 
+  /* what became of the Tree Canvas's saved work in the copy just saved: "all" of it, "capped" (the newest fit, older ones stay in this browser) or "left-out" (none fit) */
+  function canvasNote(file, left) {
+    if (left) return "left-out";
+    var local = 0; try { local = Object.keys((JSON.parse(rd("ra-canvas-v1")) || {}).items || {}).length; } catch (e) { local = 0; }
+    return (file && file.canvas ? Object.keys(file.canvas.items).length : 0) < local ? "capped" : "all";
+  }
   function later(ms) { clearTimeout(quiet); if (state()) quiet = setTimeout(function () { pass(true); }, Math.max(ms, backoff)); }
   function changedNow() { var st = state(); return !!st && (!st.saved || now() !== rd(FP)); }
 

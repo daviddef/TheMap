@@ -7,7 +7,8 @@ import { issuesByPerson } from '/roots/js/checklist.js';
 import { parseLink, profileUrl, treeUrl } from '/roots/js/myheritage.js';
 import { personUrl } from '/roots/js/ancestry.js';
 import { loadTrees, saveTreeLink, loadSite, saveSite } from '/roots/js/remember.js';
-import { parseLink as parseFileLink, fetchBytes, fileNameOf } from '/roots/js/openlink.js';   // (parseLink above is the MyHeritage one)
+import { parseLink as parseFileLink, fetchBytes, fileNameOf } from '/roots/js/openlink.js';
+import * as W from '/tree-canvas/work.js';   // (parseLink above is the MyHeritage one)
 
 const $ = s => document.querySelector(s);
 const base = new URL('/roots/', location.href).href;   // the reader fetches its place files relative to this, as it does on /roots/
@@ -49,6 +50,110 @@ function applyTreeLink() {
 
 function say(text, isError) { const m = $('#msg'); m.textContent = text; m.hidden = !text; m.classList.toggle('err', !!isError); }
 
+/* ---- keeping the visitor's work. Per tree (the link it was opened from, the archive, or the file's name, size and people), the canvas's arrangement is kept in this
+   browser (work.js says what, and why it holds no name) and, when the visitor has turned on the six words on the Connection & Backup page, the same records go into the
+   encrypted copy that page keeps (public/js/research-file.js carries them; public/js/sync-auto.js saves them). The tree file itself is never in either. The canvas
+   (in the iframe) hands its state to this page in memory; this page keeps it, and hands the saved arrangement back when the same tree is opened again. ---- */
+const BACKUP = '/backup/#canvas';
+let cur = null, wt = 0, noteT = 0, syncFailed = false;      // cur: {key, src, label, loadedUpd, plain, dirty, saw, paused, cmp}
+const syncState = () => { let st = null; try { st = JSON.parse(localStorage.getItem('ra-sync-v1')); } catch (e) { /* none */ } let c = null; try { c = localStorage.getItem('ra-canvas-sync'); } catch (e) { /* none */ }
+  return { on: !!(st && st.phrase), saved: st && st.saved || null, failed: syncFailed, canvas: c }; };
+const keepStatus = () => W.keepStatus(syncState(), cur ? W.get(cur.key) : null);
+function setCur(src, label) {
+  flushWork();
+  const key = W.treeKey(src);
+  cur = key ? { key, src: W.cleanSrc(src), label: label || '', loadedUpd: (W.get(key) || {}).upd || '', plain: null, dirty: false, saw: false, paused: false, cmp: false } : null;
+}
+/* what the canvas is handed when it is drawn: this tree's saved arrangement (if any) and a few words for its menu. The Compare view is not kept. */
+function attachKeep() {
+  if (!window.RR) return;
+  const c = cur && !cur.cmp ? cur : null, rec = c ? W.get(c.key) : null, key = c ? c.key : null;
+  window.RR.work = rec ? rec.w : null;
+  window.RR.keep = c ? { status: keepStatus, unpack: (known, bridges) => rec ? W.unpack(rec.w, key, known, bridges) : null, href: BACKUP } : null;
+  if (c) { c.saw = false; c.dirty = false; }
+}
+function onWork(plain) {
+  if (!cur || cur.cmp || !plain || !Array.isArray(plain.cards)) return;
+  cur.plain = plain; cur.dirty = true; if (plain.cards.length) cur.saw = true;
+  if (cur.paused) return;
+  clearTimeout(wt); wt = setTimeout(flushWork, 1000);
+}
+function flushWork() {
+  clearTimeout(wt); const c = cur;
+  if (!c || !c.dirty || c.paused || !c.plain) return;
+  c.dirty = false;
+  if (!c.plain.cards.length) { if (c.saw) { W.remove(c.key); c.loadedUpd = ''; c.saw = false; } }      // cleared on purpose: the saved one goes too (an empty canvas at start-up changes nothing)
+  else {
+    const rec = W.makeRecord(c.src, c.label, c.plain), old = rec && W.get(rec.k);
+    if (old && old.label === rec.label && JSON.stringify(old.w) === JSON.stringify(rec.w)) { c.loadedUpd = old.upd; return; }   // opening a tree and changing nothing is not a new save
+    if (rec && W.put(rec)) c.loadedUpd = rec.upd; else { note('This browser would not keep your canvas (its storage is blocked or full).', []); return; }
+  }
+  document.dispatchEvent(new CustomEvent('ra-progress-changed'));   // sync-auto.js: save online about 15 seconds after the last change
+  renderKeep();
+}
+/* the line at the bottom of the page: a sentence and up to two buttons */
+function note(text, actions, ms) {
+  const n = $('#keepNote'); if (!n) return; clearTimeout(noteT);
+  $('#knText').textContent = text; const box = $('#knBtns'); box.textContent = '';
+  for (const a of actions || []) { const b = document.createElement('button'); b.type = 'button'; b.textContent = a.label; b.onclick = () => { n.hidden = true; a.fn(); }; box.append(b); }
+  n.hidden = !text; if (ms) noteT = setTimeout(() => { n.hidden = true; }, ms);
+}
+$('#knX').onclick = () => { $('#keepNote').hidden = true; };
+function startFresh() {
+  if (!cur) return;
+  W.remove(cur.key); cur.loadedUpd = ''; cur.saw = false; cur.dirty = false; cur.plain = null; attachKeep();
+  if ($('#cv') && !$('#cv').hidden) mount();
+  note('Started fresh. The saved canvas for this tree was removed' + (syncState().on ? ', and from your six-word copy' : '') + '.', [], 9000);
+  document.dispatchEvent(new CustomEvent('ra-progress-changed')); renderKeep();
+}
+function onRestored(r) {
+  if (!cur || cur.cmp || !r || !(r.of > 0)) return;
+  if (r.n > 0) { cur.saw = true; note('Your saved canvas came back: ' + r.n.toLocaleString('en') + (r.n === 1 ? ' person' : ' people') + ', where you left them.', [{ label: 'Start fresh', fn: startFresh }], 20000); }
+  else note('You have a saved canvas for this tree, but none of its people are in this file, so nothing was brought back. It is kept; nothing was changed.', [], 14000);
+}
+/* another device (or another tab) saved a newer canvas for this tree: never replace it with an older one without saying so */
+function checkNewer() {
+  if (!cur || cur.cmp || cur.paused) return;
+  const rec = W.get(cur.key); if (!rec || !(rec.upd > (cur.loadedUpd || ''))) return;
+  cur.paused = true;
+  note('A newer canvas for this tree was saved elsewhere (' + W.agoText(rec.upd) + '). Your changes here are held until you choose.', [
+    { label: 'Use the newer one', fn: () => { cur.paused = false; cur.loadedUpd = rec.upd; cur.dirty = false; attachKeep(); mount(); } },
+    { label: 'Keep mine', fn: () => { cur.paused = false; cur.dirty = !!cur.plain; flushWork(); } }]);
+}
+function renderKeep() {
+  const st = W.keepStatus(syncState(), null), t = $('#stKeepSt'); if (t) t.textContent = st.text;
+  const b = $('#stKeepBtn'); if (b) b.classList.toggle('on', st.on && !syncFailed);
+  const f = $('#cv'); if (f && f.contentWindow && !f.hidden) f.contentWindow.postMessage({ tcKeep: 1 }, location.origin);
+}
+function savedWhere(r) { return r.src.t === 'link' ? 'from a link' : r.src.t === 'archive' ? 'an archive' : 'from a file on this device'; }
+async function renderSaved() {
+  const recs = W.list(), box = $('#stWork'), ul = $('#stWorkList'); if (!box) return; ul.textContent = ''; box.hidden = !recs.length;
+  let kept = []; try { kept = rememberOn() ? await recentList() : []; } catch (e) { kept = []; }
+  for (const r of recs) {
+    const li = document.createElement('li'), b = document.createElement('button'), n = document.createElement('b'), sm = document.createElement('small');
+    b.type = 'button'; b.className = 'recopen'; n.textContent = r.label || 'A saved canvas';
+    const onDevice = r.src.t === 'file' && !kept.some(k => k.name === r.src.ref);
+    sm.textContent = [r.n.toLocaleString('en') + (r.n === 1 ? ' person' : ' people') + ' on the canvas', savedWhere(r), 'saved ' + W.agoText(r.upd), onDevice ? 'open the same file to bring it back' : ''].filter(Boolean).join(' · ');
+    b.append(n, sm);
+    b.onclick = async () => {
+      if (r.src.t === 'archive') return openArchive(r.src.ref);
+      if (r.src.t === 'link') { $('#stUrl').value = r.src.ref; return openLink(r.src.ref); }
+      const k = kept.find(x => x.name === r.src.ref);
+      if (k) { try { const db = await rdb(), bytes = await rreq(db.transaction('b').objectStore('b').get(k.name)); db.close(); if (bytes) { example = false; start(bytes, k.name); return; } } catch (e) { /* fall through to the picker */ } }
+      linkMsg('Choose ' + r.src.ref + ' to bring this canvas back. It is matched by its name, size and number of people.'); $('#stFile').click();
+    };
+    li.append(b); ul.append(li);
+  }
+}
+document.addEventListener('ra-canvas-changed', () => { checkNewer(); renderSaved(); renderKeep(); });
+document.addEventListener('ra-sync-done', e => { syncFailed = !(e.detail && e.detail.ok); renderKeep(); });
+addEventListener('storage', e => {
+  if (e.key === 'ra-canvas-v1') { checkNewer(); renderSaved(); }
+  if (e.key === 'ra-sync-v1') { document.dispatchEvent(new CustomEvent('ra-conn-refresh')); renderKeep(); }   // the six words were turned on (or off) in another tab: conn.js then loads the sync
+});
+addEventListener('pagehide', flushWork);
+document.addEventListener('visibilitychange', () => { if (document.hidden) flushWork(); });
+
 function mount() {
   const old = $('#cv'), f = document.createElement('iframe');
   f.id = 'cv'; f.title = old.title;
@@ -59,9 +164,10 @@ function mount() {
 let curName = null, curHead = null, curVia = null;   // curVia: the site a file was fetched from, when it came from a link
 /* A Roots & Routes tree.json is JSON; a GEDCOM never starts with a brace. Told apart by the first character, not the name, so a renamed file still opens. */
 const isTreeJson = bytes => { try { return /^\uFEFF?\s*\{/.test(new TextDecoder('utf-8').decode(new Uint8Array(bytes, 0, Math.min(64, bytes.byteLength)))); } catch (e) { return false; } };
-function start(bytes, name, via) {
+let curLink = null, curSize = 0;   // the address a file was fetched from (if it was), and the file's size
+function start(bytes, name, via, link) {
   const json = isTreeJson(bytes);
-  curName = name || null; curVia = via || null; curHead = name && !json ? headInfo(bytes) : (json ? { from: 'tree.json', tree: '' } : null);
+  curName = name || null; curVia = via || null; curLink = link || null; curSize = bytes.byteLength; curHead = name && !json ? headInfo(bytes) : (json ? { from: 'tree.json', tree: '' } : null);
   if (curVia && curHead) curHead = { ...curHead, from: curVia };   // the last-used list says where a file came from
   $('#start').hidden = true; say('Reading your file…');
   if (worker) worker.terminate();
@@ -80,6 +186,9 @@ function start(bytes, name, via) {
       const prevMh = mhFile; mhFile = m.mh || null; anc = m.anc || null;
       if (!prevMh || !mhFile || prevMh.guid !== mhFile.guid) { mhc = null; mhText = ''; mhNote = ''; applyTreeLink(); }   // a different tree: start from what is remembered or known for it
       window.RR = { tree: m.tree, atlas: m.atlas, loadNames, links };
+      if (m.first || !cur) { const ppl = m.report && m.report.people && m.report.people.individuals | 0; setCur(example ? null : curLink ? { t: 'link', ref: curLink } : curName ? { t: 'file', ref: curName, size: curSize, people: ppl } : null, curLink ? W.linkLabel(curLink) : curName); }
+      else flushWork();
+      attachKeep();
       if (curName && m.report && m.report.people) recentMeta(curName, { people: m.report.people.individuals, from: curHead ? curHead.from : '', tree: curHead ? curHead.tree : '' });
       say(''); mount();
       /* where it came from (a link) and what was left out of a tree.json, in the visitor's words; it clears itself, the canvas keeps the screen */
@@ -142,6 +251,7 @@ async function openArchive(key) {
     const f = await fetchArchive(key);
     mhFile = null; mhc = null; anc = null;
     window.RR = { tree: f.tree, atlas: f.atlas, loadNames, links, archive: f.archive };
+    setCur({ t: 'archive', ref: key }, a.name + ' archive'); attachKeep();
     if (f.lines) { window.RR.lines = f.lines; window.RR.linesArch = key; }
     /* ?p=<slug>: an archive's link to one person's page; the canvas puts that person on and selects them (only a plain slug is passed on) */
     { const pp = new URLSearchParams(location.search).get('p'); if (pp && /^[a-z0-9-]{1,120}$/.test(pp)) window.RR.carryPerson = pp; }
@@ -154,18 +264,21 @@ async function openArchive(key) {
 async function compareWith(key, mark) {
   if (!window.RR) return;
   if (key && !ARCH[key]) return;
-  if (!key) { delete window.RR.compare; window.RR.carryMark = mark || null; window.RR.carryTab = 'compare'; mount(); return; }
+  flushWork(); if (cur) cur.cmp = !!key;   // the Compare view is not kept; the file's own canvas comes back when it stops
+  if (!key) { delete window.RR.compare; window.RR.carryMark = mark || null; window.RR.carryTab = 'compare'; attachKeep(); mount(); return; }
   say('Reading the ' + ARCH[key].name + ' archive…');
   try {
     const f = await fetchArchive(key);
     window.RR.compare = { tree: f.tree, atlas: f.atlas, archive: f.archive }; window.RR.carryMark = mark || null; window.RR.carryTab = 'compare';
-    say(''); mount();
-  } catch (err) { say('The ' + ARCH[key].name + ' archive could not be read just now (' + (err && err.message || 'error') + '). Your canvas is unchanged.', true); setTimeout(() => say(''), 6000); }
+    attachKeep(); say(''); mount();
+  } catch (err) { if (cur) cur.cmp = false; say('The ' + ARCH[key].name + ' archive could not be read just now (' + (err && err.message || 'error') + '). Your canvas is unchanged.', true); setTimeout(() => say(''), 6000); }
 }
 addEventListener('message', e => {
   if (e.origin !== location.origin) return;   // only the canvas, which is this site's own page
   const d = e.data || {};
-  if (d.tcHome) { $('#cv').hidden = true; showStart(); return; }   // the canvas's folder button: back to the opening screen (the canvas keeps its own state)
+  if (d.tcWork) { onWork(d.tcWork); return; }
+  if (d.tcRestored) { onRestored(d.tcRestored); return; }
+  if (d.tcHome) { flushWork(); $('#cv').hidden = true; showStart(); return; }   // the canvas's folder button: back to the opening screen (the canvas keeps its own state)
   if (d.tcCompare !== undefined && !d.tcOpen) { compareWith(d.tcCompare && d.tcCompare.key, d.tcCompare && d.tcCompare.mark); return; }
   if (d.tcOpen && d.tcOpen.bytes instanceof ArrayBuffer) { example = false; start(d.tcOpen.bytes, d.tcOpen.name); }
   else if (typeof d.tcLiving === 'boolean') {
@@ -220,7 +333,7 @@ async function recentForget(name) {
 const fmtBytes = n => n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + ' MB' : Math.max(1, Math.round(n / 1e3)) + ' KB';
 const fmtWhen = t => { const d = new Date(t), same = d.toDateString() === new Date().toDateString(); return same ? 'today ' + d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : d.toLocaleDateString([], { day: 'numeric', month: 'short' }); };
 async function showStart() {
-  say(''); $('#start').hidden = false;
+  say(''); $('#start').hidden = false; renderKeep(); renderSaved();
   const rec = rememberOn() ? await recentList() : [], ul = $('#stList'); ul.textContent = '';
   $('#stRecent').hidden = !rec.length;
   for (const r of rec) {
@@ -237,7 +350,7 @@ async function showStart() {
       b.replaceWith(inp); inp.focus(); inp.select();
     };
     b.onclick = async () => {
-      try { const db = await rdb(), bytes = await rreq(db.transaction('b').objectStore('b').get(r.name)); db.close(); if (!bytes) throw 0; example = false; recentSave(r.name, bytes.slice(0)); start(bytes, r.name); }
+      try { const db = await rdb(), bytes = await rreq(db.transaction('b').objectStore('b').get(r.name)); db.close(); if (!bytes) throw 0; example = false; recentSave(r.name, bytes.slice(0)); start(bytes, r.name, undefined, r.url); }
       catch (e) { say('That file is no longer kept here. Open it again from your device.', true); await recentForget(r.name); showStart(); }
     };
     x.onclick = async () => { await recentForget(r.name); showStart(); };
@@ -257,7 +370,7 @@ async function openLink(text, own) {   // own: the page's own example files, all
     if (!r.ok) return linkMsg(r.error, true);
     example = false; linkMsg('');
     const name = fileNameOf(p.url, p.host), via = r.finalHost && r.finalHost !== r.host ? r.host + ' (via ' + r.finalHost + ')' : r.host;
-    recentSave(name, r.bytes.slice(0)); start(r.bytes, name, via);
+    recentSave(name, r.bytes.slice(0)).then(() => recentMeta(name, { url: p.url })); start(r.bytes, name, via, p.url);
   } catch (e) { linkMsg('That link could not be opened: ' + String(e && e.message || e).slice(0, 160), true); }
   finally { go.disabled = false; go.textContent = 'Open link'; }
 }

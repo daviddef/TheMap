@@ -19,7 +19,7 @@ test("the fingerprint changes when any watched value changes, and not otherwise"
 
 test("everything research-file.js backs up is watched, so a changed link or decision is saved too", () => {
   const rf = fs.readFileSync(path.join(here, "../public/js/research-file.js"), "utf8");
-  for (const k of ["ra-fix-decisions-v1", "ra-areas-v1", "ra-gedcom-names-v1", "recordatlas.roots.myheritage-link", "recordatlas.roots.ancestry-site", "recordatlas.roots.myheritage-trees"]) {
+  for (const k of ["ra-fix-decisions-v1", "ra-areas-v1", "ra-gedcom-names-v1", "ra-canvas-v1", "recordatlas.roots.myheritage-link", "recordatlas.roots.ancestry-site", "recordatlas.roots.myheritage-trees"]) {
     assert.ok(rf.includes(k) && WATCH.includes(k), k);
   }
   assert.ok(WATCH.includes("ra-progress-v1"));

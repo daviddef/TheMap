@@ -4615,7 +4615,12 @@ function mainMenu() {
     + (linesAvail() ? item('lines', 'lines', 'Research lines', 'The archive\'s own drawing of its families and the roads they took, beside your tree') : '')
     + (cmpAvail() ? item('compare', 'layers', 'Compare with an archive', cmpMode() ? 'Your file beside ' + M.archives[1].name + ', from a marked person' : 'Set your file beside one of the family archives') : '')
     + item('options', 'gear', 'Options', 'Links to MyHeritage and Ancestry, how paths are judged, your file')
-    + (SA ? keepHTML() + recentHTML() : '');
+    + (SA ? yourFileHTML() + keepHTML() + recentHTML() : '');
+}
+/* ---------- Your file (standalone page only): the import report, the counts, what is kept on this device and the export are a page of the page around the canvas (public/tree-canvas/app.js);
+   this only asks for it. ---------- */
+function yourFileHTML() {
+  return `<div class="mmsep"></div><button class="mmi" data-gfile="1">${icon('info', 'lk-icon')}<span><b>Your file</b><small>What was read, the numbers, saved files, export</small></span></button>`;
 }
 /* ---------- Keep your work (standalone page only): the page around the canvas keeps where the cards sit, per tree, in this browser, and in the six-word copy when it is on. The link goes to
    Connection & Backup, where the six words are made; nothing is built twice. ---------- */
@@ -4687,6 +4692,7 @@ document.addEventListener('keydown', e => { if (e.key !== 'Enter' && e.key !== '
 document.addEventListener('click', e => {
   const m = $('#mainMenu'); if (!m) return;
   if (e.target.closest('[data-lgx]')) { openLegend(false); return; }
+  const gf = e.target.closest('[data-gfile]'); if (gf && m.contains(gf)) { openMainMenu(false); parent.postMessage({ tcYourFile: true }, location.origin); return; }
   const go = e.target.closest('[data-gopen]'); if (go && m.contains(go)) { openMainMenu(false); const gi = $('#gedIn'); if (gi) gi.click(); return; }
   const rc = e.target.closest('[data-recent]'); if (rc && m.contains(rc)) { openMainMenu(false); recentOpen(rc.dataset.recent); return; }
   const fg = e.target.closest('[data-forget]'); if (fg && m.contains(fg)) { recentForget(fg.dataset.forget); return; }

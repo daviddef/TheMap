@@ -10,11 +10,9 @@ import { parseLink, profileUrl, treeUrl, toHash, fromHash } from './myheritage.j
 import { loadLink, saveLink, loadSite, saveSite, loadTrees, saveTreeLink } from './remember.js';
 import { personUrl } from './ancestry.js';
 import { GROUPS as FIXGROUPS, describe, issuesByPerson } from './checklist.js';
+import { el, n0, pct, reportInto } from './report-view.js';   // the import report is drawn by the module the Tree Canvas's "Your file" page shares
 
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
-const n0 = n => (+n).toLocaleString('en');
-const pct = x => (x * 100).toFixed(1).replace(/\.0$/, '') + '%';
 
 let curBytes = null, curName = null;   // a private copy, only so the visitor can choose to keep the file on this device
 let worker = null, last = null, shown = { review: 0 };
@@ -51,7 +49,7 @@ function done(m) {
   const stale = !m.build || m.build.pipeline !== BUILD || m.build.model !== BUILD; $('#stale').hidden = !stale;
   last = m; window.RR = { tree: m.tree, atlas: m.atlas, loadNames, links: rrLinks }; anc = m.anc || null; ancStatus(); mhFile = m.mh || null; applyTreeLink();
   const keepTab = $('.tabs [aria-selected=true]')?.dataset.tab || 'canvas';
-  show('work'); chips(m); mountViewer(); report(m); review(m); askFix();
+  show('work'); chips(m); mountViewer(); reportInto(m, $('#p-report')); review(m); askFix();
   tab(openTo || (m.first ? 'canvas' : keepTab)); openTo = null;
 }
 
@@ -72,72 +70,6 @@ function mountViewer() {
   viewerLive = false; $('#orcount').textContent = ''; $('.tabs [data-tab=orphans]').title = ORTITLE;
 }
 function pushMh() { try { $('#viewer').contentWindow.postMessage({ mh: mhc && mhc.site ? { site: mhc.site, tree: mhc.tree, slug: mhc.treeSlug } : null }, '*'); } catch (e) { /* not loaded yet */ } }
-
-/* ---------- import report ---------- */
-const TIER = {
-  'confident': ['At a real place', 'a place with this name in the country the text names'],
-  'confident-by-region': ['At a real place', 'one place with this name in the region the text names'],
-  'probable': ['At a real place', 'the only likely place of that name'],
-  'by-tree-context': ['At a real place', 'no country given, but only one candidate is in a country your tree uses'],
-  'parent-level': ['Drawn at the town', 'the exact spot (a church, a street) was not found, so the town in the text is used'],
-  'by-neighbours': ['At a real place', 'several candidates, but only one has other people of your tree placed around it (within 50 km)'],
-  'district': ['Drawn at the district', 'the most specific part of the text is a municipality or county, so people are drawn at its centre'],
-  'region': ['Drawn at the region', 'a province or county, not a town'],
-  'country-only': ['Drawn at the country', 'only a country was given'],
-  'review-skipped-part': ['Review: only a later part matched', 'the first part of the text was not found, a later part was'],
-  'review-other-country': ['Review: found in another country', 'the name exists, but not in the country the text names'],
-  'ambiguous': ['Review: could be several places', 'more than one candidate and nothing to choose between them'],
-  'not-found': ['Review: not found', 'no place of that name in the gazetteer'],
-  'user': ['Chosen by you', 'you picked a candidate'],
-};
-const ORDER = ['confident', 'confident-by-region', 'probable', 'by-tree-context', 'by-neighbours', 'user', 'parent-level', 'district', 'region', 'country-only', 'review-skipped-part', 'review-other-country', 'ambiguous', 'not-found'];
-
-function kv(dl, k, v) { dl.append(el('dt', null, k), el('dd', null, v)); }
-
-function report(m) {
-  const r = m.report, p = $('#p-report'); p.textContent = '';
-  p.append(el('h2', null, 'The file'));
-  let d = el('dl', 'kv'); const f = r.file;
-  kv(d, 'Format', 'GEDCOM ' + (f.version || '(version not stated)') + ', ' + f.eol + ' line endings' + (f.bom ? ', with a byte-order mark' : ''));
-  kv(d, 'Text encoding', f.used + (f.declared ? ' (the file says ' + f.declared + ')' : ''));
-  if (f.relinedLines) kv(d, 'Repaired', f.relinedLines + ' lines held bytes that are not valid UTF-8; they were re-read as Windows-1252 and ' + f.invalidBytes + ' characters could not be recovered. Nothing was dropped.');
-  kv(d, 'Lines / records', n0(f.lines) + ' lines, ' + n0(f.records) + ' records');
-  kv(d, 'Continuation lines', n0(f.conc) + ' CONC, ' + n0(f.cont) + ' CONT (joined when read)');
-  if (f.junkLines) kv(d, 'Not GEDCOM lines', n0(f.junkLines) + ' lines (blank lines, or text broken across lines inside a note). Kept as they are; not used.');
-  p.append(d);
-
-  p.append(el('h2', null, 'The people'));
-  d = el('dl', 'kv'); const q = r.people;
-  kv(d, 'In the file', n0(q.individuals));
-  kv(d, 'Drawn', n0(q.drawn));
-  kv(d, 'Possibly living', n0(q.living) + ' (no death recorded and born within 110 years, or no birth year). ' + (q.livingRedacted ? n0(q.livingRedacted) + ' are drawn without a name; their birth year is rounded to the decade.' : q.livingShown ? n0(q.livingShown) + ' are shown as the file gives them: this stays on your device.' : ''));
-  kv(d, 'Not drawn: no year', n0(q.undatedNotDrawn) + ' people with no birth year and no relative to estimate from');
-  kv(d, 'Not drawn: no place', n0(q.noPlaceNotDrawn) + ' people whose birth place did not resolve and who have no relative with a resolved place');
-  kv(d, 'Borrowed a place', n0(q.placeBorrowedFromRelative) + ' people whose own birth place did not resolve are drawn at a parent’s, child’s or spouse’s; they are marked');
-  kv(d, 'Estimated years', n0(q.birthYearEstimated) + ' birth years and ' + n0(q.deathYearEstimated) + ' death years are estimates, shown as “c.” in the views');
-  p.append(d);
-
-  const pl = r.places;
-  p.append(el('h2', null, 'The places'));
-  p.append(el('p', null, n0(pl.distinct) + ' different place texts, ' + n0(pl.mentions) + ' mentions, of which ' + n0(pl.placeNameMentions) + ' name a place (the rest name only a region or a country, such as "Cape Colony" or "South Africa"). ' + pct(pl.realOfNamedPct) + ' of the named places are at a real place (' + pct(pl.realPct) + ' of all mentions), and ' + pct(pl.drawablePct) + ' can be drawn at some level. A place is never guessed: what cannot be read is listed under “Places to review”.'));
-  const t = el('table', 't'), hd = el('tr'); for (const h of ['How it was placed', 'Texts', 'Mentions', '']) hd.append(el('th', h === 'Texts' || h === 'Mentions' ? 'n' : null, h));
-  t.append(hd);
-  const maxw = Math.max(...Object.values(pl.mentionsByTier));
-  for (const k of ORDER) {
-    if (!pl.byTier[k]) continue;
-    const row = el('tr'), td = el('td'); td.append(el('span', null, TIER[k][0]), el('br'), el('span', 'small', TIER[k][1]));
-    const bar = el('td'), b = el('span', 'bar-in'); b.style.width = Math.max(2, 140 * pl.mentionsByTier[k] / maxw) + 'px'; bar.append(b);
-    row.append(td, el('td', 'n', n0(pl.byTier[k])), el('td', 'n', n0(pl.mentionsByTier[k]) + ' (' + pct(pl.mentionsByTier[k] / pl.mentions) + ')'), bar); t.append(row);
-  }
-  p.append(t);
-
-  p.append(el('h2', null, 'How long it took'));
-  d = el('dl', 'kv'); const T = m.timings;
-  kv(d, 'Read the file', T.parse + ' ms'); kv(d, 'Found people and places', T.model + ' ms');
-  kv(d, 'Loaded the Atlas', T.atlasLoad + ' ms'); kv(d, 'Placed ' + n0(pl.distinct) + ' texts (' + pl.countriesLoaded + ' country files)', T.resolve + ' ms');
-  kv(d, 'Built the tree', T.tree + ' ms'); kv(d, 'Flags, regimes, events', T.atlas + ' ms');
-  p.append(d);
-}
 
 /* The Atlas map in the viewer can send us a place text: "Fix this text" opens Places to review filtered to it, "Copy" copies it. Only messages from our own viewer are heard. */
 window.addEventListener('message', e => {

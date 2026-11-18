@@ -9,11 +9,14 @@ import { personUrl } from '/roots/js/ancestry.js';
 import { loadTrees, saveTreeLink, loadSite, saveSite } from '/roots/js/remember.js';
 import { parseLink as parseFileLink, fetchBytes, fileNameOf } from '/roots/js/openlink.js';
 import * as W from '/tree-canvas/work.js';   // (parseLink above is the MyHeritage one)
+import { reportInto, el, n0 } from '/roots/js/report-view.js';   // the import report, drawn by the same code as /roots/
+import { treeMetrics, metricTiles } from '/roots/js/metrics.js';   // the five counts of the tree views, worked out here
 
 const $ = s => document.querySelector(s);
 const base = new URL('/roots/', location.href).href;   // the reader fetches its place files relative to this, as it does on /roots/
 const STAMP = Date.now();                              // a fresh canvas each time the page is opened, never an old cached copy
 let worker = null, hide = false, example = false;
+let lastM = null;   // the reader's last 'done' message (its report and timings), for the "Your file" page; null for an archive, which is published already read
 
 /* The Atlas's own name catalogues, for the canvas's search by any form of a name and its panel of name forms: two static files from this site, the same for
    everyone. Nothing about the tree is sent. Fetched once, when the canvas first asks. */
@@ -123,27 +126,35 @@ function checkNewer() {
 function renderKeep() {
   const st = W.keepStatus(syncState(), null), t = $('#stKeepSt'); if (t) t.textContent = st.text;
   const b = $('#stKeepBtn'); if (b) b.classList.toggle('on', st.on && !syncFailed);
+  const t2 = $('#yfKeepSt'); if (t2) t2.textContent = st.text;
+  const b2 = $('#yfKeepBtn'); if (b2) b2.classList.toggle('on', st.on && !syncFailed);
   const f = $('#cv'); if (f && f.contentWindow && !f.hidden) f.contentWindow.postMessage({ tcKeep: 1 }, location.origin);
 }
 function savedWhere(r) { return r.src.t === 'link' ? 'from a link' : r.src.t === 'archive' ? 'an archive' : 'from a file on this device'; }
 async function renderSaved() {
-  const recs = W.list(), box = $('#stWork'), ul = $('#stWorkList'); if (!box) return; ul.textContent = ''; box.hidden = !recs.length;
+  const recs = W.list();
   let kept = []; try { kept = rememberOn() ? await recentList() : []; } catch (e) { kept = []; }
-  for (const r of recs) {
-    const li = document.createElement('li'), b = document.createElement('button'), n = document.createElement('b'), sm = document.createElement('small');
-    b.type = 'button'; b.className = 'recopen'; n.textContent = r.label || 'A saved canvas';
-    const onDevice = r.src.t === 'file' && !kept.some(k => k.name === r.src.ref);
-    sm.textContent = [r.n.toLocaleString('en') + (r.n === 1 ? ' person' : ' people') + ' on the canvas', savedWhere(r), 'saved ' + W.agoText(r.upd), onDevice ? 'open the same file to bring it back' : ''].filter(Boolean).join(' · ');
-    b.append(n, sm);
-    b.onclick = async () => {
-      if (r.src.t === 'archive') return openArchive(r.src.ref);
-      if (r.src.t === 'link') { $('#stUrl').value = r.src.ref; return openLink(r.src.ref); }
-      const k = kept.find(x => x.name === r.src.ref);
-      if (k) { try { const db = await rdb(), bytes = await rreq(db.transaction('b').objectStore('b').get(k.name)); db.close(); if (bytes) { example = false; start(bytes, k.name); return; } } catch (e) { /* fall through to the picker */ } }
-      linkMsg('Choose ' + r.src.ref + ' to bring this canvas back. It is matched by its name, size and number of people.'); $('#stFile').click();
-    };
-    li.append(b); ul.append(li);
+  /* one list, drawn twice: on the opening screen and on the "Your file" page */
+  for (const [boxId, ulId] of [['stWork', 'stWorkList'], ['yfWork', 'yfWorkList']]) {
+    const box = $('#' + boxId), ul = $('#' + ulId); if (!box || !ul) continue; ul.textContent = ''; box.hidden = !recs.length;
+    for (const r of recs) {
+      const li = document.createElement('li'), b = document.createElement('button'), n = document.createElement('b'), sm = document.createElement('small');
+      b.type = 'button'; b.className = 'recopen'; n.textContent = r.label || 'A saved canvas';
+      const onDevice = r.src.t === 'file' && !kept.some(k => k.name === r.src.ref);
+      sm.textContent = [r.n.toLocaleString('en') + (r.n === 1 ? ' person' : ' people') + ' on the canvas', savedWhere(r), 'saved ' + W.agoText(r.upd), onDevice ? 'open the same file to bring it back' : ''].filter(Boolean).join(' \u00b7 ');
+      b.append(n, sm);
+      b.onclick = async () => {
+        if (r.src.t === 'archive') return openArchive(r.src.ref);
+        if (r.src.t === 'link') { $('#stUrl').value = r.src.ref; return openLink(r.src.ref); }
+        const k = kept.find(x => x.name === r.src.ref);
+        if (k) { try { const db = await rdb(), bytes = await rreq(db.transaction('b').objectStore('b').get(k.name)); db.close(); if (bytes) { example = false; start(bytes, k.name); return; } } catch (e) { /* fall through to the picker */ } }
+        closeYF(true); if ($('#start').hidden) showStart();
+        linkMsg('Choose ' + r.src.ref + ' to bring this canvas back. It is matched by its name, size and number of people.'); $('#stFile').click();
+      };
+      li.append(b); ul.append(li);
+    }
   }
+  noFiles();
 }
 document.addEventListener('ra-canvas-changed', () => { checkNewer(); renderSaved(); renderKeep(); });
 document.addEventListener('ra-sync-done', e => { syncFailed = !(e.detail && e.detail.ok); renderKeep(); });
@@ -158,7 +169,7 @@ function mount() {
   const old = $('#cv'), f = document.createElement('iframe');
   f.id = 'cv'; f.title = old.title;
   f.src = '/roots/canvas.html?sa=1&v=' + STAMP + (hide ? '&liv=1' : '') + (example ? '&ex=1' : '');
-  f.hidden = false; old.replaceWith(f);
+  f.hidden = false; old.replaceWith(f); if (!$('#yf').hidden) f.inert = true;
 }
 
 let curName = null, curHead = null, curVia = null;   // curVia: the site a file was fetched from, when it came from a link
@@ -166,6 +177,7 @@ let curName = null, curHead = null, curVia = null;   // curVia: the site a file 
 const isTreeJson = bytes => { try { return /^\uFEFF?\s*\{/.test(new TextDecoder('utf-8').decode(new Uint8Array(bytes, 0, Math.min(64, bytes.byteLength)))); } catch (e) { return false; } };
 let curLink = null, curSize = 0;   // the address a file was fetched from (if it was), and the file's size
 function start(bytes, name, via, link) {
+  closeYF(true); lastM = null;
   const json = isTreeJson(bytes);
   curName = name || null; curVia = via || null; curLink = link || null; curSize = bytes.byteLength; curHead = name && !json ? headInfo(bytes) : (json ? { from: 'tree.json', tree: '' } : null);
   if (curVia && curHead) curHead = { ...curHead, from: curVia };   // the last-used list says where a file came from
@@ -180,12 +192,17 @@ function start(bytes, name, via, link) {
       try { window.RR.fix = issuesByPerson(m); } catch (e) { window.RR.fix = null; }
       const f = $('#cv'); if (f && f.contentWindow) f.contentWindow.postMessage({ tcFix: 1 }, location.origin);
     }
-    else if (m.type === 'error') { say((json ? 'That file could not be opened as a tree.json. ' : 'Sorry, that file could not be read: ') + m.msg, true); if (!window.RR) showStart(); }
+    else if (m.type === 'exported') exported(m);
+    else if (m.type === 'error') {
+      if (exporting) { exporting = false; $('#yfBusy').hidden = true; $('#yfGo').disabled = false; $('#yfSum').textContent = 'The file could not be made: ' + m.msg; $('#yfOut').hidden = false; $('#yfFile').hidden = $('#yfLog').hidden = true; return; }
+      say((json ? 'That file could not be opened as a tree.json. ' : 'Sorry, that file could not be read: ') + m.msg, true); if (!window.RR) showStart();
+    }
     else if (m.type === 'done') {
       if (m.first && hide && m.kind !== 'tree') { say('Hiding living people…'); worker.postMessage({ cmd: 'living', hide: true }); return; }   // keep the choice for the next file (a tree.json already shows its living people by name and family only)
       const prevMh = mhFile; mhFile = m.mh || null; anc = m.anc || null;
       if (!prevMh || !mhFile || prevMh.guid !== mhFile.guid) { mhc = null; mhText = ''; mhNote = ''; applyTreeLink(); }   // a different tree: start from what is remembered or known for it
       window.RR = { tree: m.tree, atlas: m.atlas, loadNames, links };
+      lastM = m; if (!$('#yf').hidden) drawYF();
       if (m.first || !cur) { const ppl = m.report && m.report.people && m.report.people.individuals | 0; setCur(example ? null : curLink ? { t: 'link', ref: curLink } : curName ? { t: 'file', ref: curName, size: curSize, people: ppl } : null, curLink ? W.linkLabel(curLink) : curName); }
       else flushWork();
       attachKeep();
@@ -245,6 +262,7 @@ async function fetchLines(a) {
 }
 async function openArchive(key) {
   const a = ARCH[key]; if (!a) return;
+  closeYF(true); lastM = null;
   curName = null; curHead = null; example = false;
   $('#start').hidden = true; say('Opening the ' + a.name + ' archive…');
   try {
@@ -277,6 +295,7 @@ addEventListener('message', e => {
   if (e.origin !== location.origin) return;   // only the canvas, which is this site's own page
   const d = e.data || {};
   if (d.tcWork) { onWork(d.tcWork); return; }
+  if (d.tcYourFile) { openYF(); return; }   // the canvas menu's "Your file"
   if (d.tcRestored) { onRestored(d.tcRestored); return; }
   if (d.tcHome) { flushWork(); $('#cv').hidden = true; showStart(); return; }   // the canvas's folder button: back to the opening screen (the canvas keeps its own state)
   if (d.tcCompare !== undefined && !d.tcOpen) { compareWith(d.tcCompare && d.tcCompare.key, d.tcCompare && d.tcCompare.mark); return; }
@@ -286,6 +305,78 @@ addEventListener('message', e => {
     if (worker) { say(hide ? 'Hiding living people…' : 'Showing everyone…'); worker.postMessage({ cmd: 'living', hide }); }
   }
 });
+
+/* ---- "Your file": what was read, the numbers, what is kept on this device, and the export, in one place. It is a page over the canvas (the canvas stays loaded underneath, with its
+   state), reached from the canvas menu and from the opening screen once a file is open. Nothing here is a second copy: the report is drawn by /roots/'s own report code, the five
+   counts by metrics.js (tested against the tree views' own code), the two lists by the functions the opening screen uses, and the export is the reader's own. ---- */
+let exporting = false, xurls = [];
+const REVIEW_TIERS = ['ambiguous', 'review-skipped-part', 'review-other-country', 'not-found'];
+function fileWhat() {
+  const a = window.RR && window.RR.archive;
+  if (a) return 'The ' + a.name + ' archive’s published tree, read in this browser from ' + a.host + '. The archive left its living people out.';
+  if (example) return 'An invented family, drawn so you can see how the canvas works. Nobody in it is real.';
+  return [curName || 'Your file', curLink ? 'opened from a link' + (curVia ? ' (' + curVia + ')' : '') : 'from a file on this device', curSize ? fmtBytes(curSize) : ''].filter(Boolean).join(' · ');
+}
+function drawYF() {
+  const RR = window.RR; if (!RR) return;
+  $('#yfWhat').textContent = fileWhat();
+  /* the five counts */
+  const M = treeMetrics(RR.tree, RR.atlas), box = $('#yfMetrics'); box.textContent = '';
+  for (const [n, l, sm] of metricTiles(M)) { const d = el('div', 'yfm'); d.append(el('b', null, n0(n)), el('span', null, l), el('small', null, sm)); box.append(d); }
+  const q = lastM && lastM.report && lastM.report.people;
+  $('#yfMetNote').textContent = 'The same counts as the top of Tree views, counted from the people in this file.' + (q && (q.birthYearEstimated || q.deathYearEstimated) ? ' ' + n0(q.birthYearEstimated || 0) + ' birth years and ' + n0(q.deathYearEstimated || 0) + ' death years in it are the reader’s estimates (shown as “c.” in the views); nothing on this page treats an estimate as recorded.' : '');
+  /* what was read */
+  const rep = $('#yfReport'); rep.textContent = '';
+  if (lastM && lastM.report) {
+    reportInto(lastM, rep, { h: 'h3' });
+    const need = (lastM.review || []).filter(i => REVIEW_TIERS.includes(i.tier)).length;
+    if (need) { const p = el('p', 'small', n0(need) + ' place texts need a look: the Atlas could not settle them. Choosing a place for each is done on Places to review in Roots & Routes, where you open the same file again. '); const a = el('a', null, 'Open Roots & Routes'); a.href = '/roots/'; a.target = '_blank'; a.rel = 'noopener'; p.append(a); rep.append(p); }
+  } else rep.append(el('p', 'small', RR.archive ? 'An archive publishes its tree already read, so there is no import report for it: its own site holds the sources and the method.' : 'There is no report for this file.'));
+  /* the export: a GEDCOM read here has one; a tree.json and an archive's tree do not */
+  const on = !!(lastM && lastM.kind !== 'tree' && worker), off = $('#yfExpOff');
+  $('#yfExpOn').hidden = !on; off.hidden = on;
+  if (!on) off.textContent = RR.archive ? 'Nothing to export: this is the archive’s published tree, and its own site holds the data.' : lastM && lastM.kind === 'tree' ? 'A tree.json is our own format and is not made again here: your file is unchanged, and the copy you opened is the one to keep.' : 'There is nothing to export for this file.';
+  $('#yfOut').hidden = true; $('#yfBusy').hidden = true; $('#yfGo').disabled = false;
+  renderKeep(); renderSaved(); drawLists();
+}
+function openYF() {
+  if (!window.RR) return;
+  drawYF();
+  $('#yf').hidden = false; $('#cv').inert = true; $('#start').inert = true;
+  $('#yfBack').textContent = $('#cv').hidden ? '← Back' : '← Back to the canvas';
+  $('#yf').scrollTop = 0; $('#yfTitle').focus();
+}
+function closeYF(quiet) {
+  const y = $('#yf'); if (!y || y.hidden) return;
+  y.hidden = true; $('#cv').inert = false; $('#start').inert = false;
+  if (!quiet) { const f = $('#cv'); if (f && !f.hidden) { try { f.focus(); } catch (e) { /* no focus to give */ } } else { const b = $('#stCurFile'); if (b && !b.closest('[hidden]')) b.focus(); } }
+}
+$('#yfBack').onclick = () => closeYF();
+addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#yf').hidden) closeYF(); });
+$('#yfGo').onclick = () => {
+  if (!worker) return; exporting = true; $('#yfBusy').hidden = false; $('#yfGo').disabled = true; $('#yfOut').hidden = true; $('#yfFile').hidden = $('#yfLog').hidden = false;
+  worker.postMessage({ cmd: 'export', mode: document.querySelector('input[name=yfxm]:checked').value });
+};
+function exported(m) {
+  exporting = false;
+  for (const u of xurls) URL.revokeObjectURL(u); xurls = [];
+  const f = URL.createObjectURL(new Blob([m.text], { type: 'text/plain;charset=utf-8' })), l = URL.createObjectURL(new Blob([m.logText], { type: 'text/plain;charset=utf-8' }));
+  xurls.push(f, l);
+  const a = $('#yfFile'), b = $('#yfLog'); a.href = f; a.download = 'tree-' + m.mode + '.ged'; b.href = l; b.download = 'tree-' + m.mode + '-change-log.txt'; a.hidden = b.hidden = false;
+  const s = m.stats, bits = [];
+  if (s.coords) bits.push(n0(s.coords) + ' places given coordinates'); if (s.applied) bits.push(n0(s.applied) + ' place texts replaced');
+  if (s.redacted) bits.push(n0(s.redacted) + ' living people reduced to a bare record');
+  if (s.textRedacted) bits.push(n0(s.textRedacted) + ' lines with a living name changed'); if (s.recoded) bits.push(n0(s.recoded) + ' lines re-read from Windows-1252 to UTF-8');
+  $('#yfSum').textContent = m.changed ? 'Made: ' + n0(m.from) + ' lines became ' + n0(m.lines) + '. ' + bits.join('; ') + '.' : 'No changes: the file is the same as the one you gave us.';
+  $('#yfOut').hidden = false; $('#yfBusy').hidden = true; $('#yfGo').disabled = false;
+}
+/* the opening screen, once a file is open: the way back to the canvas, and to this page */
+function renderCurrent() {
+  const c = $('#stCur'); if (!c) return; c.hidden = !window.RR;
+  if (window.RR) $('#stCurWhat').textContent = fileWhat();
+}
+$('#stCurBack').onclick = () => { $('#start').hidden = true; const f = $('#cv'); if (f) { f.hidden = false; try { f.focus(); } catch (e) { /* ok */ } } };
+$('#stCurFile').onclick = () => openYF();
 
 /* ---- the page it opens on: nothing is read until the visitor chooses. Two buttons, and the files used before (kept in this browser's own storage by the canvas
    too: the same database, so "Last used" in the canvas menu and here are one list). Nothing is sent anywhere. ---- */
@@ -333,30 +424,39 @@ async function recentForget(name) {
 const fmtBytes = n => n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + ' MB' : Math.max(1, Math.round(n / 1e3)) + ' KB';
 const fmtWhen = t => { const d = new Date(t), same = d.toDateString() === new Date().toDateString(); return same ? 'today ' + d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : d.toLocaleDateString([], { day: 'numeric', month: 'short' }); };
 async function showStart() {
-  say(''); $('#start').hidden = false; renderKeep(); renderSaved();
-  const rec = rememberOn() ? await recentList() : [], ul = $('#stList'); ul.textContent = '';
-  $('#stRecent').hidden = !rec.length;
+  say(''); $('#start').hidden = false; renderKeep(); renderSaved(); renderCurrent(); await drawLists();
+}
+/* "Last used": the same rows on the opening screen and on the "Your file" page, so there is one list and one place it is kept (this browser's tcRecent) */
+async function drawLists() {
+  const rec = rememberOn() ? await recentList() : [];
+  for (const [boxId, ulId] of [['stRecent', 'stList'], ['yfRecent', 'yfList']]) drawRecent($('#' + boxId), $('#' + ulId), rec);
+  noFiles();
+}
+function drawRecent(box, ul, rec) {
+  if (!box || !ul) return; ul.textContent = ''; box.hidden = !rec.length;
   for (const r of rec) {
     const li = document.createElement('li'), b = document.createElement('button'), x = document.createElement('button'), n = document.createElement('b'), sm = document.createElement('small');
-    b.type = x.type = 'button'; b.className = 'recopen'; x.className = 'recx'; x.textContent = '×'; x.title = 'Forget ' + r.name; x.setAttribute('aria-label', 'Forget ' + r.name);
-    n.textContent = r.name; sm.textContent = [r.people ? r.people.toLocaleString('en') + (r.people === 1 ? ' person' : ' people') : '', r.tree || (r.from ? 'from ' + r.from : ''), fmtBytes(r.size || 0), fmtWhen(r.when)].filter(Boolean).join(' · '); b.append(n, sm); b.title = 'Open ' + r.name + ' again';
+    b.type = x.type = 'button'; b.className = 'recopen'; x.className = 'recx'; x.textContent = '\u00d7'; x.title = 'Forget ' + r.name; x.setAttribute('aria-label', 'Forget ' + r.name);
+    n.textContent = r.name; sm.textContent = [r.people ? r.people.toLocaleString('en') + (r.people === 1 ? ' person' : ' people') : '', r.tree || (r.from ? 'from ' + r.from : ''), fmtBytes(r.size || 0), fmtWhen(r.when)].filter(Boolean).join(' \u00b7 '); b.append(n, sm); b.title = 'Open ' + r.name + ' again';
     if (r.note) { const nt = document.createElement('em'); nt.className = 'recnote'; nt.textContent = r.note; b.append(nt); }
-    const ed = document.createElement('button'); ed.type = 'button'; ed.className = 'recx recedit'; ed.textContent = '✎'; ed.title = r.note ? 'Edit the note' : 'Add a note'; ed.setAttribute('aria-label', ed.title + ' for ' + r.name);
+    const ed = document.createElement('button'); ed.type = 'button'; ed.className = 'recx recedit'; ed.textContent = '\u270e'; ed.title = r.note ? 'Edit the note' : 'Add a note'; ed.setAttribute('aria-label', ed.title + ' for ' + r.name);
     ed.onclick = () => {
       const inp = document.createElement('input'); inp.type = 'text'; inp.className = 'recin'; inp.maxLength = 80; inp.value = r.note || ''; inp.placeholder = 'A note, e.g. Mum\'s side, from MyHeritage'; inp.setAttribute('aria-label', 'Note for ' + r.name);
-      let fin = false; const save = async keep => { if (fin) return; fin = true; if (keep) await recentMeta(r.name, { note: inp.value.trim() }); showStart(); };
+      let fin = false; const save = async keep => { if (fin) return; fin = true; if (keep) await recentMeta(r.name, { note: inp.value.trim() }); drawLists(); };
       inp.onkeydown = e => { if (e.key === 'Enter') save(true); else if (e.key === 'Escape') save(false); };
       inp.onblur = () => save(true);
       b.replaceWith(inp); inp.focus(); inp.select();
     };
     b.onclick = async () => {
       try { const db = await rdb(), bytes = await rreq(db.transaction('b').objectStore('b').get(r.name)); db.close(); if (!bytes) throw 0; example = false; recentSave(r.name, bytes.slice(0)); start(bytes, r.name, undefined, r.url); }
-      catch (e) { say('That file is no longer kept here. Open it again from your device.', true); await recentForget(r.name); showStart(); }
+      catch (e) { say('That file is no longer kept here. Open it again from your device.', true); await recentForget(r.name); drawLists(); }
     };
-    x.onclick = async () => { await recentForget(r.name); showStart(); };
+    x.onclick = async () => { await recentForget(r.name); drawLists(); };
     li.append(b, ed, x); ul.append(li);
   }
 }
+/* the file page says so when nothing at all is kept, rather than showing an empty heading */
+function noFiles() { const n = $('#yfNoFiles'); if (n) n.hidden = !($('#yfWork').hidden && $('#yfRecent').hidden); }
 /* ---- a file from a link. The visitor's own browser asks the other site for the file (nothing goes through this site), after the address has been checked
    (openlink.js: https only, a public name, no sign-in details). The site it came from is shown while the canvas opens. A link on the page's own address
    (/tree-canvas/?url=…) only fills the box: nothing is fetched until the visitor presses Open link. ---- */
@@ -385,7 +485,8 @@ $('#stFile').onchange = async e => {
 };
 $('#stDemo').onclick = () => { example = true; start(new TextEncoder().encode(makeSample()).buffer); };   // the invented family is only built when asked for
 document.querySelectorAll('#stArchBtns button').forEach(b => { b.onclick = () => openArchive(b.dataset.k); });
-$('#stForget').onclick = async () => { await recentForget(); showStart(); };
+$('#stForget').onclick = async () => { await recentForget(); drawLists(); };
+$('#yfForget').onclick = async () => { await recentForget(); drawLists(); };
 /* the drop zone lights up while a file is dragged over the page (a class only; the drop itself is handled below) */
 const dragging = on => $('#stDrop').classList.toggle('over', on);
 for (const ev of ['dragenter', 'dragover']) addEventListener(ev, e => { if ($('#start').hidden) return; e.preventDefault(); dragging(!!e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files')); });

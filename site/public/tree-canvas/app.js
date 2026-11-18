@@ -92,7 +92,7 @@ function start(bytes, name) {
    THAT archive's published tree directly: the same roots page the archive serves, whose tree and Atlas extract are read in this browser. Nothing is sent but a plain
    request for that public page; the archive already leaves its living people out, and the canvas applies its own second lock as well. ---- */
 const ARCH = {
-  defranceski: { name: 'Defranceski', host: 'archive.defranceski.com', color: '#D2493A', graded: true },
+  defranceski: { name: 'Defranceski', host: 'archive.defranceski.com', color: '#D2493A', graded: true, lines: true },
   booyzen: { name: 'Booyzen', host: 'booyzen.defranceski.com', color: '#4E9A3E', graded: true },
   luwinski: { name: 'Luwinski', host: 'luwinski.defranceski.com', color: '#3A74C9', graded: false },
   lerena: { name: 'Lerena', host: 'lerena.defranceski.com', color: '#8A5CC2', graded: false },
@@ -118,7 +118,17 @@ async function fetchArchive(key) {
   const r = await fetch('https://' + a.host + '/roots/', { credentials: 'omit', referrerPolicy: 'no-referrer' });
   if (!r.ok) throw new Error('HTTP ' + r.status);
   const html = await r.text();
-  return { tree: jsonAfter(html, 'const TREE='), atlas: jsonAfter(html, 'const ATLAS='), archive: { key, name: a.name, host: a.host, color: a.color, graded: a.graded } };
+  return { tree: jsonAfter(html, 'const TREE='), atlas: jsonAfter(html, 'const ATLAS='), archive: { key, name: a.name, host: a.host, color: a.color, graded: a.graded }, lines: a.lines ? await fetchLines(a) : null };
+}
+/* an archive's drawing of its research lines (/roots/lines.json), if it publishes one: read here and handed to the canvas in memory, where it is cleaned before use. It is optional,
+   so a missing or malformed file is simply no Lines view, never an error. */
+async function fetchLines(a) {
+  try {
+    const r = await fetch('https://' + a.host + '/roots/lines.json', { credentials: 'omit', referrerPolicy: 'no-referrer' });
+    if (!r.ok || !/json/.test(r.headers.get('content-type') || '')) return null;
+    const j = await r.json();
+    return j && j.kind === 'lines' && j.v === 1 && Array.isArray(j.lanes) ? j : null;
+  } catch (e) { return null; }
 }
 async function openArchive(key) {
   const a = ARCH[key]; if (!a) return;
@@ -128,6 +138,7 @@ async function openArchive(key) {
     const f = await fetchArchive(key);
     mhFile = null; mhc = null; anc = null;
     window.RR = { tree: f.tree, atlas: f.atlas, loadNames, links, archive: f.archive };
+    if (f.lines) { window.RR.lines = f.lines; window.RR.linesArch = key; }
     /* ?p=<slug>: an archive's link to one person's page; the canvas puts that person on and selects them (only a plain slug is passed on) */
     { const pp = new URLSearchParams(location.search).get('p'); if (pp && /^[a-z0-9-]{1,120}$/.test(pp)) window.RR.carryPerson = pp; }
     say(''); mount();

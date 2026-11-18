@@ -766,6 +766,49 @@ html:not(.rzopen) #rz{display:none}
 #namesview .nmlh small{font:800 10.5px Nunito,system-ui;color:#8A5A2B}
 #namesview .nmlh .fl{width:30px!important;height:auto;display:block;border-radius:2px;margin-bottom:3px}
 #namesCap .nmlay{margin-left:6px}
+
+/* ---------- Lines view (the archive's research lines, over the canvas) ---------- */
+#linesView{display:none;position:fixed;z-index:38;left:0;right:0;top:64px;bottom:0;overflow:auto;box-sizing:border-box;background:var(--lk-paper);color:var(--lk-ink);padding:18px max(16px,calc((100vw - 980px)/2)) calc(var(--dock-h,130px) + 24px);font:600 14px/1.5 Nunito,system-ui}
+#linesView.on{display:block}
+#linesView .lgx{position:fixed;top:72px;right:16px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:2px solid var(--lk-line);border-radius:50%;background:var(--lk-card);color:var(--lk-ink);cursor:pointer}
+#linesView .lgx:hover,#linesView .lgx:focus-visible{background:var(--lk-hover);outline:none}
+#linesView .lgx svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round}
+#linesView h2{margin:0 40px 6px 0;font:400 26px/1.15 "Lilita One",system-ui;text-wrap:balance}
+#linesView h3{margin:0;font:900 16px/1.25 Nunito,system-ui}
+#linesView h4{margin:0 0 4px;font:900 14px Nunito,system-ui}
+#linesView p{margin:6px 0;max-width:70ch}
+#linesView a{color:var(--lk-accent);font-weight:800}
+#linesView .lnsrc{color:var(--lk-soft);font-size:12.5px;font-weight:700}
+#linesView .lnh{margin:26px 0 10px;font:800 11px Nunito,system-ui;letter-spacing:.07em;text-transform:uppercase;color:var(--lk-mute)}
+#linesView .lnchip{display:inline-block;margin:0 8px 0 0;padding:1px 9px;border:2px solid var(--lc,var(--lk-line));border-radius:999px;font:800 11px Nunito,system-ui;white-space:nowrap}
+#linesView small{color:var(--lk-soft);font:700 12px/1.35 Nunito,system-ui}
+#linesView .lnlanes{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;margin-top:16px}#linesView .lncap summary{cursor:pointer;font:800 12.5px Nunito,system-ui;color:var(--lk-accent)}
+#linesView .lnlane>header small{flex:1 1 200px;min-width:0}
+#linesView .lnlane{background:var(--lk-card);border:2px solid var(--lk-line);border-radius:14px;padding:12px 14px 10px;border-left:6px solid var(--lc)}
+#linesView .lnlane>header{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+#linesView .lnlane>header h3{flex:1 1 220px}
+#linesView .lntrack{display:flex;gap:0;overflow-x:auto;padding:8px 0 4px;margin-top:4px}
+#linesView .lnst{flex:0 0 150px;position:relative;text-align:left;border:0;background:transparent;color:var(--lk-ink);padding:22px 8px 8px;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;gap:2px}
+#linesView .lnst::before{content:"";position:absolute;left:0;right:0;top:9px;border-top:4px solid var(--lc)}
+#linesView .s-inferred .lnst::before{border-top-style:dashed}
+#linesView .s-origin-unknown .lnst::before{border-top-style:dotted}
+#linesView .s-family-lore .lnst::before{border-top-style:dashed;opacity:.45}
+#linesView .lnd{position:absolute;left:10px;top:2px;width:16px;height:16px;border-radius:50%;background:var(--lk-card);border:4px solid var(--lc);box-sizing:border-box}
+#linesView .lnst:hover,#linesView .lnst:focus-visible{background:var(--lk-hover);outline:none}
+#linesView .lnst.on{background:var(--lk-accent-soft)}
+#linesView .lnst b{font:900 13.5px/1.2 Nunito,system-ui}
+#linesView .lnc{font:800 11px Nunito,system-ui;color:var(--lk-soft)}#linesView .lnc.you{color:var(--lk-fa)}
+#linesView .lnends{flex:0 0 auto;display:flex;flex-direction:column;gap:3px;padding:22px 8px 8px;min-width:130px}
+#linesView .lnends a,#linesView .lnends span{font:800 12.5px Nunito,system-ui}
+#linesView .lndet{border-top:2px dashed var(--lk-line);margin-top:6px;padding-top:10px}
+#linesView .lnpens{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+#linesView .lnpen{background:var(--lk-card);border:2px solid var(--lk-line);border-radius:14px;padding:12px 14px}
+#linesView .lnpen.k-different-stock{border-style:dashed}
+#linesView .lnitems{display:flex;flex-wrap:wrap;gap:4px 12px;margin:8px 0}
+#linesView .lnbr{margin:0;padding-left:18px;max-width:80ch}#linesView .lnbr li{margin:6px 0}
+#linesView .lk-btn{margin-top:6px}
+.lines-on #stage{visibility:hidden}
+@media (max-width:640px){#linesView{padding-left:16px;padding-right:16px}#linesView .lnst{flex-basis:130px}}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -793,6 +836,7 @@ html:not(.rzopen) #rz{display:none}
 <div id="toast" class="lk-toast"></div>
 <div class="dock"><div class="srow"><span class="si" id="si"></span><input id="q" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Search people"><span class="cnt" id="cnt"></span></div><div id="rz" aria-label="Relate two people"><div class="rzs" data-s="0" tabindex="0" role="button"></div><div class="rzm" title="Drop two people here and the whole path between them is drawn">&#8644;<small>how related</small></div><div class="rzs" data-s="1" tabindex="0" role="button"></div><div class="rzx"><span id="rzmsg"></span><button class="lk-btn is-small" id="rzClr" type="button">Clear</button></div></div><div class="tabs" id="tabs"></div><div class="shelf" id="shelf"></div></div>
 <script type="application/json" id="corpus">null</script>
+<script type="application/json" id="lines">null</script>
 <script type="application/json" id="period">{
  "v": 1,
  "note": "Which sources matter in which period. Each id is a provider id in the Record Atlas's providers.json; the name, link, access class and country scope are the Atlas's and are read at run time, so nothing here can drift from it. An id the Atlas no longer holds is skipped. This file is a candidate to move into the Atlas itself (data/period-sources.json), where the catalogues live. `service` lists the ids that are military service or war-dead records: they are not offered for someone too young (under 17 by the end) or too old (over 55 at the start) to have served, and the plan says so.",
@@ -2200,6 +2244,150 @@ html:not(.rzopen) #rz{display:none}
   const API = { compare, candidates, judge, nameScore, up, down, ancLabel };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCC = API;
 })(typeof window !== 'undefined' ? window : globalThis);
+
+/* lanes.js — the engine behind the canvas's Lines mode.
+ *
+ * An archive's "lines" drawing (Defranceschi's /lines/) is a set of JUDGEMENTS: which families of one surname are lanes, how far each lane's evidence reaches
+ * (documented, inferred, origin unknown, family lore), the dated places along it, and the households the archive has read but cannot honestly place on any
+ * lane (the pens). The archive publishes it as data (/roots/lines.json, the same object its page draws). This file reads that data and joins it, live, to the
+ * people the canvas holds. It decides nothing about descent:
+ *
+ *   - A lane's status, span, places and notes are the archive's, shown as written. The canvas never upgrades a status and never moves a person onto a lane.
+ *   - "Recorded here" at a lane's place is a plain match of the place's name against where people were born, died or stopped. It is labelled as that, never as
+ *     "on this lane". A node that is not a place the tree uses (a person's name, "Taken off") simply has no count.
+ *   - A pen's members are person ids the ARCHIVE listed; the canvas counts how many of them are on this canvas and can put them there.
+ *   - Your own file (a GEDCOM or tree.json) is laid over the lanes the same way: your people recorded at a lane's place, and whether they carry the family's
+ *     surname. A suggestion to look at, never a join.
+ *
+ * Pure: data in, data out; no DOM. Tested by test/test-lanes.js. The text of the file is cut and typed before use; the canvas escapes it again when it draws it. */
+(function (root) {
+  'use strict';
+
+  const S = (v, n) => (typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, n) : '');
+  const STATUSES = ['documented', 'inferred', 'origin-unknown', 'family-lore'];
+  const KINDS = ['not-yet-placed', 'different-stock'];
+  const path = v => { const s = typeof v === 'string' ? v.trim() : ''; return /^\/(?!\/)[^\s<>"'\\]{0,300}$/.test(s) ? s : ''; };   /* a path on the archive's own site, nothing else */
+  const yearN = v => { if (v == null || v === '') return null; const m = /^\s*(\d{3,4})\s*$/.exec(String(v)); return m ? +m[1] : null; };
+
+  /* ---- reading the file ---- */
+  function readLines(raw) {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw) || !Array.isArray(raw.lanes)) return null;
+    const node = n => {
+      if (Array.isArray(n)) return { place: S(n[0], 120), year: S(String(n[1] == null ? '' : n[1]), 40), why: S(n[2], 900), person: '', evidence: '' };
+      const o = n && typeof n === 'object' ? n : {};
+      return { place: S(o.place != null ? o.place : o.name, 120), year: S(String(o.year == null ? '' : o.year), 40), why: S(o.why, 900), person: S(o.person, 120), evidence: S(o.evidence, 20) };
+    };
+    const end = n => {
+      if (Array.isArray(n)) return { place: S(n[0], 120), href: path(n[1]), why: S(n[2], 900) };
+      const o = n && typeof n === 'object' ? n : {};
+      return { place: S(o.place != null ? o.place : o.name, 120), href: path(o.href), why: S(o.why, 900) };
+    };
+    const lanes = raw.lanes.slice(0, 40).filter(l => l && typeof l === 'object').map((l, i) => ({
+      key: S(l.key, 60) || 'lane-' + (i + 1), label: S(l.label, 160), href: path(l.href), read: S(l.read, 80),
+      status: STATUSES.includes(l.status) ? l.status : null, statusNote: S(l.statusNote, 200),
+      span: Array.isArray(l.span) ? [yearN(l.span[0]), yearN(l.span[1])] : null,
+      nodes: (Array.isArray(l.nodes) ? l.nodes : []).slice(0, 60).map(node).filter(n => n.place),
+      ends: (Array.isArray(l.ends) ? l.ends : []).slice(0, 60).map(end).filter(n => n.place),
+    })).filter(l => l.label);
+    const pens = (Array.isArray(raw.pens) ? raw.pens : []).slice(0, 20).filter(p => p && typeof p === 'object').map((p, i) => ({
+      id: S(p.id, 60) || 'pen-' + (i + 1), kind: KINDS.includes(p.kind) ? p.kind : 'not-yet-placed', head: S(p.head, 200), note: S(p.note, 1500),
+      items: (Array.isArray(p.items) ? p.items : []).slice(0, 80).map(end).filter(n => n.place),
+      members: [...new Set((Array.isArray(p.members) ? p.members : []).map(m => (typeof m === 'string' ? m : m && typeof m === 'object' ? m.person : '')).map(m => S(m, 120)).filter(Boolean))].slice(0, 5000),
+    }));
+    const bridges = (Array.isArray(raw.bridges) ? raw.bridges : []).slice(0, 60).filter(b => b && typeof b === 'object').map(b => ({
+      from: S(b.from, 120), to: S(b.to, 120), conf: S(b.conf, 20), label: S(b.label, 400), href: path(b.href),
+    })).filter(b => b.from && b.to);
+    if (!lanes.length) return null;
+    return { title: S(raw.title, 200), caption: S(raw.caption, 2500), unplacedAfter: S(raw.unplacedAfter, 60), host: S(raw.host, 100), lanes, pens, bridges };
+  }
+
+  /* ---- the archive's own words for a lane (the kit's statusLine, ported so the canvas says what the page says) ---- */
+  function spanText(span) {
+    if (!Array.isArray(span)) return '';
+    const a = span[0], b = span[1];
+    if (a && b) return a === b ? String(a) : a + '–' + b;
+    if (a) return 'from ' + a;
+    if (b) return 'to ' + b;
+    return '';
+  }
+  function statusLine(lane) {
+    const tier = lane && lane.status;
+    if (!tier) return { tier: null, text: '' };
+    const sp = spanText(lane.span), note = lane.statusNote || '';
+    const lead = tier === 'family-lore' ? 'Family lore' : sp ? 'Documented ' + sp : '';
+    const tail = note || { documented: '', inferred: 'origin inferred', 'origin-unknown': 'origin not found', 'family-lore': 'not documented' }[tier];
+    return { tier, text: lead && tail ? lead + ' · ' + tail : lead || tail || 'Documented' };
+  }
+  function penCount(p) {
+    const out = [];
+    if (p.items.length) out.push(p.kind === 'different-stock' ? p.items.length + ' kept apart' : p.items.length + (p.items.length === 1 ? ' household' : ' households'));
+    if (p.members.length) out.push(p.members.length + (p.members.length === 1 ? ' person' : ' people'));
+    return out.join(' · ');
+  }
+
+  /* ---- places and years ---- */
+  const fold = s => String(s || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  /* "Rijeka, Modrus-Fiume, Hungary" is Rijeka. A node written "Germany — Pfullingen" has no single place, so it matches nothing. */
+  const placeKey = s => fold(String(s || '').split(',')[0].replace(/\(.*?\)/g, ''));
+  /* "1679" → [1679,1679]; "1800s" → [1800,1809]; "by 1818" → [1818,1818]; "1737–1759" → [1737,1759]; "–" or "" → null */
+  function yearsOf(v) {
+    const s = String(v == null ? '' : v);
+    let m = /(\d{4})\s*[–-]\s*(\d{4})/.exec(s); if (m) return [+m[1], +m[2]];
+    m = /(\d{3})0s/.exec(s); if (m) return [+m[1] * 10, +m[1] * 10 + 9];
+    m = /(\d{4})s/.exec(s); if (m) return [+m[1], +m[1] + 9];
+    m = /(\d{4})/.exec(s); return m ? [+m[1], +m[1]] : null;
+  }
+
+  /* where each person of ONE archive (index `a` in M.archives) was recorded: key → [{i, role, year}]. A living card carries no place, so it is never here. */
+  function placeIndex(M, a) {
+    const idx = new Map(), add = (k, e) => { if (!k) return; if (!idx.has(k)) idx.set(k, []); const l = idx.get(k); if (!l.some(x => x.i === e.i && x.role === e.role)) l.push(e); };
+    for (const p of M.P) {
+      if (p.a !== a || p.living) continue;
+      add(placeKey(p.bp), { i: p.i, role: 'born', year: p.by == null ? null : p.by });
+      add(placeKey(p.dp), { i: p.i, role: 'died', year: p.dy == null ? null : p.dy });
+      for (const s of p.route || []) add(placeKey(s.name), { i: p.i, role: 'lived', year: s.year == null ? null : s.year });
+    }
+    return idx;
+  }
+
+  /* who is recorded at one node's place. `known` is false when no one in this tree uses that name as a place (the node is not a place the tree has: say nothing).
+     `near` are those recorded within `slack` years of the node's date, when it has one. */
+  function atNode(idx, node, slack) {
+    const k = placeKey(node.place), list = idx.get(k) || [], yr = yearsOf(node.year), sl = slack == null ? 30 : slack;
+    const seen = new Map();
+    for (const e of list) { const q = seen.get(e.i) || { i: e.i, roles: [], year: e.year }; if (!q.roles.includes(e.role)) q.roles.push(e.role); if (q.year == null && e.year != null) q.year = e.year; seen.set(e.i, q); }
+    const all = [...seen.values()];
+    const near = yr ? all.filter(q => q.year != null && q.year >= yr[0] - sl && q.year <= yr[1] + sl) : [];
+    return { known: idx.has(k), all, near, hasDate: !!yr };
+  }
+
+  /* a pen's members, as people on this canvas: [{key,id,p}] present, and how many the archive listed. `archKey` is the archive's key (M.archives[a].k). */
+  function penOnCanvas(pen, M, archKey) {
+    const here = [];
+    for (const id of pen.members) { const p = M.byKey.get(archKey + ':' + id); if (p && !p.living) here.push(p); }
+    return { listed: pen.members.length, here };
+  }
+
+  /* Your own file, laid over the archive's lanes. `you` and `arch` are archive indexes in M. For every lane node that is a place in your tree: your people recorded
+     there, and which of them carry a surname the archive's people carry. Plus a summary. A suggestion to look at; nothing here joins anyone. */
+  function overlay(M, lines, you, arch) {
+    const surs = new Set();
+    for (const p of M.P) if (p.a === arch && !p.living) { const f = fold(p.sur); if (f) surs.add(f); for (const s of p.surAlso || []) { const g = fold(s); if (g) surs.add(g); } }
+    const idx = placeIndex(M, you), byNode = new Map();
+    let placed = new Set(), withName = new Set();
+    for (const l of lines.lanes) l.nodes.forEach((n, j) => {
+      const r = atNode(idx, n, 40); if (!r.all.length) return;
+      const people = r.all.map(q => ({ i: q.i, roles: q.roles, year: q.year, sameName: surs.has(fold(M.P[q.i].sur)) }));
+      byNode.set(l.key + '#' + j, people);
+      people.forEach(q => { placed.add(q.i); if (q.sameName) withName.add(q.i); });
+    });
+    let yours = 0, yoursName = 0; for (const p of M.P) if (p.a === you && !p.living) { yours++; if (surs.has(fold(p.sur))) yoursName++; }
+    return { byNode, placed: placed.size, withName: withName.size, yours, yoursName, surnames: surs.size };
+  }
+
+  const API = { readLines, statusLine, spanText, penCount, placeKey, yearsOf, fold, placeIndex, atNode, penOnCanvas, overlay };
+  if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCLanes = API;
+})(typeof window !== 'undefined' ? window : globalThis);
 </script>
 <script>(function(){'use strict';
 /* core.js — state, persistence, undo, geometry, the card elements. Everything below shares one scope (build.py wraps the files in one IIFE). */
@@ -2234,6 +2422,7 @@ const ICON = {
   search: '<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/>', theme: '<circle cx="12" cy="12" r="8"/><path d="M12 4v16"/><path d="M12 4a8 8 0 010 16z" fill="currentColor"/>',
   clear: 'M4 7h16M9.5 7V4.5h5V7M6 7l1 13h10l1-13M10 11v5.5M14 11v5.5', gear: '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>',
   map: 'M4 6l5-2 6 2 5-2v14l-5 2-6-2-5 2zM9 4v14M15 6v14',
+  lines: 'M3 6h6c3 0 3 6 6 6h6M3 12h4M3 18h6c3 0 3-6 6-6',
   pencil: 'M4 20l1-4.5L16.5 4a2 2 0 013 3L8 18.5zM14.5 6l3.5 3.5',
   blood: 'M12 3.5c3.2 4.2 6 7.2 6 10.6a6 6 0 01-12 0c0-3.4 2.8-6.4 6-10.6z',
   folder: 'M3 7.5A1.5 1.5 0 014.5 6H9l2 2.2h8.5A1.5 1.5 0 0121 9.7V17.5a1.5 1.5 0 01-1.5 1.5h-15A1.5 1.5 0 013 17.5z',
@@ -3832,6 +4021,131 @@ const namesDragEnd = e => {
 };
 document.addEventListener('pointerup', namesDragEnd); document.addEventListener('pointercancel', namesDragEnd);
 
+/* lanesui.js — the Lines view: an archive's own drawing of its research lines, live, beside the tree on the canvas.
+ *
+ * The archive publishes the drawing as data (/roots/lines.json); the Record Atlas page around the canvas fetches it and hands it over in memory (window.parent.RR.lines,
+ * and RR.linesArch, the key of the archive that wrote it). Nothing here is fetched or sent by the canvas. TCLanes (lanes.js) reads it and does the joins; this file only draws.
+ *
+ * What it shows is the archive's judgement, as written: each lane's status and span, its dated places, where it goes on, the households not yet placed on any lane (the pens),
+ * and the links the archive has argued between them. What it adds is plain counting: who this tree records at a lane's place, labelled as that and never as "on the lane". */
+const LN = { raw: null, lines: null, sel: null, open: false };
+const LN_COL = ['#2A7A8C', '#9B3F86', '#C26A1F', '#3F8A3A', '#B5483A', '#5B6FB5', '#8A7A2A'];   /* one colour per lane, by order; the archive's own colours are CSS variables of its site */
+const LN_STATUS = { documented: 'Documented', inferred: 'Inferred', 'origin-unknown': 'Origin unknown', 'family-lore': 'Family lore' };
+let lnOwn;   /* the standalone file carries a snapshot of the archive's lines; the embed is handed the live ones by the page around it */
+const lnRaw = () => {
+  if (EMBED) return (window.parent && window.parent.RR && window.parent.RR.lines) || null;
+  if (lnOwn === undefined) { try { lnOwn = JSON.parse(document.getElementById('lines').textContent); } catch (e) { lnOwn = null; } }
+  return lnOwn;
+};
+function lnData() {
+  const raw = lnRaw(); if (!raw) return null;
+  if (raw !== LN.raw) { LN.raw = raw; LN.lines = TCLanes.readLines(raw); LN.sel = null; LN._idx = null; }
+  return LN.lines;
+}
+const linesAvail = () => !!lnData();
+const lnPlain = s => String(s || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();   /* the archive's caption carries a little markup; the canvas shows the words only */
+function lnArch() { const R = EMBED && window.parent && window.parent.RR; const k = R ? R.linesArch : 'defranceski'; const i = M.archives.findIndex(a => a.k === k); return i >= 0 ? i : M.archives.findIndex(a => a.k !== 'you'); }
+function lnYou() { return M.archives.findIndex(a => a.k === 'you'); }
+function lnHost(l) { return l && /^[a-z0-9.-]{3,100}$/i.test(l.host || '') ? 'https://' + l.host : ''; }
+function lnIdx() {
+  const a = lnArch(); if (a < 0) return null;
+  if (!LN._idx || LN._idx.M !== M) LN._idx = { M, a, ix: TCLanes.placeIndex(M, a) };
+  return LN._idx;
+}
+function lnOverlay() {
+  const y = lnYou(), a = lnArch(); if (y < 0 || a < 0 || y === a) return null;
+  if (!LN._ov || LN._ov.M !== M) LN._ov = { M, v: TCLanes.overlay(M, LN.lines, y, a) };
+  return LN._ov.v;
+}
+function lnLink(host, href, text) { return host && href ? `<a href="${esc(host + href)}" target="_blank" rel="noopener noreferrer">${esc(text)} ↗</a>` : ''; }
+
+function lnNode(l, li, n, j) {
+  const ix = lnIdx(), r = ix ? TCLanes.atNode(ix.ix, n, 30) : null, ov = lnOverlay(), mine = ov && ov.byNode.get(l.key + '#' + j);
+  const open = LN.sel && LN.sel.l === li && LN.sel.n === j;
+  let badge = '';
+  if (r && r.known) badge = `<span class="lnc">${r.all.length} recorded here</span>`;
+  if (mine) badge += `<span class="lnc you">${mine.length} in your file</span>`;
+  return `<button type="button" class="lnst${open ? ' on' : ''}" data-ln-node="${li}:${j}" aria-expanded="${open}"><i class="lnd"></i><b>${esc(n.place)}</b><small>${esc(n.year || '')}</small>${badge}</button>`;
+}
+function lnDetail(l, li) {
+  if (!LN.sel || LN.sel.l !== li) return '';
+  const n = l.nodes[LN.sel.n]; if (!n) return '';
+  const host = lnHost(LN.lines), ix = lnIdx(), r = ix ? TCLanes.atNode(ix.ix, n, 30) : null, ov = lnOverlay(), mine = ov && ov.byNode.get(l.key + '#' + LN.sel.n);
+  let h = `<div class="lndet"><h4>${esc(n.place)}${n.year ? ' · ' + esc(n.year) : ''}</h4>`;
+  if (n.why) h += `<p>${esc(n.why)}</p><p class="lnsrc">The archive's own words.</p>`;
+  if (r && r.known) {
+    h += `<p><b>${r.all.length}</b> ${r.all.length === 1 ? 'person is' : 'people are'} recorded at ${esc(n.place)} in this tree (born, died or lived there)`
+      + (r.hasDate ? `; <b>${r.near.length}</b> within 30 years of ${esc(n.year)}` : '') + `. That is where they were recorded, not a claim that they belong to this line.</p>`;
+    const list = (r.hasDate && r.near.length ? r.near : r.all).filter(q => !S.cards.has(M.P[q.i].key));
+    if (list.length) h += `<button type="button" class="lk-btn" data-ln-put="${li}:${LN.sel.n}">Put ${Math.min(12, list.length)} of the ${r.hasDate && r.near.length ? 'nearest in time' : 'people recorded here'} on the canvas</button>`;
+  }
+  if (mine) h += `<p>Your file records <b>${mine.length}</b> here${mine.some(q => q.sameName) ? `, <b>${mine.filter(q => q.sameName).length}</b> with a surname this archive holds` : ''}. A place to look, not a join.</p>`;
+  return h + '</div>';
+}
+function lnLane(l, li) {
+  const host = lnHost(LN.lines), st = TCLanes.statusLine(l), col = LN_COL[li % LN_COL.length];
+  const ends = l.ends.map(e => e.href ? lnLink(host, e.href, e.place) : `<span>${esc(e.place)}</span>`).join('');
+  return `<section class="lnlane s-${l.status || 'none'}" style="--lc:${col}" aria-label="${esc(l.label)}">
+    <header><h3>${esc(l.label)}</h3>${st.tier ? `<span class="lnchip">${esc(LN_STATUS[st.tier] || st.tier)}</span><small>${esc(st.text)}</small>` : ''}${lnLink(host, l.href, l.read || 'The archive\'s page')}</header>
+    <div class="lntrack">${l.nodes.map((n, j) => lnNode(l, li, n, j)).join('') || '<small class="lnnone">No dated places drawn for this line.</small>'}${ends ? `<div class="lnends"><small>goes on to</small>${ends}</div>` : ''}</div>
+    ${lnDetail(l, li)}</section>`;
+}
+function lnPen(p) {
+  const host = lnHost(LN.lines), onC = TCLanes.penOnCanvas(p, M, (M.archives[lnArch()] || {}).k);
+  const rest = onC.here.filter(x => !S.cards.has(x.key));
+  return `<section class="lnpen k-${p.kind}"><h3>${esc(p.head || (p.kind === 'different-stock' ? 'Kept apart' : 'Not yet placed'))}</h3><span class="lnchip">${p.kind === 'different-stock' ? 'Different stock' : 'Not yet placed'}</span><small>${esc(TCLanes.penCount(p))}</small>
+    ${p.note ? `<p>${esc(p.note)}</p>` : ''}
+    ${p.items.length ? `<div class="lnitems">${p.items.map(e => e.href ? lnLink(host, e.href, e.place) : `<span>${esc(e.place)}</span>`).join('')}</div>` : ''}
+    ${onC.listed ? `<p class="lnsrc">${onC.here.length} of the ${onC.listed} people the archive lists are in this tree.</p>` : ''}
+    ${rest.length ? `<button type="button" class="lk-btn" data-ln-pen="${esc(p.id)}">Put ${Math.min(30, rest.length)} on the canvas</button>` : ''}</section>`;
+}
+function linesHTML() {
+  const L = LN.lines, host = lnHost(L), ov = lnOverlay();
+  return `<button type="button" class="lgx" data-ln-x aria-label="Close the Lines view">${icon('x', 'lk-icon')}</button>
+    <div class="lnhead"><h2>${esc(L.title || 'Research lines')}</h2>
+    <p class="lnsrc">Drawn by the archive${host ? ' (' + esc(L.host) + ')' : ''}, as it wrote it. Each line's status is the archive's judgement; the canvas does not change it or move anyone onto a line.</p>
+    ${L.caption ? `<details class="lncap"><summary>About this drawing</summary><p>${esc(lnPlain(L.caption))}</p></details>` : ''}
+    ${ov ? `<p class="lnsrc">Your file is laid over these lines: ${ov.placed} of your ${ov.yours} people are recorded at a place on a line${ov.yoursName ? `, and ${ov.yoursName} carry a surname this archive holds` : ''}.</p>` : ''}</div>
+    <div class="lnlanes">${L.lanes.map(lnLane).join('')}</div>
+    ${L.pens.length ? `<h3 class="lnh">Households read but not placed</h3><div class="lnpens">${L.pens.map(lnPen).join('')}</div>` : ''}
+    ${L.bridges.length ? `<h3 class="lnh">Links the archive has argued</h3><ul class="lnbr">${L.bridges.map(b => `<li><b>${esc(b.from)}</b> → <b>${esc(b.to)}</b>${b.conf ? ` <span class="lnchip">${esc(b.conf === 'inf' ? 'inferred' : b.conf)}</span>` : ''} ${esc(b.label)} ${lnLink(host, b.href, 'the page')}</li>`).join('')}</ul>` : ''}`;
+}
+function lnPlace(list, cap) {
+  const v = viewCentre(), cs = [];
+  list.slice(0, cap).forEach(p => { const c = dropPerson(p.i, v.x, v.y); if (c) cs.push(c); });
+  refreshAll(); drawEdges(); runSearchMarks(); renderInfo();
+  if (cs.length) fit(cs, { maxK: 1, ms: 380 });
+  toast(`${cs.length} on the canvas${list.length > cap ? ` (the first ${cap} of ${list.length}; press again for more)` : ''}.`, 3500);
+}
+function openLines(on) {
+  const el = $('#linesView'); if (!el) return;
+  if (on == null) on = !el.classList.contains('on');
+  if (on && !lnData()) { toast('This archive has not published its lines.', 3000); return; }
+  if (on) { openMainMenu(false); openBloodMenu(false); const keep = el.scrollTop; el.innerHTML = linesHTML(); el.scrollTop = keep; }
+  el.classList.toggle('on', on); document.documentElement.classList.toggle('lines-on', on);
+  if (on) { const x = el.querySelector('[data-ln-x]'); if (x) x.focus({ preventScroll: true }); }
+}
+function linesRefresh() { const el = $('#linesView'); if (el && el.classList.contains('on') && lnData()) { const k = el.scrollTop; el.innerHTML = linesHTML(); el.scrollTop = k; } }
+function wireLines() {
+  if ($('#linesView')) return;
+  const el = document.createElement('div'); el.id = 'linesView'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Research lines'); document.body.appendChild(el);
+  el.addEventListener('click', e => {
+    if (e.target.closest('[data-ln-x]')) { openLines(false); return; }
+    const nd = e.target.closest('[data-ln-node]');
+    if (nd) { const [l, n] = nd.dataset.lnNode.split(':').map(Number); LN.sel = LN.sel && LN.sel.l === l && LN.sel.n === n ? null : { l, n }; linesRefresh(); return; }
+    const put = e.target.closest('[data-ln-put]');
+    if (put) { const [li, j] = put.dataset.lnPut.split(':').map(Number), l = LN.lines.lanes[li], n = l && l.nodes[j], ix = lnIdx(); if (!n || !ix) return;
+      const r = TCLanes.atNode(ix.ix, n, 30), yr = TCLanes.yearsOf(n.year), mid = yr ? (yr[0] + yr[1]) / 2 : 0;
+      const list = (r.hasDate && r.near.length ? r.near : r.all).filter(q => !S.cards.has(M.P[q.i].key)).sort((a, b) => (yr ? Math.abs((a.year || 0) - mid) - Math.abs((b.year || 0) - mid) : 0)).map(q => M.P[q.i]);
+      openLines(false); lnPlace(list, 12); return; }
+    const pen = e.target.closest('[data-ln-pen]');
+    if (pen) { const p = LN.lines.pens.find(x => x.id === pen.dataset.lnPen); if (!p) return; const onC = TCLanes.penOnCanvas(p, M, (M.archives[lnArch()] || {}).k);
+      openLines(false); lnPlace(onC.here.filter(x => !S.cards.has(x.key)), 30); }
+  });
+  addEventListener('keydown', e => { if (e.key === 'Escape' && el.classList.contains('on')) { e.stopPropagation(); openLines(false); } }, true);
+  if (EMBED) addEventListener('message', e => { if (e.origin === location.origin && e.data && e.data.tcLines) { LN.raw = null; linesRefresh(); } });
+}
+
 /* ui.js — the shelf and search, pan / zoom / drag, the side panel, pathways, themes, phone mode, start-up. */
 
 /* ---------------- selection ---------------- */
@@ -4287,9 +4601,10 @@ function comparePanel() {
 function mainMenu() {
   const m = $('#mainMenu');
   const cur = document.documentElement.getAttribute('data-theme') || 'sticker';
-  const item = (k, ic, t, sub) => `<button class="mmi${(k === 'legend' ? $('#legendCard') && $('#legendCard').classList.contains('on') : S.tab === k && S.infoOpen !== false && $('#info').classList.contains('on')) ? ' on' : ''}" data-mm="${k}">${icon(ic, 'lk-icon')}<span><b>${t}</b><small>${sub}</small></span></button>`;
+  const item = (k, ic, t, sub) => `<button class="mmi${(k === 'lines' ? $('#linesView') && $('#linesView').classList.contains('on') : k === 'legend' ? $('#legendCard') && $('#legendCard').classList.contains('on') : S.tab === k && S.infoOpen !== false && $('#info').classList.contains('on')) ? ' on' : ''}" data-mm="${k}">${icon(ic, 'lk-icon')}<span><b>${t}</b><small>${sub}</small></span></button>`;
   m.innerHTML = `<div class="mmlook">${icon('theme', 'lk-icon')}<span><b>Look</b><span class="mmchips" role="group" aria-label="Look">${THEMES.map(k => `<button type="button" class="mmchip${k === cur ? ' on' : ''}" data-look="${k}" aria-pressed="${k === cur}">${THEME_NAME[k] || (k[0].toUpperCase() + k.slice(1))}</button>`).join('')}</span></span></div>`
     + item('legend', 'info', 'How to read the lines', 'What the line colours, patterns and seals mean')
+    + (linesAvail() ? item('lines', 'lines', 'Research lines', 'The archive\'s own drawing of its families and the roads they took, beside your tree') : '')
     + (cmpAvail() ? item('compare', 'layers', 'Compare with an archive', cmpMode() ? 'Your file beside ' + M.archives[1].name + ', from a marked person' : 'Set your file beside one of the family archives') : '')
     + item('options', 'gear', 'Options', 'Links to MyHeritage and Ancestry, how paths are judged, your file')
     + (SA ? recentHTML() : '');
@@ -4362,7 +4677,7 @@ document.addEventListener('click', e => {
   const lk = e.target.closest('[data-look]');
   if (lk && m.contains(lk)) { setTheme(lk.dataset.look); mainMenu(); return; }
   const t = e.target.closest('[data-mm]');
-  if (t && m.contains(t)) { openMainMenu(false); if (t.dataset.mm === 'legend') openLegend(true); else { openLegend(false); S.tab = t.dataset.mm; S.infoOpen = true; renderInfo(); syncButtons(); } return; }
+  if (t && m.contains(t)) { openMainMenu(false); if (t.dataset.mm === 'lines') openLines(true); else if (t.dataset.mm === 'legend') openLegend(true); else { openLegend(false); S.tab = t.dataset.mm; S.infoOpen = true; renderInfo(); syncButtons(); } return; }
   if (m.classList.contains('on') && !m.contains(e.target) && !e.target.closest('#bMenu')) openMainMenu(false);
   const c = $('#legendCard'); if (c && c.classList.contains('on') && !c.contains(e.target) && !e.target.closest('[data-do="legend"]')) openLegend(false);
 });
@@ -4792,7 +5107,7 @@ function ibtn(act, ic, tip, on) { return `<button type="button" class="ibtn${on 
 /* ---------------- start-up ---------------- */
 function boot() {
   buildFlagSprite();
-  initTheme(); setPhone(); if (S.phone) S.infoOpen = false; wireToolbar(); renderTabs(); runSearch(); dockH();
+  initTheme(); setPhone(); if (S.phone) S.infoOpen = false; wireToolbar(); wireLines(); renderTabs(); runSearch(); dockH();
   loadMark();
   const d = loadSaved();
   const had = restore(d);

@@ -543,6 +543,7 @@ $('#sgAnc').onchange = e => { links.setSite(e.target.value); drawSG(); };
 function wearLook(look) {
   const s = ST.shellScheme(look), r = document.documentElement;
   if (s) r.setAttribute('data-theme', s); else r.removeAttribute('data-theme');
+  if (look === 'sticker' || look === 'paper' || look === 'ground') r.setAttribute('data-look', look); else r.removeAttribute('data-look');   // the Fix list wears the canvas's palette, not just light or dark
   const f = $('#cv'); if (f && f.contentWindow && !f.hidden) f.contentWindow.postMessage({ tcLook: look }, location.origin);
 }
 /* the canvas's Look button asked for the next look: keep it like the drawer does, wear it, and say so if this browser would not keep it */

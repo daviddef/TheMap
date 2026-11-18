@@ -243,14 +243,40 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 @media (max-width: 560px) { .sgpanel { width: 100%; box-shadow: none; } }
 
 /* ---- the full Fix list: a page over the canvas, like "Your file". The rows are fixrows.css's. ---- */
-#fx { --ink: #2b2118; --soft: #6a5a45; --card: #fff7e8; --line: #cdbf9f; --accent: #d9822b; --accent-ink: #fff; --focus: #2b6cb0; --keep: #3f8f4a; --keep-fill: #e3f2e0; --keep-ink: #2c6a36;
-  --fx-ink: var(--ink); --fx-soft: var(--soft); --fx-line: var(--line); --fx-card: var(--card); --fx-accent: var(--accent); --fx-ok: var(--keep); --fx-okfill: var(--keep-fill); --fx-focus: var(--focus); --fx-warn: #c0451f; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #fx { --ink: #f3e9d6; --soft: #c9bda5; --card: #2b2620; --line: #4a4034; --accent-ink: #1d1a16; --focus: #7db4f0; --keep: #6fbf73; --keep-fill: #22331f; --keep-ink: #bfe8b9; --fx-warn: #f08a6a; } }
-:root[data-theme="dark"] #fx { --ink: #f3e9d6; --soft: #c9bda5; --card: #2b2620; --line: #4a4034; --accent-ink: #1d1a16; --focus: #7db4f0; --keep: #6fbf73; --keep-fill: #22331f; --keep-ink: #bfe8b9; --fx-warn: #f08a6a; }
+/* The Fix list wears the canvas's own looks (Sticker, Paper, Ground), the same tokens, fonts and thick-outline, ledge-shadow style, not a generic light or dark.
+   html[data-look] says which one the visitor chose; with no data-look (Automatic) the device picks Sticker or Ground. */
+@font-face { font-family: "Lilita One"; font-weight: 400; font-display: swap; src: url(/tree-canvas/fonts/lilita-one-latin.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Lilita One"; font-weight: 400; font-display: swap; src: url(/tree-canvas/fonts/lilita-one-ext.woff2) format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Nunito"; font-weight: 200 1000; font-display: swap; src: url(/tree-canvas/fonts/nunito-latin.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Nunito"; font-weight: 200 1000; font-display: swap; src: url(/tree-canvas/fonts/nunito-ext.woff2) format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+#fx { --bg: #F1E8D2; --ink: #2b2118; --soft: #6b5a44; --card: #FFFCF3; --line: #E3D6B8; --accent: #D9822B; --accent-ink: #fff; --focus: #2b6cb0; --keep: #3f8a3a; --keep-fill: #E3EFD8; --keep-ink: #2c6a36;
+  --fx-ink: var(--ink); --fx-soft: var(--soft); --fx-line: var(--line); --fx-card: var(--card); --fx-accent: var(--accent); --fx-ok: var(--keep); --fx-okfill: var(--keep-fill); --fx-focus: var(--focus); --fx-warn: #c2452d;
+  --fx-body: Nunito, system-ui, sans-serif; --fx-display: "Lilita One", Impact, system-ui, sans-serif; }
+:root[data-look="paper"] #fx { --bg: #F4E3CA; --ink: #3D2F21; --soft: #554636; --card: #D8C8B1; --line: #BEAD98; --accent: #DD7D17; --keep-fill: color-mix(in srgb, #3f8a3a 22%, #D8C8B1); --keep-ink: #1d5017; --fx-warn: #9a3220; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #fx { --bg: #291A0A; --ink: #D8C8B1; --soft: #A3937E; --card: #3D2F21; --line: #554636; --accent: #DD7D17; --accent-ink: #291A0A; --focus: #7db4f0; --keep: #8cc77f; --keep-fill: #27401d; --keep-ink: #b5dc96; --fx-warn: #e8836b; } }
+:root[data-theme="dark"] #fx { --bg: #291A0A; --ink: #D8C8B1; --soft: #A3937E; --card: #3D2F21; --line: #554636; --accent: #DD7D17; --accent-ink: #291A0A; --focus: #7db4f0; --keep: #8cc77f; --keep-fill: #27401d; --keep-ink: #b5dc96; --fx-warn: #e8836b; }
 #fx[hidden] { display: none; }
-#fx { position: fixed; inset: 0; z-index: 20; overflow: auto; background: #efe6d2; color: var(--ink); padding: 24px 16px 64px; font-family: system-ui, sans-serif; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #fx { background: #1d1a16; } }
-:root[data-theme="dark"] #fx { background: #1d1a16; }
+#fx { position: fixed; inset: 0; z-index: 20; overflow: auto; background: var(--bg); color: var(--ink); padding: 24px 16px 64px; font: 600 15px/1.4 var(--fx-body); }
+/* the sticker look itself: every word in the canvas's fonts, 2px outlines, a hard ledge underneath, pills for buttons that lift on hover and press down */
+#fx *:not(.fx-pid) { font-family: var(--fx-body); }
+#fx h1#fxTitle { font-family: var(--fx-display); }
+#fx .stbtn, #fx .fx-openall, #fx .fx-cand, #fx .fx-add { border: 2px solid var(--line); border-radius: 99px; box-shadow: 0 2px 0 var(--line); font-weight: 800; transition: transform .12s ease, box-shadow .12s ease, border-color .15s ease, color .15s ease; }
+#fx .stbtn { font-size: 13px; padding: 8px 16px; } #fx .stbtn:first-child { font-size: 14px; }
+#fx .stbtn:hover, #fx .fx-openall:hover:not(:disabled), #fx .fx-cand:hover, #fx .fx-add:hover { transform: translateY(-1px); border-color: var(--accent); }
+#fx .stbtn:active, #fx .fx-openall:active, #fx .fx-cand:active, #fx .fx-add:active { transform: translateY(2px); box-shadow: none; }
+#fx .stbtn.primary { color: var(--accent-ink); }
+#fx .fxtools, #fx .fxkeep { border-radius: 16px; box-shadow: 0 3px 0 var(--line); }
+#fx .fxkeep { border-style: solid; }
+#fx .fxf input, #fx .fxf select { border-radius: 10px; font-weight: 700; }
+#fx .fxbar { border-width: 2px; height: 14px; box-shadow: 0 2px 0 var(--line); }
+#fx .fx-row { border: 2px solid var(--line); border-radius: 16px; box-shadow: 0 3px 0 var(--line); padding: 12px 14px; font-weight: 600; }
+#fx .fx-row.done { border-style: dashed; box-shadow: none; } #fx .fx-row.asis { border-style: dotted; box-shadow: none; }
+#fx .fx-row.compact { padding: 8px 9px; }
+#fx .fx-ib { border-width: 2px; box-shadow: 0 2px 0 var(--c-line); transition: transform .12s ease, box-shadow .12s ease, color .15s ease, border-color .15s ease; }
+#fx .fx-ib:hover { transform: translateY(-1px); } #fx .fx-ib:active { transform: translateY(2px); box-shadow: none; }
+#fx .fx-ghead { border-bottom-width: 2px; } #fx .fx-sec { border-bottom-width: 2px; }
+#fx .fx-pr { border-width: 2px; }
+@media (prefers-reduced-motion: reduce) { #fx .stbtn:hover, #fx .fx-openall:hover, #fx .fx-cand:hover, #fx .fx-add:hover, #fx .fx-ib:hover, #fx .stbtn:active, #fx .fx-openall:active, #fx .fx-cand:active, #fx .fx-add:active, #fx .fx-ib:active { transform: none; } }
 .fxwrap { width: min(980px, 100%); margin: 0 auto; display: grid; gap: 18px; }
 .fxhead { display: grid; gap: 10px; justify-items: start; }
 #fx h1 { margin: 0; font: 400 36px/1.05 "Lilita One", system-ui, sans-serif; letter-spacing: .01em; }

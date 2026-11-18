@@ -99,3 +99,28 @@ test("the page accepts a look only from the canvas, only one it knows, and keeps
   assert.match(app, /ST\.LOOKS\.includes\(d\.tcLookSet\)/, "an unknown value is ignored");
   assert.match(app, /ST\.write\(\{\s*look\s*\}\)/, "kept through the same settings record the drawer uses");
 });
+
+/* The Fix list page wears the canvas's own look (Sticker, Paper, Ground), not just light or dark. */
+test("the boot script and the page say which colour look is worn, and only the three colour looks", () => {
+  for (const look of ["sticker", "paper", "ground"]) assert.equal(runBoot({ "ra-settings-v1": JSON.stringify({ v: 1, look }) })["data-look"], look, look);
+  for (const look of ["auto", "lanes", "countries", "names"]) assert.equal(runBoot({ "ra-settings-v1": JSON.stringify({ v: 1, look }) })["data-look"], undefined, look);
+  assert.match(app, /data-look/, "wearLook keeps data-look in step with data-theme");
+});
+
+test("the Fix list's colours are the canvas's own for each look, and its fonts are files from this site, never another host", () => {
+  const css = read("../public/tree-canvas/page.css");
+  const tok = name => { const m = new RegExp("\\[data-theme=\"" + name + "\"\\]\\{([^}]*)\\}").exec(template); assert.ok(m, name); return m[1]; };
+  const lk = (block, k) => (new RegExp("--lk-" + k + ":(#[0-9A-Fa-f]{6})").exec(block) || [])[1];
+  for (const [look, scope] of [["sticker", "#fx {"], ["paper", '[data-look="paper"] #fx {'], ["ground", ':root[data-theme="dark"] #fx {']]) {
+    const at = css.indexOf(scope); assert.ok(at >= 0, look);
+    const block = css.slice(at, css.indexOf("}", at));
+    for (const [v, k] of [["bg", "paper"], ["card", "card"], ["line", "line"], ["ink", "ink"]]) {
+      const want = lk(tok(look === "sticker" ? "sticker" : look), k).toLowerCase();
+      assert.ok(block.toLowerCase().includes("--" + v + ": " + want), look + " " + v + " is the canvas's " + want);
+    }
+  }
+  for (const f of ["lilita-one-latin", "lilita-one-ext", "nunito-latin", "nunito-ext"]) assert.ok(fs.existsSync(path.join(here, "../public/tree-canvas/fonts/" + f + ".woff2")), f);
+  assert.doesNotMatch(css, /url\((?!\/tree-canvas\/fonts\/)(?!["']?data:)/, "no font or image from anywhere but this site");
+  assert.match(page, /font-src 'self';/);
+  assert.doesNotMatch(page, /font-src[^;]*(https?:|\*)/);
+});

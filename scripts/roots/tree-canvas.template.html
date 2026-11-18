@@ -486,6 +486,17 @@ select.lk-input{width:auto;padding:4px 8px}
 #bloodMenu .bmrow .lk-btn{width:100%;justify-content:center}
 #bloodMenu .lk-toggle{margin-top:10px}
 .ph #bloodMenu{top:auto;bottom:calc(var(--dock-h,130px) + 16px);left:8px;right:8px;width:auto}
+/* the up arrow's "all": which way to go back */
+#backMenu{display:none;position:fixed;z-index:45;width:272px;max-width:calc(100vw - 16px);box-sizing:border-box;background:var(--lk-card);color:var(--lk-ink);border:2px solid var(--lk-ink);border-radius:16px;box-shadow:0 5px 0 var(--lk-line),0 14px 30px rgba(0,0,0,.18);padding:10px 10px 8px}
+#backMenu.on{display:block}
+#backMenu h4{margin:0 4px 6px;font-size:13px}
+#backMenu .bmsep{margin:8px 4px 3px;font:800 10.5px/1 Nunito,system-ui;letter-spacing:.06em;text-transform:uppercase;color:var(--lk-soft)}
+#backMenu .bmo{all:unset;box-sizing:border-box;display:block;width:100%;padding:6px 8px;border-radius:10px;cursor:pointer}
+#backMenu .bmo b{display:block;font:800 13px/1.2 Nunito,system-ui}
+#backMenu .bmo span{display:block;margin-top:2px;font:600 11.5px/1.25 Nunito,system-ui;color:var(--lk-soft)}
+#backMenu .bmo:hover,#backMenu .bmo:focus-visible{background:color-mix(in srgb,var(--lk-accent) 14%,var(--lk-card));outline:none}
+#backMenu .bmo[disabled]{opacity:.45;cursor:not-allowed}
+
 /* a card that is not a blood relative of the person colouring starts from */
 .card.nb .cb{border-style:dashed;border-color:#8a78b8;background:color-mix(in srgb,var(--lk-card) 78%,#9b86d4)}
 .card.nb .cb::before{background:repeating-linear-gradient(135deg,var(--ac) 0 4px,#9b86d4 4px 8px)}
@@ -2605,7 +2616,7 @@ function cardInner(c) {
   if (parentCards.length) {
     const t = parentCards.map(q => M.P[q].name).join(' and ');
     h += `<button class="hd up" data-act="up" title="How is this made? Show the parents: ${esc(t)}">${icon('up', '')}${parentCards.length}</button>`;
-    h += `<button class="hd all upall hov" data-act="upall" title="All the way back, generation by generation, until the records stop">${icon('upall', '')}all</button>`;
+    h += `<button class="hd all upall hov" data-act="upall" title="All the way back: choose everyone, the father's or mother's side, or just the paternal or maternal line">${icon('upall', '')}all</button>`;
   } else if ((p.f >= 0 || p.m >= 0) && c.up === 0) { c.up = 1; }
   const kidsOff = p.ch.filter(e => !cardOfPerson(e.c));
   if (kidsOff.length) {
@@ -2912,15 +2923,15 @@ function spawn(i, from, dx, dy) { /* a new card born at its neighbour, then glid
   return c;
 }
 /* parents: father and mother as the two ingredients */
-function addParents(c, force) {
+function addParents(c, force, only) {   /* only: 'f' or 'm' adds just that parent (the up-arrow's "all" can follow one line) */
   const p = personOf(c), made = [];
   if (!force && S.opts.stopAtNotProven) {
-    const links = TC.parentLinks(M, p);
+    const links = TC.parentLinks(M, p).filter(l => !only || l.via === only);
     if (links.length && links.every(l => l.grade === 0)) { c.stopG = true; c.up = 1; return made; }
   }
   c.stopG = false;
-  [p.f, p.m].forEach((q, k) => { if (q >= 0 && !cardOfPerson(q)) made.push(spawn(q, c, (k ? 1 : -1) * 60, -ROWH * .6)); });
-  c.up = 1;
+  [p.f, p.m].forEach((q, k) => { if (q >= 0 && !cardOfPerson(q) && (!only || only === (k ? 'm' : 'f'))) made.push(spawn(q, c, (only ? 0 : (k ? 1 : -1) * 60), -ROWH * .6)); });
+  c.up = [p.f, p.m].every(q => q < 0 || cardOfPerson(q)) ? 1 : 0;   /* still 0 while the other parent is not on the canvas, so the up arrow stays */
   return made;
 }
 function addKids(c) {
@@ -3171,17 +3182,21 @@ async function doBridge(c, brId) {
 }
 /* all the way back: one generation at a time until the records stop */
 let walking = false;
-async function doAllBack(c, force) {
-  if (walking) return; walking = true;
+/* mode: 'both' every ancestor (the default); 'fside' / 'mside' start with the father / the mother and then take both of each one's parents;
+   'fline' / 'mline' follow one parent at every step: the direct paternal or maternal line, a single person per generation */
+const BACK_LABEL = { both: '', fside: "the father's side: ", mside: "the mother's side: ", fline: 'the paternal line: ', mline: 'the maternal line: ' };
+async function doAllBack(c, force, mode) {
+  if (walking) return; walking = true; mode = mode || 'both';
   try {
     snapshot();
     let cur = [c], gen = 0, added = 0, ends = [];
     while (cur.length && gen < 40) {
       const next = [], made = [];
       for (const x of cur) {
-        const had = [personOf(x).f, personOf(x).m].filter(q => q >= 0);
-        if (!x.up || force) made.push(...addParents(x, force && x === c));
-        else x.up = 1;
+        const only = mode === 'fline' ? 'f' : mode === 'mline' ? 'm' : x === c ? (mode === 'fside' ? 'f' : mode === 'mside' ? 'm' : null) : null;
+        const had = (only ? [only === 'f' ? personOf(x).f : personOf(x).m] : [personOf(x).f, personOf(x).m]).filter(q => q >= 0);
+        if (!x.up || force) made.push(...addParents(x, force && x === c, only));
+        else if (!only) x.up = 1;
         had.forEach(q => { const o = cardOfPerson(q); if (o && !next.includes(o)) next.push(o); });
         if (!had.length) ends.push(x);
       }
@@ -3191,8 +3206,36 @@ async function doAllBack(c, force) {
     }
     S.cards.forEach(x => { if (x.up === 1) x._chk = true; });
     refreshAll(); drawEdges(); save();
-    toast(`${gen > 0 ? gen + ' generation' + (gen > 1 ? 's' : '') + ' back, ' : ''}${added} added. ${ends.length ? ends.length + ' line' + (ends.length > 1 ? 's' : '') + ' stop here.' : ''}`, 3500);
+    toast(`${BACK_LABEL[mode] || ''}${gen > 0 ? gen + ' generation' + (gen > 1 ? 's' : '') + ' back, ' : ''}${added} added. ${ends.length ? ends.length + ' line' + (ends.length > 1 ? 's' : '') + ' stop here.' : ''}`, 3500);
   } finally { walking = false; }
+}
+
+/* The up arrow's "all": ask which way to go back, so the paternal line (or the maternal) can be taken without the rest of the family. */
+function closeBackMenu() { const m = document.getElementById('backMenu'); if (m) m.classList.remove('on'); }
+function askBack(c, anchor) {
+  const p = personOf(c), f = p.f >= 0 ? M.P[p.f] : null, m = p.m >= 0 ? M.P[p.m] : null;
+  let el = document.getElementById('backMenu');
+  if (!el) { el = document.createElement('div'); el.id = 'backMenu'; el.setAttribute('role', 'menu'); document.body.appendChild(el); }
+  const opt = (mode, head, sub, ok, why) => `<button class="bmo" role="menuitem" data-mode="${mode}"${ok ? '' : ' disabled title="' + esc(why) + '"'}><b>${head}</b><span>${ok ? sub : esc(why)}</span></button>`;
+  el.innerHTML = `<h4>Go back from ${esc(p.name)}</h4>`
+    + opt('both', 'Everyone', 'Both parents, and theirs, until the records stop', !!(f || m), 'No parents on record')
+    + `<div class="bmsep">One side</div>`
+    + opt('fside', "Father's side", f ? esc(f.name) + ' and all his ancestors' : '', !!f, 'No father on record')
+    + opt('mside', "Mother's side", m ? esc(m.name) + ' and all her ancestors' : '', !!m, 'No mother on record')
+    + `<div class="bmsep">One person a generation</div>`
+    + opt('fline', 'Paternal line', 'Father, his father, his father…', !!f, 'No father on record')
+    + opt('mline', 'Maternal line', 'Mother, her mother, her mother…', !!m, 'No mother on record');
+  el.onclick = e => { const b = e.target.closest('.bmo'); if (!b || b.disabled) return; closeBackMenu(); doAllBack(c, false, b.dataset.mode); };
+  el.classList.add('on');
+  /* above the button when there is room (the button sits on the card's top edge), below it otherwise; kept inside the window */
+  const r = anchor.getBoundingClientRect(), w = el.offsetWidth, h = el.offsetHeight;
+  const left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2));
+  const top = r.top - h - 8 >= 8 ? r.top - h - 8 : Math.min(innerHeight - h - 8, r.bottom + 8);
+  el.style.left = left + 'px'; el.style.top = Math.max(8, top) + 'px';
+  const first = el.querySelector('.bmo:not([disabled])'); if (first) first.focus({ preventScroll: true });
+  const off = ev => { if (ev.type === 'keydown' ? ev.key === 'Escape' : !el.contains(ev.target)) { closeBackMenu(); removeEventListener('pointerdown', off, true); removeEventListener('keydown', off, true); } };
+  if (askBack._off) { removeEventListener('pointerdown', askBack._off, true); removeEventListener('keydown', askBack._off, true); }
+  askBack._off = off; addEventListener('pointerdown', off, true); addEventListener('keydown', off, true);
 }
 
 /* edges.js — every link drawn in one language: strength by line pattern and seal, archive by colour. */
@@ -4331,7 +4374,7 @@ function runSearchMarks() { document.querySelectorAll('#shelf .res').forEach(el 
     const act = b.dataset.act;
     if (act === 'open') return;
     e.preventDefault(); e.stopPropagation();
-    if (act === 'up') doUp(c); else if (act === 'upall') doAllBack(c);
+    if (act === 'up') doUp(c); else if (act === 'upall') askBack(c, b);
     else if (act === 'upforce') { addParentsForce(c); }
     else if (act === 'dn') doDown(c, false); else if (act === 'dnall') doDown(c, true);
     else if (act === 'sp') doSpouse(c);
@@ -4848,7 +4891,7 @@ $('#info').addEventListener('click', e => {
   else if (act === 'next') { S.tab = 'next'; renderInfo(); }
   else if (act === 'nextcopy') copyPlan();
   else if (act === 'aicopy') copyAIPrompt();
-  else if (act === 'up' && c) doUp(c); else if (act === 'upall' && c) doAllBack(c); else if (act === 'dn' && c) doDown(c, false);
+  else if (act === 'up' && c) doUp(c); else if (act === 'upall' && c) askBack(c, d); else if (act === 'dn' && c) doDown(c, false);
   else if (act === 'rel' && c) startRelate(c.key);
   else if (act === 'stat') { statOpen = statOpen === d.dataset.k ? null : d.dataset.k; renderInfo(); }
   else if (act === 'play' && key) startPlay(M.byKey.get(key).i);
@@ -5161,7 +5204,7 @@ function boot() {
     if (slug) { const hit = M.P.find(p => p.page && p.page.replace(/\/+$/, '').split('/').pop() === slug);
       if (hit) { if (!S.cards.has(hit.key)) addFromResult(hit); select([hit.key]); const c = S.cards.get(hit.key); if (c) fit([c], { maxK: 1, ms: 0 }); } } }
   if (matchMedia('(prefers-reduced-motion:reduce)').matches) document.documentElement.classList.add('rm');
-  window.__TC = { S, M, TC, dropPerson, doUp, doDown, doAllBack, showPath, drawEdges, layoutCluster, fit, select, cardOfPerson, relayout, snapshot, undo, setTheme, decide, clearCanvas, runSearch, toast };
+  window.__TC = { S, M, TC, dropPerson, doUp, doDown, doAllBack, askBack, showPath, drawEdges, layoutCluster, fit, select, cardOfPerson, relayout, snapshot, undo, setTheme, decide, clearCanvas, runSearch, toast };
 }
 boot();
 })();</script>

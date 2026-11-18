@@ -502,6 +502,7 @@ select.lk-input{width:auto;padding:4px 8px}
 .srt:hover,.srt:focus-visible{border-color:var(--lk-accent)}
 .srt b{display:block;font:400 22px/1 "Lilita One",system-ui}.srt span{display:block;margin-top:4px;font:800 10.5px/1 Nunito,system-ui;color:var(--lk-soft);white-space:nowrap}
 .srn{flex:0 0 auto;min-width:20px;height:20px;border-radius:50%;background:var(--lk-accent);color:var(--lk-on-accent,#fff);font:800 11px/20px Nunito,system-ui;text-align:center}
+.lage{display:inline-block;margin:0 2px;padding:1px 7px;border-radius:99px;border:1.5px solid var(--lk-line);font:800 10.5px/1.5 Nunito,system-ui;color:var(--lk-soft);white-space:nowrap}
 .srgo{margin:8px 0 12px}.srgo-h{margin:0 0 2px;font-size:13px}.srgo-h small{color:var(--lk-soft);font-weight:700}
 .sr-hi{font-size:13px;line-height:1.45}
 ul.srx{list-style:none;margin:4px 0 8px;padding:0}
@@ -4531,8 +4532,15 @@ function familyHTML(p, a) {
 }
 function lifeHTML(p) {
   const evs = TC.lifeEvents(M, p), eras = TC.eraChanges(M, p); if (!evs.length && !eras.length) return '';
-  const yrB = y => y < 0 ? (-y) + ' BCE' : String(y), li = e => `<li><b>${e.f === e.t ? yrB(e.f) : yrB(e.f) + '–' + yrB(e.t)}</b> · ${esc(e.n)}<small>${esc(e.at)} · ${esc(e.toll.length > 120 ? e.toll.slice(0, 119) + '…' : e.toll)}</small></li>`;
-  return `<h4>Around their lifetime</h4><ul class="life">${eras.map(e => `<li><b>${e.from}</b> · ${esc(e.polity)}<small>Birthplace changed hands.${e.note ? ' ' + esc(e.note) : ''}</small></li>`).join('')}${evs.slice(0, 5).map(li).join('')}${evs.length > 5 ? `<li class="more"><details><summary>${evs.length - 5} more while they lived</summary><ul class="life">${evs.slice(5).map(li).join('')}</ul></details></li>` : ''}</ul>`;
+  /* how old they were: at a year, or across the years of an event (kept inside their own life), "about" when the birth year is the archive's estimate */
+  const age = (f, t) => {
+    if (p.by == null) return '';
+    const end = p.dy != null ? p.dy : t, lo = Math.max(f, p.by) - p.by, hi = Math.min(t, end) - p.by; if (hi < 0) return '';
+    const a = lo >= hi ? String(hi) : lo + '\u2013' + hi;
+    return `<span class="lage" title="${p.fl & 1 ? 'The birth year is an estimate, so the age is too' : 'Their age in these years, from the birth year'}">${p.fl & 1 ? 'about ' : ''}age ${a}</span>`;
+  };
+  const yrB = y => y < 0 ? (-y) + ' BCE' : String(y), li = e => `<li><b>${e.f === e.t ? yrB(e.f) : yrB(e.f) + '–' + yrB(e.t)}</b> ${age(e.f, e.t)} · ${esc(e.n)}<small>${esc(e.at)} · ${esc(e.toll.length > 120 ? e.toll.slice(0, 119) + '…' : e.toll)}</small></li>`;
+  return `<h4>Around their lifetime</h4><ul class="life">${eras.map(e => `<li><b>${e.from}</b> ${age(e.from, e.from)} · ${esc(e.polity)}<small>Birthplace changed hands.${e.note ? ' ' + esc(e.note) : ''}</small></li>`).join('')}${evs.slice(0, 5).map(li).join('')}${evs.length > 5 ? `<li class="more"><details><summary>${evs.length - 5} more while they lived</summary><ul class="life">${evs.slice(5).map(li).join('')}</ul></details></li>` : ''}</ul>`;
 }
 function srcsHTML(p) {
   const s = (M.srcs && M.srcs[p.id]) || []; if (!s.length || p.living) return '';

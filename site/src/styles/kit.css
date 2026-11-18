@@ -28,7 +28,7 @@
 .k-tag.is-new { color: var(--accent); border-color: var(--accent); background: var(--accent-wash); }
 
 .k-hi { background: var(--accent-wash); border: 1px solid var(--rule); border-radius: 12px;
-        padding: 18px 22px; margin: 0 0 22px; max-width: 78ch; }
+        padding: 18px 22px; margin: 0 0 22px; max-width: var(--measure); }
 .k-hi p { margin: 0; font-family: var(--serif); font-size: 18px; line-height: 1.5; color: var(--ink); }
 .k-hi p + p { margin-top: 10px; font-family: var(--sans); font-size: 14px; line-height: 1.62; color: var(--ink-2); }
 .k-hi.is-plain { background: var(--panel); }
@@ -38,7 +38,7 @@
 .k-h .k-count { font-family: var(--mono); font-size: 12px; font-weight: 400; color: var(--ink-3);
                 letter-spacing: .04em; }
 .k-lede { margin: -4px 0 14px; font-family: var(--sans); font-size: 14px; line-height: 1.6;
-          color: var(--ink-2); max-width: 70ch; }
+          color: var(--ink-2); max-width: var(--measure); }
 
 .k-tiles { list-style: none; margin: 0 0 24px; padding: 0; display: grid; gap: 10px;
            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
@@ -50,7 +50,7 @@ a.k-tile, .k-tiles > li.is-link { transition: border-color .15s, transform .15s;
 .k-tiles a { color: var(--ink); text-decoration: none; font-weight: 500; }
 .k-tiles a:hover { color: var(--accent); }
 
-.k-steps { list-style: none; margin: 0 0 26px; padding: 0; display: grid; gap: 10px; counter-reset: k; max-width: 78ch; }
+.k-steps { list-style: none; margin: 0 0 26px; padding: 0; display: grid; gap: 10px; counter-reset: k; max-width: var(--measure); }
 .k-steps > li { counter-increment: k; position: relative; background: var(--panel); border: 1px solid var(--rule);
                 border-radius: 10px; padding: 14px 16px 14px 62px; font-family: var(--sans); font-size: 14px;
                 line-height: 1.6; color: var(--ink-2); }
@@ -69,10 +69,10 @@ a.k-tile, .k-tiles > li.is-link { transition: border-color .15s, transform .15s;
 .k-more .k-mt { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: .04em; }
 .k-more .k-mt::after { content: " ▾"; }
 .k-more[open] .k-clip, .k-more[open] .k-mt { display: none; }
-.k-more > div { max-width: 62ch; }
+.k-more > div { max-width: var(--measure); }
 
 .k-foot { margin-top: 28px; padding: 18px 22px; border-radius: 12px; background: var(--accent-wash);
-          border: 1px solid var(--rule); max-width: 78ch; }
+          border: 1px solid var(--rule); max-width: var(--measure); }
 .k-foot p { margin: 0; font-family: var(--serif); font-size: 18px; line-height: 1.5; color: var(--ink); }
 .k-foot p + p { margin-top: 6px; font-family: var(--sans); font-size: 13px; color: var(--ink-2); }
 
@@ -101,7 +101,7 @@ a.k-tile, .k-tiles > li.is-link { transition: border-color .15s, transform .15s;
 
 /* The «one thing to know» box: a warm card, not a terracotta-bordered slab. */
 main .one { background: var(--accent-wash); border: 1px solid var(--rule); border-left-width: 1px; border-radius: 12px;
-            padding: 18px 22px; margin-top: 22px; max-width: 78ch;
+            padding: 18px 22px; margin-top: 22px; max-width: var(--measure);
             /* The faintest grey (ink-3) passes on the page ground but not on this tint (4.2:1 light, 4.2:1 dark;
                axe wants 4.5), so inside the box it is the next grey up. The e2e audit caught it on /data/. */
             --ink-3: var(--ink-2); }
@@ -117,7 +117,7 @@ main .note { border-left: 0; border: 1px solid var(--rule); border-radius: 10px;
 
 /* Long reading pages (About, Help, Privacy, My work, Start): a paragraph that opens with a bold
    lead becomes a card, so a reader can skim the leads and open only the one they want. */
-main .k-prose { max-width: 78ch; display: grid; gap: 12px; }
+main .k-prose { max-width: var(--measure); display: grid; gap: 12px; }
 main .k-prose > * { margin-top: 0; }
 main .k-prose > p { font-size: 15px; line-height: 1.68; }
 main .k-prose > p:has(> b:first-child, > strong:first-child) { background: var(--panel); border: 1px solid var(--rule);

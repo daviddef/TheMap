@@ -139,8 +139,10 @@
   --maxw:min(1440px,94vw);   /* ONE PAGE WIDTH FOR EVERY PAGE. It was 1080 on most pages and 1600 on the map, flags and history, so
                                 the header, the cards and the text changed width from page to page. David: «every screen is of
                                 varying width, why? ... can we please standardise width across the app». */
-  --measure:44rem;           /* the one reading width for running text and callouts, wherever they sit. rem, not ch: a ch is a
-                                different width at every font size, which made a 12px caption narrower than a 15px paragraph */
+  --measure:none;            /* running text and callouts fill the page frame, level with the header (--maxw). David, after seeing the text held to a narrow column
+                                under a full-width header: «our text go across the entire width». It was 44rem; the k-* page classes also had their own 62-78ch caps,
+                                so one page showed five widths (659, 487, 798, 659 and 1147px). They all read this variable now, so one value moves every page. The
+                                archives' kit made the same change (TheArchiveKit#15). */
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --ground:#101820; --panel:#17212A; --panel-2:#1E2A34;

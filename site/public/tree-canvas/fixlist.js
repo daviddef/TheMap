@@ -124,6 +124,52 @@ export function buildModel(m, cmp, salt) {
 /* what the Roots & Routes functions (text, spreadsheet, summary) expect: its sections only */
 export const rrView = model => { const sections = model.sections.filter(s => !s.cmp); return { sections, groups: model.groups.filter(g => g.key !== 'compare'), main: model.main, counts: Object.fromEntries(sections.map(s => [s.key, s.items.length])) }; };
 
+/* ---- research names: a spelling family from the Atlas catalogue, matched on whole words, whatever the typography ---- */
+const FOLD_MAP = { đ: 'd', ł: 'l', ø: 'o', ß: 'ss', æ: 'ae', œ: 'oe', ð: 'd', þ: 'th' };
+/* a name as a list of lower-case ASCII words: accents and case do not matter, hyphens, apostrophes and spaces split words ("D'Arcy", "De-Franceschi") */
+export const foldWords = t => String(t || '').toLowerCase().replace(/[đłøßæœðþ]/g, c => FOLD_MAP[c]).normalize('NFD').replace(/[\u0300-\u036f]/g, '').split(/[^a-z]+/).filter(Boolean);
+/* which spellings a pick stands for: what the catalogue holds as the same name, met on a record, or reached by a rule, and the leads (plausible, never seen: to look for, not to claim).
+   A form the catalogue says is sometimes another family's ("case-by-case") is left out, or "Franceschi" would drag in everyone else. */
+export const NAME_STATUS = new Set(['same', 'attested', 'rule', 'lead']);
+const archiveScore = a => (/[^\x00-\x7f]/.test(a) ? 2 : /^\p{Lu}/u.test(a) ? 1 : 0);
+/* cat: the shipped surname catalogue [{id, name, a: [archive], m: [[form, status]]}] -> { archives: [{key, label, names, forms}], names: [{id, name, archives, forms}] }, each A to Z */
+export function catalogueChoices(cat) {
+  const arch = new Map(), names = [];
+  for (const f of Array.isArray(cat) ? cat : []) {
+    if (!f || !f.name) continue;
+    const forms = [...new Set([f.name, ...(f.m || []).filter(m => NAME_STATUS.has(m[1])).map(m => m[0])])], keys = [];
+    for (const a of f.a || []) {
+      const k = foldWords(a).join(''); if (!k) continue;
+      let e = arch.get(k); if (!e) arch.set(k, e = { key: k, label: a, names: [], forms: [] });
+      if (archiveScore(a) > archiveScore(e.label)) e.label = a;
+      if (!e.names.includes(f.name)) e.names.push(f.name); e.forms.push(...forms); keys.push(k);
+    }
+    names.push({ id: f.id, name: f.name, archives: [...new Set(keys)], forms });
+  }
+  const az = (a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' });
+  const archives = [...arch.values()].map(e => ({ ...e, forms: [...new Set(e.forms)], names: e.names.sort(az) })).sort((a, b) => az(a.label, b.label));
+  for (const n of names) n.archiveLabels = n.archives.map(k => arch.get(k).label);
+  return { archives, names: names.sort((a, b) => az(a.name, b.name)) };
+}
+/* the words of every name on a row (cached): the people on it, the family around an unnamed one, and, for a group, the surnames of everyone in it */
+const NAMEWORDS = new WeakMap();
+export function nameText(s, i) {
+  const a = peopleOf(s, i).map(p => (p && p.name) || '');
+  if (s.key === 'names') a.push(i.name || '', i.kin || ''); else if (s.key === 'cmpmiss') a.push(i.name || '', i.relName || ''); else if (s.key === 'cmpdiff') a.push(i.fname || '', i.aname || '');
+  if (Array.isArray(i.sur)) a.push(i.sur.join(' '));
+  return a.join(' | ');
+}
+/* forms -> a test on a row, or null when there is nothing to match. A form matches as whole words, glued or not: "Defranceschi" is found in "De Franceschi", "di Franceschi" in "difranceschi". */
+export function nameMatcher(forms) {
+  const glued = new Set(); for (const f of forms || []) { const w = foldWords(f); if (w.length) glued.add(w.join('')); }
+  if (!glued.size) return null;
+  return (s, i) => {
+    let w = NAMEWORDS.get(i); if (!w) NAMEWORDS.set(i, w = foldWords(nameText(s, i)));
+    for (let a = 0; a < w.length; a++) { let g = ''; for (let b = a; b < w.length && b < a + 3; b++) { g += w[b]; if (glued.has(g)) return true; } }
+    return false;
+  };
+}
+
 /* ---- who is on a row ---- */
 export function peopleOf(s, i) {
   if (s.key === 'dupes') return [{ id: i.a, name: i.an }, { id: i.b, name: i.bn }];
@@ -196,6 +242,7 @@ export function visible(s, st, o) {
     const d = st.ticked.has(i.key), a = !d && st.asIs.has(i.key);
     if (mode === 'open' ? (d || a) : mode === 'done' ? !d : mode === 'asis' ? !a : false) return false;
     if (q && !hay(s, i).includes(q)) return false;
+    if (o.names && !o.names(s, i)) return false;
     if (pid != null && !peopleOf(s, i).some(p => p && String(p.id) === pid)) return false;
     return true;
   });
@@ -212,7 +259,7 @@ export function copyActions(s, i) {
 export function toOpen(secs, st, o) {
   o = o || {}; const q = (o.q || '').trim().toLowerCase(), seen = new Set(), out = [];
   for (const s of secs) for (const i of rowSort(s, o.rows)) {
-    if (st.asIs.has(i.key) || st.ticked.has(i.key) || (q && !hay(s, i).includes(q))) continue;
+    if (st.asIs.has(i.key) || st.ticked.has(i.key) || (q && !hay(s, i).includes(q)) || (o.names && !o.names(s, i))) continue;
     for (const p of peopleOf(s, i)) { if (!p || p.id == null || p.via || seen.has(p.id)) continue; seen.add(p.id); out.push(p); }
   }
   return out;

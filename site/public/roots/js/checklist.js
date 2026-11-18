@@ -156,7 +156,7 @@ export function buildChecklist(env) {
   const comps = groupsOf(() => false);
   const asItem = (c, pre, extra) => {
     const s = c.slice().sort((a, b) => az(name(a), name(b)));
-    return { key: pre + s[0].id, size: c.length, gone: c.reduce((n, p) => n + (p.gone || 0), 0), people: s.slice(0, SAMPLE).map(p => ({ id: p.id, name: shown(p), by: p.by })), first: shown(s[0]), ...extra };
+    return { key: pre + s[0].id, size: c.length, gone: c.reduce((n, p) => n + (p.gone || 0), 0), people: s.slice(0, SAMPLE).map(p => ({ id: p.id, name: shown(p), by: p.by })), first: shown(s[0]), sur: [...new Set(s.map(p => (p.liv && !living ? '' : p.sur)).filter(Boolean))].slice(0, 60), ...extra };
   };
   /* TRULY apart: no link of any kind to the main tree, not even through an unknown person */
   const apart = comps.slice(1).map(c => c.filter(keep)).filter(c => c.length).map(c => asItem(c, 'a|')).sort((a, b) => az(a.first, b.first));

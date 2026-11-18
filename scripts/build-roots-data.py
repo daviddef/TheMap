@@ -218,11 +218,11 @@ def surnames():
     print('surname-families.json', w(os.path.join(OUT, 'data', 'surname-families.json'), fams), 'bytes,', len(fams), 'families')
 
 def catalogues():
-    """The first-name and surname catalogues, in the small shape the fix list reads: [{id, name, m: [[form, status]]}]. No person is in either (the
+    """The first-name and surname catalogues, in the small shape the fix list reads: [{id, name, a: [archive], m: [[form, status]]}]. No person is in either (the
     catalogues never hold one); a 'slip' or a 'not-same' form is left out because it is not a spelling of the name."""
     for src, dst, key in (('given-name-families.json', 'given-names.json', 'given'), ('surname-families.json', 'surname-catalogue.json', 'sur')):
         cat = json.load(open(D(src), encoding='utf-8'))
-        fams = [{'id': f['id'], 'name': f['name'], 'm': [[m['form'], m.get('status', '')] for m in f['members'] if m.get('status') not in ('slip', 'not-same')]} for f in cat['families']]
+        fams = [{'id': f['id'], 'name': f['name'], 'a': f.get('archives') or [], 'm': [[m['form'], m.get('status', '')] for m in f['members'] if m.get('status') not in ('slip', 'not-same')]} for f in cat['families']]
         fams = [f for f in fams if f['m']]
         print(dst, w(os.path.join(OUT, 'data', dst), fams), 'bytes,', len(fams), 'families')
 

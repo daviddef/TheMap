@@ -114,6 +114,48 @@
     ctx.globalAlpha = 1;
   }
 
+  /* A LITTLE LIFE AROUND THE TREE: a leaf or two let go and drift down to the ground, and a seed drops, takes root beside the trunk and grows into a small plant
+     (one every 8 seconds, up to three). Drawn under the map veil, so they go quiet when the map comes up. Nothing here comes from the visitor's file. */
+  var LEAFC = ['#7CC293', '#D2A860', '#E08A76'], SEEDX = [170, -175, 100], GY = H - 22, fl = [];
+  function leafShape(x, y, s, rot, col, al) {
+    if (s < 0.3) return;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.globalAlpha = al; ctx.fillStyle = col;
+    ctx.beginPath(); ctx.moveTo(0, -s); ctx.quadraticCurveTo(s * 0.9, -s * 0.2, 0, s); ctx.quadraticCurveTo(-s * 0.9, -s * 0.2, 0, -s); ctx.fill();
+    ctx.strokeStyle = 'rgba(32,28,23,.45)'; ctx.lineWidth = 0.8; ctx.beginPath(); ctx.moveTo(0, -s * 0.8); ctx.lineTo(0, s * 0.8); ctx.stroke();
+    ctx.restore(); ctx.globalAlpha = 1;
+  }
+  function plant(i, t) {
+    var px = W / 2 + SEEDX[i], sx = W / 2 + SEEDX[i] * 0.35, sy = H * 0.3, f = cl(t / 1.2, 0, 1);
+    if (t < 0) return;
+    if (f < 1) {      /* the seed falls from the canopy */
+      var fx = sx + (px - sx) * f + Math.sin(f * 6) * 7 * (1 - f), fy = sy + (GY - 3 - sy) * f * f;
+      ctx.save(); ctx.translate(fx, fy); ctx.rotate(f * 5); ctx.fillStyle = '#C79A55'; ctx.beginPath(); ctx.ellipse(0, 0, 3.4, 1.9, 0, 0, 7); ctx.fill(); ctx.restore();
+      return;
+    }
+    ctx.fillStyle = '#5E4A2E'; ctx.beginPath(); ctx.ellipse(px, GY, 8, 2.4, 0, Math.PI, 0); ctx.fill();      /* a little mound of earth */
+    var g = cl((t - 1.2 - 0.5) / 2.6, 0, 1); if (g <= 0) return;
+    var h = 40 * ez(g), sw = Math.sin(tm * 1.5 + i) * 0.06 * g, tx = px + Math.sin(sw) * h, ty = GY - Math.cos(sw) * h;
+    ctx.strokeStyle = '#7CC293'; ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(px, GY); ctx.lineTo(tx, ty); ctx.stroke();
+    [[0.42, -1], [0.7, 1]].forEach(function (a, k) {
+      var q = cl((g - 0.3 - k * 0.15) / 0.4, 0, 1);
+      leafShape(px + (tx - px) * a[0] + a[1] * 4 * q, GY - (GY - ty) * a[0], 7 * ez(q), a[1] * 1.15 + sw, LEAFC[0], 1);
+    });
+    leafShape(tx, ty - 3, 5.5 * ez(cl((g - 0.7) / 0.3, 0, 1)), sw, '#9BD7AC', 1);
+  }
+  function drift() {
+    var k, i;
+    if (leaves.length > 6) for (k = 0; k < 2; k++) {
+      var t = tm - 0.9 - k * 1.7, T = 3.8, n, q, c;
+      if (t < 0) continue;
+      n = Math.floor(t / T); q = (t - n * T) / 2.7;      /* it falls for 2.7 s, lies a moment and fades, then the next one lets go */
+      if (!fl[k] || fl[k].n !== n) { c = leaves[(n * 7 + k * 5 + 3) % leaves.length]; fl[k] = { n: n, x: c.x, y: c.y }; }
+      c = fl[k]; if (q > 1.35) continue;
+      var fq = cl(q, 0, 1), x = c.x + Math.sin(fq * 8 + k * 2) * 16 * (0.3 + fq) + fq * (k ? -22 : 22), y = c.y + (GY - 2 - c.y) * Math.pow(fq, 1.2);
+      leafShape(x, y, 5.5, Math.sin(fq * 6 + k) * 0.9 + fq * 2 + (q > 1 ? 1.2 : 0), LEAFC[(n + k) % 3], q > 1 ? Math.max(0, 1 - (q - 1) / 0.35) : 1);
+    }
+    for (i = 0; i < Math.min(3, Math.floor((tm - 0.6) / 8) + 1); i++) plant(i, tm - 0.6 - i * 8);
+  }
+
   function scene(g) {
     leaves = []; var ord = 0, landed = 0, merged = 0, pend = [];
     ctx.fillStyle = '#2A251E'; ctx.fillRect(0, H - 22, W, 22);
@@ -159,6 +201,7 @@
         fc.forEach(function (c, k) { ctx.fillStyle = c; ctx.fillRect(gx + 1, gy - 13 + k * 3, 8, 3); });
       }
     });
+    drift();
     mapLayer();
     if (sel && sayT > 0) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(sel.x, sel.y, sel.r + 2, 0, 7); ctx.stroke(); }
     var cy = H - 30;
@@ -194,7 +237,7 @@
     el.classList.add('out'); clearTimeout(outT);
     outT = setTimeout(function () { el.hidden = true; shown = false; ending = false; }, 260);
   }
-  function reset() { stage = 0; sub = 0.3; gd = 0; tm = 0; ss = 0; ssAt = 0; tAt = []; la = 0; doneAt = -1; nPins = 0; nArcs = 0; launch = {}; leaves = []; sel = null; sayT = 0; ending = false; }
+  function reset() { stage = 0; sub = 0.3; gd = 0; tm = 0; ss = 0; ssAt = 0; tAt = []; la = 0; doneAt = -1; nPins = 0; nArcs = 0; launch = {}; leaves = []; fl = []; sel = null; sayT = 0; ending = false; }
   /* the messages that are work in progress; anything else (a note that the file loaded, say) is not the loading screen's to show */
   function wants(text) { return !!stageOf(text) || /^(Starting|Hiding living people|Showing everyone|Redrawing)/.test(String(text || '')); }
   window.RALoad = {

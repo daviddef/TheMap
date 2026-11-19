@@ -11,7 +11,11 @@
    WHAT IS KEPT. A decision is `a` (left as is) or `d` (done), under the existing store (/roots/js/decisions.js, localStorage `ra-fix-decisions-v1`, which the six-word
    copy already carries). A Roots & Routes row is kept under its own key, exactly as that page keeps it, so a tick made on /roots/ shows here and the other way round.
    A Compare row is kept under `cmp|m|<hash>` or `cmp|d|<hash>`, where the hash (cyrb53 of the tree's key, a separator and the record keys) names no one and nothing: the store then
-   hashes that key again. No name, date or place is ever written. */
+   hashes that key again. No name, date or place is ever written.
+
+   THE PLACES TAB uses the same model, state, filters and counts over another set of rows (roots/js/placereview.js: the places the Atlas could not settle exactly, shaped like
+   the reader's checklist). `buildModel(msg, null, '', PLACES)` builds it; its sections have their own ranks (PLACE_PRIORITY). Its rows are kept under `d|<place text>`, the key
+   Roots & Routes already uses for the same place in its fix list, so a "done" or "left as is" made in either list is the same decision. */
 import { describe, GROUPS } from '../roots/js/checklist.js';
 import { hashKey } from '../roots/js/decisions.js';
 import { h53 } from './work.js';
@@ -67,8 +71,22 @@ export const PRIORITY = {
   ages:    { rank: 14, why: 'Often fine: it is how people name a place today. The maps already draw the flag of the day, so this is the lowest-value change.' },
 };
 export const LEVEL_AT = { High: 3, Medium: 10 };   // rank <= 3 High, <= 10 Medium, else Low
-export const levelOf = rank => rank <= LEVEL_AT.High ? 'High' : rank <= LEVEL_AT.Medium ? 'Medium' : 'Low';
-export const prioOf = key => { const p = PRIORITY[key] || { rank: 99, why: '' }; return { rank: p.rank, level: levelOf(p.rank), why: p.why }; };
+export const levelOf = (rank, at) => { at = at || LEVEL_AT; return rank <= at.High ? 'High' : rank <= at.Medium ? 'Medium' : 'Low'; };
+export const prioOf = (key, table, at) => { const p = (table || PRIORITY)[key] || { rank: 99, why: '' }; return { rank: p.rank, level: levelOf(p.rank, at), why: p.why }; };
+
+/* ---- the Places tab: the same idea for the places the Atlas could not settle exactly. A choice that moves many events at once ranks above one that only restates how a place is drawn. ---- */
+export const PLACE_PRIORITY = {
+  ambiguous:              { rank: 1, why: 'The text fits more than one place, so its events are drawn at the biggest guess. One choice moves every event that uses the same text, and the “Cleaned” export writes it.' },
+  'review-other-country': { rank: 2, why: 'The name exists, but in another country than the text names. Often an old name or a boundary that moved: only you can say which, and one choice settles every event.' },
+  'review-skipped-part':  { rank: 3, why: 'The first part of the text was not found, so the later part decided the match. Worth a look: it may be the right town, or a different one.' },
+  'not-found':            { rank: 4, why: 'No candidate to pick, so it needs a spelling or a lookup by hand. More work per place than choosing, and the Atlas cannot help beyond a near spelling.' },
+  'parent-level':         { rank: 5, why: 'Drawn at the town the text names. Right unless you know the exact spot, so nothing is wrong, only less exact.' },
+  district:               { rank: 6, why: 'Drawn at the centre of a district. A coarse but honest place; refine it only if you know where.' },
+  region:                 { rank: 7, why: 'Drawn at the centre of a province or county and marked as such. Often all the text says.' },
+  'country-only':         { rank: 8, why: 'The text names only a country, so there is nothing more to draw. The lowest-value change.' },
+};
+export const PLACE_LEVEL_AT = { High: 3, Medium: 5 };   // ranks 1-3 are places to choose, 4-5 need a lookup or are nearly right, the rest only describe how a place is drawn
+export const PLACES = { groups: null, prio: key => prioOf(key, PLACE_PRIORITY, PLACE_LEVEL_AT), table: PLACE_PRIORITY, kind: 'places' };
 export const ORDERS = { priority: 'Priority', list: 'List order', most: 'Most to do' };
 export const ROW_SORTS = { useful: 'Most useful first', name: 'Name A–Z', list: 'List order' };
 
@@ -95,6 +113,7 @@ const USEFUL = {
   dupes: i => { const a = year(i.ay), b = year(i.by); return a == null ? b : b == null ? a : Math.min(a, b); },
   years: i => (i.kind === 'estimated' ? year(i.hint) : null), cmpmiss: i => year(i.yrs),
 };
+for (const k of Object.keys(PLACE_PRIORITY)) USEFUL[k] = i => -(i.events || i.count || 0);   // a place text: the one with most events first
 const nameOf = i => (i.name || i.raw || i.an || i.fname || (i.people && i.people[0] && i.people[0].name) || i.first || '').toString();
 const SORTED = new WeakMap();
 export function rowSort(s, how) {
@@ -108,15 +127,15 @@ export function rowSort(s, how) {
 
 /* The whole list: the reader's sections in the reader's own order (groups by what the visitor has to do), then the Compare group when there is one.
    m: the worker's checklist message ({sections, groups, main}) or null. cmp: {missing, differs} or null. */
-export function buildModel(m, cmp, salt) {
+export function buildModel(m, cmp, salt, kind) {
   const sections = m && Array.isArray(m.sections) ? m.sections.map(s => ({ ...s, cmp: false })) : [];
-  const groups = (m && m.groups || GROUPS).map(g => ({ key: g.key, title: g.title, how: g.how, sections: g.sections.filter(k => sections.some(s => s.key === k)) }));
+  const groups = (m && m.groups || (kind ? [] : GROUPS)).map(g => ({ key: g.key, title: g.title, how: g.how, sections: g.sections.filter(k => sections.some(s => s.key === k)) }));
   const known = new Set(groups.flatMap(g => g.sections));
   const stray = sections.filter(s => !known.has(s.key)).map(s => s.key);
   if (stray.length) groups.push({ key: 'other', title: 'Other', how: '', sections: stray });
   const cs = cmp ? cmpSections(cmp, salt) : [];
   if (cs.length && cs.some(s => s.items.length)) { sections.push(...cs); groups.push({ ...CMP_GROUP, sections: cs.map(s => s.key) }); }
-  for (const s of sections) Object.assign(s, prioOf(s.key));
+  for (const s of sections) Object.assign(s, kind ? kind.prio(s.key) : prioOf(s.key));
   const byKey = new Map(), bySec = new Map(sections.map(s => [s.key, s]));
   for (const s of sections) for (const i of s.items) byKey.set(i.key, { s, i });
   return { sections, groups, bySec, byKey, main: m && m.main || 0, total: [...byKey.keys()].length, hasCmp: cs.some(s => s.items.length) };
@@ -184,7 +203,7 @@ export function hay(s, i) {
   let h = HAY.get(i); if (h !== undefined) return h;
   h = (s.key === 'names' ? i.name + ' ' + i.kin : s.key === 'dupes' ? i.an + ' ' + i.bn : (s.key === 'apart' || s.key === 'viaph') ? i.people.map(p => p.name).join(' ') + ' ' + (i.via || []).join(' ')
     : s.key === 'cmpmiss' ? i.name + ' ' + i.relName + ' ' + i.archive + ' ' + i.yrs : s.key === 'cmpdiff' ? i.fname + ' ' + i.aname + ' ' + i.reason + ' ' + i.archive
-    : (i.raw || '') + ' ' + (i.name || '') + ' ' + (i.country ? i.country + ' ' + i.label : '') + ' ' + (i.reasons ? i.reasons.map(r => r.text).join(' ') : '') + ' ' + (i.people ? i.people.map(p => p.name).join(' ') : '')).toLowerCase();
+    : (i.raw || '') + ' ' + (i.name || '') + ' ' + (i.country ? i.country + ' ' + i.label : '') + ' ' + (i.reasons ? i.reasons.map(r => r.text).join(' ') : '') + ' ' + (i.people ? i.people.map(p => p.name).join(' ') : '') + (s.place ? ' ' + [...(i.cands || []), ...(i.picked ? [i.picked] : [])].map(c => c.n + ' ' + (c.region || '')).join(' ') : '')).toLowerCase();
   HAY.set(i, h); return h;
 }
 /* the rows that name this person (a file person's id), with the section each is in */
@@ -243,6 +262,7 @@ export function visible(s, st, o) {
     if (mode === 'open' ? (d || a) : mode === 'done' ? !d : mode === 'asis' ? !a : false) return false;
     if (q && !hay(s, i).includes(q)) return false;
     if (o.names && !o.names(s, i)) return false;
+    if (o.likely && !i.likely) return false;   // only the rows that carry a neighbour-based suggestion (likely.js)
     if (pid != null && !peopleOf(s, i).some(p => p && String(p.id) === pid)) return false;
     return true;
   });
@@ -251,7 +271,7 @@ export function visible(s, st, o) {
 /* ---- paste-ready lines: what to copy for a row (current text -> standard form), one click each ---- */
 export function copyActions(s, i) {
   if (s.key === 'places' || s.key === 'check') return [{ label: 'New', title: 'Copy the new text, the one in bold: ' + i.to, text: i.to }, { label: 'Old', title: 'Copy the old text, the crossed-out one, to search for it in your tree: ' + i.raw, text: i.raw }];
-  if (s.key === 'decide') return (i.cands || []).map(c => ({ label: c, title: 'Copy “' + c + '”', text: c }));
+  if (s.key === 'decide') { const L = i.likely ? i.likely.idx : -1, a = (i.cands || []).map((c, n) => ({ label: c, title: 'Copy “' + c + '”', text: c, likely: n === L })); return L > 0 ? [a[L], ...a.filter((x, n) => n !== L)] : a; }   // a suggested candidate goes first, still only to copy
   return [];
 }
 

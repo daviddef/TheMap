@@ -34,7 +34,7 @@ const loadNames = () => namesP || (namesP = Promise.all(['/given-names.json', '/
    profile or tree link gives the site code and tree number. An Ancestry export needs nothing pasted. Plain links; the page sends nothing. */
 let mhc = null, mhFile = null, anc = null, mhText = '', mhNote = '', ancSite = loadSite();
 const knownP = fetch(new URL('known-sites.json', base)).then(r => r.ok ? r.json() : {}).catch(() => ({}));
-const tellCanvas = () => { const f = $('#cv'); if (f && f.contentWindow) f.contentWindow.postMessage({ tcLinks: 1 }, location.origin); if (typeof fxw !== 'undefined' && !$('#fx').hidden) fxw.draw(); };
+const tellCanvas = () => { const f = $('#cv'); if (f && f.contentWindow) f.contentWindow.postMessage({ tcLinks: 1 }, location.origin); if (typeof fxw !== 'undefined' && !$('#fx').hidden) { fxw.draw(); pw.draw(); } };
 const links = {
   get: () => ({ mh: !!mhc, mhFile: !!mhFile, text: mhText, note: mhNote, anc: !!anc, ancTree: anc ? anc.tree : '', ancSite }),
   url: (id, name) => { const p = profileUrl(mhc, id, name), t = treeUrl(mhc, id), a = personUrl(anc, id, ancSite); return p || a ? { mh: p, tree: t, anc: a } : null; },
@@ -238,7 +238,7 @@ const isTreeJson = bytes => { try { return /^\uFEFF?\s*\{/.test(new TextDecoder(
 let curLink = null, curSize = 0;   // the address a file was fetched from (if it was), and the file's size
 let openTo = null;   // the page to land on once the file is read: 'fix' is the "Fix list" button on a kept file (as on /roots/); it opens the Fix list as soon as the reader has made it
 function start(bytes, name, via, link, to) {
-  closeYF(true); closeFX(true); lastM = null; fixMsg = null; cmpFix = null; openTo = to || null;
+  closeYF(true); closeFX(true); lastM = null; fixMsg = null; cmpFix = null; placesMsg = null; pw.setData(null, null, ''); openTo = to || null;
   const json = isTreeJson(bytes);
   curName = name || null; curVia = via || null; curLink = link || null; curSize = bytes.byteLength; curHead = name && !json ? headInfo(bytes) : (json ? { from: 'tree.json', tree: '' } : null);
   if (curVia && curHead) curHead = { ...curHead, from: curVia };   // the last-used list says where a file came from
@@ -254,6 +254,9 @@ function start(bytes, name, via, link, to) {
       fixRefresh(true);
       if (openTo === 'fix') { openTo = null; openFX(null); }
     }
+    else if (m.type === 'places') { if (window.RR) { placesMsg = m; pw.setData(m, null, ''); } }
+    else if (m.type === 'places-failed') { if (window.console) console.error('places', m.msg, m.stack); }
+    else if (m.type === 'suggested') pw.suggested(m);
     else if (m.type === 'exported') exported(m);
     else if (m.type === 'error') {
       if (exporting) { exporting = false; $('#yfBusy').hidden = true; $('#yfGo').disabled = false; $('#yfSum').textContent = 'The file could not be made: ' + m.msg; $('#yfOut').hidden = false; $('#yfFile').hidden = $('#yfLog').hidden = true; return; }
@@ -333,7 +336,7 @@ async function openArchive(key) {
     const f = await fetchArchive(key);
     mhFile = null; mhc = null; anc = null;
     window.RR = { tree: f.tree, atlas: f.atlas, loadNames, links, archive: f.archive, fixApi };
-    fixMsg = null; cmpFix = null; fixRefresh(false);
+    fixMsg = null; cmpFix = null; placesMsg = null; pw.setData(null, null, ''); fixRefresh(false);
     setCur({ t: 'archive', ref: key }, a.name + ' archive'); attachKeep();
     if (f.lines) { window.RR.lines = f.lines; window.RR.linesArch = key; }
     /* ?p=<slug>: an archive's link to one person's page; the canvas puts that person on and selects them (only a plain slug is passed on) */
@@ -491,6 +494,7 @@ function drawSG(open) {
   const sel = $('#sgAnc'); if (open || sel !== document.activeElement) sel.value = L.ancSite;
   $('#sgAncSt').textContent = L.anc ? 'This file is an Ancestry export (tree ' + L.ancTree + '), so every person already links into it on ancestry.' + L.ancSite + '. Nothing is sent.' : 'Used for the “Open on Ancestry” links of an Ancestry export; not needed for other files.';
   const lk = $('#sgLook'); if (open || lk !== document.activeElement) lk.value = e.look;
+  drawLayoutTiles(e.look);
   $('#sgRem').checked = e.remember;
   const ok = storageOk() && !sgWriteFailed;
   $('#sgStore').textContent = ok ? '' : 'This browser is not letting the page keep settings, so your choices last until you close the page.';
@@ -531,6 +535,23 @@ function lookSet(look) {
   if (sgWriteFailed) { say('This browser is not letting the page keep the look, so it lasts until you close the page.'); setTimeout(() => say(''), 5000); }
   if (!$('#sg').hidden) drawSG();
 }
+/* the Layout tiles: Lanes, Countries and Names are looks of their own; Tree goes back to the last colour look worn (or Automatic) */
+const LAYOUTS = ['lanes', 'countries', 'names'];
+let lastColour = 'auto';
+function drawLayoutTiles(look) {
+  if (!LAYOUTS.includes(look)) lastColour = look;
+  document.querySelectorAll('#sg .sglk').forEach(b => {
+    const want = b.dataset.sglook, on = want === 'tree' ? !LAYOUTS.includes(look) : want === look;
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+}
+document.querySelectorAll('#sg .sglk').forEach(b => {
+  b.onclick = () => {
+    const want = b.dataset.sglook;
+    const look = want === 'tree' ? (LAYOUTS.includes(ST.effective().look) ? lastColour : ST.effective().look) : want;
+    lookSet(look);
+  };
+});
 $('#sgLook').onchange = e => {
   sgWriteFailed = !ST.write({ look: e.target.value }).ok;
   wearLook(e.target.value);
@@ -729,17 +750,48 @@ addEventListener('drop', e => { dragging(false); if ($('#start').hidden) return;
    plus, while Compare is on, what the Compare view found between the file and the archives (the canvas hands that over in memory: tcFixCompare). A tick or a "left as is" is kept under the
    same keys, in the same store, as /roots/ keeps them (decisions.js), so the two pages agree and, with the six words on, so do the devices. The canvas's side panel draws one person's own
    rows with the same row (fixApi.personRows). Nothing here is sent anywhere. ---- */
-let fixMsg = null, cmpFix = null, fxFrom = null, fxWas = null, pIdx = null, pIdxFor = null;
+let fixMsg = null, cmpFix = null, placesMsg = null, fxTab = 'people', fxFrom = null, fxWas = null, pIdx = null, pIdxFor = null;
 dec.autoOn();   // keeping starts on, on this device only, unless the visitor has switched it off (decisions.js says why)
 const toCanvas = msg => { const f = $('#cv'); if (f && f.contentWindow && !f.hidden) f.contentWindow.postMessage(msg, location.origin); };
+/* The Places tab is the same pane again: its markup is the People pane's, copied once, with every id prefixed (fxp-) so the two can sit in one document */
+{
+  const src = $('#fxpane-people'), dst = $('#fxpane-places'), c = src.cloneNode(true);
+  for (const e of [c, ...c.querySelectorAll('[id]')]) e.id = e.id.replace(/^fx-/, 'fxp-').replace(/^fxpane-people$/, 'fxpane-places-in');
+  c.querySelectorAll('[aria-describedby]').forEach(e => e.setAttribute('aria-describedby', e.getAttribute('aria-describedby').replace(/^fx-/, 'fxp-')));
+  dst.append(...c.childNodes);
+}
+const setTabN = (k, n) => { const b = $('#fxt-' + k + '-n'); if (!b) return; b.textContent = n > 99999 ? '99999+' : String(n); b.hidden = !n; b.parentElement.title = n + (n === 1 ? ' row' : ' rows') + ' still to do'; };
 const fxw = createWorkspace({
-  root: $('#fx'), dec, fixes, links: () => links, fileName: () => curName || '', syncOn: () => syncState().on, livingHidden: () => hide,
+  root: $('#fxpane-people'), keepRoot: $('#fx-keep'), dec, fixes, links: () => links, fileName: () => curName || '', syncOn: () => syncState().on, livingHidden: () => hide,
   capInfo: rows => (window.raResearchFile && window.raResearchFile.capInfo ? window.raResearchFile.capInfo(rows) : null),   // the six-word code is only on the page when the six words are on
   show: keys => { closeFX(); toCanvas({ tcShow: keys }); }, openSettings: () => openSG(),
-  onCount: open => toCanvas({ tcFixCount: open }),
+  onCount: open => { setTabN('people', open); toCanvas({ tcFixCount: open }); },
   catalogue: () => fetch(new URL('data/surname-catalogue.json', base)).then(r => r.ok ? r.json() : null).catch(() => null),   // the Atlas's spelling families, with their archives
 });
-function askFix() { if (worker && lastM && lastM.kind !== 'tree') worker.postMessage({ cmd: 'checklist', living: !hide, ancestry: ancSite }); }
+/* The Places tab: the places the Atlas could not settle exactly, as a second list of the same kind (placereview.js). Its ticks and "left as is" go to the same store; it never edits, picks or draws anything. */
+const pw = createWorkspace({
+  root: $('#fxpane-places'), kind: 'places', pfx: 'fxp', dec, fixes, links: () => links, fileName: () => curName || '', syncOn: () => syncState().on, livingHidden: () => hide,
+  capInfo: rows => (window.raResearchFile && window.raResearchFile.capInfo ? window.raResearchFile.capInfo(rows) : null),
+  show: keys => { closeFX(); toCanvas({ tcShow: keys }); }, openSettings: () => openSG(),
+  onCount: open => setTabN('places', open), drawKeep: () => fxw.drawKeep(),
+  suggest: raw => { if (worker) worker.postMessage({ cmd: 'suggest', raw }); },
+});
+fxw.addPeer(pw);
+function askFix() { if (worker && lastM && lastM.kind !== 'tree') { worker.postMessage({ cmd: 'checklist', living: !hide, ancestry: ancSite }); worker.postMessage({ cmd: 'places', living: !hide, ancestry: ancSite }); } }
+/* People or Places: one pane shows at a time. The tab strip is a WAI-ARIA tablist (arrow keys move, Home and End jump). */
+function showTab(k, focus) {
+  fxTab = k;
+  for (const t of ['people', 'places']) { const b = $('#fxt-' + t), on = t === k; b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; $('#fxpane-' + t).hidden = !on; }
+  for (const e of document.querySelectorAll('#fx .fxpeople-only')) e.hidden = k !== 'people';
+  const to = k === 'places' ? pw : fxw; to.adopt(k === 'places' ? fxw : pw);   // a row both lists have (the same place in "Choose a place" and here) is one decision
+  to.present(null);
+  if (focus) $('#fxt-' + k).focus();
+}
+for (const t of ['people', 'places']) $('#fxt-' + t).onclick = () => showTab(t, false);
+$('#fxt-people').parentElement.addEventListener('keydown', e => {
+  const k = e.key === 'ArrowRight' || e.key === 'ArrowLeft' ? (fxTab === 'people' ? 'places' : 'people') : e.key === 'Home' ? 'people' : e.key === 'End' ? 'places' : null;
+  if (k) { e.preventDefault(); showTab(k, true); }
+});
 /* the list changed (a new fix list from the reader, or Compare found something): rebuild the model, and tell the canvas (a full refresh when the rows themselves changed) */
 function fixRefresh(rows) { fxw.setData(fixMsg, cmpFix, cur ? cur.key : ''); pIdx = null; toCanvas(rows ? { tcFix: 1 } : { tcFixCount: fxw.tally().open }); }
 /* what the canvas's side panel asks: counts for a person and their rows, drawn into the canvas's own document with the same row component */
@@ -768,7 +820,8 @@ const fixApi = {
 function openFX(person) {
   if (!window.RR) return;
   const f = $('#fx'); fxFrom = document.activeElement;
-  fxw.present(person);
+  if (person) showTab('people', false); else showTab(fxTab, false);
+  if (person) fxw.present(person);
   fxWas = { cv: $('#cv').inert, yf: $('#yf').inert, start: $('#start').inert };
   f.hidden = false; $('#cv').inert = $('#yf').inert = $('#start').inert = true;
   $('#fx-back').textContent = $('#cv').hidden ? '← Back' : '← Back to the canvas';
@@ -776,12 +829,12 @@ function openFX(person) {
 }
 function closeFX(quiet) {
   const f = $('#fx'); if (!f || f.hidden) return;
-  f.hidden = true; fxw.st.flush(); const w = fxWas || {}; $('#cv').inert = !!w.cv; $('#yf').inert = !!w.yf; $('#start').inert = !!w.start;
+  f.hidden = true; fxw.st.flush(); pw.st.flush(); const w = fxWas || {}; $('#cv').inert = !!w.cv; $('#yf').inert = !!w.yf; $('#start').inert = !!w.start;
   if (!quiet) { const c = $('#cv'); if (c && !c.hidden) { try { c.focus(); } catch (e) { /* no focus to give */ } } else if (fxFrom && fxFrom.isConnected) { try { fxFrom.focus(); } catch (e) { /* ok */ } } }
 }
 $('#fx-back').onclick = () => closeFX();
 addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#fx').hidden && $('#sg').hidden) { e.preventDefault(); closeFX(); } });
-addEventListener('pagehide', () => fxw.st.flush());
+addEventListener('pagehide', () => { fxw.st.flush(); pw.st.flush(); });
 
 {
   /* from an archive: its icon sends ?archive=<key>; failing that, the page the visitor came from (some browsers send only its origin, which is enough) */

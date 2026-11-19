@@ -151,12 +151,10 @@ import { u } from "../../lib/url.js";
         <p class="stsub">Your own file, line for line, with only the changes you choose. Nothing is dropped or rewritten without being listed in a change log, and nothing leaves this page: the new file is made here and saved by your browser.</p>
         <fieldset id="yfMode" class="yfmodes">
           <legend>What to change</legend>
-          <label><input type="radio" name="yfxm" value="enriched" checked> <span><b>Enriched</b> · adds coordinates and an Atlas id under each place that was matched exactly or that you picked. No existing line is changed. The safest choice.</span></label>
-          <label><input type="radio" name="yfxm" value="cleaned"> <span><b>Cleaned</b> · as enriched, and the places you picked on the review screen replace the old place text (the old text is kept beside it).</span></label>
-          <label><input type="radio" name="yfxm" value="shareable"> <span><b>Shareable</b> · as cleaned, and living people are reduced to a bare “Living” record, their family events removed, so you can send it to a relative. Read the change log: a living person named in a way we cannot recognise stays.</span></label>
+          <label><input type="radio" name="yfxm" value="enriched" checked> <span><b>Enriched</b> · adds coordinates and an Atlas id under each place that was matched exactly. No existing line is changed. The safest choice.</span></label>
+          <label><input type="radio" name="yfxm" value="shareable"> <span><b>Shareable</b> · as enriched, and living people are reduced to a bare “Living” record, their family events removed, so you can send it to a relative. Read the change log: a living person named in a way we cannot recognise stays.</span></label>
           <label><input type="radio" name="yfxm" value="faithful"> <span><b>No changes</b> · your file again, as it was.</span></label>
         </fieldset>
-        <p class="stsub">Places are picked on the Places to review screen in Roots &amp; Routes, which this page does not have yet. Until you pick any there, Cleaned changes nothing more than Enriched.</p>
         <p><button type="button" class="stbtn primary" id="yfGo">Make the file</button> <span id="yfBusy" class="stsub" hidden>Working…</span></p>
         <div id="yfOut" hidden>
           <p id="yfSum" class="stmsg" role="status"></p>
@@ -172,37 +170,47 @@ import { u } from "../../lib/url.js";
     <header class="fxhead">
       <button type="button" class="stbtn" id="fx-back">← Back to the canvas</button>
       <h1 id="fxTitle" tabindex="-1">Fix list</h1>
-      <p class="stsub" id="fx-sub"></p>
-      <div class="fxprog"><div class="fxbar" id="fx-bar" role="progressbar" aria-label="Fix list progress" aria-valuemin="0" aria-valuemax="100"><i></i></div><span id="fx-prog" role="status"></span></div>
-      <p class="stsub" id="fx-hint" hidden>Names are plain text for now. Add your MyHeritage tree link in <button type="button" class="stlink" id="fx-settings">Settings</button> and each person in your file becomes a link to their profile.</p>
-      <p class="stsub" id="fx-living" hidden><span></span> <button type="button" class="stlink" id="fx-living-set">Change this in Settings</button></p>
+      <div class="fxtabs" role="tablist" aria-label="Which list">
+        <button type="button" role="tab" class="fxtab" id="fxt-people" aria-selected="true" aria-controls="fxpane-people">People <span class="fxtn" id="fxt-people-n" hidden></span></button>
+        <button type="button" role="tab" class="fxtab" id="fxt-places" aria-selected="false" aria-controls="fxpane-places" tabindex="-1">Places <span class="fxtn" id="fxt-places-n" hidden></span></button>
+      </div>
     </header>
 
-    <section class="fxtools" aria-label="Filter the fix list">
-      <label class="fxf"><span>Research name</span><select id="fx-name" aria-describedby="fx-names"><option value="">Pick a name or an archive…</option></select></label>
-      <label class="fxf fxq"><span>Search by name</span><input type="search" id="fx-q" autocomplete="off" spellcheck="false" placeholder="a name, a place, a reason"></label>
-      <label class="fxf"><span>Show</span><select id="fx-mode"><option value="open">Still to do</option><option value="done">Done</option><option value="asis">Left as is</option><option value="all">Everything</option></select></label>
-      <label class="fxf"><span>Group</span><select id="fx-grp"><option value="">Every group</option></select></label>
-      <label class="fxf"><span>Order</span><select id="fx-order"></select></label>
-      <label class="fxf"><span>Rows</span><select id="fx-rows"></select></label>
-      <div class="fxbtns"><button type="button" class="stbtn" id="fx-expand">Open all sections</button><button type="button" class="stbtn" id="fx-collapse">Close all</button></div>
-      <label class="fxck"><input type="checkbox" id="fx-fold"><span>Fold the Atlas notes</span></label>
-      <p class="fxnames" id="fx-names" role="status" hidden></p>
-      <p class="fxwho" id="fx-who" hidden><span></span> <button type="button" class="stlink" id="fx-whoX">Show everyone</button></p>
-    </section>
-
-    <section class="fxkeep" aria-label="Keeping your decisions">
+    <section class="fxkeep" id="fx-keep" aria-label="Keeping your decisions">
       <label class="fxck"><input type="checkbox" id="fx-keepon"><span><b>Remember my decisions on this device</b></span></label>
       <p class="stsub fxsaved" id="fx-saved" role="status"></p>
       <div class="fxbtns">
         <button type="button" class="stbtn" id="fx-save">Save decisions to a file</button><button type="button" class="stbtn" id="fx-load">Load decisions from a file</button><button type="button" class="stbtn" id="fx-forget">Forget them</button>
-        <button type="button" class="stbtn" id="fx-txt">Text</button><button type="button" class="stbtn" id="fx-csv">Spreadsheet</button><button type="button" class="stbtn" id="fx-pdf">PDF</button>
+        <span class="fxbtns fxpeople-only"><button type="button" class="stbtn" id="fx-txt">Text</button><button type="button" class="stbtn" id="fx-csv">Spreadsheet</button><button type="button" class="stbtn" id="fx-pdf">PDF</button></span>
         <input type="file" id="fx-file" accept=".json,application/json" hidden>
       </div>
     </section>
 
-    <p class="stsub" id="fx-empty" hidden>Nothing to fix: the reader found nothing in this file that needs a correction.</p>
-    <div id="fx-body"></div>
+    <div id="fxpane-people" class="fxpane" role="tabpanel" aria-labelledby="fxt-people">
+      <header class="fxhead">
+        <p class="stsub" id="fx-sub"></p>
+        <div class="fxprog"><div class="fxbar" id="fx-bar" role="progressbar" aria-label="Fix list progress" aria-valuemin="0" aria-valuemax="100"><i></i></div><span id="fx-prog" role="status"></span></div>
+        <p class="stsub" id="fx-hint" hidden>Names are plain text for now. Add your MyHeritage tree link in <button type="button" class="stlink" id="fx-settings">Settings</button> and each person in your file becomes a link to their profile.</p>
+        <p class="stsub" id="fx-living" hidden><span></span> <button type="button" class="stlink" id="fx-living-set">Change this in Settings</button></p>
+      </header>
+
+      <section class="fxtools" aria-label="Filter the fix list">
+        <label class="fxf"><span>Research name</span><select id="fx-name" aria-describedby="fx-names"><option value="">Pick a name or an archive…</option></select></label>
+        <label class="fxf fxq"><span>Search by name</span><input type="search" id="fx-q" autocomplete="off" spellcheck="false" placeholder="a name, a place, a reason"></label>
+        <label class="fxf"><span>Show</span><select id="fx-mode"><option value="open">Still to do</option><option value="done">Done</option><option value="asis">Left as is</option><option value="all">Everything</option></select></label>
+        <label class="fxf"><span>Group</span><select id="fx-grp"><option value="">Every group</option></select></label>
+        <label class="fxf"><span>Order</span><select id="fx-order"></select></label>
+        <label class="fxf"><span>Rows</span><select id="fx-rows"></select></label>
+        <div class="fxbtns"><button type="button" class="stbtn" id="fx-expand">Open all sections</button><button type="button" class="stbtn" id="fx-collapse">Close all</button></div>
+        <label class="fxck"><input type="checkbox" id="fx-fold"><span>Fold the Atlas notes</span></label>
+        <p class="fxnames" id="fx-names" role="status" hidden></p>
+        <p class="fxwho" id="fx-who" hidden><span></span> <button type="button" class="stlink" id="fx-whoX">Show everyone</button></p>
+      </section>
+
+      <p class="stsub" id="fx-empty" hidden>Nothing to fix: the reader found nothing in this file that needs a correction.</p>
+      <div id="fx-body"></div>
+    </div>
+    <div id="fxpane-places" class="fxpane" role="tabpanel" aria-labelledby="fxt-places" hidden></div>
   </div>
 </main>
 <aside id="sg" hidden role="dialog" aria-modal="true" aria-labelledby="sgTitle">
@@ -212,6 +220,17 @@ import { u } from "../../lib/url.js";
       <h2 id="sgTitle" tabindex="-1">Settings</h2>
       <button type="button" class="stbtn primary" id="sgClose">Done</button>
     </header>
+
+    <section class="sgsec" aria-labelledby="sgLayT">
+      <h3 id="sgLayT">Layout</h3>
+      <div class="sglks" role="group" aria-labelledby="sgLayT">
+        <button type="button" class="sglk" data-sglook="tree" aria-pressed="false" title="The family tree as cards, in the colour look chosen with the ◐ button"><svg viewBox="0 0 48 36" aria-hidden="true" focusable="false"><rect x="17" y="3" width="14" height="7" rx="2"/><rect x="4" y="26" width="14" height="7" rx="2"/><rect x="30" y="26" width="14" height="7" rx="2"/><path d="M24 10v7M11 26v-9h26v9" fill="none"/></svg><span>Tree</span></button>
+        <button type="button" class="sglk" data-sglook="lanes" aria-pressed="false" title="One lane for each generation"><svg viewBox="0 0 48 36" aria-hidden="true" focusable="false"><rect x="4" y="3" width="40" height="8" rx="2" fill="none"/><rect x="4" y="14" width="40" height="8" rx="2" fill="none"/><rect x="4" y="25" width="40" height="8" rx="2" fill="none"/><circle cx="14" cy="7" r="2.2"/><circle cx="26" cy="18" r="2.2"/><circle cx="36" cy="29" r="2.2"/></svg><span>Lanes</span></button>
+        <button type="button" class="sglk" data-sglook="countries" aria-pressed="false" title="One column for each country of birth, with its flag"><svg viewBox="0 0 48 36" aria-hidden="true" focusable="false"><rect x="3" y="3" width="12" height="30" rx="2" fill="none"/><rect x="18" y="3" width="12" height="30" rx="2" fill="none"/><rect x="33" y="3" width="12" height="30" rx="2" fill="none"/><circle cx="9" cy="11" r="2.2"/><circle cx="24" cy="21" r="2.2"/><circle cx="39" cy="14" r="2.2"/></svg><span>Countries</span></button>
+        <button type="button" class="sglk" data-sglook="names" aria-pressed="false" title="Surnames as cards, in rings around yours"><svg viewBox="0 0 48 36" aria-hidden="true" focusable="false"><circle cx="24" cy="18" r="15" fill="none"/><circle cx="24" cy="18" r="7" fill="none"/><circle cx="24" cy="18" r="2.2"/><circle cx="24" cy="3" r="2.2"/><circle cx="37" cy="25" r="2.2"/><circle cx="11" cy="25" r="2.2"/></svg><span>Names</span></button>
+      </div>
+      <p class="stsub" id="sgLayNote">Pick how the tree is laid out. The colours (Sticker, Paper, Ground) are chosen with the ◐ button on the canvas, or below.</p>
+    </section>
 
     <section class="sgsec" aria-labelledby="sgLivT">
       <h3 id="sgLivT">Living people</h3>

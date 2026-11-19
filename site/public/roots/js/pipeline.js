@@ -9,7 +9,9 @@ import { Gazetteer, resolveAll, REAL, COARSE, REVIEW, addCountryNames, parsePart
 import { buildExport, logText } from './export.js';
 import { offerable } from './contribute.js';
 import { Overlay, suggestMerges, cleanDate, yearOf } from './workbench.js';
-import { buildChecklist, arrange } from './checklist.js';
+import { buildChecklist, arrange, eventsByPlace } from './checklist.js';
+import { buildPlaceReview } from './placereview.js';
+import { makeLikely } from './likely.js';
 import { makeEnricher } from './enrich.js';
 import { detectAncestry } from './ancestry.js';
 import { detectMyHeritage } from './myheritage.js';
@@ -192,7 +194,7 @@ export class Session {
     const label = p => { const c = core.c.countries[p.k]; return [p.n, p.region, c ? c[0] : p.k].filter(Boolean).join(', '); };
     const resolve = raw => (this.overrides.has(raw) ? { tier: 'user', place: this.overrides.get(raw) } : this.res.get(raw));
     const out = buildChecklist({ parsed: this.parsed, P: this.P, est: this.est, dest: this.dest, living, label,
-      merges: suggestMerges(this.P, this.est, this.overlay), resolve });
+      merges: suggestMerges(this.P, this.est, this.overlay), resolve, byRaw: this.eventsFor(living), likely: this.likelyFor(living) });
     /* checks that need the whole life or the Atlas: only places the resolver is sure of are used, so a guess never raises a flag */
     const SURE = new Set([...REAL, 'user']);
     const locate = raw => { const r = resolve(raw); if (!r || !SURE.has(r.tier)) return null; const t = targetOf(r, core.c); if (!t || t.kind !== 'place') return null; const c = core.c.countries[t.iso]; return { ...t, today: c ? c[0] : null }; };
@@ -219,7 +221,31 @@ export class Session {
     return makeEnricher({ core: this.core, pages: h.pages, given: h.given, sur: h.sur, target, P: this.P, shown, est: this.est, dest: this.dest, ancestry });
   }
 
-  pick(raw, cand) { if (cand) this.overrides.set(raw, cand); else this.overrides.delete(raw); }
+  pick(raw, cand) { if (cand) this.overrides.set(raw, cand); else this.overrides.delete(raw); this.lkMemo = null; }
+
+  /* the walk of the file's events by place text, once per living setting, and the neighbour scorer built over it (likely.js); a pick changes what is firm, so it clears the scorer */
+  eventsFor(living) {
+    const shown = p => (p.liv && !living ? 'Living person' : ((p.given || '') + ' ' + (p.sur || '')).trim() || p.id), ck = living ? 'l' : 'h';
+    return (this.evMemo = this.evMemo || {})[ck] || (this.evMemo[ck] = eventsByPlace(this.parsed, this.P, shown, p => living || !p.liv));
+  }
+  likelyFor(living) {
+    const ck = living ? 'l' : 'h', SURE = ['confident', 'confident-by-region', 'user'], core = this.core, rmemo = new Map();
+    const firm = raw => { const r = this.overrides.has(raw) ? { tier: 'user', place: this.overrides.get(raw) } : this.res.get(raw); const p = r && r.place; return p && SURE.includes(r.tier) ? { y: p.y, x: p.x, k: p.k, region: p.region || null } : null; };
+    const regime = (y, x, yr) => { const k = Math.round(y * 20) + '|' + Math.round(x * 20) + '|' + yr; if (rmemo.has(k)) return rmemo.get(k); const rg = core.eraRegime(core.regionOf(y, x), yr) || null; rmemo.set(k, rg); return rg; };
+    return (this.lkMemo = this.lkMemo || {})[ck] || (this.lkMemo[ck] = makeLikely({ P: this.P, byRaw: this.eventsFor(living), firm, regime }));
+  }
+
+  /* a place the way the fix list writes it, to paste into a tree: name, region, country */
+  placeLabel(p) { const c = this.core.c.countries[p.k]; return [p.n, p.region, c ? c[0] : p.k].filter(Boolean).join(', '); }
+
+  /* The Tree Canvas's Places tab (placereview.js): every place text the Atlas could not settle exactly, with who uses it and the Atlas's help, as a checklist. It reads, and
+     changes nothing. opt.living false leaves out living people and any text only they use. */
+  places(opt = {}) {
+    const living = opt.living !== false, shown = p => (p.liv && !living ? 'Living person' : ((p.given || '') + ' ' + (p.sur || '')).trim() || p.id);
+    const label = p => this.placeLabel(p);
+    const events = this.eventsFor(living), en = this.enricher(shown, opt.ancestry);
+    return buildPlaceReview({ mentions: this.mentions, res: this.res, overrides: this.overrides, events, living, label, likely: this.likelyFor(living), enrich: o => en.enrich(o) });
+  }
 
   report(treeReport) {
     const by = {}, w = {}; let total = 0, real = 0, drawable = 0, named = 0, claims = 0, claimsDrawable = 0;

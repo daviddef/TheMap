@@ -36,7 +36,7 @@ const ver = (ctx.contract && ctx.contract.version) || "";
 
 /* THE FILE LIST ON THIS PAGE. One row per file somebody could want, grouped by the QUESTION they have, each with a command that
    was run against the live site on 19 Nov 2026 and answered. Sizes are read from the shipped files at build time, never typed.
-   A file that is in the repository but has no address on recordatlas.org is in HELD_BACK, said plainly, with the address that does work. */
+   Every file here has an address on recordatlas.org (scripts/build-open-data.py publishes the catalogues that used to be GitHub-only). */
 const H = "https://recordatlas.org";
 const sz = (f) => { try { const n = fs.statSync(path.join(PUB, f)).size; return n >= 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB"; } catch { return ""; } };
 const nMort = (() => { try { return JSON.parse(fs.readFileSync(path.join(PUB, "mortality.json"), "utf8")).events.length; } catch { return 0; } })();
@@ -48,6 +48,10 @@ const GROUPS = [
       cmd: `curl -s ${H}/p/senj.json | jq '.collections[] | {provider, title, from, to, access}'` },
     { f: "coverage-by-country.json", what: "For each country: the years the books cover, and how many volumes and places. Where you could look, not where your family was.",
       cmd: `curl -s ${H}/coverage-by-country.json | jq '.countries.HR | {from, to, volumes, places}'` },
+    { f: "collections.json", what: "WHAT, across a whole country. 3,504 FamilySearch record collections with their years and how many records and images each holds. Country-wide ones (the IGI, a whole country's church books) live only here. FamilySearch's catalogue metadata: no licence is stated for it, so read their terms before reusing it at scale.",
+      cmd: `curl -s ${H}/collections.json | jq '.collections[] | select(.title | test("Croatia")) | {title, from, to, records}'` },
+    { f: "directory.json", what: "969 collections people and archives contributed, one row per named collection at a named repository: what it holds, the years, the cost and a link. CC0.",
+      cmd: `curl -s ${H}/directory.json | jq '.rows[] | select(.countries | index("IT")) | {repo, name, access}'` },
     { f: "provider-contacts.json", what: "Where to write to an archive that does not publish its images (only what Wikidata states). Keyed by the provider's Wikidata id.",
       cmd: `curl -s ${H}/provider-contacts.json | jq '.counts'` },
   ] },
@@ -74,6 +78,8 @@ const GROUPS = [
       cmd: `curl -s https://api.recordatlas.org/v1/given-name/Ivan | jq '.matches[0]'` },
   ] },
   { id: "f-places", q: "What was this place called, and where is it?", rows: [
+    { f: "place-names.json", what: "What a place was called in a given year: Salisbury 1890–1982 is Harare. Dated, each with the page that dates it. Search a register under the name of its year.",
+      cmd: `curl -s ${H}/place-names.json | jq '.places[] | select(.id == "harare") | .names[] | {name, from, to, kind}'` },
     { f: "g/zag.json", what: "The place-name search: every other name a place is known by (Zagreb is also Agram and Zagabria). Small files named by the first three letters of a name.",
       cmd: `curl -s ${H}/g/zag.json | jq '.[0] | {name: .[0], country: .[3], also: .[4]}'` },
     { f: "index.json", what: "The map's list of places (id, name, position, how many books). The busiest places only; the rest are in the pi/ files and index-quiet.json.",
@@ -95,13 +101,6 @@ const GROUPS = [
     { f: "research-sessions.json", what: "The books and sources the family archives have searched and what they found: marks only, no names. Your own copy is a different thing: see door 2.",
       cmd: `curl -s ${H}/research-sessions.json | jq '.archives | keys'` },
   ] },
-];
-/* In the repository, not at a recordatlas.org address. The GitHub address works today. */
-const RAW = "https://raw.githubusercontent.com/daviddef/TheMap/main/data/";
-const HELD_BACK = [
-  { f: "collections.json", what: "3,504 FamilySearch record collections, each with its years and how many records and images it holds. Country-wide ones (the IGI, a whole country's church books) live only here." },
-  { f: "place-names.json", what: "What a place was called in a given year (Salisbury 1890–1982 is Harare). Dated, with the page that dates it." },
-  { f: "directory.json", what: "969 collections that people and archives contributed, one row per named collection at a named repository." },
 ];
 ---
 <Base
@@ -144,7 +143,7 @@ const HELD_BACK = [
     <ul class="cx-simple">
       <li><b><code>providers.json</code> is WHO.</b> An archive or website, such as FamilySearch or a state archive, with what it costs to look.</li>
       <li><b>A collection is WHAT.</b> One set of records inside a provider, such as "Croatia, Catholic Church Books 1678–1941", with its years and size. Each row in a place file's <code>collections</code> names its provider by the id in <code>providers.json</code>.</li>
-      <li><b>So:</b> starting from a <i>place</i>? Read <code>/p/&lt;id&gt;.json</code>. Starting from an <i>archive</i> or a <i>cost</i>? Read <code>providers.json</code>. Want the country-wide FamilySearch collections? Read <code>collections.json</code> (below: it is on GitHub, not on this site).</li>
+      <li><b>So:</b> starting from a <i>place</i>? Read <code>/p/&lt;id&gt;.json</code>. Starting from an <i>archive</i> or a <i>cost</i>? Read <code>providers.json</code>. Want the country-wide FamilySearch collections? Read <code>collections.json</code>.</li>
     </ul>
   </div>
 
@@ -166,20 +165,6 @@ const HELD_BACK = [
     </>
   ))}
 
-  <h3 class="cx-h3" id="f-held">In the repository, not on this site yet</h3>
-  <p class="k-lede">These exist, but have no recordatlas.org address. They are public on GitHub, and that address works now.</p>
-  <div class="scroll"><table class="cx-tbl cx-files">
-    <thead><tr><th>File</th><th>What it is</th><th>Fetch it</th></tr></thead>
-    <tbody>
-      {HELD_BACK.map((r) => (
-        <tr>
-          <td><a href={RAW + r.f} rel="noopener"><code>{r.f}</code></a></td>
-          <td>{r.what}</td>
-          <td><pre class="cx-pre cx-cmd">{`curl -s ${RAW}${r.f} | jq 'keys'`}</pre></td>
-        </tr>
-      ))}
-    </tbody>
-  </table></div>
   <p class="cx-see"><b>Licences and the full list</b> (including the small per-place and per-name files): <a href={u("/data/")}>Use the data</a>. Files change shape when the site needs them to; read the field you need and ignore the rest.</p>
 
   <h2 class="k-h">The whole picture <span class="k-count">four services, one website built on them</span></h2>

@@ -56,7 +56,10 @@ const here = Astro.url.pathname;
  * simply absent. The audit of 10 Nov 2026 found about 630 pages were carrying
  * the ad, not a hundred, and cut the list to what is written.
  */
-const AD_PAGES = ["/about/", "/data/", "/coverage/", "/changelog/", "/flags/"];
+/* /about/ held the ad; it is now a redirect to /start/, and David's decision (19 Nov 2026) is that /start/ carries none: it is the first page a
+   newcomer sees and it opens the story tour. The ad is only ever written by the aside below, on a page in this list, so a page that is not
+   here has no ad unit and no ad script (there is no Auto ads loader anywhere in the site). The tour loads nothing from an ad network. */
+const AD_PAGES = ["/data/", "/coverage/", "/changelog/", "/flags/"];
 /* A country's page carries the ad and its generated /sources/ page does not (95% one template, measured 10 Nov 2026), and the
    tool screens (the map, /add/, /my-research/, /errands/, /worklist/) and the pages kept out of search (/countries/,
    /jurisdictions/) have none: an ad on a screen that is a form or a list is «ads on screens without publisher content». */
@@ -198,7 +201,7 @@ import { volumes as invVolumes } from "../lib/inventory.js";
 </head>
 {/* 1080px IS A READING MEASURE AND A MAP IS NOT PROSE. --maxw caps every
     page at 1080 so a paragraph never runs to an unreadable line length,
-    which is right for /about/ and wrong for the map: on a 1280 screen it
+    which is right for /start/ and wrong for the map: on a 1280 screen it
     left the map 646 pixels and gave the rest to margin, and on anything
     wider it just grew the margin. David: «why are you only using half the
     page?»
@@ -309,6 +312,10 @@ import { volumes as invVolumes } from "../lib/inventory.js";
         the browser because pages are built once and read for weeks. Seen-ness is a per-browser convenience, so storage may be blocked. */}
     <script is:inline defer src={u("/js/spot.js")}></script>
     <script is:inline defer src={u("/js/theme.js")}></script>
+    {/* THE STORY TOUR'S LOADER: about 4 KB, on every page. It opens the tour by itself once, on the home page and /start/ only, adds the round play icon
+        beside the Reader and Canvas icons, and listens for the T key. The tour proper (css, engine, land mask, chapters) is fetched only when it opens.
+        After theme.js, so its icon lands in front of the icons that script makes. */}
+    <script is:inline defer src={u("/js/start-tour-gate.js")}></script>
     <script is:inline defer src={u("/js/sources-pop.js")}></script>
     <script is:inline defer src={u("/js/external-links.js")}></script>
     <script is:inline>
@@ -344,6 +351,7 @@ import { volumes as invVolumes } from "../lib/inventory.js";
       <div class="dgrp dquick" id="ra-quick">
         <a class="dq" href={u("/read/")} aria-current={here === u("/read/") ? "page" : undefined}><span class="dqi" set:html={'<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v15H5.5A1.5 1.5 0 0 0 4 20.5zM20 5.5A1.5 1.5 0 0 0 18.5 4H13v15h5.5a1.5 1.5 0 0 1 1.5 1.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>'}></span><span>Record Reader</span></a>
         <a class="dq dq-canvas" href={u("/tree-canvas/")} target="_blank" rel="noopener" aria-current={here === u("/tree-canvas/") ? "page" : undefined}><span class="dqi" set:html={'<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="3" y="4" width="7" height="5" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="14" y="15" width="7" height="5" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="14" y="4" width="7" height="5" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M10 6.5h4M6.5 9v8.5H14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>'}></span><span>Tree Canvas</span></a>
+        <button type="button" class="dq dq-story" data-tour-open aria-haspopup="dialog" hidden><span class="dqi" set:html={'<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="8.6" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M10.2 8.4l5.2 3.6-5.2 3.6z" fill="currentColor" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>'}></span><span>The story</span></button>
         <button type="button" class="dq dq-sources" hidden><span class="dqi" set:html={'<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="10.5" cy="10.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M14.6 14.6 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>'}></span><span>Sources</span></button>
         <button type="button" class="dq dq-theme" hidden></button>
       </div>

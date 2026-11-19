@@ -20,6 +20,7 @@ const LEFT_OUT = {
   "roots": "the GEDCOM page works on a file only the visitor has; the page is noindex",
   "jurisdictions": "redirects to the Whose archive view of /providers/; noindex",
   "survey": "redirects to Help check a source on /providers/; noindex",
+  "about": "redirects to /start/, which is the one page for what the atlas is; canonical points there",
 };
 
 const routes = [];

@@ -6,7 +6,7 @@ import provs from "../../public/providers.json";
 import site from "../data/site.json";
 import full from "../data/places-full.json";
 import "../styles/kit.css";
-/* EVERY NUMBER ON THIS PAGE IS COUNTED, as on /about/. The one typed fact is the start month. The donation link lives in
+/* EVERY NUMBER ON THIS PAGE IS COUNTED, as on /start/. The one typed fact is the start month. The donation link lives in
    src/data/site.json (support.url): it is a hosted Stripe Payment Link, so the payment happens on Stripe's page and this page
    never sees a card. check-data.py refuses the sandbox link (/test_), so the page cannot ship with it. */
 const dots = idx.places.length;
@@ -73,7 +73,7 @@ const url = site.support?.url || "";
   <div class="k-foot">
     <p>Good to know</p>
     <p>A gift is a personal gift to the person who runs this atlas, not a tax-deductible donation to a charity.
-    <a href={u("/privacy/")}>Privacy</a> · <a href={u("/about/")}>About the atlas</a></p>
+    <a href={u("/privacy/")}>Privacy</a> · <a href={u("/start/")}>About the atlas</a></p>
   </div>
 </Base>
 

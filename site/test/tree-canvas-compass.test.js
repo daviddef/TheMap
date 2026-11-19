@@ -283,3 +283,17 @@ test("coming back to Compass changes nothing: a resume path, counters, and no re
   const body = /function resume\([\s\S]*?\n  async function open/.exec(view)[0];
   assert.doesNotMatch(body, /reindex\(|fitToPeople\(|ensureMap\(|getJson\(|loadArchive\(/, "no re-index, no re-fit, no refetch on the way back");
 });
+
+test("the header is the way home and the switcher sits beside it as icons: no folder button, no word pills", () => {
+  const read = f => fs.readFileSync(path.join(here, f), "utf8");
+  const tpl = read("../../scripts/roots/tree-canvas.template.html"), css = read("../public/tree-canvas/switcher.css"), cpcss = read("../public/tree-canvas/compass.css");
+  assert.doesNotMatch(tpl, /id="bOpen"|#bOpen|\$\('#bOpen'\)/, "the folder button is gone");
+  assert.match(tpl, /hb\.className = 'home'/); assert.match(tpl, /hb\.onclick = \(\) => parent\.postMessage\(\{ tcHome: true \}/, "the TREE CANVAS title posts tcHome, as the folder button did");
+  assert.match(tpl, /hb\.type = 'button'/, "a real button, so the keyboard reaches it");
+  assert.match(tpl, /\.logo \.home\{[^}]*pointer-events:auto/, "the logo ignores the mouse, the title does not");
+  assert.doesNotMatch(tpl, /Press the folder button/, "no hint sends the visitor to a button that is not there");
+  assert.doesNotMatch(css, /\.sw-l \{ padding: 4px 9px/, "no word pill beside the round buttons");
+  assert.match(css, /min-width: 761px\)[^}]*\{\s*#sw \{ top: 10px; left: 196px; transform: none; flex-direction: row/, "in a row beside the title on a wide screen");
+  assert.match(css, /max-width: 760px/, "a column on a phone");
+  assert.match(cpcss, /min-width: 761px\) \{ #cp \{ padding-top: 58px/, "Compass starts below the row");
+});

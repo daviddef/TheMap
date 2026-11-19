@@ -379,6 +379,9 @@ button{font-family:inherit}
 .logo small.by{display:block;margin:3px 0 0 86px;padding:0;background:none;border:0;border-radius:0;font:400 17px/1 "Lilita One",Impact,system-ui;letter-spacing:.5px;text-transform:none;color:var(--lk-accent);transform:rotate(-3deg);transform-origin:left center;text-shadow:0 2px 0 color-mix(in srgb,var(--lk-card) 90%,transparent);width:max-content}
 .logo small.by a{pointer-events:auto;color:inherit;text-decoration:none;border-bottom:2px dotted currentColor}
 .logo small.by a:hover{border-bottom-style:solid}
+.logo .home{font:inherit;letter-spacing:inherit;color:inherit;text-shadow:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;pointer-events:auto;border-radius:8px}
+.logo .home:hover b{text-decoration:underline;text-decoration-style:dotted;text-underline-offset:4px}
+.logo .home:focus-visible{outline:3px solid var(--lk-accent);outline-offset:3px}
 .top .lk-btn{align-self:center;white-space:nowrap}
 #bLiv[aria-pressed="true"]{background:var(--lk-accent);border-color:var(--lk-accent);color:#fff}
 .ph .logo small.by{display:block;margin-left:53px;font-size:13px}
@@ -459,7 +462,6 @@ select.lk-input{width:auto;padding:4px 8px}
 #info .fxp{font-size:12.5px;margin:10px 0 3px;color:var(--lk-soft)}
 #info .fxp a{color:var(--lk-ink);font-weight:700}
 /* file and living-people buttons are icons now: the open button is the accent colour */
-#bOpen{background:var(--lk-accent);border-color:var(--lk-accent);color:#fff}
 #bLiv[aria-pressed="true"]{background:var(--lk-accent);border-color:var(--lk-accent);color:#fff}
 /* the tab strip pans: fade where tabs are hidden */
 #info .ih{cursor:grab;touch-action:pan-x}
@@ -9808,7 +9810,7 @@ function startSync() {
 }
 function startTexts() {
   const h = $('#stH'), note = $('#stNote');
-  if (SA && QS.get('ex') === '1') { h.textContent = 'An invented example family'; note.hidden = false; note.textContent = 'Press the folder button (top right) to open a GEDCOM and draw your own tree: it is read in this browser and never uploaded.'; }
+  if (SA && QS.get('ex') === '1') { h.textContent = 'An invented example family'; note.hidden = false; note.textContent = 'Click TREE CANVAS (top left) to open a GEDCOM and draw your own tree: it is read in this browser and never uploaded.'; }
   else if (EMBED) h.textContent = M.archives.length === 1 && M.archives[0].k !== 'you' ? 'Who are you looking for in the ' + M.archives[0].name + ' archive?' : 'Who are you looking for in your tree?';
 }
 
@@ -10689,9 +10691,13 @@ function wireToolbar() {
     document.documentElement.classList.add('sa');
     const by = document.querySelector('.logo small'); by.className = 'by';
     by.innerHTML = 'by <a href="/" target="_top" rel="noopener">Record Atlas</a>';
+    /* the TREE CANVAS title is the way back to the opening screen (it replaced the folder button): open another file or an archive; the canvas keeps its own state */
+    { const lg = document.querySelector('.logo'), hb = document.createElement('button'); hb.type = 'button'; hb.className = 'home';
+      hb.title = 'Back to the opening screen: open a GEDCOM file or one of the family archives. Your canvas is kept.'; hb.setAttribute('aria-label', 'Tree Canvas: back to the opening screen');
+      while (lg.firstChild && lg.firstChild !== by) hb.append(lg.firstChild);
+      lg.insertBefore(hb, by); hb.onclick = () => parent.postMessage({ tcHome: true }, location.origin); }
     $('.top').insertAdjacentHTML('afterbegin',
       '<button class="lk-ibtn" id="bLiv" type="button" title="Hide living people (the names of anyone who may be alive)" aria-label="Hide living people" aria-pressed="' + (QS.get('liv') === '1') + '">' + icon('eyeoff') + '</button>' +
-      '<button class="lk-ibtn" id="bOpen" type="button" title="Back to the opening screen: open a GEDCOM file or one of the family archives. Your canvas is kept." aria-label="Back to the opening screen">' + icon('folder') + '</button>' +
       '<input type="file" id="gedIn" accept=".ged,.gedcom,.txt,.json,text/plain,application/json" hidden>');
     const send = async f => {
       if (!f) return;
@@ -10701,7 +10707,6 @@ function wireToolbar() {
       parent.postMessage({ tcOpen: { bytes, name: f.name } }, location.origin, [bytes]);
     };
     SENDGED = send;
-    $('#bOpen').onclick = () => parent.postMessage({ tcHome: true }, location.origin);
     $('#gedIn').onchange = e => { send(e.target.files[0]); e.target.value = ''; };
     $('#bLiv').onclick = () => parent.postMessage({ tcLiving: $('#bLiv').getAttribute('aria-pressed') !== 'true' }, location.origin);
     for (const ev of ['dragenter', 'dragover']) document.addEventListener(ev, e => e.preventDefault());

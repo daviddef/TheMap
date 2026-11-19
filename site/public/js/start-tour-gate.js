@@ -72,6 +72,13 @@
        already in it), land mask (text) and engine (script) are fetched in parallel, once, and only now. */
     function load() {
       if (state.loading) return state.loading;
+      /* Caveat, the handwriting on the photograph and the register page: self-hosted (public/fonts, SIL OFL 1.1), declared only now, when the tour
+         opens, and in the document, because a font-face inside a shadow root is ignored. The browser fetches the file only when text uses it. */
+      if (!d.getElementById("ra-tour-font")) {
+        var fs = d.createElement("style"); fs.id = "ra-tour-font";
+        fs.textContent = '@font-face{font-family:"Caveat";font-style:normal;font-weight:500;font-display:swap;src:url("' + base + 'fonts/caveat-latin-500.woff2") format("woff2")}';
+        d.head.appendChild(fs);
+      }
       var hostEl = d.createElement("div"); hostEl.id = "ra-tour-host";
       if (!hostEl.attachShadow) return (state.loading = Promise.reject(new Error("no shadow dom")));
       var sh = hostEl.attachShadow({ mode: "open" });

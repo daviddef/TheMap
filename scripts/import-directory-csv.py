@@ -153,7 +153,8 @@ def main():
 
     json.dump({
         "source": "Contributed by David Defranceski, September 2026",
-        "licence": "Descriptions as supplied by the contributor.",
+        "licence": "CC0 1.0 Universal (public domain)",
+        "licenceNote": "Released under CC0 by the contributor, David Defranceski, on 19 Nov 2026. The descriptions are the contributor's own words, not an archive's catalogue.",
         "note": ("One row per named collection at a named repository. The "
                  "`checked` date means the LINK answered on that day and "
                  "nothing more — nobody has opened the volumes behind it, and "

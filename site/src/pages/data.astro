@@ -239,6 +239,15 @@ const FILES = [
     ...licOf("country-points.json"),
     what: "One point per country, so that clicking anywhere on earth answers with something rather than nothing.",
     shape: `{ points: [{ cc, n, y, x, p, v, c, s, w, fs }] }` },
+  { path: "/place-names.json", size: sizeOf("place-names.json"), ...licOf("place-names.json"),
+    what: "What a place was called, and when: Salisbury 1890–1982 is Harare. Each name is a dated claim with the page that dates it, or a name given without dates (a lead: search it, never date a record by it). A register is indexed under the clerk's name in his year, so a search for today's name misses it.",
+    shape: `{ licence, note, statuses, kinds, places: [{ id, name, country, names: [{ name, lang, kind, from?, to?, status, sources: [{ title, url }] }] }], counts }` },
+  { path: "/directory.json", size: sizeOf("directory.json"), ...licOf("directory.json"),
+    what: "969 collections people and archives contributed, one row per named collection at a named repository: what it holds, the years, what it costs to look, and a link. The `checked` date means only that the LINK answered on that day: nobody has opened the volumes behind it.",
+    shape: `{ source, licence, licenceNote, note, checked, counts, rows: [{ id, repo, name, url, countries[], tags[], access, from, to, what, checked, gated }] }` },
+  { path: "/collections.json", size: sizeOf("collections.json"), ...licOf("collections.json"),
+    what: "3,504 FamilySearch record collections: title, years, how many records and images. A collection is a COVERAGE CLAIM over an area, not a volume standing in a town. Country-wide ones (the IGI, a whole country's church books) live only here; the ones that reach a place are also in that place's /p/ file. FamilySearch's catalogue metadata, and NO LICENCE IS STATED for it: see the licence list below.",
+    shape: `{ source, harvested, note, licence, licenceNote, collections: [{ cc, title, from, to, records, images, kind, url, countries[], filedUnder[], crosses[], places[] }] }` },
   { path: "/sitemap-index.xml", size: "—",
     what: "Every page on this site, split by type — places, archives, countries, regions, surnames.",
     shape: "sitemap index → six sitemaps" },
@@ -277,6 +286,13 @@ const FILES = [
           what they are taking on, and «we could not establish one» is an answer
           they can act on where silence is not. It is listed with the licences
           because that is where somebody looks, not because it is one. */}
+      <li><b>No licence stated</b> — <code>collections.json</code>, FamilySearch's
+        public catalogue metadata: collection titles, years, and record and image
+        counts. FamilySearch states no licence for it here and none is asserted.
+        Titles and counts are facts about its catalogue, not this project's work,
+        and they are published so a researcher can see what exists. If you reuse
+        them at scale, read FamilySearch's own terms; we have not cleared that
+        for you.</li>
       <li><b>No licence stated</b> — the holdings list of HR-HDA-883, the
         register collection of the Croatian State Archives, taken from the
         published inventory in Angelika Milić, «Zbirka matičnih knjiga u

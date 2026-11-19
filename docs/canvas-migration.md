@@ -55,13 +55,14 @@ Phase: 0 inventory, 1 Your file, 2 Settings, 3 Tree lenses, 4 Places and the fix
 | kinship | Already there | The canvas's Path tool ("how are X and Y related") does this; retire after a check | 3 | S | none |
 | lanes | Already there | The canvas's Countries look and place lanes; retire | 3 | S | none |
 | eras | Move | A lens: the selection's lives against the regimes of their time | 3 | M | lens frame |
-| timeline | Move | A lens: lifespans of the selection | 3 | M | lens frame |
-| surnames | Move | A lens on the whole file; the same surname catalogue as the Atlas | 3 | M | lens frame |
+| timeline | **Done** as the Lifespans View (full-width band; 19 Nov 2026) | A lens: lifespans of the selection | 3 | M | lens frame |
+| surnames | **Done** as the Surnames View (full-width band; 19 Nov 2026; reads the catalogue, does not write it) | A lens on the whole file; the same surname catalogue as the Atlas | 3 | M | lens frame |
 | orphans | **R&R's Orphans tab removed 19 Nov 2026** (the viewer drops its in-page tab under `shell=1`, as before; a tile that opens the view is sent back with a pointer). Move as a checklist (David, 19 Nov: "it needs to go as a tab in the fix list") | An **Orphans** tab beside People and Places in the canvas's Fix list: the by-place, by-collection groups of detached families and orphans, the Atlas's collections as links, copy buttons, a tick and "Leave as is", kept in the same decisions store (and under the same key as People's "Groups not joined" where the group is the same). No new storage, no editing | 4 | built | Fix list parity |
 
 **Open items for the twelve views (R&R keeps them until each is in the canvas or retired).** Status on 19 Nov 2026, from David:
 
-- **To be built in the canvas:** Surnames, Generations, Household, Night sky, Lifespans (timeline), Place lanes.
+- **Moved into the canvas View menu (19 Nov 2026):** Surnames and Lifespans (timeline). Per-tree record `vw`: `m` may be `surnames` or `lifespans`, with the short settings `xs` / `xl`. Not ported: R&R's per-view zoom and pan, any tree editing, the surname-variants write path.
+- **Still to be built in the canvas:** Generations, Household, Night sky, Place lanes.
 - **Deprecated, not moving:** Where they lived, Eras, Kinship.
 - **Undecided:** Whole tree, Close family, Atlas map, Movements, Ink ledger, Hourglass descendants (the Trail band has the direct line only).
 - **Already in the canvas:** Fan (View button), the hourglass's direct line (Trail band).

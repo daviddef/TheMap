@@ -26,6 +26,7 @@ Written 18 Nov 2026 (phase 0). Read this before moving anything. It is the inven
 - R&R's saved-files list keeps **five** files in its own database (`roots-recent`); the canvas keeps **three** in `tcRecent`. They are different stores. Phase 1 makes the canvas one list instead of two (opening screen and file page draw the same list); merging with R&R's is left until R&R retires, because `/roots/` must not change.
 - **Search is a tab, not a dock (19 Nov 2026).** The bottom search dock is gone: **Find** (a magnifying glass) is the first tab of the right-hand pane, with the box, one archives button (ticks, All, None), the recent people and the results, which can be clicked or dragged onto the canvas or into the relate slots. `/` opens it. While the canvas has no one on it, the same search is shown centred on the canvas and goes away when anyone is added. The bottom edge is the Trail band's; the dock now holds only the two relate slots while they are open. The pure parts are `find.js` in the Tree Canvas source (tested by `test/test-find.js` and `site/test/tree-canvas-find.test.js`).
 - The "Keep your work" state from #63 is already the canvas's; it is shown, not rebuilt.
+- **Compass replaces the Atlas map and Movements views (Nov 2026).** It is a page-level workspace over the canvas (`compass-view.js`, rules in `compass-model.js`), opened from the switcher: three round orange buttons, Canvas, Compass and Atlas, in the same place on both (`switcher.js`). It uses the loaded file and the Compare archive selection, so there is no second upload. Canvas and Compass are both kept alive: the canvas's iframe is only made inert under Compass and Compass's map is only hidden, so going between them redraws nothing (the year, selection, zoom, panel and the canvas's cards and view stay exactly as left). The Atlas is another page and opens in a new tab so the tree stays in memory; Alt-click leaves this page instead. The Tree Canvas source needs the same change as `scripts/roots/tree-canvas.template.html`: no Compass toolbar button, and a `tcAskCompass` message answered with `tcCompass` (the selected person).
 
 ## Inventory
 
@@ -50,8 +51,8 @@ Phase: 0 inventory, 1 Your file, 2 Settings, 3 Tree lenses, 4 Places and the fix
 | fan | Move the value | **Done** as a View (the View button: Canvas, Fan; Generations is listed as "soon") | 3 | M | lens frame |
 | close (close family) | Probably there | The canvas's Bloodline menu draws a person's blood relatives; confirm side by side, then retire | 3 | S | none |
 | map (whole-tree map) | Already there | The canvas's whole-tree look; retire | 3 | S | none |
-| atlasmap | Move | A lens: the selection's birthplaces on the Atlas map | 3 | M | lens frame |
-| movements | Move | A lens: the selection's places over time | 3 | M | lens frame |
+| atlasmap | Replaced by Compass | The selection's birthplaces on the Atlas map: Compass draws every person on the map by year, from the same loaded file | 3 | M | Compass (`/tree-canvas/`, the switcher) |
+| movements | Replaced by Compass | The places over time: Compass plays the years and draws the moves as arcs, with "Under way" and the books for a place | 3 | M | Compass |
 | kinship | Already there | The canvas's Path tool ("how are X and Y related") does this; retire after a check | 3 | S | none |
 | lanes | Already there | The canvas's Countries look and place lanes; retire | 3 | S | none |
 | eras | Move | A lens: the selection's lives against the regimes of their time | 3 | M | lens frame |

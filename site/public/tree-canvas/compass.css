@@ -1,13 +1,14 @@
 /* COMPASS: the workspace over the Tree Canvas (compass-view.js). It wears the canvas's own looks the way the Fix list does: Nunito and Lilita One, the same palette tokens for Sticker, Paper and Ground (and Automatic, where the device
    picks Sticker or Ground), thick outlines, a hard ledge under every pill, buttons that lift on hover and press down. Plain stylesheet: the page's CSP allows no inline style. */
-#cp { --bg: #F1E8D2; --ink: #2b2118; --soft: #6b5a44; --card: #FFFCF3; --line: #E3D6B8; --accent: #D9822B; --accent-ink: #fff; --focus: #2b6cb0; --warn: #c2452d; --sea: #cfd8cf;
+#cp { --bg: #F1E8D2; --ink: #2b2118; --soft: #6b5a44; --card: #FFFCF3; --line: #E3D6B8; --accent: #D9822B; --accent-ink: #fff; --focus: #2b6cb0; --warn: #c2452d; --sea: #cfd8cf; --needle: #B63C25;
   --fx-ink: var(--ink); --fx-soft: var(--soft); --fx-line: var(--line); --fx-card: var(--card); --fx-accent: var(--accent); --fx-focus: var(--focus);
   --body: Nunito, system-ui, sans-serif; --display: "Lilita One", Impact, system-ui, sans-serif; }
-:root[data-look="paper"] #cp { --bg: #F4E3CA; --ink: #3D2F21; --soft: #554636; --card: #D8C8B1; --line: #BEAD98; --accent: #DD7D17; --warn: #9a3220; --sea: #c9c0ad; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #cp { --bg: #291A0A; --ink: #D8C8B1; --soft: #A3937E; --card: #3D2F21; --line: #554636; --accent: #DD7D17; --accent-ink: #291A0A; --focus: #7db4f0; --warn: #e8836b; --sea: #2c2a28; } }
-:root[data-theme="dark"] #cp { --bg: #291A0A; --ink: #D8C8B1; --soft: #A3937E; --card: #3D2F21; --line: #554636; --accent: #DD7D17; --accent-ink: #291A0A; --focus: #7db4f0; --warn: #e8836b; --sea: #2c2a28; }
+:root[data-look="paper"] #cp { --bg: #F4E3CA; --ink: #3D2F21; --soft: #554636; --card: #D8C8B1; --line: #BEAD98; --accent: #DD7D17; --warn: #9a3220; --sea: #c9c0ad; --needle: #9a3220; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #cp { --bg: #291A0A; --ink: #D8C8B1; --soft: #A3937E; --card: #3D2F21; --line: #554636; --accent: #DD7D17; --accent-ink: #291A0A; --focus: #7db4f0; --warn: #e8836b; --sea: #2c2a28; --needle: #EE8F76; } }
+:root[data-theme="dark"] #cp { --bg: #291A0A; --ink: #D8C8B1; --soft: #A3937E; --card: #3D2F21; --line: #554636; --accent: #DD7D17; --accent-ink: #291A0A; --focus: #7db4f0; --warn: #e8836b; --sea: #2c2a28; --needle: #EE8F76; }
 #cp[hidden] { display: none; }
 #cp { position: fixed; inset: 0; z-index: 20; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; background: var(--bg); color: var(--ink); font: 600 14px/1.4 var(--body); }
+#cp::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 118px; z-index: -1; pointer-events: none; background-image: radial-gradient(circle, color-mix(in srgb, var(--soft) 38%, transparent) 1.3px, transparent 1.6px); background-size: 26px 26px; -webkit-mask-image: linear-gradient(#000 55%, transparent); mask-image: linear-gradient(#000 55%, transparent); }
 #cp *, #cp *::before, #cp *::after { box-sizing: border-box; }
 #cp button, #cp select, #cp input, #cp a { font-family: var(--body); }
 .cp-vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -21,9 +22,22 @@
 #cp .stbtn:disabled { opacity: .55; cursor: default; transform: none; }
 #cp button:focus-visible, #cp a:focus-visible, #cp select:focus-visible, #cp input:focus-visible, #cp h1:focus-visible, .cp-map:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 
-.cp-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; padding: 10px 14px 4px; }
-.cp-title { margin: 0; font: 400 30px/1 var(--display); letter-spacing: .01em; }
-.cp-sum { margin: 0; flex: 1 1 280px; font-size: 13px; color: var(--soft); min-width: 0; }
+.cp-head { display: grid; grid-template-columns: auto auto minmax(0, 1fr); grid-template-areas: "back brand sum"; align-items: center; gap: 4px 18px; padding: 10px 14px 6px; }
+.cp-backbtn { grid-area: back; justify-self: start; }
+.cp-brand { grid-area: brand; display: flex; align-items: center; gap: 10px; min-width: 0; padding-bottom: 4px; }
+.cp-logo { display: block; min-width: 0; }
+/* the wordmark: the Tree Canvas's, in a compass-needle red for the second half; Lilita One, a ledge of the card colour under it, a few degrees of tilt */
+.cp-title { margin: 0; font: 400 34px/1 var(--display); letter-spacing: .5px; text-transform: uppercase; color: var(--ink); text-shadow: 0 3px 0 var(--card); outline: none; white-space: nowrap; }
+.cp-title b { color: var(--needle); font-weight: 400; display: inline-block; transform: rotate(-3deg) translateY(1px); }
+#cp .cp-title:focus, #cp .cp-title:focus-visible { outline: none; }
+.cp-by { margin: 3px 0 0 38px; font: 400 17px/1 var(--display); letter-spacing: .5px; color: var(--needle); transform: rotate(-3deg); transform-origin: left center; text-shadow: 0 2px 0 var(--card); width: max-content; }
+.cp-by a { color: inherit; text-decoration: none; border-bottom: 2px dotted currentColor; }
+.cp-by a:hover { border-bottom-style: solid; } .cp-by a:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 3px; }
+.cp-rose { width: 44px; height: 44px; flex: none; filter: drop-shadow(0 3px 0 var(--card)); }
+.cp-rose .ring { fill: var(--card); stroke: var(--ink); stroke-width: 2.5; } .cp-rose .tick { stroke: var(--ink); stroke-width: 2.5; stroke-linecap: round; }
+.cp-rose .needle .n { fill: var(--needle); stroke: var(--ink); stroke-width: 1.4; stroke-linejoin: round; } .cp-rose .needle .s { fill: var(--bg); stroke: var(--ink); stroke-width: 1.4; stroke-linejoin: round; }
+.cp-rose .pin { fill: var(--ink); }
+.cp-sum { grid-area: sum; margin: 0; font-size: 13px; color: var(--soft); min-width: 0; }
 .cp-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; padding: 4px 14px 8px; }
 .cp-grp { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .cp-glab { font: 800 11px/1 var(--body); letter-spacing: .06em; text-transform: uppercase; color: var(--soft); }
@@ -49,7 +63,7 @@
 .cp-year { position: absolute; left: 14px; top: 8px; z-index: 500; font: 400 clamp(40px, 7vw, 68px)/1 var(--display); color: var(--ink); text-shadow: 0 0 6px var(--card), 0 0 2px var(--card), 0 2px 0 var(--card); pointer-events: none; font-variant-numeric: tabular-nums; }
 .cp-caption { position: absolute; left: 12px; right: 12px; bottom: 26px; z-index: 520; margin: 0; padding: 7px 14px; border: 2px solid var(--line); border-radius: 99px; background: color-mix(in srgb, var(--card) 92%, transparent); box-shadow: 0 2px 0 var(--line); font-size: 13.5px; line-height: 1.35; pointer-events: none; max-width: max-content; }
 .cp-caption[hidden] { display: none; }
-.cp-legend { position: absolute; left: 12px; top: 70px; z-index: 510; display: grid; gap: 3px; padding: 6px 10px; border: 2px solid var(--line); border-radius: 12px; background: color-mix(in srgb, var(--card) 90%, transparent); font-size: 11.5px; font-weight: 700; pointer-events: none; }
+.cp-legend { position: absolute; left: 196px; right: 64px; top: 14px; z-index: 510; display: flex; flex-wrap: wrap; gap: 3px 12px; align-items: center; padding: 5px 10px; border: 2px solid var(--line); border-radius: 12px; background: color-mix(in srgb, var(--card) 90%, transparent); font-size: 11.5px; font-weight: 700; pointer-events: none; width: fit-content; max-width: calc(100% - 260px); }
 .cp-li { display: inline-flex; align-items: center; gap: 6px; }
 .cp-li .sw { display: inline-block; width: 20px; height: 5px; border-radius: 3px; background: var(--c); }
 .cp-li.dash .sw { background: repeating-linear-gradient(90deg, var(--c) 0 4px, transparent 4px 8px); }
@@ -142,8 +156,9 @@
 
 /* a phone: the map fills the screen; the panel is a bottom sheet over it */
 @media (max-width: 760px) {
-  .cp-head { padding: 8px 12px 2px; gap: 2px 10px; } .cp-title { font-size: 24px; }
-  .cp-sum { font-size: 12px; flex-basis: 100%; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .cp-head { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "brand back" "sum sum"; padding: 8px 12px 2px; gap: 2px 10px; }
+  .cp-backbtn { justify-self: end; } .cp-brand { gap: 7px; } .cp-title { font-size: 26px; } .cp-by { font-size: 13px; margin-left: 26px; } .cp-rose { width: 32px; height: 32px; }
+  .cp-sum { font-size: 12px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
   .cp-filters { padding: 2px 12px 6px; max-height: 96px; overflow: auto; gap: 4px 10px; } .cp-chip { padding: 5px 9px; font-size: 12px; }
   .cp-main { grid-template-columns: minmax(0, 1fr); padding: 0 8px; position: relative; }
   .cp-panel { position: absolute; left: 8px; right: 8px; bottom: 0; max-height: 44%; z-index: 700; border-radius: 16px 16px 0 0; }
@@ -151,7 +166,7 @@
   .cp-panel.shut .cp-tabs, .cp-panel.shut .cp-pbody { display: none; }
   .cp-sheet { display: block; width: 100%; padding: 12px 0 8px; border: 0; background: none; color: var(--soft); font: 800 12px/1 var(--body); text-align: center; cursor: pointer; }
   .cp-sheet::before { content: ""; display: block; width: 44px; height: 5px; border-radius: 3px; background: var(--line); margin: 0 auto 6px; }
-  .cp-year { font-size: 40px; left: 10px; } .cp-legend { top: 52px; left: 8px; } .cp-caption { left: 8px; right: 8px; bottom: 52px; max-width: none; border-radius: 14px; font-size: 12.5px; }
+  .cp-year { font-size: 40px; left: 10px; } .cp-legend { top: 10px; left: 112px; right: 56px; max-width: none; gap: 2px 9px; font-size: 11px; } .cp-caption { left: 8px; right: 8px; bottom: 52px; max-width: none; border-radius: 14px; font-size: 12.5px; }
   .cp-bar { padding: 6px 8px 10px; } .cp-row { gap: 6px 8px; } .cp-yrout { font-size: 18px; }
 }
 @media (max-height: 520px) and (max-width: 900px) { .cp-filters { display: none; } }

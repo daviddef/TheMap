@@ -17,6 +17,7 @@ import { store as dec, fixes } from '/roots/js/decisions.js';   // the Fix list'
 import { createWorkspace } from '/tree-canvas/fixlist-view.js';   // the full Fix list page
 import { rowEl, mk as fxMk } from '/tree-canvas/fixlist-rows.js';   // the Fix list's row, drawn here and, for one person, in the canvas's side panel
 import { personIndex } from '/tree-canvas/fixlist.js';
+import { createSwitcher } from '/tree-canvas/switcher.js';
 import { createCompass } from '/tree-canvas/compass-view.js';   // Compass: your family on the map through time (a workspace over the canvas, like the Fix list)
 import { buildOrphans } from '/roots/js/orphans.js';   // the Orphans tab: who is in no tree, by birthplace, with the Atlas's collections
 
@@ -232,6 +233,7 @@ function mount() {
   f.id = 'cv'; f.title = old.title;
   f.src = '/roots/canvas.html?sa=1&v=' + STAMP + (hide ? '&liv=1' : '') + (example ? '&ex=1' : '');
   f.hidden = false; old.replaceWith(f); if (!$('#yf').hidden || !$('#sg').hidden || !$('#fx').hidden || !$('#cp').hidden) f.inert = true;
+  if (typeof swSync === 'function' && typeof sw !== 'undefined') swSync();
 }
 
 let curName = null, curHead = null, curVia = null;   // curVia: the site a file was fetched from, when it came from a link
@@ -386,7 +388,7 @@ addEventListener('message', e => {
   if (d.tcYourFile) { openYF(); return; }   // the canvas menu's "Your file"
   if (d.tcFixList !== undefined) { const q = d.tcFixList && typeof d.tcFixList === 'object' ? d.tcFixList : {}; openFX(q.person != null ? { id: String(q.person).slice(0, 120), name: String(q.name || '').slice(0, 200) } : null); return; }   // the Fix button, or "Open the full Fix list"
   if (d.tcFixCompare !== undefined) { cmpFix = d.tcFixCompare && typeof d.tcFixCompare === 'object' ? d.tcFixCompare : null; fixRefresh(false); return; }   // what the Compare view found, in memory only
-  if (d.tcCompass !== undefined) { const q = d.tcCompass && typeof d.tcCompass === 'object' ? d.tcCompass : {}; openCP(q.person != null ? { person: String(q.person).slice(0, 120), a: Number.isInteger(q.a) && q.a >= 0 && q.a < 20 ? q.a : undefined } : null); return; }   // the Compass button; the selected person, if one, is where it starts
+  if (d.tcCompass !== undefined) { clearTimeout(askT); askT = 0; const quiet = swQuiet; swQuiet = false; const q = d.tcCompass && typeof d.tcCompass === 'object' ? d.tcCompass : {}; openCP(q.person != null ? { person: String(q.person).slice(0, 120), a: Number.isInteger(q.a) && q.a >= 0 && q.a < 20 ? q.a : undefined } : null, { quiet }); return; }   // the switcher's Compass (it asked the canvas for the selected person first), or the canvas's own button; the selected person, if one, is where it starts
   if (d.tcSettings) { openSG(); return; }   // the canvas menu's "Settings"
   if (d.tcRestored) { onRestored(d.tcRestored); return; }
   if (d.tcHome) { flushWork(); $('#cv').hidden = true; showStart(); return; }   // the canvas's folder button: back to the opening screen (the canvas keeps its own state)
@@ -878,12 +880,13 @@ const cpw = createCompass({
   close: () => closeCP(),
 });
 let cpFrom = null, cpWas = null;
-function openCP(want) {
+function openCP(want, opts) {
   if (!window.RR) return;
+  if (!$('#cp').hidden) { cpw.open(want || null, opts); return; }   // already open: there is nothing to put away or draw again
   const f = $('#cp'); cpFrom = document.activeElement;
   cpWas = { cv: $('#cv').inert, yf: $('#yf').inert, start: $('#start').inert, fx: $('#fx').inert };
   $('#cv').inert = $('#yf').inert = $('#start').inert = $('#fx').inert = true;
-  cpw.open(want || null);
+  cpw.open(want || null, opts);
 }
 function closeCP(quiet) {
   const f = $('#cp'); if (!f || f.hidden) return;
@@ -895,6 +898,26 @@ addEventListener('keydown', e => {
   if (!$('#cp').hidden) cpw.onKey(e);
 });
 $('#yfCompass').onclick = () => { closeYF(true); openCP(null); };
+
+/* ---- the switcher: Canvas, Compass, Atlas. Canvas and Compass are both kept alive (the canvas's iframe is only made inert under Compass, and Compass's map is only hidden), so a hop draws nothing again; the
+   Atlas is another page, opened in a new tab by default so this one, with the tree in memory, stays as it is. ---- */
+let askT = 0, swQuiet = false;
+const sw = createSwitcher({
+  root: $('#sw'),
+  canvas: () => { if (!$('#cp').hidden) closeCP(true); },   // focus stays on the button that was pressed
+  compass: () => {
+    if (!$('#cp').hidden || !window.RR) return;
+    swQuiet = true; clearTimeout(askT);
+    askT = setTimeout(() => { askT = 0; swQuiet = false; openCP(null, { quiet: true }); }, 450);   // the canvas answers at once with the selected person; an older canvas does not, and Compass opens without one
+    toCanvas({ tcAskCompass: true });
+  },
+});
+function swSync() {
+  const open = id => { const n = $(id); return !!n && !n.hidden; }, cv = $('#cv');
+  sw.show(!!window.RR && !!cv && !cv.hidden && !open('#start') && !open('#yf') && !open('#sg') && !open('#fx'));
+  sw.mark(open('#cp') ? 'compass' : 'canvas');
+}
+{ const mo = new MutationObserver(swSync); for (const id of ['#start', '#yf', '#sg', '#fx', '#cp']) { const n = $(id); if (n) mo.observe(n, { attributes: true, attributeFilter: ['hidden'] }); } }
 
 {
   /* from an archive: its icon sends ?archive=<key>; failing that, the page the visitor came from (some browsers send only its origin, which is enough) */

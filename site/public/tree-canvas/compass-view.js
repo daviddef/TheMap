@@ -58,6 +58,24 @@ function curve(a, b) {
   return pts;
 }
 
+/* How often the expensive things ran, for the page to be held to its promise that going to the canvas and back does not redraw anything (tests and the measurement read this; nothing is sent). */
+export const stats = { builds: 0, indexes: 0, opens: 0, resumes: 0, draws: 0, dots: 0, arcs: 0, grounds: 0, fits: 0, mapInits: 0 };
+const idMap = new WeakMap(); let idSeq = 0;
+const idOf = o => { if (!o || typeof o !== 'object') return String(o); let i = idMap.get(o); if (!i) { i = ++idSeq; idMap.set(o, i); } return i; };
+
+/* the compass rose by the wordmark: a ring, four ticks, a needle (red north). Decoration only (aria-hidden); the needle turns toward the pointer, or toward the selected place, unless the visitor asks for reduced motion. */
+const SVGNS = 'http://www.w3.org/2000/svg';
+function svgEl(tag, attrs) { const e = document.createElementNS(SVGNS, tag); for (const k of Object.keys(attrs || {})) e.setAttribute(k, attrs[k]); return e; }
+function roseSvg() {
+  const s = svgEl('svg', { viewBox: '0 0 48 48', class: 'cp-rose', 'aria-hidden': 'true', focusable: 'false' });
+  s.append(svgEl('circle', { cx: 24, cy: 24, r: 21, class: 'ring' }));
+  for (const [x1, y1, x2, y2] of [[24, 3, 24, 8], [24, 40, 24, 45], [3, 24, 8, 24], [40, 24, 45, 24]]) s.append(svgEl('line', { x1, y1, x2, y2, class: 'tick' }));
+  const g = svgEl('g', { class: 'needle', transform: 'rotate(25 24 24)' });
+  g.append(svgEl('polygon', { points: '24,7 29.5,24 18.5,24', class: 'n' }), svgEl('polygon', { points: '24,41 18.5,24 29.5,24', class: 's' }));
+  s.append(g, svgEl('circle', { cx: 24, cy: 24, r: 2.6, class: 'pin' }));
+  return s;
+}
+
 /* deps: { root, sources() -> [{key, name, ck, tree, atlas}], archives: {key: {name, color}}, chosen() -> [archive keys the canvas's Compare holds], loadArchive(key) -> Promise<{tree, atlas}>,
    showOnCanvas(canvasKey), close() } */
 export function createCompass(deps) {
@@ -68,13 +86,21 @@ export function createCompass(deps) {
 
   /* ---------------- the page ---------------- */
   function build() {
-    if (built) return; built = true;
+    if (built) return; built = true; stats.builds++;
     root.textContent = '';
     const head = h('header', 'cp-head');
-    el.back = btn('stbtn', '← Back to the canvas', () => deps.close(), { id: 'cp-back' });
-    el.title = h('h1', 'cp-title', 'Compass', { id: 'cpTitle', tabindex: '-1' });
+    el.back = btn('stbtn cp-backbtn', '← Back to the canvas', () => deps.close(), { id: 'cp-back' });
+    /* the wordmark is the Tree Canvas's own (Lilita One, two-tone, a sticker ledge under it, tilted; "by Record Atlas" tilted with a dotted underline), with a small compass rose.
+       The words are the accessible name; the rose is decoration. */
+    const brand = h('div', 'cp-brand');
+    el.rose = roseSvg(); brand.append(el.rose);
+    const stack = h('div', 'cp-logo');
+    el.title = h('h1', 'cp-title', null, { id: 'cpTitle', tabindex: '-1' });
+    el.title.append(document.createTextNode('Com'), h('b', '', 'pass'));
+    const by = h('p', 'cp-by'); by.append(document.createTextNode('by '), h('a', '', 'Record Atlas', { href: '/', target: '_blank', rel: 'noopener', title: 'Record Atlas, in a new tab' }));
+    stack.append(el.title, by); brand.append(stack);
     el.sum = h('p', 'cp-sum', '', { id: 'cp-sum' });
-    head.append(el.back, el.title, el.sum);
+    head.append(el.back, brand, el.sum);
     el.filters = h('section', 'cp-filters', null, { 'aria-label': 'Who is on the map' });
     el.main = h('div', 'cp-main');
     el.stage = h('div', 'cp-stage');
@@ -124,7 +150,7 @@ export function createCompass(deps) {
   }
   function reindex(keepFocus) {
     const all = gatherSources(), want = all.filter((s, i) => i === 0 || st.on.has(s.key));
-    st.srcs = want;
+    st.srcs = want; stats.indexes++;
     st.idx = M.buildIndex(want.map(s => ({ key: s.key, name: s.name, tree: s.tree, atlas: s.atlas })));
     const sp = M.yearSpan(st.idx), now = new Date().getFullYear();
     st.span = sp ? [Math.max(600, sp[0] - 0), Math.min(now, Math.max(sp[0] + 1, sp[1]))] : [1500, now];
@@ -213,7 +239,7 @@ export function createCompass(deps) {
   /* ---------------- the map ---------------- */
   async function ensureMap() {
     if (map) return;
-    await loadLeaflet();
+    await loadLeaflet(); stats.mapInits++;
     const L = window.L;
     map = L.map(el.mapBox, { worldCopyJump: true, minZoom: 2, maxZoom: 12, zoomControl: false, keyboard: true, zoomSnap: 0.5, attributionControl: true }).setView([35, 10], 3);
     L.control.zoom({ position: 'topright', zoomInTitle: 'Zoom in', zoomOutTitle: 'Zoom out' }).addTo(map);
@@ -230,6 +256,7 @@ export function createCompass(deps) {
     fitToPeople();
   }
   function fitToPeople() {
+    stats.fits++;
     if (!map || !st.idx) return;
     const pa = M.peopleAt(st.idx, st.year, st.filter, st.ctx, st.win), pts = [];
     for (const k of pa.by.keys()) { const pl = st.idx.places.get(k); if (pl) pts.push([pl.lat, pl.lon]); }
@@ -251,6 +278,7 @@ export function createCompass(deps) {
     return L.divIcon({ className: 'cp-icon', html: wrap, iconSize: [r * 2, r * 2], iconAnchor: [r, r] });
   }
   function drawDots() {
+    stats.dots++;
     if (!map || !st.idx) return;
     const L = window.L, pa = M.peopleAt(st.idx, st.year, st.filter, st.ctx, st.win), z = map.getZoom();
     const cell = z < 4 ? 60 : z < 6 ? 44 : 30;
@@ -268,6 +296,7 @@ export function createCompass(deps) {
     el.legendDots = cl.length;
   }
   function drawArcs(moves) {
+    stats.arcs++;
     const L = window.L; layers.arcs.clearLayers(); travellers = [];
     const animate = st.playing && !reduceMotion();
     const top = moves.slice(0, 60);
@@ -310,6 +339,7 @@ export function createCompass(deps) {
   }
   /* who held the ground, by year: /history/'s own boundaries, tinted */
   function drawGround() {
+    stats.grounds++;
     if (!map) return;
     const L = window.L;
     if (!st.ground) { layers.ground.clearLayers(); groundKey = ''; return; }
@@ -335,8 +365,8 @@ export function createCompass(deps) {
     if (map && pl && pan !== false) { const pts = p.stays.map(s => st.idx.places.get(s.k)).filter(Boolean).map(q => [q.lat, q.lon]); if (pts.length > 1) map.fitBounds(window.L.latLngBounds(pts).pad(0.35), { maxZoom: 7 }); else map.setView([pl.lat, pl.lon], Math.max(map.getZoom(), 5)); }
   }
   function selectMove(m) { st.sel = { kind: 'move', m }; st.more = {}; renderBody(); openPanel(); }
-  function clearSel() { st.sel = null; renderBody(); drawRoute(); drawDots(); }
-  const openPanel = () => { el.panel.classList.remove('shut'); el.sheet.setAttribute('aria-expanded', 'true'); };
+  function clearSel() { st.sel = null; renderBody(); drawRoute(); drawDots(); restNeedle(); }
+  const openPanel = () => { el.panel.classList.remove('shut'); el.sheet.setAttribute('aria-expanded', 'true'); setTimeout(restNeedle, 80); };
 
   /* ---------------- the panel ---------------- */
   function drawTabs() {
@@ -568,10 +598,37 @@ export function createCompass(deps) {
     el.playIco.firstChild.setAttribute('d', st.playing ? 'M7 5h4v14H7zM13 5h4v14h-4z' : 'M8 5v14l11-7z');
   }
 
+  /* ---------------- the needle ---------------- */
+  const needle = { a: 25, to: 25, raf: 0, idle: 0 };
+  function aimNeedle(deg, snap) {
+    needle.to = deg;
+    if (Math.abs(((deg - needle.a + 540) % 360) - 180) < 0.05 && !needle.raf) return;
+    const g = el.rose && el.rose.querySelector('.needle'); if (!g) return;
+    const set = a => g.setAttribute('transform', 'rotate(' + a.toFixed(1) + ' 24 24)');
+    cancelAnimationFrame(needle.raf);
+    if (reduceMotion() || snap) { needle.a = deg; set(deg); return; }
+    const step = () => { const d = ((needle.to - needle.a + 540) % 360) - 180; if (Math.abs(d) < 0.6) { needle.a = needle.to; set(needle.a); return; } needle.a += d * 0.22; set(needle.a); needle.raf = requestAnimationFrame(step); };
+    needle.raf = requestAnimationFrame(step);
+  }
+  /* at rest the needle points toward the selected place or person's first place (from the middle of the map), else a slight tilt */
+  function restNeedle() {
+    if (!st.open) return;
+    const s = st.sel, key = s && (s.kind === 'place' ? s.key : s.kind === 'person' ? ((personRec(s.i).stays || [])[0] || {}).k : null), pl = key && st.idx.places.get(key);
+    if (pl && map) { const c = map.getSize(), q = map.latLngToContainerPoint([pl.lat, pl.lon]); if (Math.hypot(q.x - c.x / 2, q.y - c.y / 2) > 8) { aimNeedle(Math.atan2(q.x - c.x / 2, -(q.y - c.y / 2)) * 180 / Math.PI); return; } }
+    aimNeedle(25);
+  }
+  function onPointer(e) {
+    if (!st.open || reduceMotion() || !el.rose) return;
+    const r = el.rose.getBoundingClientRect(); if (!r.width) return;
+    aimNeedle(Math.atan2(e.clientX - (r.left + r.width / 2), -(e.clientY - (r.top + r.height / 2))) * 180 / Math.PI);
+    clearTimeout(needle.idle); needle.idle = setTimeout(restNeedle, 2600);
+  }
+
   /* ---------------- one draw ---------------- */
   let underT = 0;
   function draw(now) {
     if (!st.open || !st.idx) return;
+    stats.draws++;
     el.year.textContent = String(st.year); el.yrOut.textContent = String(st.year); el.range.setAttribute('aria-valuetext', String(st.year));
     const f = st.filter, pa = M.peopleAt(st.idx, st.year, f, st.ctx, st.win), mv = M.movesIn(st.idx, st.year, st.win, f, st.ctx, st.colour);
     if (mapOk) { drawGround(); drawDots(); drawArcs(mv); drawRoute(); }
@@ -603,8 +660,30 @@ export function createCompass(deps) {
   }
 
   /* ---------------- open and close ---------------- */
-  async function open(o) {
-    build(); st.open = true; st.notes = []; st.sel = null; st.tab = 'under';
+  /* what the map was built from: the trees (by identity, so a tree read again is a different one) and the archives chosen to compare. While this is unchanged, coming back to Compass changes nothing. */
+  const signature = () => (deps.sources() || []).map(s => s.key + '#' + idOf(s.tree)).join('|') + '||' + (deps.chosen() || []).join(',');
+  const handedKey = o => (o && o.person != null ? (o.a != null ? o.a : '') + ':' + o.person : '');
+  /* the same file, the same Compare: nothing is rebuilt, redrawn or refetched. The map, its pins and arcs, the year, the selection, the panel and its scroll are as they were left; the map is told its size once, and redrawn only if the window changed size meanwhile. */
+  function resume(o, quiet) {
+    stats.resumes++; st.open = true; root.hidden = false;
+    document.addEventListener('pointermove', onPointer);
+    const hk = handedKey(o);
+    if (hk && hk !== st.handed) {   // someone else was selected on the canvas since: follow them (the year, the zoom and the panel stay)
+      st.handed = hk; pickFocus(o); st.ctx = makeCtx(); st.colour = st.focus ? st.colour : 'line'; drawFilters(); drawSummary(); draw(true);
+    }
+    if (map) {
+      const before = map.getSize(); map.invalidateSize({ animate: false }); const after = map.getSize();
+      if (before.x !== after.x || before.y !== after.y) { groundKey = ''; draw(true); }
+    }
+    restNeedle();
+    if (!quiet) { const f = st.lastFocus && root.contains(st.lastFocus) && !st.lastFocus.closest('[hidden]') ? st.lastFocus : el.title; try { f.focus({ preventScroll: true }); } catch (e) { /* ok */ } }
+  }
+  async function open(o, opts) {
+    build(); stats.opens++;
+    const sig = signature(), quiet = !!(opts && opts.quiet);
+    if (st.idx && st.sig === sig && map && mapOk) return resume(o, quiet);
+    st.sig = sig; st.handed = handedKey(o);
+    st.open = true; st.notes = []; st.sel = null; st.tab = 'under';
     const compares = deps.chosen(); st.on = new Set(compares);
     st.extra = new Map(); for (const k of st.on) { /* archives the canvas's Compare already holds come in through deps.sources() */ }
     reindex(false); pickFocus(o || null); st.ctx = makeCtx();
@@ -612,21 +691,23 @@ export function createCompass(deps) {
     st.year = Math.max(st.span[0], Math.min(st.span[1], st.year));
     if (!st.focus) st.colour = 'line';
     drawFilters(); drawSummary(); setRange(); playUi(); renderBody();
+    document.addEventListener('pointermove', onPointer); aimNeedle(25, true);
+    if (!st.shown) { st.shown = true; if (window.matchMedia && window.matchMedia('(max-width: 760px)').matches) { el.panel.classList.add('shut'); el.sheet.setAttribute('aria-expanded', 'false'); } }   // on a phone the map comes first; the panel is one tap up
     root.hidden = false; showLoad('Loading the map…');
     try { await ensureMap(); } catch (e) { showLoad(''); note('The map could not be drawn (' + String((e && e.message) || e) + '). The table still lists the same facts.', true); st.tab = 'table'; renderBody(); setYear(st.year, true); return; }
     showLoad(''); setTimeout(() => { map.invalidateSize(); fitToPeople(); draw(true); }, 30);
-    el.title.focus();
+    if (!quiet) el.title.focus();
     /* the Atlas's own history, in the background: the map and the people never wait for it */
     if (!st.hist) {
       Promise.all([getJson('/history.json'), getJson('/mortality.json').catch(() => null)]).then(([hh, mm]) => { st.hist = hh; st.mort = mm; setRange(); if (st.open) renderBody(); }).catch(() => { st.histFailed = true; if (st.open) renderBody(); });
     }
     if (!st.shapes) getJson('/history-ground.json').then(g => { st.shapes = g.shapes || []; if (st.open) { groundKey = ''; drawGround(); } }).catch(() => { /* plain tiles */ });
   }
-  function close() { stop(); st.open = false; root.hidden = true; clearTimeout(underT); }
+  function close() { stop(); if (root.contains(document.activeElement) && document.activeElement !== root) st.lastFocus = document.activeElement; st.open = false; root.hidden = true; clearTimeout(underT); clearTimeout(needle.idle); cancelAnimationFrame(needle.raf); document.removeEventListener('pointermove', onPointer); }
   function onKey(e) {
     if (!st.open) return false;
     if (e.key === ' ' && e.target === el.mapBox) { e.preventDefault(); togglePlay(); return true; }
     return false;
   }
-  return { open, close, isOpen: () => st.open, onKey, state: () => st, redraw: () => { if (st.open) { groundKey = ''; draw(true); } } };
+  return { open, close, stats: () => ({ ...stats }), isOpen: () => st.open, onKey, state: () => st, redraw: () => { if (st.open) { groundKey = ''; draw(true); } } };
 }

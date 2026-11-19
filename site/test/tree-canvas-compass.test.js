@@ -257,5 +257,29 @@ test("the workspace is a page-level workspace on the Tree Canvas page, with the 
   assert.doesNotMatch(view, /fetch\('https?:|XMLHttpRequest|sendBeacon/, "no request off the site; tiles are Leaflet's");
   assert.match(css, /Lilita One|--display/); assert.match(css, /data-look="paper"/); assert.match(css, /data-theme="dark"/); assert.match(css, /prefers-reduced-motion/);
   const tpl = read("../../scripts/roots/tree-canvas.template.html");
-  assert.match(tpl, /id="bCompass"[^>]*aria-label="Compass"/); assert.match(tpl, /tcCompass: q/);
+  assert.match(tpl, /tcAskCompass/); assert.match(tpl, /tcCompass: q/); assert.doesNotMatch(tpl, /id="bCompass"/, "the canvas has no Compass button of its own: the switcher is the way");
+});
+
+test("the switcher: three round buttons, one nav, the same in the Canvas and in Compass; the Atlas is a real link", async () => {
+  const read = f => fs.readFileSync(path.join(here, f), "utf8");
+  const html = read("../src/pages/tree-canvas/index.astro"), css = read("../public/tree-canvas/switcher.css"), app = read("../public/tree-canvas/app.js");
+  const nav = /<nav id="sw"[\s\S]*?<\/nav>/.exec(html)[0];
+  assert.match(nav, /aria-label="Move between Canvas, Compass and Atlas"/);
+  for (const v of ["canvas", "compass", "atlas"]) assert.match(nav, new RegExp('data-v="' + v + '"'));
+  assert.match(nav, /<a class="sw-b" data-v="atlas" href=\{u\("\/"\)\} target="_blank" rel="noopener"/, "a real link, opening a new tab so this page keeps the tree");
+  assert.equal((nav.match(/aria-hidden="true"/g) || []).length, 3, "the icons are decoration; the words are the names");
+  assert.ok(html.indexOf('<nav id="sw"') < html.indexOf('<main id="cp"'), "in the tab order just before Compass");
+  assert.match(css, /#C4721F/); assert.match(css, /data-look="paper"/); assert.match(css, /data-theme="dark"/); assert.match(css, /prefers-reduced-motion/); assert.match(css, /max-width: 760px/);
+  assert.doesNotMatch(css, /@import|url\(/);
+  assert.match(app, /createSwitcher/); assert.match(app, /tcAskCompass/);
+  const { atlasMode } = await import("../public/tree-canvas/switcher.js");
+  assert.equal(atlasMode({ button: 0 }), "tab"); assert.equal(atlasMode({ button: 0, altKey: true }), "same");
+  assert.equal(atlasMode({ button: 0, altKey: true, ctrlKey: true }), "tab"); assert.equal(atlasMode({ button: 1 }), "tab"); assert.equal(atlasMode({ button: 0, metaKey: true }), "tab");
+});
+
+test("coming back to Compass changes nothing: a resume path, counters, and no redraw on the way back", () => {
+  const view = fs.readFileSync(path.join(here, "../public/tree-canvas/compass-view.js"), "utf8");
+  assert.match(view, /function resume\(/); assert.match(view, /st\.sig === sig/); assert.match(view, /export const stats/);
+  const body = /function resume\([\s\S]*?\n  async function open/.exec(view)[0];
+  assert.doesNotMatch(body, /reindex\(|fitToPeople\(|ensureMap\(|getJson\(|loadArchive\(/, "no re-index, no re-fit, no refetch on the way back");
 });

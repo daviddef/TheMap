@@ -955,7 +955,7 @@ html.rm #pairs *{transition:none!important;animation:none!important}
 
 /* ---------- the Fix button and the Fix list tab's rows (the rows are the Fix list page's own: fixrows.css, copied here whole) ---------- */
 #bFix[hidden]{display:none}
-#bCompass[hidden]{display:none}
+
 #bFix{position:relative}
 #bFix .fxn{position:absolute;right:-5px;top:-6px;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:#d24b1f;color:#fff;border:2px solid var(--lk-card);font:900 11px/15px Nunito,system-ui;text-align:center;box-sizing:border-box;pointer-events:none}
 #bFix .fxn[hidden]{display:none}
@@ -1305,7 +1305,6 @@ html:not(.ph) #info .ih .lk-tab[data-tab="find"] .fvti{width:16px;height:16px}
   <button class="lk-ibtn" id="bInfo" title="Side panel: person, where next, path" aria-label="Panel"></button>
   <button class="lk-ibtn xtra" id="bClear" title="Clear the canvas (Undo brings it back)" aria-label="Clear"></button>
   <button class="lk-ibtn" id="bFix" title="Fix list" aria-label="Fix list" hidden></button>
-  <button class="lk-ibtn" id="bCompass" title="Compass: your family on the map through time" aria-label="Compass" hidden></button>
   <button class="lk-ibtn" id="bTheme" title="Look" aria-label="Look" hidden></button>
   <button class="lk-ibtn" id="bLens" title="View: how the people are drawn" aria-label="View" aria-haspopup="true" aria-expanded="false" hidden></button>
   <button class="lk-ibtn" id="bMenu" title="Menu: how to read the lines, options" aria-label="Menu" aria-haspopup="true" aria-expanded="false"></button>
@@ -7571,8 +7570,8 @@ function wireToolbar() {
   set('#bArrange', 'arrange'); set('#bGen', 'layers'); set('#bUndo', 'undo'); set('#bFit', 'fit'); set('#bRel', 'relate'); set('#bInfo', 'info'); set('#bClear', 'clear'); set('#bMore', 'more');
   set('#zIn', 'plus'); set('#zOut', 'minus');
   { const b = $('#bFix'); if (b) { b.hidden = !SA; b.innerHTML = icon('fix') + '<span class="fxn" aria-hidden="true"></span>'; fixBtn(); b.onclick = () => { try { window.parent.postMessage({ tcFixList: true }, location.origin); } catch (e) { /* no page around */ } }; } }
-  /* Compass: the page around the canvas draws the map workspace over the canvas (tcCompass); the selected person, if one, is the focus it opens on */
-  { const b = $('#bCompass'); if (b) { b.hidden = !SA; b.innerHTML = icon('compass'); b.onclick = () => { let q = true; try { const k = S.sel.size === 1 ? [...S.sel][0] : null, p = k && M.byKey.get(k); if (p) q = { person: String(p.id), a: p.a }; window.parent.postMessage({ tcCompass: q }, location.origin); } catch (e) { /* no page around */ } }; } }
+  /* Compass: the page around the canvas draws the map workspace over the canvas, from its own switcher (Canvas, Compass, Atlas). It asks, and the canvas answers (tcCompass) with the selected person, if there is one, which is where Compass starts. */
+  if (EMBED) addEventListener('message', e => { if (e.origin === location.origin && e.data && e.data.tcAskCompass) { let q = true; try { const k = S.sel.size === 1 ? [...S.sel][0] : null, p = k && M.byKey.get(k); if (p) q = { person: String(p.id), a: p.a }; } catch (x) { /* nothing selected */ } try { window.parent.postMessage({ tcCompass: q }, location.origin); } catch (x) { /* no page around */ } } });
   if (typeof lensWire === 'function') lensWire();
   { const b = $('#bTheme'); if (b) { b.hidden = !SA; lookBtn(); b.onclick = () => { const n = lookNext(lookChosen()); S.lookChosen = n; lookBtn(); try { window.parent.postMessage({ tcLookSet: n }, location.origin); } catch (e) { /* no page around */ } }; } }
   if (EMBED) addEventListener('message', e => {

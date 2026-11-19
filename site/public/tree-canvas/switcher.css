@@ -1,0 +1,23 @@
+/* THE SWITCHER: three round orange buttons (Canvas, Compass, Atlas), the same size and the same place in the Canvas and in Compass, so the visitor can always hop between them. Plain stylesheet: the page's CSP allows no inline
+   style. The orange is the Atlas header's own round Tree Canvas button (#C4721F is its hover shade, chosen so the white icon keeps 3.6:1 against it); the ledge under it and the label pills are the canvas's. */
+#sw { --sw-ink: #2b2118; --sw-card: #FFFCF3; --sw-line: #E3D6B8; --sw-orange: #C4721F; --sw-icon: #fff; --sw-focus: #2b6cb0; --sw-ledge: #8a4f14;
+  position: fixed; left: 10px; top: 50%; transform: translateY(-50%); z-index: 30; display: flex; flex-direction: column; gap: 10px; font: 800 12.5px/1 Nunito, system-ui, sans-serif; }
+:root[data-look="paper"] #sw { --sw-ink: #3D2F21; --sw-card: #D8C8B1; --sw-line: #BEAD98; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #sw { --sw-ink: #D8C8B1; --sw-card: #3D2F21; --sw-line: #554636; --sw-orange: #DD7D17; --sw-icon: #291A0A; --sw-focus: #7db4f0; --sw-ledge: #8f510c; } }
+:root[data-theme="dark"] #sw { --sw-ink: #D8C8B1; --sw-card: #3D2F21; --sw-line: #554636; --sw-orange: #DD7D17; --sw-icon: #291A0A; --sw-focus: #7db4f0; --sw-ledge: #8f510c; }
+#sw[hidden] { display: none; }
+#sw .sw-b { display: flex; align-items: center; gap: 8px; padding: 0; margin: 0; border: 0; background: none; color: var(--sw-ink); font: inherit; text-decoration: none; cursor: pointer; border-radius: 26px; }
+#sw .sw-i { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 50%; border: 2px solid var(--sw-orange); background: var(--sw-orange); color: var(--sw-icon); box-shadow: 0 3px 0 var(--sw-ledge); transition: transform .12s, box-shadow .12s; }
+#sw .sw-i svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+#sw .sw-b:hover .sw-i { transform: translateY(-1px); }
+#sw .sw-b:active .sw-i, #sw .sw-b[aria-current="page"] .sw-i { transform: translateY(3px); box-shadow: 0 0 0 3px color-mix(in srgb, var(--sw-orange) 35%, transparent); }
+#sw .sw-b:focus-visible { outline: 3px solid var(--sw-focus); outline-offset: 3px; }
+#sw .sw-l { padding: 4px 9px; border: 2px solid var(--sw-line); border-radius: 10px; background: var(--sw-card); box-shadow: 0 2px 0 var(--sw-line); white-space: nowrap; }
+#sw .sw-b[aria-current="page"] .sw-l { background: var(--sw-ink); border-color: var(--sw-ink); color: var(--sw-card); box-shadow: none; }
+#sw .sw-vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (max-width: 760px) {
+  #sw { left: 6px; gap: 8px; }
+  #sw .sw-i { width: 40px; height: 40px; }
+  #sw .sw-l { position: absolute; width: 1px; height: 1px; padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+@media (prefers-reduced-motion: reduce) { #sw .sw-i { transition: none; } }

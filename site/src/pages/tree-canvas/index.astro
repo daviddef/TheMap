@@ -21,6 +21,7 @@ import { u } from "../../lib/url.js";
 <link rel="stylesheet" href="/tree-canvas/page.css">
 <link rel="stylesheet" href="/tree-canvas/fixrows.css">
 <link rel="stylesheet" href="/tree-canvas/compass.css">
+<link rel="stylesheet" href="/tree-canvas/switcher.css">
 <script is:inline src="/tree-canvas/theme-boot.js"></script>
 </head>
 <body>
@@ -219,6 +220,17 @@ import { u } from "../../lib/url.js";
     <div id="fxpane-orphans" class="fxpane" role="tabpanel" aria-labelledby="fxt-orphans" hidden></div>
   </div>
 </main>
+<nav id="sw" class="sw" hidden aria-label="Move between Canvas, Compass and Atlas">
+  <button type="button" class="sw-b" data-v="canvas" title="Tree Canvas: your family tree">
+    <span class="sw-i"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><rect x="3" y="4" width="7" height="5" rx="1.4"/><rect x="14" y="15" width="7" height="5" rx="1.4"/><rect x="14" y="4" width="7" height="5" rx="1.4"/><path d="M10 6.5h4M6.5 9v8.5H14"/></svg></span><span class="sw-l">Canvas</span>
+  </button>
+  <button type="button" class="sw-b" data-v="compass" title="Compass: your family on the map through time">
+    <span class="sw-i"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg></span><span class="sw-l">Compass</span>
+  </button>
+  <a class="sw-b" data-v="atlas" href={u("/")} target="_blank" rel="noopener" title="Record Atlas, in a new tab so your tree stays open here (Alt-click to leave this page instead)">
+    <span class="sw-i"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17"/><path d="M12 3.5c2.6 2.4 3.9 5.2 3.9 8.5s-1.3 6.1-3.9 8.5c-2.6-2.4-3.9-5.2-3.9-8.5S9.4 5.9 12 3.5z"/></svg></span><span class="sw-l">Atlas <span class="sw-vh">(opens in a new tab)</span></span>
+  </a>
+</nav>
 <main id="cp" hidden aria-labelledby="cpTitle"></main>
 <aside id="sg" hidden role="dialog" aria-modal="true" aria-labelledby="sgTitle">
   <div class="sgback" id="sgBack"></div>

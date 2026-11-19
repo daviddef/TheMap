@@ -4,7 +4,8 @@
    "Leave as is" button, the Atlas's next step and notes. Styles: fixrows.css (copied into the canvas build too), all in --fx-* variables the host page sets.
 
    Everything drawn is set with textContent or an attribute, never as HTML, apart from the fixed icons below (our own markup). */
-import { peopleOf, copyActions, REL_WORD } from './fixlist.js';
+import { peopleOf, copyActions, REL_WORD, orphanHead } from './fixlist.js';
+import { groupText } from '../roots/js/orphans.js';
 
 const ICON = {
   copy: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg>',
@@ -105,7 +106,9 @@ export function rowEl(doc, ctx, s, i) {
   const evs = n => n + ' event' + (n === 1 ? '' : 's');
   const cpL = a => { const b = mk(doc, 'button', 'fx-cand' + (a.likely ? ' likely' : '')); b.type = 'button'; b.innerHTML = ICON.copy + '<span></span>'; b.lastChild.textContent = a.label; if (a.likely) b.prepend(mk(doc, 'b', 'fx-likelychip', 'Likely')); b.title = a.title; b.setAttribute('aria-label', a.title); b.onclick = function () { copyText(doc, a.text, this); }; return b; };
   let label = '';
-  if (s.place) {
+  if (s.orphans) {
+    label = orphanHead(i); orphanBody(doc, ctx, s, i, head, body, cpL);
+  } else if (s.place) {
     label = i.raw; placeBody(doc, ctx, s, i, head, body, cpL);
   } else if (s.key === 'places' || s.key === 'check') {
     label = i.raw + ' to ' + i.to;
@@ -124,11 +127,11 @@ export function rowEl(doc, ctx, s, i) {
     body.append(head, note, plist(doc, ctx, [{ name: i.an, id: i.a }, { name: i.bn, id: i.b }], 2));
   } else if (s.key === 'viaph') {
     label = i.size + ' people joined only through an unknown person'; head.append(mk(doc, 'b', null, i.size + (i.size === 1 ? ' person' : ' people') + ' joined to the main tree only through ' + (i.via || []).join(', ') + (i.viaN > (i.via || []).length ? ' and ' + (i.viaN - i.via.length) + ' more' : ''))); body.append(head, plist(doc, ctx, i.people, i.size));
-    note.textContent = 'In ' + (ctx.fileName || 'the file you loaded') + ' ' + (i.size === 1 ? 'this person is' : 'these people are') + ' linked to the main tree, but the link runs through a placeholder with no real name. Name that person, or find who they were, and the link becomes real.'; body.append(note);
+    note.textContent = 'In ' + (ctx.fileName || 'the file you loaded') + ' the link to the main tree runs through a placeholder with no real name. Name that person, or find who they were, and the link becomes real.'; body.append(note);
   } else if (s.key === 'apart') {
     label = i.size + ' people not connected to the main tree'; head.append(mk(doc, 'b', null, i.size + (i.size === 1 ? ' person' : ' people') + ' not connected to the main tree')); body.append(head, plist(doc, ctx, i.people, i.size));
     note.textContent = (i.gone ? 'The file names ' + i.gone + ' relative' + (i.gone === 1 ? '' : 's') + ' of these people who ' + (i.gone === 1 ? 'is' : 'are') + ' not in it, so it may be a partial export.'
-      : 'In this file there is no parent, spouse or child link from ' + (i.size === 1 ? 'this person' : 'these people') + ' to anyone else.') + ' Built from ' + (ctx.fileName || 'the file you loaded') + '. If they are joined in your tree now, export again.'; body.append(note);
+      : 'In this file there is no parent, spouse or child link from anyone here to anyone else.') + ' Built from ' + (ctx.fileName || 'the file you loaded') + '. If they are joined in your tree now, export again.'; body.append(note);
   } else if (s.key === 'suspect') {
     label = i.name; const one = mk(doc, 'ul', 'fx-pl solo'); one.append(personLine(doc, ctx, { name: i.name, id: i.id, nl: i.nl })); head.append(one); body.append(head);
     const ul = mk(doc, 'ul', 'fx-reasons'); for (const r of i.reasons) ul.append(mk(doc, 'li', null, r.text)); body.append(ul);
@@ -174,6 +177,39 @@ export function rowEl(doc, ctx, s, i) {
   row.append(cb, body); return row;
 }
 
+/* ---- SAY IT ONCE. When a section's rows all carry the same explanatory line (the Atlas's "Next step", a note, the quiet "no clear neighbours" line), the line is shown once, above the
+   rows, and dropped from each of them. A generic rule over the drawn rows, not a list of known sentences: a line is hoisted when a row-level line of the same kind has the same text on
+   EVERY drawn row of the section. One row that differs (or lacks it) and every row keeps its own. A line that introduces a list (ends in a colon), or holds a link, button or input, is
+   row-specific and stays. Only the screen changes: the Text, Spreadsheet and PDF exports are built from the model and never see this. ---- */
+const KIND_RE = /(?:^|\s)(fx-next|fx-note|fx-likelynote)(?:\s|$)/;
+const bareOf = e => { for (const c of Array.from(e.childNodes || [])) { const t = String(c.tagName || c.tag || '').toLowerCase(); if (t === 'a' || t === 'button' || t === 'input') return false; if (c.childNodes && c.childNodes.length && !bareOf(c)) return false; } return true; };
+function lineSig(e) {
+  const k = e && KIND_RE.exec(e.className || ''); if (!k) return null;
+  const t = String(e.textContent || '').replace(/\s+/g, ' ').trim();
+  return !t || t.endsWith(':') || !bareOf(e) ? null : k[1] + '|' + t;
+}
+const bodyOf = row => Array.from(row.childNodes || []).find(c => /(?:^|\s)fx-body(?:\s|$)/.test(c.className || ''));
+/* rows: the drawn row elements of one section. Removes the shared lines from each and returns { lines: [element, ...] (to show once), sigs: [string, ...] } */
+export function hoistRepeats(rows) {
+  const none = { lines: [], sigs: [] };
+  if (!rows || rows.length < 2) return none;
+  const bodies = rows.map(bodyOf); if (bodies.some(b => !b)) return none;
+  const per = bodies.map(b => { const m = new Map(); for (const c of Array.from(b.childNodes)) { const g = lineSig(c); if (g && !m.has(g)) m.set(g, c); } return m; });
+  const out = { lines: [], sigs: [] };
+  for (const [g, el] of per[0]) {
+    if (!per.every(m => m.has(g))) continue;
+    per.forEach((m, n) => bodies[n].removeChild(m.get(g)));
+    out.lines.push(el); out.sigs.push(g);
+  }
+  return out;
+}
+/* a row redrawn on its own (after a tick) drops the lines its section shows once */
+export function stripRepeats(row, sigs) {
+  const b = sigs && sigs.length ? bodyOf(row) : null; if (!b) return row;
+  for (const c of Array.from(b.childNodes)) { const g = lineSig(c); if (g && sigs.includes(g)) b.removeChild(c); }
+  return row;
+}
+
 /* the one line under a row's candidates about the neighbour suggestion (likely.js): its true counts when there is one, a quiet line when the neighbours do not point anywhere. A suggestion, never a finding. */
 function likelyNote(doc, i) {
   if (i.likely) return mk(doc, 'div', 'fx-likelynote fx-muted', 'Suggestion only: ' + i.likely.reason);
@@ -205,4 +241,42 @@ function placeBody(doc, ctx, s, i, head, body, cpL) {
   const evs = i.events || i.count || 0, shown = i.people.length;
   body.append(mk(doc, 'div', 'fx-evs', evs + (evs === 1 ? ' event' : ' events')));
   if (shown) { const w = plist(doc, ctx, i.people, shown); if (evs > shown) w.append(mk(doc, 'small', 'fx-muted', 'and ' + (evs - shown) + ' more events')); body.append(w); }
+}
+
+/* ---- the Orphans tab's row: the people of one kind born at one place, with where the Atlas says to look. A list to work down in the visitor's own tree: nothing here joins, edits or sends. ---- */
+const yearSpan = (a, b) => (a == null ? '' : a === b ? String(a) : a + '–' + b);
+function orphanBody(doc, ctx, s, i, head, body, cpL) {
+  const place = mk(doc, 'span', 'fx-was plain fx-plc');
+  if (i.inAtlas && !i.countryOnly) place.append(link(doc, i.place, i.url, 'Open ' + i.place + ' in the Record Atlas (a new tab)')); else place.textContent = i.place;
+  const where = [i.country && i.country !== i.place ? i.country : '', i.size + (i.size === 1 ? ' person' : ' people'), i.pk === 'clus' && i.families > 1 ? 'in ' + i.families + ' families' : ''].filter(Boolean).join(' · ');
+  const acts = mk(doc, 'span', 'fx-acts2');
+  acts.append(cpL({ label: 'Copy place', title: 'Copy the place name, to search for it in records or in your tree: ' + i.place, text: i.place }),
+    cpL({ label: 'Copy people', title: 'Copy this group as text: the place, the years, the surnames and a line for each person', text: groupText(i) }));
+  head.append(place, mk(doc, 'span', 'fx-muted', where), acts); body.append(head);
+  /* the regime that ruled the place in the middle year, and the period: the viewer's own chip and line */
+  const era = mk(doc, 'div', 'fx-era');
+  if (i.era && !i.countryOnly) {
+    const chip = mk(doc, 'span', 'fx-rg', i.era.label);
+    if (i.atlasRegime) { chip.style.setProperty('--rgl', i.atlasRegime[0]); chip.style.setProperty('--rgd', i.atlasRegime[1]); }
+    era.append(chip, mk(doc, 'span', 'fx-muted', i.era.polity + ', ' + i.era.from + '–' + i.era.to));
+  } else if (i.countryOnly) era.append(mk(doc, 'span', 'fx-muted', 'Only a country: no regime to show.'));
+  else if (i.inAtlas) era.append(mk(doc, 'span', 'fx-muted', 'No regime table for this place yet.'));
+  else { era.append(mk(doc, 'span', 'fx-muted', 'Not in the Atlas yet. '), link(doc, 'Add it first', 'https://recordatlas.org/add/', 'Add this place to the Record Atlas (a new tab)')); }
+  body.append(era);
+  body.append(mk(doc, 'div', 'fx-evs', [i.lo != null ? 'Born ' + yearSpan(i.lo, i.hi) : '', i.top].filter(Boolean).join(' · ')));
+  /* a group the reader draws as detached, but that the file joins to a tree through someone who is not drawn yet (no year, or no place): the quicker fix is that person's year or place */
+  if (i.bridged) body.append(mk(doc, 'div', 'fx-note fx-bridge', (i.bridged === i.size ? (i.size === 1 ? 'This person is' : 'All of them are') : i.bridged + ' of them are') + ' joined to a tree in your file through someone who is not drawn yet (no birth year or no place). Giving that person a year and a place joins ' + (i.bridged === 1 ? 'them' : 'these people') + ', no record needed.'));
+  /* where the Atlas says to look: its collections for the place and those years (the viewer shows three), or the one place to start when it lists none */
+  if (i.links && i.links.length) {
+    body.append(mk(doc, 'div', 'fx-note', i.hasCol ? 'Where the Atlas says to look:' : 'Where to start looking:'));
+    const ul = mk(doc, 'ul', 'fx-reasons fx-cols');
+    for (const c of i.links) {
+      const li = mk(doc, 'li'), u = okHref(c.u); li.append(u ? link(doc, c.t.length > 70 ? c.t.slice(0, 69) + '…' : c.t, u, c.t) : c.t);
+      const bits = [c.w === 'Atlas collection' ? c.p : c.w, c.from != null ? c.from + '–' + (c.to != null ? c.to : '') : c.to != null ? 'to ' + c.to : ''].filter(Boolean).join(' · ');
+      if (bits) li.append(' ', mk(doc, 'span', 'fx-muted', bits)); ul.append(li);
+    }
+    if (i.moreCols) { const li = mk(doc, 'li', 'fx-muted'); li.append('and ' + i.moreCols + ' more at '); li.append(link(doc, 'this place in the Atlas', i.url)); ul.append(li); }
+    body.append(ul);
+  }
+  if (i.people.length) { body.append(plist(doc, ctx, i.people, i.people.length)); if (i.more) body.append(mk(doc, 'small', 'fx-muted', 'and ' + i.more + ' more people in this group')); }
 }

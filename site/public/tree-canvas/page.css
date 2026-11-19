@@ -276,7 +276,7 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 .fxbar { flex: 1 1 260px; height: 12px; border-radius: 999px; background: color-mix(in srgb, var(--card) 70%, var(--line)); border: 1.5px solid var(--line); overflow: hidden; }
 .fxbar i { display: block; height: 100%; width: 0; background: var(--keep); border-radius: 999px; transition: width .25s ease; }
 @media (prefers-reduced-motion: reduce) { .fxbar i { transition: none; } }
-#fx-prog, #fxp-prog { font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; }
+#fx-prog, #fxp-prog, #fxo-prog { font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; }
 .fxtools { display: flex; flex-wrap: wrap; align-items: end; gap: 10px 14px; padding: 12px 14px; border: 2px solid var(--line); border-radius: 12px; background: var(--card); }
 .fxf { display: grid; gap: 3px; font-size: 12px; font-weight: 700; color: var(--soft); }
 .fxf input, .fxf select { font: 400 14px/1.2 system-ui, sans-serif; padding: 8px 10px; border: 2px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); min-width: 150px; }
@@ -293,7 +293,7 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 .fxwho { flex-basis: 100%; font-size: 13.5px; font-weight: 700; }
 .fxkeep { display: grid; gap: 8px; padding: 12px 14px; border: 2px dotted var(--line); border-radius: 12px; }
 .fxsaved.saved { color: var(--keep-ink); font-weight: 700; }
-#fx-body, #fxp-body { display: grid; gap: 4px; }
+#fx-body, #fxp-body, #fxo-body { display: grid; gap: 4px; }
 /* the two lists, People and Places, are tabs of one page: one pane shows at a time, each with its own progress, filters and rows */
 .fxpane { display: grid; gap: 18px; } .fxpane[hidden] { display: none; }
 .fxtabs { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -302,6 +302,16 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 #fx .fxtab[aria-selected="true"] { background: var(--card); color: var(--ink); border-color: var(--accent); }
 .fxtn { min-width: 22px; padding: 1px 7px; border-radius: 99px; background: var(--accent); color: var(--accent-ink); font: 800 12px/1.5 system-ui, sans-serif; font-variant-numeric: tabular-nums; text-align: center; }
 @media (prefers-reduced-motion: reduce) { #fx .fxtab:hover { transform: none; } }
+/* the Orphans tab: one quiet line of counts with its (i), the plain-words explanation, and a row's regime chip and period. The chip takes the Atlas's own colour for the regime. */
+#fx .fxsum { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; } #fx .fxsum .fxcounts { margin: 0; font-weight: 700; } #fx .fxsum .fxcounts[hidden] { display: none; }
+#fx .fxwhat { flex-basis: 100%; max-width: 70ch; padding: 10px 14px; border: 2px solid var(--line); border-radius: 12px; background: var(--card); font-size: 13.5px; font-weight: 600; } #fx .fxwhat[hidden] { display: none; }
+#fx .fxwhat p { margin: 0 0 6px; } #fx .fxwhat p:last-child { margin: 6px 0 0; } #fx .fxwhat-l { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+#fx .fx-era { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 13px; }
+#fx .fx-rg { --rgl: #7A8790; --rgd: #A9B4BB; font: 800 11px/1 system-ui, sans-serif; letter-spacing: .03em; padding: 4px 9px; border-radius: 99px; color: #fff; background: var(--rgl); text-shadow: 0 1px 0 rgba(0, 0, 0, .35); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #fx .fx-rg { background: var(--rgd); color: #1d1a16; text-shadow: none; } }
+:root[data-theme="dark"] #fx .fx-rg { background: var(--rgd); color: #1d1a16; text-shadow: none; }
+#fx .fx-plc { font-size: 15px; } #fx .fx-plc a { color: inherit; text-underline-offset: 2px; }
+#fx .fx-cols { margin: 0; }
 /* a Places row: each candidate is one copy button with its size and place beside it */
 #fx .fx-cands .fx-cand small { font-size: 11.5px; font-weight: 600; }
 
@@ -389,3 +399,7 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 .trform .trin { flex: 1 1 200px; }
 .tropen:focus-visible, .trbtn:focus-visible, .trin:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 @media (max-width: 480px) { .trhead { flex-wrap: wrap; } .trhead .tropen { flex: 1 1 100%; } .trview { flex-wrap: wrap; } .trview .tropen { flex: 1 1 100%; } .trviews { margin-left: 4px; padding-left: 8px; } .trside { margin-left: auto; } }
+
+/* a line every row of a section would repeat, said once above the rows (hoistRepeats in fixlist-rows.js) */
+.fx-hoist { margin: 0 0 8px; padding: 0 0 6px; border-bottom: 1px dashed var(--line); }
+.fx-hoist > * { margin: 0 0 2px; font-size: 13px; font-weight: 500; }

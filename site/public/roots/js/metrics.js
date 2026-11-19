@@ -12,7 +12,9 @@
 
 const BIG = 20;   // the smallest connected tree
 
-export function treeMetrics(tree, atlas) {
+/* The groups of people joined by parent, spouse or child links: the one place this rule is written for the pages that count or list them (the strip above, and the Tree Canvas's
+   Orphans list, which draws the same groups). Returns the people as { id, father, mother, spouse, kids, bp, hid }, by id, each one's group number and every group's size. */
+export function components(tree) {
   const list = [], P = new Map();
   for (const r of (tree && tree.people) || []) {
     const p = { id: r.id, father: r.father || null, mother: r.mother || null, spouse: r.spouse || [], kids: r.kids || [], bp: r.bp, hid: r.hid === 1 ? 1 : 0 };
@@ -28,6 +30,12 @@ export function treeMetrics(tree, atlas) {
     }
     sizes.push(n);
   }
+  return { list, P, comp, sizes };
+}
+export const BIG_TREE = BIG;
+
+export function treeMetrics(tree, atlas) {
+  const { list, comp, sizes } = components(tree);
   let main = 0, orph = 0, dead = 0, living = 0; const mainComps = new Set(), clusComps = new Set(); let clusPeople = 0;
   for (const p of list) {
     const s = sizes[comp.get(p.id)];

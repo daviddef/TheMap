@@ -15,7 +15,11 @@
 
    THE PLACES TAB uses the same model, state, filters and counts over another set of rows (roots/js/placereview.js: the places the Atlas could not settle exactly, shaped like
    the reader's checklist). `buildModel(msg, null, '', PLACES)` builds it; its sections have their own ranks (PLACE_PRIORITY). Its rows are kept under `d|<place text>`, the key
-   Roots & Routes already uses for the same place in its fix list, so a "done" or "left as is" made in either list is the same decision. */
+   Roots & Routes already uses for the same place in its fix list, so a "done" or "left as is" made in either list is the same decision.
+
+   THE ORPHANS TAB does the same over the people the file leaves outside every tree (roots/js/orphans.js): a row is the people of one kind born at one place, with the Atlas's record
+   collections for that place and those years. `buildModel(msg, null, '', ORPHANS)` builds it. Its rows are kept under `o|<k>|<place>`, or, where a row is exactly one of the People list's
+   "Groups not joined to the main tree" (the same people), under that row's own key, so a tick on one shows on the other. */
 import { describe, GROUPS } from '../roots/js/checklist.js';
 import { hashKey } from '../roots/js/decisions.js';
 import { h53 } from './work.js';
@@ -87,6 +91,14 @@ export const PLACE_PRIORITY = {
 };
 export const PLACE_LEVEL_AT = { High: 3, Medium: 5 };   // ranks 1-3 are places to choose, 4-5 need a lookup or are nearly right, the rest only describe how a place is drawn
 export const PLACES = { groups: null, prio: key => prioOf(key, PLACE_PRIORITY, PLACE_LEVEL_AT), table: PLACE_PRIORITY, kind: 'places' };
+/* ---- the Orphans tab: the same idea for people who are in no tree. A fix that joins several people at once ranks above one that joins one; a place with only a country has nothing to search by. ---- */
+export const ORPHAN_PRIORITY = {
+  clus:    { rank: 1, why: 'Each family here is cut off from every tree. Finding one parent, spouse or child outside it joins all of its people at once, the same reason the People list ranks its “not joined” groups first.' },
+  orph:    { rank: 2, why: 'Each person here is joined to no one, so a found relative joins one person, not a family. Worth doing, but each row is less work saved than a detached family.' },
+  country: { rank: 3, why: 'The file gives only a country for these people, so the Atlas has no collection to suggest. Find the place first; the lowest-value row until you do.' },
+};
+export const ORPHAN_LEVEL_AT = { High: 1, Medium: 2 };   // detached families High, orphans Medium, country-only Low
+export const ORPHANS = { groups: null, prio: key => prioOf(key, ORPHAN_PRIORITY, ORPHAN_LEVEL_AT), table: ORPHAN_PRIORITY, kind: 'orphans' };
 export const ORDERS = { priority: 'Priority', list: 'List order', most: 'Most to do' };
 export const ROW_SORTS = { useful: 'Most useful first', name: 'Name A–Z', list: 'List order' };
 
@@ -114,7 +126,8 @@ const USEFUL = {
   years: i => (i.kind === 'estimated' ? year(i.hint) : null), cmpmiss: i => year(i.yrs),
 };
 for (const k of Object.keys(PLACE_PRIORITY)) USEFUL[k] = i => -(i.events || i.count || 0);   // a place text: the one with most events first
-const nameOf = i => (i.name || i.raw || i.an || i.fname || (i.people && i.people[0] && i.people[0].name) || i.first || '').toString();
+for (const k of Object.keys(ORPHAN_PRIORITY)) USEFUL[k] = i => -(i.score || 0);                // an Orphans row: Roots & Routes' own ranking (people x a collection x in the Atlas)
+const nameOf = i => (i.name || i.raw || i.place || i.an || i.fname || (i.people && i.people[0] && i.people[0].name) || i.first || '').toString();
 const SORTED = new WeakMap();
 export function rowSort(s, how) {
   if (!how || how === 'list') return s.items;
@@ -202,6 +215,7 @@ const HAY = new WeakMap();
 export function hay(s, i) {
   let h = HAY.get(i); if (h !== undefined) return h;
   h = (s.key === 'names' ? i.name + ' ' + i.kin : s.key === 'dupes' ? i.an + ' ' + i.bn : (s.key === 'apart' || s.key === 'viaph') ? i.people.map(p => p.name).join(' ') + ' ' + (i.via || []).join(' ')
+    : s.orphans ? i.place + ' ' + (i.country || '') + ' ' + (i.sur || []).join(' ') + ' ' + i.people.map(p => p.name).join(' ') + ' ' + (i.links || []).map(l => l.t + ' ' + (l.p || '')).join(' ')
     : s.key === 'cmpmiss' ? i.name + ' ' + i.relName + ' ' + i.archive + ' ' + i.yrs : s.key === 'cmpdiff' ? i.fname + ' ' + i.aname + ' ' + i.reason + ' ' + i.archive
     : (i.raw || '') + ' ' + (i.name || '') + ' ' + (i.country ? i.country + ' ' + i.label : '') + ' ' + (i.reasons ? i.reasons.map(r => r.text).join(' ') : '') + ' ' + (i.people ? i.people.map(p => p.name).join(' ') : '') + (s.place ? ' ' + [...(i.cands || []), ...(i.picked ? [i.picked] : [])].map(c => c.n + ' ' + (c.region || '')).join(' ') : '')).toLowerCase();
   HAY.set(i, h); return h;
@@ -289,6 +303,9 @@ export function toOpen(secs, st, o) {
 export function headOf(s, i) {
   if (s.key === 'cmpmiss') return i.name + (i.yrs ? ' (' + i.yrs + ')' : '') + ' is in ' + i.archive + (i.relName ? ' as the ' + REL_WORD[i.rel] + ' of ' + i.relName : '') + ' but not in your file';
   if (s.key === 'cmpdiff') return i.fname + ': ' + i.reason;
+  if (s.orphans) return orphanHead(i);
   return describe(s, i).head;
 }
+/* an Orphans row as one sentence, for a screen reader's label and the row's own head */
+export function orphanHead(i) { return i.size + (i.size === 1 ? ' person' : ' people') + ' born at ' + i.place + (i.pk === 'clus' ? ', in detached families' : ', joined to no one'); }
 export const REL_WORD = { father: 'father', mother: 'mother', child: 'child', spouse: 'spouse', self: 'starting person' };

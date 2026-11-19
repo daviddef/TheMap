@@ -1455,7 +1455,8 @@ header.site nav .ra-reader:hover, header.site nav .ra-reader[aria-current="page"
 header.site nav .ra-reader[aria-current="page"] { background: var(--accent-wash, transparent); }
 header.site nav .ra-reader:focus-visible { outline: 3px solid var(--accent, #1f5c6b); outline-offset: 2px; }
 /* ---- the Tree Canvas: the same round icon-only button as the Record Reader, to its right (theme.js makes it; the roots page has it in its markup) ---- */
-.topnav .menulink[href$="/tree-canvas/"] { display: none; }
+/* only the icon entry (the one that opens in a new tab): "Roots & Routes" also points at /tree-canvas/ since 19 Nov 2026 and must stay a text link */
+.topnav .menulink[href$="/tree-canvas/"][target="_blank"] { display: none; }
 header.site nav .ra-canvas { display: inline-grid; place-items: center; width: 38px; height: 38px; margin-left: 8px; padding: 0; border: 1px solid #D9822B; border-radius: 50%; background: #D9822B; color: #fff; cursor: pointer; text-decoration: none; }   /* the orange of the word CANVAS on the canvas's own title */
 header.site nav .ra-canvas + .ra-theme { margin-left: 8px; }
 header.site nav .ra-canvas:hover { background: #C4721F; border-color: #C4721F; color: #fff; }
@@ -1879,4 +1880,4 @@ header.site .ra-grp a.ra-lines-l .ra-lines-i{flex:0 0 auto}
 .drawer .dquick .dq-canvas:hover .dqi,.drawer .dquick .dq-canvas[aria-current="page"] .dqi{background:#C4721F;border-color:#C4721F;color:#fff}
 .drawer .dquick .dq:focus-visible{outline:3px solid var(--accent,#1f5c6b);outline-offset:2px;border-radius:10px}
 /* the text rows these four replace are hidden (a browser without :has keeps them, which only repeats a link) */
-.drawer .dgrp:not(.dquick):has(> a[href$="/read/"]),.drawer .dgrp:not(.dquick):has(> a[href$="/tree-canvas/"]),.drawer .dgrp:has(> .ra-theme-row),.drawer .dgrp:has(> .ra-sources-row){display:none}
+.drawer .dgrp:not(.dquick):has(> a[href$="/read/"]),.drawer .dgrp:not(.dquick):has(> a[href$="/tree-canvas/"][target="_blank"]),.drawer .dgrp:has(> .ra-theme-row),.drawer .dgrp:has(> .ra-sources-row){display:none}

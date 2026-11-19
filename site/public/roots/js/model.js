@@ -166,7 +166,20 @@ export function buildTree(P, placeFor, est, dest, opts = {}) {
       if (p.dp === p.bp) p.my = null;
     }
   }
+  /* THE GROUPS ARE COUNTED ON THE WHOLE FILE, BEFORE ANYONE IS DROPPED. Everyone with no year or no place is not drawn, and the links to them are cleared just below,
+     so a family that hangs off an «Unknown» placeholder (which has neither) looks cut off from its own tree on the Orphans tab: a detached family, its members dead ends.
+     Counted here, on every person and every link the file holds, a group is the size it really is. gi is the group's id, cg its size, and up is 1 where a parent is in
+     the file but not drawn, so that person is not called a dead end. */
+  const grp = new Map(), gsize = [];
+  for (const id of P.keys()) {
+    if (grp.has(id)) continue;
+    const g = gsize.length, q = [id]; grp.set(id, g); let n = 0;
+    while (q.length) { const x = P.get(q.pop()); n++; for (const y of [x.father, x.mother, ...x.spouse, ...x.kids]) if (y && P.has(y) && !grp.has(y)) { grp.set(y, g); q.push(y); } }
+    gsize.push(n);
+  }
   for (const p of keep.values()) {
+    p.gi = grp.get(p.id); p.cg = gsize[p.gi];
+    p.up = (p.father && !keep.has(p.father)) || (p.mother && !keep.has(p.mother)) ? 1 : 0;
     if (p.father && !keep.has(p.father)) p.father = null; if (p.mother && !keep.has(p.mother)) p.mother = null;
     p.spouseK = p.spouse.filter(s => keep.has(s)); p.kidsK = p.kids.filter(k => keep.has(k));
   }
@@ -189,7 +202,7 @@ export function buildTree(P, placeFor, est, dest, opts = {}) {
     const li = order.indexOf(sk(p.sur));
     people.push({ id: i, sex: p.sex === 'f' ? 'f' : 'm', given: hide(p) ? '' : p.given, sur: p.sur, line: li < 0 ? maxLines - 1 : li,
       by: hide(p) ? Math.floor(p.by / 10) * 10 : p.by, hid: hide(p) ? 1 : 0, sk: sk(p.sur) || null, bp: p.bp, bpr: hide(p) ? null : p.bpRaw || null, dpr: hide(p) ? null : p.dpRaw || null, dy: hide(p) ? null : p.dy, dp: hide(p) ? null : p.dp, my: p.my,
-      occ: hide(p) ? null : p.occ, father: p.father, mother: p.mother, spouse: p.spouseK, kids: p.kidsK, srcs: hide(p) ? [] : p.srcs,
+      occ: hide(p) ? null : p.occ, father: p.father, mother: p.mother, spouse: p.spouseK, kids: p.kidsK, gi: p.gi, cg: p.cg, up: p.up, srcs: hide(p) ? [] : p.srcs,
       bye: est.has(p.id) || (p.byApprox && !hide(p)), dye: dest.has(p.id), bpe: p.bpe, slug: hide(p) ? null : slugify(p.given + ' ' + p.sur) });
   }
   const tree = { meta: { title: 'Roots & Routes', sub: 'Your tree, drawn in this browser. Click anyone and every view follows.', living, generated: new Date().toISOString().slice(0, 10), source: 'your GEDCOM' },

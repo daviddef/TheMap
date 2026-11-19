@@ -418,13 +418,6 @@ test("the person panel carries the Atlas help: details, name help, birthplace an
   assert.ok(i.help.some(x => x.k === "In your file") && i.help.some(x => x.k === "Surname") && i.help.some(x => x.k === "Birthplace"), "details, name help and birthplace");
   assert.ok(i.nl.given && i.nl.sur, "name links");
 });
-test("fix list: Generate PDF is the browser's own print over a copy built on the device, with a print layout", () => {
-  const html = fs.readFileSync(path.join(here, "../src/pages/roots/index.astro"), "utf8"), app = fs.readFileSync(R + "js/app.js", "utf8"), css = fs.readFileSync(R + "roots.css", "utf8");
-  assert.match(html, /id="fpdf"[^>]*title="[^"]*print window[^"]*"[^>]*>[\s\S]*?<span>PDF<\/span>/); assert.match(app, /\$\('#fpdf'\)\.onclick = toPdf/); assert.match(app, /window\.print\(\)/);
-  assert.match(css, /@media print/); assert.match(css, /body\.printing>\*:not\(#fprint\)\{display:none!important\}/);
-  assert.doesNotMatch(app.slice(app.indexOf("function toPdf")), /fetch\(|XMLHttpRequest|sendBeacon|window\.open/, "making the PDF reaches nowhere");
-  assert.match(app, /asIs\.has\(i\.key\)/, "the printed list drops the rows left as is, and uses the same list the toggle built (living people included or not)");
-});
 test("MyHeritage links: the last link pasted is remembered on this device, tolerates refused storage, and can be forgotten", async () => {
   const { loadLink, saveLink } = await import(R + "js/remember.js"); const { parseLink } = await import(R + "js/myheritage.js");
   const link = "https://www.myheritage.com/profile-ABCDEFGHIJKLMNOP1234-4000030/jan-test", store = new Map();
@@ -461,7 +454,7 @@ test("fix-list summary: kept for My research only while the switch is on, places
   const f = createFixes(st); assert.ok(f.put(sum)); assert.equal(Object.keys(f.all()).length, 1);
   assert.ok(f.forget("tree.ged")); assert.equal(m.size, 0, "forgetting the last list leaves nothing behind");
   assert.equal(createFixes(null).put(sum), false, "no storage is not an error");
-  const app = fs.readFileSync(R + "js/app.js", "utf8"); assert.match(app, /dec\.isOn\(\)\) fixes\.put\(/, "only while the switch is on"); assert.match(app, /fixes\.forget\(\)/);
+  assert.doesNotMatch(fs.readFileSync(R + "js/app.js", "utf8"), /fixes\.|decisions\.js/, "Roots & Routes keeps no fix list now: the Tree Canvas does (and shares this store)");
 });
 
 test("MyHeritage links: a tree link reads by parameter name, in any order, and survives a mistyped root name", async () => {
@@ -512,7 +505,7 @@ test("Ancestry links: tree number from the header, person number from the record
   assert.equal(detectAncestry(parseGedcom(enc(file.replace("3 RIN 114002002", "3 RIN abc")))), null, "and carry a numeric tree number");
   assert.equal(detectAncestry(parseGedcom(enc(makeSample()))), null, "a MyHeritage-style file gets none");
   if (has) { const { Session } = await import(R + "js/pipeline.js"); const s = new Session(io); const out = await s.load(enc(file)); assert.deepEqual(out.anc, { tree: "114002002" }, "the session reports it to the page"); }
-  const app = fs.readFileSync(R + "js/app.js", "utf8"); assert.match(app, /personUrl\(anc, id, ancSite\)/); assert.match(app, /acts\.append\(\.\.\.ancA\(p\.id\)\)/);
+  const app = fs.readFileSync(R + "js/app.js", "utf8"); assert.match(app, /saveSite\(v\)/, "the Ancestry site chosen here is the one the Tree Canvas reads"); assert.match(app, /anc = m\.anc \|\| null/);
 });
 
 test("MyHeritage: the tree is read from the file's header, and a link is remembered once per tree, with the Atlas's known tree filled in", async () => {
@@ -532,36 +525,56 @@ test("MyHeritage: the tree is read from the file's header, and a link is remembe
     globalThis.localStorage = { getItem() { throw new Error("blocked"); }, setItem() { throw new Error("blocked"); } };
     assert.deepEqual(loadTrees(), {}); assert.equal(saveTreeLink(mh.guid, k.link), false);
   } finally { delete globalThis.localStorage; }
-  const app = fs.readFileSync(R + "js/app.js", "utf8"); assert.match(app, /applyTreeLink\(\)/); assert.match(app, /saveTreeLink\(/); assert.match(app, /cpL\('New'/); assert.match(app, /cpL\('Old'/);
+  const app = fs.readFileSync(R + "js/app.js", "utf8"); assert.match(app, /applyTreeLink\(\)/); assert.match(app, /saveTreeLink\(/);
 });
 
-test("Orphans is a tab of the Atlas's own Roots & Routes page; the viewer drops its in-page tab only when framed with shell=1", () => {
+test("Roots & Routes is only Tree views: no tabs, none of the five removed panels, and the pointer to the Tree Canvas", () => {
   const page = fs.readFileSync(path.join(here, "../src/pages/roots/index.astro"), "utf8");
-  const app = fs.readFileSync(R + "js/app.js", "utf8");
+  const app = fs.readFileSync(R + "js/app.js", "utf8"), css = fs.readFileSync(R + "roots.css", "utf8");
   const tpl = fs.readFileSync(path.join(here, "../../scripts/roots/tree-views.template.html"), "utf8");
-  // the tab: after Tree views, same markup and badge as Places to review and Fix list
-  const tabs = [...page.matchAll(/data-tab="([a-z]+)"/g)].map(m => m[1]);
-  assert.deepEqual(tabs, ["canvas", "tree", "orphans", "report", "review", "fix"], "Orphans sits straight after Tree views; there is no Export tab (it is the Tree Canvas's Your file)");
-  assert.match(page, /data-tab="orphans"[^>]*>Orphans <span id="orcount" class="count"><\/span><\/button>/, "a count badge in the same style as the others");
-  // it is the viewer's Orphans view, not a second viewer: one panel, one frame
-  assert.match(app, /const panel = name === 'orphans' \? 'tree' : name;/);
-  assert.match(app, /'viewer\.html\?v=' \+ STAMP \+ '&shell=1'/, "the page tells the viewer it is the shell");
-  assert.match(app, /\{ raView: want \}/); assert.match(app, /e\.data\.type === 'ra-roots-view'/);
-  assert.doesNotMatch(page, /id="p-orphans"/, "no second panel");
-  // the viewer: the in-page tab is hidden ONLY under the shell flag, which a framed archive page never sets
+  // the tab list is exactly Tree views: there is no tab strip, one panel, one heading
+  assert.deepEqual([...page.matchAll(/data-tab="([a-z]+)"/g)].map(m => m[1]), [], "no tab strip: Tree views is the only thing the page shows");
+  assert.doesNotMatch(page, /role="tab"|role="tablist"|class="tabs"/);
+  assert.deepEqual([...page.matchAll(/class="panel"/g)].length, 1, "one panel");
+  assert.deepEqual([...page.matchAll(/id="(p-[a-z]+)"/g)].map(m => m[1]), ["p-tree"], "and it is the Tree views one");
+  assert.match(page, /<h2 class="vtitle">Tree views<\/h2>/);
+  // the five removed tabs left nothing behind: no panel, no handler, no badge, no iframe plumbing
+  for (const id of ["p-canvas", "p-report", "p-review", "p-fix", "canvasv", "fsecs", "rlist", "rfilter", "orcount", "rcount", "fxcount", "dec-on", "fpdf", "exportmoved", "savedfix"]) assert.ok(!page.includes('id="' + id + '"'), id + " is gone from the page");
+  for (const w of ["tellCanvas", "tcLinks", "tcFix", "mountCanvas", "drawFix", "drawReview", "fixRow", "askFix", "reportInto", "viewerView", "shareFix", "decisions.js", "checklist.js", "loadNames", "rrLinks", "worker.postMessage({ cmd: 'pick'", "cmd: 'checklist'", "cmd: 'suggest'"]) assert.ok(!app.includes(w), w + " is gone from app.js");
+  for (const w of ["#canvasv", ".tabs", ".frow", "#fsecs", "#rfilter", ".wpanel", "#fprint", ".sec-"]) assert.ok(!css.includes(w), w + " is gone from roots.css");
+  // the pointer: one quiet line at the top, with a button to the canvas
+  assert.match(page, /<p id="canvasnote"[^>]*>[\s\S]*Fix list, Orphans, Places, the import report and export are now in the Tree Canvas[\s\S]*href=\{u\("\/tree-canvas\/"\)\}>Open the Tree Canvas<\/a>/);
+  assert.ok(page.indexOf('id="canvasnote"') < page.indexOf('<section id="start"'), "it is above everything else, in every state of the page");
+  // the viewer is still told it is the shell, so it drops its in-page Orphans tab; a way into the Orphans view is sent straight back, with the pointer
+  assert.match(app, /'viewer\.html\?v=' \+ STAMP \+ '&shell=1'/);
+  assert.match(app, /e\.data\.view === 'orphans'[\s\S]{0,160}raView: 'tree'/);
+  assert.match(app, /typeof e\.data\.fixplace === 'string'[\s\S]{0,260}Tree Canvas/, "«Fix this text» says where Places went");
+  // the viewer: the in-page tab is hidden ONLY under the shell flag, which a framed archive page never sets (the archives are unchanged)
   assert.match(tpl, /\.inshell \.tab\[data-view="orphans"\]\{display:none!important\}/);
-  assert.match(tpl, /const SHELL=\/\[\?&\]shell=1\(&\|\$\)\/\.test\(location\.search\)&&parent!==window;/, "the flag is read from the query, and only when framed");
-  assert.match(tpl, /if\(SHELL\)RROOT\.classList\.add\('inshell'\)/);
+  assert.match(tpl, /const SHELL=\/\[\?&\]shell=1\(&\|\$\)\/\.test\(location\.search\)&&parent!==window;/);
   assert.match(tpl, /<button class="tab" role="tab" data-view="orphans" title="Orphans and where to start">/, "the in-page tab stays in the file for every archive");
-  assert.match(tpl, /const VIEWS=\[[^\]]*'orphans'/, "#orphans is still a view, so an old link opens it");
-  // old links: the address is the viewer's state and still names the view first
-  assert.match(tpl, /st\.view=VIEWS\.includes\(v0\)\?v0:DEF\.view/);
-  assert.match(tpl, /data-goto="orphans" data-okind=/, "the tiles and Kinship's «see where to start» link still open it");
-  // the numbers are the view's own tiles, sent to the page, never recomputed there
-  assert.match(tpl, /SHN\.orph=orph;SHN\.clus=nClus;/); assert.match(tpl, /orphans:SHN\.orph,clusters:SHN\.clus/);
-  // a viewer with no shell flag says nothing to its parent about views
   assert.match(tpl, /if\(SHELL\)try\{parent\.postMessage\(\{type:'ra-roots-view'/);
-  assert.match(tpl, /if\(SHELL&&typeof e\.data\.raView==='string'\)/, "and listens for nothing from it");
+  assert.match(tpl, /if\(SHELL&&typeof e\.data\.raView==='string'\)/);
+});
+
+test("the Atlas menu's Roots & Routes entry opens the Tree Canvas; /roots/ stays reachable from the canvas page", async () => {
+  const { nav } = await import("../src/lib/nav.js");
+  const rr = nav.filter(([label]) => label === "Roots & Routes");
+  assert.equal(rr.length, 1, "the label is kept for now");
+  assert.equal(rr[0][1], "/tree-canvas/", "and it points at the canvas");
+  assert.ok(!nav.some(([, links]) => typeof links === "string" ? links === "/roots/" : links.some(([h]) => h === "/roots/")), "no menu entry still points at /roots/");
+  /* both entries share /tree-canvas/, so the CSS that hides the Tree Canvas's icon row must not hide the Roots & Routes text link (it once did, by href alone) */
+  const css = fs.readFileSync(path.join(here, "../public/styles.css"), "utf8");
+  assert.match(css, /\.topnav \.menulink\[href\$="\/tree-canvas\/"\]\[target="_blank"\] \{ display: none; \}/);
+  assert.match(css, /\.dgrp:not\(\.dquick\):has\(> a\[href\$="\/tree-canvas\/"\]\[target="_blank"\]\)/);
+  assert.doesNotMatch(css, /\[href\$="\/tree-canvas\/"\]\s*[,{]/, "no rule hides by href alone");
+  assert.deepEqual(nav.filter(([, l, o]) => l === "/tree-canvas/" && o && o.newTab).map(([n]) => n), ["Tree Canvas"], "only the icon entry opens in a new tab, which is what the CSS keys on");
+  for (const f of ["../src/layouts/Base.astro", "../src/pages/roots/index.astro"]) assert.match(fs.readFileSync(path.join(here, f), "utf8"), /target=\{opt\?\.newTab \? "_blank" : undefined\}/, f + " marks the new-tab entry");
+  const canvas = fs.readFileSync(path.join(here, "../src/pages/tree-canvas/index.astro"), "utf8");
+  assert.match(canvas, /href=\{u\("\/roots\/"\)\}[^>]*>Tree views \(older page\)<\/a>/, "the canvas start page links to the twelve tree views");
+  assert.match(canvas, /id="yfRoots"[^>]*href=\{u\("\/roots\/"\)\}/, "and so does Your file");
+  const sd = fs.readFileSync(path.join(here, "../src/components/StoryDrawer.astro"), "utf8"), rd = fs.readFileSync(path.join(here, "../src/pages/read.astro"), "utf8");
+  for (const s of [sd, rd]) assert.match(s, /Already have a tree\? <a href=\{u\("\/tree-canvas\/"\)\}>Open it in Roots &amp; Routes<\/a>/);
 });
 
 /* ---- the two "not connected" checks: truly apart, and joined only through an unknown person ---- */
@@ -586,4 +599,30 @@ test("a person under an Unknown parent is in the main tree (not an orphan), and 
   assert.deepEqual(v[0].people.map(p => p.id).sort(), ["d", "e"]); assert.deepEqual(v[0].via, ["Unknown Grach"]);
   for (const n of [["Unknown", "Grach"], ["Unknown", ""], ["Grah's for Investigation (not real)", ""], ["", ""]]) assert.ok(isPlaceholderName("", ...n), JSON.stringify(n) + " is a placeholder");
   for (const n of [["Maria", "Krosnjak"], ["Antonius", "Grah"]]) assert.ok(!isPlaceholderName("", ...n), JSON.stringify(n) + " is a person");
+});
+
+test("a family that hangs off an Unknown placeholder is counted in its whole group, and nobody under one is a dead end", need, async () => {
+  /* The drawn links stop at anyone with no year or no place. A person whose own place was borrowed from a relative cannot lend it to their parent (only a place the file
+     states is borrowed), so an «Unknown» parent below the dated tree stays undrawn, the links to it were cleared, and the Orphans tab called everyone below it a detached
+     family and a dead end. The groups are counted on the whole file now: gi is the group, cg its size, up is 1 where a parent is in the file but not drawn. */
+  const { Session } = await import(R + "js/pipeline.js");
+  const ind = (id, name, sex, y, place) => `0 @${id}@ INDI\n1 NAME ${name}\n1 SEX ${sex}\n` + (y ? `1 BIRT\n2 DATE ${y}\n` + (place ? "2 PLAC Kimberley, South Africa\n" : "") + `1 DEAT\n2 DATE ${y + 60}\n` : "");
+  const fam = (id, h, w, ...c) => `0 @${id}@ FAM\n` + (h ? `1 HUSB @${h}@\n` : "") + (w ? `1 WIFE @${w}@\n` : "") + c.map(x => `1 CHIL @${x}@\n`).join("");
+  let g = "0 HEAD\n1 CHAR UTF-8\n";
+  for (let k = 1; k <= 21; k++) g += ind("M" + k, `Main${k} /Chain/`, "M", 1700 + 8 * k, true);       // a main tree of 21, a father-to-son chain
+  for (let k = 1; k < 21; k++) g += fam("FM" + k, "M" + k, null, "M" + (k + 1));
+  g += ind("U0", "Unknown /Chain/", "M") + ind("U1", "Unknown /Chain/", "M");                        // two placeholders: no year, no place
+  g += ind("C1", "Child /Chain/", "M", 1850, false) + ind("D1", "Grandchild /Chain/", "M", 1880, true);   // C1 has a year but no place of their own
+  g += fam("FU0", "M1", null, "U0") + fam("FU1", "U0", null, "U1") + fam("FU2", "U1", null, "C1") + fam("FC1", "C1", null, "D1");
+  g += ind("E1", "Alone /Pair/", "M", 1800, true) + ind("E2", "Alone /Pair/", "F", 1802, true) + fam("FE", "E1", "E2");   // two people with nothing to do with the rest
+  g += "0 TRLR\n";
+  const out = await new Session(io).load(enc(g));
+  const by = Object.fromEntries(out.tree.people.map(p => [p.id, p]));
+  assert.ok(!by.U1, "the placeholder with nothing to borrow a place from is not drawn");
+  assert.ok(by.C1 && by.D1, "the child and grandchild are drawn");
+  assert.equal(by.C1.father, null, "so the drawn link from the child to it is cleared");
+  for (const id of ["C1", "D1"]) assert.ok(by[id].cg >= 24, id + " is in a group of at least 24 (the main tree and the placeholders), not the 2 that are drawn");
+  assert.equal(by.C1.gi, by.M1.gi, "the child below the placeholder is in the main tree's group");
+  assert.equal(by.C1.up, 1, "a parent is in the file but not drawn"); assert.equal(by.D1.up, 0, "the grandchild's parent is drawn"); assert.equal(by.M1.up, 0);
+  assert.equal(by.E1.cg, 2); assert.equal(by.E1.gi, by.E2.gi); assert.notEqual(by.E1.gi, by.M1.gi, "a family with no link to the rest is still its own, small group");
 });

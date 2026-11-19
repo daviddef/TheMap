@@ -184,9 +184,6 @@ button{font-family:inherit}
 .lk-ibtn[disabled]{opacity:.4;pointer-events:none}
 .lk-ibtn .t{font:400 20px/1 "Lilita One",system-ui}
 .lk-ibtn.on{border-color:var(--lk-accent);color:var(--lk-accent)}
-#hint{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);font:400 28px "Lilita One",system-ui;color:var(--lk-faint);pointer-events:none;transition:opacity .5s;text-align:center;max-width:80vw;z-index:1}
-#hint small{display:block;font:700 14px Nunito,system-ui;margin-top:8px;color:var(--lk-faint);line-height:1.5}
-#hint.off{opacity:0}
 #toast{position:fixed;left:50%;top:16px;--lk-toast-from:-10px;z-index:30}
 /* ---------- cards ---------- */
 .card{position:absolute;left:0;top:0;width:184px;height:92px;z-index:2}
@@ -244,27 +241,12 @@ button{font-family:inherit}
 .card:hover .hd.hov,.card.sel .hd.hov{opacity:1;pointer-events:auto}
 .hd.brs{position:absolute}
 .ph .hd.hov{opacity:0}.ph .card.sel .hd.hov{opacity:1}
-/* ---------- the dock: Loam's shelf and tabs ---------- */
+/* ---------- the dock: now only the two relate slots, shown while they are open ---------- */
 .dock{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);width:min(calc(100vw - 440px),900px);min-width:min(94vw,560px);background:var(--lk-card);border:2px solid var(--lk-line);border-radius:22px;box-shadow:0 5px 0 var(--lk-line),0 18px 40px rgba(0,0,0,.14);padding:8px 10px 4px;z-index:8;transition:transform .3s cubic-bezier(.3,1.5,.5,1)}
-.srow{display:flex;align-items:center;gap:8px;margin-bottom:6px;position:relative}
-.srow .si{position:absolute;left:11px;top:50%;margin-top:-9px;width:18px;height:18px;color:var(--lk-mute);pointer-events:none}
-.srow .si svg{width:18px;height:18px}
-.srow .cnt{font:800 11px Nunito;color:var(--lk-mute);flex:none;white-space:nowrap}
-#q{flex:1;min-width:0;border:2px solid var(--lk-line);border-radius:12px;background:var(--lk-paper);padding:8px 12px 8px 36px;font:700 15px Nunito,system-ui;color:var(--lk-ink);outline:none;transition:border-color .2s,background .2s;user-select:text;-webkit-user-select:text}
-#q:focus{border-color:var(--lk-accent);background:var(--lk-card)}
-.tabs{display:flex;gap:2px;align-items:center;margin-bottom:0;overflow-x:auto;scrollbar-width:none}
-.tabs::-webkit-scrollbar{display:none}
-.tabs .lk-tab{flex:none;display:flex;align-items:center;gap:5px;padding:6px 8px}
-.tabs .lk-tab i{width:9px;height:9px;border-radius:50%;background:var(--ac);display:inline-block;flex:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--ac) 25%,transparent)}
-.tabs .lk-tab.off{opacity:.45}.tabs .lk-tab.off i{background:transparent;box-shadow:inset 0 0 0 2px var(--ac)}
-.shelf{display:flex;gap:8px;overflow-x:auto;padding:10px 6px 8px;scrollbar-width:none;min-height:84px;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 14px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 14px),transparent 100%)}
-.shelf::-webkit-scrollbar{display:none}
-.shelf .none .rs-l{font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;margin-right:6px}.shelf .none .link-quiet{background:none;border:0;padding:0 6px;font:inherit;font-size:12px;color:var(--lk-faint);text-decoration:underline;cursor:pointer}.shelf .none .link-quiet:hover{color:var(--lk-ink)}
-.shelf .none{padding:14px 12px;color:var(--lk-faint);font-weight:700;font-size:13.5px;line-height:1.9;white-space:nowrap}
-.res{position:relative;flex:0 0 236px;height:70px;border-radius:16px;border:2px solid transparent;background:transparent;padding:6px 8px 6px 18px;text-align:left;cursor:grab;color:var(--lk-ink);
-  transition:transform .18s cubic-bezier(.3,1.7,.5,1),background .15s;touch-action:pan-x;overflow:hidden}
+.res{position:relative;list-style:none;min-height:62px;border-radius:16px;border:2px solid transparent;background:transparent;padding:6px 8px 6px 18px;text-align:left;cursor:grab;color:var(--lk-ink);
+  transition:transform .18s cubic-bezier(.3,1.7,.5,1),background .15s;touch-action:pan-y;overflow:hidden;user-select:none;-webkit-user-select:none}
 .res::before{content:"";position:absolute;left:5px;top:8px;bottom:8px;width:6px;border-radius:4px;background:var(--ac)}
-.res:hover{transform:translateY(-5px) scale(1.04) rotate(-1deg);background:var(--lk-hover);border-color:var(--lk-line)}
+.res:hover,.res.act{background:var(--lk-hover);border-color:var(--lk-line)}.res.act{outline:2px solid var(--lk-accent);outline-offset:-2px}
 .res.on{background:var(--lk-accent-soft);border-color:var(--lk-line)}
 .res .n{font:400 16px/1.15 "Lilita One",system-ui;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:18px}
 .res .y{font:800 11px/1.4 Nunito;color:var(--lk-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:5px}.res .y .ac{flex:none}
@@ -336,22 +318,17 @@ button{font-family:inherit}
 .ph .top .xtra{display:none}.ph .top.more .xtra{display:inline-grid}
 .ph .zoombar{left:8px;top:54px}
 .ph .dock{left:8px;right:8px;width:auto;min-width:0;transform:none;bottom:calc(8px + env(safe-area-inset-bottom));padding:4px 6px;border-radius:16px}
-.shelfoff .dock{transform:translate(-50%,calc(100% + 40px))}.ph.shelfoff .dock{transform:translateY(calc(100% + 40px))}
-.ph .tabs .lk-tab{padding:5px 7px;font-size:12px}.ph #q{padding:6px 8px 6px 32px;font-size:16px}.ph .srow{margin-bottom:3px}
-.ph .shelf{padding:8px 4px 4px;min-height:64px}.ph .res{flex-basis:200px;height:60px;padding-top:4px}
-.ph #info{left:8px;right:8px;top:auto;width:auto;bottom:calc(var(--dock-h,130px) + 20px + env(safe-area-inset-bottom));max-height:min(44vh,calc(100vh - var(--dock-h,130px) - 120px))}
-.ph.shelfoff #info{bottom:calc(16px + env(safe-area-inset-bottom));max-height:60vh}
-.shelfoff #info{max-height:calc(100vh - 90px)}
+.ph #info{left:8px;right:8px;top:auto;width:auto;bottom:calc(16px + env(safe-area-inset-bottom));max-height:min(44vh,calc(100vh - 140px))}
+.ph.rzopen #info{bottom:calc(var(--dock-h,130px) + 20px + env(safe-area-inset-bottom));max-height:min(44vh,calc(100vh - var(--dock-h,130px) - 120px))}
 .ph #mini{display:none!important}.ph #zIn,.ph #zOut{display:none}
-.ph #hint{font-size:21px;top:34%}.ph #hint small{font-size:12.5px}
 .ph .hd{height:30px;min-width:30px;font-size:12px}.ph .hd.rm,.ph .hd.op,.ph .hd.rl{width:28px;min-width:28px;height:28px}
 .ph .hd.up,.ph .hd.upall{top:-30px}.ph .hd.dn,.ph .hd.dnall{bottom:-30px}.ph .hd.sp{left:-30px;margin-top:-15px}.ph .hd.rm{right:-30px;top:-14px}.ph .hd.op{right:-30px;bottom:-14px}.ph .hd.rl{left:-30px;top:-14px}
 .ph #pop{left:8px!important;right:8px;width:auto;top:auto!important;bottom:130px}
 @media (max-width:1100px){.dock{width:94vw;min-width:0}}
 @media (prefers-reduced-motion:reduce){.card.pop .cb,.card.pulse .cb,#info.on,#pop.on{animation:none}.cb{transition:none}#edges .pathline{animation:none;stroke-dashoffset:0}}
 .ph #bMore{display:inline-grid!important}
-/* short windows (a laptop with the browser's own chrome, a small pane): a lower shelf so the canvas keeps room */
-@media (max-height:620px){.dock{bottom:8px}.shelf{min-height:0;padding:6px 6px 4px}.res{height:60px;padding-top:4px}.shelf .none{padding:6px 12px;line-height:1.4}}
+/* short windows (a laptop with the browser's own chrome, a small pane): a lower dock so the canvas keeps room */
+@media (max-height:620px){.dock{bottom:8px}}
 
 /* the relate zone: drop two people in, the whole path between them is drawn */
 #rz{position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:6;display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--lk-card);border:2px solid var(--lk-line);border-radius:22px;box-shadow:0 4px 0 var(--lk-line),0 12px 26px rgba(0,0,0,.12);max-width:calc(100vw - 600px)}
@@ -711,10 +688,10 @@ html:not(.ph):has(#info.on) #playBar{left:calc((100vw - 340px) / 2);width:min(64
 
 /* the side pane's tabs hang off its left edge, in the same style as the collapse handle: small vertical tabs stacked under it, no column of their own (the phone keeps its row of tabs along the top of the sheet) */
 html:not(.ph) #info{overflow:visible}
-html:not(.ph) #info .ih{position:absolute;left:-26px;top:108px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;width:auto;padding:0;border:0;background:transparent;overflow:visible;cursor:auto;touch-action:auto;-webkit-mask-image:none!important;mask-image:none!important}
-html:not(.ph) #info .ih .lk-tab{writing-mode:vertical-rl;text-orientation:mixed;width:24px;padding:12px 0;border:2px solid var(--lk-line);border-right:0;border-radius:12px 0 0 12px;background:var(--lk-paper);color:var(--lk-mute);font:800 12px/1 Nunito,system-ui;white-space:nowrap;text-align:center;box-shadow:-2px 2px 0 var(--lk-line);flex:none}
+html:not(.ph) #info .ih{position:absolute;left:-28px;top:108px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;width:auto;padding:0;border:0;background:transparent;overflow:visible;cursor:auto;touch-action:auto;-webkit-mask-image:none!important;mask-image:none!important}
+html:not(.ph) #info .ih .lk-tab{writing-mode:vertical-rl;text-orientation:mixed;width:26px;padding:12px 0;border:2px solid var(--lk-line);border-right:0;border-radius:12px 0 0 12px;background:var(--lk-paper);color:var(--lk-mute);font:800 13px/1 Nunito,system-ui;white-space:nowrap;text-align:center;box-shadow:-2px 2px 0 var(--lk-line);flex:none}
 html:not(.ph) #info .ih .lk-tab:hover{background:var(--lk-accent-soft);color:var(--lk-accent)}
-html:not(.ph) #info .ih .lk-tab.on{width:28px;background:var(--lk-card);color:var(--lk-ink);margin-right:-2px;padding-right:2px;box-shadow:-2px 2px 0 var(--lk-line)}
+html:not(.ph) #info .ih .lk-tab.on{width:30px;background:var(--lk-card);color:var(--lk-ink);margin-right:-2px;padding-right:2px;box-shadow:-2px 2px 0 var(--lk-line)}
 html:not(.ph) #info .ih span,html:not(.ph) #info .ih .lk-tab[data-tab="close"]{display:none}
 html:not(.ph):has(#info.on) #infoTab{top:92px;transform:none}
 
@@ -767,11 +744,7 @@ html:not(.ph):has(#info.on) #namesCap{left:calc((100vw - 340px) / 2)}
 
 #lanehead .tt .tg{pointer-events:all;cursor:pointer}#lanehead .tt .tg:hover .tomb,#lanehead .tt .tg:focus-visible .tomb{fill:#FFF3E0;stroke-width:2.6}#lanehead .tt .tg:focus-visible{outline:none}
 
-/* the search button floats at the bottom right, see-through until it is pointed at; it follows the side panel's edge and, on a phone, sits above the search shelf */
-#bShelf{position:fixed;right:16px;bottom:16px;z-index:9;background:rgba(255,255,255,.38);border-color:rgba(31,37,48,.14);box-shadow:none;color:var(--lk-ink);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);opacity:.8;transition:background .15s,opacity .15s,right .2s}
-#bShelf:hover,#bShelf:focus-visible{background:var(--lk-card);opacity:1;border-color:var(--lk-accent)}
-html:not(.ph):has(#info.on) #bShelf{right:356px}
-.ph #bShelf{right:10px;bottom:calc(var(--dock-h,130px) + 12px)}.ph.shelfoff #bShelf{bottom:calc(14px + env(safe-area-inset-bottom))}
+/* (the search button that floated at the bottom right is gone: Find is a tab in the side panel and a button in the toolbar) */
 
 /* the two relate slots stay out of the way until the how-are-they-related button opens them */
 html:not(.rzopen) #rz{display:none}
@@ -1076,12 +1049,250 @@ button.prbey.go{background:transparent;cursor:pointer;padding:1px 7px;color:var(
 .prent.maybe em{font:800 10.5px Nunito,system-ui;color:var(--lk-ink);margin-right:2px}
 .prdup{margin:2px 0}
 .pralt .cmpc{margin:2px 0;gap:2px}
+
+/* View, the Fan and the Trail band. Its own file (after style.css) so it is not lost when style.css is edited elsewhere. Every colour is a --lk-* token of the look, so Sticker, Paper, Ground, Lanes and Countries all read. */
+#bLens[hidden]{display:none}
+html{--tr-soft:color-mix(in srgb,var(--lk-ink) 86%,var(--lk-card))}   /* the kit's soft ink is too faint for small print in the dark look; this is the ink, a little softened (tested at 4.5:1 on the card, test/test-fan-contrast.js) */
+/* the View menu */
+#lensMenu{display:none;position:fixed;top:64px;right:12px;z-index:40;width:318px;max-width:calc(100vw - 24px);box-sizing:border-box;background:var(--lk-card);color:var(--lk-ink);border:2px solid var(--lk-ink);border-radius:16px;box-shadow:0 5px 0 var(--lk-line),0 14px 30px rgba(0,0,0,.18);padding:12px 14px 14px}
+#lensMenu.on{display:block}
+#lensMenu h4{margin:0 0 4px}
+.lvi{all:unset;box-sizing:border-box;display:flex;gap:10px;align-items:flex-start;width:100%;margin:6px 0;padding:8px 10px;border:2px solid var(--lk-line);border-radius:12px;cursor:pointer;color:var(--lk-ink)}
+.lvi:hover{border-color:var(--lk-accent)}.lvi:focus-visible{outline:3px solid var(--lk-accent);outline-offset:2px}
+.lvi .lvd{flex:none;width:16px;height:16px;margin-top:2px;border-radius:50%;border:2px solid var(--lk-ink)}
+.lvi.on{border-color:var(--lk-accent);background:var(--lk-accent-soft)}
+.lvi.on .lvd{background:radial-gradient(circle,var(--lk-ink) 0 42%,transparent 46%)}
+.lvi b{display:block;font:800 13.5px/1.2 Nunito,system-ui}
+.lvi small{display:block;margin-top:2px;font:700 11.5px/1.3 Nunito,system-ui;color:var(--tr-soft)}
+.lvi[disabled]{opacity:.55;cursor:not-allowed}
+.lvsoon{font-style:normal;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;background:var(--lk-line);color:var(--lk-ink);border-radius:8px;padding:1px 6px;margin-left:4px;vertical-align:1px}
+#lensMenu .lk-toggle{margin-top:10px}
+.ph #lensMenu{top:auto;bottom:calc(var(--dock-h,130px) + 16px);left:8px;right:8px;width:auto}
+
+/* the Fan: it sits in the canvas's own world, so pan, zoom and Fit work on it; the cards are only hidden while it is open */
+body.vwfan #cards,body.vwfan #edges,body.vwfan #genbands,body.vwfan #lanes,body.vwfan #lanehead,body.vwfan #namesview,body.vwfan #mini,body.vwfan #pairs,body.vwfan #start,body.vwfan #markBar,body.vwfan #playBar{display:none!important}
+body.vwlist #fan{display:none}
+#fan{position:absolute;left:0;top:0;overflow:visible}
+#fan .fw path{stroke:var(--lk-board);stroke-width:2;stroke-linejoin:round;cursor:pointer;transition:filter .12s}
+#fan .fw:hover path{filter:brightness(1.08) saturate(1.12)}
+#fan .fw:focus{outline:none}
+#fan .fw.sel path{stroke:var(--lk-accent);stroke-width:4}
+#fan .ctr path{stroke:var(--lk-ink);stroke-width:2.5;cursor:default}
+#fan .nk{fill:none;stroke:var(--lk-faint);stroke-width:1.4;stroke-dasharray:5 5;opacity:.8;pointer-events:none}
+#fan .ffr{fill:none;stroke:var(--lk-ink);stroke-width:5;stroke-linejoin:round;pointer-events:none;display:none}
+#fan .ffr.on{display:block}
+#fan .fl{font-family:Nunito,"Segoe UI",system-ui,sans-serif;font-weight:700;pointer-events:none;user-select:none;-webkit-user-select:none}
+#fanBar{position:fixed;left:50%;top:60px;transform:translateX(-50%);z-index:7;max-width:calc(100vw - 150px);display:flex;flex-direction:column;gap:6px;align-items:center}
+html:not(.ph):has(#info.on) #fanBar{left:calc((100vw - 340px) / 2);max-width:calc(100vw - 500px)}
+#fanBar[hidden]{display:none}
+.fbrow,.fbcame{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;justify-content:center;background:var(--lk-card);color:var(--lk-ink);border:2px solid var(--lk-line);border-radius:16px;box-shadow:0 3px 0 var(--lk-line);padding:6px 10px}
+.fbcame{border-color:var(--lk-accent);font:800 12.5px/1.3 Nunito,system-ui;gap:6px 12px}
+.fbt{display:flex;flex-direction:column;line-height:1.15}.fbt b{font:400 16px "Lilita One",Impact,system-ui}.fbt small{font:700 11px Nunito,system-ui;color:var(--tr-soft)}
+.fbg{display:inline-flex;align-items:center;gap:2px;border:2px solid var(--lk-line);border-radius:99px;padding:2px}
+.fbs{font:800 12px/1 Nunito,system-ui;border:0;background:transparent;color:var(--lk-ink);border-radius:99px;padding:7px 11px;cursor:pointer;white-space:nowrap}
+.fbs small{font:800 10px Nunito;color:inherit;opacity:.8;margin-left:3px}
+.fbs:hover{background:var(--lk-accent-soft)}.fbs:focus-visible{outline:3px solid var(--lk-accent);outline-offset:1px}
+.fbs.on{background:var(--lk-ink);color:var(--lk-card)}
+.fbs[disabled]{opacity:.4;cursor:default;pointer-events:none}
+.fbc{border:2px solid var(--lk-ink)}
+.fbn{font:800 12px Nunito,system-ui;padding:0 4px;min-width:84px;text-align:center}
+.fbx{all:unset;cursor:pointer;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;color:var(--lk-ink)}.fbx svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round}.fbx:focus-visible{outline:3px solid var(--lk-accent)}
+.ph #fanBar{top:106px;left:8px;right:8px;transform:none;max-width:none}.ph .fbrow{justify-content:flex-start}
+#fanLegend{position:fixed;left:16px;bottom:calc(var(--dock-h,130px) + 22px);z-index:6;display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;max-width:min(520px,calc(100vw - 32px));padding:7px 12px;border:2px solid var(--lk-line);border-radius:14px;background:var(--lk-card);color:var(--lk-ink);box-shadow:0 3px 0 var(--lk-line);font:800 11.5px Nunito,system-ui}
+#fanLegend[hidden]{display:none}
+.fli{display:inline-flex;align-items:center;gap:5px}.fli i{display:inline-block;width:14px;height:14px;border-radius:4px;border:1.5px solid var(--lk-ink)}.fli.fgr i{width:48px}.fli .fnk,.fli i.fnk{background:transparent;border:1.5px dashed var(--lk-faint)}.fli b{color:var(--tr-soft)}
+.ph #fanLegend{left:8px;right:8px;font-size:10.5px;bottom:calc(var(--dock-h,96px) + 14px)}
+#fanTip{display:none;position:fixed;z-index:60;pointer-events:none;max-width:270px;padding:8px 11px;border:2px solid var(--lk-ink);border-radius:12px;background:var(--lk-card);color:var(--lk-ink);box-shadow:0 4px 0 var(--lk-line),0 10px 22px rgba(0,0,0,.2);font:700 12px/1.35 Nunito,system-ui}
+#fanTip.on{display:block}
+#fanTip .ftn{font:400 16px/1.15 "Lilita One",Impact,system-ui}#fanTip .ftk{color:var(--tr-soft);margin-bottom:3px}#fanTip .ftx{margin-top:4px;color:var(--tr-soft);font-size:11px}#fanTip .fl{height:11px;vertical-align:-1px;margin-right:4px}
+#fanList{position:fixed;z-index:6;left:50%;transform:translateX(-50%);top:122px;bottom:calc(var(--dock-h,130px) + 22px);width:min(760px,calc(100vw - 32px));overflow:auto;box-sizing:border-box;padding:14px 18px 18px;background:var(--lk-card);color:var(--lk-ink);border:2px solid var(--lk-line);border-radius:18px;box-shadow:0 3px 0 var(--lk-line);user-select:text;-webkit-user-select:text}
+html:not(.ph):has(#info.on) #fanList{left:calc((100vw - 340px) / 2)}
+#fanList[hidden]{display:none}
+#fanList h3{margin:0 0 6px;font:400 20px "Lilita One",Impact,system-ui}
+#fanList h4{margin:14px 0 4px;font:900 13px Nunito,system-ui;letter-spacing:.02em}#fanList h4 small{font-weight:700;color:var(--tr-soft);margin-left:6px}
+#fanList ol{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+#fanList button{all:unset;box-sizing:border-box;display:block;width:100%;padding:6px 10px 6px 12px;border-left:8px solid var(--fc);border-radius:8px;background:color-mix(in srgb,var(--lk-line) 35%,var(--lk-card));cursor:pointer;font:700 13px/1.35 Nunito,system-ui;color:var(--lk-ink)}
+#fanList button:hover{background:var(--lk-accent-soft)}#fanList button:focus-visible{outline:3px solid var(--lk-accent);outline-offset:1px}#fanList button.on{outline:3px solid var(--lk-accent);outline-offset:-1px}
+#fanList .flk{display:block;font:800 11px Nunito;color:var(--tr-soft);text-transform:capitalize}#fanList .flk small{text-transform:none;font-weight:700}#fanList .fly{color:var(--tr-soft)}#fanList .flp{color:var(--tr-soft)}#fanList .flp::before{content:"\00b7 "}
+
+/* the Trail band: the bottom-most thing on the canvas, along the very bottom edge. Whatever else sits at the bottom (the relate dock, the little map, the buttons over it, the menus that open upward) is lifted by its height, --trail-h, which viewsui.js keeps up to date (and --dock-h includes it).
+   Open, it is the direct line as big cards in a row with the focus person's places fanning out to the right; folded, it is one slim line, a handle. */
+html{--trail-h:0px;--tr-link:#9C3B28}
+#trail{--trs:1;position:fixed;left:0;right:0;bottom:0;z-index:7;box-sizing:border-box;background:var(--lk-card);color:var(--lk-ink);border-top:2px solid var(--lk-line);box-shadow:0 -6px 18px rgba(0,0,0,.09);padding:8px 18px calc(8px + env(safe-area-inset-bottom))}
+#trail[hidden]{display:none}
+html:not(.ph):has(#info.on) #trail{right:340px}
+[data-theme="names"] #trail,body.pr #trail,body.vwfan #trail{display:none}
+html.ph:has(#info.on) #trail{display:none}
+.ph #trail{--trs:.66;padding:6px 10px calc(6px + env(safe-area-inset-bottom))}
+#trail[data-size="0"]{padding:0 0 env(safe-area-inset-bottom)}
+/* what rides above the band */
+.dock{bottom:calc(16px + var(--trail-h,0px))}
+.ph .dock{bottom:calc(8px + env(safe-area-inset-bottom) + var(--trail-h,0px))}
+@media (max-height:620px){.dock{bottom:calc(8px + var(--trail-h,0px))}}
+#mini{bottom:calc(16px + var(--trail-h,0px))}
+.ph #info{bottom:calc(16px + env(safe-area-inset-bottom))}   /* the Trail band is folded away on a phone while the panel is open, so the sheet stands on the edge */.ph.rzopen #info{bottom:calc(var(--dock-h,130px) + 20px + env(safe-area-inset-bottom))}
+#playBar{bottom:calc(230px + var(--trail-h,0px))}
+#prLegend,.trlift{margin-bottom:var(--trail-h,0px)}
+/* the handle */
+.trtab{display:flex;align-items:center;gap:9px;width:100%;box-sizing:border-box;min-height:38px;padding:0 18px;border:0;background:transparent;color:var(--lk-ink);font:800 13px/1 Nunito,system-ui;cursor:pointer;text-align:left}
+.trtab .trhi{width:17px;height:17px}.trtab .trtl{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:400 15px "Lilita One",Impact,system-ui}.trtab .trtl i{font-style:normal;color:var(--tr-soft);margin:0 2px}.trtab .trtl b{font:800 13px Nunito,system-ui;color:var(--tr-soft)}
+.trtab .trch{margin-left:auto;padding-left:10px;font-size:15px;color:var(--lk-ink)}
+.trtab:hover{background:var(--lk-hover)}.trtab:focus-visible{outline:3px solid var(--lk-accent);outline-offset:-4px}
+/* the open band */
+.trhead{display:flex;align-items:center;gap:6px 14px;flex-wrap:wrap;margin-bottom:4px}
+.trt{font:400 18px "Lilita One",Impact,system-ui}.trt small{font:800 13px Nunito,system-ui;color:var(--tr-soft);margin-left:8px}
+.trsz{margin-left:auto}.trsz .fbs{padding:6px 11px}
+.trbody{display:flex;align-items:center;gap:8px;overflow-x:auto;overflow-y:hidden;padding:6px 4px 9px;scrollbar-width:thin;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.trline{display:flex;align-items:stretch;list-style:none;margin:0;padding:0;flex:none}
+.trline>li{display:flex;align-items:stretch}
+.trline>li+li::before{content:"";align-self:center;width:calc(26px*var(--trs));height:3px;border-radius:2px;background:var(--tr-link);opacity:.4;flex:none}
+.trline>li.mv::before{opacity:1;height:4px}
+.trc{display:flex;flex-direction:column;align-items:flex-start;gap:calc(3px*var(--trs));box-sizing:border-box;width:calc(228px*var(--trs));min-height:calc(158px*var(--trs));padding:calc(10px*var(--trs)) calc(14px*var(--trs)) calc(11px*var(--trs));border:2px solid var(--lk-line);border-radius:16px;background:var(--lk-card);color:var(--lk-ink);text-align:left;cursor:pointer;font-family:inherit;box-shadow:0 2px 0 var(--lk-line);user-select:none;-webkit-user-select:none}
+.trc:hover{border-color:var(--lk-accent)}.trc:focus-visible{outline:3px solid var(--lk-accent);outline-offset:2px}
+.trc.est{border-style:dashed}
+.trc.endc{border-color:var(--lk-faint);background:color-mix(in srgb,var(--lk-line) 28%,var(--lk-card))}
+.trc.foc{width:calc(248px*var(--trs));border-color:var(--lk-accent);background:color-mix(in srgb,var(--lk-accent-soft) 80%,var(--lk-card));box-shadow:0 2px 0 var(--lk-accent),0 0 0 3px var(--lk-accent-soft)}
+.trtop{display:flex;align-items:center;gap:calc(8px*var(--trs));width:100%;min-width:0}
+.trg{font:800 calc(11px*max(var(--trs),.9))/1.2 Nunito,system-ui;letter-spacing:.16em;color:var(--tr-soft);white-space:nowrap}
+.trhi{width:calc(24px*max(var(--trs),.8));height:calc(24px*max(var(--trs),.8));flex:none;stroke:var(--tr-soft);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.trfl{margin-left:auto;display:inline-flex;align-items:center;flex:none}.trfl .fl{height:calc(16px*max(var(--trs),.8))}
+.trp{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;min-width:0;max-width:100%;font:400 calc(25px*max(var(--trs),.7))/1.08 "Lilita One",Impact,system-ui;letter-spacing:.01em;text-wrap:balance;overflow-wrap:anywhere;margin-top:calc(4px*var(--trs))}
+.trp sup{font-size:.7em;line-height:0;color:var(--tr-soft);margin-left:1px}
+.mute,.trp.mute{display:block;font:700 calc(12px*max(var(--trs),.9))/1.3 Nunito,system-ui;font-style:italic;color:var(--tr-soft);letter-spacing:0;margin-top:calc(4px*var(--trs))}
+.try{font:900 calc(16px*max(var(--trs),.85))/1.2 Nunito,system-ui;color:var(--lk-ink);margin-top:auto}.try.mute{font-style:normal;margin-top:auto}
+.trn{max-width:100%;font:800 calc(13px*max(var(--trs),.9))/1.25 Nunito,system-ui;color:var(--tr-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.trn i{font-style:normal;font-weight:700;margin-left:3px}
+.trstub{box-sizing:border-box;width:calc(180px*var(--trs));min-height:calc(158px*var(--trs));padding:calc(10px*var(--trs)) calc(14px*var(--trs));border:2px dashed var(--lk-faint);border-radius:16px;display:flex;flex-direction:column;gap:calc(4px*var(--trs));color:var(--tr-soft)}
+.trmoreg{align-self:center;font:800 12px Nunito,system-ui;color:var(--tr-soft);padding:0 8px}
+.trcap{margin:0;padding:0 4px;font:700 12px/1.35 Nunito,system-ui;color:var(--tr-soft)}
+.ph .trcap{display:none}
+/* the short form: one line of pills */
+#trail[data-size="1"] .trc{width:auto;min-height:0;flex-direction:row;align-items:baseline;gap:7px;padding:5px 12px;border-radius:99px}
+#trail[data-size="1"] .trtop{display:contents}#trail[data-size="1"] .trhi,#trail[data-size="1"] .trfl,#trail[data-size="1"] .trstub .trn,#trail[data-size="1"] .trcap{display:none}
+#trail[data-size="1"] .trp{display:none}#trail[data-size="1"] .try{margin-top:0}#trail[data-size="1"] .trstub{width:auto;min-height:0;padding:5px 12px;border-radius:99px;flex-direction:row;gap:6px}
+#trail[data-size="1"] .trc.foc{width:auto}
+#trail[data-size="1"] .trline>li+li::before{width:12px;height:2px}
+/* where this life went: curves from the focus card to a column of dots, each with its flag, place and the number of events; a single event is dotted */
+.trpl{display:flex;align-items:center;flex:none;margin-left:2px}
+.trsvg{flex:none;overflow:visible}.trsvg path{fill:none;stroke:var(--tr-link);stroke-linecap:round;opacity:.9}.trsvg path.one{stroke-dasharray:.5 5}.trsvg circle{fill:var(--tr-link)}
+.trpl ul{list-style:none;margin:0;padding:0;min-width:196px}
+.trpl li{display:flex;align-items:center;gap:7px;font:800 14px/1 Nunito,system-ui}
+.trpl li a{color:var(--lk-ink);text-decoration:underline dotted 1.5px;text-underline-offset:3px;white-space:nowrap}.trpl li a:hover,.trpl li a:focus-visible{color:var(--lk-accent)}
+.trpl li b{margin-left:auto;padding-left:10px;font:900 13.5px Nunito,system-ui;color:var(--lk-ink)}
+.trpl li .fl{height:13px;flex:none}
+.trpl .trmore{color:var(--tr-soft);font-weight:700}
+.trpl.none p{margin:0 0 0 10px;font:700 12.5px/1.35 Nunito,system-ui;color:var(--tr-soft);width:240px;white-space:normal}
+.ph .trpl ul{min-width:150px}.ph .trpl li{font-size:12.5px}
+/* the note that opens upward from a place in the band, above the band's own edge, never over its controls */
+#trailTip{position:fixed;z-index:9;display:none;max-width:min(300px,calc(100vw - 16px));box-sizing:border-box;padding:8px 12px;border-radius:12px;background:var(--lk-pop-bg,var(--lk-card));color:var(--lk-pop-ink,var(--lk-ink));border:2px solid var(--lk-line);box-shadow:0 6px 18px rgba(0,0,0,.22);font:700 12.5px/1.4 Nunito,system-ui;pointer-events:none}
+#trailTip.on{display:block}#trailTip b{font:400 16px/1.15 "Lilita One",Impact,system-ui;display:block;margin-bottom:2px}#trailTip .fl{height:12px;vertical-align:-1px;margin-right:5px}
+@media (prefers-reduced-motion:reduce){#fan .fw path{transition:none}}
+
+/* ---------- Find: the search tab in the side panel, and the centred search on an empty canvas (findui.js) ---------- */
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+/* the dock is only the relate slots now: it is there while they are open */
+html:not(.rzopen) .dock{display:none}
+
+.fv{display:flex;flex-direction:column;min-height:0;position:relative}
+.fv-row{display:flex;gap:6px;align-items:center}
+.fv-box{position:relative;flex:1;min-width:0}
+.fv-si{position:absolute;left:11px;top:50%;margin-top:-9px;width:18px;height:18px;color:var(--lk-mute);pointer-events:none}
+.fv-si svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.fv-q{width:100%;box-sizing:border-box;border:2px solid var(--lk-line);border-radius:12px;background:var(--lk-paper);padding:8px 10px 8px 36px;font:700 14.5px Nunito,system-ui;color:var(--lk-ink);outline:none;transition:border-color .2s,background .2s;user-select:text;-webkit-user-select:text;-webkit-appearance:none;appearance:none}
+.fv-q:focus{border-color:var(--lk-accent);background:var(--lk-card)}
+.fv-q:focus-visible{outline:3px solid var(--lk-accent);outline-offset:1px}
+.fv-q::-webkit-search-cancel-button{cursor:pointer}
+/* the one button for the archives: it says how many are being searched, and opens the ticks */
+.fv-arch{flex:none;display:inline-flex;align-items:center;gap:4px;border:2px solid var(--lk-line);border-radius:12px;background:var(--lk-card);color:var(--lk-ink);padding:7px 9px;font:800 11.5px Nunito,system-ui;cursor:pointer;white-space:nowrap;box-shadow:0 1.5px 0 var(--lk-line)}
+.fv-arch:hover,.fv-arch[aria-expanded=true]{border-color:var(--lk-accent)}
+.fv-arch:focus-visible{outline:3px solid var(--lk-accent);outline-offset:1px}
+.fv-arch.some{background:var(--lk-accent-soft)}
+.fv-arch[hidden]{display:none}
+.fv-car{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}
+.fv-arch[aria-expanded=true] .fv-car{transform:rotate(180deg)}
+.fv-menu{margin:8px 0 0;padding:8px;border:2px solid var(--lk-line);border-radius:14px;background:var(--lk-paper)}
+.fv-menu[hidden]{display:none}
+.fv-mh{display:flex;gap:6px;margin-bottom:6px}
+.fv-mb{border:1.5px solid var(--lk-line);border-radius:99px;background:var(--lk-card);color:var(--lk-ink);padding:3px 12px;font:800 11.5px Nunito,system-ui;cursor:pointer}
+.fv-mb[aria-pressed=true]{background:var(--lk-ink);color:var(--lk-card);border-color:var(--lk-ink)}
+.fv-mb:focus-visible{outline:3px solid var(--lk-accent);outline-offset:1px}
+.fv-mg{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px}
+.fv-mi{display:flex;align-items:center;gap:7px;padding:5px 6px;border-radius:9px;font:800 12.5px Nunito,system-ui;color:var(--lk-ink);cursor:pointer;min-width:0}
+.fv-mi:hover{background:var(--lk-hover)}
+.fv-mi input{accent-color:var(--lk-accent);margin:0;width:15px;height:15px;flex:none}
+.fv-mi i{flex:none;width:11px;height:11px;border-radius:50%;background:var(--ac);box-shadow:0 0 0 2px color-mix(in srgb,var(--ac) 25%,transparent)}
+.fv-mi span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fv-mi:focus-within{outline:2px solid var(--lk-accent)}
+.fv-help{margin:10px 0 0;text-align:center;font:800 14px Nunito,system-ui;color:var(--lk-soft)}
+.fv-help[hidden]{display:none}
+.fv-recent{margin:10px 0 0;font-weight:700;font-size:13px;color:var(--lk-faint);line-height:2}
+.fv-recent[hidden]{display:none}
+.fv-recent .rs-l{font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;margin-right:6px}
+.fv-recent .lk-btn{margin:0 2px 2px 0}
+.fv-recent .link-quiet{background:none;border:0;padding:0 6px;font:inherit;font-size:12px;color:var(--lk-soft);text-decoration:underline;cursor:pointer}.fv-recent .link-quiet:hover{color:var(--lk-ink)}
+.fv-list{list-style:none;margin:8px 0 0;padding:0 0 6px;display:flex;flex-direction:column;gap:4px;overflow-y:auto;min-height:0;flex:1 1 auto;scrollbar-width:thin;touch-action:pan-y}
+.fv-list[hidden]{display:none}
+.fv-list .res{flex:none}
+.fv-list .res .n{font-size:15.5px}
+.fv-list .res .y,.fv-list .res .e{white-space:normal}
+.fv-list .res .y{flex-wrap:wrap}
+.fv-note{margin:10px 2px 0;font:700 12.5px/1.45 Nunito,system-ui;color:var(--lk-soft)}
+.fv-note[hidden]{display:none}
+.fv-note.bad{color:var(--lk-ink)}
+/* in the pane, the tab fills the panel: the box stays put and the list scrolls */
+#info .ib.ibf{overflow:hidden;display:flex;flex-direction:column;padding-bottom:6px}
+#info .ib.ibf .fh{display:flex;flex-direction:column;min-height:0;flex:1}
+#info .ib.ibf .fv{flex:1}
+.ph #info.isfind{max-height:min(54vh,calc(100vh - 140px))}
+.ph.rzopen #info.isfind{max-height:min(54vh,calc(100vh - var(--dock-h,130px) - 120px))}
+.ph .fv-q{font-size:16px}
+
+/* the centred search: on a canvas with no one on it */
+#start{position:fixed;left:50%;top:max(110px,26vh);transform:translateX(-50%);z-index:4;width:min(600px,calc(100vw - 32px));pointer-events:none}
+#start[hidden]{display:none}
+#start .st-in{pointer-events:none;text-align:center}
+#start .st-in>*{pointer-events:auto}
+html:not(.ph):has(#info.on) #start{left:calc((100vw - 340px) / 2);width:min(600px,calc(100vw - 340px - 48px))}
+#stH{margin:0 0 14px;font:400 30px/1.15 "Lilita One",system-ui;color:var(--lk-ink)}
+#start .fv{text-align:left}
+#start .fv-q{padding:15px 14px 15px 46px;font-size:19px;border-radius:18px;border-width:2.5px;box-shadow:0 4px 0 var(--lk-line),0 14px 34px rgba(0,0,0,.10)}
+#start .fv-si{left:15px;margin-top:-11px;width:22px;height:22px}#start .fv-si svg{width:22px;height:22px}
+#start .fv-arch{padding:11px 12px;font-size:12.5px;border-radius:14px}
+#start .fv-menu{background:var(--lk-card)}
+#start .fv-recent{text-align:center}
+#start .fv-list{max-height:min(54vh,470px);background:var(--lk-card);border:2px solid var(--lk-line);border-radius:16px;padding:6px;box-shadow:0 3px 0 var(--lk-line);margin-top:12px}
+#start .fv-list[hidden]{display:none}
+#start .fv-note{text-align:center}
+#start .st-note{margin:12px auto 0;max-width:460px;font:700 13.5px/1.5 Nunito,system-ui;color:var(--lk-soft)}
+#start .st-note[hidden]{display:none}
+#start .st-ex{margin-top:16px}
+body.vwfan #start,body.pr #start,[data-theme="names"] #start{display:none}
+.ph #start{top:max(104px,16vh);width:calc(100vw - 20px)}
+.ph #stH{font-size:23px;margin-bottom:10px}
+.ph #start .fv-q{padding:12px 10px 12px 40px;font-size:16px;border-radius:15px}
+.ph #start .fv-si{left:12px}
+.ph #start .fv-list{max-height:38vh}
+@media (max-height:560px){#start{top:84px}#stH{font-size:22px;margin-bottom:8px}.st-ex{display:none}}
+@media (prefers-reduced-motion:reduce){.fv-car,.fv-q{transition:none}}
+
+/* the side panel's tab row on a phone: touch-sized (44px tall, 15px type), it scrolls sideways inside itself and snaps, the open tab is marked with a bar and kept in view, the close
+   button stays at the right edge. The words are never shrunk to make them fit: the row scrolls instead. */
+.ph #info .ih{flex:none;gap:4px;padding:6px 8px 0;scroll-snap-type:x proximity;scroll-padding:0 44px;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;align-items:stretch}
+.ph #info .ih .lk-tab{min-height:44px;padding:0 15px;font:800 15px/1 Nunito,system-ui;color:var(--lk-soft);border-radius:12px 12px 0 0;scroll-snap-align:center;display:inline-flex;align-items:center}
+.ph #info .ih .lk-tab.on{background:var(--lk-paper);color:var(--lk-ink);box-shadow:inset 0 -4px 0 var(--lk-accent)}
+.ph #info .ih .lk-tab[data-tab="close"]{position:sticky;right:0;min-width:44px;padding:0;justify-content:center;font-size:24px;font-weight:700;background:var(--lk-card);border-radius:12px}
+.ph #info .ih .lk-tab:focus-visible{outline:3px solid var(--lk-accent);outline-offset:-3px}
+
+/* the Find tab is the magnifying glass (the same icon as the toolbar's Find button); its name is "Find" for a screen reader and the hover text */
+.fvti{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;display:block;flex:none}
+html:not(.ph) #info .ih .lk-tab[data-tab="find"]{padding:12px 0;display:flex;align-items:center;justify-content:center}
+html:not(.ph) #info .ih .lk-tab[data-tab="find"] .fvti{width:16px;height:16px}
+.ph #info .ih .lk-tab[data-tab="find"]{min-width:48px;padding:0 12px;justify-content:center}
+.ph #info .ih .lk-tab[data-tab="find"] .fvti{width:20px;height:20px}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
 <div class="logo">TREE<b> CANVAS</b><small>prototype</small></div>
 <div class="zoombar"><button class="lk-ibtn" id="zIn" title="Zoom in" aria-label="Zoom in"></button><button class="lk-ibtn" id="zOut" title="Zoom out" aria-label="Zoom out"></button><button class="lk-ibtn" id="bFit" title="Fit everything in view (F)" aria-label="Fit to view"></button></div>
-<button class="lk-ibtn" id="bShelf" title="Show or hide the search shelf" aria-label="Search shelf" aria-pressed="true"></button>
 <div class="top">
   <button class="lk-ibtn" id="bRel" title="How are they related? Opens two slots: put one person in each" aria-label="How are they related"></button>
   <button class="lk-ibtn" id="bBlood" title="Bloodline: add blood relatives, remove the rest, or colour them differently" aria-label="Bloodline" aria-haspopup="true" aria-expanded="false"></button>
@@ -1089,22 +1300,26 @@ button.prbey.go{background:transparent;cursor:pointer;padding:1px 7px;color:var(
   <button class="lk-ibtn" id="bGen" title="Generations: numbered bands behind each row (I is the oldest)" aria-label="Generations" aria-pressed="false"></button>
   <button class="lk-ibtn" id="bArrange" title="Arrange: tidy every card on the canvas into one neat family tree" aria-label="Arrange"></button>
   <button class="lk-ibtn" id="bUndo" title="Undo (Ctrl/Cmd Z)" aria-label="Undo"></button>
+  <button class="lk-ibtn xtra" id="bFind" title="Find people: search every archive and drop them on the canvas (press /)" aria-label="Find people" aria-keyshortcuts="/"></button>
   <button class="lk-ibtn" id="bInfo" title="Side panel: person, where next, path" aria-label="Panel"></button>
   <button class="lk-ibtn xtra" id="bClear" title="Clear the canvas (Undo brings it back)" aria-label="Clear"></button>
   <button class="lk-ibtn" id="bFix" title="Fix list" aria-label="Fix list" hidden></button>
   <button class="lk-ibtn" id="bTheme" title="Look" aria-label="Look" hidden></button>
+  <button class="lk-ibtn" id="bLens" title="View: how the people are drawn" aria-label="View" aria-haspopup="true" aria-expanded="false" hidden></button>
   <button class="lk-ibtn" id="bMenu" title="Menu: how to read the lines, options" aria-label="Menu" aria-haspopup="true" aria-expanded="false"></button>
   <button class="lk-ibtn" id="bMore" title="More" aria-label="More" style="display:none"></button>
 </div>
 <div id="flagsprite" aria-hidden="true"></div>
-<div id="hint">Search anyone, from any archive, and drop them here
-  <small>Pull up their parents, all the way back, one generation at a time.<br>Press the &#8644; button to ask how two people are related.<br>Solid means read from a register; dashed means not proven; dotted means the archive records no grade.</small>
-  <div style="margin-top:14px;pointer-events:auto"><button class="lk-btn is-primary" id="exDemo">Show me an example</button></div></div>
+<section id="start" aria-label="Find someone to put on the canvas"><div class="st-in">
+  <h2 id="stH">Who are you looking for?</h2>
+  <div id="stBox"></div>
+  <p class="st-note" id="stNote" hidden></p>
+  <div class="st-ex"><button class="lk-btn is-small" id="exDemo" type="button">Show me an example</button></div></div></section>
 <div id="info" aria-live="polite"></div>
 <div id="pop"></div>
 <div id="mini" title="Click to move there"><canvas></canvas></div>
 <div id="toast" class="lk-toast"></div>
-<div class="dock"><div class="srow"><span class="si" id="si"></span><input id="q" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Search people"><span class="cnt" id="cnt"></span></div><div id="rz" aria-label="Relate two people"><div class="rzs" data-s="0" tabindex="0" role="button"></div><div class="rzm" title="Drop two people here and the whole path between them is drawn">&#8644;<small>how related</small></div><div class="rzs" data-s="1" tabindex="0" role="button"></div><div class="rzx"><span id="rzmsg"></span><button class="lk-btn is-small" id="rzClr" type="button">Clear</button></div></div><div class="tabs" id="tabs"></div><div class="shelf" id="shelf"></div></div>
+<div class="dock"><div id="rz" aria-label="Relate two people"><div class="rzs" data-s="0" tabindex="0" role="button"></div><div class="rzm" title="Drop two people here and the whole path between them is drawn">&#8644;<small>how related</small></div><div class="rzs" data-s="1" tabindex="0" role="button"></div><div class="rzx"><span id="rzmsg"></span><button class="lk-btn is-small" id="rzClr" type="button">Clear</button></div></div></div>
 <script type="application/json" id="corpus">null</script>
 <script type="application/json" id="lines">null</script>
 <script type="application/json" id="period">{
@@ -3179,6 +3394,375 @@ button.prbey.go{background:transparent;cursor:pointer;padding:1px 7px;color:var(
   const API = { scrollDelta, decisionInfo, walkFrom, personText, addPeople, fixItems, offerable, genLabel, groupByGen, archLines, contrast, ensure, lum, pair, layout, alternatives, dkey, judgeD, matchLists, placeholder, isPlaceholderName, statusInfo, statusHtml, statusIconHtml, byState };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCP = API;
 })(typeof window !== 'undefined' ? window : globalThis);
+
+/* views.js — the pure parts of the View button, the Trail band and the Fan. No DOM; tested by test/test-views.js (and, for colour, test/test-fan-contrast.js).
+ *
+ * THE TRAIL: one person's direct line (one ancestor a generation, through the fathers or through the mothers), and the places the person's own life touched.
+ * THE FAN: a person's ancestors as a half circle, rings = generations, a wedge = an ancestor, a faint outline where nobody is recorded. The geometry is in world
+ *   units, centre (0,0) at the middle of the base, angles measured counter-clockwise from the right-hand edge. A wedge's father-side is the left half.
+ * COLOUR means one true thing: which side (the father's side blue, the mother's side orange: a pair that stays apart for the common colour-blindnesses) with the
+ *   generation shown by how far the tint has faded toward the card; or, as a switch, the colour of the flag that flew over the birthplace that year. The text
+ *   colour on a wedge is chosen from the look's own ink, black or white, whichever reads at 4.5:1, so it always does.
+ * Nothing here stores or sends anything, and nothing about a living person is read except their name.
+ */
+(function (root) {
+  'use strict';
+
+  /* ---------------- small colour maths (WCAG relative luminance) ---------------- */
+  const hex2 = h => { h = String(h || '').replace('#', ''); if (h.length === 3) h = h.replace(/./g, c => c + c); const n = parseInt(h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+  const toHex = a => '#' + a.map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+  const lum = h => { const [r, g, b] = hex2(h).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+  const contrast = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+  /* t of `a` over `b` (t = 0 is b, t = 1 is a) */
+  const mix = (a, b, t) => { const x = hex2(a), y = hex2(b); return toHex(x.map((v, i) => y[i] + (v - y[i]) * t)); };
+  const isHex = s => typeof s === 'string' && /^#[0-9a-f]{3,6}$/i.test(s);
+  /* the text colour for a fill: the look's own ink if it reads at `min`, else black, else white (one of black and white always reaches 4.58:1) */
+  function inkFor(fill, ink, min) {
+    min = min || 4.5; const c = [ink, '#000000', '#ffffff'].filter(isHex);
+    for (const k of c) if (contrast(k, fill) >= min) return k;
+    return contrast('#000000', fill) >= contrast('#ffffff', fill) ? '#000000' : '#ffffff';
+  }
+
+  /* ---------------- the person, as the Trail and the Fan print them ---------------- */
+  const clean = s => String(s == null ? '' : s).replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim();
+  const isLiving = p => !!(p && (p.living || p.ghost && false));   /* a "ghost" is a named-only stand-in: no dates exist to show, but nothing private either */
+  const hidden = p => !!(p && p.living);                           /* a living person: the name and the family only */
+  const yearText = (y, est) => y == null ? '' : (est ? '~' : '') + y;
+  function lifeText(p) {   /* "~1884–1951", "1884–", "" */
+    if (!p || hidden(p) || p.ghost) return '';
+    const b = yearText(p.by, p.fl & 1), d = yearText(p.dy, p.fl & 2);
+    if (!b && !d) return '';
+    return (b || '?') + '–' + d;
+  }
+  const given1 = p => clean(p.given).split(' ')[0] || '';
+  const fullName = p => clean((p.given || '') + ' ' + (p.sur || '')) || '(no name recorded)';
+  const initial = s => { const t = clean(s).replace(/^[^\p{L}]+/u, ''); return t ? t.charAt(0).toUpperCase() : ''; };
+
+  /* ---------------- the direct line ---------------- */
+  /* ancestors of person i going up one a generation through the fathers ('f') or the mothers ('m'); [parent, grandparent, ...], stopping where nobody is recorded */
+  function lineIdx(M, i, side, max) {
+    const out = [], seen = new Set([i]); max = max || 12; let cur = i;
+    while (out.length < max) { const p = M.P[cur], q = p ? (side === 'm' ? p.m : p.f) : -1; if (q == null || q < 0 || seen.has(q)) break; seen.add(q); out.push(q); cur = q; }
+    return out;
+  }
+  /* the line with more known generations; the father's on a tie */
+  function defaultSide(M, i) { return lineIdx(M, i, 'm').length > lineIdx(M, i, 'f').length ? 'm' : 'f'; }
+  function trailCard(M, i, gen) {
+    const p = M.P[i], hid = hidden(p), place = !hid && !p.ghost ? clean(p.bp) : '';
+    return { i, key: p.key, gen, given: clean(p.given), sur: clean(p.sur), name: fullName(p), place, year: hid || p.ghost ? null : p.by, est: !hid && !p.ghost && p.by != null && !!(p.fl & 1), pest: !hid && !p.ghost && !!place && !!(p.fl & 4),
+      life: lifeText(p), living: !!p.living, ghost: !!p.ghost, standin: !!p.standin, sex: p.sex };
+  }
+  /* {side, counts:{f,m}, anc:[card] oldest first (gen -n ... -1), focus:card, stub:{gen, why}|null (where the line stops), more:n generations further back not drawn} */
+  function trailModel(M, i, side, opt) {
+    opt = opt || {}; const cap = opt.cap || 8, cnt = { f: lineIdx(M, i, 'f').length, m: lineIdx(M, i, 'm').length };
+    side = side === 'm' || side === 'f' ? side : defaultSide(M, i);
+    const all = lineIdx(M, i, side), shown = all.slice(0, cap), anc = shown.map((q, k) => trailCard(M, q, -(k + 1))).reverse();
+    const last = shown.length ? shown[shown.length - 1] : i, lp = M.P[last], stops = all.length <= cap && !(side === 'm' ? lp.m >= 0 : lp.f >= 0);
+    return { side, counts: cnt, anc, focus: trailCard(M, i, 0), more: Math.max(0, all.length - shown.length),
+      stub: stops ? { gen: -(shown.length + 1), why: 'No ' + (side === 'm' ? 'mother' : 'father') + ' recorded for ' + fullName(lp) } : null };
+  }
+  /* "GEN -2" */
+  const genTag = g => g === 0 ? 'FOCUS' : 'GEN. ' + (g < 0 ? '\u2212' : '+') + Math.abs(g);
+
+  /* ---------------- the places of one life ---------------- */
+  /* [{name, n, year (the year to choose the flag by), first, last}] most events first. A route lists the stops an archive records; the birthplace and the deathplace are added if it left them out. A living person has none. */
+  function placeTrail(M, i) {
+    const p = M.P[i]; if (!p || hidden(p) || p.ghost) return [];
+    const ev = [];
+    const route = Array.isArray(p.route) ? p.route.filter(s => s && s.name) : [];
+    if (p.bp && (!route.length || route[0].name !== p.bp)) ev.push({ name: p.bp, year: p.by });
+    route.forEach(s => ev.push({ name: s.name, year: s.year }));
+    if (p.dp && (!route.length || route[route.length - 1].name !== p.dp)) ev.push({ name: p.dp, year: p.dy });
+    const by = new Map();
+    ev.forEach((e, k) => {
+      const name = clean(e.name); if (!name) return;
+      let r = by.get(name); if (!r) by.set(name, r = { name, n: 0, year: null, first: null, last: null, at: k });
+      r.n++; if (e.year != null) { r.last = r.last == null ? e.year : Math.max(r.last, e.year); r.first = r.first == null ? e.year : Math.min(r.first, e.year); }
+    });
+    const rows = [...by.values()];
+    rows.forEach(r => { r.year = r.last != null ? r.last : (p.by != null ? p.by : null); });
+    return rows.sort((a, b) => b.n - a.n || a.at - b.at);
+  }
+
+  /* ---------------- the Fan: who stands where ---------------- */
+  const FAN_MIN = 3, FAN_MAX = 7, FAN_DEFAULT = 5;
+  const RING = [84, 96, 96, 88, 80, 72, 64, 64];                 /* the centre's radius, then the thickness of rings 1..7, in world units */
+  const ringR = g => { let a = 0; for (let k = 0; k < g; k++) a += RING[k]; return g === 0 ? [0, RING[0]] : [a, a + RING[g]]; };
+  const fanRadius = gens => ringR(gens)[1];
+  /* slot n (1 = the centre; 2n the father, 2n + 1 the mother of slot n); gen g; place j along the ring, left to right */
+  function wedge(g, j) {
+    const [r0, r1] = ringR(g), n = 1 << g, a1 = Math.PI - j * Math.PI / n, a0 = Math.PI - (j + 1) * Math.PI / n;
+    return { g, j, r0, r1, rm: (r0 + r1) / 2, a0, a1, am: (a0 + a1) / 2 };
+  }
+  const pt = (r, a) => [r * Math.cos(a), -r * Math.sin(a)];
+  const f1 = n => Math.round(n * 10) / 10;
+  function wedgePath(w) {
+    if (w.g === 0) return `M${-w.r1} 0A${w.r1} ${w.r1} 0 0 1 ${w.r1} 0Z`;
+    const [ox1, oy1] = pt(w.r1, w.a1), [ox0, oy0] = pt(w.r1, w.a0), [ix0, iy0] = pt(w.r0, w.a0), [ix1, iy1] = pt(w.r0, w.a1);
+    return `M${f1(ox1)} ${f1(oy1)}A${w.r1} ${w.r1} 0 0 1 ${f1(ox0)} ${f1(oy0)}L${f1(ix0)} ${f1(iy0)}A${w.r0} ${w.r0} 0 0 0 ${f1(ix1)} ${f1(iy1)}Z`;
+  }
+  /* levels[g] = [slot]; slot = {n, g, j, i (person index, -1 when nobody is recorded), side ('f' | 'm' | null for the centre)} */
+  function fanSlots(M, root, gens) {
+    gens = Math.max(FAN_MIN, Math.min(FAN_MAX, gens | 0 || FAN_DEFAULT));
+    const levels = [[{ n: 1, g: 0, j: 0, i: root, side: null }]];
+    for (let g = 1; g <= gens; g++) {
+      const prev = levels[g - 1], cur = [];
+      prev.forEach(s => { [0, 1].forEach(b => { const q = s.i >= 0 ? (b ? M.P[s.i].m : M.P[s.i].f) : -1; cur.push({ n: 2 * s.n + b, g, j: cur.length, i: q == null ? -1 : q, side: g === 1 ? (b ? 'm' : 'f') : s.side }); }); });
+      levels.push(cur);
+    }
+    let known = 0; levels.forEach((l, g) => { if (g) l.forEach(s => { if (s.i >= 0) known++; }); });
+    return { gens, levels, known, total: (1 << (gens + 1)) - 2 };
+  }
+  /* "father's mother's father" for slot n */
+  function routeWords(n) {
+    const bits = n.toString(2).slice(1), w = [];
+    for (const b of bits) w.push(b === '0' ? 'father' : 'mother');
+    return w.length ? w.map((x, k) => k < w.length - 1 ? x + '’s' : x).join(' ') : 'the centre';
+  }
+  /* "great-grandmother" for slot n at generation g */
+  function kinWord(g, n) {
+    const mo = n % 2 === 1;
+    if (g === 1) return mo ? 'mother' : 'father';
+    const gr = g === 2 ? '' : g === 3 ? 'great-' : g === 4 ? 'great-great-' : (g - 2) + '× great-';
+    return gr + (mo ? 'grandmother' : 'grandfather');
+  }
+  const genName = g => g === 0 ? 'Centre' : g === 1 ? 'Parents' : g === 2 ? 'Grandparents' : g === 3 ? 'Great-grandparents' : g === 4 ? 'Great-great-grandparents' : (g - 2) + '× great-grandparents';
+
+  /* ---------------- the Fan: colour ---------------- */
+  const SIDE_BASE = { f: '#2A5FA3', m: '#DB8420' };                /* blue and orange: apart for protan, deutan and tritan eyes, and different in lightness too */
+  const STEP = [0, 0.12, 0.23, 0.33, 0.41, 0.48, 0.54];             /* how far toward the card each generation's tint has faded (generation 1 first) */
+  /* tk: the look's tokens {card, board, ink, line, faint, accent}. Returns {fill, ink} */
+  function sideFill(slot, tk) {
+    if (slot.g === 0) return { fill: mix(tk.ink, tk.card, 0.07), ink: inkFor(mix(tk.ink, tk.card, 0.07), tk.ink) };
+    const fill = mix(SIDE_BASE[slot.side], tk.card, 1 - STEP[Math.min(slot.g, 7) - 1]);
+    return { fill, ink: inkFor(fill, tk.ink) };
+  }
+  /* the flag's own colours, the clearly-coloured fills of its drawing, most common first (white, black and grey are never the answer unless the flag has nothing else) */
+  function flagCandidates(svg) {
+    const n = new Map(), order = [];
+    (String(svg || '').match(/fill="(#[0-9a-fA-F]{3,6})"/g) || []).forEach(m => {
+      const h = toHex(hex2(/#[0-9a-fA-F]+/.exec(m)[0])), [r, g, b] = hex2(h), s = (Math.max(r, g, b) - Math.min(r, g, b)) / 255;
+      if (!order.includes(h)) order.push(h); if (s >= 0.25) n.set(h, (n.get(h) || 0) + 1);
+    });
+    const c = [...n.keys()].sort((x, y) => n.get(y) - n.get(x) || order.indexOf(x) - order.indexOf(y));
+    return c.length ? c : order.slice(0, 1);
+  }
+  const flagColour = svg => flagCandidates(svg)[0] || null;
+  const rgbDist = (a, b) => { const x = hex2(a), y = hex2(b); return Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]); };
+  /* One colour for each flag that flies over a birthplace in the fan, drawn from that flag's own colours, and kept apart: the commonest flag first, and each takes the first of its colours that is
+     not close to one already used (else the one farthest from them), so two regimes that both fly red are not both red when the flag has another colour to use. items: [{fi, svg, n}] */
+  function flagPalette(items, min) {
+    min = min || 110; const used = [], out = new Map();
+    items.slice().sort((a, b) => b.n - a.n || a.fi - b.fi).forEach(it => {
+      const c = flagCandidates(it.svg); if (!c.length) { out.set(it.fi, null); return; }
+      let pick = c.find(h => used.every(u => rgbDist(h, u) >= min));
+      if (!pick) { let best = -1; c.forEach(h => { const d = used.length ? Math.min(...used.map(u => rgbDist(h, u))) : 1e9; if (d > best) { best = d; pick = h; } }); }
+      used.push(pick); out.set(it.fi, pick);
+    });
+    return out;
+  }
+  /* the index of the flag over the person's birthplace in the year they were born there (M.flags[fi] = [id, viewBox, svg]); -1 when the Atlas has none */
+  function placeFlag(M, p, TC) {
+    if (!p || hidden(p) || p.ghost || !p.bp || !TC) return -1;
+    const pl = TC.placeAt(M, p, p.bp, p.by); return pl && pl.fi >= 0 && M.flags[pl.fi] ? pl.fi : -1;
+  }
+  function placeFill(slot, col, tk) {
+    if (slot.g === 0) return sideFill(slot, tk);
+    const fill = col ? mix(col, tk.card, 1 - STEP[Math.min(slot.g, 7) - 1] * 0.6) : mix(tk.ink, tk.card, 0.1);
+    return { fill, ink: inkFor(fill, tk.ink) };
+  }
+
+  /* ---------------- the Fan: what a wedge says, and whether it fits ---------------- */
+  const CHAR_W = 0.58;                                              /* the width of an average letter of the label face, in ems (a deliberately full-bodied estimate) */
+  const textW = (s, fs) => s.length * CHAR_W * fs;
+  const LINE_H = 1.2;
+  /* does a w x h box, centred at (x, y) and turned by rot degrees, lie inside the wedge (with a margin)? Tested at its corners and the middle of each edge. */
+  function boxInWedge(wd, x, y, w, h, rot, pad) {
+    pad = pad == null ? 3 : pad; const c = Math.cos(rot * Math.PI / 180), s = Math.sin(rot * Math.PI / 180);
+    for (const [u, v] of [[-1, -1], [0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0]]) {
+      const dx = u * w / 2, dy = v * h / 2, px = x + dx * c - dy * s, py = y + dx * s + dy * c;
+      const r = Math.hypot(px, py), a = Math.atan2(-py, px);
+      if (wd.g === 0) { if (r > wd.r1 - pad || py > -pad) return false; continue; }
+      if (r < wd.r0 + pad || r > wd.r1 - pad) return false;
+      if (a < wd.a0 + pad / r || a > wd.a1 - pad / r) return false;
+    }
+    return true;
+  }
+  /* the lines a wedge can print, richest first; each level is a list of strings */
+  function labelLevels(p, g) {
+    if (!p) return [];
+    const full = fullName(p), first = [given1(p), clean(p.sur)].filter(Boolean).join(' ') || full, sur = clean(p.sur) || given1(p) || full;
+    const ini = initial(p.given), surI = ini && clean(p.sur) ? clean(p.sur) + ' ' + ini + '.' : sur;
+    const yrs = lifeText(p), by = p.by == null || hidden(p) || p.ghost ? '' : yearText(p.by, p.fl & 1);
+    const place = hidden(p) || p.ghost ? '' : clean(p.bp);
+    const mono = [initial(p.given), initial(p.sur)].filter(Boolean).join('').split('').join('.') + '.';
+    const g1 = given1(p), sr = clean(p.sur), L = [];
+    if (yrs && place) L.push([full, yrs, place]);
+    if (yrs) L.push([full, yrs]);
+    if (yrs && first !== full) L.push([first, yrs]);
+    if (yrs && g1 && sr) L.push([g1, sr, yrs]);
+    if (yrs) L.push([surI, yrs]);
+    L.push([full]);
+    if (first !== full) L.push([first]);
+    if (g1 && sr) L.push([g1, sr]);
+    L.push([surI]);
+    if (surI !== sur) L.push([sur]);
+    if (by) L.push([by]);
+    if (yrs && yrs !== by) L.push([yrs]);
+    if (mono.length > 1) L.push([mono]);
+    /* drop a level that repeats the one before it (same lines) */
+    return L.filter((l, k) => k === 0 || l.join('|') !== L[k - 1].join('|'));
+  }
+  /* The label for a wedge, or null when nothing readable fits. k = screen pixels per world unit (so a font of 10 px is 10 / k units). Rotation is only ever within +-90 degrees: never upside down.
+     lines: [{t, fs, b}]; x, y: the centre of the block; rot: degrees; trunc: true when the outermost ring had to cut a name with an ellipsis. */
+  const FS = [16, 14, 13, 12, 11, 10];
+  function fanLabel(slot, p, gens, k, minPx) {
+    if (!p) return null; minPx = minPx || 10; k = k || 1;
+    const wd = wedge(slot.g, slot.j), [x, y] = pt(wd.rm, wd.am), rotR = (wd.am <= Math.PI / 2 ? -wd.am : Math.PI - wd.am) * 180 / Math.PI;
+    const levels = labelLevels(p, slot.g);
+    const mk = (lines, fs, orient, trunc) => ({ lines: lines.map((t, i) => ({ t, fs, b: i === 0 })), fs, x, y, rot: orient === 'h' ? 0 : rotR, orient, trunc: !!trunc });
+    const dims = (lines, fs) => ({ w: Math.max(...lines.map((t, i) => textW(t, fs))), h: lines.length * fs * LINE_H });
+    const sizes = FS.filter(px => px >= minPx).map(px => px / k);
+    for (const lines of levels) {
+      for (const fs of sizes) {   /* across, if it fits at any size; only then along the wedge */
+        const d = dims(lines, fs);
+        if (slot.g === 0) { if (boxInWedge(wd, 0, -wd.r1 * 0.45, d.w, d.h, 0, 4)) return Object.assign(mk(lines, fs, 'h'), { x: 0, y: -wd.r1 * 0.45 }); continue; }
+        if (boxInWedge(wd, x, y, d.w, d.h, 0, 3)) return mk(lines, fs, 'h');
+      }
+      if (slot.g === 0) continue;
+      for (const fs of sizes) { const d = dims(lines, fs); if (boxInWedge(wd, x, y, d.w, d.h, rotR, 3)) return mk(lines, fs, 'r'); }
+    }
+    /* the outermost ring only: a name that is too long is cut, with a real ellipsis, rather than left out */
+    if (slot.g === gens && slot.g > 0) {
+      const t = levels.map(l => l[0]).find(s => s && /\p{L}/u.test(s)) || '';
+      const fs = minPx / k;
+      for (let n = Math.min(t.length - 1, 14); n >= 3; n--) {
+        const s = t.slice(0, n).replace(/[\s,.\-]+$/, '') + '…', d = { w: textW(s, fs), h: fs * LINE_H };
+        if (boxInWedge(wd, x, y, d.w, d.h, 0, 3)) return mk([s], fs, 'h', true);
+        if (boxInWedge(wd, x, y, d.w, d.h, rotR, 3)) return mk([s], fs, 'r', true);
+      }
+    }
+    return null;
+  }
+
+  /* ---------------- the Fan, as a list ---------------- */
+  /* [{gen, name, people:[{n, i, route, kin, name, life, place, side}], missing}] : the same ancestors as the drawing, a generation at a time */
+  function fanList(M, root, gens) {
+    const F = fanSlots(M, root, gens);
+    return F.levels.map((lv, g) => ({ gen: g, name: genName(g), missing: lv.filter(s => s.i < 0).length, total: lv.length,
+      people: lv.filter(s => s.i >= 0).map(s => { const p = M.P[s.i]; return { n: s.n, i: s.i, kin: g ? kinWord(g, s.n) : '', route: g ? routeWords(s.n) : '', name: fullName(p), life: lifeText(p), place: hidden(p) || p.ghost ? '' : clean(p.bp), side: s.side, living: !!p.living }; }) }));
+  }
+
+  /* ---------------- the kept choice (one small field of the tree's record) ---------------- */
+  /* {m: 'canvas' | 'fan', g: 3..7, c: 'side' | 'place', t: 0 | 1 | 2 (the Trail band: gone, one line, whole), r: person key of the fan's centre or ''} */
+  const LENS_DEFAULT = { m: 'canvas', g: FAN_DEFAULT, c: 'side', t: 2, r: '' };
+  function cleanLens(x) {
+    const o = x && typeof x === 'object' ? x : {};
+    return { m: o.m === 'fan' ? 'fan' : 'canvas', g: Math.max(FAN_MIN, Math.min(FAN_MAX, Number.isInteger(o.g) ? o.g : FAN_DEFAULT)), c: o.c === 'place' ? 'place' : 'side',
+      t: o.t === 0 || o.t === 1 ? o.t : 2, r: typeof o.r === 'string' ? o.r : '' };
+  }
+  const lensIsDefault = l => { const c = cleanLens(l); return c.m === 'canvas' && c.g === FAN_DEFAULT && c.c === 'side' && c.t === 2; };
+
+  const API = { contrast, mix, inkFor, lum, hex2, lineIdx, defaultSide, trailCard, trailModel, genTag, placeTrail, FAN_MIN, FAN_MAX, FAN_DEFAULT, RING, ringR, fanRadius, wedge, wedgePath, pt, fanSlots, routeWords, kinWord, genName,
+    SIDE_BASE, STEP, sideFill, flagColour, flagCandidates, flagPalette, placeFlag, placeFill, textW, boxInWedge, labelLevels, fanLabel, fanList, cleanLens, lensIsDefault, lifeText, fullName, hidden, LENS_DEFAULT };
+  if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCV = API;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* find.js — the pure parts of Find, the search that lives in the right-hand pane (and, while the canvas is empty, in the middle of the canvas). No DOM; tested by test/test-find.js.
+ *
+ * WHAT IT DECIDES: what the results area says (nothing yet, no archive switched on, no one matches, or the list and how many were left out); the archive menu (which archives are
+ * ticked, and what its button says); when the centred search is shown (only when the canvas has no one on it, and no other whole-canvas view is up); what the "/" key does; which
+ * way a dragged result is dropped (onto the canvas, into the relate slot, or nowhere because it is over a panel); and how the arrow keys walk the results.
+ * Nothing here is about a person: the words are only counts, and names are the visitor's own query and the archives' names.
+ */
+(function (root) {
+  'use strict';
+  const num = n => Number(n || 0).toLocaleString('en-US');
+  const plural = (n, one, many) => n === 1 ? one : many;
+
+  /* ---------------- the archive menu ---------------- */
+  /* `on` is the Set of archive indexes being searched; an empty Set searches nothing (that is "None") */
+  const archLabel = (n, NA) => NA === 1 ? '1 archive' : n + ' of ' + NA + ' archives';
+  function archMenu(archives, on) {
+    const NA = archives.length, set = on instanceof Set ? on : new Set(on || []);
+    return {
+      label: archLabel(set.size, NA), all: set.size === NA, none: set.size === 0,
+      items: archives.map((a, i) => ({ i, name: a.name, color: a.color, n: a.n || 0, graded: !!a.graded, checked: set.has(i) })),
+    };
+  }
+  function archToggle(on, i, NA) { const s = new Set(on); if (i < 0 || i >= NA) return s; if (s.has(i)) s.delete(i); else s.add(i); return s; }
+  const archAll = NA => new Set(Array.from({ length: NA }, (_, i) => i));
+  const archNone = () => new Set();
+  /* what the menu button's tip says */
+  function archTip(archives, on) {
+    const m = archMenu(archives, on);
+    return m.none ? 'No archive is being searched. Choose which to search.' : m.all ? 'Searching all ' + archives.length + ' archives. Choose which to search.' : 'Searching ' + m.items.filter(x => x.checked).map(x => x.name).join(', ') + '. Choose which to search.';
+  }
+
+  /* ---------------- the line under the box ---------------- */
+  /* archives: [{k, name, n}]; on: Set; embed: the page is inside Roots & Routes (the people are the visitor's own file, perhaps beside one archive) */
+  function helpLine(archives, on, embed) {
+    const NA = archives.length, set = on instanceof Set ? on : archAll(NA), k = set.size;
+    const total = archives.reduce((s, a, i) => s + (set.has(i) ? a.n || 0 : 0), 0);
+    if (!k) return 'No archive is switched on. Choose which archives to search.';
+    if (k < NA) return 'Search ' + num(total) + ' people across ' + k + ' of ' + NA + ' archives';
+    if (embed) {
+      if (NA === 1 && archives[0].k !== 'you') return 'Search ' + num(total) + ' people in the ' + archives[0].name + ' archive';
+      if (NA === 2) return 'Search ' + num(total) + ' people in your file and the ' + archives[1].name + ' archive';
+      return 'Search ' + num(total) + ' people in your file';
+    }
+    return NA === 1 ? 'Search ' + num(total) + ' people in your file' : 'Search ' + num(total) + ' people across all ' + NA + ' archives';
+  }
+
+  /* ---------------- the results ---------------- */
+  /* r is what TC.search gave: {list, total, perArchive}; onSize how many archives are ticked; NA how many there are; cap (optional) shows only the first few (the centred list) */
+  function resultsModel(q, r, onSize, NA, cap) {
+    const t = String(q || '').trim(), base = { kind: 'idle', q: t, shown: 0, total: 0, more: 0, hidden: 0, text: '', say: '' };
+    if (!t) return base;
+    if (!onSize) return Object.assign(base, { kind: 'noarch', text: 'No archive is switched on. Open the archives button and choose which to search.', say: 'No archive is switched on' });
+    const total = (r && r.total) || 0, listed = r && r.list ? r.list.length : 0, shown = cap ? Math.min(cap, listed) : listed;
+    if (!listed) {
+      const per = r && r.perArchive ? r.perArchive.reduce((s, n) => s + n, 0) : 0, hidden = Math.max(0, per - total);
+      return Object.assign(base, { kind: 'none', hidden, text: 'No one matches “' + t + '” in the ' + onSize + ' ' + plural(onSize, 'archive', 'archives') + ' being searched' + (hidden ? '; ' + hidden + ' match in archives that are switched off' : '') + '. Accents, case, spaces and hyphens do not matter.', say: 'No one matches ' + t });
+    }
+    const more = total - shown;
+    return Object.assign(base, { kind: 'some', shown, total, more, text: more > 0 ? '+' + more + ' more: type more of the name' : '', say: num(total) + ' ' + plural(total, 'person', 'people') + ' found' + (more > 0 ? ', showing the first ' + shown : '') });
+  }
+  /* the arrow keys over the results: -1 means "none chosen", so the first Down chooses the first one and Up from the first goes back to the box */
+  function stepActive(act, n, dir) {
+    if (!n) return -1;
+    if (dir === 'down') return Math.min(n - 1, act + 1);
+    if (dir === 'up') return act <= 0 ? -1 : act - 1;
+    if (dir === 'home') return 0;
+    if (dir === 'end') return n - 1;
+    return act;
+  }
+  /* Enter adds the one chosen with the arrows, else the first */
+  const enterPick = (act, n) => n ? (act >= 0 && act < n ? act : 0) : -1;
+
+  /* ---------------- when is the centred search shown ---------------- */
+  /* Only when no one is on the canvas, and nothing else is standing in for the canvas (the Fan, Compare, the Names look, Research lines, Play). */
+  function startShown(f) { f = f || {}; return !(f.cards > 0) && !f.fan && !f.compare && !f.names && !f.lines && !f.play; }
+
+  /* ---------------- the "/" key ---------------- */
+  /* typing: the focus is in a box that takes text */
+  const isTyping = (tag, editable) => /^(INPUT|TEXTAREA|SELECT)$/i.test(tag || '') || !!editable;
+  /* 'start' = focus the centred box; 'pane' = open the right-hand pane on Find and focus its box; null = leave the key alone */
+  function slashPlan(f) { f = f || {}; if (f.key !== '/' || f.ctrl || f.meta || f.alt || f.typing) return null; return f.start ? 'start' : 'pane'; }
+
+  /* ---------------- a dragged result ---------------- */
+  const inRect = (x, y, r, pad) => !!r && x >= r.left - (pad || 0) && x <= r.right + (pad || 0) && y >= r.top - (pad || 0) && y <= r.bottom + (pad || 0);
+  /* f: {x, y, rz: rect|null (the relate slots, when open), info: rect|null (the pane, when open), dock: rect|null (the dock, when open)}.
+     'rz' = the relate slots, 'canvas' = drop a card here, 'none' = over a panel: the drag is cancelled */
+  function dropZone(f) {
+    if (inRect(f.x, f.y, f.rz, 6)) return 'rz';
+    if (inRect(f.x, f.y, f.info, 0) || inRect(f.x, f.y, f.dock, 0)) return 'none';
+    return 'canvas';
+  }
+
+  const API = { archLabel, archMenu, archToggle, archAll, archNone, archTip, helpLine, resultsModel, stepActive, enterPick, startShown, isTyping, slashPlan, dropZone, inRect };
+  if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCFIND = API;
+})(typeof window !== 'undefined' ? window : globalThis);
 </script>
 <script>(function(){'use strict';
 /* core.js — state, persistence, undo, geometry, the card elements. Everything below shares one scope (build.py wraps the files in one IIFE). */
@@ -3225,6 +3809,10 @@ const ICON = {
   blood: 'M12 3.5c3.2 4.2 6 7.2 6 10.6a6 6 0 01-12 0c0-3.4 2.8-6.4 6-10.6z',
   folder: 'M3 7.5A1.5 1.5 0 014.5 6H9l2 2.2h8.5A1.5 1.5 0 0121 9.7V17.5a1.5 1.5 0 01-1.5 1.5h-15A1.5 1.5 0 013 17.5z',
   eyeoff: '<path d="M3 12s3.3-6 9-6 9 6 9 6-3.3 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.6"/><path d="M4.5 4.5l15 15"/>',
+  fan: 'M3.5 19.5a8.5 8.5 0 0117 0zM12 19.5V11M7 19.5l2.2-5.8M17 19.5l-2.2-5.8',
+  house: 'M3.5 11.5L12 4l8.5 7.5M6 10v9.5h12V10M10 19.5v-5h4v5',
+  town: 'M4 20.5V9.5h6v11M10 20.5V5h6v15.5M16 20.5v-8h4v8M2.5 20.5h19M6.5 12.5h1.5M6.5 16h1.5M12.5 8.5h1.5M12.5 12h1.5M12.5 15.5h1.5',   /* a town: buildings in a row */
+  land: 'M12 3.2a8.8 8.8 0 100 17.6 8.8 8.8 0 000-17.6zM3.4 12h17.2M12 3.2c2.6 2.4 3.6 5.4 3.6 8.8s-1 6.4-3.6 8.8M12 3.2C9.4 5.6 8.4 8.6 8.4 12s1 6.4 3.6 8.8',   /* a country only: a globe */
 };
 const icon = (n, cls) => `<svg class="${cls || 'lk-icon'}" viewBox="0 0 24 24" aria-hidden="true">${ICON[n].startsWith('<') ? ICON[n] : `<path d="${ICON[n]}"/>`}</svg>`;
 
@@ -3262,7 +3850,7 @@ const cx = c => c.x + W / 2;
 function serialise() {
   return {
     v: 1, cards: [...S.cards.values()].map(c => [c.key, Math.round(c.x), Math.round(c.y), c.pinned ? 1 : 0, c.up, c.down, c.sp, c.stopG ? 1 : 0, c.from || '']),
-    view: S.view, decisions: [...M.decisions], opts: S.opts, path: S.path ? [S.path.a, S.path.b] : null, filter: [...S.filter],
+    view: typeof lensView === 'function' ? lensView() : S.view, lens: typeof lensSerialise === 'function' ? lensSerialise() : null, decisions: [...M.decisions], opts: S.opts, path: S.path ? [S.path.a, S.path.b] : null, filter: [...S.filter],
     pairing: S.pr ? prSerialise() : null,    /* Compare: only the visitor's own choices (which archives, the starting people, accepted and rejected pairings); the page hashes them */
   };
 }
@@ -3287,7 +3875,7 @@ function restore(d) {
       const p = M.byKey.get(r[0]); if (!p) return;
       const c = newCard(p.i, r[1], r[2]); c.pinned = !!r[3]; c.up = r[4]; c.down = r[5]; c.sp = r[6]; c.stopG = !!r[7]; c.from = r[8] || null;
     });
-    if (d.view && isFinite(d.view.k)) S.view = d.view;
+    if (d.view && isFinite(d.view.k)) { if (typeof fanIsOn === 'function' && fanIsOn()) LV.cv = d.view; else S.view = d.view; }
     if (d.path && S.cards.has(d.path[0]) && S.cards.has(d.path[1])) S._restorePath = d.path;
     return S.cards.size > 0;
   } catch (e) { return false; }
@@ -3299,7 +3887,7 @@ function undo() {
   if (!S.undo.length) return;
   const d = JSON.parse(S.undo.pop());
   clearAll(true);
-  restore(d); S.view = d.view; applyView(); S.path = null; clearPathUi();
+  restore(d); setCanvasView(d.view); S.path = null; clearPathUi();
   S.cards.forEach(c => { c.el.classList.remove('pop'); });
   refreshAll(); drawEdges(); save(); syncButtons(); if (typeof hideHint === 'function') hideHint(); toast('Undone');
   if (S._restorePath) { const [a, b] = S._restorePath; S._restorePath = null; showPath(a, b, { quiet: true, noPlace: true }); }
@@ -3467,13 +4055,14 @@ function applyView() {
   document.documentElement.style.setProperty('--world-k', v.k);
   if (typeof drawLanes === 'function') drawLanes();
   miniDraw();
+  if (typeof lensOnZoom === 'function') lensOnZoom();
 }
 const toWorld = (px, py) => ({ x: (px - S.view.x) / S.view.k, y: (py - S.view.y) / S.view.k });
 /* Zoom about a point, but never about a point outside the cards: the pointer (or, for the buttons, the middle of the cards) is held inside the cards' own outline, so zooming out
    shrinks the tree where it stands instead of sending it off toward a pointer parked over the search box or the middle of an empty window. */
 function zoomAt(f, px, py) {
   const v = S.view;
-  const nb = typeof namesBox === 'function' ? namesBox() : null;
+  const nb = (typeof lensBox === 'function' && lensBox()) || (typeof namesBox === 'function' ? namesBox() : null);
   if (nb || S.cards.size) {
     const b = nb || bbox([...S.cards.values()]), sx0 = b.x0 * v.k + v.x, sx1 = b.x1 * v.k + v.x, sy0 = b.y0 * v.k + v.y, sy1 = b.y1 * v.k + v.y;
     px = px == null ? (sx0 + sx1) / 2 : Math.min(sx1, Math.max(sx0, px)); py = py == null ? (sy0 + sy1) / 2 : Math.min(sy1, Math.max(sy0, py));
@@ -3483,10 +4072,11 @@ function zoomAt(f, px, py) {
 }
 function usable() { /* the part of the screen not covered by the dock and the info panel */
   const dock = $('.dock'), info = $('#info');
-  const bottom = (S.phone && document.documentElement.classList.contains('shelfoff')) ? innerHeight - 8 : dock.getBoundingClientRect().top - 12;
+  const bottom = document.documentElement.classList.contains('rzopen') ? dock.getBoundingClientRect().top - 12 : innerHeight - 8;   /* the dock is only the relate slots, and only while they are open */
   const right = info.classList.contains('on') && !S.phone ? info.getBoundingClientRect().left - 12 : innerWidth - 8;
-  const top = 58, left = S.phone ? 8 : 64;
-  return { l: left, t: top, r: right, b: S.phone && info.classList.contains('on') ? Math.min(bottom, info.getBoundingClientRect().top - 8) : bottom };
+  const top = 58, left = S.phone ? 8 : 64, th = typeof trailHeight === 'function' ? trailHeight() : 0;   /* the Trail band, when it is up, is not canvas either */
+  const b0 = S.phone && info.classList.contains('on') ? Math.min(bottom, info.getBoundingClientRect().top - 8) : bottom;
+  return { l: left, t: top, r: right, b: th ? Math.min(b0, $('#trail').getBoundingClientRect().top - 12) : b0 };
 }
 let viewTween = null;
 function animateView(target, ms) {
@@ -3504,7 +4094,7 @@ function bbox(cards) {
 }
 function fit(cards, opt) {
   cards = cards && cards.length ? cards : [...S.cards.values()];
-  const nb = typeof namesBox === 'function' ? namesBox() : null;   /* in the Names look the picture is the name cards, not the people cards */
+  const nb = (typeof lensBox === 'function' && lensBox()) || (typeof namesBox === 'function' ? namesBox() : null);   /* the Fan, or in the Names look the picture is the name cards, not the people cards */
   if (!cards.length && !nb) return;
   opt = opt || {};
   const b = nb || bbox(cards), u = usable(), pad = 40;
@@ -4525,7 +5115,7 @@ document.addEventListener('change', e => {
 });
 
 /* play.js — Play: build one person's tree up on the canvas a generation at a time (the Roots & Routes "Generations" idea): the oldest generation first,
-   then each one below it, with the numbered bands on. A bar over the shelf plays, pauses and scrubs. Undo puts the canvas back as it was. */
+   then each one below it, with the numbered bands on. A bar along the bottom plays, pauses and scrubs. Undo puts the canvas back as it was. */
 const PLAY = { on: false, playing: false, k: 0, set: null, focus: -1, speed: 1, timer: 0, token: 0, mode: 'out' };
 /* the steps of a play. 'out' (the default) starts with the person and adds a generation above AND below them each step; 'oldest' (the reverse) starts with the
    earliest ancestor and builds down through every generation, as the Roots & Routes Generations view does. */
@@ -4551,7 +5141,7 @@ function playBar() {
   $('#plRange', b).addEventListener('input', e => { pausePlay(); playTo(+e.target.value); });
   return b;
 }
-function playPlace() { const b = $('#playBar'), d = $('.dock'); if (!b || !d) return; const top = document.documentElement.classList.contains('shelfoff') ? innerHeight : d.getBoundingClientRect().top; b.style.bottom = Math.max(12, Math.round(innerHeight - top + 10)) + 'px'; }
+function playPlace() { const b = $('#playBar'), d = $('.dock'); if (!b || !d) return; const th = typeof trailHeight === 'function' ? trailHeight() : 0, top = document.documentElement.classList.contains('rzopen') ? d.getBoundingClientRect().top : innerHeight - th; b.style.bottom = Math.max(12, Math.round(innerHeight - top + 10)) + 'px'; }
 function playSync() {
   const b = $('#playBar'); if (!b || !PLAY.set) return;
   const G = PLAY.set.gens.length, k = PLAY.k, g = PLAY.set.gens[k] || [];
@@ -5407,51 +5997,493 @@ $('#info').addEventListener('click', e => {
 }, true);
 $('#info').addEventListener('change', e => { const pk = e.target.closest && e.target.closest('[data-pr-pick]'); if (pk) { const [a, i] = pk.dataset.prPick.split(':').map(Number); if (S.pr) S.pr.pick[a] = i; } });
 
-/* ui.js — the shelf and search, pan / zoom / drag, the side panel, pathways, themes, phone mode, start-up. */
+/* viewsui.js — the View button, the Fan, and the Trail band. The pure parts (the direct line, the places of a life, the fan's geometry, colour and labels) are in views.js and are tested there.
+ *
+ * VIEW is how the selection is drawn: Canvas (the free canvas, as it always was) or Fan. A view is a LENS: it never replaces the canvas, it is drawn over it, and the canvas underneath keeps its cards,
+ * its pan and zoom (put back when the lens closes), and its selection. The choice is one small field of the tree's saved record (`lens` here, `vw` in the record: see public/tree-canvas/work.js), opaque
+ * (a person is a hashed id), restored when the same tree opens again with a line that says so and a way out.
+ *
+ * THE FAN lives in the canvas's own world (an <svg> beside the cards), so the canvas's pan, zoom and Fit work on it unchanged; the cards are only hidden while it is open.
+ * THE TRAIL is a docked band that follows the selected person: their direct line as a row of cards (one ancestor a generation) and the places of their own life.
+ * A person who may be living is shown by name and family only, here as everywhere. Nothing here is stored or sent. */
+const TCV = window.TCV;
+const LV = { m: 'canvas', g: TCV.FAN_DEFAULT, c: 'side', t: 2, root: null, cv: null, list: false, stack: [], kb: null, bucket: -99, came: false, side: null, tf: null, hov: null, flagCache: new Map(), model: null };
+const lensAvail = () => (!EMBED || SA) && !S.pr;
+const fanIsOn = () => LV.m === 'fan';
 
-/* ---------------- selection ---------------- */
-function select(keys, add) {
-  if (!add) S.sel.clear();
-  keys.forEach(k => S.sel.has(k) && add ? S.sel.delete(k) : S.sel.add(k));
-  S.cards.forEach(c => c.el.classList.toggle('sel', S.sel.has(c.key)));
-  if (S.sel.size && S.tab !== 'path' && S.tab !== 'options' && S.tab !== 'next' && S.tab !== 'sources' && S.tab !== 'ai' && S.tab !== 'fix' && S.tab !== 'compare') S.tab = 'person';
-  if (S.sel.size && S.tab === 'path' && !S.path) S.tab = 'person';
-  if (typeof prOnSelect === 'function') prOnSelect(keys);
-  renderInfo(); syncButtons();
-  /* the side panel is folded away: say where the person's details are */
-  if (S.sel.size && !S.phone && !$('#info').classList.contains('on')) { const t = $('#infoTab'); if (t) { t.classList.remove('nudge'); void t.offsetWidth; t.classList.add('nudge'); } }
+/* ---------------- what the canvas asks of the lens ---------------- */
+/* the field of the saved record (null when everything is as it starts, so an untouched tree's record is exactly what it was) */
+function lensSerialise() {
+  if (!lensAvail()) return null;
+  const l = { m: LV.m, g: LV.g, c: LV.c, t: LV.t, r: LV.m === 'fan' && LV.root ? LV.root : '' };
+  return TCV.lensIsDefault(l) ? null : l;
 }
-function hideHint() { $('#hint').classList.toggle('off', S.cards.size > 0); }
+/* the canvas's own pan and zoom: while the Fan is open S.view is the Fan's, and the canvas's is parked in LV.cv */
+const lensView = () => (fanIsOn() && LV.cv ? LV.cv : S.view);
+function setCanvasView(v) { if (fanIsOn()) { LV.cv = v; } else { S.view = v; applyView(); } }
+/* the box Fit and zoom keep the picture inside (world units); null when the Fan is not what is drawn */
+function lensBox() {
+  if (!fanIsOn() || LV.list) return null;
+  const R = TCV.fanRadius(LV.g) + 10; return { x0: -R, y0: -R, x1: R, y1: 14 };
+}
+function lensTokens() {
+  const cs = getComputedStyle(document.documentElement), g = (n, d) => { const v = cs.getPropertyValue(n).trim(); return /^#[0-9a-f]{3,6}$/i.test(v) ? v : d; };
+  return { card: g('--lk-card', '#FFFCF3'), board: g('--lk-board', '#F1E8D2'), ink: g('--lk-ink', '#2b2118'), line: g('--lk-line', '#E3D6B8'), faint: g('--lk-faint', '#b9a98c'), accent: g('--lk-accent', '#D9822B') };
+}
 
-/* ---------------- the shelf: search results ---------------- */
+/* ---------------- the View button and its menu ---------------- */
+function lensWire() {
+  const b = $('#bLens'); if (!b) return;
+  if (!lensAvail()) { b.hidden = true; return; }
+  b.hidden = false; b.innerHTML = icon('fan'); lensBtn();
+  const m = document.createElement('div'); m.id = 'lensMenu'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', 'View'); document.body.appendChild(m);
+  b.onclick = () => openLensMenu();
+  m.addEventListener('click', e => {
+    const t = e.target.closest('[data-lv]'); if (!t || t.disabled) return;
+    if (t.dataset.lv === 'trail') { lensTrailSize(LV.t ? 0 : 2); lensMenu(); return; }
+    lensSet(t.dataset.lv); openLensMenu(false); b.focus();
+  });
+  m.addEventListener('keydown', e => {
+    const its = [...m.querySelectorAll('[role="menuitemradio"]:not([disabled])')], k = its.indexOf(document.activeElement);
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); if (k >= 0) its[(k + (e.key === 'ArrowDown' ? 1 : its.length - 1)) % its.length].focus(); else if (its[0]) its[0].focus(); }
+    else if (e.key === 'Home' && its[0]) { e.preventDefault(); its[0].focus(); }
+    else if (e.key === 'End' && its.length) { e.preventDefault(); its[its.length - 1].focus(); }
+  });
+  document.addEventListener('click', e => { if (m.classList.contains('on') && !m.contains(e.target) && !e.target.closest('#bLens')) openLensMenu(false); });
+  addEventListener('keydown', e => { if (e.key === 'Escape' && m.classList.contains('on')) { openLensMenu(false); b.focus(); } });
+}
+function lensBtn() {
+  const b = $('#bLens'); if (!b || b.hidden) return;
+  const txt = 'View: ' + (fanIsOn() ? 'Fan' : 'Canvas') + '. Choose how the people are drawn.';
+  b.title = txt; b.setAttribute('aria-label', txt); b.classList.toggle('on', fanIsOn());
+}
+function lensMenu() {
+  const m = $('#lensMenu'); if (!m) return;
+  const item = (k, t, sub, on, dis) => `<button type="button" role="menuitemradio" class="lvi${on ? ' on' : ''}" data-lv="${k}" aria-checked="${on}"${dis ? ' disabled' : ''}><span class="lvd" aria-hidden="true"></span><span><b>${t}</b><small>${sub}</small></span></button>`;
+  m.innerHTML = `<h4>View</h4><p class="plines"><small>How the people are drawn. <b>Look</b>, the half-sun button, is the colours.</small></p>`
+    + `<div role="menu" aria-label="View">`
+    + item('canvas', 'Canvas', 'Free: the cards sit where you put them', !fanIsOn())
+    + item('fan', 'Fan', 'The ancestors of the selected person as a half circle, a ring a generation', fanIsOn())
+    + item('generations', 'Generations <em class="lvsoon">soon</em>', 'Everyone in rows by generation', false, true) + `</div>`
+    + `<button type="button" class="lk-toggle${LV.t ? ' on' : ''}" role="switch" aria-checked="${!!LV.t}" data-lv="trail"><span class="stx"><b>Direct-line strip open</b><i>A band along the very bottom: the selected person’s line, one ancestor a generation, and where they lived. Off folds it to a thin handle.</i></span><span class="knob"></span></button>`;
+}
+function openLensMenu(on) {
+  const m = $('#lensMenu'), b = $('#bLens'); if (!m || !b) return;
+  if (on == null) on = !m.classList.contains('on');
+  if (on) { openMainMenu(false); openBloodMenu(false); openViewsMenu(false); lensMenu(); }
+  m.classList.toggle('on', on); b.setAttribute('aria-expanded', String(on));
+  if (on) { const c = m.querySelector('.lvi.on') || m.querySelector('.lvi'); if (c && !S.phone) c.focus({ preventScroll: true }); }
+}
+
+/* ---------------- choosing a view ---------------- */
+function fanStartKey() {
+  const one = S.sel.size === 1 ? [...S.sel][0] : null;
+  if (one && M.byKey.has(one)) return one;
+  if (S.sel.size) { const k = [...S.sel].find(x => M.byKey.has(x)); if (k) return k; }
+  if (S.mark && M.byKey.has(S.mark)) return S.mark;
+  const last = [...S.cards.keys()].pop(); return last || null;
+}
+function lensSet(m, o) {
+  o = o || {};
+  if (!lensAvail() || m === LV.m || (m !== 'fan' && m !== 'canvas')) return;
+  if (m === 'fan') {
+    if (document.body.classList.contains('pr')) { toast('Compare is laying the people out. Stop comparing to use the Fan.', 3600); return; }
+    const k = fanStartKey(); if (!k) { toast('Put a person on the canvas and select them: the Fan is drawn from them.', 3600); return; }
+    fanOpen(k, o);
+  } else fanClose();
+  lensBtn(); save();
+}
+function fanOpen(key, o) {
+  o = o || {};
+  closePop(); LV.m = 'fan'; LV.root = key; LV.cv = Object.assign({}, S.view); LV.stack = []; LV.bucket = -99; LV.list = !!o.list;
+  document.body.classList.add('vwfan'); document.body.classList.toggle('vwlist', LV.list);
+  fanRender(); trailRender(); lensBtn();
+  fanFit(o.boot ? 1 : 520);
+}
+function fanClose() {
+  const v = LV.cv || S.view; LV.m = 'canvas'; LV.cv = null; LV.list = false; LV.came = false;
+  document.body.classList.remove('vwfan', 'vwlist');
+  S.view = v; applyView(); drawEdges(); miniDraw();
+  const f = $('#fan'); if (f) f.innerHTML = ''; const t = $('#fanTip'); if (t) t.classList.remove('on');
+  fanBar(); fanLegend(); fanListRender(); trailRender(); lensBtn();
+}
+function fanFit(ms) { if (fanIsOn() && !LV.list) fit(null, { ms: ms || 520, maxK: 1.2 }); }
+
+/* ---------------- the Fan: drawing it ---------------- */
+const fnum = n => Math.round(n * 10) / 10;
+function fanHost() {
+  let s = $('#fan');
+  if (!s) { $('#world').insertAdjacentHTML('beforeend', '<svg id="fan" width="1" height="1" overflow="visible" role="group" aria-label="Fan of ancestors"></svg>'); s = $('#fan'); }
+  return s;
+}
+const fanPerson = () => { const p = LV.root ? M.byKey.get(LV.root) : null; return p || null; };
+/* by place: one colour for each flag over a birthplace in this fan, taken from the flag and kept apart from the others (views.js flagPalette) */
+function fanPalette(F) {
+  const n = new Map();
+  F.levels.forEach(lv => lv.forEach(s => { if (s.i < 0 || s.g === 0) return; const fi = TCV.placeFlag(M, M.P[s.i], TC); if (fi >= 0) n.set(fi, (n.get(fi) || 0) + 1); }));
+  return TCV.flagPalette([...n.entries()].map(([fi, c]) => ({ fi, svg: M.flags[fi][2], n: c })));
+}
+function fanColourOf(slot, p, tk) {
+  if (slot.g === 0) return TCV.sideFill(slot, tk);
+  if (LV.c === 'place') { const fi = TCV.placeFlag(M, p, TC); return TCV.placeFill(slot, fi >= 0 && LV.pal ? LV.pal.get(fi) : null, tk); }
+  return TCV.sideFill(slot, tk);
+}
+function fanAria(slot, p) {
+  const who = p.living ? p.name + ' (living: name only)' : p.name + (TCV.lifeText(p) ? ', ' + TCV.lifeText(p) : '');
+  return (slot.g ? TCV.kinWord(slot.g, slot.n) + ': ' : 'Centre: ') + who;
+}
+function fanRender() {
+  const root = fanPerson(); const s = fanHost(); if (!root) { s.innerHTML = ''; return; }
+  const F = TCV.fanSlots(M, root.i, LV.g), tk = lensTokens(), k = S.view.k || 1;
+  LV.F = F; LV.tk = tk; LV.byN = new Map(); LV.bucket = fanBucket(); LV.pal = LV.c === 'place' ? fanPalette(F) : null;
+  const had = document.activeElement && document.activeElement.closest && document.activeElement.closest('#fan .fw'), hadN = had ? +had.dataset.n : null;
+  let out = `<g class="fring" aria-hidden="true"><path d="${TCV.wedgePath(TCV.wedge(0, 0))}" fill="none" stroke="none"/></g>`;
+  F.levels.forEach(lv => lv.forEach(slot => {
+    const wd = TCV.wedge(slot.g, slot.j), d = TCV.wedgePath(wd);
+    if (slot.i < 0) { out += `<path class="fw nk" d="${d}" aria-hidden="true"><title>Not known: nobody recorded here</title></path>`; return; }
+    const p = M.P[slot.i]; LV.byN.set(slot.n, slot);
+    const col = fanColourOf(slot, p, tk), lb = TCV.fanLabel(slot, p, F.gens, k, 10);
+    const sel = S.sel.has(p.key), focusRing = slot.g === 0;
+    out += `<g class="fw${sel ? ' sel' : ''}${focusRing ? ' ctr' : ''}" data-n="${slot.n}" tabindex="${LV.kb === slot.n || (LV.kb == null && focusRing) ? 0 : -1}" role="button" aria-label="${esc(fanAria(slot, p))}"${sel ? ' aria-pressed="true"' : ''}>`
+      + `<path d="${d}" fill="${col.fill}"/>${lb ? fanLabelSvg(lb, col.ink) : ''}</g>`;
+  }));
+  s.innerHTML = out + '<path id="fanFocus" class="ffr" d=""/>';
+  if (hadN != null) { const el = s.querySelector(`.fw[data-n="${hadN}"]`); if (el) el.focus({ preventScroll: true }); }
+  fanBar(); fanLegend(); fanListRender();
+}
+function fanLabelSvg(lb, ink) {
+  const n = lb.lines.length, lh = lb.fs * 1.2, tr = `translate(${fnum(lb.x)} ${fnum(lb.y)})${lb.rot ? ' rotate(' + fnum(lb.rot) + ')' : ''}`;
+  return `<text class="fl" transform="${tr}" text-anchor="middle" fill="${ink}">` + lb.lines.map((l, i) => `<tspan x="0" y="${fnum((i - (n - 1) / 2) * lh)}" dominant-baseline="central" font-size="${fnum(l.fs)}"${l.b ? ' font-weight="800"' : ''}>${esc(l.t)}</tspan>`).join('') + '</text>';
+}
+/* how finely the labels are redone: a coarser or finer zoom changes which of them fit, so the picture is drawn again when the zoom crosses a step (not at every pixel of it) */
+const fanBucket = () => Math.round(Math.log(S.view.k || 1) / Math.log(1.2));
+let fanRaf = 0;
+function lensOnZoom() {
+  if (!fanIsOn() || LV.list || fanBucket() === LV.bucket || fanRaf) return;
+  fanRaf = requestAnimationFrame(() => { fanRaf = 0; if (fanIsOn() && fanBucket() !== LV.bucket) fanRender(); });
+}
+function lensOnTheme() { if (fanIsOn()) fanRender(); trailRender(); }
+
+/* ---------------- the Fan: the bar, the legend, the list ---------------- */
+function fanBar() {
+  let bar = $('#fanBar');
+  if (!fanIsOn()) { if (bar) bar.hidden = true; return; }
+  if (!bar) {
+    bar = document.createElement('div'); bar.id = 'fanBar'; bar.setAttribute('role', 'toolbar'); bar.setAttribute('aria-label', 'Fan'); document.body.appendChild(bar);
+    bar.addEventListener('click', e => { const b = e.target.closest('[data-fb]'); if (b) fanAct(b.dataset.fb); });
+  }
+  const p = fanPerson(), F = LV.F, seg = (k, on, t, tip) => `<button type="button" class="fbs${on ? ' on' : ''}" data-fb="${k}" aria-pressed="${on}" title="${esc(tip || t)}">${t}</button>`;
+  const sel = S.sel.size === 1 ? M.byKey.get([...S.sel][0]) : null, canCentre = sel && sel.key !== LV.root && F && [...LV.byN.values()].some(s => s.i === sel.i);
+  bar.hidden = false;
+  bar.innerHTML = (LV.came ? `<div class="fbcame" role="status"><span>Your view came back: the Fan of ${esc(p ? p.name : 'this person')}.</span><button type="button" class="fbs" data-fb="canvas">Back to the canvas</button><button type="button" class="fbx" data-fb="ok" aria-label="Dismiss">${icon('x', '')}</button></div>` : '')
+    + `<div class="fbrow"><span class="fbt"><b>Fan of ${esc(p ? p.name : '')}</b>${F ? `<small>${F.known} of ${F.total} ancestors in ${F.gens} generations</small>` : ''}</span>`
+    + `<span class="fbg" role="group" aria-label="Generations"><button type="button" class="fbs" data-fb="less" aria-label="One generation fewer"${LV.g <= TCV.FAN_MIN ? ' disabled' : ''}>&minus;</button><span class="fbn" aria-live="polite">${LV.g} generations</span><button type="button" class="fbs" data-fb="more" aria-label="One generation more"${LV.g >= TCV.FAN_MAX ? ' disabled' : ''}>+</button></span>`
+    + `<span class="fbg" role="group" aria-label="Colour by">${seg('side', LV.c === 'side', 'By side', 'Colour by side of the family: the father’s side blue, the mother’s orange, paler the further back')}${seg('place', LV.c === 'place', 'By place', 'Colour by the flag over the birthplace in the year of birth')}</span>`
+    + `<span class="fbg" role="group" aria-label="Show as">${seg('draw', !LV.list, 'Drawing')}${seg('list', LV.list, 'List', 'The same ancestors as a list, a generation at a time')}</span>`
+    + (canCentre ? `<button type="button" class="fbs" data-fb="centre" title="Make ${esc(sel.name)} the centre of the fan">Make ${esc(given1Of(sel))} the centre</button>` : '')
+    + (LV.stack.length ? `<button type="button" class="fbs" data-fb="back" title="Back to the previous centre">Back</button>` : '')
+    + `<button type="button" class="fbs fbc" data-fb="canvas" title="Close the Fan: the canvas comes back as you left it">Canvas</button></div>`;
+}
+const given1Of = p => (p.given || p.sur || p.name || '').split(' ')[0];
+function fanAct(a) {
+  if (a === 'ok') { LV.came = false; fanBar(); return; }
+  if (a === 'canvas') { lensSet('canvas'); return; }
+  if (a === 'less' || a === 'more') { const g = Math.max(TCV.FAN_MIN, Math.min(TCV.FAN_MAX, LV.g + (a === 'more' ? 1 : -1))); if (g !== LV.g) { LV.g = g; fanRender(); fanFit(420); save(); } return; }
+  if (a === 'side' || a === 'place') { if (LV.c !== a) { LV.c = a; fanRender(); save(); } return; }
+  if (a === 'draw' || a === 'list') { LV.list = a === 'list'; document.body.classList.toggle('vwlist', LV.list); fanRender(); if (!LV.list) fanFit(300); else { const l = $('#fanList'); if (l) l.scrollTop = 0; } save(); return; }
+  if (a === 'centre') { const p = S.sel.size === 1 ? M.byKey.get([...S.sel][0]) : null; if (p) fanRecentre(p.key); return; }
+  if (a === 'back') { const k = LV.stack.pop(); if (k && M.byKey.has(k)) { LV.root = k; LV.kb = null; fanRender(); fanFit(420); save(); } return; }
+}
+function fanRecentre(key, quiet) {
+  if (!key || key === LV.root || !M.byKey.has(key)) return;
+  LV.stack.push(LV.root); if (LV.stack.length > 30) LV.stack.shift();
+  LV.root = key; LV.kb = null; LV.came = false; fanRender(); fanFit(420); save();
+  if (!quiet) toast(M.byKey.get(key).name + ' is the centre. Back returns to the last centre.', 2600);
+}
+/* what the colours mean, in the corner the minimap leaves free while the Fan is open */
+function fanLegend() {
+  let lg = $('#fanLegend');
+  if (!fanIsOn() || LV.list) { if (lg) lg.hidden = true; return; }
+  if (!lg) { lg = document.createElement('div'); lg.id = 'fanLegend'; lg.setAttribute('role', 'group'); lg.setAttribute('aria-label', 'What the colours mean'); document.body.appendChild(lg); }
+  lg.hidden = false;
+  if (LV.c === 'side') {
+    const tk = LV.tk || lensTokens(), sw = (c, t) => `<span class="fli"><i style="background:${c}"></i>${t}</span>`;
+    lg.innerHTML = sw(TCV.SIDE_BASE.f, 'Father’s side') + sw(TCV.SIDE_BASE.m, 'Mother’s side') + `<span class="fli fgr"><i style="background:linear-gradient(90deg,${TCV.sideFill({ g: 1, side: 'f' }, tk).fill},${TCV.sideFill({ g: 7, side: 'f' }, tk).fill})"></i>paler = further back</span><span class="fli"><i class="fnk"></i>not known</span>`;
+  } else {
+    const by = new Map(); (LV.F ? LV.F.levels : []).forEach(lv => lv.forEach(s => {
+      if (s.i < 0 || s.g === 0) return; const p = M.P[s.i], pl = !p.living && !p.ghost && p.bp ? TC.placeAt(M, p, p.bp, p.by) : null;
+      const key = pl && pl.fi >= 0 ? 'f' + pl.fi : 'none'; const r = by.get(key) || { n: 0, pl, p, fi: pl ? pl.fi : -1 }; r.n++; by.set(key, r);
+    }));
+    const rows = [...by.entries()].filter(([k]) => k !== 'none').sort((a, b) => b[1].n - a[1].n), none = by.get('none');
+    lg.innerHTML = rows.slice(0, 6).map(([k, r]) => `<span class="fli"><i style="background:${LV.pal && LV.pal.get(r.fi) || '#999'}"></i>${flagHTML(r.pl, r.p.by, flagTip(r.pl, r.p.by, 'Born at'))}${esc(r.pl.era ? r.pl.era.label : r.pl.cn || r.pl.name)} <b>${r.n}</b></span>`).join('')
+      + (rows.length > 6 ? `<span class="fli">+${rows.length - 6} more flags</span>` : '') + (none ? `<span class="fli"><i class="fnk"></i>no flag known <b>${none.n}</b></span>` : '');
+  }
+}
+function fanListRender() {
+  let ls = $('#fanList');
+  if (!fanIsOn() || !LV.list) { if (ls) ls.hidden = true; return; }
+  if (!ls) {
+    ls = document.createElement('div'); ls.id = 'fanList'; ls.setAttribute('role', 'region'); ls.setAttribute('aria-label', 'Ancestors by generation'); document.body.appendChild(ls);
+    ls.addEventListener('click', e => { const b = e.target.closest('[data-fln]'); if (b) fanActivate(+b.dataset.fln); });
+  }
+  const root = fanPerson(); ls.hidden = false; if (!root) return;
+  const L = TCV.fanList(M, root.i, LV.g);
+  ls.innerHTML = `<h3>${esc(root.name)}</h3>` + L.filter(g => g.gen > 0).map(g => `<h4>${g.name} <small>${g.people.length} of ${g.total}${g.missing ? ', ' + g.missing + ' not known' : ''}</small></h4><ol>`
+    + g.people.map(x => `<li><button type="button" data-fln="${x.n}" class="${S.sel.has(M.P[x.i].key) ? 'on' : ''}" style="--fc:${TCV.sideFill({ g: Math.max(1, g.gen), side: x.side }, LV.tk || lensTokens()).fill}"><span class="flk">${esc(x.kin)} <small>${esc(x.route)}</small></span><b>${esc(x.name)}</b>${x.life ? ' <span class="fly">' + esc(x.life) + '</span>' : ''}${x.place ? ' <span class="flp">' + esc(x.place) + '</span>' : ''}${x.living ? ' <span class="flp">living: name only</span>' : ''}</button></li>`).join('')
+    + `</ol>`).join('');
+}
+
+/* ---------------- the Fan: using it ---------------- */
+function fanEnsureCard(p) {
+  if (S.cards.has(p.key)) return S.cards.get(p.key);
+  snapshot();
+  const base = [...S.cards.values()].pop(), sp = freeSpot(base ? base.x + W + 60 : 0, base ? base.y : 0), c = newCard(p.i, sp.x, sp.y); c.pinned = true;
+  refreshAll(); drawEdges(); hideHint(); save();
+  toast(p.name + ' is on the canvas now (Undo takes them off)', 2600);
+  return c;
+}
+/* a click or Enter on a wedge: select that person on the canvas; on the one already selected, make them the centre */
+function fanActivate(n) {
+  const s = LV.byN && LV.byN.get(n); if (!s) return;
+  const p = M.P[s.i]; LV.kb = n;
+  if (S.sel.size === 1 && S.sel.has(p.key)) { if (p.key !== LV.root) fanRecentre(p.key); else toast(p.name + ' is already the centre.', 1800); return; }
+  fanEnsureCard(p); select([p.key]);
+}
+function lensClick(target) {   /* called when a press that did not drag ends on the stage; true if it was a wedge */
+  const w = target && target.closest ? target.closest('#fan .fw:not(.nk)') : null; if (!w) return false;
+  fanActivate(+w.dataset.n); return true;
+}
+function lensOnSelect() {
+  trailOnSelect();
+  if (!fanIsOn()) return;
+  const one = S.sel.size === 1 ? M.byKey.get([...S.sel][0]) : null;
+  if (one && LV.F && ![...LV.byN.values()].some(s => s.i === one.i)) { fanRecentre(one.key, true); return; }   // chosen somewhere else (the search, the panel): the Fan follows
+  const s = fanHost();
+  s.querySelectorAll('.fw').forEach(g => { const slot = LV.byN.get(+g.dataset.n), on = !!slot && S.sel.has(M.P[slot.i].key); g.classList.toggle('sel', on); if (on) { g.setAttribute('aria-pressed', 'true'); g.parentNode.appendChild(g); } else g.removeAttribute('aria-pressed'); });
+  fanBar(); if (LV.list) fanListRender();
+}
+function fanTip(n, at) {
+  let t = $('#fanTip');
+  if (!t) { t = document.createElement('div'); t.id = 'fanTip'; t.setAttribute('role', 'tooltip'); document.body.appendChild(t); }
+  const s = n != null && LV.byN ? LV.byN.get(n) : null; if (!s) { t.classList.remove('on'); return; }
+  const p = M.P[s.i], hid = p.living || p.ghost, bpl = !hid && p.bp ? TC.placeAt(M, p, p.bp, p.by) : null, dpl = !hid && p.dp ? TC.placeAt(M, p, p.dp, p.dy) : null;
+  const line = (lab, y, est, pl, nm, what) => (y != null || nm) ? `<div><b>${lab}</b> ${y != null ? (est ? '~' : '') + y : '?'}${nm ? ' &middot; ' + (pl ? flagHTML(pl, y, flagTip(pl, y, what)) : '') + esc(nm) : ''}</div>` : '';
+  t.innerHTML = `<div class="ftn">${esc(p.name)}</div><div class="ftk">${s.g ? esc(TCV.kinWord(s.g, s.n)) + ' &middot; ' + esc(TCV.routeWords(s.n)) : 'The centre of the fan'}</div>`
+    + (hid ? `<div>${p.living ? 'May be living: only the name and the family are shown.' : 'Named only: no dates recorded.'}</div>` : line('b.', p.by, p.fl & 1, bpl, p.bp, 'Born at') + line('d.', p.dy, p.fl & 2, dpl, p.dp, 'Died at'))
+    + `<div class="ftx">${S.sel.has(p.key) ? (p.key === LV.root ? 'The centre of the fan.' : 'Selected. Click again to make them the centre.') : 'Click to select on the canvas.'}</div>`;
+  const wd = TCV.wedge(s.g, s.j), [wx, wy] = TCV.pt(wd.rm, wd.am), v = S.view;
+  let x = at ? at.x + 14 : v.x + wx * v.k, y = at ? at.y + 14 : v.y + wy * v.k;
+  t.classList.add('on'); const r = t.getBoundingClientRect();
+  x = Math.max(8, Math.min(innerWidth - r.width - 8, x - (at ? 0 : r.width / 2))); y = Math.max(60, Math.min(innerHeight - r.height - 8, at ? y : y - r.height - 14));
+  t.style.left = x + 'px'; t.style.top = y + 'px';
+}
+function fanKey(e) {
+  const w = e.target.closest && e.target.closest('#fan .fw'); if (!w || w.classList.contains('nk')) return;
+  const n = +w.dataset.n, s = LV.byN.get(n); if (!s) return;
+  const go = m => { const o = LV.byN.get(m); if (!o) return false; const el = fanHost().querySelector(`.fw[data-n="${m}"]`); if (!el) return false; fanHost().querySelectorAll('.fw[tabindex="0"]').forEach(x => x.setAttribute('tabindex', '-1')); el.setAttribute('tabindex', '0'); el.focus(); LV.kb = m; return true; };
+  const nextKnown = d => { const lv = LV.F.levels[s.g]; for (let j = s.j + d; j >= 0 && j < lv.length; j += d) if (lv[j].i >= 0) return lv[j].n; return null; };
+  let moved = true;
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fanActivate(n); return; }
+  else if (e.key === 'ArrowLeft') { const m = nextKnown(-1); if (m != null) go(m); }
+  else if (e.key === 'ArrowRight') { const m = nextKnown(1); if (m != null) go(m); }
+  else if (e.key === 'ArrowUp') { const m = e.shiftKey ? 2 * n + 1 : 2 * n; if (!go(m) && !go(e.shiftKey ? 2 * n : 2 * n + 1)) moved = false; }
+  else if (e.key === 'ArrowDown') { if (s.g > 0) go(n >> 1); }
+  else if (e.key === 'Home') go(1);
+  else if (e.key === 'Escape') { w.blur(); fanTip(null); return; }
+  else moved = false;
+  if (moved) e.preventDefault();
+}
+(function fanEvents() {
+  document.addEventListener('keydown', e => { if (fanIsOn()) fanKey(e); });
+  const ring = n => { const f = $('#fanFocus'), s = n != null && LV.byN ? LV.byN.get(n) : null; if (!f) return; if (s) { f.setAttribute('d', TCV.wedgePath(TCV.wedge(s.g, s.j))); f.classList.add('on'); } else f.classList.remove('on'); };
+  document.addEventListener('focusin', e => { const w = e.target.closest && e.target.closest('#fan .fw'); if (w) { LV.kb = +w.dataset.n; fanTip(LV.kb); ring(LV.kb); } });
+  document.addEventListener('focusout', e => { if (e.target.closest && e.target.closest('#fan .fw')) { fanTip(null); ring(null); } });
+  document.addEventListener('pointermove', e => {
+    if (!fanIsOn() || e.pointerType === 'touch') return;
+    const w = e.target.closest && e.target.closest('#fan .fw:not(.nk)'); const n = w ? +w.dataset.n : null;
+    if (n == null) { if (LV.hov != null) { LV.hov = null; fanTip(null); } return; }
+    LV.hov = n; fanTip(n, { x: e.clientX, y: e.clientY });
+  });
+  document.addEventListener('pointerleave', () => { LV.hov = null; fanTip(null); });
+})();
+
+/* ---------------- the Trail band ---------------- */
+const TRAIL_CAP = 8, TRAIL_ROWS = 7;
+function trailFocusKey() {
+  if (S.sel.size === 1) { const k = [...S.sel][0]; if (M.byKey.has(k)) LV.tf = k; }
+  if (LV.tf && !M.byKey.has(LV.tf)) LV.tf = null;
+  return LV.tf;
+}
+function trailShown() { return lensAvail() && !fanIsOn() && !document.body.classList.contains('pr') && S.cards.size > 0 && !!trailFocusKey(); }
+function trailHeight() { const t = $('#trail'); return t && t.classList.contains('on') ? t.getBoundingClientRect().height : 0; }
+let trailQ = 0;
+function trailOnSelect() { if (!lensAvail()) return; if (S.sel.size === 1) { const k = [...S.sel][0], was = LV.tf; LV.tf = k; if (was !== k && LV.model && !LV.model.anc.some(c => c.key === k)) LV.side = null; } cancelAnimationFrame(trailQ); trailQ = requestAnimationFrame(trailRender); }
+function trailSide(i) { return LV.side || TCV.defaultSide(M, i); }
+function trailTitle(c) {
+  const bits = [c.name];
+  if (c.living) bits.push('may be living: only the name and the family are shown'); else if (c.ghost) bits.push('named only: no dates recorded');
+  else { bits.push(c.year != null ? 'born ' + (c.est ? 'about ' : '') + c.year + (c.place ? ' in ' + c.place : '') : (c.place ? 'born in ' + c.place : 'birth not recorded')); if (c.life && /–.+/.test(c.life)) bits.push('lived ' + c.life); }
+  bits.push(c.gen === 0 ? 'the person the line is drawn from' : 'generation ' + c.gen + (c.gen === -1 ? ' (a parent)' : ''));
+  return bits.join(' · ');
+}
+/* a town (buildings) or a country only (a globe); the Atlas names the country, so a place that is just that name is the globe */
+function trailKindIcon(c, pl) {
+  let cn = pl && pl.cn ? String(pl.cn) : '';
+  if (/^[A-Z]{2}$/.test(cn)) { try { cn = new Intl.DisplayNames(['en'], { type: 'region' }).of(cn) || cn; } catch (e) { /* keep the code */ } }
+  const first = String(c.place || '').split(',')[0].trim().toLowerCase();
+  return icon(cn && first && first === cn.toLowerCase() ? 'land' : 'town', 'trhi');
+}
+function trailCardHtml(c, cls, side) {
+  const q = !!c.living || !!c.ghost, t = trailTitle(c);
+  const pl = !q && c.place ? TC.placeAt(M, M.P[c.i], c.place, c.year) : null, fl = pl ? flagHTML(pl, c.year, flagTip(pl, c.year, 'Born at')) : '';
+  const place = q ? '<span class="trp mute">name and family only</span>' : c.place ? `<span class="trp">${esc(c.place)}${c.pest ? '<sup title="the place is an estimate" aria-hidden="true">*</sup>' : ''}</span>` : '<span class="trp mute">place not recorded</span>';
+  const yr = q ? '' : c.year != null ? (c.est ? '~' : '') + c.year : '';
+  return `<li${c.moved ? ' class="mv"' : ''}><button type="button" class="trc${cls}${c.est || c.pest ? ' est' : ''}${c.gen === 0 ? ' foc' : ''}" data-tk="${esc(c.key)}" title="${esc(t)}" aria-label="${esc(t)}"${c.gen === 0 ? ' aria-current="true"' : ''}>`
+    + `<span class="trtop">${q || !c.place ? icon('town', 'trhi') : trailKindIcon(c, pl)}<span class="trg">${TCV.genTag(c.gen)}</span>${fl ? `<span class="trfl">${fl}</span>` : ''}</span>${place}${yr ? `<span class="try">${yr}</span>` : '<span class="try mute">&nbsp;</span>'}`
+    + `<span class="trn">${esc(c.given || c.sur || c.name)}${c.given && c.sur ? ` <i>${esc(c.sur)}</i>` : ''}</span></button></li>`;
+}
+function trailPlacesHtml(i) {
+  const p = M.P[i];
+  if (p.living || p.ghost) return `<div class="trpl none"><p>${p.living ? 'May be living: no places are shown, only the name and the family.' : 'Named only: no places recorded.'}</p></div>`;
+  const rows = TCV.placeTrail(M, i), shown = rows.slice(0, TRAIL_ROWS), more = rows.length - shown.length;
+  if (!rows.length) return `<div class="trpl none"><p>No places recorded for ${esc(p.name)}.</p></div>`;
+  const RH = 28, H2 = shown.length * RH + (more > 0 ? RH : 0), mid = (shown.length * RH) / 2, SW = S.phone ? 70 : 120;
+  const curves = shown.map((r, k) => { const y = k * RH + RH / 2, w = 1.6 + Math.min(3, Math.log2(r.n)); return `<path d="M0 ${fnum(mid)}C${fnum(SW * .5)} ${fnum(mid)} ${fnum(SW * .42)} ${fnum(y)} ${SW - 6} ${fnum(y)}" class="${r.n === 1 ? 'one' : ''}" stroke-width="${fnum(w)}"/><circle cx="${SW - 4}" cy="${fnum(y)}" r="3.6"/>`; }).join('');
+  const li = shown.map(r => {
+    const pl = TC.placeAt(M, p, r.name, r.year), fl = pl ? flagHTML(pl, r.year, flagTip(pl, r.year, 'Place')) : '';
+    const nm = pl && pl.id ? `<a href="https://recordatlas.org/place/${encodeURIComponent(pl.id)}/" target="_blank" rel="noopener" title="Open ${esc(r.name)} in the Record Atlas">${esc(r.name)}</a>` : esc(r.name);
+    return `<li style="height:${RH}px" data-pl="${esc(r.name)}" data-py="${r.year == null ? '' : r.year}">${fl}${nm}<b title="${r.n} ${r.n === 1 ? 'event' : 'events'} here">${r.n}</b></li>`;
+  }).join('');
+  return `<div class="trpl"><svg class="trsvg" width="${SW}" height="${H2}" viewBox="0 0 ${SW} ${H2}" aria-hidden="true">${curves}</svg><ul aria-label="Places in the life of ${esc(p.name)}, with the number of events at each">${li}${more > 0 ? `<li class="trmore" style="height:${RH}px">+${more} more place${more === 1 ? '' : 's'}</li>` : ''}</ul></div>`;
+}
+function trailRender() {
+  let el = $('#trail');
+  const show = trailShown();
+  if (!el) {
+    if (!lensAvail()) return;
+    el = document.createElement('section'); el.id = 'trail'; el.setAttribute('aria-label', 'Direct line'); document.body.appendChild(el);
+    el.addEventListener('click', trailClick);
+  }
+  el.classList.toggle('on', show); el.hidden = !show;
+  if (!show) { document.documentElement.style.setProperty('--trail-h', '0px'); return; }
+  const i = M.byKey.get(LV.tf).i, side = trailSide(i), T = TCV.trailModel(M, i, side, { cap: TRAIL_CAP });
+  LV.model = T; el.dataset.size = String(LV.t);
+  const who = T.focus.name;
+  if (LV.t === 0) {
+    el.setAttribute('aria-label', 'Direct line of ' + who);
+    el.innerHTML = `<button type="button" class="trtab" data-tr="grow" aria-expanded="false" aria-label="Direct line of ${esc(who)}: open the strip" title="Open the direct line of ${esc(who)}">${icon('house', 'trhi')}<span class="trtl">Direct line <i aria-hidden="true">&middot;</i> <b>${esc(who)}</b></span><span class="trch" aria-hidden="true">&#9652;</span></button>`;
+    trailMeasure(); trailRefocus(); return;
+  }
+  const sides = (k, t, n, tip) => `<button type="button" class="fbs${side === k ? ' on' : ''}" data-tr="${k}" aria-pressed="${side === k}" title="${esc(tip)}"${n ? '' : ' disabled'}>${t}${n ? ` <small>${n}</small>` : ''}</button>`;
+  const line = [...T.anc, T.focus]; line.forEach((c, k) => { c.moved = k > 0 && !!c.place && !!line[k - 1].place && c.place !== line[k - 1].place; });
+  const cards = (T.more ? `<li class="trmoreg" title="${T.more} more generations are recorded further back">+${T.more} &larr;</li>` : '')
+    + (T.stub ? `<li class="trstub" title="${esc(T.stub.why)}"><span class="trg">${TCV.genTag(T.stub.gen)}</span><span class="trh mute">line ends here</span><span class="trn mute">${esc(T.stub.why)}</span></li>` : '')
+    + T.anc.map((c, k) => trailCardHtml(c, k === 0 && T.stub ? ' endc' : '', side)).join('') + trailCardHtml(T.focus, '', side);
+  const compact = LV.t === 1;
+  el.setAttribute('aria-label', 'Direct line of ' + who);
+  el.innerHTML = `<div class="trhead"><b class="trt">Direct line <small>${esc(who)}</small></b>`
+    + `<span class="fbg" role="group" aria-label="Which line">${sides('f', 'Father’s line', T.counts.f, 'Each step through the father: the surname line. ' + T.counts.f + ' generations recorded.')}${sides('m', 'Mother’s line', T.counts.m, 'Each step through the mother. ' + T.counts.m + ' generations recorded.')}</span>`
+    + `<span class="fbg trsz" role="group" aria-label="Size of this strip"><button type="button" class="fbs" data-tr="${compact ? 'grow' : 'shrink'}" aria-label="${compact ? 'Show places too' : 'Make the strip shorter'}" title="${compact ? 'Show places too' : 'Make the strip shorter'}">${compact ? 'Places' : 'Short'}</button><button type="button" class="fbs trfold" data-tr="hide" aria-expanded="true" aria-label="Fold the strip to a handle" title="Fold the strip to a thin handle (Esc)">Fold <span aria-hidden="true">&#9662;</span></button></span></div>`
+    + `<div class="trbody"><ol class="trline" aria-label="Direct line, oldest first">${cards}</ol>${compact ? '' : trailPlacesHtml(i)}</div>`
+    + (compact ? '' : `<p class="trcap">Each card carries the flag that flew over the birthplace in the birth year. Dashed: an estimate. Strong red link: the family moved.</p>`);
+  trailLink(el);
+  const ln = el.querySelector('.trbody'), fc = ln && ln.querySelector('.trc.foc'); if (ln && fc) ln.scrollLeft = Math.max(0, Math.min(ln.scrollWidth - ln.clientWidth, fc.parentElement.offsetLeft - ln.offsetLeft - 10));   // the focus end is the one that matters; the older cards scroll in from the left
+  trailMeasure(); trailRefocus();
+}
+/* the red of the links between the cards: the dark brick on a light card, a lighter one on a dark card (3:1 either way) */
+function trailLink(el) {
+  const m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(getComputedStyle(el).backgroundColor || ''), hx = m ? '#' + [1, 2, 3].map(k => (+m[k]).toString(16).padStart(2, '0')).join('') : '#ffffff';
+  el.style.setProperty('--tr-link', TCV.contrast('#9C3B28', hx) >= 3.2 ? '#9C3B28' : '#E58A72');
+}
+/* the band is the bottom-most thing: the relate dock and the controls over it are lifted by its height (--trail-h, and --dock-h includes it) */
+function trailMeasure() { document.documentElement.style.setProperty('--trail-h', Math.ceil(trailHeight()) + 'px'); if (typeof dockH === 'function') dockH(); trailLiftSoon(); }
+/* a fold or an open replaces the band's buttons; the keyboard stays on the one that took its place */
+let trailFocus = '';
+function trailRefocus() { if (!trailFocus) return; const b = $('#trail [data-tr="' + trailFocus + '"]'); trailFocus = ''; if (b) b.focus(); }
+function trailClick(e) {
+  const c = e.target.closest('[data-tk]');
+  if (c) { trailGo(c.dataset.tk); return; }
+  const b = e.target.closest('[data-tr]'); if (!b || b.disabled) return;
+  const a = b.dataset.tr;
+  if (a === 'f' || a === 'm') { LV.side = a; trailRender(); return; }
+  if (a === 'shrink') { trailFocus = 'grow'; lensTrailSize(1); } else if (a === 'grow') { trailFocus = LV.t === 0 ? 'hide' : 'shrink'; lensTrailSize(2); } else if (a === 'hide') { trailFocus = 'grow'; lensTrailSize(0); }
+}
+/* the note on a place: opens UPWARD from the band's top edge, so it never covers the band's own controls, and is kept inside the window */
+(function () {
+  let tip = null;
+  const hide = () => { if (tip) tip.classList.remove('on'); };
+  function show(li) {
+    const t = $('#trail'); if (!t || !li) return hide();
+    if (!tip) { tip = document.createElement('div'); tip.id = 'trailTip'; tip.setAttribute('role', 'tooltip'); document.body.appendChild(tip); }
+    const p = M.P[M.byKey.get(LV.tf).i], name = li.dataset.pl, yr = li.dataset.py === '' ? null : +li.dataset.py, pl = TC.placeAt(M, p, name, yr);
+    tip.innerHTML = `<b>${pl ? flagHTML(pl, yr, flagTip(pl, yr, 'Place')) : ''}${esc(name)}</b>${pl ? (eraNote(pl) || 'No ruler recorded for this place in the Atlas.') : 'This place is not in the Record Atlas yet.'}`;
+    tip.classList.add('on');
+    const r = li.getBoundingClientRect(), bt = t.getBoundingClientRect().top, w = tip.offsetWidth;
+    tip.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left)) + 'px'; tip.style.bottom = (innerHeight - bt + 8) + 'px'; tip.style.top = 'auto';
+  }
+  document.addEventListener('pointerover', e => { const li = e.target.closest && e.target.closest('#trail .trpl li[data-pl]'); if (li) show(li); else hide(); });
+  document.addEventListener('focusin', e => { const li = e.target.closest && e.target.closest('#trail .trpl li[data-pl]'); if (li) show(li); else hide(); });
+  document.addEventListener('focusout', hide); document.addEventListener('pointerleave', hide); addEventListener('scroll', hide, true);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') hide(); });
+})();
+/* anything else standing at the bottom of the window (a key, a note, a menu that opens upward) is lifted by the band's height, so nothing is drawn under it; the ones named in views.css are done in CSS, this catches the rest */
+let trailLiftQ = 0, trailLiftBusy = false;
+function trailLift() {
+  trailLiftQ = 0; if (trailLiftBusy) return; trailLiftBusy = true;
+  try {
+    const h = Math.ceil(trailHeight());
+    for (const e of document.querySelectorAll('body > *')) {
+      if (e.id === 'trail' || e.id === 'trailTip' || e.classList.contains('dock') || e.id === 'stage') { continue; }
+      const had = e.classList.contains('trlift'), cs = getComputedStyle(e);
+      if (cs.position !== 'fixed' || cs.display === 'none' || cs.visibility === 'hidden' || /^(mini|playBar|info|infoTab|fan|fanBar|fanLegend|fanTip|fanList|linesView|toast|prLegend)$/.test(e.id)) { if (had) e.classList.remove('trlift'); continue; }
+      const r = e.getBoundingClientRect(); if (!r.width || !r.height || r.height > innerHeight * 0.7) { if (had) e.classList.remove('trlift'); continue; }
+      const bottom = r.bottom + (had ? h : 0), want = h > 0 && r.top + (had ? h : 0) > innerHeight * 0.35 && bottom > innerHeight - h - 4 && bottom <= innerHeight + 2 && cs.bottom !== 'auto';
+      if (want !== had) e.classList.toggle('trlift', want);
+    }
+  } finally { trailLiftBusy = false; }
+}
+function trailLiftSoon() { if (!trailLiftQ) trailLiftQ = requestAnimationFrame(trailLift); }
+new MutationObserver(trailLiftSoon).observe(document.body, { childList: true, });
+new MutationObserver(trailLiftSoon).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class', 'hidden'] });
+/* Esc inside the open band folds it; the focus goes to the handle */
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape' || e.defaultPrevented) return;
+  const t = $('#trail'); if (!t || !t.classList.contains('on') || LV.t === 0 || !t.contains(document.activeElement)) return;
+  e.preventDefault(); e.stopImmediatePropagation(); trailFocus = 'grow'; lensTrailSize(0);
+}, true);
+function lensTrailSize(t) { LV.t = t; trailRender(); const m = $('#lensMenu'); if (m && m.classList.contains('on')) lensMenu(); save(); if (!S.cards.size) return; }
+/* a card in the band: select that person on the canvas and bring them into view (they are put on the canvas if they are not there) */
+function trailGo(key) {
+  const p = M.byKey.get(key); if (!p) return;
+  const c = S.cards.get(key);
+  if (c) { select([key]); fit([c], { maxK: 1 }); pulseCard(c); return; }
+  const v = viewCentre(), d = dropPerson(p.i, v.x, v.y); if (d) { select([key]); fit([d], { maxK: 1 }); }
+}
+
+/* ---------------- start ---------------- */
+function lensBoot(d) {
+  if (!lensAvail()) return;
+  const l = TCV.cleanLens(d && d.lens);
+  LV.g = l.g; LV.c = l.c; LV.t = l.t;
+  if (l.m === 'fan') {
+    const k = l.r && M.byKey.has(l.r) ? l.r : fanStartKey();
+    if (k && S.cards.size) { LV.came = true; fanOpen(k, { boot: true }); }
+  }
+  trailRender();
+}
+addEventListener('resize', () => { trailMeasure(); });
+
+/* findui.js — Find: the search. It lives in two places that share one query:
+ *   - the FIND TAB, the first tab of the right-hand pane: the box, one button for the archives (a small menu of ticks), the people brought on recently, and the results, which can
+ *     be clicked (they drop onto the canvas) or dragged from the pane onto it (or into the "how related" slots);
+ *   - the CENTRED SEARCH, in the middle of the canvas while it has no one on it: the same box, a short list under it, and it goes away as soon as anyone is on the canvas.
+ * The pure decisions (what the results say, the archive menu, when the centred box shows, the "/" key, where a drag may be dropped) are in find.js (TCFIND, tested by test/test-find.js). */
+
 let lastResults = [];
-function renderTabs() {
-  const on = S.filter.size;
-  $('#tabs').innerHTML = M.archives.map((a, i) => `<button class="lk-tab${S.filter.has(i) ? '' : ' off'}" style="--ac:${a.color}" data-a="${i}" title="${S.filter.has(i) ? 'Searching' : 'Not searching'} ${esc(a.name)} (${a.n.toLocaleString()} people${a.graded ? ', graded links' : ', no evidence grades'})"><i></i>${esc(a.name)}</button>`).join('') +
-    `<button class="lk-tab" data-a="all" title="Toggle all archives">${on === NA ? 'none' : 'all'}</button>`;
-  $('#cnt').textContent = `${on} of ${NA} archives`;
-  const q = $('#q'); q.placeholder = `Search ${M.P.length.toLocaleString()} ${EMBED ? (M.archives.length === 1 && M.archives[0].k !== 'you' ? 'people in the ' + M.archives[0].name + ' archive' : M.archives.length === 2 ? 'people in your file and the ' + M.archives[1].name + ' archive' : 'people in your file') : 'people'}: any order, accents optional`;
-}
-$('#q').addEventListener('input', () => runSearch());
-$('#q').addEventListener('keydown', e => { if (e.key === 'Enter' && lastResults[0]) addFromResult(lastResults[0]); if (e.key === 'Escape') { e.target.value = ''; runSearch(); e.target.blur(); } });
-function resHTML(p, via) {
-  const on = S.cards.has(p.key), a = M.archives[p.a];
-  return `<div class="res${on ? ' on' : ''}" data-i="${p.i}" style="--ac:${a.color}" title="${esc(p.name)} · ${esc(a.name)} · ${esc(TC.evidenceSummary(M, p))}"><div class="n">${esc(p.name)}</div>${via ? `<div class="via" title="Found as another form of this name, from the Record Atlas's name catalogue">as “${esc(via.charAt(0).toUpperCase() + via.slice(1))}”</div>` : ''}<div class="y">${a.k === 'you' ? '' : `<span class="ac">${esc(a.name)}</span>`}${TC.years(p)}${p.bp ? ' · ' + esc(p.bp) : ''}</div><div class="e">${esc(TC.evidenceSummary(M, p))}</div><button class="rplay" data-i="${p.i}" title="Play: build ${esc(p.name)}'s tree a generation at a time" aria-label="Play the tree of ${esc(p.name)}">${icon('play', 'lk-icon')}</button>${on ? '<span class="mk">&#10003;</span>' : ''}</div>`;
-}
-/* the search box tidies itself away about 10 seconds after a search has been made, so it stops covering the canvas. It waits while the cursor is in the box or the pointer is over it,
-   and the eye button brings it back. */
-let shelfT = 0, shelfToldOnce = false;
-function shelfArm() {
-  clearTimeout(shelfT);
-  shelfT = setTimeout(function tick() {
-    const h = document.documentElement.classList, dock = $('.dock');
-    if (h.contains('shelfoff') || !dock) return;
-    if (!S.cards.size) return;   /* nothing on the canvas: the search is the only way to start, so it stays */
-    if (document.activeElement === $('#q') || dock.matches(':hover') || S.rzArm != null) { shelfT = setTimeout(tick, 4000); return; }
-    h.add('shelfoff'); $('#bShelf').setAttribute('aria-pressed', 'false'); dockH();
-    if (!shelfToldOnce) { shelfToldOnce = true; toast('Search tucked away. The eye button brings it back.', 3200); }
-  }, 10000);
-}
+const FV = { q: '', r: null, act: -1, views: {}, menu: { pane: false, start: false }, dr: null, startOn: false };
+const START_CAP = 6;   /* the centred list is short: the first few, then "type more of the name" */
+
+/* ---------------- the last people brought onto the canvas ---------------- */
 /* THE LAST PEOPLE YOU BROUGHT ONTO THE CANVAS FROM THE SEARCH (replaces the old "Try ..." examples). Kept in memory for this visit; kept on this device only while
    Remember is ticked (the same switch as recent files), because the names come from the visitor's own file. A name that finds no one in the tree now open is not shown. */
 const RS_KEY = 'tcRecentPeople', RS_MAX = 6;
@@ -5469,75 +6501,220 @@ function recentAdd(name) {
   rsMem = [n, ...rsLoad().filter(x => x.toLowerCase() !== n.toLowerCase())].slice(0, RS_MAX); rsSave();
 }
 function recentClear() { rsMem = []; try { localStorage.removeItem(RS_KEY); } catch (e) { /* ignore */ } }
-function runSearch() {
-  const q = $('#q').value;
-  if (q.trim()) shelfArm();
-  const r = TC.search(M, q, { archives: S.filter, limit: 80 });
-  lastResults = r.list;
-  const sh = $('#shelf');
-  if (!q.trim()) {
-    const rc = recentSearches();
-    sh.innerHTML = `<div class="none">${rc.length ? `<span class="rs-l">Recent</span> ${rc.map(n => `<button class="lk-btn is-small" data-ex="${esc(n)}">${esc(n)}</button>`).join(' ')} <button class="link-quiet" data-rsclear="1" title="Forget these searches">Clear</button>` : `Search any name across ${NA === 1 ? 'your file' : 'all ' + NA + ' archives'}, then click or drag the person onto the canvas.`}</div>`;
-    return;
-  }
-  sh.innerHTML = r.list.length ? r.list.map(p => resHTML(p, r.via && r.via.get(p.i))).join('') + (r.total > r.list.length ? `<div class="none">+${r.total - r.list.length} more: type more of the name</div>` : '')
-    : `<div class="none">No one matches “${esc(q)}” in the ${S.filter.size} archive${S.filter.size === 1 ? '' : 's'} being searched${S.filter.size < NA ? '; ' + (r.perArchive.reduce((s, n) => s + n, 0) - r.total) + ' match in archives that are switched off' : ''}. Accents, case, spaces and hyphens do not matter.</div>`;
-  sh.scrollLeft = 0;
+
+/* ---------------- one result ---------------- */
+function resHTML(p, via, vid, k) {
+  const on = S.cards.has(p.key), a = M.archives[p.a], ev = TC.evidenceSummary(M, p);
+  const lab = p.name + ', ' + (a.k === 'you' ? 'your file' : a.name) + (TC.years(p) ? ', ' + TC.years(p) : '') + (on ? ', already on the canvas' : '');
+  return `<li class="res${on ? ' on' : ''}" role="option" id="${vid}O${p.i}" data-i="${p.i}" aria-selected="false" aria-label="${esc(lab)}" style="--ac:${a.color}" title="${esc(p.name)} · ${esc(a.name)} · ${esc(ev)}"><div class="n">${esc(p.name)}</div>${via ? `<div class="via" title="Found as another form of this name, from the Record Atlas's name catalogue">as “${esc(via.charAt(0).toUpperCase() + via.slice(1))}”</div>` : ''}<div class="y">${a.k === 'you' ? '' : `<span class="ac">${esc(a.name)}</span>`}${TC.years(p)}${p.bp ? ' · ' + esc(p.bp) : ''}</div><div class="e">${esc(ev)}</div><button class="rplay" type="button" data-i="${p.i}" title="Play: build ${esc(p.name)}'s tree a generation at a time" aria-label="Play the tree of ${esc(p.name)}">${icon('play', 'lk-icon')}</button>${on ? '<span class="mk" aria-hidden="true">&#10003;</span>' : ''}</li>`;
+}
+
+/* ---------------- one view of Find (the pane's, or the centred one) ---------------- */
+function findMake(kind) {
+  const big = kind === 'start', vid = big ? 'fs' : 'fp';
+  const el = document.createElement('div'); el.className = 'fv fv-' + kind;
+  el.innerHTML = `<div class="fv-row"><div class="fv-box"><span class="fv-si" aria-hidden="true">${icon('search', '')}</span><input class="fv-q" id="${vid}Q" type="search" role="combobox" aria-expanded="false" aria-controls="${vid}L" aria-autocomplete="list" aria-label="Search people" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"></div><button class="fv-arch" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="${vid}M"><span class="fv-al"></span><svg class="fv-car" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></div>`
+    + `<div class="fv-menu" id="${vid}M" role="group" aria-label="Archives to search" hidden></div>`
+    + `<p class="fv-help"></p><div class="fv-recent"></div>`
+    + `<ul class="fv-list" id="${vid}L" role="listbox" aria-label="Search results"></ul><p class="fv-note"></p><div class="sr-only" role="status" aria-live="polite"></div>`;
+  const v = { kind, vid, el, box: el.querySelector('.fv-q'), arch: el.querySelector('.fv-arch'), al: el.querySelector('.fv-al'), menu: el.querySelector('.fv-menu'), help: el.querySelector('.fv-help'),
+    recent: el.querySelector('.fv-recent'), list: el.querySelector('.fv-list'), note: el.querySelector('.fv-note'), live: el.querySelector('[role=status]'), shown: [] };
+  v.box.placeholder = big ? 'Type a name, in any order' : 'Search people: any order, accents optional';
+  v.box.addEventListener('input', () => { FV.q = v.box.value; runSearch(v.kind); });
+  v.box.addEventListener('keydown', e => findKey(e, v));
+  v.arch.addEventListener('click', () => findMenu(v, !FV.menu[kind]));
+  v.menu.addEventListener('change', e => { const c = e.target.closest('[data-fai]'); if (!c) return; S.filter = TCFIND.archToggle(S.filter, +c.dataset.fai, NA); findFilterChanged(); });
+  v.menu.addEventListener('click', e => { const b = e.target.closest('[data-fa]'); if (!b) return; S.filter = b.dataset.fa === 'all' ? TCFIND.archAll(NA) : TCFIND.archNone(); findFilterChanged(); });
+  v.menu.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); findMenu(v, false); v.arch.focus(); } });
+  v.recent.addEventListener('click', e => {
+    if (e.target.closest('[data-rsclear]')) { recentClear(); findRender(); return; }
+    const b = e.target.closest('[data-fx]'); if (b) { FV.q = b.dataset.fx; runSearch(); v.box.focus(); }
+  });
+  v.list.addEventListener('click', e => {   /* a click with no pointer behind it (a screen reader's, or Enter on a focused result) adds; a mouse or finger goes through findDrag */
+    const pb = e.target.closest('.rplay'); if (pb) { e.stopPropagation(); e.preventDefault(); startPlay(+pb.dataset.i); return; }
+    const r = e.target.closest('.res'); if (r && e.detail === 0) pickResult(+r.dataset.i);
+  });
+  findDrag(v);
+  return v;
+}
+function pickResult(i) { if (S.rzArm != null) rzDrop(i); else addFromResult(i); }
+
+/* the keys in the box: Down and Up walk the results (the focus stays in the box, aria-activedescendant says which), Enter drops the chosen one (else the first),
+   Esc gives the focus back to the canvas (and leaves what was typed) */
+function findKey(e, v) {
+  if (e.key === 'Escape') { e.stopPropagation(); e.preventDefault(); findBlur(); return; }
+  const n = v.shown.length;
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { if (!n) return; e.preventDefault(); FV.act = TCFIND.stepActive(FV.act, n, e.key === 'ArrowDown' ? 'down' : 'up'); findActive(v, true); return; }
+  if (e.key === 'Enter') { const k = TCFIND.enterPick(FV.act, n); if (k >= 0) { e.preventDefault(); pickResult(v.shown[k].i); } }
+}
+function findActive(v, scroll) {
+  v.list.querySelectorAll('.res').forEach((r, k) => { const on = k === FV.act; r.classList.toggle('act', on); r.setAttribute('aria-selected', String(on)); if (on && scroll) r.scrollIntoView({ block: 'nearest' }); });
+  const cur = FV.act >= 0 && v.shown[FV.act] ? v.vid + 'O' + v.shown[FV.act].i : '';
+  if (cur) v.box.setAttribute('aria-activedescendant', cur); else v.box.removeAttribute('aria-activedescendant');
+}
+function findBlur() { const a = document.activeElement; if (a && a.blur) a.blur(); const st = $('#stage'); if (st) st.focus({ preventScroll: true }); }
+
+/* the archive menu: one button that says how many archives are being searched, and under it a tick for each, with All and None */
+function findMenu(v, open) {
+  FV.menu[v.kind] = open && NA > 1;
+  v.arch.setAttribute('aria-expanded', String(FV.menu[v.kind]));
+  v.menu.hidden = !FV.menu[v.kind];
+  if (FV.menu[v.kind]) findMenuDraw(v);
+}
+function findMenuDraw(v) {
+  const m = TCFIND.archMenu(M.archives, S.filter);
+  v.menu.innerHTML = `<div class="fv-mh"><button type="button" class="fv-mb" data-fa="all"${m.all ? ' aria-pressed="true"' : ''}>All</button><button type="button" class="fv-mb" data-fa="none"${m.none ? ' aria-pressed="true"' : ''}>None</button></div><div class="fv-mg">`
+    + m.items.map(x => `<label class="fv-mi" style="--ac:${x.color}" title="${esc(x.name)}: ${x.n.toLocaleString()} people${x.graded ? ', graded links' : ', no evidence grades'}"><input type="checkbox" data-fai="${x.i}"${x.checked ? ' checked' : ''}><i aria-hidden="true"></i><span>${esc(x.name)}</span></label>`).join('') + '</div>';
+}
+function findFilterChanged() { runSearch(); save(); }
+
+/* ---------------- drawing ---------------- */
+function findRender() {
+  const q = FV.q, m = M.archives, on = S.filter, anyFocus = Object.values(FV.views).find(v => v.el.contains(document.activeElement));
+  const target = anyFocus || (FV.startOn ? FV.views.start : FV.views.pane);
+  Object.values(FV.views).forEach(v => {
+    const big = v.kind === 'start', cap = big ? START_CAP : 0, mod = TCFIND.resultsModel(q, FV.r, on.size, NA, cap), list = FV.r ? FV.r.list.slice(0, mod.shown) : [];
+    v.shown = mod.kind === 'some' ? list : [];
+    if (v.box.value !== q) v.box.value = q;
+    v.arch.hidden = NA < 2; v.al.textContent = TCFIND.archLabel(on.size, NA); v.arch.title = TCFIND.archTip(m, on); v.arch.classList.toggle('some', on.size < NA);
+    if (NA < 2) { FV.menu[v.kind] = false; v.menu.hidden = true; } else if (FV.menu[v.kind]) findMenuDraw(v);
+    v.help.hidden = !big; if (big) v.help.textContent = TCFIND.helpLine(m, on, EMBED);
+    const rc = mod.kind === 'idle' ? recentSearches() : [];
+    v.recent.hidden = !rc.length;
+    v.recent.innerHTML = rc.length ? `<span class="rs-l">Recent</span> ${rc.map(n => `<button class="lk-btn is-small" type="button" data-fx="${esc(n)}">${esc(n)}</button>`).join(' ')} <button class="link-quiet" type="button" data-rsclear="1" title="Forget these searches">Clear</button>` : '';
+    v.list.innerHTML = v.shown.map(p => resHTML(p, FV.r.via && FV.r.via.get(p.i), v.vid)).join('');
+    v.list.hidden = !v.shown.length;
+    v.note.textContent = mod.text; v.note.hidden = !mod.text; v.note.classList.toggle('bad', mod.kind === 'none' || mod.kind === 'noarch');
+    v.box.setAttribute('aria-expanded', String(!!v.shown.length));
+    v.live.textContent = v === target ? mod.say : '';
+    findActive(v, false);
+  });
+}
+function runSearch(src) {
+  const q = FV.q;
+  FV.r = TC.search(M, q, { archives: S.filter, limit: 80 });
+  lastResults = FV.r.list; FV.act = -1;
+  findRender();
+}
+function runSearchMarks() {
+  Object.values(FV.views).forEach(v => v.list.querySelectorAll('.res').forEach(el => {
+    const on = S.cards.has(M.P[+el.dataset.i].key); el.classList.toggle('on', on);
+    const lab = el.getAttribute('aria-label') || '', has = /, already on the canvas$/.test(lab);
+    if (on && !has) el.setAttribute('aria-label', lab + ', already on the canvas'); else if (!on && has) el.setAttribute('aria-label', lab.replace(/, already on the canvas$/, ''));
+    const mk = el.querySelector('.mk'); if (on && !mk) el.insertAdjacentHTML('beforeend', '<span class="mk" aria-hidden="true">&#10003;</span>'); if (!on && mk) mk.remove();
+  }));
 }
 function addFromResult(p, pt) {
-  shelfArm();
   const i = p.i !== undefined ? p.i : p;
   if (M.P[i] && M.P[i].name) recentAdd(M.P[i].name);
   const rel = S.relateFrom, wasEmpty = !S.cards.size;
-  const c = pt ? dropPerson(i, pt.x, pt.y) : (() => { const v = viewCentre(); const sel = [...S.sel].map(k => S.cards.get(k)).filter(Boolean)[0]; return dropPerson(i, sel ? sel.x + W / 2 + W + 60 : v.x, sel ? sel.y + H / 2 + 30 : v.y); })();
+  S.keepFind = S.tab === 'find';   /* someone searching in the pane stays on Find while they bring people in; clicking a card afterwards shows that person as usual */
+  let c;
+  try { c = pt ? dropPerson(i, pt.x, pt.y) : (() => { const v = viewCentre(); const sel = [...S.sel].map(k => S.cards.get(k)).filter(Boolean)[0]; return dropPerson(i, sel ? sel.x + W / 2 + W + 60 : v.x, sel ? sel.y + H / 2 + 30 : v.y); })(); }
+  finally { S.keepFind = false; }
   refreshAll();
   if (c) { if (wasEmpty && S.view.k < 0.7) fit([c], { maxK: 1, ms: 380 }); else if (!pt) ensureVisible([c]); if (rel && rel !== c.key) showPath(rel, c.key); }
-  runSearchMarks();
+  runSearchMarks(); findRender();
 }
-function runSearchMarks() { document.querySelectorAll('#shelf .res').forEach(el => { const on = S.cards.has(M.P[+el.dataset.i].key); el.classList.toggle('on', on); const mk = el.querySelector('.mk'); if (on && !mk) el.insertAdjacentHTML('beforeend', '<span class="mk">&#10003;</span>'); if (!on && mk) mk.remove(); }); }
 
-/* drag a result onto the canvas, or tap to drop it */
-(function shelfDrag() {
-  const sh = $('#shelf'); let d = null;
-  sh.addEventListener('click', e => { const b = e.target.closest('.rplay'); if (b) { e.stopPropagation(); e.preventDefault(); startPlay(+b.dataset.i); } });
-  sh.addEventListener('pointerdown', e => {
+/* ---------------- drag a result onto the canvas, or tap to drop it ---------------- */
+function findZone(x, y) {
+  const h = document.documentElement.classList, rect = e => { if (!e) return null; const r = e.getBoundingClientRect(); return { left: r.left, right: r.right, top: r.top, bottom: r.bottom }; };
+  const info = $('#info'), dock = $('.dock');
+  return TCFIND.dropZone({ x, y, rz: h.contains('rzopen') ? rect($('#rz')) : null, info: info.classList.contains('on') ? rect(info) : null, dock: h.contains('rzopen') ? rect(dock) : null });
+}
+function findDrag(v) {
+  v.list.addEventListener('pointerdown', e => {
     if (e.target.closest('.rplay')) return;
     const el = e.target.closest('.res'); if (!el) return;
-    d = { el, id: e.pointerId, x: e.clientX, y: e.clientY, ghost: null, touch: e.pointerType === 'touch', pan: false, sl: sh.scrollLeft };
+    FV.dr = { el, id: e.pointerId, x: e.clientX, y: e.clientY, ghost: null, touch: e.pointerType === 'touch', v };
   });
-  /* the strip scrolls sideways: the wheel (a mouse's up/down turns it), and a mostly-sideways drag with a mouse; pulling a card UP or out still drops it on the canvas */
-  sh.addEventListener('wheel', e => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { sh.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false });
-  let bg = null;
-  sh.addEventListener('pointerdown', e => { if (e.pointerType === 'touch' || e.target.closest('.res')) return; bg = { id: e.pointerId, x: e.clientX, sl: sh.scrollLeft }; sh.setPointerCapture(e.pointerId); });
-  sh.addEventListener('pointermove', e => { if (bg && e.pointerId === bg.id) sh.scrollLeft = bg.sl - (e.clientX - bg.x); });
-  sh.addEventListener('pointerup', () => { bg = null; });
-  window.addEventListener('pointermove', e => {
-    if (!d || e.pointerId !== d.id || d.touch) return;
-    if (!d.ghost && !d.pan && Math.abs(e.clientX - d.x) > 7 && Math.abs(e.clientX - d.x) > 2 * Math.abs(e.clientY - d.y)) d.pan = true;
-    if (d.pan) { sh.scrollLeft = d.sl - (e.clientX - d.x); return; }
-    if (!d.ghost && Math.hypot(e.clientX - d.x, e.clientY - d.y) > 7) { d.ghost = d.el.cloneNode(true); d.ghost.className = 'res ghost'; d.ghost.style.setProperty('--ac', d.el.style.getPropertyValue('--ac')); document.body.appendChild(d.ghost); }
-    if (d.ghost) { d.ghost.style.left = e.clientX + 'px'; d.ghost.style.top = e.clientY + 'px'; const zo = rzOver(e.clientX, e.clientY); $('#rz').classList.toggle('over', zo); const over = !zo && !e.target.closest('.dock'); $('#stage').classList.toggle('dropok', over); }
+}
+window.addEventListener('pointermove', e => {
+  const d = FV.dr; if (!d || e.pointerId !== d.id || d.touch) return;
+  if (!d.ghost && Math.hypot(e.clientX - d.x, e.clientY - d.y) > 7) { d.ghost = d.el.cloneNode(true); d.ghost.removeAttribute('id'); d.ghost.className = 'res ghost'; d.ghost.style.setProperty('--ac', d.el.style.getPropertyValue('--ac')); document.body.appendChild(d.ghost); }
+  if (d.ghost) { d.ghost.style.left = e.clientX + 'px'; d.ghost.style.top = e.clientY + 'px'; const z = findZone(e.clientX, e.clientY); $('#rz').classList.toggle('over', z === 'rz'); $('#stage').classList.toggle('dropok', z === 'canvas'); }
+});
+window.addEventListener('pointerup', e => {
+  const d = FV.dr; if (!d || e.pointerId !== d.id) return;
+  FV.dr = null;
+  const i = +d.el.dataset.i;
+  $('#stage').classList.remove('dropok'); $('#rz').classList.remove('over');
+  if (d.ghost) { d.ghost.remove(); const z = findZone(e.clientX, e.clientY); if (z === 'rz') rzDrop(i); else if (z === 'canvas') addFromResult(i, toWorld(e.clientX, e.clientY)); }
+  else pickResult(i);
+});
+window.addEventListener('pointercancel', () => { const d = FV.dr; FV.dr = null; if (d && d.ghost) d.ghost.remove(); $('#stage').classList.remove('dropok'); $('#rz').classList.remove('over'); });
+
+/* ---------------- the pane's tab ---------------- */
+/* renderInfo draws the pane again on every selection, so the Find view is made once and put back each time: what was typed, which result is chosen, where the list was
+   scrolled and whether the box had the focus all survive */
+function findPanel() { return '<div id="findHost" class="fh"></div>'; }
+function findKeep() {
+  const v = FV.views.pane; if (!v) return null;
+  return { focus: document.activeElement === v.box, s: v.box.selectionStart, e: v.box.selectionEnd, top: v.list.scrollTop, mtop: v.el.scrollTop };
+}
+function findMount(keep) {
+  const host = $('#findHost'), v = FV.views.pane; if (!host || !v) return;
+  host.appendChild(v.el); runSearchMarks();
+  if (keep) { v.list.scrollTop = keep.top; if (keep.focus) { v.box.focus({ preventScroll: true }); try { v.box.setSelectionRange(keep.s, keep.e); } catch (x) { /* ignore */ } } }
+}
+/* open the right-hand pane on Find; with focus, the cursor goes in the box */
+function findOpen(focus) {
+  S.tab = 'find'; S.infoOpen = true; renderInfo(); syncButtons();
+  const v = FV.views.pane; if (focus && v) { v.box.focus(); v.box.select(); }
+}
+const startVisible = () => !!FV.startOn;
+/* "find someone": the centred box when the canvas is empty, else the pane's Find tab */
+function findFocus(focus) {
+  if (startVisible()) { if (focus !== false) { const v = FV.views.start; v.box.focus(); v.box.select(); } return; }
+  findOpen(focus !== false);
+}
+
+/* ---------------- the centred search ---------------- */
+function startSync() {
+  const h = document.documentElement.classList;
+  const want = TCFIND.startShown({ cards: S.cards.size, fan: typeof fanIsOn === 'function' && fanIsOn(), compare: document.body.classList.contains('pr'), names: document.documentElement.getAttribute('data-theme') === 'names',
+    lines: !!($('#linesView') && $('#linesView').classList.contains('on')), play: typeof PLAY !== 'undefined' && PLAY.on });
+  const s = $('#start'); if (!s) return;
+  if (want !== FV.startOn) { FV.startOn = want; s.hidden = !want; h.toggle('startOn', want); if (want) findRender(); if (typeof trailRender === 'function') trailRender(); }   /* an emptied canvas has no direct line: the band comes down with it */
+}
+function startTexts() {
+  const h = $('#stH'), note = $('#stNote');
+  if (SA && QS.get('ex') === '1') { h.textContent = 'An invented example family'; note.hidden = false; note.textContent = 'Press the folder button (top right) to open a GEDCOM and draw your own tree: it is read in this browser and never uploaded.'; }
+  else if (EMBED) h.textContent = M.archives.length === 1 && M.archives[0].k !== 'you' ? 'Who are you looking for in the ' + M.archives[0].name + ' archive?' : 'Who are you looking for in your tree?';
+}
+
+function findBoot() {
+  FV.views.pane = findMake('pane'); FV.views.start = findMake('start');
+  $('#stBox').appendChild(FV.views.start.el);
+  startTexts();
+  const b = $('#bFind'); if (b) { b.innerHTML = icon('search'); b.onclick = () => findFocus(true); }
+  document.addEventListener('pointerdown', e => {   /* a click anywhere else closes an open archive menu */
+    Object.values(FV.views).forEach(v => { if (FV.menu[v.kind] && !v.arch.contains(e.target) && !v.menu.contains(e.target)) findMenu(v, false); });
   });
-  window.addEventListener('pointerup', e => {
-    if (!d || e.pointerId !== d.id) return;
-    if (d.pan) { d = null; return; }
-    const el = d.el, ghost = d.ghost; d = null;
-    $('#stage').classList.remove('dropok');
-    const i = +el.dataset.i;
-    $('#rz').classList.remove('over');
-    if (ghost) { ghost.remove(); const dock = $('.dock').getBoundingClientRect(); if (rzOver(e.clientX, e.clientY)) rzDrop(i); else if (e.clientY < dock.top) addFromResult(i, toWorld(e.clientX, e.clientY)); }
-    else if (S.rzArm != null) rzDrop(i);
-    else addFromResult(i);
-  });
-  window.addEventListener('pointercancel', () => { if (d && d.ghost) d.ghost.remove(); d = null; $('#stage').classList.remove('dropok'); $('#rz').classList.remove('over'); });
-  $('#shelf').addEventListener('click', e => { if (e.target.closest('[data-rsclear]')) { recentClear(); runSearch(); return; } const b = e.target.closest('[data-ex]'); if (b) { $('#q').value = b.dataset.ex; runSearch(); } });
-  $('#tabs').addEventListener('click', e => {
-    const b = e.target.closest('.lk-tab[data-a]'); if (!b) return;
-    if (b.dataset.a === 'all') S.filter = S.filter.size === NA ? new Set() : new Set(M.archives.map((_, i) => i));
-    else { const a = +b.dataset.a; S.filter.has(a) ? S.filter.delete(a) : S.filter.add(a); }
-    renderTabs(); runSearch(); save();
-  });
-})();
+  runSearch(); startSync();
+  { const mo = new MutationObserver(startSync); mo.observe(document.body, { attributes: true, attributeFilter: ['class'] }); mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] }); const lv = $('#linesView'); if (lv) mo.observe(lv, { attributes: true, attributeFilter: ['class'] }); }
+  if (FV.startOn && !EMBED && !S.phone) { const v = FV.views.start; setTimeout(() => { if (FV.startOn && document.activeElement === document.body) v.box.focus({ preventScroll: true }); }, 60); }
+}
+
+/* ui.js — (the search is findui.js)  pan / zoom / drag, the side panel, pathways, themes, phone mode, start-up. */
+
+/* ---------------- selection ---------------- */
+function select(keys, add) {
+  if (!add) S.sel.clear();
+  keys.forEach(k => S.sel.has(k) && add ? S.sel.delete(k) : S.sel.add(k));
+  S.cards.forEach(c => c.el.classList.toggle('sel', S.sel.has(c.key)));
+  if (S.sel.size && !(S.tab === 'find' && S.keepFind) && S.tab !== 'path' && S.tab !== 'options' && S.tab !== 'next' && S.tab !== 'sources' && S.tab !== 'ai' && S.tab !== 'fix' && S.tab !== 'compare') S.tab = 'person';
+  if (S.sel.size && S.tab === 'path' && !S.path) S.tab = 'person';
+  if (typeof prOnSelect === 'function') prOnSelect(keys);
+  renderInfo(); syncButtons();
+  if (typeof lensOnSelect === 'function') lensOnSelect();
+  /* the side panel is folded away: say where the person's details are */
+  if (S.sel.size && !S.phone && !$('#info').classList.contains('on')) { const t = $('#infoTab'); if (t) { t.classList.remove('nudge'); void t.offsetWidth; t.classList.add('nudge'); } }
+}
+function hideHint() { startSync(); }   /* the centred search is there while the canvas has no one on it (findui.js) */
+
+/* ---------------- Find: the search, in the right-hand pane and (while the canvas is empty) in the middle of the canvas: see findui.js ---------------- */
 
 /* ---------------- canvas: pan, zoom, drag cards ---------------- */
 (function canvasInput() {
@@ -5546,7 +6723,7 @@ function runSearchMarks() { document.querySelectorAll('#shelf .res').forEach(el 
   st.addEventListener('pointerdown', e => {
     if (e.target.closest('.card') || e.target.closest('#pairs button') || e.target.closest('[data-br]') || e.target.closest('#namesview .nm') || e.target.closest('#namesview .nml') || e.target.closest('#namesview .nmcouples') || e.target.closest('.tt .tg')) return;
     ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY }); st.setPointerCapture(e.pointerId);
-    if (ptrs.size === 1) { pan = { x: e.clientX, y: e.clientY, vx: S.view.x, vy: S.view.y, moved: false }; closePop(); }
+    if (ptrs.size === 1) { pan = { x: e.clientX, y: e.clientY, vx: S.view.x, vy: S.view.y, moved: false, tgt: e.target }; closePop(); }
     if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), k: S.view.k, cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2, vx: S.view.x, vy: S.view.y }; pan = null; }
   });
   st.addEventListener('pointermove', e => {
@@ -5562,7 +6739,7 @@ function runSearchMarks() { document.querySelectorAll('#shelf .res').forEach(el 
   const end = e => {
     if (!ptrs.has(e.pointerId)) return; ptrs.delete(e.pointerId);
     if (ptrs.size < 2) pinch = null;
-    if (pan && ptrs.size === 0) { if (!pan.moved) { select([]); if (S.relateFrom) cancelRelate(); } else save(); pan = null; st.classList.remove('panning'); }
+    if (pan && ptrs.size === 0) { if (!pan.moved) { if (!(typeof lensClick === 'function' && lensClick(pan.tgt))) { select([]); if (S.relateFrom) cancelRelate(); } } else save(); pan = null; st.classList.remove('panning'); }
     if (ptrs.size === 0) st.classList.remove('panning');
   };
   st.addEventListener('pointerup', end); st.addEventListener('pointercancel', end);
@@ -5646,7 +6823,7 @@ function viewsMenu() {
 function openViewsMenu(on) {
   const m = $('#viewsMenu'), b = $('#bViews'); if (!m || !b) return;
   if (on == null) on = !m.classList.contains('on');
-  if (on) { if (typeof openMainMenu === 'function') openMainMenu(false); openBloodMenu(false); viewsMenu(); }
+  if (on) { if (typeof openMainMenu === 'function') openMainMenu(false); openBloodMenu(false); if (typeof openLensMenu === 'function') openLensMenu(false); viewsMenu(); }
   m.classList.toggle('on', on); b.setAttribute('aria-expanded', String(on)); b.classList.toggle('on', on);
   if (on) { const i = $('#vwName'); if (i && !S.phone) i.focus({ preventScroll: true }); }
 }
@@ -5656,7 +6833,7 @@ function openView(id) {
   if (!d || !d.cards.length) { toast('None of the people in that view are in the tree that is open', 3600); return; }
   snapshot(); clearAll(true);
   if (d.look) setTheme(d.look);
-  restore(d); S.view = d.view; applyView(); S.path = null; clearPathUi();
+  restore(d); setCanvasView(d.view); S.path = null; clearPathUi();
   S.cards.forEach(c => { c.el.classList.remove('pop'); refreshCard(c); });
   refreshAll(); drawEdges(); save(); syncButtons(); hideHint(); runSearchMarks(); renderInfo(); openViewsMenu(false);
   if (S._restorePath) { const [a, b] = S._restorePath; S._restorePath = null; showPath(a, b, { quiet: true, noPlace: true }); }
@@ -5677,7 +6854,7 @@ document.addEventListener('click', e => {
   const V = VK(), li = t.closest('li'), id = li && li.dataset.id, act = t.dataset.vw;
   if (!V) return;
   if (act === 'save') {
-    const r = V.save($('#vwName').value, Object.assign(serialise(), { look: curLook() }));
+    const r = V.save($('#vwName').value, Object.assign(serialise(), { look: curLook(), lens: null }));
     if (r && r.ok) { toast('Saved “' + r.name + '”', 2800); viewsMenu(); } else toast(r && r.err || 'That could not be saved', 4200);
   } else if (act === 'open') openView(id);
   else if (act === 'share') shareView(id);
@@ -5897,7 +7074,7 @@ function goHTML(p) {
 }
 function personPanel() {
   const keys = [...S.sel];
-  if (!keys.length) return `<h3>Nobody selected</h3><p style="color:var(--lk-soft);font-weight:700">Click a card to see what the archives hold about them, or search above and drop someone in.</p>${S.cards.size ? `<div class="row"><button class="lk-btn is-small" data-do="legend">How to read the lines</button></div>` : ''}`;
+  if (!keys.length) return `<h3>Nobody selected</h3><p style="color:var(--lk-soft);font-weight:700">Click a card to see what the archives hold about them, or open Find (press /) and drop someone in.</p>${S.cards.size ? `<div class="row"><button class="lk-btn is-small" data-do="legend">How to read the lines</button></div>` : ''}`;
   if (keys.length >= 2) {
     const a = M.byKey.get(keys[0]), b = M.byKey.get(keys[1]);
     return `<h3>Two people selected</h3><p><b>${esc(a.name)}</b> (${esc(M.archives[a.a].name)}) and <b>${esc(b.name)}</b> (${esc(M.archives[b.a].name)})</p><div class="row"><button class="lk-btn is-primary" data-do="relate2">How are they related?</button></div>`;
@@ -6058,7 +7235,7 @@ function recentHTML() {
 function openMainMenu(on) {
   const m = $('#mainMenu'), b = $('#bMenu'); if (!m) return;
   if (on == null) on = !m.classList.contains('on');
-  if (on) { openBloodMenu(false); openViewsMenu(false); mainMenu(); if (SA) recentLoad(); }
+  if (on) { openBloodMenu(false); openViewsMenu(false); if (typeof openLensMenu === 'function') openLensMenu(false); mainMenu(); if (SA) recentLoad(); }
   m.classList.toggle('on', on); b.setAttribute('aria-expanded', String(on)); b.classList.toggle('on', on);
 }
 /* the line key is an overlay in the same corner as the menu, not a tab in the side panel */
@@ -6120,7 +7297,7 @@ function bloodMenu() {
 function openBloodMenu(on) {
   const m = $('#bloodMenu'), b = $('#bBlood'); if (!m) return;
   if (on == null) on = !m.classList.contains('on');
-  if (on) { if (typeof openMainMenu === 'function') openMainMenu(false); openViewsMenu(false); bloodMenu(); }
+  if (on) { if (typeof openMainMenu === 'function') openMainMenu(false); openViewsMenu(false); if (typeof openLensMenu === 'function') openLensMenu(false); bloodMenu(); }
   m.classList.toggle('on', on); b.setAttribute('aria-expanded', String(on)); b.classList.toggle('on', on || S.blood.tint);
 }
 function setTint(on, ref) {
@@ -6192,9 +7369,11 @@ function optionsPanel() {
 function renderInfo() {
   const prevScroll = S.pr && S.tab === 'compare' && $('#info .ib') ? $('#info .ib').scrollTop : null;
   const prevFocus = (() => { const a = document.activeElement, inf = $('#info'); if (!(S.pr && S.tab === 'compare' && a && inf && inf.contains(a))) return null; for (const k of ['data-pr-dc', 'data-pr-slot', 'data-pr-copy', 'data-pr-showa']) { const v = a.getAttribute(k); if (v) return [k, v]; } return null; })();   /* the paired Compare list keeps its place when it is drawn again */
-  const el = $('#info'), tabs = [['person', 'Person'], ['sources', 'Sources'], ['next', 'Where next'], ['ai', 'AI prompt'], ...(fixList() ? [['fix', 'Fix list' + fixTabN()]] : []), ...(cmpAvail() ? [['compare', 'Compare']] : []), ['path', 'Path'], ...(S.tab === 'options' ? [['options', 'Options']] : [])];
-  const body = S.tab === 'person' ? personPanel() : S.tab === 'sources' ? sourcesPanel() : S.tab === 'next' ? nextPanel() : S.tab === 'ai' ? aipPanel() : S.tab === 'fix' ? fixPanel() : S.tab === 'compare' ? comparePanel() : S.tab === 'path' ? pathPanel() : optionsPanel();
-  el.innerHTML = `<div class="ih">${tabs.map(([k, n]) => `<button class="lk-tab${S.tab === k ? ' on' : ''}" data-tab="${k}">${n}${k === 'path' && S.path ? ' &bull;' : ''}</button>`).join('')}<span style="flex:1"></span><button class="lk-tab" data-tab="close" title="Close panel" aria-label="Close panel">&times;</button></div><div class="ib">${body}</div>`;
+  const keepF = findKeep(), el = $('#info'), tabs = [['find', 'Find'], ['person', 'Person'], ['sources', 'Sources'], ['next', 'Where next'], ['ai', 'AI prompt'], ...(fixList() ? [['fix', 'Fix list' + fixTabN()]] : []), ...(cmpAvail() ? [['compare', 'Compare']] : []), ['path', 'Path'], ...(S.tab === 'options' ? [['options', 'Options']] : [])];
+  const body = S.tab === 'find' ? findPanel() : S.tab === 'person' ? personPanel() : S.tab === 'sources' ? sourcesPanel() : S.tab === 'next' ? nextPanel() : S.tab === 'ai' ? aipPanel() : S.tab === 'fix' ? fixPanel() : S.tab === 'compare' ? comparePanel() : S.tab === 'path' ? pathPanel() : optionsPanel();
+  el.innerHTML = `<div class="ih" role="tablist" aria-label="Side panel">${tabs.map(([k, n]) => `<button class="lk-tab${S.tab === k ? ' on' : ''}" data-tab="${k}" role="tab" id="itab-${k}" aria-selected="${S.tab === k}" aria-controls="ipanel"${k === 'find' ? ' aria-keyshortcuts="/" aria-label="Find" title="Find people (press /)"' : ''}>${k === 'find' ? icon('search', 'fvti') : n}${k === 'path' && S.path ? ' &bull;' : ''}</button>`).join('')}<span style="flex:1"></span><button class="lk-tab" data-tab="close" title="Close panel" aria-label="Close panel">&times;</button></div><div class="ib${S.tab === 'find' ? ' ibf' : ''}" id="ipanel" role="tabpanel" aria-labelledby="itab-${S.tab}">${body}</div>`;
+  el.classList.toggle('isfind', S.tab === 'find');
+  if (S.tab === 'find') findMount(keepF);
   if (S.infoOpen !== false) el.classList.add('on');
   if (typeof prPostRender === 'function') prPostRender(prevScroll, prevFocus);
   if (S.tab === 'fix') fixMount();
@@ -6213,6 +7392,11 @@ function tabEdges(ih) { if (!ih) return; ih.classList.toggle('mr', ih.scrollLeft
   addEventListener('pointerup', () => { if (d && d.moved) dragged = Date.now(); d = null; });
   info.addEventListener('click', e => { if (Date.now() - dragged < 250 && e.target.closest('.ih')) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
 })();
+$('#info').addEventListener('keydown', e => {   /* the tabs: the arrow keys move between them */
+  const tb = e.target.closest && e.target.closest('[role=tab]'); if (!tb || !/^Arrow(Left|Right|Up|Down)$/.test(e.key)) return;
+  const all = [...$('#info').querySelectorAll('[role=tab]')], k = all.indexOf(tb) + (/Right|Down/.test(e.key) ? 1 : -1), nx = all[(k + all.length) % all.length];
+  e.preventDefault(); S.tab = nx.dataset.tab; renderInfo(); const f = $('#info [data-tab="' + S.tab + '"]'); if (f) f.focus();
+});
 $('#info').addEventListener('click', e => {
   const sg = e.target.closest('[data-srgo]'); if (sg) { const t = $('#' + sg.dataset.srgo); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
   const go = e.target.closest('[data-tab-go]'); if (go) { e.preventDefault(); S.tab = go.dataset.tabGo; renderInfo(); return; }
@@ -6293,9 +7477,8 @@ $('#pop').addEventListener('click', e => {
   if (b.dataset.d === 'x') closePop(); else decide(id, b.dataset.d === 'suggested' ? null : b.dataset.d);
 });
 
-
 /* ---------------- toolbar, themes, phone ---------------- */
-function dockH() { const d = $('.dock'); document.documentElement.style.setProperty('--dock-h', (document.documentElement.classList.contains('shelfoff') ? 0 : d.offsetHeight) + 'px'); }
+function dockH() { const d = $('.dock'), on = document.documentElement.classList.contains('rzopen'); document.documentElement.style.setProperty('--dock-h', (on ? d.offsetHeight : 0) + (typeof trailHeight === 'function' ? Math.ceil(trailHeight()) : 0) + 'px'); }   /* the dock is only the two relate slots now, and only while they are open; the Trail band, when it is up, is the bottom-most thing: everything that stands on the dock stands on it too */
 function syncGenButton() { const b = $('#bGen'); if (b) { b.classList.toggle('on', !!S.opts.gens); b.setAttribute('aria-pressed', String(!!S.opts.gens)); } }
 function toggleGens() {
   S.opts.gens = !S.opts.gens; syncGenButton(); drawBands(); save();
@@ -6315,8 +7498,9 @@ function syncButtons() {
 function syncUi() { hideHint(); syncButtons(); }
 function clearCanvas() {
   if (!S.cards.size) return;
+  if (typeof fanIsOn === 'function' && fanIsOn()) lensSet('canvas');
   snapshot(); clearAll(); refreshAll(); drawEdges(); hideHint(); renderInfo(); save(); runSearchMarks();
-  clearTimeout(shelfT); { const h = document.documentElement.classList; h.remove('shelfoff'); $('#bShelf').setAttribute('aria-pressed', 'true'); dockH(); }   /* a cleared canvas starts again: the search box comes back and stays until something is searched and added */
+  startSync();   /* a cleared canvas starts again: the centred search comes back */
   toast('Cleared. Undo brings it back.');
 }
 const THEMES = ['sticker', 'paper', 'ground', 'lanes', 'countries', 'names'];
@@ -6332,7 +7516,8 @@ function setTheme(t) {
   }
   try { localStorage.setItem('loamTheme', t); } catch (e) { /* ignore */ }
   if (typeof prOnTheme === 'function') prOnTheme();
-  drawEdges(); miniDraw(); if (typeof drawNames === 'function') drawNames(true); if (S.tab === 'options') renderInfo();
+  if (typeof lensOnTheme === 'function') lensOnTheme();
+  drawEdges(); miniDraw(); if (typeof drawNames === 'function') drawNames(true); if (S.tab === 'options') renderInfo(); startSync();
 }
 function initTheme() {
   let t = null; try { t = localStorage.getItem('loamTheme'); } catch (e) { /* ignore */ }
@@ -6380,20 +7565,20 @@ function wireToolbar() {
   set('#bViews', 'views'); { const mm = document.createElement('div'); mm.id = 'viewsMenu'; mm.setAttribute('role', 'dialog'); mm.setAttribute('aria-label', 'Saved views'); document.body.appendChild(mm); $('#bViews').onclick = () => openViewsMenu(); if (!viewsOn()) $('#bViews').style.display = 'none'; }
   set('#bBlood', 'blood'); { const mm = document.createElement('div'); mm.id = 'bloodMenu'; mm.setAttribute('role', 'dialog'); mm.setAttribute('aria-label', 'Bloodline'); document.body.appendChild(mm); $('#bBlood').onclick = () => openBloodMenu(); }
   set('#bMenu', 'menu'); { const mm = document.createElement('div'); mm.id = 'mainMenu'; mm.setAttribute('role', 'menu'); mm.setAttribute('aria-label', 'Menu'); document.body.appendChild(mm); $('#bMenu').onclick = () => openMainMenu(); const lc = document.createElement('div'); lc.id = 'legendCard'; lc.setAttribute('role', 'dialog'); lc.setAttribute('aria-label', 'How to read the lines'); document.body.appendChild(lc); }
-  set('#bArrange', 'arrange'); set('#bGen', 'layers'); set('#bShelf', 'search'); $('#si').innerHTML = icon('search', ''); set('#bUndo', 'undo'); set('#bFit', 'fit'); set('#bRel', 'relate'); set('#bInfo', 'info'); set('#bClear', 'clear'); set('#bMore', 'more');
+  set('#bArrange', 'arrange'); set('#bGen', 'layers'); set('#bUndo', 'undo'); set('#bFit', 'fit'); set('#bRel', 'relate'); set('#bInfo', 'info'); set('#bClear', 'clear'); set('#bMore', 'more');
   set('#zIn', 'plus'); set('#zOut', 'minus');
   { const b = $('#bFix'); if (b) { b.hidden = !SA; b.innerHTML = icon('fix') + '<span class="fxn" aria-hidden="true"></span>'; fixBtn(); b.onclick = () => { try { window.parent.postMessage({ tcFixList: true }, location.origin); } catch (e) { /* no page around */ } }; } }
+  if (typeof lensWire === 'function') lensWire();
   { const b = $('#bTheme'); if (b) { b.hidden = !SA; lookBtn(); b.onclick = () => { const n = lookNext(lookChosen()); S.lookChosen = n; lookBtn(); try { window.parent.postMessage({ tcLookSet: n }, location.origin); } catch (e) { /* no page around */ } }; } }
   if (EMBED) addEventListener('message', e => {
   if (e.origin !== location.origin || !e.data) return;
-  if (e.data.tcLook) { const k = e.data.tcLook; if (k === 'auto') { try { localStorage.removeItem('loamTheme'); } catch (x) { /* ignore */ } initTheme(); if (typeof prOnTheme === 'function') prOnTheme(); drawEdges(); miniDraw(); if (typeof drawNames === 'function') drawNames(true); if (S.tab === 'options') renderInfo(); } else setTheme(k); return; }   // the Look was changed in Settings
+  if (e.data.tcLook) { const k = e.data.tcLook; if (k === 'auto') { try { localStorage.removeItem('loamTheme'); } catch (x) { /* ignore */ } initTheme(); if (typeof prOnTheme === 'function') prOnTheme(); if (typeof lensOnTheme === 'function') lensOnTheme(); drawEdges(); miniDraw(); if (typeof drawNames === 'function') drawNames(true); if (S.tab === 'options') renderInfo(); } else setTheme(k); return; }   // the Look was changed in Settings
   if (e.data.tcKeep) { const mm = $('#mainMenu'); if (mm && mm.classList.contains('on')) mainMenu(); return; }   // the six words were turned on, or a save finished
   if (e.data.tcLinks) { if (S.tab !== 'options') renderInfo(); return; }   // not while the Options box is being typed in: a redraw would take the cursor away
   if (e.data.tcFixCount !== undefined) { fixBtn(); clearTimeout(fixT); fixT = setTimeout(() => { refreshAll(); if (S.tab === 'fix') fixTabLabel(); }, 120); return; }   // a tick or "left as is" on the Fix list page: the badge, the "!" marks, the tab's number
   if (Array.isArray(e.data.tcShow)) { fixShow(e.data.tcShow); return; }   // "Show on canvas" on the Fix list page
   if (!e.data.tcFix) return; refreshAll(); renderInfo(); syncButtons(); fixBtn();
 });
-  $('#bShelf').onclick = () => { clearTimeout(shelfT); const h = document.documentElement.classList; h.toggle('shelfoff'); $('#bShelf').setAttribute('aria-pressed', String(!h.contains('shelfoff'))); dockH(); };
   $('#bUndo').onclick = undo;
   $('#bArrange').onclick = () => { if (!S.busy) doArrange(); };
   $('#bGen').onclick = toggleGens;
@@ -6431,14 +7616,12 @@ function wireToolbar() {
     for (const ev of ['dragenter', 'dragover']) document.addEventListener(ev, e => e.preventDefault());
     document.addEventListener('drop', e => { e.preventDefault(); send(e.dataTransfer && e.dataTransfer.files[0]); });
   }
-  if (EMBED) { const h = $('#hint'); h.firstChild.textContent = (M.archives.length === 1 && M.archives[0].k !== 'you' ? 'Search anyone in the ' + M.archives[0].name + ' archive, and drop them here ' : 'Search anyone in your tree, and drop them here '); const sm = h.querySelector('small'); if (sm) sm.innerHTML = 'Pull up their parents, all the way back, one generation at a time.<br>Click anyone, then "Where to from here" for the order to look for their records.'; }   // the example people are in the eight archives, not in a visitor's own file
-  if (SA && QS.get('ex') === '1') { const h = $('#hint'); h.firstChild.textContent = 'This is an invented example family. '; const sm = h.querySelector('small'); if (sm) sm.innerHTML = 'Press the folder button (top right) to open a GEDCOM and draw your own tree: it is read in this browser and never uploaded.<br>Search anyone, drop them here, then click them and choose "Where to from here".'; }
   addEventListener('keydown', e => {
-    const typing = /INPUT|TEXTAREA/.test(document.activeElement.tagName);
+    const ae = document.activeElement, typing = TCFIND.isTyping(ae && ae.tagName, ae && ae.isContentEditable);
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z' && !typing) { e.preventDefault(); undo(); }
     else if (e.key === 'Escape') { if (S.relateFrom) cancelRelate(); closePop(); select([]); }
     else if (typing) return;
-    else if (e.key === '/') { e.preventDefault(); $('#q').focus(); }
+    else if (TCFIND.slashPlan({ key: e.key, ctrl: e.ctrlKey, meta: e.metaKey, alt: e.altKey, typing, start: startVisible() })) { e.preventDefault(); findFocus(true); }
     else if (e.key.toLowerCase() === 'f') fit();
     else if ((e.key === 'Delete' || e.key === 'Backspace') && S.sel.size) { snapshot(); [...S.sel].forEach(k => { const c = S.cards.get(k); if (c) removeCard(c); }); S.path = null; clearPathUi(); refreshAll(); drawEdges(); hideHint(); save(); runSearchMarks(); renderInfo(); }
   });
@@ -6464,9 +7647,8 @@ function rzToggle(show) {
   const h = document.documentElement.classList, on = show == null ? !h.contains('rzopen') : !!show;
   h.toggle('rzopen', on); $('#bRel').setAttribute('aria-pressed', String(on));
   if (on) {
-    h.remove('shelfoff'); $('#bShelf').setAttribute('aria-pressed', 'true');
     if (S.rz[0] == null && S.rz[1] == null && S.sel.size === 1) { const c = S.cards.get([...S.sel][0]); if (c) { S.rz[0] = personOf(c).i; S.rzArm = 1; } }
-    rzRender();
+    rzRender(); if (S.rzArm != null) findFocus(true); else if (!startVisible()) findOpen(false);
   } else S.rzArm = null;
   dockH(); syncButtons();
 }
@@ -6513,7 +7695,7 @@ function rzClear() {
     const x = e.target.closest('[data-rx]');
     if (x) { const k = +x.dataset.rx; S.rz[k] = null; S.rzArm = null; if (S.path || S.noPath) { S.path = null; S.noPath = null; clearPathUi(); refreshAll(); drawEdges(); S.tab = 'person'; renderInfo(); syncButtons(); } rzRender(); e.stopPropagation(); return; }
     if (e.target.closest('#rzClr')) { rzClear(); return; }
-    const s = e.target.closest('.rzs.empty'); if (s) { S.rzArm = S.rzArm === +s.dataset.s ? null : +s.dataset.s; rzRender(); if (S.rzArm != null) { document.documentElement.classList.remove('shelfoff'); dockH(); $('#q').focus(); } }
+    const s = e.target.closest('.rzs.empty'); if (s) { S.rzArm = S.rzArm === +s.dataset.s ? null : +s.dataset.s; rzRender(); if (S.rzArm != null) findFocus(true); }
   });
   z.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('empty')) { e.preventDefault(); e.target.click(); } });
   rzRender();
@@ -6585,7 +7767,7 @@ function ibtn(act, ic, tip, on) { return `<button type="button" class="ibtn${on 
 /* ---------------- start-up ---------------- */
 function boot() {
   buildFlagSprite();
-  initTheme(); setPhone(); if (S.phone) S.infoOpen = false; wireToolbar(); wireLines(); renderTabs(); runSearch(); dockH();
+  initTheme(); setPhone(); if (S.phone) S.infoOpen = false; wireToolbar(); wireLines(); findBoot(); dockH();
   loadMark();
   const d = loadSaved();
   if (d && d.look) setTheme(d.look);   /* a saved or shared view remembers its look; set before the cards come, as the Countries look re-arranges any that are there */
@@ -6601,6 +7783,7 @@ function boot() {
   syncButtons();
   runSearchMarks();
   if (typeof prBoot === 'function') prBoot();
+  if (typeof lensBoot === 'function') lensBoot(d);
   if (SA && d && d.cards) { try { window.parent.postMessage({ tcRestored: { n: S.cards.size, of: d.of || d.cards.length } }, location.origin); } catch (e) { /* no page around */ } }   // the page says "your saved canvas came back" and offers Start fresh
   /* a link to one person (the archive page sends ?p=<slug of the person's page>, the wrapper hands it over as RR.carryPerson): put that person on the canvas and select them, unless the visitor's saved canvas already holds them */
   if (EMBED) { const R = window.parent && window.parent.RR, slug = R && typeof R.carryPerson === 'string' ? R.carryPerson : '';

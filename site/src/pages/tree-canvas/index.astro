@@ -98,6 +98,7 @@ import { u } from "../../lib/url.js";
     </section>
 
     <p class="stsettings"><button type="button" class="stlink" id="stSettings">Settings</button> <span class="stsub">living people, links to MyHeritage and Ancestry, the look, remembering files</span></p>
+    <p class="stsettings stsub" id="stRoots">The tree views not brought here yet (Surnames, Lifespans, Place lanes and more) are still on <a href={u("/roots/")}>Tree views (older page)</a>.</p>
 
     <details class="sthelp" id="stHelp">
       <summary>About these files and links</summary>
@@ -114,6 +115,7 @@ import { u } from "../../lib/url.js";
       <h1 id="yfTitle" tabindex="-1">Your file</h1>
       <p class="stsub" id="yfWhat"></p>
       <p class="stsub"><button type="button" class="stlink" id="yfSettings">Settings</button>: living people, links, the look, remembering files.</p>
+      <p class="stsub">The views not brought here yet are still on <a id="yfRoots" href={u("/roots/")}>Tree views (older page)</a>, where you can open this file again.</p>
     </header>
 
     <section class="yfsec" aria-labelledby="yfGlanceT">
@@ -173,6 +175,7 @@ import { u } from "../../lib/url.js";
       <div class="fxtabs" role="tablist" aria-label="Which list">
         <button type="button" role="tab" class="fxtab" id="fxt-people" aria-selected="true" aria-controls="fxpane-people">People <span class="fxtn" id="fxt-people-n" hidden></span></button>
         <button type="button" role="tab" class="fxtab" id="fxt-places" aria-selected="false" aria-controls="fxpane-places" tabindex="-1">Places <span class="fxtn" id="fxt-places-n" hidden></span></button>
+        <button type="button" role="tab" class="fxtab" id="fxt-orphans" aria-selected="false" aria-controls="fxpane-orphans" tabindex="-1">Orphans <span class="fxtn" id="fxt-orphans-n" hidden></span></button>
       </div>
     </header>
 
@@ -211,6 +214,7 @@ import { u } from "../../lib/url.js";
       <div id="fx-body"></div>
     </div>
     <div id="fxpane-places" class="fxpane" role="tabpanel" aria-labelledby="fxt-places" hidden></div>
+    <div id="fxpane-orphans" class="fxpane" role="tabpanel" aria-labelledby="fxt-orphans" hidden></div>
   </div>
 </main>
 <aside id="sg" hidden role="dialog" aria-modal="true" aria-labelledby="sgTitle">

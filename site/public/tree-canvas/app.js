@@ -17,6 +17,7 @@ import { store as dec, fixes } from '/roots/js/decisions.js';   // the Fix list'
 import { createWorkspace } from '/tree-canvas/fixlist-view.js';   // the full Fix list page
 import { rowEl, mk as fxMk } from '/tree-canvas/fixlist-rows.js';   // the Fix list's row, drawn here and, for one person, in the canvas's side panel
 import { personIndex } from '/tree-canvas/fixlist.js';
+import { buildOrphans } from '/roots/js/orphans.js';   // the Orphans tab: who is in no tree, by birthplace, with the Atlas's collections
 
 const $ = s => document.querySelector(s);
 const base = new URL('/roots/', location.href).href;   // the reader fetches its place files relative to this, as it does on /roots/
@@ -34,7 +35,7 @@ const loadNames = () => namesP || (namesP = Promise.all(['/given-names.json', '/
    profile or tree link gives the site code and tree number. An Ancestry export needs nothing pasted. Plain links; the page sends nothing. */
 let mhc = null, mhFile = null, anc = null, mhText = '', mhNote = '', ancSite = loadSite();
 const knownP = fetch(new URL('known-sites.json', base)).then(r => r.ok ? r.json() : {}).catch(() => ({}));
-const tellCanvas = () => { const f = $('#cv'); if (f && f.contentWindow) f.contentWindow.postMessage({ tcLinks: 1 }, location.origin); if (typeof fxw !== 'undefined' && !$('#fx').hidden) { fxw.draw(); pw.draw(); } };
+const tellCanvas = () => { const f = $('#cv'); if (f && f.contentWindow) f.contentWindow.postMessage({ tcLinks: 1 }, location.origin); if (typeof fxw !== 'undefined' && !$('#fx').hidden) { fxw.draw(); pw.draw(); orw.draw(); } };
 const links = {
   get: () => ({ mh: !!mhc, mhFile: !!mhFile, text: mhText, note: mhNote, anc: !!anc, ancTree: anc ? anc.tree : '', ancSite }),
   url: (id, name) => { const p = profileUrl(mhc, id, name), t = treeUrl(mhc, id), a = personUrl(anc, id, ancSite); return p || a ? { mh: p, tree: t, anc: a } : null; },
@@ -238,7 +239,7 @@ const isTreeJson = bytes => { try { return /^\uFEFF?\s*\{/.test(new TextDecoder(
 let curLink = null, curSize = 0;   // the address a file was fetched from (if it was), and the file's size
 let openTo = null;   // the page to land on once the file is read: 'fix' is the "Fix list" button on a kept file (as on /roots/); it opens the Fix list as soon as the reader has made it
 function start(bytes, name, via, link, to) {
-  closeYF(true); closeFX(true); lastM = null; fixMsg = null; cmpFix = null; placesMsg = null; pw.setData(null, null, ''); openTo = to || null;
+  closeYF(true); closeFX(true); lastM = null; fixMsg = null; cmpFix = null; placesMsg = null; pw.setData(null, null, ''); orw.setData(null, null, ''); openTo = to || null;
   const json = isTreeJson(bytes);
   curName = name || null; curVia = via || null; curLink = link || null; curSize = bytes.byteLength; curHead = name && !json ? headInfo(bytes) : (json ? { from: 'tree.json', tree: '' } : null);
   if (curVia && curHead) curHead = { ...curHead, from: curVia };   // the last-used list says where a file came from
@@ -267,6 +268,7 @@ function start(bytes, name, via, link, to) {
       const prevMh = mhFile; mhFile = m.mh || null; anc = m.anc || null;
       if (!prevMh || !mhFile || prevMh.guid !== mhFile.guid) { mhc = null; mhText = ''; mhNote = ''; applyTreeLink(); }   // a different tree: start from what is remembered or known for it
       window.RR = { tree: m.tree, atlas: m.atlas, loadNames, links, fixApi };
+      orphansRefresh();
       lastM = m; if (!$('#yf').hidden) drawYF(); if (!$('#sg').hidden) drawSG(true);
       if (m.first || !cur) { const ppl = m.report && m.report.people && m.report.people.individuals | 0; setCur(example ? null : curLink ? { t: 'link', ref: curLink } : curName ? { t: 'file', ref: curName, size: curSize, people: ppl } : null, curLink ? W.linkLabel(curLink) : curName); }
       else flushWork();
@@ -416,7 +418,7 @@ function drawYF() {
   if (lastM && lastM.report) {
     reportInto(lastM, rep, { h: 'h3' });
     const need = (lastM.review || []).filter(i => REVIEW_TIERS.includes(i.tier)).length;
-    if (need) { const p = el('p', 'small', n0(need) + ' place texts need a look: the Atlas could not settle them. Choosing a place for each is done on Places to review in Roots & Routes, where you open the same file again. '); const a = el('a', null, 'Open Roots & Routes'); a.href = '/roots/'; a.target = '_blank'; a.rel = 'noopener'; p.append(a); rep.append(p); }
+    if (need) { const p = el('p', 'small', n0(need) + ' place texts need a look: the Atlas could not settle them. They are listed on the Places tab of the Fix list, each with the Atlas’s suggestions to copy; the correction is made in your own tree program. '); rep.append(p); }
   } else rep.append(el('p', 'small', RR.archive ? 'An archive publishes its tree already read, so there is no import report for it: its own site holds the sources and the method.' : 'There is no report for this file.'));
   /* the export: a GEDCOM read here has one; a tree.json and an archive's tree do not */
   const on = !!(lastM && lastM.kind !== 'tree' && worker), off = $('#yfExpOff');
@@ -750,14 +752,15 @@ addEventListener('drop', e => { dragging(false); if ($('#start').hidden) return;
    plus, while Compare is on, what the Compare view found between the file and the archives (the canvas hands that over in memory: tcFixCompare). A tick or a "left as is" is kept under the
    same keys, in the same store, as /roots/ keeps them (decisions.js), so the two pages agree and, with the six words on, so do the devices. The canvas's side panel draws one person's own
    rows with the same row (fixApi.personRows). Nothing here is sent anywhere. ---- */
+const TABS = ['people', 'places', 'orphans'];
 let fixMsg = null, cmpFix = null, placesMsg = null, fxTab = 'people', fxFrom = null, fxWas = null, pIdx = null, pIdxFor = null;
 dec.autoOn();   // keeping starts on, on this device only, unless the visitor has switched it off (decisions.js says why)
 const toCanvas = msg => { const f = $('#cv'); if (f && f.contentWindow && !f.hidden) f.contentWindow.postMessage(msg, location.origin); };
-/* The Places tab is the same pane again: its markup is the People pane's, copied once, with every id prefixed (fxp-) so the two can sit in one document */
-{
-  const src = $('#fxpane-people'), dst = $('#fxpane-places'), c = src.cloneNode(true);
-  for (const e of [c, ...c.querySelectorAll('[id]')]) e.id = e.id.replace(/^fx-/, 'fxp-').replace(/^fxpane-people$/, 'fxpane-places-in');
-  c.querySelectorAll('[aria-describedby]').forEach(e => e.setAttribute('aria-describedby', e.getAttribute('aria-describedby').replace(/^fx-/, 'fxp-')));
+/* The Places and Orphans tabs are the same pane again: their markup is the People pane's, copied once, with every id prefixed (fxp-, fxo-) so the three can sit in one document */
+for (const [to, pfx] of [['places', 'fxp'], ['orphans', 'fxo']]) {
+  const src = $('#fxpane-people'), dst = $('#fxpane-' + to), c = src.cloneNode(true);
+  for (const e of [c, ...c.querySelectorAll('[id]')]) e.id = e.id.replace(/^fx-/, pfx + '-').replace(/^fxpane-people$/, 'fxpane-' + to + '-in');
+  c.querySelectorAll('[aria-describedby]').forEach(e => e.setAttribute('aria-describedby', e.getAttribute('aria-describedby').replace(/^fx-/, pfx + '-')));
   dst.append(...c.childNodes);
 }
 const setTabN = (k, n) => { const b = $('#fxt-' + k + '-n'); if (!b) return; b.textContent = n > 99999 ? '99999+' : String(n); b.hidden = !n; b.parentElement.title = n + (n === 1 ? ' row' : ' rows') + ' still to do'; };
@@ -776,24 +779,41 @@ const pw = createWorkspace({
   onCount: open => setTabN('places', open), drawKeep: () => fxw.drawKeep(),
   suggest: raw => { if (worker) worker.postMessage({ cmd: 'suggest', raw }); },
 });
-fxw.addPeer(pw);
+/* The Orphans tab: the people in no tree, grouped by where they were born, each group with the record collections the Atlas knows for that place and those years (orphans.js). Same store, same
+   filters, the same rows; it never joins, edits or draws anything. A row that is exactly one of the People list's "Groups not joined" shares its key, so one tick is one decision. */
+const orw = createWorkspace({
+  root: $('#fxpane-orphans'), kind: 'orphans', pfx: 'fxo', dec, fixes, links: () => links, fileName: () => curName || '', syncOn: () => syncState().on, livingHidden: () => hide,
+  capInfo: rows => (window.raResearchFile && window.raResearchFile.capInfo ? window.raResearchFile.capInfo(rows) : null),
+  show: keys => { closeFX(); toCanvas({ tcShow: keys }); }, openSettings: () => openSG(),
+  onCount: open => setTabN('orphans', open), drawKeep: () => fxw.drawKeep(),
+  catalogue: () => fetch(new URL('data/surname-catalogue.json', base)).then(r => r.ok ? r.json() : null).catch(() => null),
+});
+fxw.addPeer(pw); fxw.addPeer(orw);
+/* from the tree the reader made (and, once it has come, the People list's "Groups not joined", whose keys a matching row takes); people whose names the reader withheld are counted, not listed */
+function orphansRefresh() {
+  const R = window.RR;
+  if (!R || !R.tree) { orw.setData(null, null, ''); return; }
+  let apart = []; try { const a = fixMsg && fixMsg.sections && fixMsg.sections.find(x => x.key === 'apart'); apart = a ? a.items : []; } catch (e) { apart = []; }
+  try { orw.setData(buildOrphans(R.tree, R.atlas, { apart, omitLiving: true }), null, ''); } catch (e) { if (window.console) console.error('orphans', e); orw.setData(null, null, ''); }
+}
 function askFix() { if (worker && lastM && lastM.kind !== 'tree') { worker.postMessage({ cmd: 'checklist', living: !hide, ancestry: ancSite }); worker.postMessage({ cmd: 'places', living: !hide, ancestry: ancSite }); } }
-/* People or Places: one pane shows at a time. The tab strip is a WAI-ARIA tablist (arrow keys move, Home and End jump). */
+/* People, Places or Orphans: one pane shows at a time. The tab strip is a WAI-ARIA tablist (arrow keys move, Home and End jump). */
+const WS = { people: fxw, places: pw, orphans: orw };
 function showTab(k, focus) {
   fxTab = k;
-  for (const t of ['people', 'places']) { const b = $('#fxt-' + t), on = t === k; b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; $('#fxpane-' + t).hidden = !on; }
+  for (const t of TABS) { const b = $('#fxt-' + t), on = t === k; b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; $('#fxpane-' + t).hidden = !on; }
   for (const e of document.querySelectorAll('#fx .fxpeople-only')) e.hidden = k !== 'people';
-  const to = k === 'places' ? pw : fxw; to.adopt(k === 'places' ? fxw : pw);   // a row both lists have (the same place in "Choose a place" and here) is one decision
+  const to = WS[k]; for (const o of TABS.filter(t => t !== k)) to.adopt(WS[o]);   // a row more than one list has (a place in "Choose a place" and in Places, a group in "Groups not joined" and in Orphans) is one decision
   to.present(null);
   if (focus) $('#fxt-' + k).focus();
 }
-for (const t of ['people', 'places']) $('#fxt-' + t).onclick = () => showTab(t, false);
+for (const t of TABS) $('#fxt-' + t).onclick = () => showTab(t, false);
 $('#fxt-people').parentElement.addEventListener('keydown', e => {
-  const k = e.key === 'ArrowRight' || e.key === 'ArrowLeft' ? (fxTab === 'people' ? 'places' : 'people') : e.key === 'Home' ? 'people' : e.key === 'End' ? 'places' : null;
+  const at = TABS.indexOf(fxTab), k = e.key === 'ArrowRight' ? TABS[(at + 1) % TABS.length] : e.key === 'ArrowLeft' ? TABS[(at + TABS.length - 1) % TABS.length] : e.key === 'Home' ? TABS[0] : e.key === 'End' ? TABS[TABS.length - 1] : null;
   if (k) { e.preventDefault(); showTab(k, true); }
 });
 /* the list changed (a new fix list from the reader, or Compare found something): rebuild the model, and tell the canvas (a full refresh when the rows themselves changed) */
-function fixRefresh(rows) { fxw.setData(fixMsg, cmpFix, cur ? cur.key : ''); pIdx = null; toCanvas(rows ? { tcFix: 1 } : { tcFixCount: fxw.tally().open }); }
+function fixRefresh(rows) { fxw.setData(fixMsg, cmpFix, cur ? cur.key : ''); orphansRefresh(); pIdx = null; toCanvas(rows ? { tcFix: 1 } : { tcFixCount: fxw.tally().open }); }
 /* what the canvas's side panel asks: counts for a person and their rows, drawn into the canvas's own document with the same row component */
 const fixApi = {
   ready: () => !!(fixMsg || cmpFix),
@@ -829,12 +849,12 @@ function openFX(person) {
 }
 function closeFX(quiet) {
   const f = $('#fx'); if (!f || f.hidden) return;
-  f.hidden = true; fxw.st.flush(); pw.st.flush(); const w = fxWas || {}; $('#cv').inert = !!w.cv; $('#yf').inert = !!w.yf; $('#start').inert = !!w.start;
+  f.hidden = true; fxw.st.flush(); pw.st.flush(); orw.st.flush(); const w = fxWas || {}; $('#cv').inert = !!w.cv; $('#yf').inert = !!w.yf; $('#start').inert = !!w.start;
   if (!quiet) { const c = $('#cv'); if (c && !c.hidden) { try { c.focus(); } catch (e) { /* no focus to give */ } } else if (fxFrom && fxFrom.isConnected) { try { fxFrom.focus(); } catch (e) { /* ok */ } } }
 }
 $('#fx-back').onclick = () => closeFX();
 addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#fx').hidden && $('#sg').hidden) { e.preventDefault(); closeFX(); } });
-addEventListener('pagehide', () => { fxw.st.flush(); pw.st.flush(); });
+addEventListener('pagehide', () => { fxw.st.flush(); pw.st.flush(); orw.st.flush(); });
 
 {
   /* from an archive: its icon sends ?archive=<key>; failing that, the page the visitor came from (some browsers send only its origin, which is enough) */

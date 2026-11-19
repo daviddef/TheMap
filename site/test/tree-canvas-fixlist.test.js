@@ -211,8 +211,9 @@ test("the row CSS in the canvas build is the page's, and the canvas has the Fix 
   assert.match(tpl, /id="bFix"/); assert.match(tpl, /tcFixList/); assert.match(tpl, /tcFixCompare/); assert.match(tpl, /Open the full Fix list/); assert.match(tpl, /Nothing to fix for /);
   assert.doesNotMatch(tpl, /FIX_SHOW|fixAllHTML/, "the right pane no longer holds the whole list");
 });
-test("the Roots & Routes page's own Fix tab is untouched", () => {
-  const rr = read("public/roots/js/app.js"); assert.match(rr, /function fixRow\(s, i\)/); assert.match(rr, /function drawFix\(\)/); assert.match(rr, /openAllBar/); assert.match(rr, /dec\.put\(i\.key, 'a', true\)/);
+test("the Roots & Routes page no longer has a Fix tab (removed 19 Nov 2026); the shared modules the canvas Fix list reads are still there", () => {
+  const rr = read("public/roots/js/app.js"); assert.doesNotMatch(rr, /function fixRow\(s, i\)|function drawFix\(\)|openAllBar/);
+  assert.match(read("public/roots/js/decisions.js"), /export const store/); assert.match(read("public/roots/js/checklist.js"), /export function issuesByPerson/);
 });
 
 /* ---- priority and order ---- */

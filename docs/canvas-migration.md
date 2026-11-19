@@ -54,7 +54,7 @@ Phase: 0 inventory, 1 Your file, 2 Settings, 3 Tree lenses, 4 Places and the fix
 | eras | Move | A lens: the selection's lives against the regimes of their time | 3 | M | lens frame |
 | timeline | Move | A lens: lifespans of the selection | 3 | M | lens frame |
 | surnames | Move | A lens on the whole file; the same surname catalogue as the Atlas | 3 | M | lens frame |
-| orphans | Already a tab | Top-level tab in R&R (#65); decide in phase 3 whether the canvas needs a lens | 3 | S | none |
+| orphans | Move as a checklist (David, 19 Nov: "it needs to go as a tab in the fix list") | An **Orphans** tab beside People and Places in the canvas's Fix list: the by-place, by-collection groups of detached families and orphans, the Atlas's collections as links, copy buttons, a tick and "Leave as is", kept in the same decisions store (and under the same key as People's "Groups not joined" where the group is the same). No new storage, no editing. R&R's own tab stays until David says it becomes a pointer | 4 | built | Fix list parity |
 
 ### Everything around the tabs
 

@@ -4,36 +4,39 @@
 
    BIG LISTS. A file can have thousands of rows. Only the section headers are drawn at first; a section's rows are drawn when it is opened, one page (100) at a time, and only
    the section that changed is redrawn when a row is ticked. Counts come from one pass over the rows (tally), never from the page. */
-import { buildModel, tally, visible, toOpen, rrView, createState, arranged, catalogueChoices, nameMatcher, PRIORITY, PLACES, ORDERS, ROW_SORTS, BATCH, PAGE } from './fixlist.js';
+import { buildModel, tally, visible, toOpen, rrView, createState, arranged, catalogueChoices, nameMatcher, PRIORITY, PLACES, ORPHANS, ORDERS, ROW_SORTS, BATCH, PAGE } from './fixlist.js';
 import { NEEDS } from '../roots/js/placereview.js';
-import { rowEl, mk, FX_ICON } from './fixlist-rows.js';
+import { rowEl, mk, FX_ICON, hoistRepeats, stripRepeats } from './fixlist-rows.js';
 import { checklistText, checklistCsv, describe } from '../roots/js/checklist.js';
 import { rowsFrom, fileTextOf, parseRows, summarise } from '../roots/js/decisions.js';
 
 const n0 = n => Number(n).toLocaleString('en');
-const PRIO_N = Object.keys(PRIORITY).length, PLACE_N = Object.keys(PLACES.table).length;   // sections ranked (see PRIORITY and PLACE_PRIORITY in fixlist.js)
+const PRIO_N = Object.keys(PRIORITY).length, PLACE_N = Object.keys(PLACES.table).length, ORPH_N = Object.keys(ORPHANS.table).length;   // sections ranked (see PRIORITY, PLACE_PRIORITY and ORPHAN_PRIORITY in fixlist.js)
 const today = () => new Date().toISOString().slice(0, 10);
 /* the two sort choices are remembered on this device only (a convenience: nothing else reads them); the page works without storage */
 const keep = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { /* private window or blocked storage */ } return null; };
 
-/* TWO LISTS, ONE PAGE: cfg.kind 'places' makes the Places tab's workspace (placereview.js rows), cfg.pfx the prefix its element ids use ('fxp'), so the two panes can sit in one document
-   from one piece of markup. The People workspace also owns the shared "keeping" section (cfg.keepRoot) and is told of the other with addPeer, so that saving, loading and forgetting
-   decisions cover both lists.
+/* THREE LISTS, ONE PAGE: cfg.kind 'places' makes the Places tab's workspace (placereview.js rows) and 'orphans' the Orphans tab's (orphans.js rows), cfg.pfx the prefix their element
+   ids use ('fxp', 'fxo'), so the panes can sit in one document from one piece of markup. The People workspace also owns the shared "keeping" section (cfg.keepRoot) and is told of
+   the others with addPeer, so that saving, loading and forgetting decisions cover every list.
 
    cfg: { root, dec (the store), fixes (the My research summary store), links, show(keys), openSettings(), fileName(), syncOn(), livingHidden() (the canvas's living lock), capInfo(rows) (what the six-word copy leaves out, or null where that copy is not in play), onCount(open), onLists(), doc } */
 export function createWorkspace(cfg) {
-  const root = cfg.root, doc = root.ownerDocument, PL = cfg.kind === 'places', pfx = cfg.pfx || 'fx', KIND = PL ? PLACES : null;
+  const root = cfg.root, doc = root.ownerDocument, PL = cfg.kind === 'places', OR = cfg.kind === 'orphans', pfx = cfg.pfx || 'fx', KIND = PL ? PLACES : OR ? ORPHANS : null, PEOPLE = pfx === 'fx';
   const pid = id => pfx + id.slice(2);                                                   // 'fx-sec-x' -> 'fxp-sec-x' for the Places pane
   const $ = s => root.querySelector(pfx === 'fx' ? s : s.replace(/#fx-/g, '#' + pfx + '-'));
   const byId = id => root.querySelector('#' + pid(id));
   const keepRoot = cfg.keepRoot || root, $k = s => keepRoot.querySelector(s), peers = [];
+  const said = new Map();   // section key -> the lines its rows share, shown once above them (see hoistRepeats)
   let m = null, cmp = null, salt = '', model = buildModel(null, null, '', KIND), mode = 'open', groupFilter = '', q = '', personId = null, personName = '', loaded = null, collapse = false;
-  const OK = PL ? 'ra-fixp-order' : 'ra-fix-order', RK = PL ? 'ra-fixp-rows' : 'ra-fix-rows';
-  let order = keep(OK) in ORDERS ? keep(OK) : 'priority', rowsHow = keep(RK) in ROW_SORTS ? keep(RK) : 'useful';
+  /* the sort choices and picked research names are remembered on this device for the People and Places lists (a convenience: nothing else reads them); the Orphans list keeps nothing of its own, so the only thing it stores is the decisions, in the store the other lists use */
+  const keepL = (k, v) => (OR ? null : keep(k, v));
+  const OK = PL ? 'ra-fixp-order' : 'ra-fix-order', RK = PL ? 'ra-fixp-rows' : 'ra-fix-rows';   // (the Orphans list never reads or writes either: see keepL)
+  let order = keepL(OK) in ORDERS ? keepL(OK) : 'priority', rowsHow = keepL(RK) in ROW_SORTS ? keepL(RK) : 'useful';
   let autoOpen = false;
   /* RESEARCH NAMES: the visitor picks the names (or an archive's names) their research is about; rows that name anyone with any spelling of them are all that is shown. picks: 'n:<family id>' or 'a:<archive>' -> {label, forms} */
   let choices = null, nameTest = null, catAsked = false; const picks = new Map();
-  const prioN = PL ? PLACE_N : PRIO_N;
+  const prioN = PL ? PLACE_N : OR ? ORPH_N : PRIO_N;
   const open = new Map(), shown = new Map(), opened = new Set(), listeners = [];
   let tl = null, sumTimer = 0;
   const st = createState(cfg.dec, { saved: () => { drawKeep(); document.dispatchEvent(new CustomEvent('ra-progress-changed')); } });
@@ -54,6 +57,25 @@ export function createWorkspace(cfg) {
     $('#fx-empty').textContent = 'Nothing to review: every place in this file was found exactly.';
     const fl = $('#fx-fold').closest('label'), lk = doc.createElement('label'); lk.className = 'fxck'; lk.innerHTML = '<input type="checkbox" id="' + pfx + '-likely"><span>Has a likely candidate</span>'; fl.after(lk);
   }
+  /* the Orphans pane keeps the research-name filter (the surnames of a group are searched in every spelling) and drops what only the other lists have: one person's rows, and the Atlas notes */
+  if (OR) {
+    const who = $('#fx-who'); if (who) who.remove();
+    const fold = $('#fx-fold'); if (fold) fold.closest('label').remove();
+    const q0 = $('#fx-q'); q0.placeholder = 'a place, a surname, a person'; q0.previousElementSibling.textContent = 'Search by place or name';
+    $('#fx-empty').textContent = 'Nothing to connect: every person in this file is joined to a tree.';
+    /* one quiet line of counts and an (i) that says, in plain words, what the words mean */
+    const sum = mk(doc, 'div', 'fxsum'), line = mk(doc, 'p', 'stsub fxcounts'), what = mk(doc, 'div', 'fxwhat'), ib = mk(doc, 'button', 'fx-ib'); line.id = pfx + '-counts'; line.setAttribute('role', 'status'); what.id = pfx + '-what'; what.hidden = true;
+    ib.type = 'button'; ib.id = pfx + '-i'; ib.innerHTML = FX_ICON.info; ib.title = 'What do orphan, detached family and dead end mean?'; ib.setAttribute('aria-label', 'What do orphan, detached family and dead end mean?'); ib.setAttribute('aria-expanded', 'false'); ib.setAttribute('aria-controls', what.id);
+    what.append(mk(doc, 'p', null, 'Your file links each person to their parents, partners and children. Follow those links from one person and you reach everyone connected to them: that set of people is a tree. These words are about where the links stop.'));
+    const ul = mk(doc, 'ul', 'fxwhat-l');
+    for (const [b, t] of [['Orphan.', ' A person with no links at all: no parent, no partner and no child in your file. They sit on their own.'],
+      ['Detached family.', ' A small set of 2 to 19 people linked to each other but to nobody else. A branch that was never joined to a bigger tree.'],
+      ['Dead end.', ' A person inside a big tree (20 or more people) whose parents are not recorded. The line stops there. Dead ends are counted here but listed on the People tab, under “Find what is missing”.'],
+      ['Not drawn yet.', ' People with no birth year or no place, so they cannot be put on a map. They are listed on the People tab too.']]) { const li = mk(doc, 'li'); li.append(mk(doc, 'b', null, b), t); ul.append(li); }
+    what.append(ul, mk(doc, 'p', null, 'The rows below are the orphans and the detached families, grouped by where they were born. Each row names the record collections the Atlas knows for that place and those years, so you know where to look for the missing link. Nothing here changes your file.'));
+    ib.onclick = () => { what.hidden = !what.hidden; ib.setAttribute('aria-expanded', String(!what.hidden)); };
+    line.append(mk(doc, 'span', 'fxc-t')); sum.append(line, ib, what); $('#fx-sub').after(sum);
+  }
 
   /* ---- loading ---- */
   function setData(msg, cmpRaw, saltKey) {
@@ -73,14 +95,20 @@ export function createWorkspace(cfg) {
     tl = tl || tally(model, st);
     const done = tl.handled, total = tl.total, pct = total ? Math.round(100 * done / total) : 100;
     const bar = $('#fx-bar'); bar.setAttribute('aria-valuenow', String(pct)); bar.setAttribute('aria-valuetext', n0(done) + ' of ' + n0(total) + ' done'); bar.firstElementChild.style.width = pct + '%';
-    $('#fx-prog').textContent = total ? n0(done) + ' of ' + n0(total) + ' done · ' + n0(tl.open) + ' to do' : (PL ? 'Nothing to review' : 'Nothing to fix');
+    $('#fx-prog').textContent = total ? n0(done) + ' of ' + n0(total) + ' done · ' + n0(tl.open) + ' to do' : (PL ? 'Nothing to review' : OR ? 'Nothing to connect' : 'Nothing to fix');
     const hasMh = !!(cfg.links() && cfg.links().get && cfg.links().get().mh), anc = !!(cfg.links() && cfg.links().get && cfg.links().get().anc);
     $('#fx-hint').hidden = hasMh || anc || !total;
     /* one plain line: are living people in this list or not? It is the canvas's own living lock (Settings), the same one that decided whether the reader put them in */
     const lv = $('#fx-living'); lv.hidden = !m;
-    if (m) lv.firstElementChild.textContent = cfg.livingHidden && cfg.livingHidden() ? 'Living people are left out of this list.' : 'Living people are included in this list.';
+    if (m) lv.firstElementChild.textContent = (cfg.livingHidden && cfg.livingHidden()) || (OR && m.omitted) ? 'Living people are left out of this list.' : 'Living people are included in this list.';
     if (PL) $('#fx-sub').textContent = !m ? 'The places are read from a GEDCOM. Open one and they are worked out here, in this browser; nothing is sent.'
       : 'The places in ' + (cfg.fileName() || 'your file') + ' that the Atlas could not settle exactly, as a list to work down. Copy a candidate, open the person in your own tree, correct the text there, then open the file again: a row that has been fixed is gone.';
+    else if (OR) {
+      $('#fx-sub').textContent = !m ? 'The orphans are worked out from the tree the reader made. Open a file and they are listed here, in this browser; nothing is sent.'
+        : 'The people in ' + (cfg.fileName() || 'your file') + ' who are in no tree, grouped by where they were born, with the Atlas’s record collections for that place and those years. Find the link in a record, add it in your own tree program, then open the file again: a row that has been fixed is gone.';
+      const c = $('#fxo-counts'), M = m && m.summary;
+      if (c) { c.hidden = !M; if (M) c.firstElementChild.textContent = n0(M.orphans) + (M.orphans === 1 ? ' orphan' : ' orphans') + ' · ' + n0(M.clusters) + (M.clusters === 1 ? ' detached family' : ' detached families') + ' (' + n0(M.clusterPeople) + (M.clusterPeople === 1 ? ' person' : ' people') + ') · ' + n0(M.deadEnds) + (M.deadEnds === 1 ? ' dead end' : ' dead ends') + (M.undrawn ? ' · ' + n0(M.undrawn) + ' not drawn yet' : '') + (m.omitted ? ' · ' + n0(m.omitted) + ' living, counted but not listed' : '') + (M.bridgedPeople ? '. ' + n0(M.bridgedPeople) + (M.bridgedPeople === 1 ? ' person in a small group is' : ' people in small groups are') + ' joined to a tree through someone not drawn yet.' : ''); }
+    }
     else $('#fx-sub').textContent = !m && !model.hasCmp ? 'The fix list is made from a GEDCOM. Open one and it is worked out here, in this browser; nothing is sent.'
       : 'Made in your browser from ' + (cfg.fileName() || 'your file') + (model.main ? ' · ' + n0(model.main) + ' people in the main tree' : '') + '. Fix things in your own tree program, then open the file again: a row that has been fixed is gone.';
     drawKeep();
@@ -88,7 +116,7 @@ export function createWorkspace(cfg) {
     $('#fx-empty').hidden = !!total || !m && !model.hasCmp;
   }
   function drawKeep() {
-    if (PL) return cfg.drawKeep && cfg.drawKeep();   // the keeping section is the People workspace's
+    if (!PEOPLE) return cfg.drawKeep && cfg.drawKeep();   // the keeping section is the People workspace's
     const on = cfg.dec.isOn() && cfg.dec.available(), box = $k('#fx-keepon'); box.checked = cfg.dec.isOn(); box.disabled = !cfg.dec.available();
     const k = cfg.dec.count(), t = $k('#fx-saved'); t.classList.toggle('saved', on);
     /* the six-word copy carries 15,000 rows at most (research-file.js says which are dropped); say so when this device holds more, and that they stay here */
@@ -122,7 +150,7 @@ export function createWorkspace(cfg) {
     if (kind === 'a' && row && row.isConnected) {
       const drop = (mode === 'open' && st.isAsIs(i.key)) || (mode === 'asis' && !st.isAsIs(i.key));
       if (drop) { const body = row.parentElement; row.remove(); if (body && !body.querySelector('.fx-row')) drawSection(s); }
-      else row.replaceWith(rowEl(doc, ctx, s, i));
+      else row.replaceWith(stripRepeats(rowEl(doc, ctx, s, i), said.get(s.key)));
     }
     keepSummary(); listeners.forEach(f => f());
   }
@@ -133,8 +161,11 @@ export function createWorkspace(cfg) {
     const left = s.items.filter(i => st.isAsIs(i.key) && !st.isDone(i.key)).length;
     if (left && mode !== 'asis') { const b = mk(doc, 'button', 'fx-link', n0(left) + ' left as is: show them again'); b.type = 'button'; b.onclick = () => { st.setMany(s.items.filter(i => st.isAsIs(i.key)).map(i => i.key), 'a', false); st.flush(); open.set(s.key, true); paintCounts(); drawSection(s); }; body.append(b); }
     if (!items.length) body.append(mk(doc, 'p', 'fx-small', mode === 'open' && !q && personId == null && !nameTest ? 'Nothing left to do here.' : 'No rows match.'));
-    const frag = doc.createDocumentFragment();
-    for (const i of items.slice(0, cap)) frag.append(rowEl(doc, ctx, s, i));
+    const frag = doc.createDocumentFragment(), rows = items.slice(0, cap).map(i => rowEl(doc, ctx, s, i));
+    /* a line every drawn row would repeat (the same Next step, the same note) is said once, quietly, above the rows */
+    const once = hoistRepeats(rows); said.set(s.key, once.sigs);
+    if (once.lines.length) { const h = mk(doc, 'div', 'fx-hoist'); h.append(...once.lines); body.prepend(h); }
+    for (const r of rows) frag.append(r);
     body.append(frag);
     if (items.length > cap) { const b = mk(doc, 'button', 'fx-link fx-more', 'Show ' + Math.min(PAGE, items.length - cap) + ' more of ' + n0(items.length - cap)); b.type = 'button'; b.onclick = () => { shown.set(s.key, cap + PAGE); drawSection(s); }; body.append(b); }
     d.dataset.drawn = '1';
@@ -207,7 +238,7 @@ export function createWorkspace(cfg) {
     if (!box.firstChild) box.append(mk(doc, 'p', 'fx-small', model.total ? 'Nothing matches that. Clear the search or the filters.' : (m || model.hasCmp ? 'Nothing to fix.' : '')));
   }
   function keepSummary() {
-    if (PL) return;   // the "My research" summary is of the People list's sections
+    if (!PEOPLE) return;   // the "My research" summary is of the People list's sections
     clearTimeout(sumTimer);
     sumTimer = setTimeout(() => { if (m && cfg.fileName() && cfg.dec.isOn()) cfg.fixes.put(summarise(rrView(model), st.asIs, st.ticked, cfg.fileName())); }, 600);
   }
@@ -220,10 +251,10 @@ export function createWorkspace(cfg) {
   const ordSel = $('#fx-order'), rowSel = $('#fx-rows');
   for (const [k, t] of Object.entries(ORDERS)) ordSel.append(new Option(t, k)); ordSel.value = order;
   for (const [k, t] of Object.entries(ROW_SORTS)) rowSel.append(new Option(t, k)); rowSel.value = rowsHow;
-  ordSel.onchange = e => { order = e.target.value; keep(OK, order); draw(); };
-  rowSel.onchange = e => { rowsHow = e.target.value; keep(RK, rowsHow); shown.clear(); draw(); };
+  ordSel.onchange = e => { order = e.target.value; keepL(OK, order); draw(); };
+  rowSel.onchange = e => { rowsHow = e.target.value; keepL(RK, rowsHow); shown.clear(); draw(); };
   if (PL) $('#fx-likely').onchange = e => { likelyOnly = e.target.checked; shown.clear(); draw(); };
-  $('#fx-fold').onchange = e => { collapse = e.target.checked; for (const d of root.querySelectorAll('.fx-notes')) d.open = !collapse; };
+  const fo = $('#fx-fold'); if (fo) fo.onchange = e => { collapse = e.target.checked; for (const d of root.querySelectorAll('.fx-notes')) d.open = !collapse; };
   $('#fx-expand').onclick = () => { for (const s of model.sections) if (s.items.length) open.set(s.key, true); draw(); };
   $('#fx-collapse').onclick = () => { open.clear(); for (const s of model.sections) open.set(s.key, false); draw(); };
   const wx = $('#fx-whoX'); if (wx) wx.onclick = () => setPerson(null);
@@ -231,7 +262,7 @@ export function createWorkspace(cfg) {
   const sl = $('#fx-living-set'); if (sl) sl.onclick = () => cfg.openSettings();
   /* the keeping section (the switch, save, load, forget) belongs to the People workspace and covers both lists: the other one is a peer */
   const all = () => [{ asIs: st.asIs, ticked: st.ticked }, ...peers.map(p => p.sets())];
-  if (!PL) {
+  if (PEOPLE) {
     doc.addEventListener('ra-sync-done', () => drawKeep());   // the six-word code loads a moment after the page: say so once it is there
     $k('#fx-keepon').onchange = e => {
       const on = e.target.checked; cfg.dec.setOn(on); cfg.dec.optOut(!on);
@@ -278,9 +309,9 @@ export function createWorkspace(cfg) {
 
   function setPerson(id, name) { personId = id == null ? null : String(id); personName = name || ''; shown.clear(); open.clear(); autoOpen = true; draw(); }
   /* ---- research names ---- */
-  const NAMEKEY = 'ra-fix-names';
+  const NAMEKEY = 'ra-fix-names';   // (the Orphans list never reads or writes it: see keepL)
   function setNames() { nameTest = nameMatcher([...picks.values()].flatMap(p => p.forms)); }
-  function saveNames() { keep(NAMEKEY, JSON.stringify([...picks.keys()])); }
+  function saveNames() { keepL(NAMEKEY, JSON.stringify([...picks.keys()])); }
   function pickFor(v) {
     if (!choices) return null;
     if (v.startsWith('a:')) { const a = choices.archives.find(x => 'a:' + x.key === v); return a ? { label: a.label + ' (all its names)', forms: a.forms } : null; }
@@ -312,7 +343,7 @@ export function createWorkspace(cfg) {
     if (catAsked || !cfg.catalogue) return; catAsked = true;
     cfg.catalogue().then(cat => {
       choices = cat ? catalogueChoices(cat) : null; fillNames();
-      let saved = []; try { saved = JSON.parse(keep(NAMEKEY) || '[]'); } catch (e) { saved = []; }
+      let saved = []; try { saved = JSON.parse(keepL(NAMEKEY) || '[]'); } catch (e) { saved = []; }
       for (const k of Array.isArray(saved) ? saved : []) { const p = typeof k === 'string' ? pickFor(k) : null; if (p) picks.set(k, p); }
       setNames(); drawChips(); if (picks.size && !$('#fx-body').closest('[hidden]')) { shown.clear(); draw(); }
     });

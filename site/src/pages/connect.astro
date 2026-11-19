@@ -16,6 +16,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import Base from "../layouts/Base.astro";
+import { SERVICES } from "../lib/api-reference.js";
 import { u } from "../lib/url.js";
 import regions from "../../public/regions.json";
 import provs from "../../public/providers.json";
@@ -130,6 +131,7 @@ const HELD_BACK = [
     <li><a href="#names"><b>3 · Use every spelling of a name</b></a><span>Ivan is Johann is Giovanni. Ask once, search them all.</span></li>
     <li><a href="#eras"><b>4 · Who governed this place in 1850?</b></a><span>Places, countries, flags and their eras, with the years, the polity and the archive that filed them.</span></li>
     <li><a href="#files"><b>5 · Every file, with its curl</b></a><span>Names, places, wars and plagues, archives, cemeteries. One line each, and providers or collections explained.</span></li>
+    <li><a href="#api"><b>6 · How each API works</b></a><span>Addresses, formats, how a POST works, the MCP server, and what each one answers when it goes wrong.</span></li>
   </ul>
 
   <h2 class="k-h" id="files">Every file, and the one line that fetches it <span class="k-count">no key, no login</span></h2>
@@ -443,8 +445,78 @@ console.log(era.regime, era.polity, era.filedUnder);`}></pre></details>
       <tr><td><b>A README still says "not deployed"</b></td><td><code>workers/api/README.md</code> and <code>workers/sync/README.md</code> say not deployed; both answer on the live hosts.</td><td>Update the READMEs.</td></tr>
     </tbody></table></div>
 
+  <h2 class="k-h" id="api">How each service works, in detail <span class="k-count">addresses, formats, how a POST works, examples</span></h2>
+  <p class="k-lede">Four services sit behind the Atlas: a <b>read API</b>, an <b>MCP server</b> for AI assistants, <b>Sync</b> for keeping your research, and <b>Ask Claude</b>.
+    Each section below says what the service is for, what to send, what you get back, and what goes wrong. Every example is a command you can paste into a terminal.
+    The read API and MCP examples were run against the live services; the sections say plainly which parts were not.</p>
+  <ul class="cx-jump">
+    {SERVICES.map((sv) => <li><a href={"#" + sv.id}>{sv.name}</a></li>)}
+  </ul>
+
+  {SERVICES.map((sv) => (
+    <section class="cx-svc" id={sv.id}>
+      <h3 class="cx-h3 cx-svc-h">{sv.name} <span class="k-tag">{sv.badge}</span></h3>
+      <p class="k-lede">{sv.lead}</p>
+      {sv.plain && <div class="k-hi is-plain"><p><b>Read this first.</b> {sv.plain}</p></div>}
+      {sv.setup && <ol class="k-steps">{sv.setup.map((t) => <li>{t}</li>)}</ol>}
+      <div class="scroll"><table class="cx-tbl cx-facts"><tbody>
+        {sv.facts.map((f) => <tr><th scope="row">{f[0]}</th><td>{f[1]}</td></tr>)}
+      </tbody></table></div>
+      <p class="cx-hint cx-checked">{sv.checked}</p>
+
+      {sv.endpoints.map((e) => (
+        <div class="cx-ep">
+          <div class="cx-ep-h"><span class={"cx-m cx-m-" + e.method.toLowerCase()}>{e.method}</span> <code>{e.path}</code></div>
+          <p class="cx-ep-does">{e.does}</p>
+          {e.params && (
+            <div class="scroll"><table class="cx-tbl cx-params">
+              <thead><tr><th>Name</th><th>Where</th><th>Needed</th><th>What it is</th></tr></thead>
+              <tbody>{e.params.map((q) => <tr><td><code>{q[0]}</code></td><td>{q[1]}</td><td>{q[2]}</td><td>{q[3]}</td></tr>)}</tbody>
+            </table></div>
+          )}
+          <div class="cx-lab">Try it</div>
+          <pre class="cx-pre cx-cmd">{e.curl}</pre>
+          <div class="cx-lab">You get</div>
+          <pre class="cx-pre cx-resp">{e.response}</pre>
+          {e.notes && <ul class="cx-notes">{e.notes.map((t) => <li>{t}</li>)}</ul>}
+          {e.errors && (
+            <div class="scroll"><table class="cx-tbl cx-params">
+              <thead><tr><th>If it goes wrong</th><th>What you see</th></tr></thead>
+              <tbody>{e.errors.map((q) => <tr><td><code>{q[0]}</code></td><td>{q[1]}</td></tr>)}</tbody>
+            </table></div>
+          )}
+        </div>
+      ))}
+
+      {sv.tools && (
+        <>
+          <h4 class="cx-h4">The five tools</h4>
+          <div class="scroll"><table class="cx-tbl cx-params">
+            <thead><tr><th>Tool</th><th>Arguments</th><th>What it does</th></tr></thead>
+            <tbody>{sv.tools.map((q) => <tr><td><code>{q[0]}</code></td><td>{q[1]}</td><td>{q[2]}</td></tr>)}</tbody>
+          </table></div>
+        </>
+      )}
+      {sv.errors && (
+        <>
+          <h4 class="cx-h4">{sv.errorsTitle}</h4>
+          <div class="scroll"><table class="cx-tbl cx-params">
+            <thead><tr><th>Code</th><th>Meaning</th><th>You see</th></tr></thead>
+            <tbody>{sv.errors.map((q) => <tr><td><code>{q[0]}</code></td><td>{q[1]}</td><td>{q[2]}</td></tr>)}</tbody>
+          </table></div>
+        </>
+      )}
+      {sv.box && (
+        <>
+          <h4 class="cx-h4">{sv.boxTitle}</h4>
+          <ol class="k-steps">{sv.box.map((t) => <li>{t}</li>)}</ol>
+        </>
+      )}
+    </section>
+  ))}
+
   <!-- reference ───────────────────────────────────────────────────── -->
-  <h2 class="k-h" id="reference">Quick reference <span class="k-count">every address in one table</span></h2>
+  <h2 class="k-h" id="reference">Quick reference <span class="k-count">every address in one table; <a href="#api">details above</a></span></h2>
   <div class="scroll"><table class="cx-tbl cx-ref">
     <thead><tr><th>Address</th><th>Method</th><th>Needs</th><th>Gives you</th></tr></thead>
     <tbody>
@@ -609,6 +681,21 @@ console.log(era.regime, era.polity, era.filedUnder);`}></pre></details>
 </script>
 
 <style is:global>
+  .cx-jump { display: flex; flex-wrap: wrap; gap: 8px 18px; list-style: none; padding: 0; margin: 0 0 22px; font-size: 14px; }
+  .cx-svc { margin: 0 0 40px; padding-top: 6px; border-top: 1px solid var(--rule); }
+  .cx-svc-h { font-size: 22px; } .cx-svc-h .k-tag { font-size: 11px; vertical-align: middle; margin-left: 8px; }
+  .cx-facts th { width: 9em; font: 600 12px var(--mono, monospace); text-transform: none; letter-spacing: 0; color: var(--ink-2); white-space: nowrap; }
+  .cx-checked { margin: 8px 0 18px; }
+  .cx-ep { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 12px 16px 14px; margin: 0 0 16px; max-width: 980px; }
+  .cx-ep-h { font-size: 14.5px; overflow-wrap: anywhere; } .cx-ep-h code { font-weight: 600; }
+  .cx-m { display: inline-block; font: 700 11px var(--mono, monospace); letter-spacing: .04em; padding: 2px 7px; border-radius: 6px; background: var(--ink-3, #777); color: #fff; margin-right: 6px; }
+  .cx-m-get { background: #1d7a45; } .cx-m-post { background: #8a5a00; } .cx-m-put { background: #8a5a00; } .cx-m-delete { background: #b3261e; }
+  .cx-ep-does { margin: 6px 0 8px; }
+  .cx-lab { font: 600 11px var(--mono, monospace); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); margin: 10px 0 4px; }
+  .cx-ep .cx-pre { margin: 0; white-space: pre-wrap; word-break: break-word; font-size: 12px; }
+  .cx-notes { margin: 8px 0 0; padding-left: 18px; font-size: 13.5px; } .cx-notes li { margin: 3px 0; }
+  .cx-params { margin-top: 8px; } .cx-params td:first-child { white-space: nowrap; }
+  .cx-h4 { font: 600 15px var(--serif); margin: 18px 0 6px; }
   .cx-simple { margin: 6px 0 0; padding-left: 18px; } .cx-simple li { margin: 5px 0; }
   .cx-files td:first-child { white-space: nowrap; } .cx-files td:nth-child(2) { min-width: 15em; }
   .cx-files .cx-pre.cx-cmd { margin: 0; white-space: pre-wrap; word-break: break-all; font-size: 11.5px; min-width: 16em; }

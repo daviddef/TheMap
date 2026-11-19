@@ -19,6 +19,13 @@ import { buildConsistency } from './consistency.js';
 import { AtlasCore, targetOf, nameTargets, buildAtlas } from './atlas.js';
 import { readTreeJson, placeMentions, describe as describeTree } from './treejson.js';
 
+/* The loading screen's two steps after the tree is built (public/js/load-tree.js): how many places are on the map, and how many people moved (a route of more than one stop, or a
+   birth place that is not the death place). Counts only: no name, place or date from the file is ever in the message. */
+const count = (n, one, many) => n.toLocaleString('en') + ' ' + (n === 1 ? one : many);
+const movers = people => people.filter(p => !p.living && !p.hid && !p.unplaced && ((p.route && p.route.length > 1) || (p.bp && p.dp && p.bp !== p.dp))).length;
+const tellMap = (progress, places) => progress('Putting ' + count(places, 'place', 'places') + ' on the map');
+const tellMoves = (progress, people) => { const n = movers(people); progress('Tracing journeys (' + (n ? count(n, 'person', 'people') + ' moved' : 'no moves found') + ')'); };
+
 const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
 
 export class Session {
@@ -83,6 +90,7 @@ export class Session {
     });
     const used = new Set(); for (const p of people) { if (p.living) continue; if (p.bp) used.add(p.bp); if (p.dp) used.add(p.dp); for (const s of p.route) used.add(s[0]); }
     const keep = new Map([...targets].filter(([, tg]) => used.has(tg.n)));
+    tellMap(this.progress, keep.size); tellMoves(this.progress, people);
     this.progress('Drawing flags and regimes');
     const atlas = await buildAtlas(keep, this.core, id => this.io.flag(id));
     const tree = { ...t0, people };
@@ -107,6 +115,7 @@ export class Session {
     T.tree = Math.round(now() - t0);
     const used = new Set(); for (const p of tree.people) { if (p.bp) used.add(p.bp); if (p.dp) used.add(p.dp); }
     const keep = new Map([...targets].filter(([, t]) => used.has(t.n)));
+    tellMap(this.progress, keep.size); tellMoves(this.progress, tree.people);
     t0 = now(); this.progress('Drawing flags and regimes');
     const atlas = await buildAtlas(keep, this.core, id => this.io.flag(id)); T.atlas = Math.round(now() - t0);
     this.tree = tree; this.atlas = atlas;

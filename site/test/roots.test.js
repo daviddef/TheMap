@@ -557,15 +557,13 @@ test("Roots & Routes is only Tree views: no tabs, none of the five removed panel
   assert.match(tpl, /if\(SHELL&&typeof e\.data\.raView==='string'\)/);
 });
 
-test("the Atlas menu's Roots & Routes entry opens the Tree Canvas; /roots/ stays reachable from the canvas page", async () => {
+test("the Atlas menu has no Roots & Routes entry; the Tree Canvas is the orange icon, and /roots/ stays reachable from the canvas page", async () => {
   const { nav } = await import("../src/lib/nav.js");
-  const rr = nav.filter(([label]) => label === "Roots & Routes");
-  assert.equal(rr.length, 1, "the label is kept for now");
-  assert.equal(rr[0][1], "/tree-canvas/", "and it points at the canvas");
-  assert.ok(!nav.some(([, links]) => typeof links === "string" ? links === "/roots/" : links.some(([h]) => h === "/roots/")), "no menu entry still points at /roots/");
-  /* both entries share /tree-canvas/, so the CSS that hides the Tree Canvas's icon row must not hide the Roots & Routes text link (it once did, by href alone) */
+  assert.equal(nav.filter(([label]) => label === "Roots & Routes").length, 0, "the header no longer lists Roots & Routes");
+  assert.ok(!nav.some(([, links]) => typeof links === "string" ? links === "/roots/" : links.some(([h]) => h === "/roots/")), "no menu entry points at /roots/");
+  /* the Tree Canvas's icon (target=_blank) is hidden from the text row, and no rule hides a link by href alone */
   const css = fs.readFileSync(path.join(here, "../public/styles.css"), "utf8");
-  assert.match(css, /\.topnav \.menulink\[href\$="\/tree-canvas\/"\]\[target="_blank"\] \{ display: none; \}/);
+assert.match(css, /\.topnav \.menulink\[href\$="\/tree-canvas\/"\]\[target="_blank"\] \{ display: none; \}/);
   assert.match(css, /\.dgrp:not\(\.dquick\):has\(> a\[href\$="\/tree-canvas\/"\]\[target="_blank"\]\)/);
   assert.doesNotMatch(css, /\[href\$="\/tree-canvas\/"\]\s*[,{]/, "no rule hides by href alone");
   assert.deepEqual(nav.filter(([, l, o]) => l === "/tree-canvas/" && o && o.newTab).map(([n]) => n), ["Tree Canvas"], "only the icon entry opens in a new tab, which is what the CSS keys on");

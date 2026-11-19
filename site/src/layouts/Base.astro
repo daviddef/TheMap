@@ -56,7 +56,10 @@ const here = Astro.url.pathname;
  * simply absent. The audit of 10 Nov 2026 found about 630 pages were carrying
  * the ad, not a hundred, and cut the list to what is written.
  */
-const AD_PAGES = ["/start/", "/data/", "/coverage/", "/changelog/", "/flags/"];
+/* /about/ held the ad; it is now a redirect to /start/, and David's decision (19 Nov 2026) is that /start/ carries none: it is the first page a
+   newcomer sees and it opens the story tour. The ad is only ever written by the aside below, on a page in this list, so a page that is not
+   here has no ad unit and no ad script (there is no Auto ads loader anywhere in the site). The tour loads nothing from an ad network. */
+const AD_PAGES = ["/data/", "/coverage/", "/changelog/", "/flags/"];
 /* A country's page carries the ad and its generated /sources/ page does not (95% one template, measured 10 Nov 2026), and the
    tool screens (the map, /add/, /my-research/, /errands/, /worklist/) and the pages kept out of search (/countries/,
    /jurisdictions/) have none: an ad on a screen that is a form or a list is «ads on screens without publisher content». */

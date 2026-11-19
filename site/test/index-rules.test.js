@@ -23,8 +23,8 @@ test("a given name is indexed only with a meaning, bearers or a story", () => {
 test("the ad is on written pages and on a country's page, not on its generated sources page or a tool screen", () => {
   const base = readFileSync(new URL("../src/layouts/Base.astro", import.meta.url), "utf8");
   const list = base.match(/const AD_PAGES = \[([^\]]*)\]/)[1];
-  for (const p of ["/start/", "/data/", "/coverage/", "/changelog/", "/flags/"]) assert.ok(list.includes(`"${p}"`), p);
-  for (const p of ["/add/", "/my-research/", "/errands/", "/worklist/", "/countries/", "/help/", "/jurisdictions/"]) assert.ok(!list.includes(`"${p}"`), p);
+  for (const p of ["/data/", "/coverage/", "/changelog/", "/flags/"]) assert.ok(list.includes(`"${p}"`), p);
+  for (const p of ["/start/", "/about/", "/add/", "/my-research/", "/errands/", "/worklist/", "/countries/", "/help/", "/jurisdictions/"]) assert.ok(!list.includes(`"${p}"`), p);
   assert.match(base, /startsWith\("\/country\/"\) && !here\.replace\(\/\\\/\$\/, ""\)\.endsWith\("\/sources"\)/);
 });
 

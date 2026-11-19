@@ -189,3 +189,14 @@ test("compare: a living archive person of the same name is named in the empty pl
   assert.equal(twin({ name: "David" }), null, "a single word is not enough to name anyone");
   assert.match(TPL, /a living person of this name is in the archive: not compared/);
 });
+
+test("compare: a start of two generations back, a Back choice, and Arrange that brings back only the cards still on the canvas", () => {
+  const M = build([arch("one", "#1B6E99", ONE()), arch("two", "#2E8B57", TWO())]);
+  const all = go(M, "I5", { one: "x5", two: "y5" }), one = go(M, "I5", { one: "x5", two: "y5" }, { up: 1 });
+  assert.ok(one.slots.every(s => s.gen >= -1), "up: 1 stops at the parents");
+  assert.ok(all.slots.some(s => s.gen <= -2) && one.slots.length < all.slots.length, "the default walk goes further back than one generation");
+  assert.match(TPL, /whole: false, up: 2,/, "Compare starts two generations back");
+  assert.match(TPL, /data-pr-up="\$\{n\}"/, "the Back choices are buttons");
+  assert.match(TPL, /prDraw\(\{ fit: true, keep: keep\.size \? keep : null \}\)/, "Arrange keeps to the cards on the canvas");
+  assert.match(TPL, /\(!keep \|\| keep\.has\(M\.P\[s\.f\]\.key\)\)/, "each side is drawn only if its card is still there");
+});

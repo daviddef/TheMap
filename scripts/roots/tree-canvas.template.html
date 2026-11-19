@@ -1058,6 +1058,7 @@ html.rm #pairs *{transition:none!important;animation:none!important}
 .prhint{display:block;margin:2px 0;color:var(--lk-ink);font-size:11px}
 .prbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0}.prbar .lk-btn{padding-left:8px;padding-right:8px}
 .prseg{display:inline-flex;gap:0}.prseg .lk-btn:first-child{border-top-right-radius:0;border-bottom-right-radius:0}.prseg .lk-btn:last-child{border-top-left-radius:0;border-bottom-left-radius:0;margin-left:-2px}
+.prback .lk-btn{border-radius:0;margin-left:-2px}.prback .lk-btn:first-child{margin-left:0}.prsegl{font:800 12px Nunito,system-ui;color:var(--lk-mute);margin:0 6px 0 10px;align-self:center}
 .prcopyall b{font-weight:900;margin-right:2px}
 /* a collapsed row is ONE line */
 .prsel{flex-wrap:nowrap;gap:6px}
@@ -4991,7 +4992,7 @@ if (pairMode()) {
 }
 /* the look changed: the cards' stripes and every line are drawn again in the ink that reads on the new ground */
 function prOnTheme() { if (!S.pr) return; prInkKey = ''; S.cards.forEach(c => { c.el.style.setProperty('--ac', colour(personOf(c).a)); }); if (S.pr.res) drawPairs(); renderLegend(); }
-S.pr = pairMode() ? { an: null, dec: new Map(), whole: false, res: null, lay: null, sel: null, show: new Map(), pick: {}, chooser: false, listAll: false, ms: 0 } : null;
+S.pr = pairMode() ? { an: null, dec: new Map(), whole: false, up: 2, res: null, lay: null, sel: null, show: new Map(), pick: {}, chooser: false, listAll: false, ms: 0 } : null;
 const prOn = () => !!(S.pr && S.pr.res);
 const TCPe = () => window.TCP;
 
@@ -5019,7 +5020,7 @@ const prSt = (state, notes) => TCPe().statusHtml(state, notes, esc);
 function prRun() {
   const P = S.pr; if (!P || !P.an) return;
   const t0 = performance.now();
-  P.res = TCPe().pair(M, P.an, { decisions: P.dec, whole: P.whole });
+  P.res = TCPe().pair(M, P.an, { decisions: P.dec, whole: P.whole, up: P.up });
   P.lay = TCPe().layout(P.res, { W, H, stack: S.phone });
   P.ms = Math.round(performance.now() - t0);
   if (P.sel && !P.res.slots.some(s => prSlotName(s) === P.sel)) P.sel = null;
@@ -5040,10 +5041,12 @@ function prDraw(opt) {
   opt = opt || {};
   clearAll(true); S.rz = S.rz;
   const off = P.lay.off;
+  const keep = opt.keep || null;   /* Arrange: only the places that already have a card on the canvas come back, never the ones that were taken off */
   P.res.slots.forEach(s => {
     const o = P.lay.pos.get(s.id); if (!o) return;
-    if (s.f >= 0) newCard(s.f, o.x, o.y);
-    const a = prShown(s); if (a != null && s.arch[a]) newCard(s.arch[a].i, o.x + off.dx, o.y + off.dy);
+    const a = prShown(s);
+    if (s.f >= 0 && (!keep || keep.has(M.P[s.f].key))) newCard(s.f, o.x, o.y);
+    if (a != null && s.arch[a] && (!keep || keep.has(M.P[s.arch[a].i].key))) newCard(s.arch[a].i, o.x + off.dx, o.y + off.dy);
   });
   S.cards.forEach(refreshCard);
   drawEdges(); hideHint(); syncButtons(); renderInfo(); renderLegend();
@@ -5063,7 +5066,7 @@ function prOnSelect(keys) {
   const p = M.byKey.get(keys[0]); if (!p) return; const s = prSlotOf(p.i); if (!s) return;
   P.sel = prSlotName(s); S.tab = 'compare'; P.reveal = 'smooth'; P.flash = P.sel; drawPairs();
 }
-function prArrange() { if (!prOn()) return false; prRun(); prDraw({ fit: true }); toast('Pairs put back in their generations', 2600); return true; }
+function prArrange() { if (!prOn()) return false; const keep = new Set([...S.cards.values()].map(c => personOf(c).key)); prRun(); prDraw({ fit: true, keep: keep.size ? keep : null }); toast('Pairs put back in their generations', 2600); return true; }
 
 /* ---------- the overlay: status buttons, empty places, chips ---------- */
 /* Living people are never compared. When the archive holds a LIVING entry with this person's first name and surname, the empty place says so, instead of "not in the archive" beside a card that plainly is. */
@@ -5201,7 +5204,7 @@ function prResult() {
   if (needHint) h += `<small class="prhint"><button type="button" class="lk-linkbtn" data-gsettings="1">Add your MyHeritage link</button> to link these.</small>`;
   if (R.capped) h += `<div class="warnbox bad"><b>Showing the nearest ${sm.slots.toLocaleString()} places.</b> ${R.skipped.toLocaleString()} more were left out so the canvas stays quick.</div>`;
   const ad = prAddAll();
-  h += `<div class="row prbar"><span class="prseg" role="group" aria-label="Who to show"><button class="lk-btn is-small${P.whole ? '' : ' on'}" data-pr-whole="0" aria-pressed="${!P.whole}">Direct line</button><button class="lk-btn is-small${P.whole ? ' on' : ''}" data-pr-whole="1" aria-pressed="${P.whole}">Whole family</button></span>${ad.total ? `<button type="button" class="lk-btn is-small prcopyall" data-pr-copy="*all" title="Copy details of the ${ad.total.toLocaleString()} ${ad.total === 1 ? 'person' : 'people'} not in your file${ad.capped ? ' (the first ' + ad.items.length + ')' : ''}" aria-label="Copy details of the ${ad.total.toLocaleString()} ${ad.total === 1 ? 'person' : 'people'} not in your file${ad.capped ? ', the first ' + ad.items.length : ''}"><b aria-hidden="true">+</b> Copy ${ad.capped ? ad.items.length : ad.total} missing</button>` : ''}</div>${ad.total ? prCopied('*all') : ''}`;
+  h += `<div class="row prbar"><span class="prseg" role="group" aria-label="Who to show"><button class="lk-btn is-small${P.whole ? '' : ' on'}" data-pr-whole="0" aria-pressed="${!P.whole}">Direct line</button><button class="lk-btn is-small${P.whole ? ' on' : ''}" data-pr-whole="1" aria-pressed="${P.whole}">Whole family</button></span><small class="prsegl">Back</small><span class="prseg prback" role="group" aria-label="How many generations back to show">${[2, 3, 5, 8, 12].map(n => `<button class="lk-btn is-small${P.up === n ? ' on' : ''}" data-pr-up="${n}" aria-pressed="${P.up === n}" title="${n} generations back"${P.up === n ? ' aria-current="true"' : ''}>${n === 12 ? 'all' : n}</button>`).join('')}</span>${ad.total ? `<button type="button" class="lk-btn is-small prcopyall" data-pr-copy="*all" title="Copy details of the ${ad.total.toLocaleString()} ${ad.total === 1 ? 'person' : 'people'} not in your file${ad.capped ? ' (the first ' + ad.items.length + ')' : ''}" aria-label="Copy details of the ${ad.total.toLocaleString()} ${ad.total === 1 ? 'person' : 'people'} not in your file${ad.capped ? ', the first ' + ad.items.length : ''}"><b aria-hidden="true">+</b> Copy ${ad.capped ? ad.items.length : ad.total} missing</button>` : ''}</div>${ad.total ? prCopied('*all') : ''}`;
   h += prList();
   return h;
 }
@@ -5349,6 +5352,7 @@ $('#info').addEventListener('click', e => {
   const fl = t.closest('[data-pr-flt]'); if (fl) { if (fl.disabled) return; const k = fl.dataset.prFlt; P.flt = P.flt === k ? null : k; renderInfo(); const b = $('#info [data-pr-flt="' + k + '"]'); if (b) b.focus({ preventScroll: true }); prLive(P.flt ? 'Showing only these' : 'Showing all'); return; }
   const pk = t.closest('[data-pr-pick]'); if (pk) { const [a, i] = pk.dataset.prPick.split(':').map(Number); P.pick[a] = i; return; }
   if (t.closest('[data-pr-anchor]')) { prStart(); return; }
+  const bk = t.closest('[data-pr-up]'); if (bk) { P.up = +bk.dataset.prUp; prRun(); prDraw({ fit: true }); return; }
   const wh = t.closest('[data-pr-whole]'); if (wh) { P.whole = wh.dataset.prWhole === '1'; prRun(); prDraw({ fit: true }); return; }
   if (t.closest('a[href]:not([href="#"])')) return;   /* a link out follows itself */
   const inDet = !!t.closest('.prdet'), rw = inDet ? null : t.closest('[data-pr-row]'); const sl = inDet ? null : (t.closest('[data-pr-slot]') || (rw && rw.querySelector('[data-pr-slot]')));

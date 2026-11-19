@@ -92,6 +92,8 @@ RULES = {
     "translit": "A documented substitution when a Slavic name crosses a Latin-alphabet border (ć written ch, š sh).",
     "latin-case": "Latin declension: the register writes the name in the case the sentence needs (Joannem, Joannis).",
     "ending": "A systematic ending change between languages (-schi / -ski, -ić / -ich).",
+    "patronymic-ending": "A Scandinavian patronymic: the father's name with -sen, -søn or -son (son) or -datter / -dotter (daughter). One stem, a different ending for the child's sex or the clerk's language.",
+    "norwegian-aa": "Aa and Å are one letter: Å replaced the digraph Aa in Norwegian in 1917, and Aa still stands in many personal names.",
 }
 PARTICLES = ["della", "del", "de", "di", "da", "van", "von", "du", "le", "la", "des", "ten", "ter"]
 

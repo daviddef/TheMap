@@ -45,7 +45,7 @@ KINDS = [
      r"probate|\bwills?\b|estate|testament|land record|deed|notar|"
      r"cadastr|property|mortgage|seigniorial|court record"),
     ("civil", "Civil registration and vital records",
-     r"civil regist|vital record|\bbirths?\b|\bdeaths?\b|\bmarriages?\b|"
+     r"civil regist|civil records?\b|vital record|\bbirths?\b|\bdeaths?\b|\bmarriages?\b|"
      r"divorce|register office|state registration"),
     # LAST, AND THE POSITION IS THE POINT. Trove's 2,014 Australian papers are
     # a genealogical source of the first rank — Australian papers printed

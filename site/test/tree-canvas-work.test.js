@@ -273,3 +273,29 @@ test("the opening page's list: a card per tree, its views nested under it, a vie
   assert.equal(JSON.stringify(await W.shareDecode(await W.shareEncode(n))).includes("Aunt Ann"), false, "a shared link carries the view's name, never the note");
   const odd = JSON.parse(JSON.stringify(n)); odd.note = "<i>x</i>\u0000y"; assert.equal(RF.cleanCanvas({ v: 1, items: { [odd.k]: odd }, gone: {} }).items[odd.k].note, "x y");
 });
+
+test("the View button's choice rides in the tree's record as `vw`: only when it is not the default, the centre as a hash, nothing about anyone", () => {
+  const src = { t: "link", ref: LINK }, mk = lens => W.makeRecord(src, W.linkLabel(LINK), { ...plain(), lens }, 1.7e12);
+  for (const l of [undefined, null, { m: "canvas", g: 5, c: "side", t: 2 }, { m: "canvas" }, "fan", 7]) assert.equal("vw" in mk(l).w, false, "the default view adds nothing to the record: " + JSON.stringify(l));
+  const fan = mk({ m: "fan", g: 6, c: "place", t: 1, r: "defranceski:" + NAMES[1] }), text = JSON.stringify(fan);
+  assert.deepEqual({ ...fan.w.vw, r: undefined }, { m: "fan", g: 6, c: "place", t: 1, r: undefined });
+  assert.match(fan.w.vw.r, /^[0-9a-z]{1,16}$/);
+  for (const n of NAMES) assert.equal(text.includes(n), false, n);
+  assert.equal(text.includes("defranceski"), false);
+  /* the strip folded is a choice worth keeping on its own */
+  assert.deepEqual(mk({ m: "canvas", g: 5, c: "side", t: 0 }).w.vw, { m: "canvas", g: 5, c: "side", t: 0 });
+  /* and it comes back: the centre is found again among the tree's own people, and is dropped if that person is no longer in the tree */
+  const back = W.unpack(fan.w, fan.k, known(), bridges());
+  assert.deepEqual(back.lens, { m: "fan", g: 6, c: "place", t: 1, r: "defranceski:" + NAMES[1] });
+  assert.equal(W.unpack(fan.w, fan.k, known().filter(k => !k.includes(NAMES[1])), bridges()).lens.r, "");
+  assert.equal("lens" in W.unpack(W.makeRecord(src, "x", plain(), 1.7e12).w, "l:" + LINK, known(), bridges()), false, "a record without a View comes back without one, as before");
+  /* the six-word copy keeps it unchanged, and cleans anything odd */
+  assert.deepEqual(RF.cleanCanvas({ v: 1, items: { [fan.k]: fan }, gone: {} }).items[fan.k], fan);
+  const odd = JSON.parse(JSON.stringify(fan)); odd.w.vw = { m: "spiral", g: 99, c: "evil", t: 7, r: "Anna Example", zz: "Anna" };
+  assert.deepEqual(RF.cleanCanvas({ v: 1, items: { [odd.k]: odd }, gone: {} }).items[odd.k].w.vw, { m: "canvas", g: 7, c: "side", t: 2 });
+  odd.w.vw = "fan"; assert.equal("vw" in RF.cleanCanvas({ v: 1, items: { [odd.k]: odd }, gone: {} }).items[odd.k].w, false);
+});
+
+test("the Backup page says the chosen View is kept", () => {
+  assert.match(read("../src/pages/backup.astro"), /<b>View<\/b> you chose/);
+});

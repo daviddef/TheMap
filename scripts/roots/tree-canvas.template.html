@@ -1073,6 +1073,146 @@ html.rm #pairs *{transition:none!important;animation:none!important}
 .prent.maybe em{font:800 10.5px Nunito,system-ui;color:var(--lk-ink);margin-right:2px}
 .prdup{margin:2px 0}
 .pralt .cmpc{margin:2px 0;gap:2px}
+
+/* View, the Fan and the Trail band. Its own file (after style.css) so it is not lost when style.css is edited elsewhere. Every colour is a --lk-* token of the look, so Sticker, Paper, Ground, Lanes and Countries all read. */
+#bLens[hidden]{display:none}
+html{--tr-soft:color-mix(in srgb,var(--lk-ink) 86%,var(--lk-card))}   /* the kit's soft ink is too faint for small print in the dark look; this is the ink, a little softened (tested at 4.5:1 on the card, test/test-fan-contrast.js) */
+/* the View menu */
+#lensMenu{display:none;position:fixed;top:64px;right:12px;z-index:40;width:318px;max-width:calc(100vw - 24px);box-sizing:border-box;background:var(--lk-card);color:var(--lk-ink);border:2px solid var(--lk-ink);border-radius:16px;box-shadow:0 5px 0 var(--lk-line),0 14px 30px rgba(0,0,0,.18);padding:12px 14px 14px}
+#lensMenu.on{display:block}
+#lensMenu h4{margin:0 0 4px}
+.lvi{all:unset;box-sizing:border-box;display:flex;gap:10px;align-items:flex-start;width:100%;margin:6px 0;padding:8px 10px;border:2px solid var(--lk-line);border-radius:12px;cursor:pointer;color:var(--lk-ink)}
+.lvi:hover{border-color:var(--lk-accent)}.lvi:focus-visible{outline:3px solid var(--lk-accent);outline-offset:2px}
+.lvi .lvd{flex:none;width:16px;height:16px;margin-top:2px;border-radius:50%;border:2px solid var(--lk-ink)}
+.lvi.on{border-color:var(--lk-accent);background:var(--lk-accent-soft)}
+.lvi.on .lvd{background:radial-gradient(circle,var(--lk-ink) 0 42%,transparent 46%)}
+.lvi b{display:block;font:800 13.5px/1.2 Nunito,system-ui}
+.lvi small{display:block;margin-top:2px;font:700 11.5px/1.3 Nunito,system-ui;color:var(--tr-soft)}
+.lvi[disabled]{opacity:.55;cursor:not-allowed}
+.lvsoon{font-style:normal;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;background:var(--lk-line);color:var(--lk-ink);border-radius:8px;padding:1px 6px;margin-left:4px;vertical-align:1px}
+#lensMenu .lk-toggle{margin-top:10px}
+.ph #lensMenu{top:auto;bottom:calc(var(--dock-h,130px) + 16px);left:8px;right:8px;width:auto}
+
+/* the Fan: it sits in the canvas's own world, so pan, zoom and Fit work on it; the cards are only hidden while it is open */
+body.vwfan #cards,body.vwfan #edges,body.vwfan #genbands,body.vwfan #lanes,body.vwfan #lanehead,body.vwfan #namesview,body.vwfan #mini,body.vwfan #pairs,body.vwfan #hint,body.vwfan #markBar,body.vwfan #playBar{display:none!important}
+body.vwlist #fan{display:none}
+#fan{position:absolute;left:0;top:0;overflow:visible}
+#fan .fw path{stroke:var(--lk-board);stroke-width:2;stroke-linejoin:round;cursor:pointer;transition:filter .12s}
+#fan .fw:hover path{filter:brightness(1.08) saturate(1.12)}
+#fan .fw:focus{outline:none}
+#fan .fw.sel path{stroke:var(--lk-accent);stroke-width:4}
+#fan .ctr path{stroke:var(--lk-ink);stroke-width:2.5;cursor:default}
+#fan .nk{fill:none;stroke:var(--lk-faint);stroke-width:1.4;stroke-dasharray:5 5;opacity:.8;pointer-events:none}
+#fan .ffr{fill:none;stroke:var(--lk-ink);stroke-width:5;stroke-linejoin:round;pointer-events:none;display:none}
+#fan .ffr.on{display:block}
+#fan .fl{font-family:Nunito,"Segoe UI",system-ui,sans-serif;font-weight:700;pointer-events:none;user-select:none;-webkit-user-select:none}
+#fanBar{position:fixed;left:50%;top:60px;transform:translateX(-50%);z-index:7;max-width:calc(100vw - 150px);display:flex;flex-direction:column;gap:6px;align-items:center}
+html:not(.ph):has(#info.on) #fanBar{left:calc((100vw - 340px) / 2);max-width:calc(100vw - 500px)}
+#fanBar[hidden]{display:none}
+.fbrow,.fbcame{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;justify-content:center;background:var(--lk-card);color:var(--lk-ink);border:2px solid var(--lk-line);border-radius:16px;box-shadow:0 3px 0 var(--lk-line);padding:6px 10px}
+.fbcame{border-color:var(--lk-accent);font:800 12.5px/1.3 Nunito,system-ui;gap:6px 12px}
+.fbt{display:flex;flex-direction:column;line-height:1.15}.fbt b{font:400 16px "Lilita One",Impact,system-ui}.fbt small{font:700 11px Nunito,system-ui;color:var(--tr-soft)}
+.fbg{display:inline-flex;align-items:center;gap:2px;border:2px solid var(--lk-line);border-radius:99px;padding:2px}
+.fbs{font:800 12px/1 Nunito,system-ui;border:0;background:transparent;color:var(--lk-ink);border-radius:99px;padding:7px 11px;cursor:pointer;white-space:nowrap}
+.fbs small{font:800 10px Nunito;color:inherit;opacity:.8;margin-left:3px}
+.fbs:hover{background:var(--lk-accent-soft)}.fbs:focus-visible{outline:3px solid var(--lk-accent);outline-offset:1px}
+.fbs.on{background:var(--lk-ink);color:var(--lk-card)}
+.fbs[disabled]{opacity:.4;cursor:default;pointer-events:none}
+.fbc{border:2px solid var(--lk-ink)}
+.fbn{font:800 12px Nunito,system-ui;padding:0 4px;min-width:84px;text-align:center}
+.fbx{all:unset;cursor:pointer;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;color:var(--lk-ink)}.fbx svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round}.fbx:focus-visible{outline:3px solid var(--lk-accent)}
+.ph #fanBar{top:106px;left:8px;right:8px;transform:none;max-width:none}.ph .fbrow{justify-content:flex-start}
+#fanLegend{position:fixed;left:16px;bottom:calc(var(--dock-h,130px) + 22px);z-index:6;display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;max-width:min(520px,calc(100vw - 32px));padding:7px 12px;border:2px solid var(--lk-line);border-radius:14px;background:var(--lk-card);color:var(--lk-ink);box-shadow:0 3px 0 var(--lk-line);font:800 11.5px Nunito,system-ui}
+#fanLegend[hidden]{display:none}
+.fli{display:inline-flex;align-items:center;gap:5px}.fli i{display:inline-block;width:14px;height:14px;border-radius:4px;border:1.5px solid var(--lk-ink)}.fli.fgr i{width:48px}.fli .fnk,.fli i.fnk{background:transparent;border:1.5px dashed var(--lk-faint)}.fli b{color:var(--tr-soft)}
+.ph #fanLegend{left:8px;right:8px;font-size:10.5px;bottom:calc(var(--dock-h,96px) + 14px)}
+#fanTip{display:none;position:fixed;z-index:60;pointer-events:none;max-width:270px;padding:8px 11px;border:2px solid var(--lk-ink);border-radius:12px;background:var(--lk-card);color:var(--lk-ink);box-shadow:0 4px 0 var(--lk-line),0 10px 22px rgba(0,0,0,.2);font:700 12px/1.35 Nunito,system-ui}
+#fanTip.on{display:block}
+#fanTip .ftn{font:400 16px/1.15 "Lilita One",Impact,system-ui}#fanTip .ftk{color:var(--tr-soft);margin-bottom:3px}#fanTip .ftx{margin-top:4px;color:var(--tr-soft);font-size:11px}#fanTip .fl{height:11px;vertical-align:-1px;margin-right:4px}
+#fanList{position:fixed;z-index:6;left:50%;transform:translateX(-50%);top:122px;bottom:calc(var(--dock-h,130px) + 22px);width:min(760px,calc(100vw - 32px));overflow:auto;box-sizing:border-box;padding:14px 18px 18px;background:var(--lk-card);color:var(--lk-ink);border:2px solid var(--lk-line);border-radius:18px;box-shadow:0 3px 0 var(--lk-line);user-select:text;-webkit-user-select:text}
+html:not(.ph):has(#info.on) #fanList{left:calc((100vw - 340px) / 2)}
+#fanList[hidden]{display:none}
+#fanList h3{margin:0 0 6px;font:400 20px "Lilita One",Impact,system-ui}
+#fanList h4{margin:14px 0 4px;font:900 13px Nunito,system-ui;letter-spacing:.02em}#fanList h4 small{font-weight:700;color:var(--tr-soft);margin-left:6px}
+#fanList ol{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+#fanList button{all:unset;box-sizing:border-box;display:block;width:100%;padding:6px 10px 6px 12px;border-left:8px solid var(--fc);border-radius:8px;background:color-mix(in srgb,var(--lk-line) 35%,var(--lk-card));cursor:pointer;font:700 13px/1.35 Nunito,system-ui;color:var(--lk-ink)}
+#fanList button:hover{background:var(--lk-accent-soft)}#fanList button:focus-visible{outline:3px solid var(--lk-accent);outline-offset:1px}#fanList button.on{outline:3px solid var(--lk-accent);outline-offset:-1px}
+#fanList .flk{display:block;font:800 11px Nunito;color:var(--tr-soft);text-transform:capitalize}#fanList .flk small{text-transform:none;font-weight:700}#fanList .fly{color:var(--tr-soft)}#fanList .flp{color:var(--tr-soft)}#fanList .flp::before{content:"\00b7 "}
+
+/* the Trail band: the bottom-most thing on the canvas, along the very bottom edge. Whatever else sits at the bottom (the search dock, the little map, the buttons over it, the menus that open upward) is lifted by its height, --trail-h, which viewsui.js keeps up to date (and --dock-h includes it).
+   Open, it is the direct line as big cards in a row with the focus person's places fanning out to the right; folded, it is one slim line, a handle. */
+html{--trail-h:0px;--tr-link:#9C3B28}
+#trail{--trs:1;position:fixed;left:0;right:0;bottom:0;z-index:7;box-sizing:border-box;background:var(--lk-card);color:var(--lk-ink);border-top:2px solid var(--lk-line);box-shadow:0 -6px 18px rgba(0,0,0,.09);padding:8px 18px calc(8px + env(safe-area-inset-bottom))}
+#trail[hidden]{display:none}
+html:not(.ph):has(#info.on) #trail{right:340px}
+[data-theme="names"] #trail,body.pr #trail,body.vwfan #trail{display:none}
+html.ph:has(#info.on) #trail{display:none}
+.ph #trail{--trs:.66;padding:6px 10px calc(6px + env(safe-area-inset-bottom))}
+#trail[data-size="0"]{padding:0 0 env(safe-area-inset-bottom)}
+/* what rides above the band */
+.dock{bottom:calc(16px + var(--trail-h,0px))}
+.ph .dock{bottom:calc(8px + env(safe-area-inset-bottom) + var(--trail-h,0px))}
+@media (max-height:620px){.dock{bottom:calc(8px + var(--trail-h,0px))}}
+.shelfoff .dock{transform:translate(-50%,calc(100% + 40px + var(--trail-h,0px)))}.ph.shelfoff .dock{transform:translateY(calc(100% + 40px + var(--trail-h,0px)))}
+#mini{bottom:calc(16px + var(--trail-h,0px))}
+#bShelf{bottom:calc(16px + var(--trail-h,0px))}
+.ph #bShelf{bottom:calc(var(--dock-h,130px) + 12px)}.ph.shelfoff #bShelf{bottom:calc(14px + env(safe-area-inset-bottom) + var(--trail-h,0px))}
+#playBar{bottom:calc(230px + var(--trail-h,0px))}
+.ph.shelfoff #info{bottom:calc(16px + env(safe-area-inset-bottom) + var(--trail-h,0px))}
+#prLegend,.trlift{margin-bottom:var(--trail-h,0px)}
+/* the handle */
+.trtab{display:flex;align-items:center;gap:9px;width:100%;box-sizing:border-box;min-height:38px;padding:0 18px;border:0;background:transparent;color:var(--lk-ink);font:800 13px/1 Nunito,system-ui;cursor:pointer;text-align:left}
+.trtab .trhi{width:17px;height:17px}.trtab .trtl{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:400 15px "Lilita One",Impact,system-ui}.trtab .trtl i{font-style:normal;color:var(--tr-soft);margin:0 2px}.trtab .trtl b{font:800 13px Nunito,system-ui;color:var(--tr-soft)}
+.trtab .trch{margin-left:auto;padding-left:10px;font-size:15px;color:var(--lk-ink)}
+.trtab:hover{background:var(--lk-hover)}.trtab:focus-visible{outline:3px solid var(--lk-accent);outline-offset:-4px}
+/* the open band */
+.trhead{display:flex;align-items:center;gap:6px 14px;flex-wrap:wrap;margin-bottom:4px}
+.trt{font:400 18px "Lilita One",Impact,system-ui}.trt small{font:800 13px Nunito,system-ui;color:var(--tr-soft);margin-left:8px}
+.trsz{margin-left:auto}.trsz .fbs{padding:6px 11px}
+.trbody{display:flex;align-items:center;gap:8px;overflow-x:auto;overflow-y:hidden;padding:6px 4px 9px;scrollbar-width:thin;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.trline{display:flex;align-items:stretch;list-style:none;margin:0;padding:0;flex:none}
+.trline>li{display:flex;align-items:stretch}
+.trline>li+li::before{content:"";align-self:center;width:calc(26px*var(--trs));height:3px;border-radius:2px;background:var(--tr-link);opacity:.4;flex:none}
+.trline>li.mv::before{opacity:1;height:4px}
+.trc{display:flex;flex-direction:column;align-items:flex-start;gap:calc(3px*var(--trs));box-sizing:border-box;width:calc(228px*var(--trs));min-height:calc(158px*var(--trs));padding:calc(10px*var(--trs)) calc(14px*var(--trs)) calc(11px*var(--trs));border:2px solid var(--lk-line);border-radius:16px;background:var(--lk-card);color:var(--lk-ink);text-align:left;cursor:pointer;font-family:inherit;box-shadow:0 2px 0 var(--lk-line);user-select:none;-webkit-user-select:none}
+.trc:hover{border-color:var(--lk-accent)}.trc:focus-visible{outline:3px solid var(--lk-accent);outline-offset:2px}
+.trc.est{border-style:dashed}
+.trc.endc{border-color:var(--lk-faint);background:color-mix(in srgb,var(--lk-line) 28%,var(--lk-card))}
+.trc.foc{width:calc(248px*var(--trs));border-color:var(--lk-accent);background:color-mix(in srgb,var(--lk-accent-soft) 80%,var(--lk-card));box-shadow:0 2px 0 var(--lk-accent),0 0 0 3px var(--lk-accent-soft)}
+.trtop{display:flex;align-items:center;gap:calc(8px*var(--trs));width:100%;min-width:0}
+.trg{font:800 calc(11px*max(var(--trs),.9))/1.2 Nunito,system-ui;letter-spacing:.16em;color:var(--tr-soft);white-space:nowrap}
+.trhi{width:calc(24px*max(var(--trs),.8));height:calc(24px*max(var(--trs),.8));flex:none;stroke:var(--tr-soft);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.trfl{margin-left:auto;display:inline-flex;align-items:center;flex:none}.trfl .fl{height:calc(16px*max(var(--trs),.8))}
+.trp{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;min-width:0;max-width:100%;font:400 calc(25px*max(var(--trs),.7))/1.08 "Lilita One",Impact,system-ui;letter-spacing:.01em;text-wrap:balance;overflow-wrap:anywhere;margin-top:calc(4px*var(--trs))}
+.trp sup{font-size:.7em;line-height:0;color:var(--tr-soft);margin-left:1px}
+.mute,.trp.mute{display:block;font:700 calc(12px*max(var(--trs),.9))/1.3 Nunito,system-ui;font-style:italic;color:var(--tr-soft);letter-spacing:0;margin-top:calc(4px*var(--trs))}
+.try{font:900 calc(16px*max(var(--trs),.85))/1.2 Nunito,system-ui;color:var(--lk-ink);margin-top:auto}.try.mute{font-style:normal;margin-top:auto}
+.trn{max-width:100%;font:800 calc(13px*max(var(--trs),.9))/1.25 Nunito,system-ui;color:var(--tr-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.trn i{font-style:normal;font-weight:700;margin-left:3px}
+.trstub{box-sizing:border-box;width:calc(180px*var(--trs));min-height:calc(158px*var(--trs));padding:calc(10px*var(--trs)) calc(14px*var(--trs));border:2px dashed var(--lk-faint);border-radius:16px;display:flex;flex-direction:column;gap:calc(4px*var(--trs));color:var(--tr-soft)}
+.trmoreg{align-self:center;font:800 12px Nunito,system-ui;color:var(--tr-soft);padding:0 8px}
+.trcap{margin:0;padding:0 4px;font:700 12px/1.35 Nunito,system-ui;color:var(--tr-soft)}
+.ph .trcap{display:none}
+/* the short form: one line of pills */
+#trail[data-size="1"] .trc{width:auto;min-height:0;flex-direction:row;align-items:baseline;gap:7px;padding:5px 12px;border-radius:99px}
+#trail[data-size="1"] .trtop{display:contents}#trail[data-size="1"] .trhi,#trail[data-size="1"] .trfl,#trail[data-size="1"] .trstub .trn,#trail[data-size="1"] .trcap{display:none}
+#trail[data-size="1"] .trp{display:none}#trail[data-size="1"] .try{margin-top:0}#trail[data-size="1"] .trstub{width:auto;min-height:0;padding:5px 12px;border-radius:99px;flex-direction:row;gap:6px}
+#trail[data-size="1"] .trc.foc{width:auto}
+#trail[data-size="1"] .trline>li+li::before{width:12px;height:2px}
+/* where this life went: curves from the focus card to a column of dots, each with its flag, place and the number of events; a single event is dotted */
+.trpl{display:flex;align-items:center;flex:none;margin-left:2px}
+.trsvg{flex:none;overflow:visible}.trsvg path{fill:none;stroke:var(--tr-link);stroke-linecap:round;opacity:.9}.trsvg path.one{stroke-dasharray:.5 5}.trsvg circle{fill:var(--tr-link)}
+.trpl ul{list-style:none;margin:0;padding:0;min-width:196px}
+.trpl li{display:flex;align-items:center;gap:7px;font:800 14px/1 Nunito,system-ui}
+.trpl li a{color:var(--lk-ink);text-decoration:underline dotted 1.5px;text-underline-offset:3px;white-space:nowrap}.trpl li a:hover,.trpl li a:focus-visible{color:var(--lk-accent)}
+.trpl li b{margin-left:auto;padding-left:10px;font:900 13.5px Nunito,system-ui;color:var(--lk-ink)}
+.trpl li .fl{height:13px;flex:none}
+.trpl .trmore{color:var(--tr-soft);font-weight:700}
+.trpl.none p{margin:0 0 0 10px;font:700 12.5px/1.35 Nunito,system-ui;color:var(--tr-soft);width:240px;white-space:normal}
+.ph .trpl ul{min-width:150px}.ph .trpl li{font-size:12.5px}
+/* the note that opens upward from a place in the band, above the band's own edge, never over its controls */
+#trailTip{position:fixed;z-index:9;display:none;max-width:min(300px,calc(100vw - 16px));box-sizing:border-box;padding:8px 12px;border-radius:12px;background:var(--lk-pop-bg,var(--lk-card));color:var(--lk-pop-ink,var(--lk-ink));border:2px solid var(--lk-line);box-shadow:0 6px 18px rgba(0,0,0,.22);font:700 12.5px/1.4 Nunito,system-ui;pointer-events:none}
+#trailTip.on{display:block}#trailTip b{font:400 16px/1.15 "Lilita One",Impact,system-ui;display:block;margin-bottom:2px}#trailTip .fl{height:12px;vertical-align:-1px;margin-right:5px}
+@media (prefers-reduced-motion:reduce){#fan .fw path{transition:none}}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -1090,6 +1230,7 @@ html.rm #pairs *{transition:none!important;animation:none!important}
   <button class="lk-ibtn xtra" id="bClear" title="Clear the canvas (Undo brings it back)" aria-label="Clear"></button>
   <button class="lk-ibtn" id="bFix" title="Fix list" aria-label="Fix list" hidden></button>
   <button class="lk-ibtn" id="bTheme" title="Look" aria-label="Look" hidden></button>
+  <button class="lk-ibtn" id="bLens" title="View: how the people are drawn" aria-label="View" aria-haspopup="true" aria-expanded="false" hidden></button>
   <button class="lk-ibtn" id="bMenu" title="Menu: how to read the lines, options" aria-label="Menu" aria-haspopup="true" aria-expanded="false"></button>
   <button class="lk-ibtn" id="bMore" title="More" aria-label="More" style="display:none"></button>
 </div>
@@ -3164,6 +3305,279 @@ html.rm #pairs *{transition:none!important;animation:none!important}
   const API = { scrollDelta, decisionInfo, personText, addPeople, fixItems, offerable, genLabel, groupByGen, archLines, contrast, ensure, lum, pair, layout, alternatives, dkey, judgeD, matchLists, placeholder, isPlaceholderName, statusInfo, statusHtml, statusIconHtml, byState };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCP = API;
 })(typeof window !== 'undefined' ? window : globalThis);
+
+/* views.js — the pure parts of the View button, the Trail band and the Fan. No DOM; tested by test/test-views.js (and, for colour, test/test-fan-contrast.js).
+ *
+ * THE TRAIL: one person's direct line (one ancestor a generation, through the fathers or through the mothers), and the places the person's own life touched.
+ * THE FAN: a person's ancestors as a half circle, rings = generations, a wedge = an ancestor, a faint outline where nobody is recorded. The geometry is in world
+ *   units, centre (0,0) at the middle of the base, angles measured counter-clockwise from the right-hand edge. A wedge's father-side is the left half.
+ * COLOUR means one true thing: which side (the father's side blue, the mother's side orange: a pair that stays apart for the common colour-blindnesses) with the
+ *   generation shown by how far the tint has faded toward the card; or, as a switch, the colour of the flag that flew over the birthplace that year. The text
+ *   colour on a wedge is chosen from the look's own ink, black or white, whichever reads at 4.5:1, so it always does.
+ * Nothing here stores or sends anything, and nothing about a living person is read except their name.
+ */
+(function (root) {
+  'use strict';
+
+  /* ---------------- small colour maths (WCAG relative luminance) ---------------- */
+  const hex2 = h => { h = String(h || '').replace('#', ''); if (h.length === 3) h = h.replace(/./g, c => c + c); const n = parseInt(h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+  const toHex = a => '#' + a.map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+  const lum = h => { const [r, g, b] = hex2(h).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+  const contrast = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+  /* t of `a` over `b` (t = 0 is b, t = 1 is a) */
+  const mix = (a, b, t) => { const x = hex2(a), y = hex2(b); return toHex(x.map((v, i) => y[i] + (v - y[i]) * t)); };
+  const isHex = s => typeof s === 'string' && /^#[0-9a-f]{3,6}$/i.test(s);
+  /* the text colour for a fill: the look's own ink if it reads at `min`, else black, else white (one of black and white always reaches 4.58:1) */
+  function inkFor(fill, ink, min) {
+    min = min || 4.5; const c = [ink, '#000000', '#ffffff'].filter(isHex);
+    for (const k of c) if (contrast(k, fill) >= min) return k;
+    return contrast('#000000', fill) >= contrast('#ffffff', fill) ? '#000000' : '#ffffff';
+  }
+
+  /* ---------------- the person, as the Trail and the Fan print them ---------------- */
+  const clean = s => String(s == null ? '' : s).replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim();
+  const isLiving = p => !!(p && (p.living || p.ghost && false));   /* a "ghost" is a named-only stand-in: no dates exist to show, but nothing private either */
+  const hidden = p => !!(p && p.living);                           /* a living person: the name and the family only */
+  const yearText = (y, est) => y == null ? '' : (est ? '~' : '') + y;
+  function lifeText(p) {   /* "~1884–1951", "1884–", "" */
+    if (!p || hidden(p) || p.ghost) return '';
+    const b = yearText(p.by, p.fl & 1), d = yearText(p.dy, p.fl & 2);
+    if (!b && !d) return '';
+    return (b || '?') + '–' + d;
+  }
+  const given1 = p => clean(p.given).split(' ')[0] || '';
+  const fullName = p => clean((p.given || '') + ' ' + (p.sur || '')) || '(no name recorded)';
+  const initial = s => { const t = clean(s).replace(/^[^\p{L}]+/u, ''); return t ? t.charAt(0).toUpperCase() : ''; };
+
+  /* ---------------- the direct line ---------------- */
+  /* ancestors of person i going up one a generation through the fathers ('f') or the mothers ('m'); [parent, grandparent, ...], stopping where nobody is recorded */
+  function lineIdx(M, i, side, max) {
+    const out = [], seen = new Set([i]); max = max || 12; let cur = i;
+    while (out.length < max) { const p = M.P[cur], q = p ? (side === 'm' ? p.m : p.f) : -1; if (q == null || q < 0 || seen.has(q)) break; seen.add(q); out.push(q); cur = q; }
+    return out;
+  }
+  /* the line with more known generations; the father's on a tie */
+  function defaultSide(M, i) { return lineIdx(M, i, 'm').length > lineIdx(M, i, 'f').length ? 'm' : 'f'; }
+  function trailCard(M, i, gen) {
+    const p = M.P[i], hid = hidden(p), place = !hid && !p.ghost ? clean(p.bp) : '';
+    return { i, key: p.key, gen, given: clean(p.given), sur: clean(p.sur), name: fullName(p), place, year: hid || p.ghost ? null : p.by, est: !hid && !p.ghost && p.by != null && !!(p.fl & 1), pest: !hid && !p.ghost && !!place && !!(p.fl & 4),
+      life: lifeText(p), living: !!p.living, ghost: !!p.ghost, standin: !!p.standin, sex: p.sex };
+  }
+  /* {side, counts:{f,m}, anc:[card] oldest first (gen -n ... -1), focus:card, stub:{gen, why}|null (where the line stops), more:n generations further back not drawn} */
+  function trailModel(M, i, side, opt) {
+    opt = opt || {}; const cap = opt.cap || 8, cnt = { f: lineIdx(M, i, 'f').length, m: lineIdx(M, i, 'm').length };
+    side = side === 'm' || side === 'f' ? side : defaultSide(M, i);
+    const all = lineIdx(M, i, side), shown = all.slice(0, cap), anc = shown.map((q, k) => trailCard(M, q, -(k + 1))).reverse();
+    const last = shown.length ? shown[shown.length - 1] : i, lp = M.P[last], stops = all.length <= cap && !(side === 'm' ? lp.m >= 0 : lp.f >= 0);
+    return { side, counts: cnt, anc, focus: trailCard(M, i, 0), more: Math.max(0, all.length - shown.length),
+      stub: stops ? { gen: -(shown.length + 1), why: 'No ' + (side === 'm' ? 'mother' : 'father') + ' recorded for ' + fullName(lp) } : null };
+  }
+  /* "GEN -2" */
+  const genTag = g => g === 0 ? 'FOCUS' : 'GEN. ' + (g < 0 ? '\u2212' : '+') + Math.abs(g);
+
+  /* ---------------- the places of one life ---------------- */
+  /* [{name, n, year (the year to choose the flag by), first, last}] most events first. A route lists the stops an archive records; the birthplace and the deathplace are added if it left them out. A living person has none. */
+  function placeTrail(M, i) {
+    const p = M.P[i]; if (!p || hidden(p) || p.ghost) return [];
+    const ev = [];
+    const route = Array.isArray(p.route) ? p.route.filter(s => s && s.name) : [];
+    if (p.bp && (!route.length || route[0].name !== p.bp)) ev.push({ name: p.bp, year: p.by });
+    route.forEach(s => ev.push({ name: s.name, year: s.year }));
+    if (p.dp && (!route.length || route[route.length - 1].name !== p.dp)) ev.push({ name: p.dp, year: p.dy });
+    const by = new Map();
+    ev.forEach((e, k) => {
+      const name = clean(e.name); if (!name) return;
+      let r = by.get(name); if (!r) by.set(name, r = { name, n: 0, year: null, first: null, last: null, at: k });
+      r.n++; if (e.year != null) { r.last = r.last == null ? e.year : Math.max(r.last, e.year); r.first = r.first == null ? e.year : Math.min(r.first, e.year); }
+    });
+    const rows = [...by.values()];
+    rows.forEach(r => { r.year = r.last != null ? r.last : (p.by != null ? p.by : null); });
+    return rows.sort((a, b) => b.n - a.n || a.at - b.at);
+  }
+
+  /* ---------------- the Fan: who stands where ---------------- */
+  const FAN_MIN = 3, FAN_MAX = 7, FAN_DEFAULT = 5;
+  const RING = [84, 96, 96, 88, 80, 72, 64, 64];                 /* the centre's radius, then the thickness of rings 1..7, in world units */
+  const ringR = g => { let a = 0; for (let k = 0; k < g; k++) a += RING[k]; return g === 0 ? [0, RING[0]] : [a, a + RING[g]]; };
+  const fanRadius = gens => ringR(gens)[1];
+  /* slot n (1 = the centre; 2n the father, 2n + 1 the mother of slot n); gen g; place j along the ring, left to right */
+  function wedge(g, j) {
+    const [r0, r1] = ringR(g), n = 1 << g, a1 = Math.PI - j * Math.PI / n, a0 = Math.PI - (j + 1) * Math.PI / n;
+    return { g, j, r0, r1, rm: (r0 + r1) / 2, a0, a1, am: (a0 + a1) / 2 };
+  }
+  const pt = (r, a) => [r * Math.cos(a), -r * Math.sin(a)];
+  const f1 = n => Math.round(n * 10) / 10;
+  function wedgePath(w) {
+    if (w.g === 0) return `M${-w.r1} 0A${w.r1} ${w.r1} 0 0 1 ${w.r1} 0Z`;
+    const [ox1, oy1] = pt(w.r1, w.a1), [ox0, oy0] = pt(w.r1, w.a0), [ix0, iy0] = pt(w.r0, w.a0), [ix1, iy1] = pt(w.r0, w.a1);
+    return `M${f1(ox1)} ${f1(oy1)}A${w.r1} ${w.r1} 0 0 1 ${f1(ox0)} ${f1(oy0)}L${f1(ix0)} ${f1(iy0)}A${w.r0} ${w.r0} 0 0 0 ${f1(ix1)} ${f1(iy1)}Z`;
+  }
+  /* levels[g] = [slot]; slot = {n, g, j, i (person index, -1 when nobody is recorded), side ('f' | 'm' | null for the centre)} */
+  function fanSlots(M, root, gens) {
+    gens = Math.max(FAN_MIN, Math.min(FAN_MAX, gens | 0 || FAN_DEFAULT));
+    const levels = [[{ n: 1, g: 0, j: 0, i: root, side: null }]];
+    for (let g = 1; g <= gens; g++) {
+      const prev = levels[g - 1], cur = [];
+      prev.forEach(s => { [0, 1].forEach(b => { const q = s.i >= 0 ? (b ? M.P[s.i].m : M.P[s.i].f) : -1; cur.push({ n: 2 * s.n + b, g, j: cur.length, i: q == null ? -1 : q, side: g === 1 ? (b ? 'm' : 'f') : s.side }); }); });
+      levels.push(cur);
+    }
+    let known = 0; levels.forEach((l, g) => { if (g) l.forEach(s => { if (s.i >= 0) known++; }); });
+    return { gens, levels, known, total: (1 << (gens + 1)) - 2 };
+  }
+  /* "father's mother's father" for slot n */
+  function routeWords(n) {
+    const bits = n.toString(2).slice(1), w = [];
+    for (const b of bits) w.push(b === '0' ? 'father' : 'mother');
+    return w.length ? w.map((x, k) => k < w.length - 1 ? x + '’s' : x).join(' ') : 'the centre';
+  }
+  /* "great-grandmother" for slot n at generation g */
+  function kinWord(g, n) {
+    const mo = n % 2 === 1;
+    if (g === 1) return mo ? 'mother' : 'father';
+    const gr = g === 2 ? '' : g === 3 ? 'great-' : g === 4 ? 'great-great-' : (g - 2) + '× great-';
+    return gr + (mo ? 'grandmother' : 'grandfather');
+  }
+  const genName = g => g === 0 ? 'Centre' : g === 1 ? 'Parents' : g === 2 ? 'Grandparents' : g === 3 ? 'Great-grandparents' : g === 4 ? 'Great-great-grandparents' : (g - 2) + '× great-grandparents';
+
+  /* ---------------- the Fan: colour ---------------- */
+  const SIDE_BASE = { f: '#2A5FA3', m: '#DB8420' };                /* blue and orange: apart for protan, deutan and tritan eyes, and different in lightness too */
+  const STEP = [0, 0.12, 0.23, 0.33, 0.41, 0.48, 0.54];             /* how far toward the card each generation's tint has faded (generation 1 first) */
+  /* tk: the look's tokens {card, board, ink, line, faint, accent}. Returns {fill, ink} */
+  function sideFill(slot, tk) {
+    if (slot.g === 0) return { fill: mix(tk.ink, tk.card, 0.07), ink: inkFor(mix(tk.ink, tk.card, 0.07), tk.ink) };
+    const fill = mix(SIDE_BASE[slot.side], tk.card, 1 - STEP[Math.min(slot.g, 7) - 1]);
+    return { fill, ink: inkFor(fill, tk.ink) };
+  }
+  /* the flag's own colours, the clearly-coloured fills of its drawing, most common first (white, black and grey are never the answer unless the flag has nothing else) */
+  function flagCandidates(svg) {
+    const n = new Map(), order = [];
+    (String(svg || '').match(/fill="(#[0-9a-fA-F]{3,6})"/g) || []).forEach(m => {
+      const h = toHex(hex2(/#[0-9a-fA-F]+/.exec(m)[0])), [r, g, b] = hex2(h), s = (Math.max(r, g, b) - Math.min(r, g, b)) / 255;
+      if (!order.includes(h)) order.push(h); if (s >= 0.25) n.set(h, (n.get(h) || 0) + 1);
+    });
+    const c = [...n.keys()].sort((x, y) => n.get(y) - n.get(x) || order.indexOf(x) - order.indexOf(y));
+    return c.length ? c : order.slice(0, 1);
+  }
+  const flagColour = svg => flagCandidates(svg)[0] || null;
+  const rgbDist = (a, b) => { const x = hex2(a), y = hex2(b); return Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]); };
+  /* One colour for each flag that flies over a birthplace in the fan, drawn from that flag's own colours, and kept apart: the commonest flag first, and each takes the first of its colours that is
+     not close to one already used (else the one farthest from them), so two regimes that both fly red are not both red when the flag has another colour to use. items: [{fi, svg, n}] */
+  function flagPalette(items, min) {
+    min = min || 110; const used = [], out = new Map();
+    items.slice().sort((a, b) => b.n - a.n || a.fi - b.fi).forEach(it => {
+      const c = flagCandidates(it.svg); if (!c.length) { out.set(it.fi, null); return; }
+      let pick = c.find(h => used.every(u => rgbDist(h, u) >= min));
+      if (!pick) { let best = -1; c.forEach(h => { const d = used.length ? Math.min(...used.map(u => rgbDist(h, u))) : 1e9; if (d > best) { best = d; pick = h; } }); }
+      used.push(pick); out.set(it.fi, pick);
+    });
+    return out;
+  }
+  /* the index of the flag over the person's birthplace in the year they were born there (M.flags[fi] = [id, viewBox, svg]); -1 when the Atlas has none */
+  function placeFlag(M, p, TC) {
+    if (!p || hidden(p) || p.ghost || !p.bp || !TC) return -1;
+    const pl = TC.placeAt(M, p, p.bp, p.by); return pl && pl.fi >= 0 && M.flags[pl.fi] ? pl.fi : -1;
+  }
+  function placeFill(slot, col, tk) {
+    if (slot.g === 0) return sideFill(slot, tk);
+    const fill = col ? mix(col, tk.card, 1 - STEP[Math.min(slot.g, 7) - 1] * 0.6) : mix(tk.ink, tk.card, 0.1);
+    return { fill, ink: inkFor(fill, tk.ink) };
+  }
+
+  /* ---------------- the Fan: what a wedge says, and whether it fits ---------------- */
+  const CHAR_W = 0.58;                                              /* the width of an average letter of the label face, in ems (a deliberately full-bodied estimate) */
+  const textW = (s, fs) => s.length * CHAR_W * fs;
+  const LINE_H = 1.2;
+  /* does a w x h box, centred at (x, y) and turned by rot degrees, lie inside the wedge (with a margin)? Tested at its corners and the middle of each edge. */
+  function boxInWedge(wd, x, y, w, h, rot, pad) {
+    pad = pad == null ? 3 : pad; const c = Math.cos(rot * Math.PI / 180), s = Math.sin(rot * Math.PI / 180);
+    for (const [u, v] of [[-1, -1], [0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0]]) {
+      const dx = u * w / 2, dy = v * h / 2, px = x + dx * c - dy * s, py = y + dx * s + dy * c;
+      const r = Math.hypot(px, py), a = Math.atan2(-py, px);
+      if (wd.g === 0) { if (r > wd.r1 - pad || py > -pad) return false; continue; }
+      if (r < wd.r0 + pad || r > wd.r1 - pad) return false;
+      if (a < wd.a0 + pad / r || a > wd.a1 - pad / r) return false;
+    }
+    return true;
+  }
+  /* the lines a wedge can print, richest first; each level is a list of strings */
+  function labelLevels(p, g) {
+    if (!p) return [];
+    const full = fullName(p), first = [given1(p), clean(p.sur)].filter(Boolean).join(' ') || full, sur = clean(p.sur) || given1(p) || full;
+    const ini = initial(p.given), surI = ini && clean(p.sur) ? clean(p.sur) + ' ' + ini + '.' : sur;
+    const yrs = lifeText(p), by = p.by == null || hidden(p) || p.ghost ? '' : yearText(p.by, p.fl & 1);
+    const place = hidden(p) || p.ghost ? '' : clean(p.bp);
+    const mono = [initial(p.given), initial(p.sur)].filter(Boolean).join('').split('').join('.') + '.';
+    const g1 = given1(p), sr = clean(p.sur), L = [];
+    if (yrs && place) L.push([full, yrs, place]);
+    if (yrs) L.push([full, yrs]);
+    if (yrs && first !== full) L.push([first, yrs]);
+    if (yrs && g1 && sr) L.push([g1, sr, yrs]);
+    if (yrs) L.push([surI, yrs]);
+    L.push([full]);
+    if (first !== full) L.push([first]);
+    if (g1 && sr) L.push([g1, sr]);
+    L.push([surI]);
+    if (surI !== sur) L.push([sur]);
+    if (by) L.push([by]);
+    if (yrs && yrs !== by) L.push([yrs]);
+    if (mono.length > 1) L.push([mono]);
+    /* drop a level that repeats the one before it (same lines) */
+    return L.filter((l, k) => k === 0 || l.join('|') !== L[k - 1].join('|'));
+  }
+  /* The label for a wedge, or null when nothing readable fits. k = screen pixels per world unit (so a font of 10 px is 10 / k units). Rotation is only ever within +-90 degrees: never upside down.
+     lines: [{t, fs, b}]; x, y: the centre of the block; rot: degrees; trunc: true when the outermost ring had to cut a name with an ellipsis. */
+  const FS = [16, 14, 13, 12, 11, 10];
+  function fanLabel(slot, p, gens, k, minPx) {
+    if (!p) return null; minPx = minPx || 10; k = k || 1;
+    const wd = wedge(slot.g, slot.j), [x, y] = pt(wd.rm, wd.am), rotR = (wd.am <= Math.PI / 2 ? -wd.am : Math.PI - wd.am) * 180 / Math.PI;
+    const levels = labelLevels(p, slot.g);
+    const mk = (lines, fs, orient, trunc) => ({ lines: lines.map((t, i) => ({ t, fs, b: i === 0 })), fs, x, y, rot: orient === 'h' ? 0 : rotR, orient, trunc: !!trunc });
+    const dims = (lines, fs) => ({ w: Math.max(...lines.map((t, i) => textW(t, fs))), h: lines.length * fs * LINE_H });
+    const sizes = FS.filter(px => px >= minPx).map(px => px / k);
+    for (const lines of levels) {
+      for (const fs of sizes) {   /* across, if it fits at any size; only then along the wedge */
+        const d = dims(lines, fs);
+        if (slot.g === 0) { if (boxInWedge(wd, 0, -wd.r1 * 0.45, d.w, d.h, 0, 4)) return Object.assign(mk(lines, fs, 'h'), { x: 0, y: -wd.r1 * 0.45 }); continue; }
+        if (boxInWedge(wd, x, y, d.w, d.h, 0, 3)) return mk(lines, fs, 'h');
+      }
+      if (slot.g === 0) continue;
+      for (const fs of sizes) { const d = dims(lines, fs); if (boxInWedge(wd, x, y, d.w, d.h, rotR, 3)) return mk(lines, fs, 'r'); }
+    }
+    /* the outermost ring only: a name that is too long is cut, with a real ellipsis, rather than left out */
+    if (slot.g === gens && slot.g > 0) {
+      const t = levels.map(l => l[0]).find(s => s && /\p{L}/u.test(s)) || '';
+      const fs = minPx / k;
+      for (let n = Math.min(t.length - 1, 14); n >= 3; n--) {
+        const s = t.slice(0, n).replace(/[\s,.\-]+$/, '') + '…', d = { w: textW(s, fs), h: fs * LINE_H };
+        if (boxInWedge(wd, x, y, d.w, d.h, 0, 3)) return mk([s], fs, 'h', true);
+        if (boxInWedge(wd, x, y, d.w, d.h, rotR, 3)) return mk([s], fs, 'r', true);
+      }
+    }
+    return null;
+  }
+
+  /* ---------------- the Fan, as a list ---------------- */
+  /* [{gen, name, people:[{n, i, route, kin, name, life, place, side}], missing}] : the same ancestors as the drawing, a generation at a time */
+  function fanList(M, root, gens) {
+    const F = fanSlots(M, root, gens);
+    return F.levels.map((lv, g) => ({ gen: g, name: genName(g), missing: lv.filter(s => s.i < 0).length, total: lv.length,
+      people: lv.filter(s => s.i >= 0).map(s => { const p = M.P[s.i]; return { n: s.n, i: s.i, kin: g ? kinWord(g, s.n) : '', route: g ? routeWords(s.n) : '', name: fullName(p), life: lifeText(p), place: hidden(p) || p.ghost ? '' : clean(p.bp), side: s.side, living: !!p.living }; }) }));
+  }
+
+  /* ---------------- the kept choice (one small field of the tree's record) ---------------- */
+  /* {m: 'canvas' | 'fan', g: 3..7, c: 'side' | 'place', t: 0 | 1 | 2 (the Trail band: gone, one line, whole), r: person key of the fan's centre or ''} */
+  const LENS_DEFAULT = { m: 'canvas', g: FAN_DEFAULT, c: 'side', t: 2, r: '' };
+  function cleanLens(x) {
+    const o = x && typeof x === 'object' ? x : {};
+    return { m: o.m === 'fan' ? 'fan' : 'canvas', g: Math.max(FAN_MIN, Math.min(FAN_MAX, Number.isInteger(o.g) ? o.g : FAN_DEFAULT)), c: o.c === 'place' ? 'place' : 'side',
+      t: o.t === 0 || o.t === 1 ? o.t : 2, r: typeof o.r === 'string' ? o.r : '' };
+  }
+  const lensIsDefault = l => { const c = cleanLens(l); return c.m === 'canvas' && c.g === FAN_DEFAULT && c.c === 'side' && c.t === 2; };
+
+  const API = { contrast, mix, inkFor, lum, hex2, lineIdx, defaultSide, trailCard, trailModel, genTag, placeTrail, FAN_MIN, FAN_MAX, FAN_DEFAULT, RING, ringR, fanRadius, wedge, wedgePath, pt, fanSlots, routeWords, kinWord, genName,
+    SIDE_BASE, STEP, sideFill, flagColour, flagCandidates, flagPalette, placeFlag, placeFill, textW, boxInWedge, labelLevels, fanLabel, fanList, cleanLens, lensIsDefault, lifeText, fullName, hidden, LENS_DEFAULT };
+  if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCV = API;
+})(typeof window !== 'undefined' ? window : globalThis);
 </script>
 <script>(function(){'use strict';
 /* core.js — state, persistence, undo, geometry, the card elements. Everything below shares one scope (build.py wraps the files in one IIFE). */
@@ -3210,6 +3624,10 @@ const ICON = {
   blood: 'M12 3.5c3.2 4.2 6 7.2 6 10.6a6 6 0 01-12 0c0-3.4 2.8-6.4 6-10.6z',
   folder: 'M3 7.5A1.5 1.5 0 014.5 6H9l2 2.2h8.5A1.5 1.5 0 0121 9.7V17.5a1.5 1.5 0 01-1.5 1.5h-15A1.5 1.5 0 013 17.5z',
   eyeoff: '<path d="M3 12s3.3-6 9-6 9 6 9 6-3.3 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.6"/><path d="M4.5 4.5l15 15"/>',
+  fan: 'M3.5 19.5a8.5 8.5 0 0117 0zM12 19.5V11M7 19.5l2.2-5.8M17 19.5l-2.2-5.8',
+  house: 'M3.5 11.5L12 4l8.5 7.5M6 10v9.5h12V10M10 19.5v-5h4v5',
+  town: 'M4 20.5V9.5h6v11M10 20.5V5h6v15.5M16 20.5v-8h4v8M2.5 20.5h19M6.5 12.5h1.5M6.5 16h1.5M12.5 8.5h1.5M12.5 12h1.5M12.5 15.5h1.5',   /* a town: buildings in a row */
+  land: 'M12 3.2a8.8 8.8 0 100 17.6 8.8 8.8 0 000-17.6zM3.4 12h17.2M12 3.2c2.6 2.4 3.6 5.4 3.6 8.8s-1 6.4-3.6 8.8M12 3.2C9.4 5.6 8.4 8.6 8.4 12s1 6.4 3.6 8.8',   /* a country only: a globe */
 };
 const icon = (n, cls) => `<svg class="${cls || 'lk-icon'}" viewBox="0 0 24 24" aria-hidden="true">${ICON[n].startsWith('<') ? ICON[n] : `<path d="${ICON[n]}"/>`}</svg>`;
 
@@ -3247,7 +3665,7 @@ const cx = c => c.x + W / 2;
 function serialise() {
   return {
     v: 1, cards: [...S.cards.values()].map(c => [c.key, Math.round(c.x), Math.round(c.y), c.pinned ? 1 : 0, c.up, c.down, c.sp, c.stopG ? 1 : 0, c.from || '']),
-    view: S.view, decisions: [...M.decisions], opts: S.opts, path: S.path ? [S.path.a, S.path.b] : null, filter: [...S.filter],
+    view: typeof lensView === 'function' ? lensView() : S.view, lens: typeof lensSerialise === 'function' ? lensSerialise() : null, decisions: [...M.decisions], opts: S.opts, path: S.path ? [S.path.a, S.path.b] : null, filter: [...S.filter],
     pairing: S.pr ? prSerialise() : null,    /* Compare: only the visitor's own choices (which archives, the starting people, accepted and rejected pairings); the page hashes them */
   };
 }
@@ -3272,7 +3690,7 @@ function restore(d) {
       const p = M.byKey.get(r[0]); if (!p) return;
       const c = newCard(p.i, r[1], r[2]); c.pinned = !!r[3]; c.up = r[4]; c.down = r[5]; c.sp = r[6]; c.stopG = !!r[7]; c.from = r[8] || null;
     });
-    if (d.view && isFinite(d.view.k)) S.view = d.view;
+    if (d.view && isFinite(d.view.k)) { if (typeof fanIsOn === 'function' && fanIsOn()) LV.cv = d.view; else S.view = d.view; }
     if (d.path && S.cards.has(d.path[0]) && S.cards.has(d.path[1])) S._restorePath = d.path;
     return S.cards.size > 0;
   } catch (e) { return false; }
@@ -3284,7 +3702,7 @@ function undo() {
   if (!S.undo.length) return;
   const d = JSON.parse(S.undo.pop());
   clearAll(true);
-  restore(d); S.view = d.view; applyView(); S.path = null; clearPathUi();
+  restore(d); setCanvasView(d.view); S.path = null; clearPathUi();
   S.cards.forEach(c => { c.el.classList.remove('pop'); });
   refreshAll(); drawEdges(); save(); syncButtons(); if (typeof hideHint === 'function') hideHint(); toast('Undone');
   if (S._restorePath) { const [a, b] = S._restorePath; S._restorePath = null; showPath(a, b, { quiet: true, noPlace: true }); }
@@ -3452,13 +3870,14 @@ function applyView() {
   document.documentElement.style.setProperty('--world-k', v.k);
   if (typeof drawLanes === 'function') drawLanes();
   miniDraw();
+  if (typeof lensOnZoom === 'function') lensOnZoom();
 }
 const toWorld = (px, py) => ({ x: (px - S.view.x) / S.view.k, y: (py - S.view.y) / S.view.k });
 /* Zoom about a point, but never about a point outside the cards: the pointer (or, for the buttons, the middle of the cards) is held inside the cards' own outline, so zooming out
    shrinks the tree where it stands instead of sending it off toward a pointer parked over the search box or the middle of an empty window. */
 function zoomAt(f, px, py) {
   const v = S.view;
-  const nb = typeof namesBox === 'function' ? namesBox() : null;
+  const nb = (typeof lensBox === 'function' && lensBox()) || (typeof namesBox === 'function' ? namesBox() : null);
   if (nb || S.cards.size) {
     const b = nb || bbox([...S.cards.values()]), sx0 = b.x0 * v.k + v.x, sx1 = b.x1 * v.k + v.x, sy0 = b.y0 * v.k + v.y, sy1 = b.y1 * v.k + v.y;
     px = px == null ? (sx0 + sx1) / 2 : Math.min(sx1, Math.max(sx0, px)); py = py == null ? (sy0 + sy1) / 2 : Math.min(sy1, Math.max(sy0, py));
@@ -3470,8 +3889,9 @@ function usable() { /* the part of the screen not covered by the dock and the in
   const dock = $('.dock'), info = $('#info');
   const bottom = (S.phone && document.documentElement.classList.contains('shelfoff')) ? innerHeight - 8 : dock.getBoundingClientRect().top - 12;
   const right = info.classList.contains('on') && !S.phone ? info.getBoundingClientRect().left - 12 : innerWidth - 8;
-  const top = 58, left = S.phone ? 8 : 64;
-  return { l: left, t: top, r: right, b: S.phone && info.classList.contains('on') ? Math.min(bottom, info.getBoundingClientRect().top - 8) : bottom };
+  const top = 58, left = S.phone ? 8 : 64, th = typeof trailHeight === 'function' ? trailHeight() : 0;   /* the Trail band, when it is up, is not canvas either */
+  const b0 = S.phone && info.classList.contains('on') ? Math.min(bottom, info.getBoundingClientRect().top - 8) : bottom;
+  return { l: left, t: top, r: right, b: th ? Math.min(b0, $('#trail').getBoundingClientRect().top - 12) : b0 };
 }
 let viewTween = null;
 function animateView(target, ms) {
@@ -3489,7 +3909,7 @@ function bbox(cards) {
 }
 function fit(cards, opt) {
   cards = cards && cards.length ? cards : [...S.cards.values()];
-  const nb = typeof namesBox === 'function' ? namesBox() : null;   /* in the Names look the picture is the name cards, not the people cards */
+  const nb = (typeof lensBox === 'function' && lensBox()) || (typeof namesBox === 'function' ? namesBox() : null);   /* the Fan, or in the Names look the picture is the name cards, not the people cards */
   if (!cards.length && !nb) return;
   opt = opt || {};
   const b = nb || bbox(cards), u = usable(), pad = 40;
@@ -5364,6 +5784,482 @@ $('#info').addEventListener('click', e => {
 }, true);
 $('#info').addEventListener('change', e => { const pk = e.target.closest && e.target.closest('[data-pr-pick]'); if (pk) { const [a, i] = pk.dataset.prPick.split(':').map(Number); if (S.pr) S.pr.pick[a] = i; } });
 
+/* viewsui.js — the View button, the Fan, and the Trail band. The pure parts (the direct line, the places of a life, the fan's geometry, colour and labels) are in views.js and are tested there.
+ *
+ * VIEW is how the selection is drawn: Canvas (the free canvas, as it always was) or Fan. A view is a LENS: it never replaces the canvas, it is drawn over it, and the canvas underneath keeps its cards,
+ * its pan and zoom (put back when the lens closes), and its selection. The choice is one small field of the tree's saved record (`lens` here, `vw` in the record: see public/tree-canvas/work.js), opaque
+ * (a person is a hashed id), restored when the same tree opens again with a line that says so and a way out.
+ *
+ * THE FAN lives in the canvas's own world (an <svg> beside the cards), so the canvas's pan, zoom and Fit work on it unchanged; the cards are only hidden while it is open.
+ * THE TRAIL is a docked band that follows the selected person: their direct line as a row of cards (one ancestor a generation) and the places of their own life.
+ * A person who may be living is shown by name and family only, here as everywhere. Nothing here is stored or sent. */
+const TCV = window.TCV;
+const LV = { m: 'canvas', g: TCV.FAN_DEFAULT, c: 'side', t: 2, root: null, cv: null, list: false, stack: [], kb: null, bucket: -99, came: false, side: null, tf: null, hov: null, flagCache: new Map(), model: null };
+const lensAvail = () => (!EMBED || SA) && !S.pr;
+const fanIsOn = () => LV.m === 'fan';
+
+/* ---------------- what the canvas asks of the lens ---------------- */
+/* the field of the saved record (null when everything is as it starts, so an untouched tree's record is exactly what it was) */
+function lensSerialise() {
+  if (!lensAvail()) return null;
+  const l = { m: LV.m, g: LV.g, c: LV.c, t: LV.t, r: LV.m === 'fan' && LV.root ? LV.root : '' };
+  return TCV.lensIsDefault(l) ? null : l;
+}
+/* the canvas's own pan and zoom: while the Fan is open S.view is the Fan's, and the canvas's is parked in LV.cv */
+const lensView = () => (fanIsOn() && LV.cv ? LV.cv : S.view);
+function setCanvasView(v) { if (fanIsOn()) { LV.cv = v; } else { S.view = v; applyView(); } }
+/* the box Fit and zoom keep the picture inside (world units); null when the Fan is not what is drawn */
+function lensBox() {
+  if (!fanIsOn() || LV.list) return null;
+  const R = TCV.fanRadius(LV.g) + 10; return { x0: -R, y0: -R, x1: R, y1: 14 };
+}
+function lensTokens() {
+  const cs = getComputedStyle(document.documentElement), g = (n, d) => { const v = cs.getPropertyValue(n).trim(); return /^#[0-9a-f]{3,6}$/i.test(v) ? v : d; };
+  return { card: g('--lk-card', '#FFFCF3'), board: g('--lk-board', '#F1E8D2'), ink: g('--lk-ink', '#2b2118'), line: g('--lk-line', '#E3D6B8'), faint: g('--lk-faint', '#b9a98c'), accent: g('--lk-accent', '#D9822B') };
+}
+
+/* ---------------- the View button and its menu ---------------- */
+function lensWire() {
+  const b = $('#bLens'); if (!b) return;
+  if (!lensAvail()) { b.hidden = true; return; }
+  b.hidden = false; b.innerHTML = icon('fan'); lensBtn();
+  const m = document.createElement('div'); m.id = 'lensMenu'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', 'View'); document.body.appendChild(m);
+  b.onclick = () => openLensMenu();
+  m.addEventListener('click', e => {
+    const t = e.target.closest('[data-lv]'); if (!t || t.disabled) return;
+    if (t.dataset.lv === 'trail') { lensTrailSize(LV.t ? 0 : 2); lensMenu(); return; }
+    lensSet(t.dataset.lv); openLensMenu(false); b.focus();
+  });
+  m.addEventListener('keydown', e => {
+    const its = [...m.querySelectorAll('[role="menuitemradio"]:not([disabled])')], k = its.indexOf(document.activeElement);
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); if (k >= 0) its[(k + (e.key === 'ArrowDown' ? 1 : its.length - 1)) % its.length].focus(); else if (its[0]) its[0].focus(); }
+    else if (e.key === 'Home' && its[0]) { e.preventDefault(); its[0].focus(); }
+    else if (e.key === 'End' && its.length) { e.preventDefault(); its[its.length - 1].focus(); }
+  });
+  document.addEventListener('click', e => { if (m.classList.contains('on') && !m.contains(e.target) && !e.target.closest('#bLens')) openLensMenu(false); });
+  addEventListener('keydown', e => { if (e.key === 'Escape' && m.classList.contains('on')) { openLensMenu(false); b.focus(); } });
+}
+function lensBtn() {
+  const b = $('#bLens'); if (!b || b.hidden) return;
+  const txt = 'View: ' + (fanIsOn() ? 'Fan' : 'Canvas') + '. Choose how the people are drawn.';
+  b.title = txt; b.setAttribute('aria-label', txt); b.classList.toggle('on', fanIsOn());
+}
+function lensMenu() {
+  const m = $('#lensMenu'); if (!m) return;
+  const item = (k, t, sub, on, dis) => `<button type="button" role="menuitemradio" class="lvi${on ? ' on' : ''}" data-lv="${k}" aria-checked="${on}"${dis ? ' disabled' : ''}><span class="lvd" aria-hidden="true"></span><span><b>${t}</b><small>${sub}</small></span></button>`;
+  m.innerHTML = `<h4>View</h4><p class="plines"><small>How the people are drawn. <b>Look</b>, the half-sun button, is the colours.</small></p>`
+    + `<div role="menu" aria-label="View">`
+    + item('canvas', 'Canvas', 'Free: the cards sit where you put them', !fanIsOn())
+    + item('fan', 'Fan', 'The ancestors of the selected person as a half circle, a ring a generation', fanIsOn())
+    + item('generations', 'Generations <em class="lvsoon">soon</em>', 'Everyone in rows by generation', false, true) + `</div>`
+    + `<button type="button" class="lk-toggle${LV.t ? ' on' : ''}" role="switch" aria-checked="${!!LV.t}" data-lv="trail"><span class="stx"><b>Direct-line strip open</b><i>A band along the very bottom: the selected person’s line, one ancestor a generation, and where they lived. Off folds it to a thin handle.</i></span><span class="knob"></span></button>`;
+}
+function openLensMenu(on) {
+  const m = $('#lensMenu'), b = $('#bLens'); if (!m || !b) return;
+  if (on == null) on = !m.classList.contains('on');
+  if (on) { openMainMenu(false); openBloodMenu(false); openViewsMenu(false); lensMenu(); }
+  m.classList.toggle('on', on); b.setAttribute('aria-expanded', String(on));
+  if (on) { const c = m.querySelector('.lvi.on') || m.querySelector('.lvi'); if (c && !S.phone) c.focus({ preventScroll: true }); }
+}
+
+/* ---------------- choosing a view ---------------- */
+function fanStartKey() {
+  const one = S.sel.size === 1 ? [...S.sel][0] : null;
+  if (one && M.byKey.has(one)) return one;
+  if (S.sel.size) { const k = [...S.sel].find(x => M.byKey.has(x)); if (k) return k; }
+  if (S.mark && M.byKey.has(S.mark)) return S.mark;
+  const last = [...S.cards.keys()].pop(); return last || null;
+}
+function lensSet(m, o) {
+  o = o || {};
+  if (!lensAvail() || m === LV.m || (m !== 'fan' && m !== 'canvas')) return;
+  if (m === 'fan') {
+    if (document.body.classList.contains('pr')) { toast('Compare is laying the people out. Stop comparing to use the Fan.', 3600); return; }
+    const k = fanStartKey(); if (!k) { toast('Put a person on the canvas and select them: the Fan is drawn from them.', 3600); return; }
+    fanOpen(k, o);
+  } else fanClose();
+  lensBtn(); save();
+}
+function fanOpen(key, o) {
+  o = o || {};
+  closePop(); LV.m = 'fan'; LV.root = key; LV.cv = Object.assign({}, S.view); LV.stack = []; LV.bucket = -99; LV.list = !!o.list;
+  document.body.classList.add('vwfan'); document.body.classList.toggle('vwlist', LV.list);
+  fanRender(); trailRender(); lensBtn();
+  fanFit(o.boot ? 1 : 520);
+}
+function fanClose() {
+  const v = LV.cv || S.view; LV.m = 'canvas'; LV.cv = null; LV.list = false; LV.came = false;
+  document.body.classList.remove('vwfan', 'vwlist');
+  S.view = v; applyView(); drawEdges(); miniDraw();
+  const f = $('#fan'); if (f) f.innerHTML = ''; const t = $('#fanTip'); if (t) t.classList.remove('on');
+  fanBar(); fanLegend(); fanListRender(); trailRender(); lensBtn();
+}
+function fanFit(ms) { if (fanIsOn() && !LV.list) fit(null, { ms: ms || 520, maxK: 1.2 }); }
+
+/* ---------------- the Fan: drawing it ---------------- */
+const fnum = n => Math.round(n * 10) / 10;
+function fanHost() {
+  let s = $('#fan');
+  if (!s) { $('#world').insertAdjacentHTML('beforeend', '<svg id="fan" width="1" height="1" overflow="visible" role="group" aria-label="Fan of ancestors"></svg>'); s = $('#fan'); }
+  return s;
+}
+const fanPerson = () => { const p = LV.root ? M.byKey.get(LV.root) : null; return p || null; };
+/* by place: one colour for each flag over a birthplace in this fan, taken from the flag and kept apart from the others (views.js flagPalette) */
+function fanPalette(F) {
+  const n = new Map();
+  F.levels.forEach(lv => lv.forEach(s => { if (s.i < 0 || s.g === 0) return; const fi = TCV.placeFlag(M, M.P[s.i], TC); if (fi >= 0) n.set(fi, (n.get(fi) || 0) + 1); }));
+  return TCV.flagPalette([...n.entries()].map(([fi, c]) => ({ fi, svg: M.flags[fi][2], n: c })));
+}
+function fanColourOf(slot, p, tk) {
+  if (slot.g === 0) return TCV.sideFill(slot, tk);
+  if (LV.c === 'place') { const fi = TCV.placeFlag(M, p, TC); return TCV.placeFill(slot, fi >= 0 && LV.pal ? LV.pal.get(fi) : null, tk); }
+  return TCV.sideFill(slot, tk);
+}
+function fanAria(slot, p) {
+  const who = p.living ? p.name + ' (living: name only)' : p.name + (TCV.lifeText(p) ? ', ' + TCV.lifeText(p) : '');
+  return (slot.g ? TCV.kinWord(slot.g, slot.n) + ': ' : 'Centre: ') + who;
+}
+function fanRender() {
+  const root = fanPerson(); const s = fanHost(); if (!root) { s.innerHTML = ''; return; }
+  const F = TCV.fanSlots(M, root.i, LV.g), tk = lensTokens(), k = S.view.k || 1;
+  LV.F = F; LV.tk = tk; LV.byN = new Map(); LV.bucket = fanBucket(); LV.pal = LV.c === 'place' ? fanPalette(F) : null;
+  const had = document.activeElement && document.activeElement.closest && document.activeElement.closest('#fan .fw'), hadN = had ? +had.dataset.n : null;
+  let out = `<g class="fring" aria-hidden="true"><path d="${TCV.wedgePath(TCV.wedge(0, 0))}" fill="none" stroke="none"/></g>`;
+  F.levels.forEach(lv => lv.forEach(slot => {
+    const wd = TCV.wedge(slot.g, slot.j), d = TCV.wedgePath(wd);
+    if (slot.i < 0) { out += `<path class="fw nk" d="${d}" aria-hidden="true"><title>Not known: nobody recorded here</title></path>`; return; }
+    const p = M.P[slot.i]; LV.byN.set(slot.n, slot);
+    const col = fanColourOf(slot, p, tk), lb = TCV.fanLabel(slot, p, F.gens, k, 10);
+    const sel = S.sel.has(p.key), focusRing = slot.g === 0;
+    out += `<g class="fw${sel ? ' sel' : ''}${focusRing ? ' ctr' : ''}" data-n="${slot.n}" tabindex="${LV.kb === slot.n || (LV.kb == null && focusRing) ? 0 : -1}" role="button" aria-label="${esc(fanAria(slot, p))}"${sel ? ' aria-pressed="true"' : ''}>`
+      + `<path d="${d}" fill="${col.fill}"/>${lb ? fanLabelSvg(lb, col.ink) : ''}</g>`;
+  }));
+  s.innerHTML = out + '<path id="fanFocus" class="ffr" d=""/>';
+  if (hadN != null) { const el = s.querySelector(`.fw[data-n="${hadN}"]`); if (el) el.focus({ preventScroll: true }); }
+  fanBar(); fanLegend(); fanListRender();
+}
+function fanLabelSvg(lb, ink) {
+  const n = lb.lines.length, lh = lb.fs * 1.2, tr = `translate(${fnum(lb.x)} ${fnum(lb.y)})${lb.rot ? ' rotate(' + fnum(lb.rot) + ')' : ''}`;
+  return `<text class="fl" transform="${tr}" text-anchor="middle" fill="${ink}">` + lb.lines.map((l, i) => `<tspan x="0" y="${fnum((i - (n - 1) / 2) * lh)}" dominant-baseline="central" font-size="${fnum(l.fs)}"${l.b ? ' font-weight="800"' : ''}>${esc(l.t)}</tspan>`).join('') + '</text>';
+}
+/* how finely the labels are redone: a coarser or finer zoom changes which of them fit, so the picture is drawn again when the zoom crosses a step (not at every pixel of it) */
+const fanBucket = () => Math.round(Math.log(S.view.k || 1) / Math.log(1.2));
+let fanRaf = 0;
+function lensOnZoom() {
+  if (!fanIsOn() || LV.list || fanBucket() === LV.bucket || fanRaf) return;
+  fanRaf = requestAnimationFrame(() => { fanRaf = 0; if (fanIsOn() && fanBucket() !== LV.bucket) fanRender(); });
+}
+function lensOnTheme() { if (fanIsOn()) fanRender(); trailRender(); }
+
+/* ---------------- the Fan: the bar, the legend, the list ---------------- */
+function fanBar() {
+  let bar = $('#fanBar');
+  if (!fanIsOn()) { if (bar) bar.hidden = true; return; }
+  if (!bar) {
+    bar = document.createElement('div'); bar.id = 'fanBar'; bar.setAttribute('role', 'toolbar'); bar.setAttribute('aria-label', 'Fan'); document.body.appendChild(bar);
+    bar.addEventListener('click', e => { const b = e.target.closest('[data-fb]'); if (b) fanAct(b.dataset.fb); });
+  }
+  const p = fanPerson(), F = LV.F, seg = (k, on, t, tip) => `<button type="button" class="fbs${on ? ' on' : ''}" data-fb="${k}" aria-pressed="${on}" title="${esc(tip || t)}">${t}</button>`;
+  const sel = S.sel.size === 1 ? M.byKey.get([...S.sel][0]) : null, canCentre = sel && sel.key !== LV.root && F && [...LV.byN.values()].some(s => s.i === sel.i);
+  bar.hidden = false;
+  bar.innerHTML = (LV.came ? `<div class="fbcame" role="status"><span>Your view came back: the Fan of ${esc(p ? p.name : 'this person')}.</span><button type="button" class="fbs" data-fb="canvas">Back to the canvas</button><button type="button" class="fbx" data-fb="ok" aria-label="Dismiss">${icon('x', '')}</button></div>` : '')
+    + `<div class="fbrow"><span class="fbt"><b>Fan of ${esc(p ? p.name : '')}</b>${F ? `<small>${F.known} of ${F.total} ancestors in ${F.gens} generations</small>` : ''}</span>`
+    + `<span class="fbg" role="group" aria-label="Generations"><button type="button" class="fbs" data-fb="less" aria-label="One generation fewer"${LV.g <= TCV.FAN_MIN ? ' disabled' : ''}>&minus;</button><span class="fbn" aria-live="polite">${LV.g} generations</span><button type="button" class="fbs" data-fb="more" aria-label="One generation more"${LV.g >= TCV.FAN_MAX ? ' disabled' : ''}>+</button></span>`
+    + `<span class="fbg" role="group" aria-label="Colour by">${seg('side', LV.c === 'side', 'By side', 'Colour by side of the family: the father’s side blue, the mother’s orange, paler the further back')}${seg('place', LV.c === 'place', 'By place', 'Colour by the flag over the birthplace in the year of birth')}</span>`
+    + `<span class="fbg" role="group" aria-label="Show as">${seg('draw', !LV.list, 'Drawing')}${seg('list', LV.list, 'List', 'The same ancestors as a list, a generation at a time')}</span>`
+    + (canCentre ? `<button type="button" class="fbs" data-fb="centre" title="Make ${esc(sel.name)} the centre of the fan">Make ${esc(given1Of(sel))} the centre</button>` : '')
+    + (LV.stack.length ? `<button type="button" class="fbs" data-fb="back" title="Back to the previous centre">Back</button>` : '')
+    + `<button type="button" class="fbs fbc" data-fb="canvas" title="Close the Fan: the canvas comes back as you left it">Canvas</button></div>`;
+}
+const given1Of = p => (p.given || p.sur || p.name || '').split(' ')[0];
+function fanAct(a) {
+  if (a === 'ok') { LV.came = false; fanBar(); return; }
+  if (a === 'canvas') { lensSet('canvas'); return; }
+  if (a === 'less' || a === 'more') { const g = Math.max(TCV.FAN_MIN, Math.min(TCV.FAN_MAX, LV.g + (a === 'more' ? 1 : -1))); if (g !== LV.g) { LV.g = g; fanRender(); fanFit(420); save(); } return; }
+  if (a === 'side' || a === 'place') { if (LV.c !== a) { LV.c = a; fanRender(); save(); } return; }
+  if (a === 'draw' || a === 'list') { LV.list = a === 'list'; document.body.classList.toggle('vwlist', LV.list); fanRender(); if (!LV.list) fanFit(300); else { const l = $('#fanList'); if (l) l.scrollTop = 0; } save(); return; }
+  if (a === 'centre') { const p = S.sel.size === 1 ? M.byKey.get([...S.sel][0]) : null; if (p) fanRecentre(p.key); return; }
+  if (a === 'back') { const k = LV.stack.pop(); if (k && M.byKey.has(k)) { LV.root = k; LV.kb = null; fanRender(); fanFit(420); save(); } return; }
+}
+function fanRecentre(key, quiet) {
+  if (!key || key === LV.root || !M.byKey.has(key)) return;
+  LV.stack.push(LV.root); if (LV.stack.length > 30) LV.stack.shift();
+  LV.root = key; LV.kb = null; LV.came = false; fanRender(); fanFit(420); save();
+  if (!quiet) toast(M.byKey.get(key).name + ' is the centre. Back returns to the last centre.', 2600);
+}
+/* what the colours mean, in the corner the minimap leaves free while the Fan is open */
+function fanLegend() {
+  let lg = $('#fanLegend');
+  if (!fanIsOn() || LV.list) { if (lg) lg.hidden = true; return; }
+  if (!lg) { lg = document.createElement('div'); lg.id = 'fanLegend'; lg.setAttribute('role', 'group'); lg.setAttribute('aria-label', 'What the colours mean'); document.body.appendChild(lg); }
+  lg.hidden = false;
+  if (LV.c === 'side') {
+    const tk = LV.tk || lensTokens(), sw = (c, t) => `<span class="fli"><i style="background:${c}"></i>${t}</span>`;
+    lg.innerHTML = sw(TCV.SIDE_BASE.f, 'Father’s side') + sw(TCV.SIDE_BASE.m, 'Mother’s side') + `<span class="fli fgr"><i style="background:linear-gradient(90deg,${TCV.sideFill({ g: 1, side: 'f' }, tk).fill},${TCV.sideFill({ g: 7, side: 'f' }, tk).fill})"></i>paler = further back</span><span class="fli"><i class="fnk"></i>not known</span>`;
+  } else {
+    const by = new Map(); (LV.F ? LV.F.levels : []).forEach(lv => lv.forEach(s => {
+      if (s.i < 0 || s.g === 0) return; const p = M.P[s.i], pl = !p.living && !p.ghost && p.bp ? TC.placeAt(M, p, p.bp, p.by) : null;
+      const key = pl && pl.fi >= 0 ? 'f' + pl.fi : 'none'; const r = by.get(key) || { n: 0, pl, p, fi: pl ? pl.fi : -1 }; r.n++; by.set(key, r);
+    }));
+    const rows = [...by.entries()].filter(([k]) => k !== 'none').sort((a, b) => b[1].n - a[1].n), none = by.get('none');
+    lg.innerHTML = rows.slice(0, 6).map(([k, r]) => `<span class="fli"><i style="background:${LV.pal && LV.pal.get(r.fi) || '#999'}"></i>${flagHTML(r.pl, r.p.by, flagTip(r.pl, r.p.by, 'Born at'))}${esc(r.pl.era ? r.pl.era.label : r.pl.cn || r.pl.name)} <b>${r.n}</b></span>`).join('')
+      + (rows.length > 6 ? `<span class="fli">+${rows.length - 6} more flags</span>` : '') + (none ? `<span class="fli"><i class="fnk"></i>no flag known <b>${none.n}</b></span>` : '');
+  }
+}
+function fanListRender() {
+  let ls = $('#fanList');
+  if (!fanIsOn() || !LV.list) { if (ls) ls.hidden = true; return; }
+  if (!ls) {
+    ls = document.createElement('div'); ls.id = 'fanList'; ls.setAttribute('role', 'region'); ls.setAttribute('aria-label', 'Ancestors by generation'); document.body.appendChild(ls);
+    ls.addEventListener('click', e => { const b = e.target.closest('[data-fln]'); if (b) fanActivate(+b.dataset.fln); });
+  }
+  const root = fanPerson(); ls.hidden = false; if (!root) return;
+  const L = TCV.fanList(M, root.i, LV.g);
+  ls.innerHTML = `<h3>${esc(root.name)}</h3>` + L.filter(g => g.gen > 0).map(g => `<h4>${g.name} <small>${g.people.length} of ${g.total}${g.missing ? ', ' + g.missing + ' not known' : ''}</small></h4><ol>`
+    + g.people.map(x => `<li><button type="button" data-fln="${x.n}" class="${S.sel.has(M.P[x.i].key) ? 'on' : ''}" style="--fc:${TCV.sideFill({ g: Math.max(1, g.gen), side: x.side }, LV.tk || lensTokens()).fill}"><span class="flk">${esc(x.kin)} <small>${esc(x.route)}</small></span><b>${esc(x.name)}</b>${x.life ? ' <span class="fly">' + esc(x.life) + '</span>' : ''}${x.place ? ' <span class="flp">' + esc(x.place) + '</span>' : ''}${x.living ? ' <span class="flp">living: name only</span>' : ''}</button></li>`).join('')
+    + `</ol>`).join('');
+}
+
+/* ---------------- the Fan: using it ---------------- */
+function fanEnsureCard(p) {
+  if (S.cards.has(p.key)) return S.cards.get(p.key);
+  snapshot();
+  const base = [...S.cards.values()].pop(), sp = freeSpot(base ? base.x + W + 60 : 0, base ? base.y : 0), c = newCard(p.i, sp.x, sp.y); c.pinned = true;
+  refreshAll(); drawEdges(); hideHint(); save();
+  toast(p.name + ' is on the canvas now (Undo takes them off)', 2600);
+  return c;
+}
+/* a click or Enter on a wedge: select that person on the canvas; on the one already selected, make them the centre */
+function fanActivate(n) {
+  const s = LV.byN && LV.byN.get(n); if (!s) return;
+  const p = M.P[s.i]; LV.kb = n;
+  if (S.sel.size === 1 && S.sel.has(p.key)) { if (p.key !== LV.root) fanRecentre(p.key); else toast(p.name + ' is already the centre.', 1800); return; }
+  fanEnsureCard(p); select([p.key]);
+}
+function lensClick(target) {   /* called when a press that did not drag ends on the stage; true if it was a wedge */
+  const w = target && target.closest ? target.closest('#fan .fw:not(.nk)') : null; if (!w) return false;
+  fanActivate(+w.dataset.n); return true;
+}
+function lensOnSelect() {
+  trailOnSelect();
+  if (!fanIsOn()) return;
+  const one = S.sel.size === 1 ? M.byKey.get([...S.sel][0]) : null;
+  if (one && LV.F && ![...LV.byN.values()].some(s => s.i === one.i)) { fanRecentre(one.key, true); return; }   // chosen somewhere else (the search, the panel): the Fan follows
+  const s = fanHost();
+  s.querySelectorAll('.fw').forEach(g => { const slot = LV.byN.get(+g.dataset.n), on = !!slot && S.sel.has(M.P[slot.i].key); g.classList.toggle('sel', on); if (on) { g.setAttribute('aria-pressed', 'true'); g.parentNode.appendChild(g); } else g.removeAttribute('aria-pressed'); });
+  fanBar(); if (LV.list) fanListRender();
+}
+function fanTip(n, at) {
+  let t = $('#fanTip');
+  if (!t) { t = document.createElement('div'); t.id = 'fanTip'; t.setAttribute('role', 'tooltip'); document.body.appendChild(t); }
+  const s = n != null && LV.byN ? LV.byN.get(n) : null; if (!s) { t.classList.remove('on'); return; }
+  const p = M.P[s.i], hid = p.living || p.ghost, bpl = !hid && p.bp ? TC.placeAt(M, p, p.bp, p.by) : null, dpl = !hid && p.dp ? TC.placeAt(M, p, p.dp, p.dy) : null;
+  const line = (lab, y, est, pl, nm, what) => (y != null || nm) ? `<div><b>${lab}</b> ${y != null ? (est ? '~' : '') + y : '?'}${nm ? ' &middot; ' + (pl ? flagHTML(pl, y, flagTip(pl, y, what)) : '') + esc(nm) : ''}</div>` : '';
+  t.innerHTML = `<div class="ftn">${esc(p.name)}</div><div class="ftk">${s.g ? esc(TCV.kinWord(s.g, s.n)) + ' &middot; ' + esc(TCV.routeWords(s.n)) : 'The centre of the fan'}</div>`
+    + (hid ? `<div>${p.living ? 'May be living: only the name and the family are shown.' : 'Named only: no dates recorded.'}</div>` : line('b.', p.by, p.fl & 1, bpl, p.bp, 'Born at') + line('d.', p.dy, p.fl & 2, dpl, p.dp, 'Died at'))
+    + `<div class="ftx">${S.sel.has(p.key) ? (p.key === LV.root ? 'The centre of the fan.' : 'Selected. Click again to make them the centre.') : 'Click to select on the canvas.'}</div>`;
+  const wd = TCV.wedge(s.g, s.j), [wx, wy] = TCV.pt(wd.rm, wd.am), v = S.view;
+  let x = at ? at.x + 14 : v.x + wx * v.k, y = at ? at.y + 14 : v.y + wy * v.k;
+  t.classList.add('on'); const r = t.getBoundingClientRect();
+  x = Math.max(8, Math.min(innerWidth - r.width - 8, x - (at ? 0 : r.width / 2))); y = Math.max(60, Math.min(innerHeight - r.height - 8, at ? y : y - r.height - 14));
+  t.style.left = x + 'px'; t.style.top = y + 'px';
+}
+function fanKey(e) {
+  const w = e.target.closest && e.target.closest('#fan .fw'); if (!w || w.classList.contains('nk')) return;
+  const n = +w.dataset.n, s = LV.byN.get(n); if (!s) return;
+  const go = m => { const o = LV.byN.get(m); if (!o) return false; const el = fanHost().querySelector(`.fw[data-n="${m}"]`); if (!el) return false; fanHost().querySelectorAll('.fw[tabindex="0"]').forEach(x => x.setAttribute('tabindex', '-1')); el.setAttribute('tabindex', '0'); el.focus(); LV.kb = m; return true; };
+  const nextKnown = d => { const lv = LV.F.levels[s.g]; for (let j = s.j + d; j >= 0 && j < lv.length; j += d) if (lv[j].i >= 0) return lv[j].n; return null; };
+  let moved = true;
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fanActivate(n); return; }
+  else if (e.key === 'ArrowLeft') { const m = nextKnown(-1); if (m != null) go(m); }
+  else if (e.key === 'ArrowRight') { const m = nextKnown(1); if (m != null) go(m); }
+  else if (e.key === 'ArrowUp') { const m = e.shiftKey ? 2 * n + 1 : 2 * n; if (!go(m) && !go(e.shiftKey ? 2 * n : 2 * n + 1)) moved = false; }
+  else if (e.key === 'ArrowDown') { if (s.g > 0) go(n >> 1); }
+  else if (e.key === 'Home') go(1);
+  else if (e.key === 'Escape') { w.blur(); fanTip(null); return; }
+  else moved = false;
+  if (moved) e.preventDefault();
+}
+(function fanEvents() {
+  document.addEventListener('keydown', e => { if (fanIsOn()) fanKey(e); });
+  const ring = n => { const f = $('#fanFocus'), s = n != null && LV.byN ? LV.byN.get(n) : null; if (!f) return; if (s) { f.setAttribute('d', TCV.wedgePath(TCV.wedge(s.g, s.j))); f.classList.add('on'); } else f.classList.remove('on'); };
+  document.addEventListener('focusin', e => { const w = e.target.closest && e.target.closest('#fan .fw'); if (w) { LV.kb = +w.dataset.n; fanTip(LV.kb); ring(LV.kb); } });
+  document.addEventListener('focusout', e => { if (e.target.closest && e.target.closest('#fan .fw')) { fanTip(null); ring(null); } });
+  document.addEventListener('pointermove', e => {
+    if (!fanIsOn() || e.pointerType === 'touch') return;
+    const w = e.target.closest && e.target.closest('#fan .fw:not(.nk)'); const n = w ? +w.dataset.n : null;
+    if (n == null) { if (LV.hov != null) { LV.hov = null; fanTip(null); } return; }
+    LV.hov = n; fanTip(n, { x: e.clientX, y: e.clientY });
+  });
+  document.addEventListener('pointerleave', () => { LV.hov = null; fanTip(null); });
+})();
+
+/* ---------------- the Trail band ---------------- */
+const TRAIL_CAP = 8, TRAIL_ROWS = 7;
+function trailFocusKey() {
+  if (S.sel.size === 1) { const k = [...S.sel][0]; if (M.byKey.has(k)) LV.tf = k; }
+  if (LV.tf && !M.byKey.has(LV.tf)) LV.tf = null;
+  return LV.tf;
+}
+function trailShown() { return lensAvail() && !fanIsOn() && !document.body.classList.contains('pr') && S.cards.size > 0 && !!trailFocusKey(); }
+function trailHeight() { const t = $('#trail'); return t && t.classList.contains('on') ? t.getBoundingClientRect().height : 0; }
+let trailQ = 0;
+function trailOnSelect() { if (!lensAvail()) return; if (S.sel.size === 1) { const k = [...S.sel][0], was = LV.tf; LV.tf = k; if (was !== k && LV.model && !LV.model.anc.some(c => c.key === k)) LV.side = null; } cancelAnimationFrame(trailQ); trailQ = requestAnimationFrame(trailRender); }
+function trailSide(i) { return LV.side || TCV.defaultSide(M, i); }
+function trailTitle(c) {
+  const bits = [c.name];
+  if (c.living) bits.push('may be living: only the name and the family are shown'); else if (c.ghost) bits.push('named only: no dates recorded');
+  else { bits.push(c.year != null ? 'born ' + (c.est ? 'about ' : '') + c.year + (c.place ? ' in ' + c.place : '') : (c.place ? 'born in ' + c.place : 'birth not recorded')); if (c.life && /–.+/.test(c.life)) bits.push('lived ' + c.life); }
+  bits.push(c.gen === 0 ? 'the person the line is drawn from' : 'generation ' + c.gen + (c.gen === -1 ? ' (a parent)' : ''));
+  return bits.join(' · ');
+}
+/* a town (buildings) or a country only (a globe); the Atlas names the country, so a place that is just that name is the globe */
+function trailKindIcon(c, pl) {
+  let cn = pl && pl.cn ? String(pl.cn) : '';
+  if (/^[A-Z]{2}$/.test(cn)) { try { cn = new Intl.DisplayNames(['en'], { type: 'region' }).of(cn) || cn; } catch (e) { /* keep the code */ } }
+  const first = String(c.place || '').split(',')[0].trim().toLowerCase();
+  return icon(cn && first && first === cn.toLowerCase() ? 'land' : 'town', 'trhi');
+}
+function trailCardHtml(c, cls, side) {
+  const q = !!c.living || !!c.ghost, t = trailTitle(c);
+  const pl = !q && c.place ? TC.placeAt(M, M.P[c.i], c.place, c.year) : null, fl = pl ? flagHTML(pl, c.year, flagTip(pl, c.year, 'Born at')) : '';
+  const place = q ? '<span class="trp mute">name and family only</span>' : c.place ? `<span class="trp">${esc(c.place)}${c.pest ? '<sup title="the place is an estimate" aria-hidden="true">*</sup>' : ''}</span>` : '<span class="trp mute">place not recorded</span>';
+  const yr = q ? '' : c.year != null ? (c.est ? '~' : '') + c.year : '';
+  return `<li${c.moved ? ' class="mv"' : ''}><button type="button" class="trc${cls}${c.est || c.pest ? ' est' : ''}${c.gen === 0 ? ' foc' : ''}" data-tk="${esc(c.key)}" title="${esc(t)}" aria-label="${esc(t)}"${c.gen === 0 ? ' aria-current="true"' : ''}>`
+    + `<span class="trtop">${q || !c.place ? icon('town', 'trhi') : trailKindIcon(c, pl)}<span class="trg">${TCV.genTag(c.gen)}</span>${fl ? `<span class="trfl">${fl}</span>` : ''}</span>${place}${yr ? `<span class="try">${yr}</span>` : '<span class="try mute">&nbsp;</span>'}`
+    + `<span class="trn">${esc(c.given || c.sur || c.name)}${c.given && c.sur ? ` <i>${esc(c.sur)}</i>` : ''}</span></button></li>`;
+}
+function trailPlacesHtml(i) {
+  const p = M.P[i];
+  if (p.living || p.ghost) return `<div class="trpl none"><p>${p.living ? 'May be living: no places are shown, only the name and the family.' : 'Named only: no places recorded.'}</p></div>`;
+  const rows = TCV.placeTrail(M, i), shown = rows.slice(0, TRAIL_ROWS), more = rows.length - shown.length;
+  if (!rows.length) return `<div class="trpl none"><p>No places recorded for ${esc(p.name)}.</p></div>`;
+  const RH = 28, H2 = shown.length * RH + (more > 0 ? RH : 0), mid = (shown.length * RH) / 2, SW = S.phone ? 70 : 120;
+  const curves = shown.map((r, k) => { const y = k * RH + RH / 2, w = 1.6 + Math.min(3, Math.log2(r.n)); return `<path d="M0 ${fnum(mid)}C${fnum(SW * .5)} ${fnum(mid)} ${fnum(SW * .42)} ${fnum(y)} ${SW - 6} ${fnum(y)}" class="${r.n === 1 ? 'one' : ''}" stroke-width="${fnum(w)}"/><circle cx="${SW - 4}" cy="${fnum(y)}" r="3.6"/>`; }).join('');
+  const li = shown.map(r => {
+    const pl = TC.placeAt(M, p, r.name, r.year), fl = pl ? flagHTML(pl, r.year, flagTip(pl, r.year, 'Place')) : '';
+    const nm = pl && pl.id ? `<a href="https://recordatlas.org/place/${encodeURIComponent(pl.id)}/" target="_blank" rel="noopener" title="Open ${esc(r.name)} in the Record Atlas">${esc(r.name)}</a>` : esc(r.name);
+    return `<li style="height:${RH}px" data-pl="${esc(r.name)}" data-py="${r.year == null ? '' : r.year}">${fl}${nm}<b title="${r.n} ${r.n === 1 ? 'event' : 'events'} here">${r.n}</b></li>`;
+  }).join('');
+  return `<div class="trpl"><svg class="trsvg" width="${SW}" height="${H2}" viewBox="0 0 ${SW} ${H2}" aria-hidden="true">${curves}</svg><ul aria-label="Places in the life of ${esc(p.name)}, with the number of events at each">${li}${more > 0 ? `<li class="trmore" style="height:${RH}px">+${more} more place${more === 1 ? '' : 's'}</li>` : ''}</ul></div>`;
+}
+function trailRender() {
+  let el = $('#trail');
+  const show = trailShown();
+  if (!el) {
+    if (!lensAvail()) return;
+    el = document.createElement('section'); el.id = 'trail'; el.setAttribute('aria-label', 'Direct line'); document.body.appendChild(el);
+    el.addEventListener('click', trailClick);
+  }
+  el.classList.toggle('on', show); el.hidden = !show;
+  if (!show) { document.documentElement.style.setProperty('--trail-h', '0px'); return; }
+  const i = M.byKey.get(LV.tf).i, side = trailSide(i), T = TCV.trailModel(M, i, side, { cap: TRAIL_CAP });
+  LV.model = T; el.dataset.size = String(LV.t);
+  const who = T.focus.name;
+  if (LV.t === 0) {
+    el.setAttribute('aria-label', 'Direct line of ' + who);
+    el.innerHTML = `<button type="button" class="trtab" data-tr="grow" aria-expanded="false" aria-label="Direct line of ${esc(who)}: open the strip" title="Open the direct line of ${esc(who)}">${icon('house', 'trhi')}<span class="trtl">Direct line <i aria-hidden="true">&middot;</i> <b>${esc(who)}</b></span><span class="trch" aria-hidden="true">&#9652;</span></button>`;
+    trailMeasure(); trailRefocus(); return;
+  }
+  const sides = (k, t, n, tip) => `<button type="button" class="fbs${side === k ? ' on' : ''}" data-tr="${k}" aria-pressed="${side === k}" title="${esc(tip)}"${n ? '' : ' disabled'}>${t}${n ? ` <small>${n}</small>` : ''}</button>`;
+  const line = [...T.anc, T.focus]; line.forEach((c, k) => { c.moved = k > 0 && !!c.place && !!line[k - 1].place && c.place !== line[k - 1].place; });
+  const cards = (T.more ? `<li class="trmoreg" title="${T.more} more generations are recorded further back">+${T.more} &larr;</li>` : '')
+    + (T.stub ? `<li class="trstub" title="${esc(T.stub.why)}"><span class="trg">${TCV.genTag(T.stub.gen)}</span><span class="trh mute">line ends here</span><span class="trn mute">${esc(T.stub.why)}</span></li>` : '')
+    + T.anc.map((c, k) => trailCardHtml(c, k === 0 && T.stub ? ' endc' : '', side)).join('') + trailCardHtml(T.focus, '', side);
+  const compact = LV.t === 1;
+  el.setAttribute('aria-label', 'Direct line of ' + who);
+  el.innerHTML = `<div class="trhead"><b class="trt">Direct line <small>${esc(who)}</small></b>`
+    + `<span class="fbg" role="group" aria-label="Which line">${sides('f', 'Father’s line', T.counts.f, 'Each step through the father: the surname line. ' + T.counts.f + ' generations recorded.')}${sides('m', 'Mother’s line', T.counts.m, 'Each step through the mother. ' + T.counts.m + ' generations recorded.')}</span>`
+    + `<span class="fbg trsz" role="group" aria-label="Size of this strip"><button type="button" class="fbs" data-tr="${compact ? 'grow' : 'shrink'}" aria-label="${compact ? 'Show places too' : 'Make the strip shorter'}" title="${compact ? 'Show places too' : 'Make the strip shorter'}">${compact ? 'Places' : 'Short'}</button><button type="button" class="fbs trfold" data-tr="hide" aria-expanded="true" aria-label="Fold the strip to a handle" title="Fold the strip to a thin handle (Esc)">Fold <span aria-hidden="true">&#9662;</span></button></span></div>`
+    + `<div class="trbody"><ol class="trline" aria-label="Direct line, oldest first">${cards}</ol>${compact ? '' : trailPlacesHtml(i)}</div>`
+    + (compact ? '' : `<p class="trcap">Each card carries the flag that flew over the birthplace in the birth year. Dashed: an estimate. Strong red link: the family moved.</p>`);
+  trailLink(el);
+  const ln = el.querySelector('.trbody'), fc = ln && ln.querySelector('.trc.foc'); if (ln && fc) ln.scrollLeft = Math.max(0, Math.min(ln.scrollWidth - ln.clientWidth, fc.parentElement.offsetLeft - ln.offsetLeft - 10));   // the focus end is the one that matters; the older cards scroll in from the left
+  trailMeasure(); trailRefocus();
+}
+/* the red of the links between the cards: the dark brick on a light card, a lighter one on a dark card (3:1 either way) */
+function trailLink(el) {
+  const m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(getComputedStyle(el).backgroundColor || ''), hx = m ? '#' + [1, 2, 3].map(k => (+m[k]).toString(16).padStart(2, '0')).join('') : '#ffffff';
+  el.style.setProperty('--tr-link', TCV.contrast('#9C3B28', hx) >= 3.2 ? '#9C3B28' : '#E58A72');
+}
+/* the band is the bottom-most thing: the search dock and the controls over it are lifted by its height (--trail-h, and --dock-h includes it) */
+function trailMeasure() { document.documentElement.style.setProperty('--trail-h', Math.ceil(trailHeight()) + 'px'); if (typeof dockH === 'function') dockH(); trailLiftSoon(); }
+/* a fold or an open replaces the band's buttons; the keyboard stays on the one that took its place */
+let trailFocus = '';
+function trailRefocus() { if (!trailFocus) return; const b = $('#trail [data-tr="' + trailFocus + '"]'); trailFocus = ''; if (b) b.focus(); }
+function trailClick(e) {
+  const c = e.target.closest('[data-tk]');
+  if (c) { trailGo(c.dataset.tk); return; }
+  const b = e.target.closest('[data-tr]'); if (!b || b.disabled) return;
+  const a = b.dataset.tr;
+  if (a === 'f' || a === 'm') { LV.side = a; trailRender(); return; }
+  if (a === 'shrink') { trailFocus = 'grow'; lensTrailSize(1); } else if (a === 'grow') { trailFocus = LV.t === 0 ? 'hide' : 'shrink'; lensTrailSize(2); } else if (a === 'hide') { trailFocus = 'grow'; lensTrailSize(0); }
+}
+/* the note on a place: opens UPWARD from the band's top edge, so it never covers the band's own controls, and is kept inside the window */
+(function () {
+  let tip = null;
+  const hide = () => { if (tip) tip.classList.remove('on'); };
+  function show(li) {
+    const t = $('#trail'); if (!t || !li) return hide();
+    if (!tip) { tip = document.createElement('div'); tip.id = 'trailTip'; tip.setAttribute('role', 'tooltip'); document.body.appendChild(tip); }
+    const p = M.P[M.byKey.get(LV.tf).i], name = li.dataset.pl, yr = li.dataset.py === '' ? null : +li.dataset.py, pl = TC.placeAt(M, p, name, yr);
+    tip.innerHTML = `<b>${pl ? flagHTML(pl, yr, flagTip(pl, yr, 'Place')) : ''}${esc(name)}</b>${pl ? (eraNote(pl) || 'No ruler recorded for this place in the Atlas.') : 'This place is not in the Record Atlas yet.'}`;
+    tip.classList.add('on');
+    const r = li.getBoundingClientRect(), bt = t.getBoundingClientRect().top, w = tip.offsetWidth;
+    tip.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left)) + 'px'; tip.style.bottom = (innerHeight - bt + 8) + 'px'; tip.style.top = 'auto';
+  }
+  document.addEventListener('pointerover', e => { const li = e.target.closest && e.target.closest('#trail .trpl li[data-pl]'); if (li) show(li); else hide(); });
+  document.addEventListener('focusin', e => { const li = e.target.closest && e.target.closest('#trail .trpl li[data-pl]'); if (li) show(li); else hide(); });
+  document.addEventListener('focusout', hide); document.addEventListener('pointerleave', hide); addEventListener('scroll', hide, true);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') hide(); });
+})();
+/* anything else standing at the bottom of the window (a key, a note, a menu that opens upward) is lifted by the band's height, so nothing is drawn under it; the ones named in views.css are done in CSS, this catches the rest */
+let trailLiftQ = 0, trailLiftBusy = false;
+function trailLift() {
+  trailLiftQ = 0; if (trailLiftBusy) return; trailLiftBusy = true;
+  try {
+    const h = Math.ceil(trailHeight());
+    for (const e of document.querySelectorAll('body > *')) {
+      if (e.id === 'trail' || e.id === 'trailTip' || e.classList.contains('dock') || e.id === 'stage') { continue; }
+      const had = e.classList.contains('trlift'), cs = getComputedStyle(e);
+      if (cs.position !== 'fixed' || cs.display === 'none' || cs.visibility === 'hidden' || /^(mini|bShelf|playBar|info|infoTab|fan|fanBar|fanLegend|fanTip|fanList|linesView|toast|prLegend)$/.test(e.id)) { if (had) e.classList.remove('trlift'); continue; }
+      const r = e.getBoundingClientRect(); if (!r.width || !r.height || r.height > innerHeight * 0.7) { if (had) e.classList.remove('trlift'); continue; }
+      const bottom = r.bottom + (had ? h : 0), want = h > 0 && r.top + (had ? h : 0) > innerHeight * 0.35 && bottom > innerHeight - h - 4 && bottom <= innerHeight + 2 && cs.bottom !== 'auto';
+      if (want !== had) e.classList.toggle('trlift', want);
+    }
+  } finally { trailLiftBusy = false; }
+}
+function trailLiftSoon() { if (!trailLiftQ) trailLiftQ = requestAnimationFrame(trailLift); }
+new MutationObserver(trailLiftSoon).observe(document.body, { childList: true, });
+new MutationObserver(trailLiftSoon).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class', 'hidden'] });
+/* Esc inside the open band folds it; the focus goes to the handle */
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape' || e.defaultPrevented) return;
+  const t = $('#trail'); if (!t || !t.classList.contains('on') || LV.t === 0 || !t.contains(document.activeElement)) return;
+  e.preventDefault(); e.stopImmediatePropagation(); trailFocus = 'grow'; lensTrailSize(0);
+}, true);
+function lensTrailSize(t) { LV.t = t; trailRender(); const m = $('#lensMenu'); if (m && m.classList.contains('on')) lensMenu(); save(); if (!S.cards.size) return; }
+/* a card in the band: select that person on the canvas and bring them into view (they are put on the canvas if they are not there) */
+function trailGo(key) {
+  const p = M.byKey.get(key); if (!p) return;
+  const c = S.cards.get(key);
+  if (c) { select([key]); fit([c], { maxK: 1 }); pulseCard(c); return; }
+  const v = viewCentre(), d = dropPerson(p.i, v.x, v.y); if (d) { select([key]); fit([d], { maxK: 1 }); }
+}
+
+/* ---------------- start ---------------- */
+function lensBoot(d) {
+  if (!lensAvail()) return;
+  const l = TCV.cleanLens(d && d.lens);
+  LV.g = l.g; LV.c = l.c; LV.t = l.t;
+  if (l.m === 'fan') {
+    const k = l.r && M.byKey.has(l.r) ? l.r : fanStartKey();
+    if (k && S.cards.size) { LV.came = true; fanOpen(k, { boot: true }); }
+  }
+  trailRender();
+}
+addEventListener('resize', () => { trailMeasure(); });
+
 /* ui.js — the shelf and search, pan / zoom / drag, the side panel, pathways, themes, phone mode, start-up. */
 
 /* ---------------- selection ---------------- */
@@ -5375,6 +6271,7 @@ function select(keys, add) {
   if (S.sel.size && S.tab === 'path' && !S.path) S.tab = 'person';
   if (typeof prOnSelect === 'function') prOnSelect(keys);
   renderInfo(); syncButtons();
+  if (typeof lensOnSelect === 'function') lensOnSelect();
   /* the side panel is folded away: say where the person's details are */
   if (S.sel.size && !S.phone && !$('#info').classList.contains('on')) { const t = $('#infoTab'); if (t) { t.classList.remove('nudge'); void t.offsetWidth; t.classList.add('nudge'); } }
 }
@@ -5503,7 +6400,7 @@ function runSearchMarks() { document.querySelectorAll('#shelf .res').forEach(el 
   st.addEventListener('pointerdown', e => {
     if (e.target.closest('.card') || e.target.closest('#pairs button') || e.target.closest('[data-br]') || e.target.closest('#namesview .nm') || e.target.closest('#namesview .nml') || e.target.closest('#namesview .nmcouples') || e.target.closest('.tt .tg')) return;
     ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY }); st.setPointerCapture(e.pointerId);
-    if (ptrs.size === 1) { pan = { x: e.clientX, y: e.clientY, vx: S.view.x, vy: S.view.y, moved: false }; closePop(); }
+    if (ptrs.size === 1) { pan = { x: e.clientX, y: e.clientY, vx: S.view.x, vy: S.view.y, moved: false, tgt: e.target }; closePop(); }
     if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), k: S.view.k, cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2, vx: S.view.x, vy: S.view.y }; pan = null; }
   });
   st.addEventListener('pointermove', e => {
@@ -5519,7 +6416,7 @@ function runSearchMarks() { document.querySelectorAll('#shelf .res').forEach(el 
   const end = e => {
     if (!ptrs.has(e.pointerId)) return; ptrs.delete(e.pointerId);
     if (ptrs.size < 2) pinch = null;
-    if (pan && ptrs.size === 0) { if (!pan.moved) { select([]); if (S.relateFrom) cancelRelate(); } else save(); pan = null; st.classList.remove('panning'); }
+    if (pan && ptrs.size === 0) { if (!pan.moved) { if (!(typeof lensClick === 'function' && lensClick(pan.tgt))) { select([]); if (S.relateFrom) cancelRelate(); } } else save(); pan = null; st.classList.remove('panning'); }
     if (ptrs.size === 0) st.classList.remove('panning');
   };
   st.addEventListener('pointerup', end); st.addEventListener('pointercancel', end);
@@ -5603,7 +6500,7 @@ function viewsMenu() {
 function openViewsMenu(on) {
   const m = $('#viewsMenu'), b = $('#bViews'); if (!m || !b) return;
   if (on == null) on = !m.classList.contains('on');
-  if (on) { if (typeof openMainMenu === 'function') openMainMenu(false); openBloodMenu(false); viewsMenu(); }
+  if (on) { if (typeof openMainMenu === 'function') openMainMenu(false); openBloodMenu(false); if (typeof openLensMenu === 'function') openLensMenu(false); viewsMenu(); }
   m.classList.toggle('on', on); b.setAttribute('aria-expanded', String(on)); b.classList.toggle('on', on);
   if (on) { const i = $('#vwName'); if (i && !S.phone) i.focus({ preventScroll: true }); }
 }
@@ -5613,7 +6510,7 @@ function openView(id) {
   if (!d || !d.cards.length) { toast('None of the people in that view are in the tree that is open', 3600); return; }
   snapshot(); clearAll(true);
   if (d.look) setTheme(d.look);
-  restore(d); S.view = d.view; applyView(); S.path = null; clearPathUi();
+  restore(d); setCanvasView(d.view); S.path = null; clearPathUi();
   S.cards.forEach(c => { c.el.classList.remove('pop'); refreshCard(c); });
   refreshAll(); drawEdges(); save(); syncButtons(); hideHint(); runSearchMarks(); renderInfo(); openViewsMenu(false);
   if (S._restorePath) { const [a, b] = S._restorePath; S._restorePath = null; showPath(a, b, { quiet: true, noPlace: true }); }
@@ -5634,7 +6531,7 @@ document.addEventListener('click', e => {
   const V = VK(), li = t.closest('li'), id = li && li.dataset.id, act = t.dataset.vw;
   if (!V) return;
   if (act === 'save') {
-    const r = V.save($('#vwName').value, Object.assign(serialise(), { look: curLook() }));
+    const r = V.save($('#vwName').value, Object.assign(serialise(), { look: curLook(), lens: null }));
     if (r && r.ok) { toast('Saved “' + r.name + '”', 2800); viewsMenu(); } else toast(r && r.err || 'That could not be saved', 4200);
   } else if (act === 'open') openView(id);
   else if (act === 'share') shareView(id);
@@ -6015,7 +6912,7 @@ function recentHTML() {
 function openMainMenu(on) {
   const m = $('#mainMenu'), b = $('#bMenu'); if (!m) return;
   if (on == null) on = !m.classList.contains('on');
-  if (on) { openBloodMenu(false); openViewsMenu(false); mainMenu(); if (SA) recentLoad(); }
+  if (on) { openBloodMenu(false); openViewsMenu(false); if (typeof openLensMenu === 'function') openLensMenu(false); mainMenu(); if (SA) recentLoad(); }
   m.classList.toggle('on', on); b.setAttribute('aria-expanded', String(on)); b.classList.toggle('on', on);
 }
 /* the line key is an overlay in the same corner as the menu, not a tab in the side panel */
@@ -6077,7 +6974,7 @@ function bloodMenu() {
 function openBloodMenu(on) {
   const m = $('#bloodMenu'), b = $('#bBlood'); if (!m) return;
   if (on == null) on = !m.classList.contains('on');
-  if (on) { if (typeof openMainMenu === 'function') openMainMenu(false); openViewsMenu(false); bloodMenu(); }
+  if (on) { if (typeof openMainMenu === 'function') openMainMenu(false); openViewsMenu(false); if (typeof openLensMenu === 'function') openLensMenu(false); bloodMenu(); }
   m.classList.toggle('on', on); b.setAttribute('aria-expanded', String(on)); b.classList.toggle('on', on || S.blood.tint);
 }
 function setTint(on, ref) {
@@ -6250,9 +7147,8 @@ $('#pop').addEventListener('click', e => {
   if (b.dataset.d === 'x') closePop(); else decide(id, b.dataset.d === 'suggested' ? null : b.dataset.d);
 });
 
-
 /* ---------------- toolbar, themes, phone ---------------- */
-function dockH() { const d = $('.dock'); document.documentElement.style.setProperty('--dock-h', (document.documentElement.classList.contains('shelfoff') ? 0 : d.offsetHeight) + 'px'); }
+function dockH() { const d = $('.dock'); document.documentElement.style.setProperty('--dock-h', (document.documentElement.classList.contains('shelfoff') ? 0 : d.offsetHeight) + (typeof trailHeight === 'function' ? Math.ceil(trailHeight()) : 0) + 'px'); }   /* the Trail band, when it is up, is the bottom-most thing: everything that stands on the dock stands on it too */
 function syncGenButton() { const b = $('#bGen'); if (b) { b.classList.toggle('on', !!S.opts.gens); b.setAttribute('aria-pressed', String(!!S.opts.gens)); } }
 function toggleGens() {
   S.opts.gens = !S.opts.gens; syncGenButton(); drawBands(); save();
@@ -6272,6 +7168,7 @@ function syncButtons() {
 function syncUi() { hideHint(); syncButtons(); }
 function clearCanvas() {
   if (!S.cards.size) return;
+  if (typeof fanIsOn === 'function' && fanIsOn()) lensSet('canvas');
   snapshot(); clearAll(); refreshAll(); drawEdges(); hideHint(); renderInfo(); save(); runSearchMarks();
   clearTimeout(shelfT); { const h = document.documentElement.classList; h.remove('shelfoff'); $('#bShelf').setAttribute('aria-pressed', 'true'); dockH(); }   /* a cleared canvas starts again: the search box comes back and stays until something is searched and added */
   toast('Cleared. Undo brings it back.');
@@ -6289,6 +7186,7 @@ function setTheme(t) {
   }
   try { localStorage.setItem('loamTheme', t); } catch (e) { /* ignore */ }
   if (typeof prOnTheme === 'function') prOnTheme();
+  if (typeof lensOnTheme === 'function') lensOnTheme();
   drawEdges(); miniDraw(); if (typeof drawNames === 'function') drawNames(true); if (S.tab === 'options') renderInfo();
 }
 function initTheme() {
@@ -6340,10 +7238,11 @@ function wireToolbar() {
   set('#bArrange', 'arrange'); set('#bGen', 'layers'); set('#bShelf', 'search'); $('#si').innerHTML = icon('search', ''); set('#bUndo', 'undo'); set('#bFit', 'fit'); set('#bRel', 'relate'); set('#bInfo', 'info'); set('#bClear', 'clear'); set('#bMore', 'more');
   set('#zIn', 'plus'); set('#zOut', 'minus');
   { const b = $('#bFix'); if (b) { b.hidden = !SA; b.innerHTML = icon('fix') + '<span class="fxn" aria-hidden="true"></span>'; fixBtn(); b.onclick = () => { try { window.parent.postMessage({ tcFixList: true }, location.origin); } catch (e) { /* no page around */ } }; } }
+  if (typeof lensWire === 'function') lensWire();
   { const b = $('#bTheme'); if (b) { b.hidden = !SA; lookBtn(); b.onclick = () => { const n = lookNext(lookChosen()); S.lookChosen = n; lookBtn(); try { window.parent.postMessage({ tcLookSet: n }, location.origin); } catch (e) { /* no page around */ } }; } }
   if (EMBED) addEventListener('message', e => {
   if (e.origin !== location.origin || !e.data) return;
-  if (e.data.tcLook) { const k = e.data.tcLook; if (k === 'auto') { try { localStorage.removeItem('loamTheme'); } catch (x) { /* ignore */ } initTheme(); if (typeof prOnTheme === 'function') prOnTheme(); drawEdges(); miniDraw(); if (typeof drawNames === 'function') drawNames(true); if (S.tab === 'options') renderInfo(); } else setTheme(k); return; }   // the Look was changed in Settings
+  if (e.data.tcLook) { const k = e.data.tcLook; if (k === 'auto') { try { localStorage.removeItem('loamTheme'); } catch (x) { /* ignore */ } initTheme(); if (typeof prOnTheme === 'function') prOnTheme(); if (typeof lensOnTheme === 'function') lensOnTheme(); drawEdges(); miniDraw(); if (typeof drawNames === 'function') drawNames(true); if (S.tab === 'options') renderInfo(); } else setTheme(k); return; }   // the Look was changed in Settings
   if (e.data.tcKeep) { const mm = $('#mainMenu'); if (mm && mm.classList.contains('on')) mainMenu(); return; }   // the six words were turned on, or a save finished
   if (e.data.tcLinks) { if (S.tab !== 'options') renderInfo(); return; }   // not while the Options box is being typed in: a redraw would take the cursor away
   if (e.data.tcFixCount !== undefined) { fixBtn(); clearTimeout(fixT); fixT = setTimeout(() => { refreshAll(); if (S.tab === 'fix') fixTabLabel(); }, 120); return; }   // a tick or "left as is" on the Fix list page: the badge, the "!" marks, the tab's number
@@ -6558,6 +7457,7 @@ function boot() {
   syncButtons();
   runSearchMarks();
   if (typeof prBoot === 'function') prBoot();
+  if (typeof lensBoot === 'function') lensBoot(d);
   if (SA && d && d.cards) { try { window.parent.postMessage({ tcRestored: { n: S.cards.size, of: d.of || d.cards.length } }, location.origin); } catch (e) { /* no page around */ } }   // the page says "your saved canvas came back" and offers Start fresh
   /* a link to one person (the archive page sends ?p=<slug of the person's page>, the wrapper hands it over as RR.carryPerson): put that person on the canvas and select them, unless the visitor's saved canvas already holds them */
   if (EMBED) { const R = window.parent && window.parent.RR, slug = R && typeof R.carryPerson === 'string' ? R.carryPerson : '';

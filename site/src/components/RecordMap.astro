@@ -8467,20 +8467,18 @@ window.addEventListener("load", async function () {
     var box = document.getElementById("ra-viewin"); if (!box) return;
     var vs = myaSorted(MYA.views), as = myaSorted(MYA.areas), h = [];
     h.push('<p class="ra-fgroup-h">Views</p>');
-    h.push('<p class="ra-key-lead">Save where the map is looking now (place, zoom, layers and filters), and come back to it in one click. The address of this page is always the view you are looking at, so you can also send it as it is.</p>');
-    h.push('<p class="ra-vnow"><button type="button" class="ra-vcopy" data-copy="now">Copy a link to this view</button><span class="ra-vnote" role="status" aria-live="polite"></span></p>');
-    h.push('<form class="ra-vsave" data-f="view"><input type="text" maxlength="60" aria-label="Name this view" placeholder="Name this view, e.g. Kvarner coast"><button type="submit">Save view</button></form>');
+    h.push('<form class="ra-vsave" data-f="view"><input type="text" maxlength="60" aria-label="Name this view" placeholder="Name this view"><button type="submit">Save view</button></form>');
+    h.push('<p class="ra-vnow"><button type="button" class="ra-vcopy" data-copy="now">Copy link to this view</button><span class="ra-vnote" role="status" aria-live="polite"></span></p>');
     h.push(vs.length ? '<ul class="ra-vlist">' + vs.map(function (id) {
       return '<li><button type="button" class="ra-vgo" data-go="view:' + id + '">' + esc(MYA.views[id].name) + '</button><button type="button" class="ra-vcopy" data-copy="' + id + '" aria-label="Copy a link to the view ' + esc(MYA.views[id].name) + '" title="Copy a link to this view">Copy link</button><button type="button" class="ra-vdel" data-del="view:' + id + '" aria-label="Delete the view ' + esc(MYA.views[id].name) + '">×</button></li>';
-    }).join("") + "</ul>" : '<p class="at-sub">No saved views yet.</p>');
+    }).join("") + "</ul>" : "");
     h.push('<p class="ra-fgroup-h">Areas</p>');
-    h.push('<p class="ra-key-lead">Draw a box or shape with the two tools on the map, use Add area for as many more as you like, then Save to name them as one group. Tick the areas you want drawn on the map; a group lists what lies inside all of it and can be a research group.</p>');
     var nShown = myaShown().length;
     if (nShown > 1) h.push('<button type="button" class="ra-vmany" data-go="many:x">Show what is inside the ' + nShown + ' ticked areas together</button>');
     h.push(as.length ? '<ul class="ra-vlist">' + as.map(function (id) {
       var a = MYA.areas[id];
       return '<li><input type="checkbox" class="ra-vchk" data-show="' + id + '"' + (MYA_OFF[id] ? "" : " checked") + ' aria-label="Show ' + esc(a.name) + ' on the map"><button type="button" class="ra-vgo" data-go="area:' + id + '">' + esc(a.name) + (a.rings && a.rings.length > 1 ? ' <small>' + a.rings.length + " areas</small>" : "") + (a.line ? ' <small>' + esc(a.line) + "</small>" : "") + '</button><button type="button" class="ra-vdel" data-del="area:' + id + '" aria-label="Delete the area ' + esc(a.name) + '">×</button></li>';
-    }).join("") + "</ul>" : '<p class="at-sub">No saved areas yet.</p>');
+    }).join("") + "</ul>" : '<p class="at-sub">Draw a shape on the map, then Save.</p>');
     box.innerHTML = h.join("");
   }
   (function () {

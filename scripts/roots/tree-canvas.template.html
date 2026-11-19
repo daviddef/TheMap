@@ -1444,6 +1444,138 @@ button.sllg{cursor:pointer}button.sllg:hover{border-color:var(--lk-accent)}butto
 .lfchart.narrow .lfl{padding:2px 8px}
 .lfchart.narrow .lft{height:28px}
 .lfchart.narrow .lfbar{height:14px;margin-top:-7px}
+
+/* Generations (and the frame Household shares): the lanes. Its own file (after views.css). Every colour is a --lk-* token of the look, so Sticker, Paper, Ground, Lanes and Countries all read;
+   the bar and wash of a card are set per card by generationsview.js from the Fan's two hues and tested in test/test-gh-contrast.js. */
+body.vwgv #cards,body.vwgv #edges,body.vwgv #genbands,body.vwgv #lanes,body.vwgv #lanehead,body.vwgv #namesview,body.vwgv #mini,body.vwgv #pairs,body.vwgv #start,body.vwgv #markBar,body.vwgv #playBar,body.vwgv .zoombar,body.vwgv #trail{display:none!important}
+#gv{position:fixed;z-index:5;left:8px;right:8px;top:58px;bottom:8px;display:flex;flex-direction:column;gap:6px;color:var(--lk-ink);min-height:0}
+#gv[hidden]{display:none}
+html:not(.ph):has(#info.on) #gv{right:340px}
+#gvBar{display:flex;flex-direction:column;gap:6px;align-items:center;flex:none}
+#gvBar .fbrow{max-width:100%}
+.gvlive{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* the key and the note on "related" */
+.gvnote{flex:none;background:var(--lk-card);color:var(--lk-ink);border:2px solid var(--lk-line);border-radius:14px;padding:5px 12px;font:800 11.5px/1.3 Nunito,system-ui}
+.gvkey{display:flex;flex-wrap:wrap;gap:3px 14px;align-items:center}
+.gvkey svg{display:block}
+.gvk1{stroke:var(--tr-soft);stroke-width:2.2;fill:none}.gvk1.np{stroke-dasharray:7 5}.gvk2{stroke:var(--tr-soft);stroke-width:3;fill:none;stroke-dasharray:3 4}
+.gvwhy{margin-top:3px;font:700 12px/1.45 Nunito,system-ui}
+.gvwhy summary{cursor:pointer;font-weight:800;padding:3px 0;min-height:24px;color:var(--lk-ink)}.gvwhy summary:focus-visible{outline:3px solid var(--lk-accent);outline-offset:2px;border-radius:6px}
+.gvwhy p{margin:2px 0 6px;max-width:74ch;color:var(--lk-ink)}
+/* the body: scrolls inside, never the page */
+#gvBody{flex:1;min-height:0;overflow:auto;position:relative;background:var(--lk-board);border:2px solid var(--lk-line);border-radius:18px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;user-select:text;-webkit-user-select:text}
+#gvBody:focus{outline:none}
+.gvc{position:relative}
+.gvlbg{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--lk-line) 30%,transparent);border-radius:14px}
+.gvlbg.focus{background:color-mix(in srgb,var(--lk-accent) 14%,transparent)}
+.gvhead{position:sticky;top:0;z-index:4;background:var(--lk-board);border-bottom:2px solid var(--lk-line)}
+.gvh{position:absolute;top:8px;box-sizing:border-box;min-height:42px;padding:5px 10px;border:2px solid var(--lk-line);border-radius:12px;background:var(--lk-card);color:var(--lk-ink)}
+.gvh.focus{border-color:var(--lk-accent);background:var(--lk-accent-soft)}
+.gvh b{display:block;font:400 15.5px/1.15 "Lilita One",Impact,system-ui;overflow-wrap:break-word}
+.gvh span{display:block;font:800 12px/1.25 Nunito,system-ui;color:var(--tr-soft)}
+.gvsvg{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
+.gvg line{stroke:var(--lk-faint);stroke-width:1;stroke-dasharray:2 7;opacity:.55}
+.gvln{fill:none;stroke-width:2.2;stroke-linejoin:round;opacity:.92}.gvln.np{stroke-dasharray:7 5}
+.gvsp{fill:none;stroke:var(--tr-soft);stroke-width:3;stroke-dasharray:3 4;stroke-linecap:butt}
+.gvl{list-style:none;margin:0;padding:0;position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
+.gvli{position:absolute;pointer-events:auto;list-style:none}
+.gvcard{all:unset;box-sizing:border-box;position:relative;display:flex;flex-direction:column;justify-content:center;gap:1px;width:100%;height:100%;padding:5px 9px 5px 17px;overflow:hidden;
+  border:2px solid var(--lk-line);border-radius:12px;background:var(--gf);color:var(--gi);cursor:pointer;font-family:Nunito,"Segoe UI",system-ui,sans-serif}
+.gvcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:9px;background:var(--gc)}
+.gvcard:hover{border-color:var(--lk-accent)}
+.gvcard:focus-visible{outline:3px solid var(--lk-accent);outline-offset:2px}
+.gvcard.sel{outline:3px solid var(--lk-accent);outline-offset:1px;border-color:var(--lk-accent)}
+.gvcard.foc{border:3px solid var(--lk-ink);padding:4px 8px 4px 16px}
+.gvcard.ghost,.gvcard.standin{border-style:dashed}
+.gvn{font-weight:800;font-size:13.5px;line-height:1.18;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere}
+.gvy{font-weight:700;font-size:12.5px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gvp{font-weight:700;font-size:12px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;min-height:15px}
+.gvp .fl{height:11px;margin:0 5px 0 0}
+.gvdup{position:absolute;right:8px;top:-10px;z-index:2;padding:0 7px;border-radius:99px;background:var(--lk-ink);color:var(--lk-card);font:900 11.5px/18px Nunito,system-ui;border:2px solid var(--lk-board)}
+.gvmore{position:absolute;right:10px;bottom:3px;z-index:2;font:900 18px/1 Nunito,system-ui;color:var(--lk-ink);pointer-events:none}
+.gvfx{position:absolute;left:-9px;bottom:-10px;z-index:3;width:23px;height:23px;border-radius:50%;border:2px solid var(--lk-card);background:#d24b1f;color:#fff;font:900 13px/1 Nunito,system-ui;padding:0;cursor:pointer;display:grid;place-items:center}
+.gvfx::after{content:"";position:absolute;inset:-10px}
+.gvfx:hover,.gvfx:focus-visible{transform:scale(1.15)}.gvfx:focus-visible{outline:3px solid var(--lk-accent)}
+.gvcx{position:absolute;right:30px;bottom:-9px;z-index:3}
+.gvcx .cxm{display:inline-flex;align-items:center;gap:2px;color:var(--lk-ink);background:var(--lk-card);text-decoration:none;border:1.5px solid var(--lk-line);border-radius:99px;padding:0 6px 0 4px;font:800 11px/16px Nunito,system-ui}
+.gvcx .cxm svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.gvfoot{margin:0;padding:8px 18px 14px;font:700 12px/1.4 Nunito,system-ui;color:var(--tr-soft);max-width:90ch;position:sticky;left:0}
+/* the same lanes as a list */
+.gvlistbody{background:var(--lk-card)!important}
+.gvlistin{padding:14px 18px 22px;max-width:780px;margin:0 auto}
+.gvlistin h3{margin:0 0 6px;font:400 20px "Lilita One",Impact,system-ui}
+.gvls h4{margin:14px 0 4px;font:900 13px Nunito,system-ui;letter-spacing:.02em}.gvls h4 small{font-weight:700;color:var(--tr-soft);margin-left:6px}
+.gvli2{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.gvli2 .gvli{position:static}
+.gvli2 button{all:unset;box-sizing:border-box;display:block;width:100%;min-height:44px;padding:6px 10px 6px 12px;border-left:8px solid var(--fc);border-radius:8px;background:color-mix(in srgb,var(--lk-line) 35%,var(--lk-card));cursor:pointer;font:700 13px/1.4 Nunito,system-ui;color:var(--lk-ink)}
+.gvli2 button:hover{background:var(--lk-accent-soft)}.gvli2 button:focus-visible{outline:3px solid var(--lk-accent);outline-offset:1px}.gvli2 button.on{outline:3px solid var(--lk-accent);outline-offset:-1px}
+.gvli2 .flk{display:block;font:800 11px Nunito;color:var(--tr-soft);text-transform:capitalize}.gvli2 .flk small{text-transform:none;font-weight:700}.gvli2 .fly,.gvli2 .flp{color:var(--tr-soft)}.gvli2 .flp::before{content:"\00b7 "}
+.gvnone{margin:6px 0;font:700 12.5px/1.4 Nunito,system-ui;color:var(--tr-soft)}.gvpad{padding:14px 18px 0}
+/* the bar, on a phone: one scrolling line, and finger-sized buttons */
+.ph #gv{top:104px;left:6px;right:6px;bottom:6px}   /* the buttons along the top wrap to two lines on a phone */
+.ph #gvBar{align-items:stretch}
+.ph #gv .fbrow{justify-content:flex-start;gap:4px 6px;padding:4px 6px}
+.ph #gv .fbt{flex:1 1 100%;min-width:0}.ph #gv .fbt b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ph #gv .fbt small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph #gv .fbn{min-width:0;padding:0 2px}
+.ph #gv .fbs{min-height:44px;padding:0 14px}.ph #gv .fbx{width:44px;height:44px}
+.ph .gvnote{max-height:150px;overflow:auto}
+.gvnd>summary{cursor:pointer;font-weight:800;min-height:24px;padding:2px 0}.gvnd>summary:focus-visible{outline:3px solid var(--lk-accent);outline-offset:2px;border-radius:6px}
+.gvnd:not([open])>summary{padding:4px 0}
+.ph .gvkey{gap:2px 10px}
+.ph .gvwhy summary{min-height:44px;display:flex;align-items:center}
+@media (prefers-reduced-motion:reduce){.gvcard,.gvfx{transition:none}.gvfx:hover,.gvfx:focus-visible{transform:none}}
+
+.gvsm{display:none}.ph .gvlg{display:none}.ph .gvsm{display:inline}
+.ph #gv .fbs{min-width:44px}.ph #gv .fbt small{display:none}.ph #gv .fbrow{padding:3px 5px;gap:2px 6px}
+.ph .gvnd>summary{min-height:44px;display:flex;align-items:center}
+
+/* Household: the timeline. Its own file (after generations.css, whose frame it shares). Colours are --lk-* tokens and per-row bar colours set in householdview.js (tested in test/test-gh-contrast.js). */
+.hvc{position:relative;min-width:calc(var(--lab) + var(--tw) + 24px);padding-bottom:6px}
+.hvax{position:sticky;top:0;z-index:5;display:flex;height:34px;background:var(--lk-board);border-bottom:2px solid var(--lk-line)}
+.hvcorner{flex:none;box-sizing:border-box;width:var(--lab);position:sticky;left:0;z-index:6;background:var(--lk-board);font:800 12px/34px Nunito,system-ui;color:var(--tr-soft);padding:0 12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hvaxt{position:relative;flex:none;height:34px}
+.hvaxt span{position:absolute;top:0;transform:translateX(-50%);font:800 12px/34px Nunito,system-ui;color:var(--tr-soft)}
+.hvbub{position:absolute;top:4px;transform:translateX(-50%);padding:0 9px;border-radius:99px;background:var(--lk-ink);color:var(--lk-card);font:900 13px/24px Nunito,system-ui;font-style:normal;z-index:2}
+.hvrows{list-style:none;margin:0;padding:0;position:relative}
+.hvrows::before{content:"";position:absolute;left:var(--lab);top:0;bottom:0;width:var(--tw);background:repeating-linear-gradient(90deg,color-mix(in srgb,var(--lk-line) 80%,transparent) 0 1px,transparent 1px var(--gs));background-position:var(--go) 0;pointer-events:none}
+.hvg{display:block;position:sticky;left:0;width:var(--lab)}
+.hvg h3{margin:0;padding:12px 12px 2px;font:900 11.5px/1.2 Nunito,system-ui;letter-spacing:.07em;text-transform:uppercase;color:var(--tr-soft)}
+.hvr{display:flex;min-height:46px;align-items:stretch;border-bottom:1px solid color-mix(in srgb,var(--lk-line) 55%,transparent);position:relative}
+.hvl{all:unset;box-sizing:border-box;flex:none;width:var(--lab);position:sticky;left:0;z-index:3;display:flex;flex-direction:column;justify-content:center;padding:3px 10px 3px 14px;min-height:46px;cursor:pointer;background:var(--lk-board);border-left:8px solid var(--bc);color:var(--lk-ink);font-family:Nunito,"Segoe UI",system-ui,sans-serif}
+.hvl:hover{background:color-mix(in srgb,var(--lk-accent) 14%,var(--lk-board))}
+.hvl:focus-visible{outline:3px solid var(--lk-accent);outline-offset:-3px}
+.hvr.sel .hvl{background:var(--lk-accent-soft);box-shadow:inset 0 0 0 3px var(--lk-accent)}
+.hvr.focus .hvl{border-left-width:12px}.hvr.focus .hvn{font-size:14.5px}
+.hvn{font-weight:800;font-size:13.5px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hvk{font-weight:700;font-size:12px;line-height:1.25;color:var(--tr-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hva{font-weight:800;font-size:12px;line-height:1.25;min-height:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hvt{position:relative;flex:none;min-height:46px}
+.hvb{position:absolute;top:50%;height:10px;margin-top:-5px;border-radius:5px;background:var(--bc)}
+.hvb.open{background:linear-gradient(90deg,var(--bc) 0,var(--bc) 60%,transparent)}
+.hvu{position:absolute;top:50%;height:22px;margin-top:-11px;border-radius:7px;background:var(--bc);box-shadow:0 0 0 2px var(--lk-board)}
+.hvu.inf{background:repeating-linear-gradient(135deg,var(--bc) 0 4px,color-mix(in srgb,var(--bc) 30%,var(--lk-board)) 4px 8px);outline:2px dashed var(--bc);outline-offset:0}
+.hvu.open{-webkit-mask-image:linear-gradient(90deg,#000 60%,transparent);mask-image:linear-gradient(90deg,#000 60%,transparent)}
+.hvd{position:absolute;top:50%;width:15px;height:15px;margin-top:-7.5px;border-radius:50%;background:var(--bc);border:2.5px solid var(--lk-board);box-sizing:border-box;z-index:1}
+.hvr.out .hvb,.hvr.out .hvu{opacity:.3}
+.hvr.out .hva{color:var(--tr-soft)}
+.hvnb{position:absolute;left:12px;top:50%;transform:translateY(-50%);font:700 12px Nunito,system-ui;color:var(--tr-soft);white-space:nowrap;position:sticky;display:block;left:calc(var(--lab) + 12px);width:max-content}
+.hvline{position:absolute;top:34px;bottom:0;width:2px;margin-left:-1px;background:var(--lk-accent);z-index:4;pointer-events:none}
+.hvyr{gap:8px;padding:2px 12px 2px 4px}
+.hvlab{font:800 12px Nunito,system-ui;white-space:nowrap;color:var(--lk-ink)}.hvlab output{font-weight:900;margin-left:2px}
+#hvYear{width:min(240px,34vw);min-width:120px;height:32px;accent-color:var(--lk-accent);cursor:pointer;margin:0}
+#hvYear:focus-visible{outline:3px solid var(--lk-accent);outline-offset:2px;border-radius:6px}
+.hvsum{margin:4px 0 2px;font:800 13px/1.4 Nunito,system-ui;color:var(--lk-ink)}
+.hvev{padding:0 18px}
+.hvevl{margin:0 0 8px;padding:0;list-style:none;display:grid;gap:3px;max-width:90ch}
+.hvevl li{font:700 13px/1.4 Nunito,system-ui;color:var(--lk-ink)}.hvevl li b{display:inline-block;min-width:3.6em;font-weight:900}.hvevl em{color:var(--tr-soft);font-style:normal}
+.fli i.hvk1{width:28px;height:14px;border-radius:5px;background:var(--lk-ink)}
+.fli i.hvk2{width:28px;height:8px;border:0;border-radius:4px;background:linear-gradient(90deg,var(--lk-ink) 0,var(--lk-ink) 55%,transparent)}
+.fli i.hvk3{border-radius:50%;background:var(--lk-ink);border:2.5px solid var(--lk-card);box-shadow:0 0 0 1.5px var(--lk-ink)}
+.ph #hvYear{width:104px;height:44px}.ph .hvsum{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}.ph .hvn{white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.ph .hvyr{min-height:44px;flex:none}
+.ph .hvl{min-height:50px}
+.ph .hvr,.ph .hvt{min-height:50px}
+.hvr.focus .hvb{height:14px;margin-top:-7px;border-radius:7px}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -3810,15 +3942,20 @@ button.sllg{cursor:pointer}button.sllg:hover{border-color:var(--lk-accent)}butto
   }
 
   /* ---------------- the kept choice (one small field of the tree's record) ---------------- */
-  /* {m: 'canvas' | 'fan', g: 3..7, c: 'side' | 'place', t: 0 | 1 | 2 (the Trail band: gone, one line, whole), r: person key of the fan's centre or ''} */
+  /* {m: 'canvas' | 'fan' | 'gen' | 'house', g: 3..7, c: 'side' | 'place', t: 0 | 1 | 2 (the Trail band: gone, one line, whole), r: person key of the fan's centre or ''} */
   const LENS_DEFAULT = { m: 'canvas', g: FAN_DEFAULT, c: 'side', t: 2, r: '' };
   function cleanLens(x) {
     const o = x && typeof x === 'object' ? x : {};
     const X = /^[a-z0-9]{1,8}$/, xs = X.test(o.xs) ? { xs: o.xs } : {}, xl = X.test(o.xl) ? { xl: o.xl } : {};   // the panel views' short strings (surnames, lifespans)
-    return { m: o.m === 'fan' || o.m === 'surnames' || o.m === 'lifespans' ? o.m : 'canvas', g: Math.max(FAN_MIN, Math.min(FAN_MAX, Number.isInteger(o.g) ? o.g : FAN_DEFAULT)), c: o.c === 'place' ? 'place' : 'side',
+    const c = { m: o.m === 'fan' || o.m === 'surnames' || o.m === 'lifespans' || o.m === 'gen' || o.m === 'house' ? o.m : 'canvas', g: Math.max(FAN_MIN, Math.min(FAN_MAX, Number.isInteger(o.g) ? o.g : FAN_DEFAULT)), c: o.c === 'place' ? 'place' : 'side',
       t: o.t === 0 || o.t === 1 ? o.t : 2, r: typeof o.r === 'string' ? o.r : '', ...xs, ...xl };
+    /* Generations (gu: 1..5 ancestor lanes, gd: 1..4 descendant lanes) and Household (hk: 0 leaves out the brothers and sisters): kept only when they differ from how they start */
+    if (Number.isInteger(o.gu) && Math.max(1, Math.min(5, o.gu)) !== 3) c.gu = Math.max(1, Math.min(5, o.gu));
+    if (Number.isInteger(o.gd) && Math.max(1, Math.min(4, o.gd)) !== 2) c.gd = Math.max(1, Math.min(4, o.gd));
+    if (o.hk === 0) c.hk = 0;
+    return c;
   }
-  const lensIsDefault = l => { const c = cleanLens(l); return c.m === 'canvas' && c.g === FAN_DEFAULT && c.c === 'side' && c.t === 2 && !c.xs && !c.xl; };
+  const lensIsDefault = l => { const c = cleanLens(l); return c.m === 'canvas' && c.g === FAN_DEFAULT && c.c === 'side' && c.t === 2 && !c.xs && !c.xl && c.gu === undefined && c.gd === undefined && c.hk === undefined; };
 
   const API = { contrast, mix, inkFor, lum, hex2, lineIdx, defaultSide, trailCard, trailModel, genTag, placeTrail, FAN_MIN, FAN_MAX, FAN_DEFAULT, RING, ringR, fanRadius, wedge, wedgePath, pt, fanSlots, routeWords, kinWord, genName,
     SIDE_BASE, STEP, sideFill, flagColour, flagCandidates, flagPalette, placeFlag, placeFill, textW, boxInWedge, labelLevels, fanLabel, fanList, cleanLens, lensIsDefault, lifeText, fullName, hidden, LENS_DEFAULT };
@@ -4220,6 +4357,365 @@ button.sllg{cursor:pointer}button.sllg:hover{border-color:var(--lk-accent)}butto
 
   const API = { members, personRow, marks, sortRows, extent, axis, dirFill, placeColours, eventsFor, lifeLine, ariaOf, kindWord, groupLabel, tableRows, parseX, packX, STEP, UP, DOWN, CAP };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCLF = API;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* generations.js — the pure parts of the Generations view: who stands in which lane, how related each lane is, where every card sits, which lines join them, and the same lanes as a list.
+ * No DOM; tested by test/test-generations.js (and, for colour, test/test-gh-contrast.js). Loaded after views.js (it uses TCV for names, life text and colour).
+ *
+ * THE LANES run left to right: the oldest ancestors on the left, the focus person (with their partners) in the middle, the descendants on the right. A card is a person; a line joins a
+ * parent to a child. Only the DIRECT line is drawn: parents, grandparents ... and children, grandchildren ... An aunt, an uncle, a cousin or a brother or sister is in no lane, because the
+ * lane's percentage would be wrong for them (a full brother is 50%, a half brother, an aunt and a grandparent are each 25%, and none of them is a grandparent).
+ *
+ * "% RELATED" is the expected share of genes two people have from one common descent, the coefficient of relationship: 100 / 2^n for a person n generations away in a direct line
+ * (parent 50, grandparent 25, great-grandparent 12.5). It is an average: a real DNA match varies. When the family married back into itself, one ancestor stands in a lane more than
+ * once; each place on the tree adds its share, so the card says so (2 places in the grandparents' lane: 2 x 25% = 50%).
+ *
+ * LAYOUT is in rows (one row is one card high). A parent stands level with the middle of its children, a child with the middle of its parents; a person nobody recorded takes no room.
+ */
+(function (root) {
+  'use strict';
+  const V = (typeof module !== 'undefined' && module.exports) ? require('./views.js') : root.TCV;
+
+  const UP_MIN = 1, UP_MAX = 5, UP_DEFAULT = 3, DOWN_MIN = 1, DOWN_MAX = 4, DOWN_DEFAULT = 2;
+  const clampInt = (v, lo, hi, d) => Number.isInteger(v) ? Math.max(lo, Math.min(hi, v)) : d;
+
+  /* ---------------- the words ---------------- */
+  /* 100 / 2^n, as a number and as text: 50, 25, 12.5, 6.25, 3.13, 1.56, 0.781 */
+  const pct = n => 100 / Math.pow(2, Math.abs(n));
+  const pctText = n => { const v = pct(n); return String(+v.toPrecision(3)) + '%'; };
+  const downName = d => d === 0 ? 'Focus' : d === 1 ? 'Children' : d === 2 ? 'Grandchildren' : d === 3 ? 'Great-grandchildren' : d === 4 ? 'Great-great-grandchildren' : (d - 2) + '× great-grandchildren';
+  /* the lane's name for lane g (negative: ancestors; positive: descendants) */
+  const laneName = g => g === 0 ? 'Focus' : g < 0 ? V.genName(-g) : downName(g);
+  /* "Parents, 50% related": what a screen reader reads and the header's two lines say together */
+  const laneLabel = g => g === 0 ? 'Focus: the person and their partners' : laneName(g) + ', ' + pctText(g) + ' related';
+  /* "son", "granddaughter", "great-grandchild" for generation d below, by sex */
+  function kinDown(d, sex) {
+    const base = sex === 'm' ? ['son', 'grandson'] : sex === 'f' ? ['daughter', 'granddaughter'] : ['child', 'grandchild'];
+    if (d === 1) return base[0];
+    const gr = d === 2 ? '' : d === 3 ? 'great-' : d === 4 ? 'great-great-' : (d - 2) + '× great-';
+    return gr + base[1];
+  }
+  const routeDown = (names) => names.join('’s ');
+
+  /* ---------------- the cleaned choice (the kept record: lane counts) ---------------- */
+  const cleanUp = v => clampInt(v, UP_MIN, UP_MAX, UP_DEFAULT);
+  const cleanDown = v => clampInt(v, DOWN_MIN, DOWN_MAX, DOWN_DEFAULT);
+
+  /* ---------------- the model ---------------- */
+  const sideOf = (g, b, parent) => g === 1 ? (b ? 'm' : 'f') : parent;
+  /* The tree of ancestors of root: nodes with slot numbers like the Fan (1 = the focus, 2n the father, 2n + 1 the mother of slot n), laid out in rows. */
+  function ancestors(M, root, up) {
+    const nodes = [], edges = [];
+    function place(i, g, n, side, path, childNode, via) {
+      const p = M.P[i], node = { id: g === 0 ? 'f0' : 'a' + n, i, lane: g ? -g : 0, n, g, side, dup: 1, more: false, row: 0, h: 1 };
+      nodes.push(node);
+      if (childNode) edges.push({ from: node.id, to: childNode.id, kind: 'parent', via, grade: via === 'f' ? M.P[childNode.i].fg : M.P[childNode.i].mg });
+      const kids = [];
+      if (g < up) {
+        [['f', p.f, 0], ['m', p.m, 1]].forEach(([v, q, b]) => {
+          if (q == null || q < 0 || path.has(q)) return;   /* nobody recorded, or a loop in the data: no room is made */
+          path.add(q); const k = place(q, g + 1, 2 * n + b, sideOf(g + 1, b, side), path, node, v); path.delete(q); kids.push(k);
+        });
+      } else node.more = (p.f >= 0 || p.m >= 0);
+      if (!kids.length) { node.h = 1; node.c = 0.5; } else {
+        let off = 0; kids.forEach(k => { k.off = off; off += k.h; });   /* a parent's block, from the top of this node's block */
+        node.h = off; node.c = kids.length === 1 ? kids[0].off + kids[0].c : (kids[0].off + kids[0].c + kids[kids.length - 1].off + kids[kids.length - 1].c) / 2;
+        node.kids = kids;
+      }
+      return node;
+    }
+    const top = place(root, 0, 1, null, new Set([root]), null, null);
+    /* absolute rows: walk down adding each block's offset */
+    (function abs(node, base) { node.row = base + node.c; (node.kids || []).forEach(k => abs(k, base + k.off)); })(top, 0);
+    return { top, nodes, edges };
+  }
+  /* the children of a person as the canvas knows them (the child's own father/mother field, plus a kids list nobody contradicts), once each, oldest first */
+  function childrenOf(M, i) {
+    const seen = new Set(), out = [];
+    M.P[i].ch.forEach(e => { if (!seen.has(e.c)) { seen.add(e.c); out.push(e.c); } });
+    return out;
+  }
+  const otherParent = (M, child, parent) => { const c = M.P[child]; return c.f === parent ? (c.m >= 0 ? c.m : -1) : c.m === parent ? (c.f >= 0 ? c.f : -1) : -1; };
+  /* the people the focus person had children with or is recorded as married to, in the order of their first child (those with none after) */
+  function partnersOf(M, root) {
+    const p = M.P[root], first = new Map();
+    childrenOf(M, root).forEach(c => { const o = otherParent(M, c, root); if (o >= 0 && !first.has(o)) first.set(o, M.P[c].by == null ? 9999 : M.P[c].by); });
+    const sp = p.sp.filter(s => s !== root && M.P[s]);
+    const all = [...new Set([...first.keys(), ...sp])];
+    return all.sort((a, b) => (first.has(a) ? first.get(a) : 99999) - (first.has(b) ? first.get(b) : 99999) || all.indexOf(a) - all.indexOf(b)).map(i => ({ i, married: sp.includes(i), kids: [...first.keys()].includes(i) }));
+  }
+  function descendants(M, root, down, partnerOrder) {
+    const nodes = [], edges = [], rank = new Map(partnerOrder.map((x, k) => [x, k]));
+    function place(i, d, path, parentNode, c) {
+      const node = { id: d === 0 ? 'f0' : 'd' + nodes.length, i, lane: d, d, side: null, dup: 1, more: false, row: 0, h: 1 };
+      nodes.push(node);
+      let kids = [];
+      if (d < down) {
+        let ch = childrenOf(M, i);
+        if (d === 0) ch = ch.slice().sort((a, b) => { const ra = rank.has(otherParent(M, a, i)) ? rank.get(otherParent(M, a, i)) : 1e6, rb = rank.has(otherParent(M, b, i)) ? rank.get(otherParent(M, b, i)) : 1e6; return ra - rb; });   /* stable: oldest first inside a partner */
+        ch.forEach(q => { if (path.has(q)) return; path.add(q); const k = place(q, d + 1, path, node, q); path.delete(q); kids.push(k); });
+      } else node.more = childrenOf(M, i).length > 0;
+      if (!kids.length) { node.h = 1; node.c = 0.5; } else {
+        let off = 0; kids.forEach(k => { k.off = off; off += k.h; });
+        node.h = off; node.c = kids.length === 1 ? kids[0].off + kids[0].c : (kids[0].off + kids[0].c + kids[kids.length - 1].off + kids[kids.length - 1].c) / 2;
+        node.kids = kids;
+      }
+      return node;
+    }
+    const top = place(root, 0, new Set([root]), null, null);
+    (function abs(node, base) { node.row = base + node.c; (node.kids || []).forEach(k => abs(k, base + k.off)); })(top, 0);
+    return { top, nodes, edges };
+  }
+
+  /* The whole picture. opt: {up, down}. Returns
+     { root, up, down, lanes: [{g, name, pct, pctText, label, nodes:[node]}], nodes, edges, rows, rootRow, partners:[node], counts:{anc, desc, partners, hiddenBack, hiddenForward} }
+     node = {id, i, lane, row (the middle of the card, in rows), side ('f' | 'm' | null), dup (places in the lane), n (the Fan's slot, ancestors), more (more recorded beyond the lanes shown), role, kin} */
+  function model(M, rootIdx, opt) {
+    opt = opt || {};
+    const up = cleanUp(opt.up), down = cleanDown(opt.down);
+    const A = ancestors(M, rootIdx, up);
+    const partners = partnersOf(M, rootIdx), D = descendants(M, rootIdx, down, partners.map(x => x.i));
+    /* the focus person stands where both halves need them: the lower of the two middles; the shorter half is moved down to meet it */
+    const rootRow = Math.max(A.top.row, D.top.row), dA = rootRow - A.top.row, dD = rootRow - D.top.row;
+    A.nodes.forEach(n => { n.row += dA; }); D.nodes.forEach(n => { n.row += dD; });
+    const focus = A.top;   /* the ancestors' top node IS the focus node */
+    focus.role = 'focus'; focus.kin = '';
+    /* partners stand under the focus person, in the focus lane, a row apart */
+    const pn = partners.map((x, k) => ({ id: 'pt' + k, i: x.i, lane: 0, row: rootRow + 1 + k, side: null, dup: 1, more: false, role: 'partner', married: x.married, kin: x.married ? 'spouse or partner' : 'partner' }));
+    const nodes = [], edges = [];
+    A.nodes.forEach(n => { if (n !== focus) { n.role = 'ancestor'; n.kin = V.kinWord(n.g, n.n); n.route = V.routeWords(n.n); } nodes.push(n); });
+    D.nodes.forEach(n => {
+      if (n === D.nodes[0]) return;
+      n.role = 'descendant'; n.kin = kinDown(n.d, M.P[n.i].sex); nodes.push(n);
+    });
+    pn.forEach(n => nodes.push(n));
+    /* lines: ancestors to children (made in ancestors()), then parents to children below the focus person */
+    edges.push(...A.edges);
+        /* descendants' lines: each node's parent in the descendant tree, and, for the focus person's children, the other parent when a partner card is drawn */
+    (function walk(node, parent) {
+      (node.kids || []).forEach(k => {
+        const kc = M.P[k.i], via = kc.f === parent.i ? 'f' : kc.m === parent.i ? 'm' : '?';
+        edges.push({ from: parent.id, to: k.id, kind: 'parent', via, grade: via === 'f' ? kc.fg : via === 'm' ? kc.mg : -1 });
+        if (parent === D.top) { const o = otherParent(M, k.i, rootIdx), pt = o >= 0 ? pn.find(x => x.i === o) : null; if (pt) edges.push({ from: pt.id, to: k.id, kind: 'parent', via: kc.f === o ? 'f' : 'm', grade: kc.f === o ? kc.fg : kc.mg }); }
+        walk(k, k);
+      });
+    })(D.top, D.top);
+    pn.forEach(n => edges.push({ from: 'f0', to: n.id, kind: 'spouse', via: '', grade: -1, married: n.married }));
+    /* a person in more than one place of a lane (the family married back into itself): each place says how many */
+    const lanes = [];
+    const lo = -up, hi = down;
+    for (let g = lo; g <= hi; g++) {
+      const ns = nodes.filter(n => n.lane === g).sort((a, b) => a.row - b.row || (a.role === 'partner') - (b.role === 'partner'));
+      const cnt = new Map(); ns.forEach(n => { if (n.role !== 'partner') cnt.set(n.i, (cnt.get(n.i) || 0) + 1); });
+      ns.forEach(n => { n.dup = n.role === 'partner' ? 1 : cnt.get(n.i); });
+      lanes.push({ g, name: laneName(g), pct: g === 0 ? null : pct(g), pctText: g === 0 ? '' : pctText(g), label: laneLabel(g), nodes: ns });
+    }
+    const rows = Math.max(1, ...nodes.map(n => n.row + 0.5));
+    return { root: rootIdx, up, down, lanes, nodes, edges, rows, rootRow, partners: pn, byId: new Map(nodes.map(n => [n.id, n])),
+      counts: { anc: A.nodes.length - 1, desc: D.nodes.length - 1, partners: pn.length, hiddenBack: nodes.filter(n => n.role !== 'partner' && n.lane < 0 && n.more).length, hiddenForward: nodes.filter(n => n.lane > 0 && n.more).length } };
+  }
+
+  /* ---------------- geometry (px) ---------------- */
+  const CARD_W = 188, CARD_H = 84, GAP_X = 44, GAP_Y = 14, HEAD_H = 58, HEAD_H2 = 78, PAD = 16;   /* HEAD_H2: a header of two lines of name ("Great-grandparents" in a narrow lane) and the percentage */
+  /* the x of the left edge of lane k (0 = leftmost), and the y of the TOP of a card whose middle is `row` */
+  function geometry(m, o) {
+    o = o || {}; const cw = o.cardW || CARD_W, ch = o.cardH || CARD_H, gx = o.gapX || GAP_X, gy = GAP_Y, rowH = ch + gy;
+    const nl = m.lanes.length, laneW = cw + gx, hh = o.headH || HEAD_H;
+    const pos = new Map();
+    m.nodes.forEach(n => { const k = n.lane + m.up; pos.set(n.id, { x: PAD + k * laneW, y: hh + PAD + (n.row - 0.5) * rowH, w: cw, h: ch }); });
+    return { cw, ch, gx, rowH, laneW, width: PAD * 2 + nl * laneW - gx, height: hh + PAD * 2 + m.rows * rowH - gy, pos, headH: hh };
+  }
+  /* an elbow from the right edge of a to the left edge of b: out, across at the middle of the gap, in */
+  function elbow(a, b) {
+    const x1 = a.x + a.w, y1 = a.y + a.h / 2, x2 = b.x, y2 = b.y + b.h / 2, mx = Math.round((x1 + x2) / 2);
+    const r = v => Math.round(v * 10) / 10;
+    return y1 === y2 ? `M${r(x1)} ${r(y1)}H${r(x2)}` : `M${r(x1)} ${r(y1)}H${mx}V${r(y2)}H${r(x2)}`;
+  }
+
+  /* ---------------- colour: the Fan's own two hues ---------------- */
+  /* The bar down the left edge of a card must read against the card (3:1) in every look: the Fan's blue and orange, darkened toward the look's ink only as far as that takes. */
+  function barColour(base, tk, min) {
+    min = min || 3; if (!V.contrast) return base;
+    if (V.contrast(base, tk.card) >= min && V.contrast(base, tk.board) >= min) return base;
+    for (let t = 0.1; t <= 1.0001; t += 0.05) { const c = V.mix(tk.ink, base, t); if (V.contrast(c, tk.card) >= min && V.contrast(c, tk.board) >= min) return c; }
+    return tk.ink;
+  }
+  /* the card's own wash (a faint tint of the bar's colour over the card), then the text colour that reads on it */
+  function cardFill(bar, tk) {
+    const fill = V.mix(bar, tk.card, 0.1);
+    return { fill, ink: V.inkFor(fill, tk.ink) };
+  }
+  /* what colours a card in the 'side' mode: the father's side blue, the mother's side orange (the Fan's), the focus person the look's ink, everyone not of the Fan's two sides a near-ink neutral */
+  function sideBar(node, tk) {
+    if (node.role === 'focus') return tk.ink;
+    if (node.side === 'f' || node.side === 'm') return barColour(V.SIDE_BASE[node.side], tk);
+    return neutralBar(tk);   /* partners and descendants: no side of the family to name */
+  }
+  /* the colour for "no side of the family": the look's ink softened only a little, so it stays apart from the Fan's blue and orange by lightness for every look and every kind of colour-blindness (tested) */
+  const NEUTRAL_T = 0.85;
+  const neutralBar = tk => V.mix(tk.ink, tk.card, NEUTRAL_T);
+  /* the lines are lighter than the neutral bar so they do not shout, but still read against the board (3:1, tested) */
+  const lineColour = (node, tk) => node && (node.side === 'f' || node.side === 'm') ? barColour(V.SIDE_BASE[node.side], tk) : V.mix(tk.ink, tk.card, 0.62);
+
+  /* ---------------- the same lanes as lists ---------------- */
+  /* [{g, name, label, pctText, people:[{id, i, kin, route, name, life, place, side, living, dup, role}], note}] */
+  function list(M, m) {
+    return m.lanes.map(l => ({ g: l.g, name: l.name, label: l.label, pctText: l.pctText,
+      people: l.nodes.map(n => { const p = M.P[n.i]; return { id: n.id, i: n.i, kin: n.kin || '', route: n.route || '', name: V.fullName(p), life: V.lifeText(p), place: V.hidden(p) || p.ghost ? '' : (p.bp || ''), side: n.side, living: !!p.living, dup: n.dup, role: n.role, more: !!n.more }; }) }));
+  }
+  /* "2 places on the tree: 2 x 25% = 50% related" */
+  function dupNote(n, g) { return n.dup > 1 ? n.dup + ' places on the tree: ' + n.dup + ' × ' + pctText(g) + ' = ' + String(+(pct(g) * n.dup).toPrecision(3)) + '% related' : ''; }
+
+  /* ---------------- the kept choice ---------------- */
+  const API = { UP_MIN, UP_MAX, UP_DEFAULT, DOWN_MIN, DOWN_MAX, DOWN_DEFAULT, pct, pctText, downName, laneName, laneLabel, kinDown, routeDown, cleanUp, cleanDown, childrenOf, otherParent, partnersOf,
+    model, geometry, elbow, barColour, cardFill, sideBar, neutralBar, NEUTRAL_T, lineColour, list, dupNote, CARD_W, CARD_H, GAP_X, GAP_Y, HEAD_H, HEAD_H2, PAD };
+  if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCG = API;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* household.js — the pure parts of the Household view: who is in a person's household, when each of them lived, who was alive in any year, and the events of the household in order.
+ * No DOM; tested by test/test-household.js (and, for colour, test/test-gh-contrast.js). Loaded after generations.js (it shares the partner and children rules, and the colour helpers).
+ *
+ * THE HOUSEHOLD of a person is the people nearest them: their parents, their brothers and sisters (a choice), the person, their partners and their children. Each is a row on a timeline of years,
+ * a bar from birth to death. Where a partner and the person were together (the marriage year when it is recorded; else a year before their first child, said to be inferred) a stronger stretch
+ * is drawn on the partner's bar. Move to a year and the page names who was alive then and how old they were. Everything is the record's own: no year is invented. A bar that has no recorded death
+ * fades out instead of stopping; a living person has no bar at all, the name and the family only.
+ */
+(function (root) {
+  'use strict';
+  const V = (typeof module !== 'undefined' && module.exports) ? require('./views.js') : root.TCV;
+  const G = (typeof module !== 'undefined' && module.exports) ? require('./generations.js') : root.TCG;
+
+  const KIN_CAP = 10, CHILD_CAP = 16, FADE_YEARS = 90;
+  const GROUPS = [['parents', 'Parents'], ['siblings', 'Brothers and sisters'], ['focus', ''], ['partners', 'Partners'], ['children', 'Children']];
+  const sexWord = (sex, m, f, u) => sex === 'm' ? m : sex === 'f' ? f : u;
+
+  /* ---------------- the people ---------------- */
+  function siblingsOf(M, root) {
+    const p = M.P[root], seen = new Set(), out = [];
+    [p.f, p.m].filter(q => q >= 0).forEach(q => G.childrenOf(M, q).forEach(c => { if (c !== root && !seen.has(c)) { seen.add(c); out.push(c); } }));
+    return out.map(c => { const s = M.P[c], both = p.f >= 0 && p.m >= 0 && s.f === p.f && s.m === p.m; return { i: c, half: !both }; })
+      .sort((a, b) => (M.P[a.i].by == null ? 9999 : M.P[a.i].by) - (M.P[b.i].by == null ? 9999 : M.P[b.i].by));
+  }
+  const kinOfSibling = (sex, half) => (half ? 'half-' : '') + sexWord(sex, 'brother', 'sister', 'brother or sister');
+  const kinOfChild = sex => sexWord(sex, 'son', 'daughter', 'child');
+  const kinOfParent = (sex, via) => via === 'f' ? 'father' : via === 'm' ? 'mother' : sexWord(sex, 'father', 'mother', 'parent');
+
+  /* The members, in the order the timeline lists them. opt: {kin: true to include the brothers and sisters, now: the year to stop an open bar at}
+     {root, now, members:[{id, i, group, kin, side, name, living, ghost, start, end, startEst, endEst, openEnd, bar (true when a bar can be drawn), union}], notes:{moreSiblings, moreChildren}} */
+  function members(M, root, opt) {
+    opt = opt || {}; const now = opt.now || new Date().getFullYear(), P = M.P, p = P[root], out = [], notes = { moreSiblings: 0, moreChildren: 0 };
+    const add = (i, group, kin, side, extra) => {
+      const q = P[i], hid = V.hidden(q), ghost = !!q.ghost;
+      const start = hid || ghost ? null : q.by, end = hid || ghost ? null : q.dy;
+      const m = Object.assign({ id: group + ':' + i, i, group, kin, side: side || null, name: V.fullName(q), living: !!q.living, ghost, start: start == null ? null : start, end: end == null ? null : end,
+        startEst: !hid && !ghost && !!(q.fl & 1), endEst: !hid && !ghost && !!(q.fl & 2), sex: q.sex }, extra || {});
+      m.bar = m.start != null;
+      m.openEnd = m.bar && m.end == null;                          /* no death recorded: the bar fades out instead of stopping */
+      m.drawEnd = m.bar ? (m.end != null ? m.end : Math.min(m.start + FADE_YEARS, now)) : null;
+      if (m.bar && m.drawEnd < m.start) m.drawEnd = m.start;
+      out.push(m); return m;
+    };
+    [['f', p.f], ['m', p.m]].forEach(([v, q]) => { if (q >= 0) add(q, 'parents', kinOfParent(P[q].sex, v), v); });
+    if (opt.kin) {
+      const sb = siblingsOf(M, root); sb.slice(0, KIN_CAP).forEach(s => add(s.i, 'siblings', kinOfSibling(P[s.i].sex, s.half), null, { half: s.half }));
+      notes.moreSiblings = Math.max(0, sb.length - KIN_CAP);
+    }
+    add(root, 'focus', '', null);
+    const kidsAll = G.childrenOf(M, root), partners = G.partnersOf(M, root);
+    partners.forEach(pt => {
+      const q = P[pt.i], kids = kidsAll.filter(c => G.otherParent(M, c, root) === pt.i).map(c => P[c].by).filter(y => y != null);
+      const firstKid = kids.length ? Math.min(...kids) : null;
+      /* when they were together: the marriage year if either of them records one (the partner's own, else the focus person's when they have only one spouse), else a year before the first child (inferred) */
+      let from = null, est = false, inferred = false;
+      if (q.my != null && !V.hidden(q)) { from = q.my; est = !!(q.fl & 16); }
+      else if (p.my != null && p.sp.length === 1 && p.sp[0] === pt.i && !V.hidden(p)) { from = p.my; est = !!(p.fl & 16); }
+      else if (firstKid != null) { from = firstKid - 1; inferred = true; }
+      const m = add(pt.i, 'partners', pt.married ? 'spouse or partner' : 'partner', null, { married: pt.married });
+      if (from != null && !V.hidden(p) && !V.hidden(q)) {
+        const ends = [p.dy, q.dy].filter(y => y != null), to = ends.length ? Math.min(...ends) : null;
+        m.union = { from, to, est, inferred, openEnd: ends.length === 0 };
+      }
+    });
+    kidsAll.slice(0, CHILD_CAP).forEach(c => add(c, 'children', kinOfChild(P[c].sex), null));
+    notes.moreChildren = Math.max(0, kidsAll.length - CHILD_CAP);
+    return { root, now, members: out, notes };
+  }
+
+  /* ---------------- the timeline ---------------- */
+  /* the years the axis covers: from the first birth to the last death (or the end of a fading bar), with a little room; a very early parent is cut at 70 years before the person */
+  function span(model) {
+    const bars = model.members.filter(m => m.bar);
+    if (!bars.length) return null;
+    const focus = model.members.find(m => m.group === 'focus'), f0 = focus && focus.bar ? focus.start : null;
+    let t0 = Math.min(...bars.map(m => m.start)), cut = false;
+    if (f0 != null && t0 < f0 - 70) { t0 = f0 - 70; cut = true; }
+    const t1 = Math.max(...bars.map(m => m.drawEnd));
+    return { t0: Math.floor(t0 / 5) * 5, t1: Math.max(Math.ceil(t1 / 5) * 5, Math.floor(t0 / 5) * 5 + 10), cut };
+  }
+  /* axis ticks: a round step so there are about 6 to 14 */
+  function ticks(t0, t1) {
+    const len = Math.max(1, t1 - t0); let step = [5, 10, 20, 25, 50, 100].find(s => len / s <= 14) || 100;
+    const out = []; for (let y = Math.ceil(t0 / step) * step; y <= t1; y += step) out.push(y); return out;
+  }
+  const clampYear = (y, s) => Math.max(s.t0, Math.min(s.t1, y));
+
+  /* ---------------- a year: who was alive, and how old ---------------- */
+  /* {year, alive:[{id, age}], maybe:[{id, age}], hidden: n, text}  — `maybe`: born by then and no death recorded, within the fade; `hidden`: living people, whose dates are not shown */
+  function at(model, year) {
+    const alive = [], maybe = [];
+    let hidden = 0;
+    model.members.forEach(m => {
+      if (!m.bar) { if (m.living) hidden++; return; }
+      if (year < m.start) return;
+      const age = year - m.start;
+      if (m.end != null) { if (year <= m.end) alive.push({ id: m.id, age, est: m.startEst }); }
+      else if (year <= m.drawEnd) maybe.push({ id: m.id, age, est: m.startEst });
+    });
+    const by = new Map(model.members.map(m => [m.id, m]));
+    const who = a => by.get(a.id).name.split(' ')[0] + ' (' + (a.est ? '~' : '') + a.age + ')';
+    const text = 'In ' + year + ': ' + (alive.length ? alive.length + (alive.length === 1 ? ' person' : ' people') + ' alive: ' + alive.map(who).join(', ') : 'nobody recorded as alive')
+      + (maybe.length ? '. May have been alive, no death recorded: ' + maybe.map(who).join(', ') : '') + (hidden ? '. Plus ' + hidden + ' living ' + (hidden === 1 ? 'person' : 'people') + ' whose dates are not shown' : '') + '.';
+    return { year, alive, maybe, hidden, text };
+  }
+  /* the year to start on: the year the household had most people alive (the latest of a tie before the focus person's death), between the focus person's birth and death */
+  function busiestYear(model) {
+    const s = span(model), focus = model.members.find(m => m.group === 'focus'); if (!s) return null;
+    const lo = focus && focus.bar ? focus.start : s.t0, hi = focus && focus.bar ? Math.min(focus.drawEnd, s.t1) : s.t1;
+    let best = lo, bn = -1;
+    for (let y = lo; y <= hi; y++) { const a = at(model, y), n = a.alive.length + a.maybe.length; if (n >= bn) { bn = n; best = y; } }
+    return best;
+  }
+
+  /* ---------------- the events, in order (also the text alternative) ---------------- */
+  const KIND_ORDER = { born: 0, together: 1, died: 2 };
+  function events(M, model) {
+    const out = [], by = new Map(model.members.map(m => [m.id, m])), focus = model.members.find(m => m.group === 'focus'), P = M.P;
+    const yt = (y, est) => (est ? '~' : '') + y;
+    model.members.forEach(m => {
+      const q = P[m.i]; if (!m.bar) return;
+      const first = m.name.split(' ')[0] || m.name;
+      const fn = focus ? focus.name.split(' ')[0] : 'the person';
+      let t = m.group === 'focus' ? first + ' is born' : first + ' is born (' + fn + '\u2019s ' + m.kin + ')';
+      if (q.bp && !V.hidden(q)) t += ' in ' + q.bp;
+      out.push({ year: m.start, est: m.startEst, kind: 'born', who: m.id, group: m.group, text: t });
+      if (m.end != null) out.push({ year: m.end, est: m.endEst, kind: 'died', who: m.id, group: m.group, text: first + ' dies' + (q.dp && !V.hidden(q) ? ' in ' + q.dp : '') + ', aged ' + (m.end - m.start) });
+      if (m.union) out.push({ year: m.union.from, est: m.union.est, kind: 'together', who: m.id, group: m.group, inferred: m.union.inferred,
+        text: m.union.inferred ? first + ' and ' + fn + ' are together by now (a child was born the next year; the year is inferred)' : first + ' and ' + fn + ' marry or settle together' });
+    });
+    return out.sort((a, b) => a.year - b.year || KIND_ORDER[a.kind] - KIND_ORDER[b.kind] || (a.who < b.who ? -1 : 1)).map(e => Object.assign(e, { when: yt(e.year, e.est) }));
+  }
+
+  /* ---------------- colour ---------------- */
+  /* COLOUR in the household says the one thing colour can say truly here: which parent a person is (the Fan's father's-side blue and mother's-side orange); the person is the look's ink and everyone else (brothers and sisters,
+     partners, children) a near-ink neutral. Who is who is said in words: the group's heading, the "father" / "son" under each name; colour is never the only thing that says it. */
+  function barBase(m, tk) {
+    if (m.group === 'focus') return tk.ink;
+    if (m.group === 'parents') return V.SIDE_BASE[m.side === 'm' ? 'm' : 'f'];
+    return G.neutralBar(tk);
+  }
+  const barColour = (m, tk) => m.group === 'focus' ? tk.ink : m.group === 'parents' ? G.barColour(barBase(m, tk), tk) : barBase(m, tk);
+  const API = { KIN_CAP, CHILD_CAP, FADE_YEARS, GROUPS, siblingsOf, members, span, ticks, clampYear, at, busiestYear, events, barBase, barColour };
+  if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCH = API;
 })(typeof window !== 'undefined' ? window : globalThis);
 
 /* find.js — the pure parts of Find, the search that lives in the right-hand pane (and, while the canvas is empty, in the middle of the canvas). No DOM; tested by test/test-find.js.
@@ -6570,6 +7066,7 @@ const fanIsOn = () => LV.m === 'fan';
 function lensSerialise() {
   if (!lensAvail()) return null;
   const l = Object.assign({ m: LV.m, g: LV.g, c: LV.c, t: LV.t, r: LV.m === 'fan' && LV.root ? LV.root : '' }, slvFields());   // slvFields (panelviews.js): the short strings of the panel views
+  if (typeof gvSerialise === 'function') gvSerialise(l);   /* Generations / Household: their own fields (generationsview.js) */
   return TCV.lensIsDefault(l) ? null : l;
 }
 /* the canvas's own pan and zoom: while the Fan is open S.view is the Fan's, and the canvas's is parked in LV.cv */
@@ -6608,8 +7105,8 @@ function lensWire() {
 }
 function lensBtn() {
   const b = $('#bLens'); if (!b || b.hidden) return;
-  const txt = 'View: ' + (fanIsOn() ? 'Fan' : slvOn() ? slvName() : 'Canvas') + '. Choose how the people are drawn.';
-  b.title = txt; b.setAttribute('aria-label', txt); b.classList.toggle('on', fanIsOn() || slvOn());
+  const txt = 'View: ' + (fanIsOn() ? 'Fan' : slvOn() ? slvName() : typeof gvName === 'function' && gvName() || 'Canvas') + '. Choose how the people are drawn.';
+  b.title = txt; b.setAttribute('aria-label', txt); b.classList.toggle('on', fanIsOn() || slvOn() || (typeof gvOn === 'function' && gvOn()));
 }
 function lensMenu() {
   const m = $('#lensMenu'); if (!m) return;
@@ -6619,7 +7116,8 @@ function lensMenu() {
     + item('canvas', 'Canvas', 'Free: the cards sit where you put them', LV.m === 'canvas')
     + item('fan', 'Fan', 'The ancestors of the selected person as a half circle, a ring a generation', fanIsOn())
     + slvMenuItems()   // Surnames, Lifespans (panelviews.js)
-    + item('generations', 'Generations <em class="lvsoon">soon</em>', 'Everyone in rows by generation', false, true) + `</div>`
+    + item('gen', 'Generations', 'The direct line in lanes: parents, grandparents, children, each lane with how related they are', LV.m === 'gen')
+    + item('house', 'Household', 'Parents, brothers and sisters, partners and children on a timeline of years', LV.m === 'house') + `</div>`
     + `<button type="button" class="lk-toggle${LV.t ? ' on' : ''}" role="switch" aria-checked="${!!LV.t}" data-lv="trail"><span class="stx"><b>Direct-line strip open</b><i>A band along the very bottom: the selected person’s line, one ancestor a generation, and where they lived. Off folds it to a thin handle.</i></span><span class="knob"></span></button>`;
 }
 function openLensMenu(on) {
@@ -6640,6 +7138,7 @@ function fanStartKey() {
 }
 function lensSet(m, o) {
   o = o || {};
+  if (typeof gvSet === 'function' && gvSet(m, o)) return;   /* Generations / Household, and leaving them (generationsview.js) */
   if (!lensAvail() || m === LV.m || (m !== 'fan' && m !== 'canvas' && !slvHas(m))) return;
   const wasPanel = slvOn(); if (wasPanel) slvClose();   // leaving a panel view (Surnames, Lifespans) for the canvas, the Fan or another panel
   if (slvHas(m)) {
@@ -6723,7 +7222,7 @@ function lensOnZoom() {
   if (!fanIsOn() || LV.list || fanBucket() === LV.bucket || fanRaf) return;
   fanRaf = requestAnimationFrame(() => { fanRaf = 0; if (fanIsOn() && fanBucket() !== LV.bucket) fanRender(); });
 }
-function lensOnTheme() { if (fanIsOn()) fanRender(); trailRender(); slvOnTheme(); }
+function lensOnTheme() { if (fanIsOn()) fanRender(); trailRender(); slvOnTheme(); if (typeof gvOnTheme === 'function') gvOnTheme(); }
 
 /* ---------------- the Fan: the bar, the legend, the list ---------------- */
 function fanBar() {
@@ -6816,6 +7315,7 @@ function lensClick(target) {   /* called when a press that did not drag ends on 
 }
 function lensOnSelect() {
   trailOnSelect(); slvOnSelect();
+  if (typeof gvOnSelect === 'function') gvOnSelect();
   if (!fanIsOn()) return;
   const one = S.sel.size === 1 ? M.byKey.get([...S.sel][0]) : null;
   if (one && LV.F && ![...LV.byN.values()].some(s => s.i === one.i)) { fanRecentre(one.key, true); return; }   // chosen somewhere else (the search, the panel): the Fan follows
@@ -6875,7 +7375,7 @@ function trailFocusKey() {
   if (LV.tf && !M.byKey.has(LV.tf)) LV.tf = null;
   return LV.tf;
 }
-function trailShown() { return lensAvail() && !fanIsOn() && !slvOn() && !document.body.classList.contains('pr') && S.cards.size > 0 && !!trailFocusKey(); }
+function trailShown() { return lensAvail() && !fanIsOn() && !slvOn() && !(typeof gvOn === 'function' && gvOn()) && !document.body.classList.contains('pr') && S.cards.size > 0 && !!trailFocusKey(); }
 function trailHeight() { if (typeof slvBandH === 'function' && slvOn()) return slvBandH(); const t = $('#trail'); return t && t.classList.contains('on') ? t.getBoundingClientRect().height : 0; }   // a panel view (Surnames, Lifespans) is the bottom band while it is open: slvBandH
 let trailQ = 0;
 function trailOnSelect() { if (!lensAvail()) return; if (S.sel.size === 1) { const k = [...S.sel][0], was = LV.tf; LV.tf = k; if (was !== k && LV.model && !LV.model.anc.some(c => c.key === k)) LV.side = null; } cancelAnimationFrame(trailQ); trailQ = requestAnimationFrame(trailRender); }
@@ -7030,6 +7530,7 @@ function lensBoot(d) {
     const k = l.r && M.byKey.has(l.r) ? l.r : fanStartKey();
     if (k && S.cards.size) { LV.came = true; fanOpen(k, { boot: true }); }
   } else if (slvHas(l.m) && S.cards.size && !document.body.classList.contains('pr') && slvOpen(l.m, { boot: true })) LV.m = l.m;
+  else if ((l.m === 'gen' || l.m === 'house') && typeof gvBoot === 'function') gvBoot(l);
   trailRender();
 }
 addEventListener('resize', () => { trailMeasure(); });
@@ -7493,6 +7994,435 @@ function lfTip(r) {
   document.addEventListener('scroll', () => { if (SLV.m === 'lifespans') slvTip(null); }, true);
 })();
 slvReg(LFV);
+
+/* generationsview.js — the View menu's "Generations" (and the frame it shares with "Household", householdview.js).
+ *
+ * Generations draws the selected person's direct line as LANES, oldest on the left: the great-grandparents, the grandparents, the parents, the person with their partners, the children, the
+ * grandchildren. Each lane says in plain words how related its people are ("Parents, 50% related"). The pure parts (lanes, rows, lines, the percentages, the lists, colour) are in generations.js and tested there.
+ *
+ * WHY IT IS ITS OWN DRAWING, NOT THE CANVAS'S CARDS: Compare in pairs owns the arrangement because it is a whole mode with its own saved choices. Lanes would need a card for every person in them, which means moving the
+ * visitor's cards, adding cards they never chose and putting everything back (and saving the lanes' positions instead of theirs if the page were closed in between). This view never touches the canvas: the cards, pan,
+ * zoom and selection are left as they were and come back on Esc or "Canvas". It still does what a card does: a click selects that person on the canvas (the person is put on the canvas if they are not there, Undo
+ * takes them off), the "!" of the fix list and the corrections pencil are there, and the side panel opens for the person as always. What it does not do is drag: a lane keeps its people in order.
+ *
+ * The choice (which view, the centre, how many lanes each way, the colouring) is one small field of the tree's saved record (`lens`, see viewsui.js), opaque like everything there. Nothing is stored or sent here.
+ * A person who may be living is shown by name and family only, as everywhere. */
+const TCG = window.TCG;
+const GV = { m: null, root: null, gu: 3, gd: 2, hk: 1, c: 'side', list: false, kb: null, came: false, stack: [], year: null, model: null, geo: null, tk: null, pal: null, hh: null, sized: '' };
+const gvOn = () => GV.m === 'gen' || GV.m === 'house';
+const gvName = () => GV.m === 'gen' ? 'Generations' : GV.m === 'house' ? 'Household' : '';
+const gvPerson = () => { const p = GV.root ? M.byKey.get(GV.root) : null; return p || null; };
+const gvReduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------------- what the View button asks of this view (viewsui.js calls these) ---------------- */
+/* the extra fields of the kept choice; null when nothing of this view is open */
+function gvSerialise(l) {
+  if (!gvOn()) return l;
+  l.m = GV.m; l.r = GV.root || ''; l.c = GV.c;
+  if (GV.gu !== 3) l.gu = GV.gu; if (GV.gd !== 2) l.gd = GV.gd; if (GV.hk === 0) l.hk = 0;
+  return l;
+}
+/* called by lensSet first. true: handled here. Leaving for the Fan or the free canvas closes this view first. */
+function gvSet(m, o) {
+  if (m === 'gen' || m === 'house') {
+    if (!lensAvail()) return true;
+    if (m === GV.m) return true;
+    if (document.body.classList.contains('pr')) { toast('Compare is laying the people out. Stop comparing to use ' + (m === 'gen' ? 'Generations' : 'the Household') + '.', 3600); return true; }
+    const k = (GV.root && M.byKey.has(GV.root) && gvOn() ? GV.root : null) || fanStartKey(); if (!k) { toast('Put a person on the canvas and select them: the view is drawn from them.', 3600); return true; }
+    gvOpen(m, k, o); lensBtn(); save(); return true;
+  }
+  if (gvOn()) { gvClose(); if (m === 'canvas') { lensBtn(); save(); return true; } }
+  return false;
+}
+function gvOpen(m, key, o) {
+  o = o || {}; closePop(); if (fanIsOn()) fanClose(); if (typeof slvOn === 'function' && slvOn()) slvClose();
+  GV.m = m; LV.m = m; GV.root = key; GV.stack = []; GV.kb = null; GV.came = !!o.boot; GV.list = !!o.list; GV.year = null; if (!o.boot) GV.c = LV.c === 'place' ? 'place' : 'side';
+  document.body.classList.add('vwgv'); document.body.classList.toggle('vwgen', m === 'gen'); document.body.classList.toggle('vwhouse', m === 'house');
+  gvRender(); trailRender(); gvScrollToFocus(); lensBtn();
+}
+function gvClose() {
+  gvStopPlay();
+  GV.m = null; LV.m = 'canvas'; GV.came = false;
+  document.body.classList.remove('vwgv', 'vwgen', 'vwhouse');
+  const g = $('#gv'); if (g) { g.hidden = true; g.querySelector('#gvBody').innerHTML = ''; }
+  drawEdges(); miniDraw(); trailRender(); lensBtn();
+}
+function gvBoot(l) {   /* from lensBoot: the tree came back with this view open */
+  GV.gu = l.gu || 3; GV.gd = l.gd || 2; GV.hk = l.hk === 0 ? 0 : 1; GV.c = l.c === 'place' ? 'place' : 'side';
+  const k = l.r && M.byKey.has(l.r) ? l.r : fanStartKey();
+  LV.c = 'side';   /* the Fan's own colouring is not this view's */
+  if (k && S.cards.size) gvOpen(l.m, k, { boot: true });
+}
+function gvOnTheme() { if (gvOn()) gvRender(true); }
+/* a person was chosen somewhere (a click here, the search, the panel): this view follows when they are not in it yet */
+function gvOnSelect() {
+  if (!gvOn()) return;
+  const one = S.sel.size === 1 ? M.byKey.get([...S.sel][0]) : null;
+  if (one && one.key !== GV.root && !gvHas(one.i)) { gvRecentre(one.key, true); return; }
+  gvMarkSelection();
+  gvBar();
+}
+function gvHas(i) { return GV.m === 'gen' ? !!(GV.model && GV.model.nodes.some(n => n.i === i)) : !!(GV.hh && GV.hh.members.some(x => x.i === i)); }
+
+/* ---------------- the frame: the bar, the note, the body ---------------- */
+function gvFrame() {
+  let el = $('#gv');
+  if (!el) {
+    el = document.createElement('section'); el.id = 'gv'; el.setAttribute('role', 'region');
+    el.innerHTML = '<div id="gvBar" role="toolbar"></div><div id="gvNote"></div><div id="gvBody" tabindex="-1"></div><div id="gvLive" class="gvlive" role="status" aria-live="polite"></div>';
+    document.body.appendChild(el);
+    el.addEventListener('click', gvClick);
+    el.addEventListener('keydown', gvKey);
+    el.addEventListener('input', e => { if (e.target.id === 'hvYear') hvYear(+e.target.value, false); });
+    el.addEventListener('change', e => { if (e.target.id === 'hvYear') hvYear(+e.target.value, true); });
+    el.addEventListener('toggle', e => { if (e.target.id === 'hvEvents') GV.evOpen = e.target.open; else if (e.target.classList && e.target.classList.contains('gvnd')) GV.noteOpen = e.target.open; }, true);
+    let rt = 0; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (gvOn() && GV.sized !== gvSize()) gvRender(true); }, 180); });
+  }
+  el.hidden = !gvOn(); el.setAttribute('aria-label', gvName() + ' of ' + (gvPerson() ? gvPerson().name : ''));
+  return el;
+}
+const gvSize = () => { const b = $('#gvBody'); return b ? b.clientWidth + 'x' + innerHeight + (S.phone ? 'p' : '') : ''; };
+function gvRender(keepScroll) {
+  if (!gvOn()) return;
+  const root = gvPerson(); const el = gvFrame(); if (!root) { el.querySelector('#gvBody').innerHTML = ''; return; }
+  GV.tk = lensTokens();
+  const b = $('#gvBody'), sx = b.scrollLeft, sy = b.scrollTop, had = document.activeElement && document.activeElement.closest && document.activeElement.closest('#gvBody') ? document.activeElement.dataset.gc || document.activeElement.dataset.hr : null;
+  if (GV.m === 'gen') genRender(); else hvRender();
+  gvBar();
+  GV.sized = gvSize();
+  if (keepScroll === true) { b.scrollLeft = sx; b.scrollTop = sy; }
+  if (had) { const e = b.querySelector(`[data-gc="${CSS.escape(had)}"],[data-hr="${CSS.escape(had)}"]`); if (e) e.focus({ preventScroll: true }); }
+}
+function gvScrollToFocus() {
+  const b = $('#gvBody'), f = b && b.querySelector('.gvcard.foc, .hvr.focus .hvl'); if (!f) return;
+  requestAnimationFrame(() => {
+    const r = f.getBoundingClientRect(), br = b.getBoundingClientRect();
+    b.scrollLeft = Math.max(0, b.scrollLeft + (GV.m === 'gen' ? r.left - br.left - (br.width - r.width) / 2 : 0));
+    b.scrollTop = Math.max(0, b.scrollTop + r.top - br.top - (br.height - r.height) / 2);
+  });
+}
+const gvTitle = () => { const p = gvPerson(); return p ? p.name : ''; };
+
+/* ---------------- the bar ---------------- */
+function gvBar() {
+  const bar = $('#gvBar'); if (!bar || !gvOn()) return;
+  const p = gvPerson(), seg = (k, on, t, tip) => `<button type="button" class="fbs${on ? ' on' : ''}" data-gv="${k}" aria-pressed="${on}" title="${esc(tip || t)}">${t}</button>`;
+  const step = (kind, label, val, lo, hi, what) => `<span class="fbg" role="group" aria-label="${label}"><button type="button" class="fbs" data-gv="${kind}-" aria-label="One generation fewer ${what}"${val <= lo ? ' disabled' : ''}>&minus;</button><span class="fbn" aria-live="polite"><span class="gvlg">${val} ${what === 'back' ? (val === 1 ? 'generation back' : 'generations back') : (val === 1 ? 'generation forward' : 'generations forward')}</span><span class="gvsm" aria-hidden="true">${val} ${what}</span></span><button type="button" class="fbs" data-gv="${kind}+" aria-label="One generation more ${what}"${val >= hi ? ' disabled' : ''}>+</button></span>`;
+  const sel = S.sel.size === 1 ? M.byKey.get([...S.sel][0]) : null, canCentre = sel && sel.key !== GV.root && gvHas(sel.i);
+  let mid;
+  if (GV.m === 'gen') {
+    const m = GV.model, c = m ? m.counts : null;
+    mid = `<span class="fbt"><b>Generations of ${esc(p ? p.name : '')}</b>${c ? `<small>${c.anc} ${c.anc === 1 ? 'ancestor' : 'ancestors'}, ${c.desc} ${c.desc === 1 ? 'descendant' : 'descendants'}${c.partners ? ', ' + c.partners + (c.partners === 1 ? ' partner' : ' partners') : ''} shown</small>` : ''}</span>`
+      + step('gu', 'Generations back', GV.gu, TCG.UP_MIN, TCG.UP_MAX, 'back') + step('gd', 'Generations forward', GV.gd, TCG.DOWN_MIN, TCG.DOWN_MAX, 'forward')
+      + `<span class="fbg" role="group" aria-label="Colour by">${seg('side', GV.c === 'side', 'By side', 'Colour the bar by side of the family: the father’s side blue, the mother’s side orange (as in the Fan)')}${seg('place', GV.c === 'place', 'By place', 'Colour the bar by the flag over the birthplace in the year of birth (as in the Fan)')}</span>`;
+  } else {
+    const h = GV.hh;
+    mid = `<span class="fbt"><b>Household of ${esc(p ? p.name : '')}</b>${h ? `<small>${h.members.length} ${h.members.length === 1 ? 'person' : 'people'}${h.notes.moreChildren || h.notes.moreSiblings ? ', some not shown' : ''}</small>` : ''}</span>`
+      + `<span class="fbg" role="group" aria-label="Who is in the household">${seg('kin', GV.hk === 1, '<span class="gvlg">Brothers and sisters</span><span class="gvsm">Siblings</span>', 'Show the brothers and sisters (and half-brothers and half-sisters) beside the parents')}</span>`
+      + hvYearBar();
+  }
+  bar.setAttribute('aria-label', gvName());
+  bar.innerHTML = (GV.came ? `<div class="fbcame" role="status"><span>Your view came back: ${gvName()} of ${esc(p ? p.name : 'this person')}.</span><button type="button" class="fbs" data-gv="canvas">Back to the canvas</button><button type="button" class="fbx" data-gv="ok" aria-label="Dismiss">${icon('x', '')}</button></div>` : '')
+    + `<div class="fbrow">${mid}`
+    + `<span class="fbg" role="group" aria-label="Show as">${seg('draw', !GV.list, 'Drawing', 'The picture')}${seg('list', GV.list, 'List', 'The same people as a list of words')}</span>`
+    + (canCentre ? `<button type="button" class="fbs" data-gv="centre" title="Make ${esc(sel.name)} the centre">Make ${esc(given1Of(sel))} the centre</button>` : '')
+    + (GV.stack.length ? `<button type="button" class="fbs" data-gv="back" title="Back to the previous centre">Back</button>` : '')
+    + `<button type="button" class="fbs fbc" data-gv="canvas" title="Close ${gvName()}: the canvas comes back as you left it (Esc)">Canvas</button></div>`;
+}
+function gvAct(a) {
+  if (a === 'ok') { GV.came = false; gvBar(); return; }
+  if (a === 'canvas') { lensSet('canvas'); return; }
+  if (a === 'gu-' || a === 'gu+') { const v = Math.max(TCG.UP_MIN, Math.min(TCG.UP_MAX, GV.gu + (a === 'gu+' ? 1 : -1))); if (v !== GV.gu) { GV.gu = v; gvRender(true); gvLive(GV.gu + (GV.gu === 1 ? ' generation' : ' generations') + ' back'); save(); } return; }
+  if (a === 'gd-' || a === 'gd+') { const v = Math.max(TCG.DOWN_MIN, Math.min(TCG.DOWN_MAX, GV.gd + (a === 'gd+' ? 1 : -1))); if (v !== GV.gd) { GV.gd = v; gvRender(true); gvLive(GV.gd + (GV.gd === 1 ? ' generation' : ' generations') + ' forward'); save(); } return; }
+  if (a === 'side' || a === 'place') { if (GV.c !== a) { GV.c = a; gvRender(true); save(); } return; }
+  if (a === 'draw' || a === 'list') { GV.list = a === 'list'; gvRender(); if (!GV.list) gvScrollToFocus(); else { const b = $('#gvBody'); if (b) b.scrollTop = 0; } return; }
+  if (a === 'kin') { GV.hk = GV.hk ? 0 : 1; gvRender(true); save(); return; }
+  if (a === 'centre') { const p = S.sel.size === 1 ? M.byKey.get([...S.sel][0]) : null; if (p) gvRecentre(p.key); return; }
+  if (a === 'back') { const k = GV.stack.pop(); if (k && M.byKey.has(k)) { GV.root = k; GV.kb = null; GV.year = null; gvRender(); gvScrollToFocus(); save(); } return; }
+  if (a === 'play') { hvPlay(); return; }
+}
+function gvLive(t) { const l = $('#gvLive'); if (l) { l.textContent = ''; setTimeout(() => { l.textContent = t; }, 30); } }
+function gvRecentre(key, quiet) {
+  if (!key || key === GV.root || !M.byKey.has(key)) return;
+  GV.stack.push(GV.root); if (GV.stack.length > 30) GV.stack.shift();
+  GV.root = key; GV.kb = null; GV.came = false; GV.year = null; gvStopPlay(); gvRender(); gvScrollToFocus(); save();
+  if (!quiet) toast(M.byKey.get(key).name + ' is the centre. Back returns to the last centre.', 2600);
+}
+
+/* ---------------- using it: clicks and keys ---------------- */
+function gvEnsure(p) { return S.cards.has(p.key) ? S.cards.get(p.key) : fanEnsureCard(p); }
+/* a click or Enter on a person: select them on the canvas (and bring them into view there); on the one already selected, make them the centre */
+function gvActivate(key) {
+  const p = M.byKey.get(key); if (!p) return;
+  if (S.sel.size === 1 && S.sel.has(key)) { if (key !== GV.root) gvRecentre(key); else toast(p.name + ' is already the centre.', 1800); return; }
+  const c = gvEnsure(p); select([key]);
+  if (c) { try { fit([c], { maxK: 1, ms: 1 }); } catch (e) { /* the canvas is behind this view: its view is only put right for when you go back */ } }
+}
+function gvClick(e) {
+  const a = e.target.closest('[data-gv]'); if (a && !a.disabled) { gvAct(a.dataset.gv); return; }
+  const fx = e.target.closest('[data-gfx]'); if (fx) { const p = M.byKey.get(fx.dataset.gfx); if (p) { gvEnsure(p); select([p.key]); S.tab = 'fix'; S.infoOpen = true; renderInfo(); syncButtons(); } return; }
+  const c = e.target.closest('[data-gc]'); if (c) { const id = c.dataset.gc; GV.kb = id; const n = GV.model && GV.model.byId.get(id); if (n) gvActivate(M.P[n.i].key); return; }
+  const l = e.target.closest('[data-gl]'); if (l) { GV.kb = l.dataset.gl; gvActivate(l.dataset.gk); return; }
+  const r = e.target.closest('[data-hr]'); if (r) { gvActivate(r.dataset.hk); return; }
+}
+function gvKey(e) {
+  const c = e.target.closest && e.target.closest('.gvcard'); if (!c || !GV.model) return;
+  const m = GV.model, id = c.dataset.gc, n = m.byId.get(id); if (!n) return;
+  const lane = m.lanes.find(l => l.g === n.lane), k = lane.nodes.indexOf(n);
+  let to = null;
+  if (e.key === 'ArrowDown') to = lane.nodes[k + 1];
+  else if (e.key === 'ArrowUp') to = lane.nodes[k - 1];
+  else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+    const want = n.lane + (e.key === 'ArrowLeft' ? -1 : 1), ln = m.lanes.find(l => l.g === want);
+    if (ln && ln.nodes.length) {
+      const linked = m.edges.filter(x => x.kind === 'parent' && (x.from === id || x.to === id)).map(x => x.from === id ? x.to : x.from).map(x => m.byId.get(x)).filter(x => x && x.lane === want);
+      to = linked.sort((a, b) => Math.abs(a.row - n.row) - Math.abs(b.row - n.row))[0] || ln.nodes.slice().sort((a, b) => Math.abs(a.row - n.row) - Math.abs(b.row - n.row))[0];
+    }
+  } else if (e.key === 'Home') to = lane.nodes[0]; else if (e.key === 'End') to = lane.nodes[lane.nodes.length - 1];
+  else return;
+  e.preventDefault(); if (!to) return;
+  const el = $('#gvBody').querySelector(`[data-gc="${CSS.escape(to.id)}"]`); if (!el) return;
+  $('#gvBody').querySelectorAll('.gvcard[tabindex="0"]').forEach(x => x.setAttribute('tabindex', '-1')); el.setAttribute('tabindex', '0'); el.focus(); GV.kb = to.id;
+}
+/* Esc closes the view, unless Esc was for a menu or a field */
+addEventListener('keydown', e => {
+  if (e.key !== 'Escape' || e.defaultPrevented || !gvOn()) return;
+  const lm = $('#lensMenu'); if (lm && lm.classList.contains('on')) return;
+  const t = e.target; if (t && t !== document.body && !(t.closest && t.closest('#gv'))) return;
+  if (t && t.tagName === 'INPUT' && t.type !== 'range') return;
+  lensSet('canvas');
+});
+function gvMarkSelection() {
+  const b = $('#gvBody'); if (!b) return;
+  b.querySelectorAll('.gvcard,.hvl').forEach(x => {
+    const key = x.dataset.gk, on = !!key && S.sel.has(key);
+    x.classList.toggle('sel', on); if (on) x.setAttribute('aria-pressed', 'true'); else x.removeAttribute('aria-pressed');
+  });
+  b.querySelectorAll('.gvli button').forEach(x => x.classList.toggle('on', S.sel.has(x.dataset.gk)));
+  b.querySelectorAll('.hvr').forEach(x => x.classList.toggle('sel', S.sel.has(x.dataset.hk)));
+}
+
+/* ---------------- Generations: drawing it ---------------- */
+function genPalette(m) {
+  const n = new Map();
+  m.nodes.forEach(x => { const fi = TCV.placeFlag(M, M.P[x.i], TC); if (fi >= 0) n.set(fi, (n.get(fi) || 0) + 1); });
+  return TCV.flagPalette([...n.entries()].map(([fi, c]) => ({ fi, svg: M.flags[fi][2], n: c })));
+}
+function genBar(node, tk) {
+  if (node.role === 'focus') return tk.ink;
+  if (GV.c === 'place') { const fi = TCV.placeFlag(M, M.P[node.i], TC), col = fi >= 0 && GV.pal ? GV.pal.get(fi) : null; return col ? TCG.barColour(col, tk) : TCG.sideBar({ role: 'none' }, tk); }
+  return TCG.sideBar(node, tk);
+}
+function genAria(n, lane) {
+  const p = M.P[n.i], who = p.living ? p.name + ' (living: name only)' : p.name + (TCV.lifeText(p) ? ', ' + TCV.lifeText(p) : '') + (!p.ghost && p.bp ? ', born ' + p.bp : '');
+  return (n.role === 'focus' ? 'Focus: ' : (n.kin ? n.kin.charAt(0).toUpperCase() + n.kin.slice(1) + ': ' : '')) + who + (n.dup > 1 ? '. ' + TCG.dupNote(n, n.lane) : '');
+}
+function genRender() {
+  const root = gvPerson(), body = $('#gvBody'); const frame = $('#gv'); frame.hidden = false;
+  const m = TCG.model(M, root.i, { up: GV.gu, down: GV.gd }); GV.model = m; GV.hh = null;
+  GV.pal = GV.c === 'place' ? genPalette(m) : null;
+  const tk = GV.tk, avail = Math.max(280, body.clientWidth || innerWidth), gap = S.phone ? 26 : 38, n = m.lanes.length;
+  const cardW = Math.max(S.phone ? 150 : 150, Math.min(204, Math.floor((avail - TCG.PAD * 2 + gap) / n - gap)));
+  const geo = TCG.geometry(m, { cardW, gapX: gap, headH: cardW < 176 && m.lanes.some(l => l.name.length > 13) ? TCG.HEAD_H2 : TCG.HEAD_H }); GV.geo = geo;
+  genNote(m);
+  if (GV.list) { body.className = 'gvlistbody'; body.innerHTML = genListHtml(root, m); return; }
+  body.className = 'gvdraw';
+  const sel = id => S.sel.has(M.P[m.byId.get(id).i].key);
+  /* lane stripes, headers */
+  let stripes = '', heads = '';
+  m.lanes.forEach((l, k) => {
+    const x = TCG.PAD + k * geo.laneW;
+    stripes += `<div class="gvlbg${l.g === 0 ? ' focus' : ''}" style="left:${x - gap / 2}px;width:${geo.cw + gap}px" aria-hidden="true"></div>`;
+    heads += `<div class="gvh${l.g === 0 ? ' focus' : ''}" style="left:${x}px;width:${geo.cw}px"><b>${esc(l.name)}</b>${l.g === 0 ? '<span>the person and partners</span>' : `<span title="Each person in this lane is about ${esc(l.pctText)} related to ${esc(root.name)}, on average">${esc(l.pctText)} related</span>`}</div>`;
+  });
+  /* faint horizontal guides, one a row */
+  let guides = ''; for (let r = 0; r < m.rows + 0.001; r++) { const y = geo.headH + TCG.PAD + r * geo.rowH + geo.ch / 2; if (r + 0.5 > m.rows + 0.01) break; guides += `<line x1="0" x2="${geo.width}" y1="${y}" y2="${y}"/>`; }
+  /* lines */
+  let paths = '', spouse = '';
+  const cols = new Map(); m.nodes.forEach(x => cols.set(x.id, genBar(x, tk)));
+  m.edges.forEach(e => {
+    if (e.kind === 'spouse') return;
+    const a = geo.pos.get(e.from), b = geo.pos.get(e.to); if (!a || !b) return;
+    const from = m.byId.get(e.from), col = TCG.lineColour(from, tk), lv = TC.levelOfGrade(e.grade);
+    paths += `<path class="gvln${lv === 'notproven' ? ' np' : ''}" style="stroke:${col}" d="${TCG.elbow(a, b)}"/>`;
+  });
+  /* the partner chain: a dotted line from the person down to each partner */
+  const fp = geo.pos.get('f0'); let prev = fp;
+  m.partners.forEach(pt => { const q = geo.pos.get(pt.id); spouse += `<path class="gvsp" d="M${fp.x + 22} ${prev.y + prev.h} V${q.y}"/>`; prev = q; });
+  /* the cards */
+  let lanes = '';
+  m.lanes.forEach(l => {
+    lanes += `<ol class="gvl" aria-label="${esc(l.label)}">` + l.nodes.map(x => {
+      const p = M.P[x.i], r = geo.pos.get(x.id), hid = p.living || p.ghost, bar = cols.get(x.id), fill = TCG.cardFill(bar, tk);
+      const bpl = !hid && p.bp ? TC.placeAt(M, p, p.bp, p.by) : null, fl = bpl ? flagHTML(bpl, p.by, flagTip(bpl, p.by, 'Born at')) : '';
+      const life = TCV.lifeText(p), second = p.living ? 'living: name only' : p.ghost ? 'named only' : life || 'no dates recorded';
+      const key = p.key, on = sel(x.id), kbId = GV.kb && m.byId.has(GV.kb) ? GV.kb : 'f0', tab = x.id === kbId ? 0 : -1;
+      const fx = fixOf(p), cx = !hid && p.cx ? cxMark(p, M.archives[p.a]) : '';
+      const title = genAria(x, l) + (x.route ? ' (' + x.route + ')' : '') + '. ' + (x.lane ? l.label : 'Focus lane');
+      return `<li class="gvli" style="left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px">`
+        + `<button type="button" class="gvcard${x.role === 'focus' ? ' foc' : ''}${on ? ' sel' : ''}${p.ghost ? ' ghost' : ''}${p.standin ? ' standin' : ''}" data-gc="${x.id}" data-gk="${esc(key)}" tabindex="${tab}" style="--gc:${bar};--gf:${fill.fill};--gi:${fill.ink}" title="${esc(title)}" aria-label="${esc(genAria(x, l))}"${on ? ' aria-pressed="true"' : ''}>`
+        + `<span class="gvn">${esc(p.name)}</span><span class="gvy">${esc(second)}</span>`
+        + `<span class="gvp">${fl}${!hid && p.bp ? esc(p.bp) : (hid ? '' : '')}</span></button>`
+        + (x.dup > 1 ? `<span class="gvdup" title="${esc(TCG.dupNote(x, x.lane))}" aria-hidden="true">&times;${x.dup}</span>` : '')
+        + (x.more ? `<span class="gvmore" title="More ${x.lane < 0 ? 'ancestors' : 'descendants'} are recorded beyond the lanes shown: raise the generation limit" aria-hidden="true">${x.lane < 0 ? '&lsaquo;' : '&rsaquo;'}</span>` : '')
+        + (fx ? `<button type="button" class="gvfx" data-gfx="${esc(key)}" title="${fx.length} on your fix list for ${esc(p.name)}" aria-label="${fx.length} on the fix list for ${esc(p.name)}">!</button>` : '') + (cx ? `<span class="gvcx">${cx}</span>` : '') + `</li>`;
+    }).join('') + `</ol>`;
+  });
+  const kinds = m.counts.hiddenBack + m.counts.hiddenForward;
+  body.innerHTML = `<div class="gvc" style="width:${geo.width}px;height:${geo.height}px">${stripes}<div class="gvhead" style="width:${geo.width}px;height:${geo.headH}px">${heads}</div>`
+    + `<svg class="gvsvg" width="${geo.width}" height="${geo.height}" aria-hidden="true"><g class="gvg">${guides}</g><g>${paths}</g><g>${spouse}</g></svg>${lanes}</div>`
+    + `<p class="gvfoot">${m.counts.anc + m.counts.desc + 1 + m.counts.partners} people. Only the direct line is drawn, so a brother, an aunt or a cousin is not in a lane.${kinds ? ' A ' + '&lsaquo;' + ' or ' + '&rsaquo;' + ' on a card says more of the line is recorded beyond the lanes shown.' : ''}</p>`;
+}
+/* the key under the bar: what the colours and the lines mean, and how "related" is counted */
+function genNote(m) {
+  const n = $('#gvNote'); if (!n) return;
+  const tk = GV.tk, sw = (c, t) => `<span class="fli"><i style="background:${c}"></i>${t}</span>`;
+  let key;
+  if (GV.c === 'side') key = sw(TCG.sideBar({ side: 'f' }, tk), 'Father’s side') + sw(TCG.sideBar({ side: 'm' }, tk), 'Mother’s side') + sw(TCG.sideBar({ role: 'x' }, tk), 'Partners and descendants') + sw(tk.ink, 'The centre');
+  else {
+    const by = new Map(); m.nodes.forEach(x => { const p = M.P[x.i]; if (x.role === 'focus' || p.living || p.ghost || !p.bp) return; const pl = TC.placeAt(M, p, p.bp, p.by); if (pl && pl.fi >= 0) { const r = by.get(pl.fi) || { n: 0, pl, p }; r.n++; by.set(pl.fi, r); } });
+    const rows = [...by.entries()].sort((a, b) => b[1].n - a[1].n);
+    key = rows.slice(0, 6).map(([fi, r]) => `<span class="fli"><i style="background:${genBar({ role: 'x', i: r.p.i }, tk)}"></i>${flagHTML(r.pl, r.p.by, flagTip(r.pl, r.p.by, 'Born at'))}${esc(r.pl.era ? r.pl.era.label : r.pl.cn || r.pl.name)} <b>${r.n}</b></span>`).join('') + (rows.length > 6 ? `<span class="fli">+${rows.length - 6} more flags</span>` : '') + `<span class="fli"><i class="fnk"></i>no flag known</span>`;
+  }
+  n.className = 'gvnote';
+  n.innerHTML = gvNoteOpen() + `<div class="gvkey" role="group" aria-label="What the colours and lines mean">${key}<span class="fli"><svg width="30" height="10" aria-hidden="true"><path d="M0 5H30" class="gvk1"/></svg>parent and child</span><span class="fli"><svg width="30" height="10" aria-hidden="true"><path d="M0 5H30" class="gvk1 np"/></svg>link not proven</span><span class="fli"><svg width="30" height="10" aria-hidden="true"><path d="M0 5H30" class="gvk2"/></svg>partner</span></div>`
+    + `<details class="gvwhy"><summary>How is “related” counted?</summary><p>A person in a straight line above or below ${esc(gvTitle())} is on average 50% related if a parent or child, 25% for a grandparent or grandchild, 12.5% for a great-grandparent, and half again for each generation further. It is the share of genes expected by descent, so a real DNA match can be a little more or less. Only the direct line is in the lanes, because the figure is wrong for anyone else in the same row: an uncle or aunt is 25%, a half-brother 25% and a full brother 50%, none of them a grandparent. When the family married back into itself one ancestor stands in a lane twice and the card says so (2 × 25% = 50%).</p></details></details>`;
+}
+/* the key sits in a fold: open on a wide screen, closed on a phone, where the picture needs the room */
+const gvNoteOpen = () => `<details class="gvnd"${(GV.noteOpen == null ? !S.phone : GV.noteOpen) ? ' open' : ''}><summary>Key</summary>`;
+/* the same lanes as lists of words */
+function genListHtml(root, m) {
+  const L = TCG.list(M, m), tk = GV.tk;
+  return `<div class="gvlistin"><h3>${esc(root.name)}</h3>` + L.map(l => `<section class="gvls" aria-label="${esc(l.label)}"><h4>${esc(l.name)} ${l.pctText ? `<small>${esc(l.pctText)} related</small>` : '<small>the person and partners</small>'}</h4>`
+    + (l.people.length ? '<ol class="gvli2">' + l.people.map(x => {
+      const n = m.byId.get(x.id), bar = genBar(n, tk), p = M.P[x.i];
+      return `<li class="gvli"><button type="button" data-gl="${x.id}" data-gk="${esc(p.key)}" class="${S.sel.has(p.key) ? 'on' : ''}" style="--fc:${bar}"><span class="flk">${esc(x.kin || 'the centre')}${x.route ? ` <small>${esc(x.route)}</small>` : ''}</span><b>${esc(x.name)}</b>${x.life ? ' <span class="fly">' + esc(x.life) + '</span>' : ''}${x.place ? ' <span class="flp">' + esc(x.place) + '</span>' : ''}${x.living ? ' <span class="flp">living: name only</span>' : ''}${x.dup > 1 ? ` <span class="flp">${esc(TCG.dupNote(n, n.lane))}</span>` : ''}${x.more ? ' <span class="flp">more recorded beyond these lanes</span>' : ''}</button></li>`;
+    }).join('') + '</ol>' : '<p class="gvnone">Nobody recorded.</p>') + '</section>').join('') + '</div>';
+}
+
+/* householdview.js — the View menu's "Household". Loaded after generationsview.js, whose frame (the bar, the key, the scrolling body, Esc, the choice kept in the tree's record) it shares.
+ *
+ * The household of the selected person is a timeline: one row each for their parents, brothers and sisters (a choice), themselves, their partners and their children, each a bar from birth to death. Move the
+ * year (the slider, or Play) and every row says how old that person was, or that they were not yet born, or had died; the line above the chart says who was alive. The pure parts (the members, the bars, the union with
+ * a partner, who was alive, the events, colour) are in household.js and tested there.
+ *
+ * Painted Lines drew this as a canvas animation: a ribbon the width of the household, a caption sliding past. Here every fact is text as well as shape: the rows are buttons, the year is a slider, the events are a list.
+ * A stretch drawn taller on a partner's bar is when they were together (the marriage year when it is recorded; dashed when it is only inferred from the first child). A bar that fades has no recorded death. A living
+ * person has no bar at all, the name and the family only. Nothing is stored or sent here beyond the one small field of the tree's record that viewsui.js keeps. */
+const TCH = window.TCH;
+
+function hvYearBar() {
+  const s = GV.hh && GV.hh.span; if (!s || GV.list) return '';
+  const y = Math.max(s.t0, Math.min(s.t1, GV.year == null ? s.t0 : GV.year));
+  return `<span class="fbg hvyr" role="group" aria-label="Year">${gvReduced() ? '' : `<button type="button" class="fbs" id="hvPlay" data-gv="play" aria-pressed="${!!GV.playT}" title="Play through the years, or move the slider">${GV.playT ? 'Pause' : 'Play'}</button>`}`
+    + `<label class="hvlab" for="hvYear"><span class="gvlg">Year </span><output id="hvOut" for="hvYear">${y}</output></label><input id="hvYear" type="range" min="${s.t0}" max="${s.t1}" step="1" value="${y}" aria-valuetext="${y}"></span>`;
+}
+function hvTrack(m, s, ppy) { return m.bar ? { l: (m.start - s.t0) * ppy, w: Math.max(3, (m.drawEnd - m.start) * ppy) } : null; }
+function hvAria(m) {
+  const p = M.P[m.i], hid = p.living ? ' (living: name only)' : '';
+  return (m.kin ? m.kin.charAt(0).toUpperCase() + m.kin.slice(1) + ': ' : 'The person: ') + m.name + hid + (TCV.lifeText(p) ? ', ' + TCV.lifeText(p) : '') + (!p.living && !p.ghost && p.bp ? ', born ' + p.bp : '');
+}
+function hvRender() {
+  const root = gvPerson(), body = $('#gvBody'); $('#gv').hidden = false; GV.model = null;
+  const mod = TCH.members(M, root.i, { kin: !!GV.hk, now: new Date().getFullYear() });
+  mod.span = TCH.span(mod); mod.events = TCH.events(M, mod); GV.hh = mod;
+  if (mod.span) { if (GV.year == null || GV.year < mod.span.t0 || GV.year > mod.span.t1) GV.year = TCH.busiestYear(mod); }
+  hvNote(mod);
+  if (GV.list || !mod.span) { body.className = 'gvlistbody'; body.innerHTML = (!mod.span && !GV.list ? '<p class="gvnone gvpad">No dates can be drawn: the dates of living people are not shown, and nobody else here has a birth year recorded. Here are the people.</p>' : '') + hvListHtml(root, mod); return; }
+  const s = mod.span, tk = GV.tk, labW = S.phone ? 132 : 232, avail = Math.max(280, body.clientWidth || innerWidth), span = s.t1 - s.t0;
+  const ppy = Math.max(S.phone ? 4 : 5, Math.min(14, Math.floor((avail - labW - 30) / span))), trackW = span * ppy, ticks = TCH.ticks(s.t0, s.t1);
+  const step = ticks.length > 1 ? ticks[1] - ticks[0] : 10, first = ticks.length ? ticks[0] : s.t0;
+  const col = new Map(); mod.members.forEach(m => col.set(m.id, TCH.barColour(m, tk)));
+  const kidsOf = (pt) => mod.members.filter(k => k.group === 'children' && k.bar && (pt === null || (() => { const c = M.P[k.i]; return c.f === pt || c.m === pt; })()));
+  let rows = '', group = '';
+  mod.members.forEach(m => {
+    if (m.group !== group) { group = m.group; const g = TCH.GROUPS.find(x => x[0] === group); if (g && g[1]) rows += `<li class="hvg"><h3>${esc(g[1])}</h3></li>`; }
+    const p = M.P[m.i], t = hvTrack(m, s, ppy), c = col.get(m.id), key = p.key, on = S.sel.has(key), life = TCV.lifeText(p);
+    const sub = [m.kin || (m.group === 'focus' ? 'the person' : ''), p.living ? 'living: name only' : p.ghost ? 'named only' : life].filter(Boolean).join(' · ');
+    let track = '';
+    if (t) {
+      const fade = m.openEnd ? ` style="left:${t.l}px;width:${t.w}px;--bc:${c}" ` : ` style="left:${t.l}px;width:${t.w}px;--bc:${c}" `;
+      track += `<i class="hvb${m.openEnd ? ' open' : ''}${m.startEst || m.endEst ? ' est' : ''}"${fade}></i>`;
+      if (m.union) {
+        const u = m.union, u0 = Math.max(s.t0, u.from), u1 = Math.min(m.drawEnd, u.to == null ? m.drawEnd : u.to);
+        if (u1 > u0) track += `<i class="hvu${u.inferred ? ' inf' : ''}${u.to == null ? ' open' : ''}" style="left:${(u0 - s.t0) * ppy}px;width:${Math.max(3, (u1 - u0) * ppy)}px;--bc:${c}" title="${esc(u.inferred ? 'Together by ' + u.from + ' (inferred from the first child)' : 'Together from ' + (u.est ? '~' : '') + u.from)}"></i>`;
+      }
+      if (m.group === 'focus' || m.group === 'partners') kidsOf(m.group === 'focus' ? null : p.i).forEach(k => { const kc = col.get(k.id); track += `<b class="hvd" style="left:${(k.start - s.t0) * ppy - 5}px;--bc:${kc}" title="${esc(k.name.split(' ')[0] + ' is born in ' + (k.startEst ? '~' : '') + k.start)}"></b>`; });
+    } else track = `<span class="hvnb">${p.living ? 'no bar: the dates of a living person are not shown' : 'no birth year recorded'}</span>`;
+    rows += `<li class="hvr${m.group === 'focus' ? ' focus' : ''}${on ? ' sel' : ''}" data-hk="${esc(key)}" data-s="${m.start == null ? '' : m.start}" data-e="${m.end == null ? '' : m.end}" data-de="${m.drawEnd == null ? '' : m.drawEnd}" data-id="${m.id}">`
+      + `<button type="button" class="hvl${on ? ' sel' : ''}" data-hr="${m.id}" data-hk="${esc(key)}" data-gk="${esc(key)}" style="--bc:${c}" title="${esc(hvAria(m))}" aria-label="${esc(hvAria(m))}"${on ? ' aria-pressed="true"' : ''}><span class="hvn">${esc(m.name)}</span><span class="hvk">${esc(sub)}</span><span class="hva"></span></button>`
+      + `<div class="hvt" style="width:${trackW}px">${track}</div></li>`;
+  });
+  const axis = ticks.map(y => { const x = (y - s.t0) * ppy; return `<span style="left:${Math.max(x, 16)}px">${y}</span>`; }).join('');
+  body.className = 'gvdraw hvdraw';
+  body.innerHTML = `<div class="hvc" style="--lab:${labW}px;--tw:${trackW}px;--gs:${step * ppy}px;--go:${(first - s.t0) * ppy}px" data-t0="${s.t0}" data-ppy="${ppy}">`
+    + `<div class="hvax"><span class="hvcorner">${s.cut ? 'Years before ' + s.t0 + ' are cut' : 'Year'}</span><div class="hvaxt" style="width:${trackW}px" aria-hidden="true">${axis}<em class="hvbub" id="hvBub"></em></div></div>`
+    + `<ul class="hvrows">${rows}</ul><div class="hvline" id="hvLine" aria-hidden="true"></div></div>`
+    + `<details class="gvwhy hvev" id="hvEvents"${GV.evOpen ? ' open' : ''}><summary>What happened, in order (as text)</summary>${hvEventsHtml(mod)}</details>`
+    + `<p class="gvfoot">${mod.notes.moreSiblings ? mod.notes.moreSiblings + ' more brothers and sisters are not drawn. ' : ''}${mod.notes.moreChildren ? mod.notes.moreChildren + ' more children are not drawn. ' : ''}Years are as recorded; a “~” is an estimate.</p>`;
+  hvYear(GV.year, false, true);
+}
+/* the year moved: the line, the numbers on every row, the sentence */
+function hvYear(y, commit, quiet) {
+  const mod = GV.hh, c = $('#gvBody .hvc'); if (!mod || !mod.span) return;
+  y = Math.max(mod.span.t0, Math.min(mod.span.t1, Math.round(y))); GV.year = y;
+  const a = TCH.at(mod, y), ppy = mod.span ? +(c ? c.dataset.ppy : 6) : 6;
+  if (c) {
+    const x = (y - mod.span.t0) * ppy, ln = $('#hvLine'), bub = $('#hvBub'); if (ln) ln.style.left = `calc(var(--lab) + ${x}px)`; if (bub) { bub.textContent = y; bub.style.left = x + 'px'; }
+    c.querySelectorAll('.hvr').forEach(r => {
+      const m = mod.members.find(q => q.id === r.dataset.id); if (!m) return;
+      const st = r.dataset.s === '' ? null : +r.dataset.s, en = r.dataset.e === '' ? null : +r.dataset.e, de = r.dataset.de === '' ? null : +r.dataset.de, ag = r.querySelector('.hva');
+      let cls = 'nobar', txt = '';
+      if (st != null) {
+        if (y < st) { cls = 'out'; txt = 'not yet born'; }
+        else if (en != null && y > en) { cls = 'out'; txt = 'died in ' + (m.endEst ? '~' : '') + en; }
+        else if (en == null && de != null && y > de) { cls = 'out'; txt = 'no record after this'; }
+        else { cls = en == null ? 'maybe' : 'in'; txt = 'aged ' + (m.startEst ? '~' : '') + (y - st) + (en == null ? ', no death recorded' : ''); }
+      }
+      r.classList.remove('in', 'maybe', 'out', 'nobar'); r.classList.add(cls); ag.textContent = txt;
+    });
+  }
+  const out = $('#hvOut'); if (out) out.textContent = y; const rg = $('#hvYear'); if (rg) { if (+rg.value !== y) rg.value = y; rg.setAttribute('aria-valuetext', a.text); }
+  const sum = $('#hvSum'); if (sum) sum.textContent = a.text;
+  if (commit) gvLive(a.text);
+}
+function hvPlay() {
+  const mod = GV.hh; if (!mod || !mod.span || gvReduced()) return;
+  if (GV.playT) { gvStopPlay(); return; }
+  if (GV.year >= mod.span.t1) GV.year = mod.span.t0;
+  GV.playT = setInterval(() => { if (!gvOn() || GV.year >= mod.span.t1) { gvStopPlay(); const sm = $('#hvSum'); if (sm) gvLive(sm.textContent); return; } hvYear(GV.year + 1, false); }, 90);
+  const b = $('#hvPlay'); if (b) { b.textContent = 'Pause'; b.setAttribute('aria-pressed', 'true'); }
+}
+function gvStopPlay() { if (GV.playT) { clearInterval(GV.playT); GV.playT = 0; } const b = $('#hvPlay'); if (b) { b.textContent = 'Play'; b.setAttribute('aria-pressed', 'false'); } }
+
+/* the key under the bar, and the sentence for the year */
+function hvNote(mod) {
+  const n = $('#gvNote'); if (!n) return; const tk = GV.tk, h = mod;
+  const sw = (c, t) => `<span class="fli"><i style="background:${c}"></i>${t}</span>`;
+  const fa = h.members.find(m => m.group === 'parents' && m.side === 'f'), mo = h.members.find(m => m.group === 'parents' && m.side === 'm');
+  n.className = 'gvnote';
+  n.innerHTML = gvNoteOpen() + `<div class="gvkey" role="group" aria-label="What the colours and shapes mean">`
+    + (fa ? sw(TCH.barColour(fa, tk), 'Father') : '') + (mo ? sw(TCH.barColour(mo, tk), 'Mother') : '') + sw(tk.ink, 'The person') + sw(TCG.neutralBar(tk), 'Brothers and sisters, partners, children')
+    + `<span class="fli"><i class="hvk1"></i>together (taller; dashed = inferred)</span><span class="fli"><i class="hvk2"></i>fades: no death recorded</span><span class="fli"><i class="hvk3"></i>a child is born</span></div></details>`
+    + (h.span && !GV.list ? `<p class="hvsum" id="hvSum"></p>` : '');
+}
+
+/* ---------------- the same household as words ---------------- */
+function hvEventsHtml(mod) {
+  if (!mod.events.length) return '<p class="gvnone">No dated events to list.</p>';
+  return '<ol class="hvevl">' + mod.events.map(e => `<li><b>${esc(e.when)}</b> ${esc(e.text)}${e.inferred ? ' <em>(inferred)</em>' : ''}</li>`).join('') + '</ol>';
+}
+function hvListHtml(root, mod) {
+  const by = {}; mod.members.forEach(m => (by[m.group] = by[m.group] || []).push(m));
+  const li = m => {
+    const p = M.P[m.i], life = TCV.lifeText(p), bar = TCH.barColour(m, GV.tk);
+    const un = m.union ? (m.union.inferred ? 'together by ' + m.union.from + ' (inferred from the first child)' : 'together from ' + (m.union.est ? '~' : '') + m.union.from) : '';
+    return `<li class="gvli"><button type="button" data-hr="${m.id}" data-hk="${esc(p.key)}" data-gk="${esc(p.key)}" class="${S.sel.has(p.key) ? 'on' : ''}" style="--fc:${bar}"><span class="flk">${esc(m.kin || 'the person')}</span><b>${esc(m.name)}</b>${life ? ' <span class="fly">' + esc(life) + '</span>' : ''}${!p.living && !p.ghost && p.bp ? ' <span class="flp">' + esc(p.bp) + '</span>' : ''}${p.living ? ' <span class="flp">living: name only</span>' : ''}${m.openEnd ? ' <span class="flp">no death recorded</span>' : ''}${un ? ' <span class="flp">' + esc(un) + '</span>' : ''}</button></li>`;
+  };
+  return `<div class="gvlistin"><h3>${esc(root.name)}</h3>` + TCH.GROUPS.filter(g => by[g[0]]).map(g => `<section class="gvls" aria-label="${esc(g[1] || 'The person')}"><h4>${esc(g[1] || 'The person')}</h4><ol class="gvli2">${by[g[0]].map(li).join('')}</ol></section>`).join('')
+    + (mod.notes.moreSiblings || mod.notes.moreChildren ? `<p class="gvnone">${mod.notes.moreSiblings ? mod.notes.moreSiblings + ' more brothers and sisters, ' : ''}${mod.notes.moreChildren ? mod.notes.moreChildren + ' more children ' : ''}not listed.</p>` : '')
+    + `<section class="gvls"><h4>What happened, in order</h4>${hvEventsHtml(mod)}</section></div>`;
+}
 
 /* findui.js — Find: the search. It lives in two places that share one query:
  *   - the FIND TAB, the first tab of the right-hand pane: the box, one button for the archives (a small menu of ticks), the people brought on recently, and the results, which can

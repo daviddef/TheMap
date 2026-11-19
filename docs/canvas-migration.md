@@ -47,7 +47,7 @@ Phase: 0 inventory, 1 Your file, 2 Settings, 3 Tree lenses, 4 Places and the fix
 | View | Verdict | Where it goes | Phase | Size | Dep. |
 |---|---|---|---|---|---|
 | hourglass | Move the value | **Done as the Trail band** (see below): the selected person's direct line as cards along the very bottom, with their places. The descendants half is not built | 3 | M | lens frame |
-| fan | Move the value | **Done** as a View (the View button: Canvas, Fan; Generations is listed as "soon") | 3 | M | lens frame |
+| fan | Move the value | **Done** as a View (the View button: Canvas, Fan, Surnames, Lifespans, Generations, Household) | 3 | M | lens frame |
 | close (close family) | Probably there | The canvas's Bloodline menu draws a person's blood relatives; confirm side by side, then retire | 3 | S | none |
 | map (whole-tree map) | Already there | The canvas's whole-tree look; retire | 3 | S | none |
 | atlasmap | Move | A lens: the selection's birthplaces on the Atlas map | 3 | M | lens frame |
@@ -61,8 +61,8 @@ Phase: 0 inventory, 1 Your file, 2 Settings, 3 Tree lenses, 4 Places and the fix
 
 **Open items for the twelve views (R&R keeps them until each is in the canvas or retired).** Status on 19 Nov 2026, from David:
 
-- **Moved into the canvas View menu (19 Nov 2026):** Surnames and Lifespans (timeline). Per-tree record `vw`: `m` may be `surnames` or `lifespans`, with the short settings `xs` / `xl`. Not ported: R&R's per-view zoom and pan, any tree editing, the surname-variants write path.
-- **Still to be built in the canvas:** Generations, Household, Night sky, Place lanes.
+- **Moved into the canvas View menu (19 Nov 2026):** Surnames, Lifespans (timeline), Generations and Household. Per-tree record `vw`: `m` may be `surnames`, `lifespans`, `gen` or `house`, with the short settings `xs` / `xl` and, for Generations and Household, `gu` (1-5), `gd` (1-4) and `hk` (0), each kept only when it differs from the start. Not ported: R&R's per-view zoom and pan, any tree editing, the surname-variants write path.
+- **Still to be built in the canvas:** Night sky, Place lanes.
 - **Deprecated, not moving:** Where they lived, Eras, Kinship.
 - **Undecided:** Whole tree, Close family, Atlas map, Movements, Ink ledger, Hourglass descendants (the Trail band has the direct line only).
 - **Already in the canvas:** Fan (View button), the hourglass's direct line (Trail band).
@@ -118,7 +118,7 @@ Effect on the plan: the "lens frame" dependency shrinks from a new component to 
 - **View button** beside Look (standalone only; `/roots/`'s embedded canvas is unchanged). Canvas (free, as before) | Fan | Generations (listed greyed "soon"; the swimlane lens is next). The choice is kept per tree as one more field of the record, `vw` (`m` canvas or fan, `g` generations 3 to 7, `c` side or place colouring, `t` the strip's size, and `r`, the Fan's centre, as the same opaque hash every person gets). Nothing is written when every choice is as it starts. It passes the six-word copy's cleaning (`cleanCanvasItem`) and is listed on the Backup page. A restored Fan says "Your view came back" with a way out.
 - **Trail band** (the hourglass's direct-line strip): the bottom-most thing on the canvas, collapsible to a one-line handle ("Direct line, name"), its size kept in `vw.t`. The father's or mother's line (the longer one by default), a card a generation (GEN, place as the headline, year, given names, the birth flag), solid red links where the family moved and faint ones where it did not, the focus person's places fanning out to dots with flag and event count (a single event is dotted). The search dock, the little map, the Search button and the menus that open upward are lifted by its height (`--trail-h`, included in `--dock-h`). Hidden in Compare, the Fan and the Names look, and on a phone while the side panel is open. Living people show the name and family only.
 - **Fan**: a lens drawn inside the canvas's own world, so pan, zoom and Fit are the canvas's. Colour by side (paternal blue, maternal orange, lightness stepping by generation) or by the flag over the birthplace; text never upside down, outer rings surname plus initial, details in a tooltip and on keyboard focus; a text list alternative; contrast tested in every look (`test/test-fan-contrast.js` in the canvas source).
-- **Not built**: Generations lens (swimlanes), the descendants half of the hourglass, and any change to `/roots/`.
+- **Not built**: the descendants half of the hourglass, and any change to `/roots/`.
 
 ## Decisions needed from David
 

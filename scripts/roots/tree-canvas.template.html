@@ -9089,8 +9089,11 @@ function hvListHtml(root, mod) {
         + `<circle class="sksel" r="${f1(r + 6)}" fill="none"/></g>`;
     });
     s += '<circle id="skFocus" class="skring" r="14" cx="0" cy="0"/></svg>';
+    /* the readout under the sky changes height as the focus moves, which resizes this pane and redraws it: keep the keyboard on the same star */
+    const hadK = pane.contains(document.activeElement) && document.activeElement.closest && document.activeElement.closest('.sks'), kk = hadK && hadK.dataset.k;
     pane.innerHTML = s; SKY.size = pane.clientWidth + 'x' + pane.clientHeight;
     skyYear(); skyFoot(); skyRead();
+    if (kk) { const n = pane.querySelector(`.sks[data-k="${CSS.escape(kk)}"]`); if (n) n.focus({ preventScroll: true }); }
   }
   const skyFlagCol = t => { if (!SKY.pal) return null; const fi = TCV.placeFlag(M, M.P[t.i], TC); return fi >= 0 ? SKY.pal.get(fi) : null; };
   function skyPalette(m) {

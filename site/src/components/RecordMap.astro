@@ -8002,7 +8002,7 @@ window.addEventListener("load", async function () {
     if (!MULTI) h.push(areaShapeRows(R));
     h.push('<p class="ra-area-sum"><b>' + nfl(R.places.length) + "</b> " + T(R.places.length === 1 ? "catalogued place" : "catalogued places") + " · <b>" + nfl(vtot) + "</b> " + T(vtot === 1 ? "volume" : "volumes") +
            " · <b>" + nfl(R.arch.length) + "</b> " + T(R.arch.length === 1 ? "archive" : "archives") + ". " + T("Colours show") + " <b>" + esc(line || T("your research")) + "</b>.</p>");
-    h.push('<div class="ra-area-tally">' + ["done", "busy", "list", "none"].map(function (k) {
+    h.push('<div class="ra-area-tally"><span class="ra-area-tl">Places:</span>' + ["done", "busy", "list", "none"].map(function (k) {
       return '<span><i style="background:' + RC_COL[k] + '"></i>' + RC_LAB[k] + " <b>" + nfl(groups[k].length) + "</b></span>";
     }).join("") + "</div>");
     if (!R.places.length) h.push('<p class="at-sub">No catalogued place lies inside this area. Country-wide sources still apply: open a place or a country for them.</p>');
@@ -8013,7 +8013,7 @@ window.addEventListener("load", async function () {
     ["busy", "list", "none", "done"].forEach(function (k) {
       var g = groups[k]; if (!g.length) return;
       g.sort(function (a, b) { return a.n.localeCompare(b.n); });
-      h.push('<details class="ra-area-g" ' + (k !== "none" || g.length <= 40 ? "open" : "") + '><summary><i style="background:' + RC_COL[k] + '"></i>' + RC_LAB[k] + " <b>" + nfl(g.length) + "</b></summary><ul>");
+      h.push('<details class="ra-area-g" ' + (k !== "none" || g.length <= 200 ? "open" : "") + '><summary><i style="background:' + RC_COL[k] + '"></i>' + RC_LAB[k] + " <b>" + nfl(g.length) + "</b></summary><ul>");
       g.slice(0, 400).forEach(function (p) {
         var nv = (p.v || 0) || (p.c || 0);
         h.push('<li' + (nv >= 10 ? ' class="ra-area-big"' : "") + '><button type="button" class="ra-area-p" data-open="' + esc(p.i) + '"><i' + (k === "busy" ? ' class="pz"' : "") + ' style="background:' + RC_COL[k] + '"></i><span>' + esc(p.n) + "</span>" +
@@ -8027,7 +8027,7 @@ window.addEventListener("load", async function () {
       h.push('<details class="ra-area-g" open><summary><i style="background:#8A6D3B"></i>Archives in this area <b>' + nfl(R.arch.length) + "</b></summary><ul>");
       R.arch.slice().sort(function (a, b) { return a.name.localeCompare(b.name); }).forEach(function (a) {
         var st = volStatus("source:" + a.id);
-        h.push('<li><a class="ra-area-p" href="' + BASE + "archive/" + esc(a.id) + '/"><i style="background:' + RC_COL[st] + '"></i><span>' + esc(a.name) + "</span><small>" +
+        h.push('<li><a class="ra-area-p" target="_blank" rel="noopener" title="Opens in a new tab, so your areas stay on the map" href="' + BASE + "archive/" + esc(a.id) + '/"><i style="background:' + RC_COL[st] + '"></i><span>' + esc(a.name) + "</span><small>" +
                esc((a.at && a.at.place) || "") + "</small></a></li>");
       });
       h.push("</ul></details>");
@@ -8099,12 +8099,12 @@ window.addEventListener("load", async function () {
       R.vols[id].vols.forEach(function (v) {
         var vid = areaVolId(v);
         if (volStatus(vid) === "none" && !(window.raProgress.get(vid) || {}).state)
-          out.push({ id: vid, t: v.t, where: p.n + (p.cc ? ", " + (CNAME[p.cc] || p.cc) : ""), href: BASE + "place/" + p.i + "/" });
+          out.push({ id: vid, t: v.t, kind: "book", fs: /familysearch\.org/i.test(v.url || ""), where: p.n + (p.cc ? ", " + (CNAME[p.cc] || p.cc) : ""), href: BASE + "place/" + p.i + "/" });
       });
     });
     R.arch.forEach(function (a) {
       var vid = "source:" + a.id;
-      if (!(window.raProgress.get(vid) || {}).state) out.push({ id: vid, t: a.name, where: (a.at && a.at.place) || "", href: BASE + "archive/" + a.id + "/" });
+      if (!(window.raProgress.get(vid) || {}).state) out.push({ id: vid, t: a.name, kind: "archive", where: (a.at && a.at.place) || "", href: BASE + "archive/" + a.id + "/" });
     });
     return out;
   }
@@ -8119,13 +8119,18 @@ window.addEventListener("load", async function () {
     }
     if (!c.length) { box.innerHTML = '<p class="at-sub">Everything found here is already on the list or started.' + cap + "</p>"; return; }
     var n = Math.min(c.length, ADD_CAP);
+    /* say which things these are: the tally above counts PLACES, the list takes BOOKS and ARCHIVES, and the two numbers are not the same thing */
+    var nb = c.filter(function (x) { return x.kind === "book"; }).length, na = c.length - nb, nfs = c.filter(function (x) { return x.fs; }).length;
+    var what = nb ? nfl(nb) + " book" + (nb === 1 ? "" : "s") + (nfs ? " (" + nfl(nfs) + " on FamilySearch)" : "") : "";
+    if (na) what += (what ? " and " : "") + nfl(na) + " archive" + (na === 1 ? "" : "s");
     if (AREA.confirm) {
       box.innerHTML = '<p class="ra-area-ok">Add <b>' + nfl(n) + "</b> to the list for <b>" + esc(line) + "</b>? You can undo it straight after.<br>" +
         '<button type="button" data-a="yes">Yes, add them</button><button type="button" data-a="no">Cancel</button></p>';
       return;
     }
-    box.innerHTML = '<button type="button" class="ra-area-addb" data-a="add">Add ' + nfl(n) + " not started to " + esc(line) + "'s list</button>" +
-      (c.length > ADD_CAP ? '<p class="at-sub">That is the first ' + nfl(ADD_CAP) + " of " + nfl(c.length) + ". Draw a smaller area for the rest.</p>" : "") +
+    box.innerHTML = '<p class="at-sub ra-area-what">Not started in this area: <b>' + what + "</b>. The places above are only where they sit.</p>" +
+      '<button type="button" class="ra-area-addb" data-a="add">Add ' + nfl(n) + (n === c.length ? "" : " of them") + " to " + esc(line) + "'s list</button>" +
+      (c.length > ADD_CAP ? '<p class="at-sub">One click adds at most ' + nfl(ADD_CAP) + ". Draw a smaller area for the rest.</p>" : "") +
       (cap ? '<p class="at-sub">' + cap.trim() + "</p>" : "");
   }
   function areaDoAdd() {
@@ -10589,6 +10594,8 @@ window.addEventListener("load", async function () {
   :global(.ra-area-shapes li) { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0; border-top: 1px dashed var(--rule); font: 500 13px/1.3 var(--sans); }
   :global(.ra-area-shapes li small) { color: var(--ink-3); }
   :global(.ra-area-hint button[data-sa="done"]) { background: var(--accent); color: #fff; border-color: var(--accent); }
+  :global(.ra-area-tl) { font: 600 11px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+  :global(.ra-area-what) { font: 400 13px/1.45 var(--sans); color: var(--ink-2); margin: 0 0 8px; }
   :global(.ra-area-sum) { font: 400 13px/1.5 var(--sans); margin: 4px 0 10px; }
   :global(.ra-area-tally) { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0 0 12px; font: 400 12.5px/1.4 var(--sans); color: var(--ink-2); }
   :global(.ra-area-tally span), :global(.ra-area-g > summary) { display: inline-flex; align-items: center; gap: 6px; }

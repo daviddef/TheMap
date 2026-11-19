@@ -1288,6 +1288,160 @@ html:not(.ph) #info .ih .lk-tab[data-tab="find"]{padding:12px 0;display:flex;ali
 html:not(.ph) #info .ih .lk-tab[data-tab="find"] .fvti{width:16px;height:16px}
 .ph #info .ih .lk-tab[data-tab="find"]{min-width:48px;padding:0 12px;justify-content:center}
 .ph #info .ih .lk-tab[data-tab="find"] .fvti{width:20px;height:20px}
+
+/* The panel the Surnames and Lifespans views share, and the Surnames view. Its own file (after style.css and views.css). Every colour is a --lk-* token of the look, so Sticker, Paper, Ground, Lanes and Countries all read.
+   The words are always in the look's ink; a colour of the data lives in a bar or a swatch that has an ink edge (see viewcolour.js). */
+body.slvon #trail,body.slvon #trailTip{display:none!important}
+#slvPanel[hidden]{display:none}
+/* the band: full width along the bottom, the canvas live above it; it stands where the Trail band stands (viewsui.js counts its height) */
+#slvPanel{--slv-max:48vh;position:fixed;z-index:7;left:0;right:0;bottom:0;max-height:var(--slv-max);box-sizing:border-box;display:flex;flex-direction:column;overflow:hidden;background:var(--lk-card);color:var(--lk-ink);border-top:2px solid var(--lk-line);box-shadow:0 -6px 18px rgba(0,0,0,.09);padding-bottom:env(safe-area-inset-bottom);user-select:text;-webkit-user-select:text}
+body.slv-lifespans #slvPanel{--slv-max:58vh}
+html:not(.ph):has(#info.on) #slvPanel{right:340px}
+html.ph:has(#info.on) #slvPanel{display:none}
+#lensMenu{max-height:calc(100vh - 84px);overflow:auto}
+.slvcame{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;padding:5px 14px;background:var(--lk-accent-soft);border-bottom:2px solid var(--lk-accent);font:800 12.5px/1.3 Nunito,system-ui;flex:none}
+.slvh{display:flex;align-items:center;gap:8px;padding:0 10px 0 0;flex:none;min-height:44px}
+#slvPanel:not(.folded) .slvh{border-bottom:2px solid var(--lk-line)}
+.slvfold{all:unset;box-sizing:border-box;flex:1 1 auto;min-width:0;min-height:44px;display:flex;align-items:center;gap:10px;padding:0 10px 0 16px;cursor:pointer;color:var(--lk-ink)}
+.slvfold:hover{background:var(--lk-hover)}.slvfold:focus-visible{outline:3px solid var(--lk-accent);outline-offset:-4px}
+.slvt{display:flex;flex-direction:row;align-items:baseline;gap:4px 12px;min-width:0;flex:1 1 auto;line-height:1.2}
+.slvt b{font:400 20px "Lilita One",Impact,system-ui;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 0 auto;max-width:100%}
+.slvt small{font:700 12px/1.35 Nunito,system-ui;color:var(--tr-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:0 100 auto}
+.slvch{flex:none;font-size:16px;color:var(--lk-ink)}
+.slvin{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
+.slvc{display:flex;flex-wrap:nowrap;gap:6px 14px;align-items:center;padding:6px 16px;overflow-x:auto;flex:none;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.slvg{display:inline-flex;align-items:center;gap:6px;flex:none}
+.slvg>b{font:800 10.5px Nunito,system-ui;color:var(--tr-soft);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.slvc .fbs{padding:5px 10px}
+.slvc .fbg{flex:none}
+.slvc .fbs[disabled]{opacity:.5}
+.slvlg{display:flex;flex-wrap:nowrap;align-items:center;gap:4px 8px;padding:4px 16px 6px;border-bottom:2px solid var(--lk-line);flex:none;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;-webkit-overflow-scrolling:touch;font:700 12px/1.3 Nunito,system-ui}
+.slvlgt{flex:none;white-space:nowrap;color:var(--tr-soft);margin-right:4px}
+.slvlgs{display:contents}
+.sllg{flex:none;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;min-height:28px;box-sizing:border-box;padding:2px 10px 2px 8px;border:2px solid var(--lk-line);border-radius:99px;background:transparent;color:var(--lk-ink);font:800 12px/1.2 Nunito,system-ui}
+button.sllg{cursor:pointer}button.sllg:hover{border-color:var(--lk-accent)}button.sllg:focus-visible{outline:3px solid var(--lk-accent);outline-offset:1px}
+.sllg b{color:var(--tr-soft);font-weight:800}
+.sllg.on{background:var(--lk-ink);color:var(--lk-card)}.sllg.on b{color:inherit}
+.slsw{display:inline-block;flex:none;width:16px;height:12px;border-radius:4px;border:1.5px solid var(--lk-ink);box-sizing:border-box}
+.hatch{background-image:repeating-linear-gradient(45deg,var(--lk-faint) 0 2px,transparent 2px 5px)}
+.slbar{display:flex;width:100%;height:10px;box-sizing:border-box;border:1.5px solid var(--lk-ink);border-radius:6px;overflow:hidden;background:var(--lk-card)}
+.slbar i{display:block;min-width:3px;border-right:1.5px solid var(--lk-ink)}.slbar i:last-child{border-right:0}
+.slvbody{flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.slvbody.split{display:flex;flex-direction:column;overflow:hidden}
+.slvscroll{overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.slvsr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.snempty{padding:28px 16px;text-align:center;font:700 14px/1.4 Nunito,system-ui;color:var(--tr-soft)}
+/* the Surnames cloud: a centred, wrapped run of buttons, biggest first; it cannot overlap and always draws the same */
+.sncloud{min-width:0;flex:1 1 55%;min-height:70px;padding:8px 16px 4px}
+.sncl{list-style:none;margin:0;padding:4px 0 8px;display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-end;gap:10px 12px}
+.snw{all:unset;box-sizing:border-box;display:inline-flex;flex-direction:column;gap:4px;min-width:44px;min-height:44px;padding:6px 10px 7px;border:2px solid var(--lk-line);border-radius:14px;background:color-mix(in srgb,var(--lk-line) 28%,var(--lk-card));color:var(--lk-ink);cursor:pointer;transition:border-color .12s,transform .12s}
+.snw:hover{border-color:var(--lk-accent);transform:translateY(-2px)}
+.snw:focus-visible{outline:3px solid var(--lk-accent);outline-offset:2px}
+.snw.on{border-color:var(--lk-accent);background:var(--lk-accent-soft);box-shadow:0 0 0 3px var(--lk-accent-soft)}
+.snw .snt{font-family:"Lilita One",Impact,system-ui;font-weight:400;line-height:1.1;letter-spacing:.2px;white-space:nowrap}
+.snw .snn{font:800 12px/1 Nunito,system-ui;color:var(--tr-soft);margin-left:6px;vertical-align:2px}
+.snfoot{margin:10px 0 0;text-align:center;font:700 12.5px/1.4 Nunito,system-ui;color:var(--tr-soft)}
+.snd{box-sizing:border-box;flex:0 1 auto;min-width:0;border-top:2px solid var(--lk-line);padding:6px 16px 10px;background:var(--lk-card)}
+.snd.open{flex:1 1 42%;min-height:96px;background:color-mix(in srgb,var(--lk-line) 14%,var(--lk-card))}
+.snhint{margin:0;padding:2px 0;font:700 12.5px/1.4 Nunito,system-ui;color:var(--tr-soft)}.snhint b{color:var(--lk-ink)}
+.sndh{display:flex;flex-wrap:wrap;align-items:center;gap:2px 14px}
+.snd h3{margin:0;font:400 22px/1.1 "Lilita One",Impact,system-ui}.snd h3:focus{outline:none}
+.snd p{margin:4px 0;font:700 13px/1.4 Nunito,system-ui;color:var(--tr-soft)}
+.snd p b{color:var(--lk-ink)}
+.snchips{margin:2px 0}
+.snchip{display:inline-flex;align-items:center;gap:6px;margin:2px 4px 2px 0;padding:2px 10px 2px 8px;border:2px solid var(--lk-line);border-radius:99px;font:800 12px/1.3 Nunito,system-ui}.snchip b{color:var(--tr-soft)}
+.snact{min-height:36px}
+.snpl{list-style:none;margin:6px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:5px 8px}
+.snp{all:unset;box-sizing:border-box;display:flex;flex-wrap:wrap;align-items:baseline;gap:1px 9px;width:100%;min-height:44px;padding:6px 10px;border-radius:10px;background:color-mix(in srgb,var(--lk-line) 35%,var(--lk-card));cursor:pointer;font:700 13px/1.35 Nunito,system-ui;color:var(--lk-ink)}
+.snp b{font:800 14px/1.3 Nunito,system-ui}
+.snp:hover{background:var(--lk-accent-soft)}.snp:focus-visible{outline:3px solid var(--lk-accent);outline-offset:1px}.snp.on{outline:3px solid var(--lk-accent);outline-offset:-1px}
+.snpm{color:var(--tr-soft);font-size:12px}
+.snhere{margin-left:auto;font:800 11px/1.5 Nunito,system-ui;border:1.5px solid var(--lk-ink);border-radius:99px;padding:0 8px}
+/* the table: the same facts as text */
+.sntb{padding:0 16px 10px;flex:1 1 55%;min-height:70px}.sntb:focus-visible{outline:3px solid var(--lk-accent);outline-offset:-3px}
+.sntbl{border-collapse:collapse;width:100%;font:700 13px/1.35 Nunito,system-ui}
+.sntbl caption{text-align:left;padding:12px 0 8px;font:700 12.5px/1.4 Nunito,system-ui;color:var(--tr-soft)}
+.sntbl th,.sntbl td{padding:7px 10px;border-bottom:1px solid var(--lk-line);text-align:left;vertical-align:top}
+.sntbl thead th{position:sticky;top:0;z-index:2;background:var(--lk-card);font:800 11px Nunito,system-ui;text-transform:uppercase;letter-spacing:.04em;color:var(--tr-soft);border-bottom:2px solid var(--lk-line)}
+.sntbl tbody th{font-weight:800}
+.sntbl .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sntbl tr.on{background:var(--lk-accent-soft)}
+.sntbl small{color:var(--tr-soft);font-weight:700}.snsp{display:block}
+.snlk{all:unset;cursor:pointer;color:var(--lk-ink);text-decoration:underline dotted 1.5px;text-underline-offset:3px;border-radius:4px}
+.snlk:hover{color:var(--lk-accent)}.snlk:focus-visible{outline:3px solid var(--lk-accent);outline-offset:2px}
+/* the detail on hover or focus (Lifespans uses it; the Surnames words carry theirs in their title) */
+#slvTip{display:none;position:fixed;z-index:60;pointer-events:none;max-width:290px;padding:8px 11px;border:2px solid var(--lk-ink);border-radius:12px;background:var(--lk-card);color:var(--lk-ink);box-shadow:0 4px 0 var(--lk-line),0 10px 22px rgba(0,0,0,.2);font:700 12px/1.35 Nunito,system-ui}
+#slvTip.on{display:block}
+#slvTip .ftn{font:400 16px/1.15 "Lilita One",Impact,system-ui}#slvTip .ftk{color:var(--tr-soft);margin-bottom:3px}#slvTip .ftx{margin-top:4px;color:var(--tr-soft);font-size:11px}#slvTip .fl{height:11px;vertical-align:-1px;margin-right:4px}
+/* a phone: the controls are one row you slide along, every target 44px */
+.ph #slvPanel,.ph body.slv-lifespans #slvPanel{--slv-max:58vh}
+.ph .slvt b{font-size:17px}
+.ph .slvc{padding:4px 10px}
+.ph #slvPanel .fbs{min-height:44px;padding:0 13px}
+.ph #slvPanel .fbx{width:44px;height:44px}
+.ph .slvlg{padding:2px 10px 4px}
+.ph button.sllg{min-height:44px}
+.ph .snp,.ph .snw{min-height:44px}
+.ph .snlk{display:inline-block;min-height:44px;line-height:44px}
+.ph .sncloud{padding:6px 10px 2px}
+.ph .snd{padding:6px 10px 10px}
+.ph .snpl{grid-template-columns:1fr}
+.ph .sntb{padding:0 8px 10px}
+.ph .slvh{padding-right:6px}
+@media (prefers-reduced-motion:reduce){.snw{transition:none}.snw:hover{transform:none}}
+.rm .snw{transition:none}.rm .snw:hover{transform:none}
+
+/* The Lifespans view (the frame it sits in is in surnames.css). One bar a person on one shared year axis; the axis stays at the top while the list scrolls. */
+.lfchart{position:relative;padding:0 16px 18px;--lfl:250px}
+.lfaxis{position:sticky;top:0;z-index:3;display:grid;grid-template-columns:var(--lfl) minmax(0,1fr);align-items:end;height:32px;margin:0 -16px;padding:0 16px;background:var(--lk-card);border-bottom:2px solid var(--lk-line)}
+.lfal{padding:0 0 7px 6px;font:800 10.5px Nunito,system-ui;color:var(--tr-soft);text-transform:uppercase;letter-spacing:.05em}
+.lfat{position:relative;height:100%}
+.lftk{position:absolute;bottom:6px;transform:translateX(-50%);font:800 12px/1 Nunito,system-ui;color:var(--lk-ink);white-space:nowrap;font-variant-numeric:tabular-nums}
+.lftk.l{transform:none}.lftk.r{transform:translateX(-100%)}
+.lfbody{position:relative}
+.lfkeys{display:flex;flex-wrap:wrap;gap:4px 8px;padding:8px 0 8px}
+.lfgrid{position:absolute;top:0;bottom:0;left:var(--lfl);right:0;pointer-events:none}
+.lfgl{position:absolute;top:0;bottom:0;width:0;border-left:1px solid color-mix(in srgb,var(--lk-faint) 60%,transparent)}
+.lfgl.minor{border-left-style:dotted;opacity:.6}
+.lfev{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--lk-ink) 10%,transparent) 0 3px,transparent 3px 8px);border-left:1px solid color-mix(in srgb,#9C3B28 55%,transparent);border-right:1px solid color-mix(in srgb,#9C3B28 55%,transparent)}
+.lfrows{position:relative;list-style:none;margin:0;padding:0}
+.lfli{margin:0;padding:0}
+.lfgh{list-style:none;margin:12px 0 2px;padding:0 0 0 6px}
+.lfgh span{font:900 11.5px Nunito,system-ui;letter-spacing:.05em;text-transform:uppercase;color:var(--tr-soft)}
+.lfrow{all:unset;box-sizing:border-box;display:grid;grid-template-columns:var(--lfl) minmax(0,1fr);align-items:center;width:100%;min-height:44px;border-radius:10px;cursor:pointer;color:var(--lk-ink)}
+.lfrow:hover{background:color-mix(in srgb,var(--lk-line) 30%,transparent)}
+.lfrow:focus-visible{outline:3px solid var(--lk-accent);outline-offset:-1px}
+.lfrow.on{background:var(--lk-accent-soft);outline:2px solid var(--lk-accent);outline-offset:-2px}
+.lfrow.root{box-shadow:inset 5px 0 0 var(--lk-accent)}
+.lfl{display:flex;flex-direction:column;min-width:0;padding:4px 10px 4px 12px}
+.lfn{font:400 15px/1.15 "Lilita One",Impact,system-ui;letter-spacing:.2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lfs{font:700 11.5px/1.3 Nunito,system-ui;color:var(--tr-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lft{position:relative;height:44px;min-width:0}
+.lfbar{position:absolute;top:50%;height:16px;margin-top:-8px;min-width:7px;box-sizing:border-box;border:2px solid var(--lk-ink);border-radius:8px;background:var(--bc)}
+.lfbar.est{border-style:dashed}
+.lfbar.hatch{background-image:repeating-linear-gradient(45deg,var(--lk-faint) 0 2px,transparent 2px 5px)}
+.lfbar.fadeout{width:46px;border-right-color:transparent;-webkit-mask-image:linear-gradient(90deg,#000 40%,transparent);mask-image:linear-gradient(90deg,#000 40%,transparent)}
+.lfbar.fadein{width:46px;transform:translateX(-100%);border-left-color:transparent;-webkit-mask-image:linear-gradient(270deg,#000 40%,transparent);mask-image:linear-gradient(270deg,#000 40%,transparent)}
+.lfm{position:absolute;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;box-sizing:border-box;background:var(--lk-card);border:2px solid var(--lk-ink);box-shadow:0 0 0 1.5px var(--lk-card);z-index:2}
+.lfm.marriage{transform:rotate(45deg);border-radius:2px;width:11px;height:11px;margin:-5.5px 0 0 -5.5px}
+.lfm.child{border-radius:50%}
+.lfm.lfkey{position:static;display:inline-block;margin:0;flex:none}
+.lfdash{display:inline-block;flex:none;width:26px;height:10px;box-sizing:border-box;border:2px dashed var(--lk-ink);border-radius:6px}
+.lfdash.fade{border-style:solid;border-right-color:transparent;-webkit-mask-image:linear-gradient(90deg,#000 40%,transparent);mask-image:linear-gradient(90deg,#000 40%,transparent)}
+.lfliv,.lfnone{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);padding-left:8px;font:700 italic 11.5px/1.2 Nunito,system-ui;color:var(--tr-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lfhist{margin-top:16px;padding:10px 14px;border:2px solid var(--lk-line);border-radius:12px}
+.lfhist h4{margin:0 0 4px;font:900 12px Nunito,system-ui;letter-spacing:.04em;text-transform:uppercase;color:var(--tr-soft)}
+.lfhist ul{margin:0;padding-left:18px;font:700 13px/1.5 Nunito,system-ui}.lfhist small{color:var(--tr-soft)}
+.lftip .ftn{font:400 16px/1.15 "Lilita One",Impact,system-ui}
+/* narrow: the name sits over its bar, the axis takes the whole width */
+.lfchart.narrow{--lfl:0px;padding:0 10px 14px}
+.lfchart.narrow .lfaxis{margin:0 -10px;padding:0 10px}
+.lfchart.narrow .lfal{display:none}
+.lfchart.narrow .lfaxis{grid-template-columns:minmax(0,1fr)}
+.lfchart.narrow .lfrow{grid-template-columns:minmax(0,1fr);padding-top:4px}
+.lfchart.narrow .lfl{padding:2px 8px}
+.lfchart.narrow .lft{height:28px}
+.lfchart.narrow .lfbar{height:14px;margin-top:-7px}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -3658,14 +3812,412 @@ html:not(.ph) #info .ih .lk-tab[data-tab="find"] .fvti{width:16px;height:16px}
   const LENS_DEFAULT = { m: 'canvas', g: FAN_DEFAULT, c: 'side', t: 2, r: '' };
   function cleanLens(x) {
     const o = x && typeof x === 'object' ? x : {};
-    return { m: o.m === 'fan' ? 'fan' : 'canvas', g: Math.max(FAN_MIN, Math.min(FAN_MAX, Number.isInteger(o.g) ? o.g : FAN_DEFAULT)), c: o.c === 'place' ? 'place' : 'side',
-      t: o.t === 0 || o.t === 1 ? o.t : 2, r: typeof o.r === 'string' ? o.r : '' };
+    const X = /^[a-z0-9]{1,8}$/, xs = X.test(o.xs) ? { xs: o.xs } : {}, xl = X.test(o.xl) ? { xl: o.xl } : {};   // the panel views' short strings (surnames, lifespans)
+    return { m: o.m === 'fan' || o.m === 'surnames' || o.m === 'lifespans' ? o.m : 'canvas', g: Math.max(FAN_MIN, Math.min(FAN_MAX, Number.isInteger(o.g) ? o.g : FAN_DEFAULT)), c: o.c === 'place' ? 'place' : 'side',
+      t: o.t === 0 || o.t === 1 ? o.t : 2, r: typeof o.r === 'string' ? o.r : '', ...xs, ...xl };
   }
-  const lensIsDefault = l => { const c = cleanLens(l); return c.m === 'canvas' && c.g === FAN_DEFAULT && c.c === 'side' && c.t === 2; };
+  const lensIsDefault = l => { const c = cleanLens(l); return c.m === 'canvas' && c.g === FAN_DEFAULT && c.c === 'side' && c.t === 2 && !c.xs && !c.xl; };
 
   const API = { contrast, mix, inkFor, lum, hex2, lineIdx, defaultSide, trailCard, trailModel, genTag, placeTrail, FAN_MIN, FAN_MAX, FAN_DEFAULT, RING, ringR, fanRadius, wedge, wedgePath, pt, fanSlots, routeWords, kinWord, genName,
     SIDE_BASE, STEP, sideFill, flagColour, flagCandidates, flagPalette, placeFlag, placeFill, textW, boxInWedge, labelLevels, fanLabel, fanList, cleanLens, lensIsDefault, lifeText, fullName, hidden, LENS_DEFAULT };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCV = API;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* viewcolour.js — the colours the Surnames and Lifespans views share. No DOM; tested by test/test-surnames.js, test/test-lifespans.js and test/test-sl-contrast.js.
+ *
+ * A COLOUR MEANS ONE TRUE THING, and never carries it alone:
+ *   - PLACE (country of birth): eight hues that stay apart for the common colour-blindnesses (tested by simulating protanopia, deuteranopia and tritanopia), one grey for "other countries",
+ *     and a hatched swatch for "no place shown". Every swatch is drawn with an ink outline (and ink lines between the parts of a bar), so a swatch is seen against any look's ground
+ *     by its edge, and told from its neighbour by its fill; the legend always gives the count, and the same facts are in a table.
+ *   - ORDER (when, how far back): a five-step ramp from pale to deep, cut into bands whose edges are printed in the legend ("before 1790", "1790–1829" ...).
+ *   - DIRECTION (Lifespans): ancestors blue, descendants vermillion, the selected person and spouses neutral; the further away, the paler.
+ * Nothing here knows about a person. */
+(function (root) {
+  'use strict';
+  const V = root.TCV || (typeof require !== 'undefined' ? require('./views.js') : null);
+
+  /* ---------------- the palettes ---------------- */
+  /* Okabe–Ito, minus its black and with the yellow kept (its worst pair, orange and yellow, is checked by the test at the ΔE it must keep under every simulated colour-blindness) */
+  const PLACE = ['#0072B2', '#D55E00', '#009E73', '#CC79A7', '#E69F00', '#56B4E9', '#F0E442'];
+  const OTHER = '#6E6E6E';
+  const RAMP = ['#E3EEF9', '#B2D0EC', '#79A8D6', '#3F78B5', '#1B4A82'];
+  const DIR = { anc: '#0072B2', desc: '#D55E00', self: '#4A4A4A', spouse: '#8C8C8C' };
+
+  /* ---------------- colour-blindness simulation (Machado et al. 2009, severity 1.0) and CIE Lab distance ---------------- */
+  const SIM = {
+    protan: [[0.152286, 1.052583, -0.204868], [0.114503, 0.786281, 0.099216], [-0.003882, -0.048116, 1.051998]],
+    deutan: [[0.367322, 0.860646, -0.227968], [0.280085, 0.672501, 0.047413], [-0.01182, 0.04294, 0.968881]],
+    tritan: [[1.255528, -0.076749, -0.178779], [-0.078411, 0.930809, 0.147602], [0.004733, 0.691367, 0.3039]],
+  };
+  const lin = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+  const gam = v => 255 * (v <= 0.0031308 ? 12.92 * v : 1.055 * Math.pow(v, 1 / 2.4) - 0.055);
+  const rgbOf = h => V.hex2(h);
+  function simulate(rgb, kind) {
+    if (!kind || kind === 'normal') return rgb;
+    const c = rgb.map(lin), M = SIM[kind];
+    return M.map(r => gam(Math.max(0, Math.min(1, r[0] * c[0] + r[1] * c[1] + r[2] * c[2]))));
+  }
+  function lab(rgb) {
+    const [r, g, b] = rgb.map(lin), x = (r * 0.4124 + g * 0.3576 + b * 0.1805) / 0.95047, y = r * 0.2126 + g * 0.7152 + b * 0.0722, z = (r * 0.0193 + g * 0.1192 + b * 0.9505) / 1.08883;
+    const f = t => t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116;
+    return [116 * f(y) - 16, 500 * (f(x) - f(y)), 200 * (f(y) - f(z))];
+  }
+  const deltaE = (a, b, kind) => { const x = lab(simulate(rgbOf(a), kind)), y = lab(simulate(rgbOf(b), kind)); return Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]); };
+  /* the smallest distance between any two of the colours, as seen under `kind` */
+  function minDistance(cols, kind) {
+    let best = Infinity, pair = null;
+    for (let i = 0; i < cols.length; i++) for (let j = i + 1; j < cols.length; j++) { const d = deltaE(cols[i], cols[j], kind); if (d < best) { best = d; pair = [cols[i], cols[j]]; } }
+    return { d: best, pair };
+  }
+
+  /* ---------------- order bands ---------------- */
+  /* five bands cut at the quantiles of the years, edges rounded to a decade, no empty or repeated band: [{lo, hi, label, col}], the last one open at the top.
+     A year falls in the band whose lo it reaches; below the first edge it is the first band. */
+  function bands(years, steps) {
+    const ys = years.filter(y => y != null && isFinite(y)).sort((a, b) => a - b);
+    steps = steps || RAMP.length;
+    if (!ys.length) return [];
+    const edges = [];
+    for (let k = 1; k < steps; k++) { const e = Math.round(ys[Math.min(ys.length - 1, Math.floor(ys.length * k / steps))] / 10) * 10; if (e > ys[0] && (!edges.length || e > edges[edges.length - 1])) edges.push(e); }
+    const cuts = [ys[0]].concat(edges), out = cuts.map((lo, k) => ({ lo: k === 0 ? -Infinity : lo, hi: k + 1 < cuts.length ? cuts[k + 1] - 1 : Infinity }));
+    const n = out.length;
+    out.forEach((b, k) => {
+      b.col = RAMP[n === 1 ? RAMP.length - 1 : Math.round(k * (RAMP.length - 1) / (n - 1))];
+      b.label = k === 0 && n > 1 ? 'before ' + (cuts[1]) : k === n - 1 && n > 1 ? cuts[k] + ' on' : n === 1 ? String(ys[0]) : cuts[k] + '–' + (cuts[k + 1] - 1);
+    });
+    return out;
+  }
+  const bandOf = (bs, y) => { if (y == null || !bs.length) return -1; let k = 0; bs.forEach((b, i) => { if (y >= b.lo) k = i; }); return k; };
+
+  /* ---------------- tints (Lifespans' direction colours fade as they go further) ---------------- */
+  const tint = (base, card, t) => V.mix(base, card, t);
+
+  const API = { PLACE, OTHER, RAMP, DIR, SIM, simulate, deltaE, minDistance, bands, bandOf, tint };
+  if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCC = API;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* surnames.js — the pure parts of the Surnames view: who is counted, how spellings are grouped, the numbers behind each name, sizes, colours, the table and the kept choice. No DOM; tested by test/test-surnames.js.
+ *
+ * WHAT IT IS. Every surname of the people in the file (or of one person's ancestors), sized by the number of people who carry it, each underlined by a bar. The bar is the colour: where those people were born
+ * (the mix, a segment each), or how far back the name goes, or when it was typical. The words themselves are always in the look's ink, so they read at full contrast in every look.
+ *
+ * ONE SURNAME, WHATEVER ITS SPELLING. A person may carry `sk`, the Record Atlas's catalogue family for their surname; when they do not (a visitor's own file), the canvas's copy of that catalogue (M.N, handed over by the page)
+ * puts "Botha" and "Bota" in one family if the catalogue says they are one name. Otherwise the folded name is the key: case, spaces, hyphens, apostrophes and full stops are never a spelling; an accent is only folded for
+ * the key, and both forms stay visible ("Spelled: ...") in the details. This module keeps no list of spellings of its own.
+ *
+ * LIVING PEOPLE. A person who may be living counts toward their surname (name and family are shown on the canvas as well) but never contributes a place, a year or an age; their row in a list says so.
+ * Nothing here stores or sends anything. */
+(function (root) {
+  'use strict';
+  const V = root.TCV || (typeof require !== 'undefined' ? require('./views.js') : null);
+  const C = root.TCC || (typeof require !== 'undefined' ? require('./viewcolour.js') : null);
+  const LG = root.TC || (typeof require !== 'undefined' ? require('./logic.js') : null);
+
+  const clean = s => String(s == null ? '' : s).replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim();
+  const hid = p => !!(p.living);                            /* a living person: the name and the family only */
+  const nodate = p => hid(p) || !!p.ghost;                  /* nothing about when or where is read for these */
+
+  /* ---------------- the family a surname belongs to ---------------- */
+  /* the key two spellings of one surname share; '' if the person has no surname recorded */
+  function familyKey(M, p) {
+    if (p.sk) return 'k:' + clean(p.sk).toLowerCase();
+    const sq = LG.squash(p.sur || ''); if (!sq) return '';
+    const N = M && M.N;
+    if (N && N.snIdx) {
+      const fams = new Set(); for (const t of [sq].concat(p.surToks ? [...p.surToks] : [])) { const f = N.snIdx.get(t); if (f) f.forEach(x => fams.add(x)); }
+      if (fams.size) { const fam = Math.min(...fams); return 'f:' + (N.sn[fam].id || N.sn[fam].canon); }
+    }
+    return 'n:' + sq;
+  }
+
+  /* ---------------- who is counted ---------------- */
+  /* the people of the view: [{i, g}] (g = generation back from the root, 0 = the root, null for the whole file).
+     opts: {scope: 'file' | 'anc', root: person index, gens: null | 4 | 6 | 8, filter: Set of archive indexes | null} */
+  function scopePeople(M, opts) {
+    opts = opts || {};
+    const keep = p => !opts.filter || opts.filter.has(p.a);
+    if (opts.scope !== 'anc' || opts.root == null || !M.P[opts.root]) return M.P.filter(keep).map(p => ({ i: p.i, g: null }));
+    const lim = opts.gens || Infinity, seen = new Map([[opts.root, 0]]), q = [opts.root];
+    while (q.length) { const x = q.shift(), d = seen.get(x); if (d >= lim) continue; const p = M.P[x]; [p.f, p.m].forEach(y => { if (y != null && y >= 0 && M.P[y] && !seen.has(y)) { seen.set(y, d + 1); q.push(y); } }); }
+    return [...seen].map(([i, g]) => ({ i, g })).filter(r => keep(M.P[r.i]));
+  }
+
+  /* ---------------- where a person was born, as a country ---------------- */
+  /* '' for a living person, a named-only row, or no birthplace; else the Atlas's country (a code like "DE", or a name) */
+  function countryOf(M, p) {
+    if (nodate(p) || !p.bp) return '';
+    const pl = LG.placeAt(M, p, p.bp, p.by); return pl && pl.cn ? String(pl.cn) : '';
+  }
+  const regionName = code => { if (/^[A-Z]{2}$/.test(code)) { try { return new Intl.DisplayNames(['en'], { type: 'region' }).of(code) || code; } catch (e) { /* keep the code */ } } return code; };
+
+  const med = a => { a = a.filter(x => x != null).sort((x, y) => x - y); return a.length ? a[a.length >> 1] : null; };
+
+  /* ---------------- the numbers behind each name ---------------- */
+  /* {rows: people counted, none: with no surname recorded, living, list: [group] biggest first, byCountry: Map code -> people}
+     group = {key, label, forms: [[form, n]], n, living, ppl: [{i, g}], cn: Map code ('' = none shown) -> n, first: {y, est} | null, last: {y, est} | null, medBy, top: code | ''} */
+  function groups(M, ppl) {
+    const G = new Map(); let none = 0, living = 0;
+    for (const r of ppl) {
+      const p = M.P[r.i], key = familyKey(M, p);
+      if (hid(p)) living++;
+      if (!key) { none++; continue; }
+      let e = G.get(key); if (!e) G.set(key, e = { key, forms: new Map(), n: 0, living: 0, ppl: [], cn: new Map(), ys: [], by: [] });
+      const form = clean(p.sur); e.forms.set(form, (e.forms.get(form) || 0) + 1);
+      e.n++; e.ppl.push(r);
+      if (hid(p)) e.living++;
+      const c = countryOf(M, p); e.cn.set(c, (e.cn.get(c) || 0) + 1);
+      if (!nodate(p) && p.by != null) { e.ys.push({ y: p.by, est: !!(p.fl & 1) }); e.by.push(p.by); }
+    }
+    const byCountry = new Map();
+    const list = [...G.values()];
+    list.forEach(e => {
+      const f = [...e.forms].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+      e.forms = f; e.label = f[0][0];
+      e.first = e.ys.length ? e.ys.reduce((a, b) => b.y < a.y ? b : a) : null;
+      e.last = e.ys.length ? e.ys.reduce((a, b) => b.y > a.y ? b : a) : null;
+      e.medBy = med(e.by);
+      const real = [...e.cn].filter(([c]) => c !== '').sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+      e.top = real.length ? real[0][0] : '';
+      e.cn.forEach((n, c) => byCountry.set(c, (byCountry.get(c) || 0) + n));
+      delete e.ys; delete e.by;
+    });
+    list.sort((a, b) => b.n - a.n || a.label.localeCompare(b.label) || (a.key < b.key ? -1 : 1));
+    return { rows: ppl.length, none, living, list, byCountry };
+  }
+
+  /* ---------------- the cloud ---------------- */
+  /* a font size in px for each group: the square root of its share between the smallest and largest, so a name of 4 is not four times a name of 1; never below `min` (legible) */
+  function sizes(list, opt) {
+    opt = opt || {}; const min = opt.min || 13, max = Math.max(min + 4, opt.max || 52);
+    if (!list.length) return [];
+    const lo = Math.min(...list.map(e => e.n)), hi = Math.max(...list.map(e => e.n));
+    return list.map(e => hi === lo ? Math.round((min + max) / 2 * 0.6 + min * 0.4) : Math.round((min + (max - min) * Math.sqrt((e.n - lo) / (hi - lo))) * 10) / 10);
+  }
+
+  /* ---------------- colour ---------------- */
+  /* by place: the seven biggest countries get a colour each (in order of size, ties by code); the rest share the grey; no place shown is hatched
+     returns {top: [code], colour(code) -> hex | 'none', legend: [{code, name, col, n}], other: {n, codes}, none: n} */
+  function placeColours(byCountry, nTop) {
+    nTop = nTop || C.PLACE.length;
+    const real = [...byCountry].filter(([c]) => c !== '').sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    const top = real.slice(0, nTop).map(([c]) => c), rest = real.slice(nTop);
+    const colour = c => c === '' ? 'none' : top.includes(c) ? C.PLACE[top.indexOf(c)] : C.OTHER;
+    return { top, colour,
+      legend: top.map((c, k) => ({ code: c, name: regionName(c), col: C.PLACE[k], n: byCountry.get(c) })),
+      other: { n: rest.reduce((n, [, k]) => n + k, 0), codes: rest.map(([c]) => c) }, none: byCountry.get('') || 0 };
+  }
+  /* the segments of one name's bar: [{k, col, n, name}] biggest first, the others joined, no place last */
+  function placeSegs(g, pc) {
+    const out = []; let other = 0;
+    [...g.cn].filter(([c]) => c !== '').sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).forEach(([c, n]) => { if (pc.top.includes(c)) out.push({ k: c, col: pc.colour(c), n, name: regionName(c) }); else other += n; });
+    if (other) out.push({ k: 'other', col: C.OTHER, n: other, name: 'other countries' });
+    const none = g.cn.get('') || 0; if (none) out.push({ k: 'none', col: 'none', n: none, name: 'no place shown' });
+    return out;
+  }
+  /* by order: 'back' = the earliest birth year of anyone with the name, 'when' = the middle birth year; one segment in the band's colour (or hatched when no year is known) */
+  function orderValue(g, mode) { return mode === 'back' ? (g.first ? g.first.y : null) : g.medBy; }
+  function orderBands(list, mode) { return C.bands(list.map(g => orderValue(g, mode))); }
+  function orderSegs(g, mode, bs) {
+    const k = C.bandOf(bs, orderValue(g, mode)); return [k < 0 ? { k: 'none', col: 'none', n: g.n, name: 'no year known' } : { k: 'b' + k, col: bs[k].col, n: g.n, name: bs[k].label }];
+  }
+  const segsOf = (g, mode, ctx) => mode === 'place' ? placeSegs(g, ctx.pc) : orderSegs(g, mode, ctx.bs);
+
+  /* ---------------- words ---------------- */
+  const yr = (v) => v ? (v.est ? '~' : '') + v.y : '';
+  const plural = (n, a, b) => n + ' ' + (n === 1 ? a : b);
+  /* "Germany 3, South Africa 2, no place shown 1" */
+  function mixText(g) {
+    return [...g.cn].sort((a, b) => (a[0] === '') - (b[0] === '') || b[1] - a[1] || a[0].localeCompare(b[0])).map(([c, n]) => (c === '' ? 'no place shown' : regionName(c)) + ' ' + n).join(', ');
+  }
+  function ariaOf(g) {
+    return g.label + ', ' + plural(g.n, 'person', 'people') + (g.top ? ', born mostly in ' + regionName(g.top) : '') + (g.forms.length > 1 ? ', also spelled ' + g.forms.slice(1).map(f => f[0]).join(', ') : '');
+  }
+  /* the text alternative: one row per surname */
+  function tableRows(data) {
+    return data.list.map(g => ({ key: g.key, surname: g.label, people: g.n, living: g.living, mix: mixText(g), earliest: yr(g.first), latest: yr(g.last), spelled: g.forms.length > 1 ? g.forms.map(f => f[0] + ' (' + f[1] + ')').join(', ') : '' }));
+  }
+  /* the people of one name, oldest first; those with no year after them; the living last, by given name (so the order says nothing about when they were born) */
+  function peopleOf(M, g) {
+    const rows = g.ppl.map(r => { const p = M.P[r.i]; return { i: r.i, g: r.g, key: p.key, name: V.fullName(p), living: hid(p), ghost: !!p.ghost, by: nodate(p) ? null : p.by, life: V.lifeText(p), place: nodate(p) ? '' : clean(p.bp), country: countryOf(M, p) }; });
+    const rank = r => r.living ? 2 : r.by == null ? 1 : 0;
+    return rows.sort((a, b) => rank(a) - rank(b) || (a.by == null ? 0 : a.by - b.by) || a.name.localeCompare(b.name) || a.i - b.i);
+  }
+
+  /* ---------------- the kept choice ---------------- */
+  /* one short string in the tree's record: colour (p place, b how far back, w when) + generations (a all, 4, 6, 8) + scope (f the whole file, a one person's ancestors); '' when everything is as it starts */
+  const GENS = [null, 4, 6, 8];
+  function parseX(x) {
+    const s = typeof x === 'string' ? x : '';
+    return { c: s[0] === 'b' ? 'back' : s[0] === 'w' ? 'when' : 'place', gens: s[1] === '4' ? 4 : s[1] === '6' ? 6 : s[1] === '8' ? 8 : null, scope: s[2] === 'a' ? 'anc' : 'file', view: s[3] === 't' ? 'table' : 'cloud', fold: s[4] === 'f' };
+  }
+  function packX(o) {
+    o = o || {};
+    const s = (o.c === 'back' ? 'b' : o.c === 'when' ? 'w' : 'p') + (o.gens === 4 || o.gens === 6 || o.gens === 8 ? String(o.gens) : 'a') + (o.scope === 'anc' ? 'a' : 'f') + (o.view === 'table' ? 't' : 'c') + (o.fold ? 'f' : '');
+    return s === 'pafc' ? '' : s;
+  }
+
+  const API = { familyKey, scopePeople, countryOf, regionName, groups, sizes, placeColours, placeSegs, orderValue, orderBands, orderSegs, segsOf, mixText, ariaOf, tableRows, peopleOf, parseX, packX, GENS, yearText: yr };
+  if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCS = API;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* lifespans.js — the pure parts of the Lifespans view: who is on the chart, the order, the years each bar spans, the axis, the colours and the text alternative. No DOM; tested by test/test-lifespans.js.
+ *
+ * WHAT IT IS. One bar per person from birth to death on one shared year axis: the selected person, their ancestors (up to six generations), their spouses and their descendants (three generations), or the people on the canvas.
+ * Sorted by birth year, or in generations. Colour is direction and distance (ancestors blue, descendants vermillion, paler the further from the selected person) or the country of birth. Small marks sit on a bar for a
+ * marriage and for each child's birth; hatched bands behind the bars are the Atlas's events (a war, a famine) that touched a place where one of them was born or died.
+ *
+ * WHAT IT NEVER DOES. A person who may be living is drawn as a name-and-family bar with no dates and no place, and never sets the axis, a mark or an age; they are put after everyone else in their group so the
+ * order says nothing about when they were born. A year that is an estimate is shown with "~" and its bar has a dashed edge. A person with one known year gets a bar that fades out (no death recorded) or in (no birth
+ * recorded), not an invented one; with none, a note. Nothing here stores or sends anything. */
+(function (root) {
+  'use strict';
+  const V = root.TCV || (typeof require !== 'undefined' ? require('./views.js') : null);
+  const C = root.TCC || (typeof require !== 'undefined' ? require('./viewcolour.js') : null);
+  const LG = root.TC || (typeof require !== 'undefined' ? require('./logic.js') : null);
+
+  const clean = s => String(s == null ? '' : s).replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim();
+  const hid = p => !!p.living;
+  const nodate = p => hid(p) || !!p.ghost;
+  const UP = 6, DOWN = 3, CAP = 120;
+
+  /* ---------------- who is on the chart ---------------- */
+  /* roots: person indexes. scope: 'fam' (ancestors, spouses, descendants), 'anc', 'desc', or 'canvas' (opts.keys: the people on the canvas).
+     returns [{i, gen, kind: 'self' | 'spouse' | 'anc' | 'desc'}] (not yet sorted), `more` = how many were left out by the cap */
+  function members(M, roots, opts) {
+    opts = opts || {}; const up = opts.up == null ? UP : opts.up, down = opts.down == null ? DOWN : opts.down, cap = opts.cap || CAP;
+    const out = new Map();
+    const put = (i, gen, kind) => { if (i != null && i >= 0 && M.P[i] && !out.has(i)) out.set(i, { i, gen, kind }); };
+    if (opts.scope === 'canvas') {
+      (opts.keys || []).forEach(k => { const p = M.byKey.get(k); if (p) put(p.i, 0, 'self'); });
+      const all = [...out.values()]; return { rows: all.slice(0, cap), more: Math.max(0, all.length - cap) };
+    }
+    roots = (roots || []).filter(i => M.P[i]);
+    roots.forEach(i => put(i, 0, 'self'));
+    const wantUp = opts.scope !== 'desc', wantDown = opts.scope !== 'anc';
+    roots.forEach(r => {
+      if (wantUp) { let layer = [r]; for (let g = 1; g <= up; g++) { const next = []; layer.forEach(x => [M.P[x].f, M.P[x].m].forEach(y => { if (y != null && y >= 0 && M.P[y] && !out.has(y)) { put(y, -g, 'anc'); next.push(y); } })); layer = next; if (!layer.length) break; } }
+      if (wantDown) {
+        M.P[r].sp.forEach(s => put(s, 0, 'spouse'));
+        let layer = [r]; for (let g = 1; g <= down; g++) { const next = []; layer.forEach(x => M.P[x].ch.forEach(c => { if (!out.has(c.c)) { put(c.c, g, 'desc'); next.push(c.c); } })); layer = next; if (!layer.length) break; }
+      }
+    });
+    const all = [...out.values()];
+    return { rows: all.slice(0, cap), more: Math.max(0, all.length - cap) };
+  }
+
+  /* ---------------- one person as a bar ---------------- */
+  const yv = (y, est) => y == null ? null : { y, est: !!est };
+  function personRow(M, m) {
+    const p = M.P[m.i], q = nodate(p);
+    const b = q ? null : yv(p.by, p.fl & 1), d = q ? null : yv(p.dy, p.fl & 2);
+    const age = b && d && d.y >= b.y ? { n: d.y - b.y, about: b.est || d.est } : null;
+    const bar = hid(p) ? 'living' : p.ghost ? 'none' : b && d ? 'closed' : b ? 'openEnd' : d ? 'openStart' : 'none';
+    return { i: p.i, key: p.key, gen: m.gen, kind: m.kind, name: V.fullName(p), sur: clean(p.sur), given: clean(p.given), living: hid(p), ghost: !!p.ghost, b, d, age, bar,
+      est: !!((b && b.est) || (d && d.est)), bp: q ? '' : clean(p.bp), dp: q ? '' : clean(p.dp), country: q || !p.bp ? '' : ((LG.placeAt(M, p, p.bp, p.by) || {}).cn || ''), sex: p.sex };
+  }
+  /* small marks on a bar: a marriage, and each child's birth; never one that would tell a living person's year (a living spouse, a living child) */
+  function marks(M, i) {
+    const p = M.P[i]; if (nodate(p)) return [];
+    const out = [];
+    if (p.my != null && p.sp.every(s => !hid(M.P[s]))) out.push({ y: p.my, est: !!(p.fl & 16), t: 'marriage' });
+    p.ch.forEach(c => { const k = M.P[c.c]; if (k && !nodate(k) && k.by != null) out.push({ y: k.by, est: !!(k.fl & 1), t: 'child', who: V.fullName(k) }); });
+    return out.sort((a, b) => a.y - b.y);
+  }
+
+  /* ---------------- the order ---------------- */
+  /* 'birth': by birth year (the death year if that is all there is); 'gen': the oldest generation first, then by birth year; either way: no year after those with one, the living last, then by name */
+  function sortRows(rows, mode) {
+    const key = r => r.living ? 3 : (r.b || r.d) ? 0 : 1;
+    const yr = r => r.b ? r.b.y : r.d ? r.d.y : 0;
+    const gens = mode === 'gen';
+    return rows.slice().sort((a, b) => (gens ? a.gen - b.gen : 0) || key(a) - key(b) || (key(a) === 0 ? yr(a) - yr(b) : 0) || a.name.localeCompare(b.name) || a.i - b.i);
+  }
+
+  /* ---------------- the axis ---------------- */
+  const STEPS = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000];
+  /* the years every bar sits between: [lo, hi] over the known years of people who are not living, with the marks inside them */
+  function extent(rows) {
+    let lo = Infinity, hi = -Infinity;
+    rows.forEach(r => [r.b, r.d].forEach(v => { if (v) { lo = Math.min(lo, v.y); hi = Math.max(hi, v.y); } }));
+    if (!isFinite(lo)) return null;
+    if (hi - lo < 10) { const mid = (lo + hi) / 2; lo = Math.floor(mid - 5); hi = Math.ceil(mid + 5); }
+    return { lo, hi };
+  }
+  /* ticks that are never closer than `minPx` apart: the finest step of 1, 2, 5, 10, 20, 25, 50, 100 ... years that leaves room for the label (decades in a century, centuries in a millennium).
+     returns {lo, hi, step, ticks: [{y, label}], minor: [y], pct(y)}: the range is the known years with a little room either side, and the ticks are the multiples of the step inside it */
+  function axis(ext, widthPx, minPx) {
+    minPx = minPx || 64; widthPx = Math.max(120, widthPx || 600);
+    const pad = Math.max(1, Math.round((ext.hi - ext.lo) * 0.02)), lo = ext.lo - pad, hi = ext.hi + pad, span = hi - lo;
+    const step = STEPS.find(st => st / span * widthPx >= minPx) || STEPS[STEPS.length - 1];   /* the finest step whose labels still fit */
+    const ticks = []; for (let y = Math.ceil(lo / step) * step; y <= hi; y += step) ticks.push({ y, label: String(y) });
+    const ms = step >= 2 && step % 2 === 0 ? step / 2 : 0, minor = []; if (ms) for (let y = Math.ceil(lo / ms) * ms; y <= hi; y += ms) if (y % step) minor.push(y);
+    return { lo, hi, step, ticks, minor, pct: y => (y - lo) / (hi - lo) * 100 };
+  }
+
+  /* ---------------- colour ---------------- */
+  const STEP = [1, 0.86, 0.74, 0.64, 0.56, 0.5];
+  /* by direction: {fill, label} for a row; `card` is the look's card colour the tint fades toward */
+  function dirFill(row, card) {
+    if (row.kind === 'self') return C.DIR.self;
+    if (row.kind === 'spouse') return C.DIR.spouse;
+    const base = row.kind === 'anc' ? C.DIR.anc : C.DIR.desc;
+    return C.tint(base, card, STEP[Math.min(Math.abs(row.gen), STEP.length) - 1]);
+  }
+  /* by country of birth: the same colours as the Surnames view; the biggest seven countries, grey for the rest, hatched for none */
+  function placeColours(rows) {
+    const m = new Map(); rows.forEach(r => m.set(r.country, (m.get(r.country) || 0) + 1));
+    const real = [...m].filter(([c]) => c !== '').sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])), top = real.slice(0, C.PLACE.length).map(([c]) => c);
+    const colour = c => c === '' ? 'none' : top.includes(c) ? C.PLACE[top.indexOf(c)] : C.OTHER;
+    return { top, colour, counts: m, rest: real.slice(C.PLACE.length).reduce((n, [, k]) => n + k, 0), none: m.get('') || 0 };
+  }
+
+  /* ---------------- the Atlas's events behind the bars ---------------- */
+  /* events that overlapped the life of anyone on the chart in a place where they were born or died: [{id, n, f, t, toll, people}] */
+  function eventsFor(M, rows, ext) {
+    if (!M.events || !LG.lifeEvents) return [];
+    const by = new Map();
+    rows.forEach(r => { const p = M.P[r.i]; if (nodate(p)) return; LG.lifeEvents(M, p).forEach(e => { if (ext && (e.t < ext.lo || e.f > ext.hi)) return; const o = by.get(e.id) || Object.assign({ people: 0 }, e); o.people++; by.set(e.id, o); }); });
+    return [...by.values()].sort((a, b) => b.people - a.people || a.f - b.f).slice(0, 10).sort((a, b) => a.f - b.f);
+  }
+
+  /* ---------------- words ---------------- */
+  const ys = v => v ? (v.est ? '~' : '') + v.y : '';
+  const kindWord = r => r.kind === 'self' ? 'selected' : r.kind === 'spouse' ? 'spouse' : r.kind === 'anc' ? (['', 'parent', 'grandparent', 'great-grandparent'][-r.gen] || (-r.gen) + ' generations back') : (r.gen === 1 ? 'child' : 'generation ' + r.gen + ' down');
+  /* the heading over a generation when the chart is in generations */
+  const groupLabel = g => g === 0 ? 'The selected people and their spouses' : g < 0 ? V.genName(-g) : (['', 'Children', 'Grandchildren', 'Great-grandchildren'][g] || (g - 2) + '× great-grandchildren');
+  /* the line on the chart under a name: "1850–1921 · 71" */
+  function lifeLine(r) {
+    if (r.living) return 'living: name and family only';
+    if (r.ghost) return 'named only: no dates';
+    if (!r.b && !r.d) return 'no years recorded';
+    return (ys(r.b) || '?') + '–' + (ys(r.d) || '?') + (r.age ? ' · ' + (r.age.about ? 'about ' : '') + r.age.n : '');
+  }
+  /* one sentence for a screen reader */
+  function ariaOf(r) {
+    const k = kindWord(r);
+    if (r.living) return r.name + ', ' + k + ', may be living: name and family only, no dates';
+    if (r.ghost) return r.name + ', ' + k + ', named only: no dates recorded';
+    return r.name + ', ' + k + ', ' + (r.b ? 'born ' + (r.b.est ? 'about ' : '') + r.b.y : 'birth not recorded') + (r.d ? ', died ' + (r.d.est ? 'about ' : '') + r.d.y : r.b ? ', death not recorded' : '') + (r.age ? ', aged ' + (r.age.about ? 'about ' : '') + r.age.n : '');
+  }
+  /* the text alternative: one row per person, in the order of the chart */
+  function tableRows(rows) {
+    return rows.map(r => ({ key: r.key, name: r.name, relation: kindWord(r), born: r.living ? 'not shown' : ys(r.b) || '', died: r.living ? 'not shown' : ys(r.d) || '', age: r.age ? (r.age.about ? 'about ' : '') + r.age.n : '', place: r.bp, living: r.living }));
+  }
+
+  /* ---------------- the kept choice ---------------- */
+  /* five or six letters: colour (g direction, c country) + order (b birth year, g generations) + who (f family, a ancestors, d descendants, c the canvas) + marks (m shown, n hidden) + history (h shown, n hidden) + f if the panel is folded to its handle; '' when as it starts */
+  function parseX(x) {
+    const s = typeof x === 'string' ? x : '';
+    return { c: s[0] === 'c' ? 'country' : 'gen', sort: s[1] === 'g' ? 'gen' : 'birth', scope: s[2] === 'a' ? 'anc' : s[2] === 'd' ? 'desc' : s[2] === 'c' ? 'canvas' : 'fam', marks: s[3] !== 'n', hist: s[4] !== 'n', fold: s[5] === 'f' };
+  }
+  function packX(o) {
+    o = o || {};
+    const s = (o.c === 'country' ? 'c' : 'g') + (o.sort === 'gen' ? 'g' : 'b') + (o.scope === 'anc' ? 'a' : o.scope === 'desc' ? 'd' : o.scope === 'canvas' ? 'c' : 'f') + (o.marks === false ? 'n' : 'm') + (o.hist === false ? 'n' : 'h') + (o.fold ? 'f' : '');
+    return s === 'gbfmh' ? '' : s;
+  }
+
+  const API = { members, personRow, marks, sortRows, extent, axis, dirFill, placeColours, eventsFor, lifeLine, ariaOf, kindWord, groupLabel, tableRows, parseX, packX, STEP, UP, DOWN, CAP };
+  if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCLF = API;
 })(typeof window !== 'undefined' ? window : globalThis);
 
 /* find.js — the pure parts of Find, the search that lives in the right-hand pane (and, while the canvas is empty, in the middle of the canvas). No DOM; tested by test/test-find.js.
@@ -4076,7 +4628,7 @@ function usable() { /* the part of the screen not covered by the dock and the in
   const right = info.classList.contains('on') && !S.phone ? info.getBoundingClientRect().left - 12 : innerWidth - 8;
   const top = 58, left = S.phone ? 8 : 64, th = typeof trailHeight === 'function' ? trailHeight() : 0;   /* the Trail band, when it is up, is not canvas either */
   const b0 = S.phone && info.classList.contains('on') ? Math.min(bottom, info.getBoundingClientRect().top - 8) : bottom;
-  return { l: left, t: top, r: right, b: th ? Math.min(b0, $('#trail').getBoundingClientRect().top - 12) : b0 };
+  return { l: left, t: top, r: right, b: th ? Math.min(b0, (typeof slvOn === 'function' && slvOn() ? $('#slvPanel') : $('#trail')).getBoundingClientRect().top - 12) : b0 };
 }
 let viewTween = null;
 function animateView(target, ms) {
@@ -6015,7 +6567,7 @@ const fanIsOn = () => LV.m === 'fan';
 /* the field of the saved record (null when everything is as it starts, so an untouched tree's record is exactly what it was) */
 function lensSerialise() {
   if (!lensAvail()) return null;
-  const l = { m: LV.m, g: LV.g, c: LV.c, t: LV.t, r: LV.m === 'fan' && LV.root ? LV.root : '' };
+  const l = Object.assign({ m: LV.m, g: LV.g, c: LV.c, t: LV.t, r: LV.m === 'fan' && LV.root ? LV.root : '' }, slvFields());   // slvFields (panelviews.js): the short strings of the panel views
   return TCV.lensIsDefault(l) ? null : l;
 }
 /* the canvas's own pan and zoom: while the Fan is open S.view is the Fan's, and the canvas's is parked in LV.cv */
@@ -6054,16 +6606,17 @@ function lensWire() {
 }
 function lensBtn() {
   const b = $('#bLens'); if (!b || b.hidden) return;
-  const txt = 'View: ' + (fanIsOn() ? 'Fan' : 'Canvas') + '. Choose how the people are drawn.';
-  b.title = txt; b.setAttribute('aria-label', txt); b.classList.toggle('on', fanIsOn());
+  const txt = 'View: ' + (fanIsOn() ? 'Fan' : slvOn() ? slvName() : 'Canvas') + '. Choose how the people are drawn.';
+  b.title = txt; b.setAttribute('aria-label', txt); b.classList.toggle('on', fanIsOn() || slvOn());
 }
 function lensMenu() {
   const m = $('#lensMenu'); if (!m) return;
   const item = (k, t, sub, on, dis) => `<button type="button" role="menuitemradio" class="lvi${on ? ' on' : ''}" data-lv="${k}" aria-checked="${on}"${dis ? ' disabled' : ''}><span class="lvd" aria-hidden="true"></span><span><b>${t}</b><small>${sub}</small></span></button>`;
   m.innerHTML = `<h4>View</h4><p class="plines"><small>How the people are drawn. <b>Look</b>, the half-sun button, is the colours.</small></p>`
     + `<div role="menu" aria-label="View">`
-    + item('canvas', 'Canvas', 'Free: the cards sit where you put them', !fanIsOn())
+    + item('canvas', 'Canvas', 'Free: the cards sit where you put them', LV.m === 'canvas')
     + item('fan', 'Fan', 'The ancestors of the selected person as a half circle, a ring a generation', fanIsOn())
+    + slvMenuItems()   // Surnames, Lifespans (panelviews.js)
     + item('generations', 'Generations <em class="lvsoon">soon</em>', 'Everyone in rows by generation', false, true) + `</div>`
     + `<button type="button" class="lk-toggle${LV.t ? ' on' : ''}" role="switch" aria-checked="${!!LV.t}" data-lv="trail"><span class="stx"><b>Direct-line strip open</b><i>A band along the very bottom: the selected person’s line, one ancestor a generation, and where they lived. Off folds it to a thin handle.</i></span><span class="knob"></span></button>`;
 }
@@ -6085,12 +6638,18 @@ function fanStartKey() {
 }
 function lensSet(m, o) {
   o = o || {};
-  if (!lensAvail() || m === LV.m || (m !== 'fan' && m !== 'canvas')) return;
-  if (m === 'fan') {
+  if (!lensAvail() || m === LV.m || (m !== 'fan' && m !== 'canvas' && !slvHas(m))) return;
+  const wasPanel = slvOn(); if (wasPanel) slvClose();   // leaving a panel view (Surnames, Lifespans) for the canvas, the Fan or another panel
+  if (slvHas(m)) {
+    if (fanIsOn()) fanClose();
+    if (document.body.classList.contains('pr')) { toast('Compare is laying the people out. Stop comparing to use ' + SLV.views[m].title + '.', 3600); lensBtn(); return; }
+    if (!slvOpen(m, o)) { lensBtn(); return; }
+    LV.m = m;
+  } else if (m === 'fan') {
     if (document.body.classList.contains('pr')) { toast('Compare is laying the people out. Stop comparing to use the Fan.', 3600); return; }
     const k = fanStartKey(); if (!k) { toast('Put a person on the canvas and select them: the Fan is drawn from them.', 3600); return; }
     fanOpen(k, o);
-  } else fanClose();
+  } else if (!wasPanel) fanClose();
   lensBtn(); save();
 }
 function fanOpen(key, o) {
@@ -6162,7 +6721,7 @@ function lensOnZoom() {
   if (!fanIsOn() || LV.list || fanBucket() === LV.bucket || fanRaf) return;
   fanRaf = requestAnimationFrame(() => { fanRaf = 0; if (fanIsOn() && fanBucket() !== LV.bucket) fanRender(); });
 }
-function lensOnTheme() { if (fanIsOn()) fanRender(); trailRender(); }
+function lensOnTheme() { if (fanIsOn()) fanRender(); trailRender(); slvOnTheme(); }
 
 /* ---------------- the Fan: the bar, the legend, the list ---------------- */
 function fanBar() {
@@ -6254,7 +6813,7 @@ function lensClick(target) {   /* called when a press that did not drag ends on 
   fanActivate(+w.dataset.n); return true;
 }
 function lensOnSelect() {
-  trailOnSelect();
+  trailOnSelect(); slvOnSelect();
   if (!fanIsOn()) return;
   const one = S.sel.size === 1 ? M.byKey.get([...S.sel][0]) : null;
   if (one && LV.F && ![...LV.byN.values()].some(s => s.i === one.i)) { fanRecentre(one.key, true); return; }   // chosen somewhere else (the search, the panel): the Fan follows
@@ -6314,8 +6873,8 @@ function trailFocusKey() {
   if (LV.tf && !M.byKey.has(LV.tf)) LV.tf = null;
   return LV.tf;
 }
-function trailShown() { return lensAvail() && !fanIsOn() && !document.body.classList.contains('pr') && S.cards.size > 0 && !!trailFocusKey(); }
-function trailHeight() { const t = $('#trail'); return t && t.classList.contains('on') ? t.getBoundingClientRect().height : 0; }
+function trailShown() { return lensAvail() && !fanIsOn() && !slvOn() && !document.body.classList.contains('pr') && S.cards.size > 0 && !!trailFocusKey(); }
+function trailHeight() { if (typeof slvBandH === 'function' && slvOn()) return slvBandH(); const t = $('#trail'); return t && t.classList.contains('on') ? t.getBoundingClientRect().height : 0; }   // a panel view (Surnames, Lifespans) is the bottom band while it is open: slvBandH
 let trailQ = 0;
 function trailOnSelect() { if (!lensAvail()) return; if (S.sel.size === 1) { const k = [...S.sel][0], was = LV.tf; LV.tf = k; if (was !== k && LV.model && !LV.model.anc.some(c => c.key === k)) LV.side = null; } cancelAnimationFrame(trailQ); trailQ = requestAnimationFrame(trailRender); }
 function trailSide(i) { return LV.side || TCV.defaultSide(M, i); }
@@ -6365,7 +6924,7 @@ function trailRender() {
     el.addEventListener('click', trailClick);
   }
   el.classList.toggle('on', show); el.hidden = !show;
-  if (!show) { document.documentElement.style.setProperty('--trail-h', '0px'); return; }
+  if (!show) { document.documentElement.style.setProperty('--trail-h', Math.ceil(trailHeight()) + 'px'); return; }
   const i = M.byKey.get(LV.tf).i, side = trailSide(i), T = TCV.trailModel(M, i, side, { cap: TRAIL_CAP });
   LV.model = T; el.dataset.size = String(LV.t);
   const who = T.focus.name;
@@ -6435,7 +6994,7 @@ function trailLift() {
     for (const e of document.querySelectorAll('body > *')) {
       if (e.id === 'trail' || e.id === 'trailTip' || e.classList.contains('dock') || e.id === 'stage') { continue; }
       const had = e.classList.contains('trlift'), cs = getComputedStyle(e);
-      if (cs.position !== 'fixed' || cs.display === 'none' || cs.visibility === 'hidden' || /^(mini|playBar|info|infoTab|fan|fanBar|fanLegend|fanTip|fanList|linesView|toast|prLegend)$/.test(e.id)) { if (had) e.classList.remove('trlift'); continue; }
+      if (cs.position !== 'fixed' || cs.display === 'none' || cs.visibility === 'hidden' || /^(mini|playBar|info|infoTab|fan|fanBar|fanLegend|fanTip|fanList|linesView|toast|prLegend|slvPanel|slvTip)$/.test(e.id)) { if (had) e.classList.remove('trlift'); continue; }
       const r = e.getBoundingClientRect(); if (!r.width || !r.height || r.height > innerHeight * 0.7) { if (had) e.classList.remove('trlift'); continue; }
       const bottom = r.bottom + (had ? h : 0), want = h > 0 && r.top + (had ? h : 0) > innerHeight * 0.35 && bottom > innerHeight - h - 4 && bottom <= innerHeight + 2 && cs.bottom !== 'auto';
       if (want !== had) e.classList.toggle('trlift', want);
@@ -6464,14 +7023,474 @@ function trailGo(key) {
 function lensBoot(d) {
   if (!lensAvail()) return;
   const l = TCV.cleanLens(d && d.lens);
-  LV.g = l.g; LV.c = l.c; LV.t = l.t;
+  LV.g = l.g; LV.c = l.c; LV.t = l.t; slvLoad(l);
   if (l.m === 'fan') {
     const k = l.r && M.byKey.has(l.r) ? l.r : fanStartKey();
     if (k && S.cards.size) { LV.came = true; fanOpen(k, { boot: true }); }
-  }
+  } else if (slvHas(l.m) && S.cards.size && !document.body.classList.contains('pr') && slvOpen(l.m, { boot: true })) LV.m = l.m;
   trailRender();
 }
 addEventListener('resize', () => { trailMeasure(); });
+
+/* panelviews.js — the frame the Surnames and Lifespans views share (the View menu items, the band along the bottom, the handle that folds it, the way out, the kept choice). The views themselves are in
+ * surnamesview.js and lifespansview.js; their pure parts (what is counted, sizes, colours, geometry) are in surnames.js, lifespans.js and viewcolour.js and are tested there.
+ *
+ * A PANEL VIEW is a lens like the Fan, but drawn as a BAND: full width along the bottom of the canvas, up to about half the height and scrolling inside, with the canvas still live above it. While it is open it is the
+ * bottom-most thing and stands where the Trail band stands: the Trail is put away, and --trail-h, --dock-h and usable() count the band's height, so the canvas, its minimap and its buttons keep clear of it and
+ * Fit fits above it. Clicking a person in a panel selects them on the canvas (putting them there if they are not) and pans to them.
+ * IT FOLDS to a one-line handle ("Surnames · 15 names · ancestors of X"): Enter or a click on the handle toggles it, Esc folds it (and on the folded handle closes it); the Canvas button closes it. Folded or open is kept with the tree.
+ *
+ * What is kept in the tree's record (field `vw`): the view in use (m: 'surnames' | 'lifespans') and, for each view, one short string of letters (xs, xl) that says only which buttons were pressed, and whether it is folded.
+ * Nothing about anyone is kept, and nothing is sent. A living person is drawn by name and family only, here as everywhere. */
+const SLV = { m: null, el: null, views: {}, came: false, raf: 0, fold: false, ro: null };
+const slvReg = v => { SLV.views[v.id] = v; };
+const slvHas = m => !!SLV.views[m];
+const slvOn = () => !!SLV.m;
+const slvView = () => (SLV.m ? SLV.views[SLV.m] : null);
+
+/* ---------------- what the View button asks of the panels ---------------- */
+function slvMenuItems() {
+  return Object.values(SLV.views).map(v => {
+    const on = SLV.m === v.id;
+    return `<button type="button" role="menuitemradio" class="lvi${on ? ' on' : ''}" data-lv="${v.id}" aria-checked="${on}"><span class="lvd" aria-hidden="true"></span><span><b>${esc(v.title)}</b><small>${esc(v.sub)}</small></span></button>`;
+  }).join('');
+}
+const slvName = () => (slvView() ? slvView().title : '');
+/* the fields of the saved record: each view's short string, only when it is not as it starts */
+function slvFields() { const o = {}; Object.values(SLV.views).forEach(v => { const x = v.pack(); if (x) o[v.field] = x; }); return o; }
+function slvLoad(l) { Object.values(SLV.views).forEach(v => v.unpack(l && typeof l[v.field] === 'string' ? l[v.field] : '')); const v = l && SLV.views[l.m]; SLV.fold = !!(v && v.foldX); }
+/* the band's height, for the canvas to keep clear of */
+function slvBandH() { const e = SLV.el; return SLV.m && e && !e.hidden && getComputedStyle(e).display !== 'none' ? e.getBoundingClientRect().height : 0; }
+
+/* ---------------- opening and closing ---------------- */
+function slvHost() {
+  if (SLV.el) return SLV.el;
+  const el = document.createElement('section'); el.id = 'slvPanel'; el.hidden = true; document.body.appendChild(el); SLV.el = el;
+  el.addEventListener('click', e => {
+    if (SLV.came && !e.target.closest('.slvcame')) SLV.came = false;   // the note that the view came back goes once the visitor does anything
+    const a = e.target.closest('[data-slv]');
+    if (a) { const k = a.dataset.slv; if (k === 'canvas') { lensSet('canvas'); const b = $('#bLens'); if (b) b.focus(); } else if (k === 'fold') slvFold(!SLV.fold); else if (k === 'ok') slvDraw(); return; }
+    const v = slvView(); if (v && v.click) v.click(e);
+  });
+  el.addEventListener('keydown', e => { const v = slvView(); if (v && v.key) v.key(e); });
+  if (window.ResizeObserver) { SLV.ro = new ResizeObserver(() => { if (SLV.m) slvTrailSoon(); }); SLV.ro.observe(el); }
+  return el;
+}
+/* fold to the handle, or open again; the focus stays on the handle */
+function slvFold(f) {
+  SLV.fold = !!f; slvDraw(); save();
+  const h = $('#slvPanel [data-slv="fold"]'); if (h) h.focus({ preventScroll: true });
+}
+/* true if the panel opened; false (with a toast saying why) if it could not */
+function slvOpen(m, o) {
+  o = o || {}; const v = SLV.views[m]; if (!v) return false;
+  const why = v.start(o); if (why) { toast(why, 3600); return false; }
+  closePop(); SLV.m = m; SLV.came = !!o.boot; if (!o.boot) SLV.fold = false;
+  document.body.classList.add('slvon', 'slv-' + m);
+  slvHost().hidden = false; slvTrail(); lensBtn(); slvDraw();
+  if (!o.boot) setTimeout(() => { const h = $('#slvPanel [data-slv="fold"]'); if (h && SLV.m === m) h.focus({ preventScroll: true }); }, 0);   // after the menu has handed the focus back to its button
+  if (!o.boot) { const cs = [...S.sel].map(k => S.cards.get(k)).filter(Boolean); if (cs.length) ensureVisible(cs); }   // the selected person stays in sight above the band
+  return true;
+}
+/* the Trail band goes while a panel is open and comes back after; the space the canvas keeps for what stands along the bottom (--dock-h) is measured again, as the band does not do it when it is hidden */
+function slvTrail() { trailRender(); if (typeof dockH === 'function') dockH(); }
+let slvTq = 0;
+function slvTrailSoon() { if (!slvTq) slvTq = requestAnimationFrame(() => { slvTq = 0; if (SLV.m) { slvTrail(); trailLiftSoon(); } }); }
+function slvClose() {
+  if (!SLV.m) return;
+  const v = slvView(); if (v && v.stop) v.stop();
+  document.body.classList.remove('slvon', 'slv-' + SLV.m);
+  SLV.m = null; SLV.came = false; LV.m = 'canvas';
+  if (SLV.el) { SLV.el.hidden = true; SLV.el.innerHTML = ''; }
+  const tip = $('#slvTip'); if (tip) tip.classList.remove('on');
+  /* back on the canvas: whoever was chosen in the panel is brought into view */
+  const cs = [...S.sel].map(k => S.cards.get(k)).filter(Boolean);
+  if (cs.length) { ensureVisible(cs); if (cs.length === 1) pulseCard(cs[0]); }
+  drawEdges(); miniDraw(); slvTrail();
+}
+/* the whole panel again: the frame (title, the way out), then the view's controls and body */
+function slvDraw() {
+  const v = slvView(); if (!v || !SLV.el) return;
+  const el = SLV.el, keep = el.querySelector('.slvbody'), top = keep ? keep.scrollTop : 0, left = keep ? keep.scrollLeft : 0;
+  const scr = [...el.querySelectorAll('.slvscroll')].map(x => x.scrollTop);
+  const had = document.activeElement && el.contains(document.activeElement) ? document.activeElement : null;
+  const focusSel = had ? (had.dataset.slv ? `[data-slv="${had.dataset.slv}"]` : had.dataset.kk ? `[data-kk="${had.dataset.kk.replace(/"/g, '')}"]` : had.dataset.sn ? `[data-sn="${had.dataset.sn.replace(/"/g, '')}"]` : had.dataset.sl ? `[data-sl="${had.dataset.sl}"]` : '') : '';
+  const r = v.render(), fold = SLV.fold;
+  el.setAttribute('aria-label', v.title); el.classList.toggle('folded', fold);
+  el.innerHTML = (SLV.came && !fold ? `<div class="slvcame" role="status"><span>Your view came back: ${esc(v.title)}.</span><button type="button" class="fbs" data-slv="canvas">Back to the canvas</button><button type="button" class="fbx" data-slv="ok" aria-label="Dismiss">${icon('x', '')}</button></div>` : '')
+    + `<div class="slvh"><button type="button" class="slvfold" data-slv="fold" aria-expanded="${!fold}" aria-controls="slvInner" title="${fold ? 'Open' : 'Fold'} ${esc(v.title)} (Enter; Esc folds it)"><span class="slvt"><b>${esc(r.title || v.title)}</b><small id="slvSub" aria-live="polite">${esc(fold ? (r.fold || r.sub || '') : (r.sub || ''))}</small></span><span class="slvch" aria-hidden="true">${fold ? '&#9652;' : '&#9662;'}</span></button><button type="button" class="fbs fbc" data-slv="canvas" title="Close ${esc(v.title)}: the free canvas (Canvas)">Canvas</button></div>`
+    + (fold ? '' : `<div id="slvInner" class="slvin"><div class="slvc">${r.controls}</div>`
+      + (r.legend ? `<div class="slvlg" role="group" aria-label="${esc(r.legendLabel || 'What the colours mean')}">${r.legend}</div>` : '')
+      + `<div class="slvbody${r.split ? ' split' : ''}">${r.body}</div></div>`);
+  const b = el.querySelector('.slvbody'); if (b) { b.scrollTop = top; b.scrollLeft = left; }
+  el.querySelectorAll('.slvscroll').forEach((x, k) => { if (scr[k]) x.scrollTop = scr[k]; });
+  if (focusSel) { const t = el.querySelector(focusSel); if (t) t.focus({ preventScroll: true }); }
+  if (v.after) v.after(el);
+  slvTrailSoon();
+}
+const slvDrawSoon = () => { if (SLV.raf) return; SLV.raf = requestAnimationFrame(() => { SLV.raf = 0; if (SLV.m) slvDraw(); }); };
+
+/* ---------------- what the canvas tells the panels ---------------- */
+function slvOnSelect() { const v = slvView(); if (v && v.select) { if (v.select() !== false) slvDrawSoon(); } }
+function slvOnTheme() { if (SLV.m) slvDraw(); }
+function slvOnNames() { if (SLV.m) slvDrawSoon(); }
+let slvResizeT = 0;
+addEventListener('resize', () => { if (!SLV.m) return; clearTimeout(slvResizeT); slvResizeT = setTimeout(() => { if (SLV.m) slvDraw(); }, 140); });
+
+/* Esc: on the open band it folds it, on the folded handle it closes it; only when the focus is in the band (or nowhere), so the canvas's own Esc (let go of the selection) still works from the canvas */
+addEventListener('keydown', e => {
+  if (!SLV.m || e.key !== 'Escape' || e.defaultPrevented) return;
+  const mn = $('#lensMenu'); if (mn && mn.classList.contains('on')) return;
+  const ae = document.activeElement; if (ae && ae !== document.body && !SLV.el.contains(ae)) return;
+  const v = slvView(); if (v && v.esc && v.esc(e)) { e.preventDefault(); e.stopImmediatePropagation(); return; }
+  e.preventDefault(); e.stopImmediatePropagation();
+  if (!SLV.fold) slvFold(true); else { lensSet('canvas'); const b = $('#bLens'); if (b) b.focus(); }
+}, true);
+
+/* ---------------- shared pieces the views draw with ---------------- */
+const slvSeg = (k, on, t, tip, dis) => `<button type="button" class="fbs${on ? ' on' : ''}" data-sl="${k}" aria-pressed="${on}" title="${esc(tip || t)}"${dis ? ' disabled' : ''}>${t}</button>`;
+const slvGroup = (label, inner) => `<span class="slvg"><b>${esc(label)}</b><span class="fbg" role="group" aria-label="${esc(label)}">${inner}</span></span>`;
+/* a bar of coloured parts: segs = [{col, n, name}]; 'none' is the hatched part. Every part has an ink edge, so a colour is seen by its outline as well as its fill. */
+function slvBar(segs, cls) {
+  return `<span class="slbar${cls ? ' ' + cls : ''}" aria-hidden="true">` + segs.map(s => s.col === 'none' ? `<i class="hatch" style="flex:${s.n}"></i>` : `<i style="flex:${s.n};background:${s.col}"></i>`).join('') + '</span>';
+}
+const slvSwatch = col => col === 'none' ? '<i class="slsw hatch"></i>' : `<i class="slsw" style="background:${col}"></i>`;
+/* put a person on the canvas (if they are not there) and select them */
+function slvGo(key) {
+  const p = M.byKey.get(key); if (!p) return null;
+  fanEnsureCard(p); select([p.key]);
+  const c = S.cards.get(p.key); if (c) { ensureVisible([c]); pulseCard(c); }   // the canvas above the band pans to them
+  return p;
+}
+/* bring several people across at once (the people of one surname): they are laid out in rows round the middle of the canvas as it is now, selected and fitted into the part of the canvas above the band; Undo takes them off */
+function slvDrop(keys) {
+  const ps = keys.map(k => M.byKey.get(k)).filter(p => p && !S.cards.has(p.key)); if (!ps.length) return;
+  snapshot(); const v = viewCentre(), cols = Math.min(5, ps.length), x0 = v.x - (cols * (W + 24)) / 2;
+  ps.forEach((p, j) => { const sp = freeSpot(x0 + (j % cols) * (W + 24), v.y - H / 2 + Math.floor(j / cols) * (H + 40)); const c = newCard(p.i, sp.x, sp.y); c.pinned = true; });
+  refreshAll(); drawEdges(); hideHint(); save();
+  const here = keys.filter(k => S.cards.has(k));
+  select(here);
+  const cs = here.map(k => S.cards.get(k)).filter(Boolean); if (cs.length) fit(cs, { maxK: 1 });
+  toast(ps.length + (ps.length === 1 ? ' person is' : ' people are') + ' on the canvas now (Undo takes them off)', 3000);
+}
+/* roving focus along a list of buttons: arrows, Home and End */
+function slvRove(e, sel) {
+  const k = e.key; if (!/^(Arrow(Left|Right|Up|Down)|Home|End)$/.test(k)) return false;
+  const all = [...SLV.el.querySelectorAll(sel)], i = all.indexOf(document.activeElement); if (i < 0) return false;
+  const j = k === 'Home' ? 0 : k === 'End' ? all.length - 1 : (k === 'ArrowLeft' || k === 'ArrowUp') ? Math.max(0, i - 1) : Math.min(all.length - 1, i + 1);
+  e.preventDefault(); all.forEach(b => b.setAttribute('tabindex', '-1')); all[j].setAttribute('tabindex', '0'); all[j].focus(); return true;
+}
+function slvTip(html, at) {
+  let t = $('#slvTip');
+  if (!t) { t = document.createElement('div'); t.id = 'slvTip'; t.setAttribute('role', 'tooltip'); document.body.appendChild(t); }
+  if (!html) { t.classList.remove('on'); return; }
+  t.innerHTML = html; t.classList.add('on'); const r = t.getBoundingClientRect();
+  let x = at.x + 14, y = at.y + 16; x = Math.max(8, Math.min(innerWidth - r.width - 8, x)); y = Math.max(60, Math.min(innerHeight - r.height - 8, y));
+  if (at.y + 16 + r.height > innerHeight - 8) y = Math.max(60, at.y - r.height - 12);
+  t.style.left = x + 'px'; t.style.top = y + 'px';
+}
+
+/* surnamesview.js — the Surnames view: the surnames of the file as a cloud, sized by the number of people, each underlined by a bar of colour. The counting, sizes, colours and words are in surnames.js (tested).
+ *
+ * THE CLOUD is a wrapped, centred run of buttons, biggest name first, so it can never overlap, always draws the same way, reads left to right, and is in the page for a screen reader and the keyboard (arrows move along it).
+ * THE BAR under a name is its colour: where those people were born (a part for each place, the legend gives the count of each), or how far back the name goes, or when it was typical. The words stay in the look's own ink.
+ * THE LIST. A name picked in the cloud lists its people, oldest first; each is a button that puts them on the canvas (if they are not there) and selects them; "Put these on the canvas" brings a small family across at once.
+ * THE TABLE is the same facts as text (surname, people, where born, earliest and latest birth, spellings), reachable with "Show as: Table".
+ * Whole file by default; "Ancestors of" the selected person, with 4, 6, 8 or all generations, narrows it. A living person counts toward their surname and shows no place or year. */
+const TCS = window.TCS, TCC = window.TCC;
+const SNV = { id: 'surnames', field: 'xs', title: 'Surnames', sub: 'The surnames in the file, sized by the number of people, coloured by where they were born', c: 'place', gens: null, scope: 'file', view: 'cloud', root: null, sn: null, cty: null, kb: null, reveal: false, D: null, set: new Set() };
+const SN_CAP = 160, SN_TABLE_CAP = 600;
+const snGiven = p => (p.given || p.sur || p.name || '').split(' ')[0];
+const snSelOne = () => (S.sel.size === 1 ? [...S.sel][0] : null);
+
+SNV.pack = () => TCS.packX({ c: SNV.c, gens: SNV.gens, scope: SNV.scope, view: SNV.view, fold: SLV.fold });
+SNV.unpack = x => { const o = TCS.parseX(x); SNV.c = o.c; SNV.gens = o.gens; SNV.scope = o.scope; SNV.view = o.view; SNV.foldX = o.fold; };
+/* opening: the person the ancestors are counted from is the one selected (or the marked one); with nobody, the whole file */
+SNV.start = o => {
+  const k = snSelOne() || [...S.sel].find(x => M.byKey.has(x)) || (S.mark && M.byKey.has(S.mark) ? S.mark : null);
+  SNV.root = k && M.byKey.has(k) ? k : null; SNV.sn = null; SNV.cty = null; SNV.kb = null;
+  if (!SNV.root) SNV.scope = 'file';
+  return '';
+};
+SNV.stop = () => { SNV.D = null; };
+/* the canvas selection changed: the "ancestors of" person follows it if the new person is not already among those counted */
+SNV.select = () => {
+  const one = snSelOne(); if (!one || !M.byKey.has(one)) return true;
+  if (SNV.scope === 'file') SNV.root = one; else if (one !== SNV.root && !SNV.set.has(one)) { SNV.root = one; SNV.sn = null; }
+  return true;
+};
+
+function snPeopleWords() {
+  const p = SNV.root ? M.byKey.get(SNV.root) : null;
+  return SNV.scope === 'anc' && p ? 'the ancestors of ' + p.name + (SNV.gens ? ', ' + SNV.gens + ' generations back' : ', every generation') : 'everyone in the file';
+}
+function snLegend(D, pc, bs) {
+  const btn = (k, sw, t, n, tip) => `<button type="button" class="sllg${SNV.cty === k ? ' on' : ''}" data-cty="${esc(k)}" aria-pressed="${SNV.cty === k}" title="${esc(tip)}">${sw}<span>${t}</span><b>${n}</b></button>`;
+  if (SNV.c === 'place') {
+    let h = '<span class="slvlgt">Where born (most common place of birth for each name; the bar under a name shows the mix):</span>';
+    pc.legend.forEach(l => { h += btn(l.code, slvSwatch(l.col), esc(l.code), l.n, l.name + ': ' + l.n + (l.n === 1 ? ' person' : ' people') + '. Press to show only the names with someone born here'); });
+    if (pc.other.n) h += btn('~other', slvSwatch(TCC.OTHER), 'other', pc.other.n, 'Other countries: ' + pc.other.codes.map(TCS.regionName).join(', '));
+    if (pc.none) h += btn('~none', slvSwatch('none'), 'no place shown', pc.none, 'People with no birthplace recorded, and anyone who may be living (their place is never shown)');
+    return h;
+  }
+  const what = SNV.c === 'back' ? 'How far back (the earliest birth year of anyone with the name; the bar under a name is its band):' : 'When (the middle birth year of the people with the name; the bar under a name is its band):';
+  let h = `<span class="slvlgt">${what}</span>`;
+  bs.forEach((b, k) => { const n = D.list.filter(g => TCC.bandOf(bs, TCS.orderValue(g, SNV.c)) === k).length; h += `<span class="sllg" title="${n} names"><i class="slsw" style="background:${b.col}"></i><span>${esc(b.label)}</span><b>${n}</b></span>`; });
+  const nn = D.list.filter(g => TCS.orderValue(g, SNV.c) == null).length;
+  if (nn) h += `<span class="sllg" title="${nn} names with no birth year known"><i class="slsw hatch"></i><span>no year known</span><b>${nn}</b></span>`;
+  return h;
+}
+/* does this name have someone in the place being filtered on? */
+function snMatches(g, pc) {
+  if (SNV.c !== 'place' || SNV.cty == null) return true;
+  if (SNV.cty === '~none') return (g.cn.get('') || 0) > 0;
+  if (SNV.cty === '~other') return [...g.cn].some(([c, n]) => c !== '' && !pc.top.includes(c) && n > 0);
+  return (g.cn.get(SNV.cty) || 0) > 0;
+}
+
+SNV.render = () => {
+  const rootP = SNV.root ? M.byKey.get(SNV.root) : null;
+  if (!rootP) SNV.root = null;
+  if (SNV.scope === 'anc' && !rootP) SNV.scope = 'file';
+  const ppl = TCS.scopePeople(M, { scope: SNV.scope, root: rootP ? rootP.i : null, gens: SNV.gens, filter: S.filter });
+  const D = TCS.groups(M, ppl); SNV.D = D; SNV.set = new Set(ppl.map(r => M.P[r.i].key));
+  const pc = TCS.placeColours(D.byCountry), bs = SNV.c === 'place' ? null : TCS.orderBands(D.list, SNV.c), ctx = { pc, bs };
+  if (SNV.cty != null && SNV.c === 'place' && !(SNV.cty === '~none' || SNV.cty === '~other' || pc.top.includes(SNV.cty))) SNV.cty = null;
+  if (SNV.sn && !D.list.some(g => g.key === SNV.sn)) SNV.sn = null;
+  const sub = D.rows.toLocaleString('en') + ' ' + (D.rows === 1 ? 'person' : 'people') + ' · ' + D.list.length.toLocaleString('en') + ' ' + (D.list.length === 1 ? 'surname' : 'surnames') + (D.none ? ' · ' + D.none.toLocaleString('en') + ' with no surname recorded' : '') + ' · ' + snPeopleWords();
+  const g1 = rootP ? snGiven(rootP) : '';
+  const controls = slvGroup('Colour by', slvSeg('c:place', SNV.c === 'place', 'Where born', 'The bar under each name shows where its people were born, a part for each place') + slvSeg('c:back', SNV.c === 'back', 'How far back', 'Colour by the earliest birth year of anyone with the name') + slvSeg('c:when', SNV.c === 'when', 'When', 'Colour by the middle birth year of the people with the name'))
+    + slvGroup('People', slvSeg('s:file', SNV.scope === 'file', 'Everyone', 'Every person in the file (the archives shown)') + slvSeg('s:anc', SNV.scope === 'anc', rootP ? esc(g1) + '’s ancestors' : 'Ancestors', rootP ? 'Only ' + rootP.name + ' and their ancestors' : 'Select a person on the canvas first', !rootP))
+    + slvGroup('Generations', [[0, 'All'], [4, '4'], [6, '6'], [8, '8']].map(([n, t]) => slvSeg('g:' + n, (SNV.gens || 0) === n, t, n ? n + ' generations back from ' + (rootP ? rootP.name : 'the selected person') : 'Every generation', SNV.scope !== 'anc')).join(''))
+    + slvGroup('Show as', slvSeg('v:cloud', SNV.view === 'cloud', 'Cloud') + slvSeg('v:table', SNV.view === 'table', 'Table', 'The same facts as a table: surname, people, where born, earliest and latest birth'));
+
+  const shown = D.list.filter(g => snMatches(g, pc));
+  let main = '';
+  if (!D.list.length) main = `<p class="snempty">${D.rows ? 'Nobody here has a surname recorded.' : 'Nobody to show. Select a person on the canvas, or choose Everyone.'}</p>`;
+  else if (SNV.view === 'table') {
+    const rows = TCS.tableRows({ list: shown }).slice(0, SN_TABLE_CAP);
+    main = `<div class="sntb slvscroll" role="region" aria-label="Surnames as a table" tabindex="0"><table class="sntbl"><caption>${shown.length.toLocaleString('en')} surnames of ${esc(snPeopleWords())}, most people first. Earliest and latest are birth years; a living person adds to the count and to nothing else.</caption>`
+      + '<thead><tr><th scope="col">Surname</th><th scope="col" class="num">People</th><th scope="col">Born in</th><th scope="col" class="num">Earliest birth</th><th scope="col" class="num">Latest birth</th></tr></thead><tbody>'
+      + rows.map(r => `<tr${SNV.sn === r.key ? ' class="on"' : ''}><th scope="row"><button type="button" class="snlk" data-sn="${esc(r.key)}" aria-pressed="${SNV.sn === r.key}">${esc(r.surname)}</button>${r.spelled ? `<small class="snsp">Spelled: ${esc(r.spelled)}</small>` : ''}</th><td class="num">${r.people}${r.living ? ` <small>(${r.living} living)</small>` : ''}</td><td>${esc(r.mix)}</td><td class="num">${esc(r.earliest)}</td><td class="num">${esc(r.latest)}</td></tr>`).join('')
+      + `</tbody></table>${shown.length > rows.length ? `<p class="snfoot">${(shown.length - rows.length).toLocaleString('en')} more names are not listed here; choose fewer people.</p>` : ''}</div>`;
+  } else {
+    const fs = new Map(); TCS.sizes(D.list, { min: 14, max: S.phone ? 34 : 54 }).forEach((v, k) => fs.set(D.list[k].key, v));
+    const items = shown.slice(0, SN_CAP);
+    main = `<div class="sncloud slvscroll"><ul class="sncl" aria-label="Surnames, most people first">` + items.map((g, k) => {
+      const on = SNV.sn === g.key, tab = SNV.kb ? SNV.kb === g.key : k === 0;
+      return `<li><button type="button" class="snw${on ? ' on' : ''}" data-sn="${esc(g.key)}" style="font-size:${fs.get(g.key)}px" tabindex="${tab ? 0 : -1}" aria-pressed="${on}" aria-label="${esc(TCS.ariaOf(g))}" title="${esc(g.label + ': ' + TCS.mixText(g))}"><span class="snr"><span class="snt">${esc(g.label)}</span><span class="snn">${g.n}</span></span>${slvBar(TCS.segsOf(g, SNV.c, ctx))}</button></li>`;
+    }).join('') + `</ul><p class="snfoot">${shown.length > items.length ? (shown.length - items.length).toLocaleString('en') + ' smaller names are in the table (Show as: Table). ' : ''}${SNV.cty != null && SNV.c === 'place' ? `Showing the ${shown.length.toLocaleString('en')} names with someone born in the place chosen in the key. <button type="button" class="snlk" data-cty="${esc(SNV.cty)}">Show all</button>` : 'Every name is shown. A bigger name has more people; the bar is its colour.'}</p></div>`;
+  }
+  const fold = D.list.length.toLocaleString('en') + (D.list.length === 1 ? ' name' : ' names') + ' · ' + snPeopleWords();
+  return { title: 'Surnames', sub, fold, split: true, controls, legend: D.list.length ? snLegend(D, pc, bs) : '', legendLabel: 'What the bars mean',
+    body: `${main}<aside class="snd${SNV.sn ? ' open' : ''}${SNV.sn ? ' slvscroll' : ''}" aria-label="The people of the chosen surname">${snDetails(D, ctx)}</aside><div class="slvsr" role="status" aria-live="polite" id="snLive"></div>` };
+};
+
+function snDetails(D, ctx) {
+  const g = SNV.sn ? D.list.find(x => x.key === SNV.sn) : null;
+  if (!g) return '<p class="snhint"><b>Pick a name</b> to list the people who carried it, oldest first, here. Each person is a button: it puts them on the canvas and selects them. The bar under a name is its colour; the key above says what each colour is.</p>';
+  const ppl = TCS.peopleOf(M, g), off = ppl.filter(r => !S.cards.has(r.key)), all = ppl;
+  const mix = [...g.cn].sort((a, b) => (a[0] === '') - (b[0] === '') || b[1] - a[1] || a[0].localeCompare(b[0])).map(([c, n]) => {
+    const col = c === '' ? 'none' : ctx.pc.colour(c);
+    return `<span class="snchip">${slvSwatch(col)}${esc(c === '' ? 'no place shown' : TCS.regionName(c))} <b>${n}</b></span>`;
+  }).join('');
+  const span = g.first ? `Born ${TCS.yearText(g.first)}${g.last && g.last.y !== g.first.y ? ' to ' + TCS.yearText(g.last) : ''} (earliest and latest birth)` : 'No birth year recorded';
+  return `<div class="sndh"><h3 tabindex="-1" id="snHead">${esc(g.label)}</h3><p class="snsum">${g.n} ${g.n === 1 ? 'person' : 'people'}${g.living ? ` (${g.living} may be living: name and family only)` : ''} · ${esc(span)}</p>`
+    + (g.forms.length > 1 ? `<p class="snsp2"><b>Spelled</b> ${g.forms.map(f => esc(f[0]) + ' (' + f[1] + ')').join(', ')}. One name in the Record Atlas’s catalogue of surnames.</p>` : '')
+    + `<div class="snchips" aria-label="Where they were born">${mix}</div>`
+    + (off.length && off.length <= 30 ? `<button type="button" class="fbs fbc snact" data-snact="drop">Put ${off.length === all.length ? 'these ' + off.length : 'the ' + off.length + ' not yet there'} on the canvas</button>` : off.length ? `<p class="snsp2">${off.length} are not on the canvas. That is too many to bring across at once: click people one at a time, or choose fewer generations.</p>` : '<p class="snsp2">All of them are on the canvas.</p>')
+    + `</div><ol class="snpl" aria-label="${esc(g.label)}, oldest first">` + ppl.map(r => {
+      const on = S.sel.has(r.key), here = S.cards.has(r.key);
+      const meta = r.living ? '<span class="snpm">living: name and family only</span>' : [r.life && `<span class="snpm">${esc(r.life)}</span>`, r.place && `<span class="snpm">${esc(r.place)}</span>`].filter(Boolean).join('') || (r.ghost ? '<span class="snpm">named only</span>' : '<span class="snpm">no years or place recorded</span>');
+      return `<li><button type="button" class="snp${on ? ' on' : ''}" data-kk="${esc(r.key)}" aria-pressed="${on}"><b>${esc(r.name)}</b>${r.g != null ? `<span class="snpm">${r.g === 0 ? 'selected person' : r.g === 1 ? 'parent' : 'generation ' + r.g}</span>` : ''}${meta}${here ? '<span class="snhere">on canvas</span>' : ''}</button></li>`;
+    }).join('') + '</ol>';
+}
+
+SNV.click = e => {
+  const t = e.target;
+  const sl = t.closest('[data-sl]');
+  if (sl && !sl.disabled) {
+    const [k, v] = sl.dataset.sl.split(':');
+    if (k === 'c') { SNV.c = v === 'back' ? 'back' : v === 'when' ? 'when' : 'place'; SNV.cty = null; }
+    else if (k === 's') { SNV.scope = v === 'anc' && SNV.root ? 'anc' : 'file'; SNV.sn = null; }
+    else if (k === 'g') { SNV.gens = +v || null; if (SNV.scope === 'anc') SNV.sn = null; }
+    else if (k === 'v') SNV.view = v === 'table' ? 'table' : 'cloud';
+    slvDraw(); save(); return;
+  }
+  const cty = t.closest('[data-cty]'); if (cty) { SNV.cty = SNV.cty === cty.dataset.cty ? null : cty.dataset.cty; slvDraw(); return; }
+  const sn = t.closest('[data-sn]');
+  if (sn) {
+    SNV.sn = SNV.sn === sn.dataset.sn ? null : sn.dataset.sn; SNV.kb = sn.dataset.sn; SNV.reveal = !!SNV.sn; slvDraw();
+    const g = SNV.sn && SNV.D ? SNV.D.list.find(x => x.key === SNV.sn) : null, live = $('#snLive'); if (live) live.textContent = g ? g.label + ': ' + g.n + (g.n === 1 ? ' person' : ' people') + ' listed' : '';
+    return;
+  }
+  const act = t.closest('[data-snact]');
+  if (act) { const g = SNV.D && SNV.sn ? SNV.D.list.find(x => x.key === SNV.sn) : null; if (g) slvDrop(TCS.peopleOf(M, g).map(r => r.key)); return; }
+  const kk = t.closest('[data-kk]');
+  if (kk) { SNV.kbp = kk.dataset.kk; const p = slvGo(kk.dataset.kk); if (p) toast(p.name + ' is selected on the canvas. Canvas (or Esc) takes you there.', 2600); }
+};
+SNV.key = e => { if (e.target.closest && e.target.closest('.snw')) slvRove(e, '.snw'); };
+/* after each drawing: a name just picked on a narrow window brings its list into view */
+SNV.after = el => {
+  if (SNV.reveal) { SNV.reveal = false; const d = el.querySelector('.snd'); if (d && !matchMedia('(min-width: 900px)').matches) d.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); }
+};
+slvReg(SNV);
+
+/* lifespansview.js — the Lifespans view: one bar per person from birth to death on a shared year axis, for the people around the selected person (their ancestors, spouses and descendants) or the people on the canvas.
+ * Who is on the chart, the order, the geometry of the axis, the colours and the words are in lifespans.js (tested); this file draws them.
+ *
+ * THE ROWS are buttons, in a list that scrolls inside the panel under an axis that stays at the top. Each row has the name and life on the left (over the bar on a phone) and the bar on the shared axis on the right.
+ *   Click (or Enter) selects that person on the canvas; click the selected person again to centre the chart on them. Hover or focus shows the detail.
+ * A person with one known year gets a bar that fades out (no death recorded) or in (no birth recorded); estimated years are "~" with a dashed edge; a living person is a name-and-family line with no dates and no place on the axis.
+ * THE TABLE is the same facts as text (name, relation, born, died, age, born at), reachable with "Show as: Table". */
+const TCLF = window.TCLF;
+const LFV = { id: 'lifespans', field: 'xl', title: 'Lifespans', sub: 'A bar for each person, from birth to death, on one shared year axis', c: 'gen', sort: 'birth', scope: 'fam', marks: true, hist: true, view: 'chart', roots: [], rows: [], more: 0 };
+const LF_LABEL_W = 250;
+
+LFV.pack = () => TCLF.packX({ c: LFV.c, sort: LFV.sort, scope: LFV.scope, marks: LFV.marks, hist: LFV.hist, fold: SLV.fold });
+LFV.unpack = x => { const o = TCLF.parseX(x); LFV.c = o.c; LFV.sort = o.sort; LFV.scope = o.scope; LFV.marks = o.marks; LFV.hist = o.hist; LFV.foldX = o.fold; };
+LFV.start = o => {
+  const sel = [...S.sel].filter(k => M.byKey.has(k)).slice(0, 5);
+  const k = sel.length ? sel : (S.mark && M.byKey.has(S.mark) ? [S.mark] : []);
+  if (k.length) LFV.roots = k;
+  else if (S.cards.size) { LFV.roots = []; LFV.scope = 'canvas'; }
+  else return 'Put a person on the canvas and select them: the Lifespans are drawn around them.';
+  if (!k.length && LFV.scope !== 'canvas') LFV.scope = 'canvas';
+  LFV.view = 'chart'; return '';
+};
+LFV.stop = () => { LFV.rows = []; };
+/* the canvas selection changed: if the people chosen are all on the chart, only the highlight moves; if not, the chart is drawn round them */
+LFV.select = () => {
+  const sel = [...S.sel].filter(k => M.byKey.has(k)); if (!sel.length || LFV.scope === 'canvas') return true;
+  const have = new Set(LFV.rows.map(r => r.key));
+  if (!sel.every(k => have.has(k))) LFV.roots = sel.slice(0, 5);
+  return true;
+};
+
+const lfRootName = () => { const ps = LFV.roots.map(k => M.byKey.get(k)).filter(Boolean); return !ps.length ? '' : ps.length === 1 ? ps[0].name : ps[0].name + ' and ' + (ps.length - 1) + ' other' + (ps.length > 2 ? 's' : ''); };
+
+LFV.render = () => {
+  const roots = LFV.roots.map(k => M.byKey.get(k)).filter(Boolean).map(p => p.i);
+  if (!roots.length && LFV.scope !== 'canvas') LFV.scope = 'canvas';
+  const mem = TCLF.members(M, roots, { scope: LFV.scope, keys: [...S.cards.keys()] });
+  const rows = TCLF.sortRows(mem.rows.map(m => TCLF.personRow(M, m)), LFV.sort); LFV.rows = rows; LFV.more = mem.more;
+  const ext = TCLF.extent(rows), dated = rows.filter(r => r.b || r.d).length;
+  const phone = S.phone || innerWidth < 640, labelW = phone ? 0 : LF_LABEL_W;
+  const panelW = (SLV.el && SLV.el.clientWidth) || Math.min(1100, innerWidth - 32), trackW = Math.max(120, panelW - 36 - labelW - (phone ? 0 : 12));
+  const ax = ext ? TCLF.axis(ext, trackW, 66) : null;
+  const tk = lensTokens(), byDir = LFV.c === 'gen' && LFV.scope !== 'canvas', pc = byDir ? null : TCLF.placeColours(rows);
+  const fillOf = r => byDir ? TCLF.dirFill(r, tk.card) : pc.colour(r.country);
+  const sub = rows.length + (rows.length === 1 ? ' person' : ' people') + (ext ? ' · ' + ext.lo + '–' + ext.hi : '') + (dated < rows.length ? ' · ' + (rows.length - dated) + ' with no years shown' : '') + (mem.more ? ' · ' + mem.more + ' more not drawn' : '');
+  const sel1 = S.sel.size === 1 ? M.byKey.get([...S.sel][0]) : null, canCentre = sel1 && LFV.scope !== 'canvas' && rows.some(r => r.key === sel1.key) && !(LFV.roots.length === 1 && LFV.roots[0] === sel1.key);
+  const controls = slvGroup('Colour by', slvSeg('c:gen', byDir, 'Direction', 'Ancestors blue, descendants vermillion, paler the further from the selected person', LFV.scope === 'canvas') + slvSeg('c:country', !byDir, 'Country of birth', 'The country of the birthplace, the same colours as the Surnames view'))
+    + slvGroup('Order', slvSeg('o:birth', LFV.sort === 'birth', 'Birth year', 'Everyone in order of birth') + slvSeg('o:gen', LFV.sort === 'gen', 'Generations', 'The oldest generation first, each in order of birth'))
+    + slvGroup('Who', slvSeg('w:fam', LFV.scope === 'fam', 'Family', 'The selected person’s ancestors (6 generations), spouses and descendants (3 generations)', !roots.length) + slvSeg('w:anc', LFV.scope === 'anc', 'Ancestors', '', !roots.length) + slvSeg('w:desc', LFV.scope === 'desc', 'Descendants', '', !roots.length) + slvSeg('w:canvas', LFV.scope === 'canvas', 'On the canvas', 'Everyone who has a card on the canvas', !S.cards.size))
+    + slvGroup('Show', slvSeg('m:marks', LFV.marks, 'Marriages, births', 'Marks on a bar: a diamond for a marriage, a dot for each child’s birth') + slvSeg('m:hist', LFV.hist, 'History', 'Bands behind the bars: events (a war, a famine) in a place where one of them was born or died'))
+    + slvGroup('Show as', slvSeg('v:chart', LFV.view === 'chart', 'Chart') + slvSeg('v:table', LFV.view === 'table', 'Table', 'The same facts as a table: name, relation, born, died, age'))
+    + (canCentre ? `<button type="button" class="fbs" data-sl="centre" title="Draw the chart round ${esc(sel1.name)}">Centre on ${esc((sel1.given || sel1.sur || sel1.name).split(' ')[0])}</button>` : '');
+
+  /* the key */
+  let legend = '';
+  const mk = '<span class="sllg"><i class="lfm marriage lfkey"></i><span>marriage</span></span><span class="sllg"><i class="lfm child lfkey"></i><span>a child’s birth</span></span><span class="sllg"><i class="lfdash"></i><span>dashed edge: a year is an estimate (~)</span></span><span class="sllg"><i class="lfdash fade"></i><span>fades out: only one year is known</span></span>';
+  if (byDir) {
+    const cnt = k => rows.filter(r => r.kind === k).length, step = k => [1, 3, 5].map(g => `<i class="slsw" style="background:${TCLF.dirFill({ kind: k, gen: k === 'anc' ? -g : g }, tk.card)}"></i>`).join('');
+    legend = '<span class="slvlgt">Colour is direction; paler is further from the selected person:</span>'
+      + `<span class="sllg"><i class="slsw" style="background:${TCC.DIR.self}"></i><span>selected</span><b>${cnt('self')}</b></span>` + (cnt('spouse') ? `<span class="sllg"><i class="slsw" style="background:${TCC.DIR.spouse}"></i><span>spouse</span><b>${cnt('spouse')}</b></span>` : '')
+      + (cnt('anc') ? `<span class="sllg">${step('anc')}<span>ancestors</span><b>${cnt('anc')}</b></span>` : '') + (cnt('desc') ? `<span class="sllg">${step('desc')}<span>descendants</span><b>${cnt('desc')}</b></span>` : '');
+  } else {
+    legend = '<span class="slvlgt">' + (LFV.scope === 'canvas' ? 'Country of birth (direction needs a selected person; this is the people on the canvas):' : 'Country of birth:') + '</span>'
+      + pc.top.map(c => `<span class="sllg" title="${esc(TCS.regionName(c))}: ${pc.counts.get(c)}">${slvSwatch(pc.colour(c))}<span>${esc(c)}</span><b>${pc.counts.get(c)}</b></span>`).join('')
+      + (pc.rest ? `<span class="sllg">${slvSwatch(TCC.OTHER)}<span>other</span><b>${pc.rest}</b></span>` : '') + (pc.none ? `<span class="sllg" title="No birthplace recorded, or may be living (a place is never shown for them)">${slvSwatch('none')}<span>no place shown</span><b>${pc.none}</b></span>` : '');
+  }
+
+  let body;
+  if (!rows.length) body = '<p class="snempty">Nobody to show. Select a person on the canvas.</p>';
+  else if (LFV.view === 'table') body = lfTable(rows);
+  else if (!ax) body = '<p class="snempty">None of these people has a year recorded, so there is nothing to draw on an axis. The table lists them.</p>' + lfTable(rows);
+  else body = lfChart(rows, ax, fillOf, { phone, labelW, ext, mk });
+  const fold = rows.length + (rows.length === 1 ? ' person' : ' people') + (ext ? ' · ' + ext.lo + '–' + ext.hi : '');
+  return { fold, title: 'Lifespans' + (lfRootName() && LFV.scope !== 'canvas' ? ' of ' + lfRootName() : LFV.scope === 'canvas' ? ' of the people on the canvas' : ''), sub, controls, legend, legendLabel: 'What the bars mean', body };
+};
+
+function lfChart(rows, ax, fillOf, o) {
+  const pct = y => Math.max(-2, Math.min(102, ax.pct(y)));
+  const grid = ax.minor.map(y => `<i class="lfgl minor" style="left:${ax.pct(y)}%"></i>`).join('') + ax.ticks.map(t => `<i class="lfgl" style="left:${ax.pct(t.y)}%"></i>`).join('');
+  const evs = LFV.hist ? TCLF.eventsFor(M, rows, { lo: ax.lo, hi: ax.hi }) : [];
+  const bands = evs.map(e => { const l = pct(Math.max(ax.lo, e.f)), r = pct(Math.min(ax.hi, e.t + 1)); return `<i class="lfev" style="left:${l}%;width:${Math.max(0.4, r - l)}%" title="${esc(e.n + ' (' + e.f + '–' + e.t + ')')}"></i>`; }).join('');
+  const axisTicks = ax.ticks.map(t => { const p = ax.pct(t.y); return `<span class="lftk${p < 3 ? ' l' : p > 97 ? ' r' : ''}" style="left:${p}%">${t.label}</span>`; }).join('');
+  let lastGen = null;
+  const lis = rows.map(r => {
+    let head = ''; if (LFV.sort === 'gen' && r.gen !== lastGen) { head = `<li class="lfgh"><span>${esc(TCLF.groupLabel(r.gen))}</span></li>`; } lastGen = r.gen;
+    const fill = fillOf(r), on = S.sel.has(r.key), root = LFV.roots.includes(r.key) && LFV.scope !== 'canvas';
+    let bar = '';
+    if (r.bar === 'closed') { const l = pct(r.b.y), w = Math.max(0.3, pct(r.d.y) - l); bar = `<span class="lfbar${r.est ? ' est' : ''}${fill === 'none' ? ' hatch' : ''}" style="left:${l}%;width:${w}%;--bc:${fill === 'none' ? 'transparent' : fill}"></span>`; }
+    else if (r.bar === 'openEnd') bar = `<span class="lfbar fadeout${r.est ? ' est' : ''}${fill === 'none' ? ' hatch' : ''}" style="left:${pct(r.b.y)}%;--bc:${fill === 'none' ? 'transparent' : fill}"></span>`;
+    else if (r.bar === 'openStart') bar = `<span class="lfbar fadein${r.est ? ' est' : ''}${fill === 'none' ? ' hatch' : ''}" style="left:${pct(r.d.y)}%;--bc:${fill === 'none' ? 'transparent' : fill}"></span>`;
+    else if (r.bar === 'living') bar = '<span class="lfliv"><span>living: name and family only, no dates</span></span>';
+    else bar = `<span class="lfnone"><span>${r.ghost ? 'named only: no dates' : 'no years recorded'}</span></span>`;
+    let mk = '';
+    if (LFV.marks && (r.bar === 'closed' || r.bar === 'openEnd' || r.bar === 'openStart')) TCLF.marks(M, r.i).forEach(m => { if (m.y >= ax.lo && m.y <= ax.hi) mk += `<i class="lfm ${m.t}" style="left:${ax.pct(m.y)}%"></i>`; });
+    const sublabel = TCLF.lifeLine(r) + (r.kind !== 'self' ? ' · ' + TCLF.kindWord(r) : '');
+    return head + `<li class="lfli"><button type="button" class="lfrow${on ? ' on' : ''}${root ? ' root' : ''}" data-kk="${esc(r.key)}" aria-pressed="${on}"${root ? ' aria-current="true"' : ''} aria-label="${esc(TCLF.ariaOf(r))}"><span class="lfl"><b class="lfn">${esc(r.name)}</b><span class="lfs">${esc(sublabel)}</span></span><span class="lft">${bar}${mk}</span></button></li>`;
+  }).join('');
+  const hist = evs.length ? `<section class="lfhist" aria-label="History behind the bars"><h4>History behind the bars</h4><ul>${evs.map(e => `<li><b>${esc(e.n)}</b> ${e.f}–${e.t}${e.toll ? ' · ' + esc(e.toll) : ''} <small>touched the place of ${e.people} of these ${e.people === 1 ? 'life' : 'lives'}</small></li>`).join('')}</ul></section>` : '';
+  const more = LFV.more ? `<p class="snfoot">${LFV.more} more people are not drawn; the nearest ${rows.length} are. Choose Ancestors or Descendants to see the others.</p>` : '';
+  return `<div class="lfchart${o.phone ? ' narrow' : ''}" style="--lfl:${o.labelW}px"><div class="lfkeys" role="group" aria-label="Marks on the bars">${o.mk}</div><div class="lfaxis" aria-hidden="true"><span class="lfal">${LFV.sort === 'gen' ? 'In generations' : 'In order of birth'}</span><span class="lfat">${axisTicks}</span></div>`
+    + `<div class="lfbody"><div class="lfgrid" aria-hidden="true">${grid}${bands}</div><ol class="lfrows" aria-label="Lifespans, ${LFV.sort === 'gen' ? 'oldest generation first' : 'in order of birth'}">${lis}</ol></div>${more}${hist}</div>`;
+}
+
+function lfTable(rows) {
+  const t = TCLF.tableRows(rows);
+  return `<div class="sntb" role="region" aria-label="Lifespans as a table" tabindex="0"><table class="sntbl"><caption>${rows.length} people in the order of the chart. A year with ~ is an estimate. A person who may be living is listed by name and family only.</caption><thead><tr><th scope="col">Name</th><th scope="col">Relation</th><th scope="col" class="num">Born</th><th scope="col" class="num">Died</th><th scope="col" class="num">Age</th><th scope="col">Born at</th></tr></thead><tbody>`
+    + t.map(r => `<tr${S.sel.has(r.key) ? ' class="on"' : ''}><th scope="row"><button type="button" class="snlk" data-kk="${esc(r.key)}" aria-pressed="${S.sel.has(r.key)}">${esc(r.name)}</button></th><td>${esc(r.relation)}</td><td class="num">${esc(r.born)}</td><td class="num">${esc(r.died)}</td><td class="num">${esc(r.age)}</td><td>${esc(r.place)}</td></tr>`).join('') + '</tbody></table></div>';
+}
+
+LFV.click = e => {
+  const t = e.target, sl = t.closest('[data-sl]');
+  if (sl && !sl.disabled) {
+    const v = sl.dataset.sl, [k, a] = v.split(':');
+    if (v === 'centre') { const p = S.sel.size === 1 ? M.byKey.get([...S.sel][0]) : null; if (p) { LFV.roots = [p.key]; if (LFV.scope === 'canvas') LFV.scope = 'fam'; slvDraw(); } return; }
+    if (k === 'c') LFV.c = a === 'country' ? 'country' : 'gen';
+    else if (k === 'o') LFV.sort = a === 'gen' ? 'gen' : 'birth';
+    else if (k === 'w') LFV.scope = a === 'anc' ? 'anc' : a === 'desc' ? 'desc' : a === 'canvas' ? 'canvas' : 'fam';
+    else if (k === 'm') { if (a === 'marks') LFV.marks = !LFV.marks; else LFV.hist = !LFV.hist; }
+    else if (k === 'v') LFV.view = a === 'table' ? 'table' : 'chart';
+    slvDraw(); save(); return;
+  }
+  const kk = t.closest('[data-kk]'); if (!kk) return;
+  const key = kk.dataset.kk, p = M.byKey.get(key); if (!p) return;
+  /* the person already selected: the chart is drawn round them; anyone else: they are selected on the canvas */
+  if (S.sel.size === 1 && S.sel.has(key) && LFV.scope !== 'canvas' && !(LFV.roots.length === 1 && LFV.roots[0] === key)) { LFV.roots = [key]; slvDraw(); toast('The chart is drawn round ' + p.name + '.', 2200); return; }
+  slvGo(key);
+};
+
+/* the detail, on hover and on focus */
+function lfTip(r) {
+  const p = M.P[r.i], hid = p.living || p.ghost;
+  const line = (lab, v, pl, nm, what) => (v || nm) ? `<div><b>${lab}</b> ${v ? (v.est ? '~' : '') + v.y : '?'}${nm ? ' &middot; ' + (pl ? flagHTML(pl, v && v.y, flagTip(pl, v && v.y, what)) : '') + esc(nm) : ''}</div>` : '';
+  const bpl = !hid && p.bp ? TC.placeAt(M, p, p.bp, p.by) : null, dpl = !hid && p.dp ? TC.placeAt(M, p, p.dp, p.dy) : null;
+  let h = `<div class="ftn">${esc(r.name)}</div><div class="ftk">${esc(TCLF.kindWord(r))}</div>`;
+  if (r.living) return h + '<div>May be living: only the name and the family are shown.</div>';
+  if (r.ghost) return h + '<div>Named only: no dates recorded.</div>';
+  h += line('b.', r.b, bpl, r.bp, 'Born at') + line('d.', r.d, dpl, r.dp, 'Died at');
+  if (r.age) h += `<div><b>Age</b> ${r.age.about ? 'about ' : ''}${r.age.n}</div>`;
+  if (!r.b && !r.d) h += '<div>No years recorded.</div>'; else if (r.bar === 'openEnd') h += '<div>No death recorded.</div>'; else if (r.bar === 'openStart') h += '<div>No birth recorded.</div>';
+  const ms = LFV.marks ? TCLF.marks(M, r.i) : [];
+  const mar = ms.find(m => m.t === 'marriage'), kids = ms.filter(m => m.t === 'child');
+  if (mar) h += `<div><b>Married</b> ${mar.est ? '~' : ''}${mar.y}</div>`;
+  if (kids.length) h += `<div><b>${kids.length === 1 ? 'Child' : 'Children'}</b> ${kids.slice(0, 6).map(k => esc(k.who.split(' ')[0]) + ' ' + (k.est ? '~' : '') + k.y).join(', ')}${kids.length > 6 ? ' and ' + (kids.length - 6) + ' more' : ''}</div>`;
+  return h + `<div class="ftx">${S.sel.has(r.key) ? (LFV.roots.includes(r.key) ? 'The chart is drawn round them.' : 'Selected. Click again to draw the chart round them.') : 'Click to select on the canvas.'}</div>`;
+}
+(function lfEvents() {
+  const rowOf = e => (SLV.m === 'lifespans' && e.target.closest) ? e.target.closest('#slvPanel .lfrow') : null;
+  const rec = b => LFV.rows.find(r => r.key === b.dataset.kk);
+  document.addEventListener('pointermove', e => { if (e.pointerType === 'touch') return; const b = rowOf(e), r = b && rec(b); if (r) slvTip('<div class="lftip">' + lfTip(r) + '</div>', { x: e.clientX, y: e.clientY }); else if (SLV.m === 'lifespans') slvTip(null); });
+  document.addEventListener('focusin', e => { const b = rowOf(e), r = b && rec(b); if (r) { const q = b.getBoundingClientRect(); slvTip('<div class="lftip">' + lfTip(r) + '</div>', { x: q.left + Math.min(q.width, 320) / 2, y: q.bottom - 14 }); } });
+  document.addEventListener('focusout', e => { if (rowOf(e)) slvTip(null); });
+  document.addEventListener('pointerleave', () => { if (SLV.m === 'lifespans') slvTip(null); });
+  document.addEventListener('scroll', () => { if (SLV.m === 'lifespans') slvTip(null); }, true);
+})();
+slvReg(LFV);
 
 /* findui.js — Find: the search. It lives in two places that share one query:
  *   - the FIND TAB, the first tab of the right-hand pane: the box, one button for the archives (a small menu of ticks), the people brought on recently, and the results, which can
@@ -7128,7 +8147,7 @@ function nameFormsHTML(p) {
 }
 /* the catalogue: handed over with the corpus (the archives) or by the page around a visitor's own tree */
 function loadNames() {
-  const done = raw => { if (!raw) return; TC.attachNames(M, raw); runSearch(); if (S.sel.size) renderInfo(); };
+  const done = raw => { if (!raw) return; TC.attachNames(M, raw); runSearch(); if (S.sel.size) renderInfo(); if (typeof slvOnNames === 'function') slvOnNames(); };
   if (CORPUS.names) { done(CORPUS.names); return; }
   if (EMBED) { try { const f = window.parent.RR && window.parent.RR.loadNames; if (f) f().then(done, () => {}); } catch (e) { /* no names: search by the forms as written */ } }
 }

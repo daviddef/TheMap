@@ -212,9 +212,9 @@
         whole: P.whole ? 1 : 0,
         d: (Array.isArray(P.d) ? P.d : []).filter(function (r) { return Array.isArray(r) && id(r[0]) && id(r[1]) && (r[2] === "y" || r[2] === "n"); }).slice(0, CANVAS_MAX_PAIR_DEC).map(function (r) { return [r[0], r[1], r[2]]; }) };
     }
-    /* the View button: Canvas or Fan, how many generations, what colours the Fan, the direct-line strip's size, and the Fan's centre (a hash) */
+    /* the View button: Canvas, Fan, Surnames or Lifespans, how many generations, what colours the Fan, the direct-line strip's size, and the Fan's centre (a hash) */
     var vw = null;
-    if (w.vw && typeof w.vw === "object") { var V = w.vw; vw = { m: V.m === "fan" ? "fan" : "canvas", g: Number.isInteger(V.g) ? Math.max(3, Math.min(7, V.g)) : 5, c: V.c === "place" ? "place" : "side", t: V.t === 0 || V.t === 1 ? V.t : 2 }; if (id(V.r)) vw.r = V.r; }
+    if (w.vw && typeof w.vw === "object") { var V = w.vw; vw = { m: V.m === "fan" || V.m === "surnames" || V.m === "lifespans" ? V.m : "canvas", g: Number.isInteger(V.g) ? Math.max(3, Math.min(7, V.g)) : 5, c: V.c === "place" ? "place" : "side", t: V.t === 0 || V.t === 1 ? V.t : 2 }; if (id(V.r)) vw.r = V.r; if (typeof V.xs === "string" && /^[a-z0-9]{1,8}$/.test(V.xs)) vw.xs = V.xs; if (typeof V.xl === "string" && /^[a-z0-9]{1,8}$/.test(V.xl)) vw.xl = V.xl; }
     var out = { k: it.k, label: typeof it.label === "string" ? it.label.replace(/[\u0000-\u001f]/g, " ").slice(0, 120) : "", src: src, upd: it.upd, n: c.length,
       w: { v: 1, c: c, view: { x: Math.round(num(v.x, 1e6)), y: Math.round(num(v.y, 1e6)), k: Math.max(0.05, Math.min(8, num(v.k, 8) || 1)) },
         path: Array.isArray(w.path) && w.path.length === 2 && id(w.path[0]) && id(w.path[1]) ? [w.path[0], w.path[1]] : null,

@@ -296,6 +296,34 @@ test("the View button's choice rides in the tree's record as `vw`: only when it 
   odd.w.vw = "fan"; assert.equal("vw" in RF.cleanCanvas({ v: 1, items: { [odd.k]: odd }, gone: {} }).items[odd.k].w, false);
 });
 
+test("the Surnames and Lifespans views ride in `vw` too: m, plus the short settings xs and xl, and nothing else", async () => {
+  const src = { t: "link", ref: LINK }, mk = lens => W.makeRecord(src, W.linkLabel(LINK), { ...plain(), lens }, 1.7e12);
+  const sn = mk({ m: "surnames", g: 5, c: "side", t: 2, r: "", xs: "g6s" }), lf = mk({ m: "lifespans", g: 5, c: "side", t: 2, xl: "cty" });
+  assert.deepEqual(sn.w.vw, { m: "surnames", g: 5, c: "side", t: 2, xs: "g6s" });
+  assert.deepEqual(lf.w.vw, { m: "lifespans", g: 5, c: "side", t: 2, xl: "cty" });
+  /* a mode alone is a choice worth keeping; a setting alone on the canvas too (it is what the View will open with) */
+  assert.deepEqual(mk({ m: "surnames" }).w.vw, { m: "surnames", g: 5, c: "side", t: 2 });
+  assert.deepEqual(mk({ m: "canvas", xl: "cty" }).w.vw, { m: "canvas", g: 5, c: "side", t: 2, xl: "cty" });
+  /* the settings are short lower-case strings or nothing: a name, a place, a long string, capitals or punctuation never get in */
+  for (const bad of ["Anna Example", "ABC", "a-b", "", "abcdefghi", 7, null, ["a"], { a: 1 }]) {
+    assert.equal("xs" in mk({ m: "surnames", xs: bad }).w.vw, false, JSON.stringify(bad));
+    assert.equal("xl" in mk({ m: "lifespans", xl: bad }).w.vw, false, JSON.stringify(bad));
+  }
+  assert.equal("vw" in mk({ m: "canvas", xs: "Anna Example" }).w, false, "a refused setting leaves the default view as it was");
+  /* they come back */
+  assert.deepEqual(W.unpack(sn.w, sn.k, known(), bridges()).lens, { m: "surnames", g: 5, c: "side", t: 2, r: "", xs: "g6s" });
+  assert.deepEqual(W.unpack(lf.w, lf.k, known(), bridges()).lens, { m: "lifespans", g: 5, c: "side", t: 2, r: "", xl: "cty" });
+  /* the six-word copy keeps them, and cleans anything odd */
+  for (const rec of [sn, lf]) assert.deepEqual(RF.cleanCanvas({ v: 1, items: { [rec.k]: rec }, gone: {} }).items[rec.k], rec);
+  const odd = JSON.parse(JSON.stringify(sn)); odd.w.vw = { m: "surnames", g: 5, c: "side", t: 2, xs: "Anna Example", xl: "ok1", zz: "Anna" };
+  assert.deepEqual(RF.cleanCanvas({ v: 1, items: { [odd.k]: odd }, gone: {} }).items[odd.k].w.vw, { m: "surnames", g: 5, c: "side", t: 2, xl: "ok1" });
+  /* a shared link applies the same rules */
+  const sh = JSON.parse(JSON.stringify(sn)); sh.w.vw.xs = "Bad Value";
+  const dec = await W.shareDecode(await W.shareEncode({ name: "x", src, w: sh.w }));
+  assert.ok(dec, "the link decodes");
+  assert.deepEqual(dec.w.vw, { m: "surnames", g: 5, c: "side", t: 2 });
+});
+
 test("the Backup page says the chosen View is kept", () => {
   assert.match(read("../src/pages/backup.astro"), /<b>View<\/b> you chose/);
 });

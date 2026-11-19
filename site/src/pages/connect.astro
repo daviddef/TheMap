@@ -49,8 +49,9 @@ const GROUPS = [
     { f: "coverage-by-country.json", what: "For each country: the years the books cover, and how many volumes and places. Where you could look, not where your family was.",
       cmd: `curl -s ${H}/coverage-by-country.json | jq '.countries.HR | {from, to, volumes, places}'` },
     { f: "collections.json", what: "WHAT, across a whole country. 3,504 FamilySearch record collections with their years and how many records and images each holds. Country-wide ones (the IGI, a whole country's church books) live only here. FamilySearch's catalogue metadata: no licence is stated for it, so read their terms before reusing it at scale.",
-      cmd: `curl -s ${H}/collections.json | jq '.collections[] | select(.title | test("Croatia")) | {title, from, to, records}'` },
+      cmd: `curl -s ${H}/collections.json | jq '.collections[] | select(.countries | index("HR")) | {title, from, to, records}'` },
     { f: "directory.json", what: "969 collections people and archives contributed, one row per named collection at a named repository: what it holds, the years, the cost and a link. CC0.",
+      note: "A small, contributed list (60 countries; the US has 504 rows, Britain 103, Italy 43), so it has no rows for Croatia. That says nothing about the Atlas's Croatian coverage, which is large: look in providers.json, coverage-by-country.json and the place files (see the Croatia walk-through below).",
       cmd: `curl -s ${H}/directory.json | jq '.rows[] | select(.countries | index("IT")) | {repo, name, access}'` },
     { f: "provider-contacts.json", what: "Where to write to an archive that does not publish its images (only what Wikidata states). Keyed by the provider's Wikidata id.",
       cmd: `curl -s ${H}/provider-contacts.json | jq '.counts'` },
@@ -106,7 +107,7 @@ const GROUPS = [
 <Base
   title="Connect to the Atlas"
   eyebrow="Read it · write your research to it · from a spreadsheet, a script, or an AI assistant"
-  dek="Five things you can do with the Atlas's data without opening the website, each as a short recipe you can try on this page. And the things that do not work yet, listed honestly.">
+  dek="Seven things you can do with the Atlas's data without opening the website, each as a short recipe you can try on this page. And the things that do not work yet, listed honestly.">
 
   <div class="k-stats" id="cx-status" aria-live="polite">
     <span class="k-tag">Read API <b id="st-api">checking…</b></span>
@@ -129,8 +130,9 @@ const GROUPS = [
     <li><a href="#research"><b>2 · Keep my own research progress</b></a><span>Write "I searched this book, found it" from your own tool. Needs the six words.</span></li>
     <li><a href="#names"><b>3 · Use every spelling of a name</b></a><span>Ivan is Johann is Giovanni. Ask once, search them all.</span></li>
     <li><a href="#eras"><b>4 · Who governed this place in 1850?</b></a><span>Places, countries, flags and their eras, with the years, the polity and the archive that filed them.</span></li>
-    <li><a href="#files"><b>5 · Every file, with its curl</b></a><span>Names, places, wars and plagues, archives, cemeteries. One line each, and providers or collections explained.</span></li>
-    <li><a href="#api"><b>6 · How each API works</b></a><span>Addresses, formats, how a POST works, the MCP server, and what each one answers when it goes wrong.</span></li>
+    <li><a href="#country"><b>5 · Everything for one country</b></a><span>A walk-through for Croatia: find the archives, years, places, eras and flag, with each address and what comes back.</span></li>
+    <li><a href="#files"><b>6 · Every file, with its curl</b></a><span>Names, places, wars and plagues, archives, cemeteries. One line each, and providers or collections explained.</span></li>
+    <li><a href="#api"><b>7 · How each API works</b></a><span>Addresses, formats, how a POST works, the MCP server, and what each one answers when it goes wrong.</span></li>
   </ul>
 
   <h2 class="k-h" id="files">Every file, and the one line that fetches it <span class="k-count">no key, no login</span></h2>
@@ -156,7 +158,7 @@ const GROUPS = [
           {g.rows.map((r) => (
             <tr>
               <td><a href={r.url || (H + "/" + r.f)} rel="noopener"><code>{r.f}</code></a>{sz(r.f) && <><br /><span class="cx-hint">{sz(r.f)}</span></>}</td>
-              <td>{r.what}</td>
+              <td>{r.what}{r.note && <p class="cx-hint cx-note"><b>Note.</b> {r.note}</p>}</td>
               <td><pre class="cx-pre cx-cmd">{r.cmd}</pre></td>
             </tr>
           ))}
@@ -166,6 +168,54 @@ const GROUPS = [
   ))}
 
   <p class="cx-see"><b>Licences and the full list</b> (including the small per-place and per-name files): <a href={u("/data/")}>Use the data</a>. Files change shape when the site needs them to; read the field you need and ignore the rest.</p>
+
+
+  <h2 class="k-h" id="country">Everything for one country: Croatia, step by step <span class="k-count">worked example · every line was run on 19 Nov 2026</span></h2>
+  <p class="k-lede">You want <b>all the Atlas knows about a country</b>. There is no single "country file", so you ask seven small questions, each answered by one address.
+    Swap <code>HR</code> (the two-letter country code) and <code>croatia-flags</code> for your country and the same lines work. Output is trimmed to a few rows; the shape of each row is what to look at.</p>
+  <ol class="k-steps cx-walk">
+    <li><b>Which archives and websites hold records? <span class="cx-hint">the live API, JSON</span></b>
+      <pre class="cx-pre" set:text={`curl -s "https://api.recordatlas.org/v1/providers?country=HR&limit=100"
+{ "total": 49,
+  "providers": [
+    { "id": "acta-croatica", "name": "Acta Croatica", "kind": "index", "access": "mixed", "countries": ["HR"], "url": "…", "what": "…" },
+    { "id": "anno",          "name": "ANNO — Austrian Newspapers Online", "kind": "library", "access": "free", … },
+    { "id": "arhinet",       "name": "ARHiNET — Croatian State Archives", "kind": "national-archive", "access": "catalogue", … } ] }`}></pre>
+      <span class="cx-hint">Format: one object per source (without <code>&amp;limit=</code> you get the first 20 of the <code>total</code>). <code>access</code> says what it costs: <code>free</code> (6), <code>account</code> (2), <code>onsite</code> (8), <code>unsurveyed</code> (20)… The same list is in <code>providers.json</code>, filtered with <code>jq '.providers[] | select(.countries | index("HR"))'</code>.</span></li>
+    <li><b>Which years do the books cover? <span class="cx-hint">a file, JSON</span></b>
+      <pre class="cx-pre" set:text={`curl -s https://recordatlas.org/coverage-by-country.json | jq '.countries.HR | {from, to, volumes, places, kinds}'
+{ "from": 1516, "to": 1994, "volumes": 5361, "places": 1154, "kinds": ["civil","church","census","military"] }`}></pre>
+      <span class="cx-hint">Add <code>.decades</code> to the <code>jq</code> to get volumes per decade (1850s: 2,709), which draws the histogram on the country page.</span></li>
+    <li><b>Which whole-country FamilySearch collections exist? <span class="cx-hint">a file, JSON</span></b>
+      <pre class="cx-pre" set:text={`curl -s https://recordatlas.org/collections.json | jq '.collections[] | select(.countries | index("HR")) | {title, from, to, records, images}'
+{ "title": "Croatia, Church Books, 1516-1994", "from": 1515, "to": 1994, "records": 7007772, "images": 1421761 }
+{ "title": "Croatia, Delnice Deanery Catholic Church Books, 1571-1926", "from": 1570, "to": 1926, "records": 233088, "images": 3485 }`}></pre>
+      <span class="cx-hint">Only two, because most Croatian books are catalogued as individual volumes per place (step 5), not as one country-wide collection.</span></li>
+    <li><b>Which places? <span class="cx-hint">files by map square, JSON</span></b>
+      <pre class="cx-pre" set:text={`curl -s https://recordatlas.org/pi/45_15.json | jq '[.places[] | select(.cc == "HR")] | sort_by(-(.v // 0)) | .[0:3] | map({i, n, y, x, v})'
+[ { "i": "zagreb-hr", "n": "Zagreb",  "y": 45.8156,  "x": 15.9881,  "v": 66 },
+  { "i": "vukovar",   "n": "Vukovar", "y": 45.34536, "x": 19.00604, "v": 40 },
+  { "i": "osijek",    "n": "Osijek",  "y": 45.55355, "x": 18.69058, "v": 36 } ]`}></pre>
+      <span class="cx-hint">Format: <code>i</code> is the place id, <code>n</code> the name, <code>y</code>/<code>x</code> latitude/longitude, <code>v</code> the volumes. There is no search-by-country call yet, so you read the squares the country sits in: Croatia's places are in <code>pi/45_10</code>, <code>pi/45_15</code>, <code>pi/40_10</code> and <code>pi/40_15</code>. (Filename = the south-west corner of a 5-degree square.) Or just open <a href={u("/country/hr/")}>the country page</a>.</span></li>
+    <li><b>What exactly can I read for one place? <span class="cx-hint">one small file per place</span></b>
+      <pre class="cx-pre" set:text={`curl -s https://recordatlas.org/p/senj.json | jq '{region, collections: (.collections | length), volumes: (.volumes | length)}'
+{ "region": "vojna-krajina", "collections": 10, "volumes": 7 }
+
+curl -s https://recordatlas.org/p/senj.json | jq '.collections[0] | {provider, title, from, to, access}'
+{ "provider": "familysearch", "title": "Births (Rođeni) 1734-1756", "from": 1734, "to": 1756, "access": "account" }`}></pre>
+      <span class="cx-hint">The id is the one from step 4 (<code>zagreb-hr</code>, <code>senj</code>…). Its <code>region</code> leads to step 6.</span></li>
+    <li><b>Who governed it, and which archive got its paper? <span class="cx-hint">a file, JSON</span></b>
+      <pre class="cx-pre" set:text={`curl -s https://recordatlas.org/regions.json | jq '.regions[] | select(.id == "vojna-krajina") | .eras[0:2] | map({from, to, regime, polity, filedUnder})'
+[ { "from": 1553, "to": 1746, "regime": "habsburg", "polity": "Habsburg military frontier, under Graz and Vienna", "filedUnder": ["arhinet","familysearch"] },
+  { "from": 1746, "to": 1848, "regime": "habsburg", "polity": "Habsburg — the regiment system", "filedUnder": ["arhinet","familysearch","anno"] } ]`}></pre>
+      <span class="cx-hint">A year equal to a boundary belongs to the newer era. <code>filedUnder</code> are provider ids from step 1. For the country as a whole (18 eras) use <code>context.json</code>: <code>jq '.countries[] | select(.cc == "HR") | .eras'</code>.</span></li>
+    <li><b>Which flags, in which years? <span class="cx-hint">a file, JSON, plus a page</span></b>
+      <pre class="cx-pre" set:text={`curl -s https://recordatlas.org/flag-index.json | jq '.countries[] | select(.name == "Croatia") | {name, region, hub, flags: (.crowns | length)}'
+{ "name": "Croatia", "region": "Balkans", "hub": "Former Yugoslavia", "flags": 18 }`}></pre>
+      <span class="cx-hint">The era-by-era flags, with their dates, are in <code>context.json</code> (<code>{'.countries[] | select(.cc == "HR") | .eras[] | {dates, polity, url}'}</code>), and the page for each is at <a href={u("/flags/croatia-flags/")}>/flags/croatia-flags/</a>.</span></li>
+  </ol>
+  <p class="cx-see"><b>Not country-tagged.</b> Wars and plagues (<code>mortality.json</code>) and migrations (<code>history.json</code>) are drawn as shapes and routes with dates, not filed under a country code, so a country filter would be a guess. To find the ones that touched Croatia, read their dates and shapes against the eras above.
+    <b>Names</b> are not per country either: see <a href="#names">door 3</a>.</p>
 
   <h2 class="k-h">The whole picture <span class="k-count">four services, one website built on them</span></h2>
   <figure class="cx-fig">
@@ -683,6 +733,8 @@ console.log(era.regime, era.polity, era.filedUnder);`}></pre></details>
   .cx-h4 { font: 600 15px var(--serif); margin: 18px 0 6px; }
   .cx-simple { margin: 6px 0 0; padding-left: 18px; } .cx-simple li { margin: 5px 0; }
   .cx-files td:first-child { white-space: nowrap; } .cx-files td:nth-child(2) { min-width: 15em; }
+  .cx-walk .cx-pre { margin: 8px 0 6px; white-space: pre-wrap; word-break: break-word; font-size: 12px; }
+  .cx-note { margin: 8px 0 0; }
   .cx-files .cx-pre.cx-cmd { margin: 0; white-space: pre-wrap; word-break: break-all; font-size: 11.5px; min-width: 16em; }
   .cx-doors { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); max-width: 1000px; }
   .cx-doors a { display: block; font-family: var(--serif); font-size: 17px; line-height: 1.3; }

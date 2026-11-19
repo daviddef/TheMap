@@ -1577,6 +1577,100 @@ html:not(.ph):has(#info.on) #gv{right:340px}
 .ph .hvl{min-height:50px}
 .ph .hvr,.ph .hvt{min-height:50px}
 .hvr.focus .hvb{height:14px;margin-top:-7px;border-radius:7px}
+
+/* The Night sky View, and the frame it shares with Place lanes (.xv: a View drawn over the canvas, with a control bar, a reading line, a legend). After views.css, whose .fbrow/.fbs/.fbg/.fbcame it reuses.
+   The frame follows the Look (every colour is a --lk-* token); the SKY itself is a dark panel with its own palette in every Look (skyview.js PAL, tested at 4.5:1 for text and 3:1 for stars in test/test-sky-contrast.js). */
+body.vwx #cards,body.vwx #edges,body.vwx #genbands,body.vwx #lanes,body.vwx #lanehead,body.vwx #namesview,body.vwx #mini,body.vwx #pairs,body.vwx #start,body.vwx #markBar,body.vwx #playBar{display:none!important}
+.xv{position:fixed;z-index:6;left:64px;right:12px;top:58px;bottom:calc(var(--trail-h,0px) + 8px);display:flex;flex-direction:column;gap:6px;box-sizing:border-box;padding:6px 0 0;color:var(--lk-ink)}
+.xv[hidden]{display:none}
+html:not(.ph):has(#info.on) .xv{right:352px}
+.ph .xv{left:6px;right:6px;top:106px;bottom:calc(var(--trail-h,0px) + 6px)}
+.xvtop{flex:none;display:flex;justify-content:center}
+.xvtop .fbrow{max-width:100%}
+.xvcame{flex:none;display:flex;justify-content:center}.xvcame[hidden]{display:none}
+.xv .fbs[disabled]{opacity:.5}
+.xvyr input[type=range]{width:min(190px,28vw);accent-color:var(--lk-ink);height:24px;margin:0 4px}
+.xvyr output{font:800 12px Nunito,system-ui;min-width:74px;padding-right:6px}
+.xvread{flex:none;min-height:46px;display:flex;flex-wrap:wrap;gap:2px 12px;align-items:center;padding:6px 12px;background:var(--lk-card);color:var(--lk-ink);border:2px solid var(--lk-line);border-radius:14px;font:700 13px/1.35 Nunito,system-ui}
+.xvread b{font-weight:900}.xvl svg.fl,.xvread svg.fl{vertical-align:-1px;margin-right:3px}
+.xvk,.xvhelp{color:var(--tr-soft);font-weight:700;font-size:12.5px}
+.xvfoot{flex:none;max-height:34vh;overflow:auto;background:var(--lk-card);color:var(--lk-ink);border:2px solid var(--lk-line);border-radius:14px;padding:4px 12px;font:700 12.5px/1.4 Nunito,system-ui}
+.xvfoot:empty{display:none}
+.xvleg>summary{cursor:pointer;font:700 12.5px Nunito,system-ui;padding:6px 0;min-height:28px;list-style:none}.xvleg>summary::-webkit-details-marker{display:none}
+.xvsum{display:flex;flex-wrap:wrap;gap:2px 14px;align-items:center}.xvsum b{font-weight:900}.xvmore{margin-left:auto;font-weight:900;text-decoration:underline;text-underline-offset:3px}.xvmore::before{content:"\25B8  "}details[open]>summary .xvmore::before{content:"\25BE  "}.xvleg>summary:focus-visible{outline:3px solid var(--lk-accent);outline-offset:2px}
+.xvlg p{margin:2px 0 6px}.xvrow{margin:6px 0;line-height:1.9}.xvrow .xvi{margin-right:12px}.xvrow .skw{margin:0 3px 0 6px}
+.xvi{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}.xvi svg.fl{margin:0 2px}
+.xvnote{color:var(--tr-soft)}
+.skw{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#18235A;flex:none}
+.skw b{display:block;width:10px;height:10px;border-radius:50%;box-sizing:border-box}
+.skw b.est{width:15px;height:15px;border:1.5px dashed;background:none}
+.xvnone{margin:30px 20px;font:800 14px Nunito,system-ui;color:inherit}
+
+/* the sky */
+.skpane{flex:1 1 auto;min-height:180px;overflow:auto;border:2px solid var(--lk-line);border-radius:14px;background:#0A1030;position:relative;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.skpane svg{display:block}
+.skpane .skt{font:700 11px Nunito,system-ui;fill:#C4CCF0}
+.skpane.xvtab{background:var(--lk-card);color:var(--lk-ink)}
+.sks{cursor:pointer;outline:none}
+.sks .skc{opacity:var(--a,1)}
+.sks .skh{opacity:.2;pointer-events:none;animation:sktw var(--tw,4s) ease-in-out var(--td,0s) infinite}
+.sks.hid .skh{opacity:.08}
+@keyframes sktw{0%,100%{opacity:.26}50%{opacity:.08}}
+.xvcalm .sks .skh{animation:none}
+@media (prefers-reduced-motion:reduce){.sks .skh{animation:none!important}}
+.sks .sksel{display:none;stroke:#fff;stroke-width:2.6}.sks.sel .sksel{display:block}
+.sks:hover .skc{filter:brightness(1.25)}
+.skl{stroke-width:1.2;stroke-opacity:.34}.skl.hot{stroke-opacity:.95;stroke-width:2.2}
+.skring{fill:none;stroke:#FFE27A;stroke-width:2.6;stroke-dasharray:4 3;display:none;pointer-events:none}.skring.on{display:block}
+.asof .sks.yu{opacity:.16}
+.asof .sks.yg .skc{opacity:calc(var(--a,1) * .55)}.asof .sks.yg .skh{display:none}
+.asof .sks.ya .skc{opacity:1}
+.asof .sks.yx{opacity:.7}
+
+/* the table: the same people as text */
+.xvt{border-collapse:collapse;width:100%;min-width:640px;font:700 13px/1.35 Nunito,system-ui}
+.xvt caption{text-align:left;padding:10px 12px;font:800 12.5px Nunito,system-ui;color:var(--tr-soft);position:sticky;left:0}
+.xvt th,.xvt td{text-align:left;padding:4px 10px;border-top:1.5px dashed var(--lk-line);vertical-align:middle}
+.xvt thead th{position:sticky;top:0;background:var(--lk-card);font:900 11.5px Nunito,system-ui;text-transform:uppercase;letter-spacing:.03em;border-top:0;border-bottom:2px solid var(--lk-line);z-index:1}
+.xvt tbody th{font-weight:800}
+.xvt tr.on{background:var(--lk-accent-soft)}
+.xvt button{all:unset;box-sizing:border-box;cursor:pointer;min-height:32px;display:inline-flex;align-items:center;color:var(--lk-ink);font:800 13px Nunito,system-ui;text-decoration:underline;text-decoration-color:var(--lk-line);text-underline-offset:3px;border-radius:6px}
+.xvt button:hover{text-decoration-color:var(--lk-accent)}.xvt button:focus-visible{outline:3px solid var(--lk-accent);outline-offset:2px}
+.ph .xv .fbs,.ph .xv .xvt button{min-height:44px}
+.ph .xv .xvleg>summary{min-height:44px;display:flex;align-items:center}
+.ph .xvyr input[type=range]{height:44px;width:34vw}
+.ph .xvfoot{max-height:28vh}
+
+/* a phone: the controls are one row you scroll sideways, with Canvas first so the way out is always at hand */
+.ph .xv .xvtop{display:block}
+.ph .xv .fbrow{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;scrollbar-width:thin;padding:4px 8px}
+.ph .xv .fbrow>*{flex:none}
+.ph .xv .fbt small{display:none}.ph .xv .fbt{max-width:34vw}.ph .xv .fbt b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph .xv .fbc{order:-1}
+
+/* Place lanes. The frame (.xv, the bar, the reading line, the legend, the table) is in sky.css; this is the lanes themselves. Every colour is a --lk-* token of the Look, or computed from one (placelanesui.js lnTokens). */
+.plbox{flex:1 1 auto;min-height:180px;overflow:auto;border:2px solid var(--lk-line);border-radius:14px;background:var(--lk-card);color:var(--lk-ink);position:relative;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.plbox.xvtab{display:block}
+.plgrid{display:grid;grid-template-rows:auto auto;width:max-content}
+.plgrid svg{display:block}
+.plcorner{position:sticky;top:0;left:0;z-index:4;border-bottom:2px solid var(--lk-line);border-right:2px solid var(--lk-line);box-sizing:border-box}
+.plaxis{position:sticky;top:0;z-index:3;border-bottom:2px solid var(--lk-line);box-sizing:content-box}
+.pllab{position:sticky;left:0;z-index:2;border-right:2px solid var(--lk-line);box-sizing:content-box}
+.plbt{font:800 11px Nunito,system-ui}.pln{font:900 12.5px Nunito,system-ui}.plc2{font:700 10.5px Nunito,system-ui}.plat{font:700 11px Nunito,system-ui}
+.pllab a:hover .pln{text-decoration:underline}.pllab a:focus-visible{outline:3px solid var(--lk-accent);outline-offset:1px}
+.plb{cursor:help}
+.plp{cursor:pointer;outline:none}
+.plp .plc{fill:none;stroke-width:1.4;opacity:.8}
+.plp .plj{fill:none;stroke-width:1.5;stroke-dasharray:2 4;opacity:.85}
+.plp .plm{transition:stroke-width .1s}
+.plp.hot .plm,.plp:focus .plm{stroke:var(--lk-accent);stroke-width:3}
+.plp:focus .plc,.plp:focus .plj,.plp.hot .plc,.plp.hot .plj{stroke-width:2.8;opacity:1}
+.plp.sel .plm{stroke:var(--lk-ink);stroke-width:2.8}
+.plp.sel .plc,.plp.sel .plj{stroke-width:2.6;opacity:1}
+.plhas .plp:not(.sel):not(.hot){opacity:.55}
+.plsw{vertical-align:middle;flex:none}
+@media (prefers-reduced-motion:reduce){.plp .plm{transition:none}}
+.ph .plp{-webkit-tap-highlight-color:transparent}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -3943,23 +4037,25 @@ html:not(.ph):has(#info.on) #gv{right:340px}
   }
 
   /* ---------------- the kept choice (one small field of the tree's record) ---------------- */
-  /* {m: 'canvas' | 'fan' | 'gen' | 'house', g: 3..7, c: 'side' | 'place', t: 0 | 1 | 2 (the Trail band: gone, one line, whole), r: person key of the fan's centre or ''} */
-  const LENS_DEFAULT = { m: 'canvas', g: FAN_DEFAULT, c: 'side', t: 2, r: '' };
+  /* {m: 'canvas' | 'fan' | 'surnames' | 'lifespans' | 'gen' | 'house' | 'sky' | 'lanes', o: 'sp' | 'pp' | 'sc' | 'pc' (sky colouring, lanes grouping), g: 3..7, c: 'side' | 'place', t: 0 | 1 | 2 (the Trail band: gone, one line, whole), r: person key of the fan's centre or ''} */
+  /* the Views drawn over the canvas by skyui.js and placelanesui.js: 'sky' (the Night sky) and 'lanes' (Place lanes). `o` keeps their two choices as two letters: the sky's colouring (s = side of the family, p = flag of the birthplace) then the lanes' grouping (p = place, c = country) */
+  const VIEW_IDS = ['canvas', 'fan', 'surnames', 'lifespans', 'gen', 'house', 'sky', 'lanes'];
+  const LENS_DEFAULT = { m: 'canvas', g: FAN_DEFAULT, c: 'side', t: 2, r: '', o: 'sp' };
   function cleanLens(x) {
     const o = x && typeof x === 'object' ? x : {};
     const X = /^[a-z0-9]{1,8}$/, xs = X.test(o.xs) ? { xs: o.xs } : {}, xl = X.test(o.xl) ? { xl: o.xl } : {};   // the panel views' short strings (surnames, lifespans)
-    const c = { m: o.m === 'fan' || o.m === 'surnames' || o.m === 'lifespans' || o.m === 'gen' || o.m === 'house' ? o.m : 'canvas', g: Math.max(FAN_MIN, Math.min(FAN_MAX, Number.isInteger(o.g) ? o.g : FAN_DEFAULT)), c: o.c === 'place' ? 'place' : 'side',
-      t: o.t === 0 || o.t === 1 ? o.t : 2, r: typeof o.r === 'string' ? o.r : '', ...xs, ...xl };
+    const c = { m: VIEW_IDS.includes(o.m) ? o.m : 'canvas', g: Math.max(FAN_MIN, Math.min(FAN_MAX, Number.isInteger(o.g) ? o.g : FAN_DEFAULT)), c: o.c === 'place' ? 'place' : 'side',
+      t: o.t === 0 || o.t === 1 ? o.t : 2, r: typeof o.r === 'string' ? o.r : '', o: typeof o.o === 'string' && /^[sp][pc]$/.test(o.o) ? o.o : 'sp', ...xs, ...xl };
     /* Generations (gu: 1..5 ancestor lanes, gd: 1..4 descendant lanes) and Household (hk: 0 leaves out the brothers and sisters): kept only when they differ from how they start */
     if (Number.isInteger(o.gu) && Math.max(1, Math.min(5, o.gu)) !== 3) c.gu = Math.max(1, Math.min(5, o.gu));
     if (Number.isInteger(o.gd) && Math.max(1, Math.min(4, o.gd)) !== 2) c.gd = Math.max(1, Math.min(4, o.gd));
     if (o.hk === 0) c.hk = 0;
     return c;
   }
-  const lensIsDefault = l => { const c = cleanLens(l); return c.m === 'canvas' && c.g === FAN_DEFAULT && c.c === 'side' && c.t === 2 && !c.xs && !c.xl && c.gu === undefined && c.gd === undefined && c.hk === undefined; };
+  const lensIsDefault = l => { const c = cleanLens(l); return c.m === 'canvas' && c.g === FAN_DEFAULT && c.c === 'side' && c.t === 2 && c.o === 'sp' && !c.xs && !c.xl && c.gu === undefined && c.gd === undefined && c.hk === undefined; };
 
   const API = { contrast, mix, inkFor, lum, hex2, lineIdx, defaultSide, trailCard, trailModel, genTag, placeTrail, FAN_MIN, FAN_MAX, FAN_DEFAULT, RING, ringR, fanRadius, wedge, wedgePath, pt, fanSlots, routeWords, kinWord, genName,
-    SIDE_BASE, STEP, sideFill, flagColour, flagCandidates, flagPalette, placeFlag, placeFill, textW, boxInWedge, labelLevels, fanLabel, fanList, cleanLens, lensIsDefault, lifeText, fullName, hidden, LENS_DEFAULT };
+    SIDE_BASE, STEP, sideFill, flagColour, flagCandidates, flagPalette, placeFlag, placeFill, textW, boxInWedge, labelLevels, fanLabel, fanList, cleanLens, lensIsDefault, VIEW_IDS, lifeText, fullName, hidden, LENS_DEFAULT };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCV = API;
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -4717,6 +4813,427 @@ html:not(.ph):has(#info.on) #gv{right:340px}
   const barColour = (m, tk) => m.group === 'focus' ? tk.ink : m.group === 'parents' ? G.barColour(barBase(m, tk), tk) : barBase(m, tk);
   const API = { KIN_CAP, CHILD_CAP, FADE_YEARS, GROUPS, siblingsOf, members, span, ticks, clampYear, at, busiestYear, events, barBase, barColour };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCH = API;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* skyview.js — the pure parts of the Night sky View (no DOM; tested by test/test-sky.js and, for colour, test/test-sky-contrast.js).
+ *
+ * THE NIGHT SKY draws the selected person's line (their ancestors and descendants, and the other parent of each child) as stars, each one a person:
+ *   WHERE   across: the year of birth (older to the left); down: the generation within this line (the oldest generation on top). A person with no birth year is not put on the year axis:
+ *           they stand in a strip at the left, in their generation's row. A living person is the same strip, a hollow ring, the name only.
+ *   SIZE    how long the life was (birth to death, both recorded); a life of unknown length is the smallest star, drawn as an open ring.
+ *   BRIGHTNESS  how much is recorded: a year of birth, a year of death, a birthplace, a deathplace (four facts; a brighter star has more of them).
+ *   COLOUR  the side of the family (the father's blue, the mother's orange, as in the Fan) or the flag over the birthplace in the year of birth; the person at the centre is white.
+ *   LINES   a thin line from each person to each parent in the line: a constellation is a family.
+ *   YEAR    an optional "as of" year: those not yet born are faint, those alive then are bright, those gone are dim and steady. (A death not recorded is drawn as alive for 90 years at most.)
+ * The sky is a DARK panel with its own palette, in every look; its text is tested at 4.5:1 against it and its stars at 3:1.
+ *
+ * Nothing here stores or sends anything, and a living person is the name and the family only: no year, no place. A cap keeps a very large line drawable (CAP stars, the nearest relatives first). */
+(function (root) {
+  'use strict';
+  const V = typeof module !== 'undefined' && module.exports ? require('./views.js') : root.TCV;
+
+  const CAP = 300;                 /* the most stars drawn; the rest of a big line are counted, never drawn */
+  const ALIVE_MAX = 90;            /* a death not recorded: alive at most this long, for the "as of" year */
+
+  /* ---------------- who is in the sky ---------------- */
+  const hidden = p => !!(p && (p.living || p.ghost));
+  /* The line of one or more people: every ancestor, every descendant, and the other parent of each child. Nearest first (by steps through parent and child links), so a cap keeps the close family.
+     keys: person keys (the last is the focus). Returns { idx:[person index...], total, capped, roots:[idx], focus:idx, hop:Map }. */
+  function lineSet(M, keys, opt) {
+    opt = opt || {}; const cap = opt.cap || CAP, scope = opt.scope === 'anc' || opt.scope === 'desc' ? opt.scope : 'line';
+    const roots = [...new Set((keys || []).filter(k => M.byKey.has(k)).map(k => M.byKey.get(k).i))].slice(0, 12);
+    if (!roots.length) return { idx: [], total: 0, capped: false, roots: [], focus: -1, hop: new Map() };
+    const hop = new Map(), order = [];
+    const put = (i, h) => { if (hop.has(i)) return false; hop.set(i, h); order.push(i); return true; };
+    roots.forEach(i => put(i, 0));
+    let up = roots.slice(), down = roots.slice(), h = 0, guard = 0;
+    while ((up.length || down.length) && guard++ < 80 && order.length < 40000) {
+      h++; const nu = [], nd = [];
+      if (scope !== 'desc') up.forEach(i => { const p = M.P[i]; [p.f, p.m].forEach(q => { if (q != null && q >= 0 && put(q, h)) nu.push(q); }); });
+      if (scope !== 'anc') down.forEach(i => {
+        M.P[i].ch.forEach(e => {
+          if (put(e.c, h)) nd.push(e.c);
+          const c = M.P[e.c]; [c.f, c.m].forEach(q => { if (q != null && q >= 0 && q !== i) put(q, h + 0.5); });   /* the other parent: one half step after the child, and not followed further */
+        });
+      });
+      up = nu; down = nd;
+    }
+    const total = order.length;
+    const byHop = order.slice().sort((a, b) => hop.get(a) - hop.get(b) || (M.P[a].by == null ? 1e9 : M.P[a].by) - (M.P[b].by == null ? 1e9 : M.P[b].by) || a - b);
+    const idx = byHop.slice(0, cap);
+    return { idx, total, capped: total > cap, roots, focus: roots[roots.length - 1], hop };
+  }
+
+  /* Generation rows within the set: a person with parents in the set is one row below the lower of them; one with none is row 1, unless they have a child in the set, when they stand one row above
+     their earliest child (so a married-in parent is level with their partner, not at the top). Rows are numbered from 1 at the top. Returns Map(person index -> row), and the number of rows. */
+  function generations(M, idx) {
+    const set = new Set(idx), g = new Map(), busy = new Set();
+    const inP = p => [p.f, p.m].filter(q => q != null && q >= 0 && set.has(q));
+    const gen = i => {
+      if (g.has(i)) return g.get(i); if (busy.has(i)) return 1; busy.add(i);
+      const ps = inP(M.P[i]); const v = ps.length ? 1 + Math.max(...ps.map(gen)) : 1; busy.delete(i); g.set(i, v); return v;
+    };
+    idx.forEach(gen);
+    idx.forEach(i => {
+      if (inP(M.P[i]).length) return;
+      const ks = M.P[i].ch.map(e => e.c).filter(c => set.has(c)); if (!ks.length) return;
+      const lowest = Math.min(...ks.map(c => g.get(c))); if (lowest - 1 >= 1 && g.get(i) < lowest - 1) g.set(i, lowest - 1);
+    });
+    const lo = idx.length ? Math.min(...idx.map(i => g.get(i))) : 1;
+    idx.forEach(i => g.set(i, g.get(i) - lo + 1));
+    return { g, rows: idx.length ? Math.max(...idx.map(i => g.get(i))) : 0 };
+  }
+
+  /* the side of the family, from the focus: 'f' (through the father), 'm' (through the mother), 'c' (the centre), 'o' (not an ancestor: a descendant, a partner) */
+  function sides(M, focus) {
+    const out = new Map(); if (focus < 0) return out; out.set(focus, 'c');
+    const walk = (i, s) => { const st = [i]; while (st.length) { const x = st.pop(); if (out.has(x) && x !== i) continue; out.set(x, s); const p = M.P[x]; [p.f, p.m].forEach(q => { if (q != null && q >= 0 && !out.has(q)) st.push(q); }); } };
+    const p = M.P[focus]; if (p.f >= 0) walk(p.f, 'f'); if (p.m >= 0) walk(p.m, 'm');
+    return out;
+  }
+
+  /* ---------------- the stars ---------------- */
+  const yr = (y, est) => y == null ? '' : (est ? '~' : '') + y;
+  /* How much is recorded: a birth year, a death year, a birthplace, a deathplace. A living person or a name-only row has none of these shown (0 facts is "not shown", never "poorly researched"). */
+  function facts(p) {
+    if (hidden(p)) return 0;
+    return (p.by != null ? 1 : 0) + (p.dy != null ? 1 : 0) + (p.bp ? 1 : 0) + (p.dp ? 1 : 0);
+  }
+  const alphaOf = n => 0.5 + 0.125 * n;                                   /* 0 facts .5 ... 4 facts 1 */
+  /* radius in px: a life of 0..90 years is 4..10; unknown length 3.5 (open ring) */
+  function radiusOf(p) {
+    if (hidden(p) || p.by == null || p.dy == null || p.dy < p.by) return 3.5;
+    return Math.round((4 + 6 * Math.sqrt(Math.min(90, p.dy - p.by) / 90)) * 10) / 10;
+  }
+  function starOf(M, i, ctx) {
+    const p = M.P[i], hid = hidden(p), n = facts(p);
+    return {
+      i, key: p.key, name: p.name, given: p.given, sur: p.sur, living: !!p.living, ghost: !!p.ghost, hid,
+      g: ctx.gen.get(i), side: ctx.side.get(i) || 'o', hop: ctx.hop.get(i) || 0,
+      by: hid ? null : p.by, byEst: !hid && !!(p.fl & 1), dy: hid ? null : p.dy, dyEst: !hid && !!(p.fl & 2), bp: hid ? '' : p.bp, dp: hid ? '' : p.dp,
+      facts: n, alpha: hid ? 0.85 : alphaOf(n), r: radiusOf(p), open: hid || p.by == null || p.dy == null || p.dy < p.by,
+      placed: !hid && p.by != null,
+    };
+  }
+  /* The whole model: stars, parent links, the years and the counts a caption needs. keys: the selection (the last is the focus). */
+  function skyModel(M, keys, opt) {
+    opt = opt || {}; const L = lineSet(M, keys, opt), gen = generations(M, L.idx), side = sides(M, L.focus);
+    const ctx = { gen: gen.g, side, hop: L.hop }, stars = L.idx.map(i => starOf(M, i, ctx));
+    const at = new Map(stars.map(s => [s.i, s])), links = [];
+    stars.forEach(s => { const p = M.P[s.i]; [p.f, p.m].forEach(q => { if (q != null && q >= 0 && at.has(q)) links.push([q, s.i]); }); });
+    const ys = stars.filter(s => s.placed).flatMap(s => [s.by, s.dy != null ? s.dy : null]).filter(v => v != null);
+    const lo = ys.length ? Math.min(...ys) : 1800, hi = ys.length ? Math.max(...ys) : 2000;
+    return { stars, links, rows: gen.rows, lo, hi, total: L.total, capped: L.capped, shown: stars.length, focus: L.focus, roots: L.roots,
+      unplaced: stars.filter(s => !s.placed && !s.hid).length, living: stars.filter(s => s.hid).length };
+  }
+
+  /* "alive" | "unborn" | "gone" | "unknown" (no year: not on the axis) at a year */
+  function statusAt(s, year) {
+    if (!s.placed || year == null) return 'unknown';
+    if (year < s.by) return 'unborn';
+    const end = s.dy != null ? s.dy : s.by + ALIVE_MAX;
+    return year <= end ? 'alive' : 'gone';
+  }
+
+  /* ---------------- where each star stands ---------------- */
+  /* A small deterministic hash 0..1 from a key (so a star does not jump when the sky is drawn again) */
+  function h01(key, salt) { let h = 2166136261 ^ (salt || 0); for (let k = 0; k < key.length; k++) { h ^= key.charCodeAt(k); h = Math.imul(h, 16777619); } return ((h >>> 0) % 10007) / 10007; }
+  /* Positions in a W x H box. Years run across the part to the right of a strip (for those with no year); each generation has a band; stars in a band are nudged so none overlaps another.
+     Returns { pos: Map(key -> {x, y}), x0, x1 (the year axis' ends in px), strip: {x0, x1}|null, bands:[{g, y0, y1}], year: fn(yr)->x }. */
+  function layout(model, W, H, opt) {
+    opt = opt || {}; const padL = opt.padL || 96, padR = opt.padR || 28, padT = opt.padT || 34, padB = opt.padB || 46;
+    const stars = model.stars, hasStrip = stars.some(s => !s.placed);
+    const stripW = hasStrip ? Math.min(120, Math.max(70, W * 0.1)) : 0;
+    const ax0 = padL + stripW + (hasStrip ? 18 : 0), ax1 = W - padR, span = Math.max(1, model.hi - model.lo);
+    const year = v => ax0 + (v - model.lo) / span * (ax1 - ax0);
+    const rows = Math.max(1, model.rows), bandH = (H - padT - padB) / rows;
+    const bands = Array.from({ length: rows }, (_, k) => ({ g: k + 1, y0: padT + k * bandH, y1: padT + (k + 1) * bandH }));
+    const pos = new Map();
+    stars.forEach(s => {
+      const b = bands[Math.min(rows, Math.max(1, s.g)) - 1], jy = (h01(s.key, 3) - 0.5) * bandH * 0.62;
+      const x = s.placed ? year(s.by) : padL + 10 + h01(s.key, 7) * Math.max(10, stripW - 20);
+      pos.set(s.key, { x, y: (b.y0 + b.y1) / 2 + jy, y0: b.y0, y1: b.y1 });
+    });
+    /* a few passes of pushing apart stars that are nearer than the sum of their radii (+ a gap), staying inside their band */
+    const list = stars.map(s => ({ s, p: pos.get(s.key) })), gap = 4;
+    for (let pass = 0; pass < 14; pass++) {
+      let moved = false;
+      for (let a = 0; a < list.length; a++) for (let b = a + 1; b < list.length; b++) {
+        const A = list[a], B = list[b]; if (A.p.y0 !== B.p.y0) continue;
+        const dx = B.p.x - A.p.x, dy = B.p.y - A.p.y, d = Math.hypot(dx, dy), need = A.s.r + B.s.r + gap;
+        if (d >= need) continue; moved = true;
+        const ux = d > 0.01 ? dx / d : (h01(A.s.key, 11) - 0.5), uy = d > 0.01 ? dy / d : (h01(B.s.key, 13) - 0.5), push = (need - d) / 2;
+        A.p.y -= uy * push; B.p.y += uy * push; if (!A.s.placed) A.p.x -= ux * push; if (!B.s.placed) B.p.x += ux * push;   /* a star on the year axis keeps its year; only unplaced ones move across */
+        [A, B].forEach(Z => { Z.p.y = Math.max(Z.p.y0 + Z.s.r + 1, Math.min(Z.p.y1 - Z.s.r - 1, Z.p.y)); });
+      }
+      if (!moved) break;
+    }
+    return { pos, x0: ax0, x1: ax1, strip: hasStrip ? { x0: padL, x1: padL + stripW } : null, bands, year, padT, padB };
+  }
+
+  /* ---------------- moving about by keyboard, and finding what a finger touched ---------------- */
+  /* items: [{k, x, y}]. The nearest item in a direction ('left' | 'right' | 'up' | 'down'), counting sideways drift double; null if there is none that way. */
+  function neighbour(items, from, dir) {
+    const o = items.find(t => t.k === from); if (!o) return items.length ? items[0].k : null;
+    let best = null, bs = Infinity;
+    for (const t of items) {
+      if (t.k === from) continue; const dx = t.x - o.x, dy = t.y - o.y;
+      const along = dir === 'right' ? dx : dir === 'left' ? -dx : dir === 'down' ? dy : -dy, across = dir === 'left' || dir === 'right' ? Math.abs(dy) : Math.abs(dx);
+      if (along <= 0.5) continue; const sc = along + 2 * across; if (sc < bs) { bs = sc; best = t.k; }
+    }
+    return best;
+  }
+  /* the item nearest a point, within tol px (22 = a 44 px target); ties go to the smaller distance */
+  function nearestHit(items, x, y, tol) {
+    let best = null, bd = tol == null ? 22 : tol;
+    for (const t of items) { const d = Math.hypot(t.x - x, t.y - y) - (t.r || 0); if (d <= bd) { bd = d; best = t.k; } }
+    return best;
+  }
+
+  /* ---------------- colour: the sky's own palette ---------------- */
+  /* Dark panel, light stars. Text (the title, the year, the labels, the legend's words) is SOFT or INK on the panel at 4.5:1; every star colour is 3:1 or better against the darkest and lightest panel colour. */
+  const PAL = { bg0: '#0A1030', bg1: '#18235A', ink: '#F3F5FF', soft: '#C4CCF0', f: '#7FB4FF', m: '#FFB450', o: '#E2E6FF', c: '#FFFFFF', unborn: '#8C97C8', grid: '#8C97C8', halo: '#FFFFFF' };
+  const contrast = V.contrast, mix = V.mix;
+  /* a colour lifted toward white until it reads against the panel's lightest colour at `min` (a flag colour such as Union blue is too dark to be a star otherwise) */
+  function lift(h, min) {
+    min = min || 3; let c = h, t = 0;
+    while (contrast(c, PAL.bg1) < min && t < 1) { t += 0.05; c = mix('#ffffff', h, t); }
+    return c;
+  }
+  /* the colour of a star: its side, or (colour by place) the flag colour of its birthplace lifted to read on the sky; the person at the centre is white */
+  function starColour(s, mode, flagCol) {
+    if (s.side === 'c') return PAL.c;
+    if (mode === 'place') return flagCol ? lift(flagCol, 3) : PAL.unborn;
+    return s.side === 'f' ? PAL.f : s.side === 'm' ? PAL.m : PAL.o;
+  }
+
+  /* ---------------- the words ---------------- */
+  /* "b. ~1884 · d. 1951" and so on; a living person is the name and the family only */
+  function lifeLine(s) {
+    if (s.living) return 'living: name and family only';
+    if (s.ghost) return 'named only: no dates recorded';
+    const b = s.by != null ? 'b. ' + yr(s.by, s.byEst) : '', d = s.dy != null ? 'd. ' + yr(s.dy, s.dyEst) : '';
+    return [b, d].filter(Boolean).join(' · ') || 'no dates recorded';
+  }
+  const factsWord = s => s.hid ? 'not shown' : s.facts + ' of 4 recorded';
+  const sideWord = s => s.side === 'c' ? 'the centre' : s.side === 'f' ? 'father’s side' : s.side === 'm' ? 'mother’s side' : 'descendant or partner';
+  /* the table rows: the same stars as text (name, born, died, where, side), oldest first; a living person has a name and the family only */
+  function tableRows(model) {
+    return model.stars.slice().sort((a, b) => (a.by == null) - (b.by == null) || a.by - b.by || a.g - b.g || a.name.localeCompare(b.name)).map(s => ({
+      key: s.key, name: s.name, born: s.hid ? '' : yr(s.by, s.byEst), died: s.hid ? '' : yr(s.dy, s.dyEst), place: s.hid ? '' : [s.bp, s.dp && s.dp !== s.bp ? s.dp : ''].filter(Boolean).join(' → '),
+      side: sideWord(s), facts: factsWord(s), note: s.living ? 'living: name and family only' : s.ghost ? 'named only' : '' }));
+  }
+  /* the line under the sky: how many, and what was left out */
+  function caption(model) {
+    const bits = [model.shown.toLocaleString() + (model.shown === 1 ? ' person' : ' people') + ' in ' + model.rows + (model.rows === 1 ? ' generation' : ' generations')];
+    if (model.capped) bits.push('showing the ' + CAP + ' nearest relatives of ' + model.total.toLocaleString() + ' in this line (the rest are not drawn)');
+    if (model.unplaced) bits.push(model.unplaced + ' with no birth year stand in the strip at the left');
+    if (model.living) bits.push(model.living + ' living or named only: a ring, no dates or places');
+    return bits.join('; ') + '.';
+  }
+
+  const API = { CAP, ALIVE_MAX, PAL, lineSet, generations, sides, facts, alphaOf, radiusOf, skyModel, statusAt, h01, layout, neighbour, nearestHit, lift, starColour, lifeLine, factsWord, sideWord, tableRows, caption, hidden };
+  if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCSky = API;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* placelanesview.js — the pure parts of the Place lanes View (no DOM; tested by test/test-placelanes.js and, for colour, test/test-placelanes-contrast.js).
+ *
+ * PLACE LANES draw the selected person's line (the same people as the Night sky: ancestors, descendants and the other parent of each child) with TIME running across and PLACES running down:
+ *   LANES   one for each place the line was recorded in (or, as a choice, each country today), the lane where the line began at the top.
+ *   BANDS   behind a lane, the Record Atlas's rule over that place in each stretch of years, tinted with the colour of its flag and headed by the flag itself ("Austria–Hungary", "Italy"). A place
+ *           the Atlas has not surveyed shows only its flags. (In a country lane the bands are the rule over the place in it that most people were recorded at, and the lane says which.)
+ *   EVENTS  the Atlas's wars, epidemics and changes of rule that touched the place: a hatched strip along the foot of the lane.
+ *   MARKS   a person is a circle where they were born, a diamond where they died, a bar for the years the record places them there (both ends dated), and a dotted bar across the years a place is
+ *           recorded without a year. A dotted line joins a birthplace to a deathplace when nothing says when they moved. Colour is the side of the family, as in the Fan and the Night sky.
+ * Nothing here decides where anyone lived: a bar is exactly what the record gives, a dotted bar says it is between dates. A living person is the name and the family only: no places, no years.
+ * Reuses TC.placeAt (logic.js) for the flag and rule in the year, TCSky.lineSet / sides (skyview.js) for who is in the picture, and TCV (views.js) for flag colours and contrast. */
+(function (root) {
+  'use strict';
+  const node = typeof module !== 'undefined' && module.exports;
+  const V = node ? require('./views.js') : root.TCV, SK = node ? require('./skyview.js') : root.TCSky, TC = node ? require('./logic.js') : root.TC;
+
+  const MAX_LANES = 40;
+  const NOW = 2026;
+  const hidden = SK.hidden, mix = V.mix;
+  const yearsText = (a, b, estA, estB) => a == null && b == null ? '' : a === b ? (estA ? '~' : '') + a : (a != null ? (estA ? '~' : '') + a : '?') + '–' + (b != null ? (estB ? '~' : '') + b : '');
+
+  /* ---------------- where a person was, and when ---------------- */
+  /* { segs:[{place, a, b, kind:'bar'|'span', est}], marks:[{kind:'born'|'moved'|'died'|'seen', place, year, est}], joins:[{from, to, a, b}] } or null for a living or name-only person.
+     bar: both ends dated by the record. span: a place recorded without a year, drawn across the years it could have been (from the last year known before it to the first known after).
+     joins: a birthplace and a deathplace that differ, with nothing saying when the move was: a dotted line from one to the other. */
+  function stays(M, p) {
+    if (!p || hidden(p)) return null;
+    const out = { segs: [], marks: [], joins: [] }, by = p.by, dy = p.dy, byE = !!(p.fl & 1), dyE = !!(p.fl & 2);
+    const stops = (Array.isArray(p.route) ? p.route : []).filter(s => s && s.name);
+    if (by != null && p.bp) out.marks.push({ kind: 'born', place: p.bp, year: by, est: byE });
+    if (!stops.length) {
+      if (dy != null && p.dp) out.marks.push({ kind: 'died', place: p.dp, year: dy, est: dyE });
+      if (by != null && dy != null && p.bp && p.dp && p.bp === p.dp && dy >= by) out.segs.push({ place: p.bp, a: by, b: dy, kind: 'bar', est: byE || dyE });
+      else if (by != null && dy != null && p.bp && p.dp && p.bp !== p.dp && dy >= by) out.joins.push({ from: p.bp, to: p.dp, a: by, b: dy });
+      return out;
+    }
+    const arr = stops.map((s, k) => s.year != null ? s.year : (k === 0 && (!p.bp || stops[0].name === p.bp) ? by : null));
+    const n = stops.length;
+    const known = k => arr[k] != null;
+    stops.forEach((s, k) => {
+      const start = arr[k], end = k + 1 < n ? arr[k + 1] : (dy != null ? dy : null);
+      if (start != null && end != null && end >= start) { out.segs.push({ place: s.name, a: start, b: end, kind: 'bar', est: !!s.est || (k === 0 && byE) }); return; }
+      let a = by, b = dy;
+      for (let j = k; j >= 0; j--) if (known(j)) { a = arr[j]; break; }
+      for (let j = k + 1; j < n; j++) if (known(j)) { b = arr[j]; break; }
+      if (a != null && b != null && b >= a) out.segs.push({ place: s.name, a, b, kind: 'span', est: !!s.est });
+      else if (start != null) out.marks.push({ kind: 'seen', place: s.name, year: start, est: !!s.est });
+    });
+    stops.forEach((s, k) => { if (k > 0 && arr[k] != null && s.year != null) out.marks.push({ kind: 'moved', place: s.name, year: arr[k], est: !!s.est }); });
+    if (dy != null) { const dp = p.dp || stops[n - 1].name; if (dp) out.marks.push({ kind: 'died', place: dp, year: dy, est: dyE }); }
+    return out;
+  }
+
+  /* ---------------- the lanes ---------------- */
+  const flagAt = (g, y) => { let fi = -1; if (g && g[2] && g[2].length) { fi = g[2][0][1]; for (const e of g[2]) { if (e[0] <= y) fi = e[1]; else break; } } return fi; };
+  const geoOf = (M, a, name) => { const pi = M.placeIdx ? M.placeIdx.get(name) : undefined; return pi != null && M.geo && M.geo[a] ? M.geo[a][String(pi)] || null : null; };
+  const laneOfPlace = (M, p, name, year, group) => {
+    if (group !== 'country') return name;
+    const pl = TC.placeAt(M, p, name, year); return (pl && pl.cn) || '';
+  };
+
+  /* The model for a list of people (indexes). opt.group: 'place' (default) | 'country'. Returns
+     { lanes:[{key, label, cn, place, a (the archive the place's record is from), people, first, last, n}], items:[{k, i, lane, a, b, kind, role, est, place, row}], lo, hi, drawn, undrawn:[idx], livingN, moreLanes } */
+  function laneModel(M, idxList, opt) {
+    opt = opt || {}; const group = opt.group === 'country' ? 'country' : 'place', now = opt.now || NOW;
+    const lanes = new Map(), items = [], undrawn = []; let livingN = 0;
+    const lane = (key, name, p, y) => {
+      if (!lanes.has(key)) lanes.set(key, { key, label: group === 'country' ? (key || 'Country not recorded') : key, cn: '', place: name, a: p.a, people: new Set(), first: Infinity, last: -Infinity, byPlace: new Map() });
+      const L = lanes.get(key); L.byPlace.set(name, (L.byPlace.get(name) || 0) + 1);
+      if (group === 'place' && !L.cn) { const pl = TC.placeAt(M, p, name, y); if (pl && pl.cn) L.cn = pl.cn; }
+      return L;
+    };
+    idxList.forEach(i => {
+      const p = M.P[i]; if (hidden(p)) { livingN++; return; }
+      const s = stays(M, p); let any = false;
+      if (!s) return;
+      const add = (name, a, b, kind, role, est) => {
+        if (!name || a == null) return;
+        const key = laneOfPlace(M, p, name, a, group), L = lane(key, name, p, a); L.people.add(p.key); L.first = Math.min(L.first, a); L.last = Math.max(L.last, b);
+        items.push({ k: p.key, i, lane: key, a, b, kind, role, est: !!est, place: name }); any = true;
+      };
+      s.segs.forEach(g => add(g.place, g.a, g.b, g.kind, g.kind === 'span' ? 'recorded here, year not given' : 'lived', g.est));
+      s.marks.forEach(m => add(m.place, m.year, m.year, 'mark', m.kind, m.est));
+      s.joins.forEach(j => { const ka = laneOfPlace(M, p, j.from, j.a, group), kb = laneOfPlace(M, p, j.to, j.b, group); if (ka !== kb && lanes.has(ka) && lanes.has(kb)) items.push({ k: p.key, i, kind: 'join', lane: ka, lane2: kb, a: j.a, b: j.b, role: 'moved', est: false, place: j.from, place2: j.to }); });
+      if (!any) undrawn.push(i);
+    });
+    /* the modal place of a country lane gives its bands; label which */
+    lanes.forEach(L => { if (group === 'country') { const best = [...L.byPlace.entries()].sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0]))[0]; if (best) L.place = best[0]; L.cn = L.key; } });
+    let list = [...lanes.values()].sort((x, y) => (x.first - y.first) || x.label.localeCompare(y.label));
+    let moreLanes = 0;
+    if (list.length > MAX_LANES) {   /* keep the lanes with most people, in their time order; say how many were left out */
+      const keep = new Set(list.slice().sort((x, y) => y.people.size - x.people.size || x.first - y.first).slice(0, MAX_LANES).map(L => L.key));
+      moreLanes = list.length - MAX_LANES; list = list.filter(L => keep.has(L.key));
+    }
+    const keys = new Set(list.map(L => L.key)), kept = items.filter(it => keys.has(it.lane) && (it.kind !== 'join' || keys.has(it.lane2)));
+    const ys = kept.flatMap(it => [it.a, it.b]);
+    const lo = ys.length ? Math.floor(Math.min(...ys) / 10) * 10 - 5 : 1800, hi = ys.length ? Math.min(now, Math.max(...ys)) + 3 : 2000;
+    list.forEach((L, k) => { L.i = k; L.n = L.people.size; });
+    return { lanes: list, items: kept, lo, hi: Math.max(hi, lo + 20), drawn: new Set(kept.map(it => it.k)).size, undrawn, livingN, moreLanes, group };
+  }
+
+  /* Give every person a row in each lane (so their marks in a lane share one row and a row holds people whose years do not touch). ppy: pixels a year; gap: pixels between two people in a row.
+     Sets item.row and lane.rows. */
+  function pack(model, ppy, gap) {
+    gap = gap == null ? 6 : gap;
+    model.lanes.forEach(L => {
+      const who = new Map();
+      model.items.forEach(it => { if (it.lane !== L.key || it.kind === 'join') return; const w = who.get(it.k) || { k: it.k, a: Infinity, b: -Infinity }; w.a = Math.min(w.a, it.a); w.b = Math.max(w.b, it.b); who.set(it.k, w); });
+      const ends = [], row = new Map();
+      [...who.values()].sort((x, y) => x.a - y.a || x.k.localeCompare(y.k)).forEach(w => {
+        const x0 = w.a * ppy, x1 = w.b * ppy + 12;   /* a mark has width of its own */
+        let r = 0; while (ends[r] !== undefined && ends[r] > x0 - gap) r++;
+        ends[r] = x1; row.set(w.k, r);
+      });
+      model.items.forEach(it => { if (it.lane === L.key && it.kind !== 'join') it.row = row.get(it.k) || 0; });
+      L.rows = Math.max(1, ends.length);
+    });
+    return model;
+  }
+
+  /* ---------------- the Atlas behind a lane ---------------- */
+  /* Bands for a lane between years lo and hi: [{from, to, label (the Atlas's words), short (the part before the dash), fi (flag index or -1), col (the flag's own colour or null)}].
+     surveyed: false when the Atlas has the flags of the place but no record of who ruled it. */
+  function bands(M, lane, lo, hi) {
+    const g = geoOf(M, lane.a, lane.place), out = { bands: [], surveyed: false, place: lane.place, g: !!g, reg: g && g[3] || null, id: g && g[0] || null };
+    if (!g) return out;
+    const eras = g[3] && M.regionEras ? M.regionEras[g[3]] : null, col = fi => fi >= 0 && M.flags[fi] ? V.flagColour(M.flags[fi][2]) : null;
+    if (eras && eras.length) {
+      out.surveyed = true;
+      eras.forEach(e => {
+        const from = Math.max(lo, e[0]), to = Math.min(hi, e[1]); if (to <= from) return;
+        const fi = flagAt(g, Math.max(e[0], lo)); out.bands.push({ from, to, label: e[2], short: String(e[2]).split(' — ')[0], fi, col: col(fi) });
+      });
+    } else if (g[2] && g[2].length) {
+      g[2].forEach((e, k) => {
+        const from = Math.max(lo, e[0]), to = Math.min(hi, k + 1 < g[2].length ? g[2][k + 1][0] : hi); if (to <= from) return;
+        out.bands.push({ from, to, label: '', short: '', fi: e[1], col: col(e[1]) });
+      });
+    }
+    return out;
+  }
+  /* the Atlas events that touched the lane's place and overlapped these years: [{id, name, from, to, toll}] */
+  function events(M, lane, lo, hi) {
+    const g = geoOf(M, lane.a, lane.place); if (!g || !g[4] || !M.events) return [];
+    return g[4].map(id => { const e = M.events[id]; return e ? { id, name: e[0], from: e[2], to: e[3], toll: e[5] || e[4] || '' } : null; }).filter(e => e && e.to >= lo && e.from <= hi).sort((a, b) => a.from - b.from);
+  }
+
+  /* ---------------- the axis ---------------- */
+  function tickStep(ppy) { return [1, 2, 5, 10, 25, 50, 100].find(s => s * ppy >= 58) || 100; }
+  function ticks(lo, hi, ppy) { const st = tickStep(ppy), out = []; for (let y = Math.ceil(lo / st) * st; y <= hi; y += st) out.push(y); return out; }
+
+  /* ---------------- colour (read against the look's own lane background) ---------------- */
+  /* The mark colour for a side of the family, nudged toward the look's ink until it reads at 3:1 against the lane's background (the Fan's blue and orange on a light card; lighter on a dark one). */
+  function markColour(side, bg, ink, min, _skipPair) {
+    min = min || 4.2; const base = side === 'f' ? V.SIDE_BASE.f : side === 'm' ? V.SIDE_BASE.m : side === 'c' ? ink : mix(ink, bg, 0.72);
+    let c = base, t = 0; while (V.contrast(c, bg) < min && t < 1) { t += 0.05; c = V.mix(ink, base, t); }
+    /* the father's and the mother's marks must also differ in lightness (not only hue), for colour-blind readers: the father's moves on toward the ink until it does */
+    if (side === 'f' && !_skipPair) { const m = markColour('m', bg, ink, min, true); while (V.contrast(c, m) < 1.15 && t < 1) { t += 0.05; c = V.mix(ink, base, t); } }
+    return c;
+  }
+  /* the tint of a regime band: the flag's colour at a light strength over the lane's background; its text is the look's ink (tested at 4.5:1) */
+  const BAND_STRENGTH = 0.14;
+  /* on a dark lane a pale flag would lift the lane and take the marks' contrast with it, so it is tinted more lightly */
+  const bandFill = (col, bg, strength) => { if (!col) return bg; let s = strength == null ? BAND_STRENGTH : strength; if (strength == null && V.lum(bg) < 0.18 && V.lum(col) > V.lum(bg)) s *= 0.5; return V.mix(col, bg, s); };
+  /* the lane backgrounds: the card, and a hair darker (alternating) */
+  const laneBg = (tk, k) => k % 2 ? V.mix(tk.line, tk.card, 0.2) : tk.card;
+
+  /* ---------------- the words ---------------- */
+  const roleWord = { born: 'born', died: 'died', moved: 'arrived', seen: 'recorded', lived: 'lived here' };
+  /* the table: one row for each person in each lane, in lane order, oldest first; a living person is the name only and not in a lane */
+  function tableRows(M, model) {
+    const rows = [], by = new Map();
+    model.items.forEach(it => { if (it.kind === 'join') return; const k = it.lane + '\u0001' + it.k; const r = by.get(k) || { lane: it.lane, key: it.k, i: it.i, a: Infinity, b: -Infinity, roles: [], est: false, undated: false }; r.a = Math.min(r.a, it.a); r.b = Math.max(r.b, it.b); const w = it.kind === 'span' ? 'recorded here, year not given' : it.role === 'lived' ? 'lived here' : (roleWord[it.role] || it.role); if (!r.roles.includes(w)) r.roles.push(w); r.est = r.est || it.est; by.set(k, r); });
+    const order = new Map(model.lanes.map(L => [L.key, L]));
+    [...by.values()].sort((x, y) => order.get(x.lane).i - order.get(y.lane).i || x.a - y.a).forEach(r => {
+      const L = order.get(r.lane), p = M.P[r.i];
+      rows.push({ key: r.key, name: p.name, place: r.lane || L.label, lane: L.label, years: yearsText(r.a, r.b, r.est, r.est), what: r.roles.join(', '), est: r.est });
+    });
+    model.undrawn.forEach(i => rows.push({ key: M.P[i].key, name: M.P[i].name, place: '', lane: '', years: '', what: 'no place with a year recorded', est: false }));
+    return rows;
+  }
+  const caption = (model, selN) => {
+    const bits = [model.drawn.toLocaleString() + (model.drawn === 1 ? ' person' : ' people') + ' in ' + model.lanes.length + (model.group === 'country' ? (model.lanes.length === 1 ? ' country' : ' countries') : (model.lanes.length === 1 ? ' place' : ' places'))];
+    if (model.moreLanes) bits.push(model.moreLanes + ' more ' + (model.group === 'country' ? 'countries' : 'places') + ' with fewer people are not drawn');
+    if (model.undrawn.length) bits.push(model.undrawn.length + ' with no place and year to draw are in the table only');
+    if (model.livingN) bits.push(model.livingN + ' living or named only: not drawn (name and family only)');
+    return bits.join('; ') + '.';
+  };
+
+  /* the nearest of some horizontal segments [{k, x1, x2, y}] (a mark is a segment of no length) to a point, within tol px (22 = a 44 px target) */
+  function nearestSeg(segs, px, py, tol) {
+    let best = null, bd = tol == null ? 22 : tol;
+    for (const t of segs) { const dx = Math.max(t.x1 - px, 0, px - t.x2), d = Math.hypot(dx, py - t.y); if (d <= bd) { bd = d; best = t.k; } }
+    return best;
+  }
+
+  const API = { nearestSeg, MAX_LANES, stays, laneModel, pack, bands, events, flagAt, tickStep, ticks, markColour, BAND_STRENGTH, bandFill, laneBg, tableRows, caption, yearsText };
+  if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCPL = API;
 })(typeof window !== 'undefined' ? window : globalThis);
 
 /* find.js — the pure parts of Find, the search that lives in the right-hand pane (and, while the canvas is empty, in the middle of the canvas). No DOM; tested by test/test-find.js.
@@ -7059,15 +7576,19 @@ $('#info').addEventListener('change', e => { const pk = e.target.closest && e.ta
  * THE TRAIL is a docked band that follows the selected person: their direct line as a row of cards (one ancestor a generation) and the places of their own life.
  * A person who may be living is shown by name and family only, here as everywhere. Nothing here is stored or sent. */
 const TCV = window.TCV;
-const LV = { m: 'canvas', g: TCV.FAN_DEFAULT, c: 'side', t: 2, root: null, cv: null, list: false, stack: [], kb: null, bucket: -99, came: false, side: null, tf: null, hov: null, flagCache: new Map(), model: null };
+const LV = { m: 'canvas', o: 'sp', g: TCV.FAN_DEFAULT, c: 'side', t: 2, root: null, cv: null, list: false, stack: [], kb: null, bucket: -99, came: false, side: null, tf: null, hov: null, flagCache: new Map(), model: null };
 const lensAvail = () => (!EMBED || SA) && !S.pr;
 const fanIsOn = () => LV.m === 'fan';
+/* the other Views (skyui.js, placelanesui.js) register here: id -> { title, sub, open(key, opts), close(), onSelect(), onTheme() }. They are drawn over the canvas, which keeps its cards, pan, zoom and selection. */
+const VIEWX = {};
+const xOn = () => VIEWX[LV.m] || null;
+const lensExtraOn = () => !!xOn();
 
 /* ---------------- what the canvas asks of the lens ---------------- */
 /* the field of the saved record (null when everything is as it starts, so an untouched tree's record is exactly what it was) */
 function lensSerialise() {
   if (!lensAvail()) return null;
-  const l = Object.assign({ m: LV.m, g: LV.g, c: LV.c, t: LV.t, r: LV.m === 'fan' && LV.root ? LV.root : '' }, slvFields());   // slvFields (panelviews.js): the short strings of the panel views
+  const l = Object.assign({ m: LV.m, g: LV.g, c: LV.c, t: LV.t, r: (LV.m === 'fan' || xOn()) && LV.root ? LV.root : '', o: LV.o }, slvFields());   // slvFields (panelviews.js): the short strings of the panel views
   if (typeof gvSerialise === 'function') gvSerialise(l);   /* Generations / Household: their own fields (generationsview.js) */
   return TCV.lensIsDefault(l) ? null : l;
 }
@@ -7107,8 +7628,8 @@ function lensWire() {
 }
 function lensBtn() {
   const b = $('#bLens'); if (!b || b.hidden) return;
-  const txt = 'View: ' + (fanIsOn() ? 'Fan' : slvOn() ? slvName() : typeof gvName === 'function' && gvName() || 'Canvas') + '. Choose how the people are drawn.';
-  b.title = txt; b.setAttribute('aria-label', txt); b.classList.toggle('on', fanIsOn() || slvOn() || (typeof gvOn === 'function' && gvOn()));
+  const txt = 'View: ' + (fanIsOn() ? 'Fan' : slvOn() ? slvName() : typeof gvName === 'function' && gvName() || (xOn() ? xOn().title : 'Canvas')) + '. Choose how the people are drawn.';
+  b.title = txt; b.setAttribute('aria-label', txt); b.classList.toggle('on', fanIsOn() || slvOn() || (typeof gvOn === 'function' && gvOn()) || !!xOn());
 }
 function lensMenu() {
   const m = $('#lensMenu'); if (!m) return;
@@ -7119,7 +7640,8 @@ function lensMenu() {
     + item('fan', 'Fan', 'The ancestors of the selected person as a half circle, a ring a generation', fanIsOn())
     + slvMenuItems()   // Surnames, Lifespans (panelviews.js)
     + item('gen', 'Generations', 'The direct line in lanes: parents, grandparents, children, each lane with how related they are', LV.m === 'gen')
-    + item('house', 'Household', 'Parents, brothers and sisters, partners and children on a timeline of years', LV.m === 'house') + `</div>`
+    + item('house', 'Household', 'Parents, brothers and sisters, partners and children on a timeline of years', LV.m === 'house')
+    + Object.keys(VIEWX).map(k => item(k, VIEWX[k].title, VIEWX[k].sub, LV.m === k)).join('') + `</div>`
     + `<button type="button" class="lk-toggle${LV.t ? ' on' : ''}" role="switch" aria-checked="${!!LV.t}" data-lv="trail"><span class="stx"><b>Direct-line strip open</b><i>A band along the very bottom: the selected person’s line, one ancestor a generation, and where they lived. Off folds it to a thin handle.</i></span><span class="knob"></span></button>`;
 }
 function openLensMenu(on) {
@@ -7141,13 +7663,19 @@ function fanStartKey() {
 function lensSet(m, o) {
   o = o || {};
   if (typeof gvSet === 'function' && gvSet(m, o)) return;   /* Generations / Household, and leaving them (generationsview.js) */
-  if (!lensAvail() || m === LV.m || (m !== 'fan' && m !== 'canvas' && !slvHas(m))) return;
-  const wasPanel = slvOn(); if (wasPanel) slvClose();   // leaving a panel view (Surnames, Lifespans) for the canvas, the Fan or another panel
+  if (!lensAvail() || m === LV.m || (m !== 'fan' && m !== 'canvas' && !slvHas(m) && !VIEWX[m])) return;
+  const wasPanel = slvOn(); if (wasPanel) slvClose();   // leaving a panel view (Surnames, Lifespans) for the canvas, the Fan or another view
+  if (xOn()) { xOn().close(); document.body.classList.remove('vwx'); LV.m = 'canvas'; LV.came = false; if (m === 'canvas') { lensBtn(); trailRender(); save(); return; } }
   if (slvHas(m)) {
     if (fanIsOn()) fanClose();
     if (document.body.classList.contains('pr')) { toast('Compare is laying the people out. Stop comparing to use ' + SLV.views[m].title + '.', 3600); lensBtn(); return; }
     if (!slvOpen(m, o)) { lensBtn(); return; }
     LV.m = m;
+  } else if (VIEWX[m]) {
+    if (document.body.classList.contains('pr')) { toast('Compare is laying the people out. Stop comparing to use ' + VIEWX[m].title + '.', 3600); return; }
+    const k = fanStartKey(); if (!k) { toast('Put a person on the canvas and select them: ' + VIEWX[m].title + ' is drawn from them.', 3600); return; }
+    if (fanIsOn()) fanClose();
+    LV.m = m; LV.root = k; document.body.classList.add('vwx'); closePop(); VIEWX[m].open(k, o);
   } else if (m === 'fan') {
     if (document.body.classList.contains('pr')) { toast('Compare is laying the people out. Stop comparing to use the Fan.', 3600); return; }
     const k = fanStartKey(); if (!k) { toast('Put a person on the canvas and select them: the Fan is drawn from them.', 3600); return; }
@@ -7224,7 +7752,7 @@ function lensOnZoom() {
   if (!fanIsOn() || LV.list || fanBucket() === LV.bucket || fanRaf) return;
   fanRaf = requestAnimationFrame(() => { fanRaf = 0; if (fanIsOn() && fanBucket() !== LV.bucket) fanRender(); });
 }
-function lensOnTheme() { if (fanIsOn()) fanRender(); trailRender(); slvOnTheme(); if (typeof gvOnTheme === 'function') gvOnTheme(); }
+function lensOnTheme() { if (fanIsOn()) fanRender(); if (xOn()) xOn().onTheme(); trailRender(); slvOnTheme(); if (typeof gvOnTheme === 'function') gvOnTheme(); }
 
 /* ---------------- the Fan: the bar, the legend, the list ---------------- */
 function fanBar() {
@@ -7318,6 +7846,7 @@ function lensClick(target) {   /* called when a press that did not drag ends on 
 function lensOnSelect() {
   trailOnSelect(); slvOnSelect();
   if (typeof gvOnSelect === 'function') gvOnSelect();
+  if (xOn()) { xOn().onSelect(); return; }
   if (!fanIsOn()) return;
   const one = S.sel.size === 1 ? M.byKey.get([...S.sel][0]) : null;
   if (one && LV.F && ![...LV.byN.values()].some(s => s.i === one.i)) { fanRecentre(one.key, true); return; }   // chosen somewhere else (the search, the panel): the Fan follows
@@ -7498,7 +8027,7 @@ function trailLift() {
     for (const e of document.querySelectorAll('body > *')) {
       if (e.id === 'trail' || e.id === 'trailTip' || e.classList.contains('dock') || e.id === 'stage') { continue; }
       const had = e.classList.contains('trlift'), cs = getComputedStyle(e);
-      if (cs.position !== 'fixed' || cs.display === 'none' || cs.visibility === 'hidden' || /^(mini|playBar|info|infoTab|fan|fanBar|fanLegend|fanTip|fanList|linesView|toast|prLegend|slvPanel|slvTip)$/.test(e.id)) { if (had) e.classList.remove('trlift'); continue; }
+      if (cs.position !== 'fixed' || cs.display === 'none' || cs.visibility === 'hidden' || /^(mini|playBar|info|infoTab|fan|fanBar|fanLegend|fanTip|fanList|linesView|toast|prLegend|slvPanel|slvTip|skyView|lanesView)$/.test(e.id)) { if (had) e.classList.remove('trlift'); continue; }
       const r = e.getBoundingClientRect(); if (!r.width || !r.height || r.height > innerHeight * 0.7) { if (had) e.classList.remove('trlift'); continue; }
       const bottom = r.bottom + (had ? h : 0), want = h > 0 && r.top + (had ? h : 0) > innerHeight * 0.35 && bottom > innerHeight - h - 4 && bottom <= innerHeight + 2 && cs.bottom !== 'auto';
       if (want !== had) e.classList.toggle('trlift', want);
@@ -7527,12 +8056,16 @@ function trailGo(key) {
 function lensBoot(d) {
   if (!lensAvail()) return;
   const l = TCV.cleanLens(d && d.lens);
-  LV.g = l.g; LV.c = l.c; LV.t = l.t; slvLoad(l);
+  LV.g = l.g; LV.c = l.c; LV.t = l.t; LV.o = l.o; slvLoad(l);
   if (l.m === 'fan') {
     const k = l.r && M.byKey.has(l.r) ? l.r : fanStartKey();
     if (k && S.cards.size) { LV.came = true; fanOpen(k, { boot: true }); }
   } else if (slvHas(l.m) && S.cards.size && !document.body.classList.contains('pr') && slvOpen(l.m, { boot: true })) LV.m = l.m;
   else if ((l.m === 'gen' || l.m === 'house') && typeof gvBoot === 'function') gvBoot(l);
+  else if (VIEWX[l.m]) {
+    const k = l.r && M.byKey.has(l.r) ? l.r : fanStartKey();
+    if (k && S.cards.size) { LV.m = l.m; LV.root = k; LV.came = true; document.body.classList.add('vwx'); VIEWX[l.m].open(k, { boot: true }); lensBtn(); }
+  }
   trailRender();
 }
 addEventListener('resize', () => { trailMeasure(); });
@@ -8037,7 +8570,7 @@ function gvSet(m, o) {
   return false;
 }
 function gvOpen(m, key, o) {
-  o = o || {}; closePop(); if (fanIsOn()) fanClose(); if (typeof slvOn === 'function' && slvOn()) slvClose();
+  o = o || {}; closePop(); if (fanIsOn()) fanClose(); if (typeof slvOn === 'function' && slvOn()) slvClose(); if (typeof xOn === 'function' && xOn()) { xOn().close(); document.body.classList.remove('vwx'); }
   GV.m = m; LV.m = m; GV.root = key; GV.stack = []; GV.kb = null; GV.came = !!o.boot; GV.list = !!o.list; GV.year = null; if (!o.boot) GV.c = LV.c === 'place' ? 'place' : 'side';
   document.body.classList.add('vwgv'); document.body.classList.toggle('vwgen', m === 'gen'); document.body.classList.toggle('vwhouse', m === 'house');
   gvRender(); trailRender(); gvScrollToFocus(); lensBtn();
@@ -8425,6 +8958,505 @@ function hvListHtml(root, mod) {
     + (mod.notes.moreSiblings || mod.notes.moreChildren ? `<p class="gvnone">${mod.notes.moreSiblings ? mod.notes.moreSiblings + ' more brothers and sisters, ' : ''}${mod.notes.moreChildren ? mod.notes.moreChildren + ' more children ' : ''}not listed.</p>` : '')
     + `<section class="gvls"><h4>What happened, in order</h4>${hvEventsHtml(mod)}</section></div>`;
 }
+
+/* skyui.js — the Night sky View. The pure parts (who is in the sky, where each star stands, colour, words) are in skyview.js and are tested there.
+ *
+ * It is registered with the View button (VIEWX in viewsui.js) and drawn OVER the canvas, which keeps its cards, pan, zoom and selection; Esc, or "Canvas", puts the sky away.
+ * It follows the selection: the person selected (or all of those selected) is drawn with their ancestors and descendants as stars. A star is a person; click one and that person is selected on the
+ * canvas (and put there if they were not). The sky is a dark panel of its own in every Look. Choices kept per tree: the colouring (LV.o[0]) and the centre (LV.root).
+ * A living person is the name and the family only (a ring in the strip at the left); nothing is stored or sent from here. */
+(function () {
+  const SK = window.TCSky, PL = window.TCPL, P = SK.PAL;
+  const SKY = { el: null, model: null, lay: null, items: [], yr: null, scope: 'line', table: false, kb: null, hov: null, play: 0, calm: false, pal: null, size: '', raf: 0, last: '' };
+  const reduceMq = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : null;
+  const reduced = () => !!(reduceMq && reduceMq.matches);
+  const colourMode = () => (LV.o || 'sp')[0] === 'p' ? 'place' : 'side';
+  const f1 = n => Math.round(n * 10) / 10;
+
+  /* ---------------- the frame ---------------- */
+  function skyEl() {
+    if (SKY.el) return SKY.el;
+    const el = document.createElement('section'); el.id = 'skyView'; el.className = 'xv'; el.setAttribute('aria-label', 'Night sky'); el.hidden = true;
+    el.innerHTML = '<div class="xvtop"></div><div class="xvcame" hidden></div><div class="skpane" tabindex="-1"></div><div class="xvread" role="status" aria-live="polite"></div><div class="xvfoot"></div>';
+    document.body.appendChild(el); SKY.el = el;
+    el.addEventListener('click', skyClick);
+    el.addEventListener('keydown', skyKeys);
+    el.addEventListener('input', e => { if (e.target.id === 'skYear') { skyStop(); SKY.yr = +e.target.value >= +e.target.max ? null : +e.target.value; skyYear(); } });
+    const pane = el.querySelector('.skpane');
+    pane.addEventListener('pointermove', skyMove); pane.addEventListener('pointerleave', () => { SKY.hov = null; skyRead(); });
+    pane.addEventListener('focusin', e => { const g = e.target.closest && e.target.closest('.sks'); if (g) { SKY.kb = g.dataset.k; SKY.hov = null; skyRead(g.dataset.k); skyRing(g.dataset.k); } });
+    pane.addEventListener('focusout', e => { if (e.target.closest && e.target.closest('.sks')) skyRing(null); });
+    if (window.ResizeObserver) new ResizeObserver(() => { if (!SKY.el.hidden && !SKY.raf) SKY.raf = requestAnimationFrame(() => { SKY.raf = 0; const k = pane.clientWidth + 'x' + pane.clientHeight; if (k !== SKY.size) skyRender(); }); }).observe(pane);
+    if (reduceMq && reduceMq.addEventListener) reduceMq.addEventListener('change', () => { if (!SKY.el.hidden) { SKY.calm = reduced() ? true : SKY.calm; if (reduced()) skyStop(); skyBar(); skyApplyCalm(); } });
+    /* Delete would take the selected cards off the canvas behind the sky; it does nothing here */
+    addEventListener('keydown', e => { if (!SKY.el.hidden && (e.key === 'Delete' || e.key === 'Backspace') && SKY.el.contains(document.activeElement)) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
+    addEventListener('keydown', e => { if (e.key === 'Escape' && !SKY.el.hidden && SKY.el.contains(document.activeElement) && !e.defaultPrevented) { e.preventDefault(); e.stopImmediatePropagation(); lensSet('canvas'); const b = $('#bLens'); if (b) b.focus(); } }, true);
+    return el;
+  }
+  const skyShown = () => SKY.el && !SKY.el.hidden && LV.m === 'sky';
+  function skyKeysOf() {
+    const sel = [...S.sel].filter(k => M.byKey.has(k));
+    return sel.length ? sel : (LV.root && M.byKey.has(LV.root) ? [LV.root] : []);
+  }
+  function skyApplyCalm() { SKY.el.classList.toggle('xvcalm', SKY.calm || reduced()); }
+
+  /* ---------------- the controls ---------------- */
+  function skyBar() {
+    const el = skyEl(), top = el.querySelector('.xvtop'), md = colourMode(), m = SKY.model, root = M.byKey.get(LV.root);
+    const seg = (k, on, t, tip) => `<button type="button" class="fbs${on ? ' on' : ''}" data-sk="${k}" aria-pressed="${on}" title="${esc(tip || t)}">${t}</button>`;
+    const max = m ? Math.max(m.hi, 1) + 1 : 2020, min = m ? m.lo : 1800, val = SKY.yr == null ? max : SKY.yr;
+    const rm = reduced();
+    top.innerHTML = `<div class="fbrow"><span class="fbt"><b>Night sky of ${esc(root ? root.name : '')}</b><small>${m ? m.shown.toLocaleString() + (m.shown === 1 ? ' person' : ' people') + ' as stars' : ''}</small></span>`
+      + `<span class="fbg" role="group" aria-label="Colour by">${seg('side', md === 'side', 'By side', 'Colour by side of the family: the father’s side blue, the mother’s orange')}${seg('place', md === 'place', 'By place', 'Colour by the flag over the birthplace in the year of birth')}</span>`
+      + `<span class="fbg" role="group" aria-label="Whose line">${seg('line', SKY.scope === 'line', 'Everyone', 'Ancestors, descendants and the other parent of each child')}${seg('anc', SKY.scope === 'anc', 'Ancestors')}${seg('desc', SKY.scope === 'desc', 'Descendants')}</span>`
+      + `<span class="fbg xvyr" role="group" aria-label="As of a year"><button type="button" class="fbs" data-sk="${SKY.play ? 'pause' : 'play'}" ${rm ? 'disabled title="Play is off because your device asks for less motion: drag the year instead"' : `title="${SKY.play ? 'Pause' : 'Play the sky through the years'}"`} aria-label="${SKY.play ? 'Pause' : 'Play through the years'}">${SKY.play ? 'Pause' : 'Play'}</button>`
+      + `<input type="range" id="skYear" min="${min}" max="${max}" step="1" value="${val}" aria-label="Show the sky as of a year (drag to the far right for all years)"><output id="skYo" for="skYear"></output></span>`
+      + `<span class="fbg" role="group" aria-label="Show as">${seg('draw', !SKY.table, 'Sky')}${seg('table', SKY.table, 'Table', 'The same people as a table: name, born, died, place')}</span>`
+      + `<button type="button" class="fbs${SKY.calm || rm ? '' : ' on'}" data-sk="calm" aria-pressed="${!(SKY.calm || rm)}" ${rm ? 'disabled title="The twinkle is off because your device asks for less motion"' : 'title="A gentle twinkle: on or off"'}>Twinkle</button>`
+      + `<button type="button" class="fbs fbc" data-sk="canvas" title="Close the sky: the canvas comes back as you left it">Canvas</button></div>`;
+    skyYearOut();
+  }
+  function skyYearOut() {
+    const o = $('#skYo'); if (!o) return; const r = $('#skYear');
+    o.textContent = SKY.yr == null ? 'All years' : 'As of ' + SKY.yr; if (r) r.setAttribute('aria-valuetext', o.textContent);
+  }
+  function skyClick(e) {
+    const b = e.target.closest('[data-sk]');
+    if (b) { skyAct(b.dataset.sk); return; }
+    const t = e.target.closest('[data-tk]'); if (t) { skyActivate(t.dataset.tk); return; }
+    if (e.target.closest('.xvcame [data-x="ok"]')) { LV.came = false; skyCame(); return; }
+    if (e.target.closest('.xvcame [data-x="canvas"]')) { lensSet('canvas'); return; }
+    const pane = e.target.closest('.skpane'); if (pane && !SKY.table) { const k = skyHit(e, 22); if (k) skyActivate(k); }
+  }
+  function skyAct(a) {
+    if (a === 'canvas') { lensSet('canvas'); return; }
+    if (a === 'side' || a === 'place') { LV.o = (a === 'place' ? 'p' : 's') + LV.o[1]; skyRender(); save(); return; }
+    if (a === 'line' || a === 'anc' || a === 'desc') { SKY.scope = a; skyRender(); return; }
+    if (a === 'draw' || a === 'table') { SKY.table = a === 'table'; skyRender(); return; }
+    if (a === 'calm') { SKY.calm = !SKY.calm; skyApplyCalm(); skyBar(); return; }
+    if (a === 'play') { skyPlay(); return; }
+    if (a === 'pause') { skyStop(); skyBar(); return; }
+  }
+  function skyStop() { if (SKY.play) { clearInterval(SKY.play); SKY.play = 0; } const b = SKY.el && SKY.el.querySelector('[data-sk="pause"]'); if (b) { b.dataset.sk = 'play'; b.textContent = 'Play'; b.setAttribute('aria-label', 'Play through the years'); } }
+  function skyPlay() {
+    if (reduced() || !SKY.model) return; const m = SKY.model, step = Math.max(1, Math.round((m.hi - m.lo) / 160));
+    if (SKY.yr == null || SKY.yr >= m.hi) SKY.yr = m.lo;
+    SKY.play = setInterval(() => { SKY.yr = Math.min(m.hi + 1, SKY.yr + step); const r = $('#skYear'); if (r) r.value = SKY.yr; skyYear(); if (SKY.yr >= m.hi + 1) { SKY.yr = null; skyStop(); skyBar(); skyYear(); } }, 90);
+    skyBar();
+  }
+  function skyCame() {
+    const c = SKY.el.querySelector('.xvcame'), r = M.byKey.get(LV.root);
+    c.hidden = !LV.came; c.innerHTML = LV.came ? `<div class="fbcame" role="status"><span>Your view came back: the Night sky of ${esc(r ? r.name : 'this person')}.</span><button type="button" class="fbs" data-x="canvas">Back to the canvas</button><button type="button" class="fbx" data-x="ok" aria-label="Dismiss">${icon('x', '')}</button></div>` : '';
+  }
+
+  /* ---------------- drawing ---------------- */
+  function skyRender() {
+    const el = skyEl(); const keys = skyKeysOf();
+    if (!keys.length) { el.querySelector('.skpane').innerHTML = '<p class="xvnone">Put a person on the canvas and select them: the sky is drawn from them.</p>'; return; }
+    const m = SK.skyModel(M, keys, { scope: SKY.scope }); SKY.model = m;
+    if (M.byKey.has(keys[keys.length - 1])) LV.root = keys[keys.length - 1];
+    SKY.pal = colourMode() === 'place' ? skyPalette(m) : null;
+    skyBar(); skyCame(); skyApplyCalm();
+    const pane = el.querySelector('.skpane');
+    if (SKY.table) { SKY.items = []; pane.classList.add('xvtab'); pane.innerHTML = skyTable(m); SKY.size = pane.clientWidth + 'x' + pane.clientHeight; skyFoot(); skyRead(); return; }
+    pane.classList.remove('xvtab');
+    const W = Math.max(pane.clientWidth, 720), H = Math.max(pane.clientHeight - 2, m.rows * 62 + 90, 330);
+    const lay = SK.layout(m, W, H); SKY.lay = lay;
+    const ppy = (lay.x1 - lay.x0) / Math.max(1, m.hi - m.lo);
+    let s = `<svg id="skySvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="group" aria-label="Night sky: ${m.shown} people of the line of ${esc(M.byKey.get(LV.root).name)} drawn as stars, older generations on top and older births to the left. The arrow keys move between stars, Enter selects one on the canvas. The same people are in the table.">`
+      + `<defs><linearGradient id="skBg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${P.bg0}"/><stop offset="1" stop-color="${P.bg1}"/></linearGradient></defs><rect width="${W}" height="${H}" fill="url(#skBg)"/>`;
+    s += '<g aria-hidden="true">';
+    for (let k = 0; k < 90; k++) s += `<circle cx="${f1(SK.h01('d' + k, 1) * W)}" cy="${f1(SK.h01('d' + k, 2) * H)}" r="${f1(0.5 + SK.h01('d' + k, 3) * 0.9)}" fill="#fff" opacity="${f1(0.10 + SK.h01('d' + k, 4) * 0.18)}"/>`;
+    /* the year axis and the generation rows */
+    PL.ticks(m.lo, m.hi, ppy).forEach(y => { const x = f1(lay.year(y)); s += `<line x1="${x}" x2="${x}" y1="${lay.padT - 8}" y2="${H - lay.padB + 6}" stroke="${P.grid}" stroke-opacity=".16"/><text x="${x}" y="${H - lay.padB + 22}" text-anchor="middle" class="skt">${y}</text>`; });
+    s += `<text x="${lay.x1}" y="${H - 8}" text-anchor="end" class="skt">year of birth &rarr;</text>`;
+    lay.bands.forEach(b => { s += `<text x="10" y="${f1(b.y0 + 14)}" class="skt">Gen. ${b.g}${b.g === 1 ? ' · oldest' : ''}</text>${b.g > 1 ? `<line x1="10" x2="${W - 10}" y1="${f1(b.y0)}" y2="${f1(b.y0)}" stroke="${P.grid}" stroke-opacity=".12" stroke-dasharray="2 6"/>` : ''}`; });
+    if (lay.strip) s += `<line x1="${lay.strip.x1 + 9}" x2="${lay.strip.x1 + 9}" y1="${lay.padT - 8}" y2="${H - lay.padB + 6}" stroke="${P.grid}" stroke-opacity=".3" stroke-dasharray="3 5"/><text x="${lay.strip.x0 + 2}" y="${lay.padT - 14}" class="skt">No birth year</text>`;
+    s += '</g>';
+    /* the lines from a parent to a child */
+    const byI = new Map(m.stars.map(t => [t.i, t])); s += '<g aria-hidden="true">';
+    m.links.forEach(([a, b]) => { const A = byI.get(a), B = byI.get(b), pa = lay.pos.get(A.key), pb = lay.pos.get(B.key); s += `<line class="skl" data-a="${esc(A.key)}" data-b="${esc(B.key)}" x1="${f1(pa.x)}" y1="${f1(pa.y)}" x2="${f1(pb.x)}" y2="${f1(pb.y)}" stroke="${SK.starColour(B, colourMode(), skyFlagCol(B))}"/>`; });
+    s += '</g>';
+    /* the stars */
+    SKY.items = [];
+    const kbKey = m.stars.some(t => t.key === SKY.kb) ? SKY.kb : (m.stars.find(t => S.sel.has(t.key)) || m.stars.find(t => t.i === m.focus) || m.stars[0]).key; SKY.kb = kbKey;
+    m.stars.forEach(t => {
+      const pos = lay.pos.get(t.key), col = SK.starColour(t, colourMode(), skyFlagCol(t)), x = f1(pos.x), y = f1(pos.y), r = t.r, sel = S.sel.has(t.key);
+      SKY.items.push({ k: t.key, x: pos.x, y: pos.y, r });
+      const core = t.open ? `<circle class="skc" r="${r}" fill="none" stroke="${col}" stroke-width="1.8" ${t.hid ? 'stroke-dasharray="3 2.4"' : ''}/><circle r="1.3" fill="${col}"/>` : `<circle class="skc" r="${r}" fill="${col}"/>`;
+      s += `<g class="sks st-${t.side}${sel ? ' sel' : ''}${t.hid ? ' hid' : ''}" data-k="${esc(t.key)}" transform="translate(${x} ${y})" style="--a:${f1(t.alpha)};--tw:${f1(2.8 + SK.h01(t.key, 5) * 3.4)}s;--td:${f1(-SK.h01(t.key, 6) * 6)}s" tabindex="${t.key === kbKey ? 0 : -1}" role="button" aria-label="${esc(skyAria(t))}"${sel ? ' aria-pressed="true"' : ''}>`
+        + `<circle class="skh" r="${f1(r * 2.4)}" fill="${col}"/>${t.byEst ? `<circle r="${f1(r + 4.5)}" fill="none" stroke="${col}" stroke-width="1.2" stroke-dasharray="2.5 2.5"/>` : ''}${core}`
+        + `<circle class="sksel" r="${f1(r + 6)}" fill="none"/></g>`;
+    });
+    s += '<circle id="skFocus" class="skring" r="14" cx="0" cy="0"/></svg>';
+    /* the readout under the sky changes height as the focus moves, which resizes this pane and redraws it: keep the keyboard on the same star */
+    const hadK = pane.contains(document.activeElement) && document.activeElement.closest && document.activeElement.closest('.sks'), kk = hadK && hadK.dataset.k;
+    pane.innerHTML = s; SKY.size = pane.clientWidth + 'x' + pane.clientHeight;
+    skyYear(); skyFoot(); skyRead();
+    if (kk) { const n = pane.querySelector(`.sks[data-k="${CSS.escape(kk)}"]`); if (n) n.focus({ preventScroll: true }); }
+  }
+  const skyFlagCol = t => { if (!SKY.pal) return null; const fi = TCV.placeFlag(M, M.P[t.i], TC); return fi >= 0 ? SKY.pal.get(fi) : null; };
+  function skyPalette(m) {
+    const n = new Map(); m.stars.forEach(t => { if (t.hid) return; const fi = TCV.placeFlag(M, M.P[t.i], TC); if (fi >= 0) n.set(fi, (n.get(fi) || 0) + 1); });
+    return TCV.flagPalette([...n.entries()].map(([fi, c]) => ({ fi, svg: M.flags[fi][2], n: c })));
+  }
+  const skyAria = t => t.hid ? `${t.name}, ${SK.lifeLine(t)}` : `${t.name}, ${SK.lifeLine(t)}, ${SK.sideWord(t)}, generation ${t.g}, ${SK.factsWord(t)}`;
+  /* as of a year: those not yet born are faint, those alive bright, those gone dim and steady */
+  function skyYear() {
+    const svg = $('#skySvg'); skyYearOut(); if (!svg || !SKY.model) return;
+    SKY.model.stars.forEach(t => {
+      const g = svg.querySelector(`.sks[data-k="${CSS.escape(t.key)}"]`); if (!g) return;
+      const st = SKY.yr == null ? 'all' : SK.statusAt(t, SKY.yr); g.classList.remove('yu', 'ya', 'yg', 'yx'); if (st === 'unborn') g.classList.add('yu'); else if (st === 'alive') g.classList.add('ya'); else if (st === 'gone') g.classList.add('yg'); else if (st === 'unknown') g.classList.add('yx');
+    });
+    svg.classList.toggle('asof', SKY.yr != null);
+  }
+  /* the focus ring, and the link lines of the star under the pointer or focus */
+  function skyRing(k) {
+    const f = $('#skyView #skFocus'), it = k && SKY.items.find(t => t.k === k); if (!f) return;
+    if (it) { f.setAttribute('cx', f1(it.x)); f.setAttribute('cy', f1(it.y)); f.setAttribute('r', f1(it.r + 10)); f.classList.add('on'); } else f.classList.remove('on');
+    const svg = $('#skySvg'); if (svg) svg.querySelectorAll('.skl').forEach(l => l.classList.toggle('hot', !!k && (l.dataset.a === k || l.dataset.b === k)));
+  }
+  function skyFoot() {
+    const f = SKY.el.querySelector('.xvfoot'), m = SKY.model; if (!m) { f.innerHTML = ''; return; }
+    const sw = (c, extra) => `<i class="skw"><b style="background:${c}"></b></i>`;
+    const dot = (px, a, open) => `<i class="skw"><b style="width:${px}px;height:${px}px;opacity:${a}${open ? ';background:none;border:2px solid ' + P.o : ';background:' + P.o}"></b></i>`;
+    let colours;
+    if (colourMode() === 'side') colours = `<span class="xvi">${sw(P.f)}Father’s side</span><span class="xvi">${sw(P.m)}Mother’s side</span><span class="xvi">${sw(P.o)}Descendants and partners</span><span class="xvi">${sw(P.c)}The centre</span>`;
+    else {
+      const by = new Map(); m.stars.forEach(t => { if (t.hid) return; const p = M.P[t.i], pl = p.bp ? TC.placeAt(M, p, p.bp, p.by) : null, k = pl && pl.fi >= 0 ? pl.fi : -1, r = by.get(k) || { n: 0, pl, p, fi: k }; r.n++; by.set(k, r); });
+      const rows = [...by.entries()].filter(([k]) => k >= 0).sort((a, b) => b[1].n - a[1].n), none = by.get(-1);
+      colours = rows.slice(0, 6).map(([k, r]) => `<span class="xvi">${sw(SK.lift(SKY.pal && SKY.pal.get(k) || '#999999', 3))}${flagHTML(r.pl, r.p.by, flagTip(r.pl, r.p.by, 'Born at'))}${esc(r.pl.era ? r.pl.era.label.split(' — ')[0] : r.pl.cn || r.pl.name)} <b>${r.n}</b></span>`).join('')
+        + (rows.length > 6 ? `<span class="xvi">+${rows.length - 6} more flags</span>` : '') + (none ? `<span class="xvi">${sw(P.unborn)}no flag known <b>${none.n}</b></span>` : '') + `<span class="xvi">${sw(P.c)}The centre</span>`;
+    }
+    const sumColour = colourMode() === 'side' ? `<span class="xvi">${sw(P.f)}father’s</span><span class="xvi">${sw(P.m)}mother’s side</span>` : `<span class="xvi">${sw(P.o)}flag of the birthplace</span>`;
+    f.innerHTML = `<details class="xvleg"${innerHeight >= 1100 && !S.phone ? ' open' : ''}><summary><span class="xvsum"><span class="xvi"><b>Across</b> year of birth</span><span class="xvi"><b>Down</b> generation</span><span class="xvi"><b>Size</b> length of life</span><span class="xvi"><b>Brightness</b> how much is recorded</span><span class="xvi"><b>Colour</b> ${sumColour}</span><span class="xvmore">What the stars mean</span></span></summary><div class="xvlg">`
+      + `<p><b>Across</b>: the year of birth, older on the left. <b>Down</b>: the generation in this line, the oldest on top. People with no birth year stand in the strip at the far left. Lines join a child to each parent.</p>`
+      + `<div class="xvrow"><b>Size</b>: how long the life was ${dot(5, 1)} short ${dot(10, 1)} long ${dot(7, 1, true)} open ring: length not recorded, or living</div>`
+      + `<div class="xvrow"><b>Brightness</b>: how much is recorded (a birth year, a death year, a birthplace, a deathplace) ${dot(8, .5)} none ${dot(8, .75)} some ${dot(8, 1)} all four</div>`
+      + `<div class="xvrow"><b>Colour</b>: ${colourMode() === 'side' ? 'the side of the family' : 'the flag over the birthplace in the year of birth (lightened to read on the night sky)'} ${colours}</div>`
+      + `<div class="xvrow"><i class="skw"><b class="est" style="border-color:${P.o}"></b></i> <span>A dashed ring: the year of birth is an estimate (<b>~</b>). The <b>year</b> slider shows who was alive then (a death not recorded counts as at most ${SK.ALIVE_MAX} years of life).</span></div>`
+      + `<p class="xvnote">The sky is a dark panel in every Look, so its colours stay true. ${esc(SK.caption(m))}</p></div></details>`;
+  }
+  /* what is under the pointer (or focus), else the selected person */
+  function skyRead(k) {
+    const r = SKY.el.querySelector('.xvread'), m = SKY.model; if (!m) { r.innerHTML = ''; return; }
+    const key = k || SKY.hov || (S.sel.size === 1 ? [...S.sel][0] : null), t = key && m.stars.find(x => x.key === key);
+    if (!t) { r.innerHTML = '<span class="xvhelp">Hover, focus or tap a star for its details; click it, or press Enter, to select that person on the canvas.</span>'; return; }
+    const p = M.P[t.i];
+    if (t.hid) { r.innerHTML = `<b>${esc(t.name)}</b> <span class="xvk">${p.living ? 'May be living: only the name and the family are shown.' : 'Named only: no dates recorded.'}</span>`; return; }
+    const bpl = p.bp ? TC.placeAt(M, p, p.bp, p.by) : null, dpl = p.dp ? TC.placeAt(M, p, p.dp, p.dy) : null;
+    const ln = (lab, y, est, pl, nm, what) => (y != null || nm) ? `<span class="xvl"><b>${lab}</b> ${y != null ? (est ? '~' : '') + y : '?'}${nm ? ' &middot; ' + (pl ? flagHTML(pl, y, flagTip(pl, y, what)) : '') + esc(nm) : ''}</span>` : '';
+    const lived = t.by != null && t.dy != null && t.dy >= t.by ? ` &middot; lived ${t.dy - t.by} years` : '';
+    r.innerHTML = `<b>${esc(t.name)}</b> <span class="xvk">${esc(SK.sideWord(t))} &middot; generation ${t.g}</span> ${ln('b.', p.by, p.fl & 1, bpl, p.bp, 'Born at')} ${ln('d.', p.dy, p.fl & 2, dpl, p.dp, 'Died at')} <span class="xvk">${esc(SK.factsWord(t))}${lived}${S.sel.has(t.key) ? ' &middot; selected' : ''}</span>`;
+  }
+  function skyHit(e, tol) {
+    const svg = $('#skySvg'); if (!svg) return null; const b = svg.getBoundingClientRect();
+    return SK.nearestHit(SKY.items, e.clientX - b.left, e.clientY - b.top, tol);
+  }
+  function skyMove(e) {
+    if (e.pointerType === 'touch' || SKY.table) return; const k = skyHit(e, 16);
+    if (k !== SKY.hov) { SKY.hov = k; skyRead(); skyRing(k); const pane = SKY.el.querySelector('.skpane'); pane.style.cursor = k ? 'pointer' : ''; }
+  }
+  function skyTable(m) {
+    const rows = SK.tableRows(m);
+    return `<table class="xvt"><caption>${m.shown} people in the line of ${esc(M.byKey.get(LV.root).name)}, oldest first. Years marked ~ are estimates.</caption><thead><tr><th scope="col">Person</th><th scope="col">Born</th><th scope="col">Died</th><th scope="col">Place</th><th scope="col">Side</th><th scope="col">Recorded</th></tr></thead><tbody>`
+      + rows.map(r => `<tr class="${S.sel.has(r.key) ? 'on' : ''}"><th scope="row"><button type="button" data-tk="${esc(r.key)}"${S.sel.has(r.key) ? ' aria-current="true"' : ''}>${esc(r.name)}</button></th><td>${esc(r.born)}</td><td>${esc(r.died)}</td><td>${r.note ? '<i>' + esc(r.note) + '</i>' : esc(r.place)}</td><td>${esc(r.side)}</td><td>${esc(r.facts)}</td></tr>`).join('')
+      + `</tbody></table>`;
+  }
+
+  /* ---------------- using it ---------------- */
+  /* click, tap or Enter: select that person on the canvas (putting them there if they are not), and bring the canvas to them */
+  function skyActivate(k) {
+    const p = M.byKey.get(k); if (!p) return; SKY.kb = k;
+    const c = fanEnsureCard(p); select([k]); if (c) { fit([c], { maxK: 1 }); pulseCard(c); }
+  }
+  function skyKeys(e) {
+    const g = e.target.closest && e.target.closest('.sks'); if (!g) return;
+    const k = g.dataset.k, dir = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down' }[e.key];
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); skyActivate(k); return; }
+    let to = null;
+    if (dir) to = SK.neighbour(SKY.items, k, dir); else if (e.key === 'Home') to = SKY.items[0] && SKY.items.slice().sort((a, b) => a.x - b.x)[0].k; else if (e.key === 'End') to = SKY.items.length && SKY.items.slice().sort((a, b) => b.x - a.x)[0].k;
+    if (to == null) { if (dir || e.key === 'Home' || e.key === 'End') e.preventDefault(); return; }
+    e.preventDefault(); const el = SKY.el.querySelector(`.sks[data-k="${CSS.escape(to)}"]`);
+    if (el) { SKY.el.querySelectorAll('.sks[tabindex="0"]').forEach(x => x.setAttribute('tabindex', '-1')); el.setAttribute('tabindex', '0'); el.focus({ preventScroll: false }); SKY.kb = to; }
+  }
+
+  /* ---------------- what the View button asks ---------------- */
+  VIEWX.sky = {
+    id: 'sky', title: 'Night sky', sub: 'The selected person’s line as stars: older births to the left, the oldest generation on top',
+    open(key, o) {
+      o = o || {}; const el = skyEl(); SKY.yr = null; SKY.table = false; SKY.scope = 'line'; SKY.hov = null; SKY.kb = null; SKY.calm = reduced();
+      LV.came = !!o.came || !!o.boot; el.hidden = false; skyRender(); lensBtn(); trailRender();
+    },
+    close() { skyStop(); if (SKY.el) { SKY.el.hidden = true; } SKY.hov = null; },
+    onSelect() {
+      if (!skyShown()) return; const keys = skyKeysOf(), m = SKY.model;
+      if (!keys.length) return;
+      const inside = m && keys.every(k => m.stars.some(t => t.key === k));
+      if (!inside) { LV.came = false; skyRender(); save(); return; }     /* chosen somewhere else (the search, the panel, a card): the sky follows */
+      LV.root = keys[keys.length - 1];
+      if (SKY.table) { skyRender(); return; }
+      const svg = $('#skySvg'); if (svg) svg.querySelectorAll('.sks').forEach(g => { const on = S.sel.has(g.dataset.k); g.classList.toggle('sel', on); if (on) g.setAttribute('aria-pressed', 'true'); else g.removeAttribute('aria-pressed'); });
+      skyBar(); skyRead();
+    },
+    onTheme() { /* the sky is its own dark panel in every Look; only the frame around it follows the Look, through CSS */ },
+  };
+})();
+
+/* placelanesui.js — the Place lanes View. The pure parts (who is in it, the stays of a life, the lanes, the Atlas bands, colour, the table) are in placelanesview.js and are tested there.
+ *
+ * Registered with the View button (VIEWX in viewsui.js) and drawn OVER the canvas, which keeps its cards, pan, zoom and selection. It follows the selection: the people selected (with their ancestors and
+ * descendants) are drawn with time across and a lane for each place (or country) they were recorded in; behind a lane, the Record Atlas's rule over that place in each stretch of years, in the colour of
+ * its flag and headed by the flag. Click a person and they are selected on the canvas (and put there if they were not). Choices kept per tree: the grouping (LV.o[1]: p place, c country) and the centre.
+ * It reuses the canvas's own helpers (flagHTML, TC.placeAt, the flag sprite) and the Night sky's frame (.xv in sky.css) and line of people (skyview.js). A living person is not drawn: name and family only. */
+(function () {
+  const SK = window.TCSky, PL = window.TCPL;
+  const LN = { el: null, model: null, L: null, geo: null, items: [], zoom: 1, scope: 'line', table: false, hov: null, kb: null, size: '', raf: 0, tk: null, band: null };
+  const f1 = n => Math.round(n * 10) / 10;
+  const group = () => (LV.o || 'sp')[1] === 'c' ? 'country' : 'place';
+  const cnName = cn => { cn = String(cn || ''); if (/^[A-Z]{2}$/.test(cn)) { try { return new Intl.DisplayNames(['en'], { type: 'region' }).of(cn) || cn; } catch (e) { /* keep the code */ } } return cn; };
+  const clipTo = (s, w, fs) => { s = String(s || ''); const n = Math.max(0, Math.floor(w / (fs * 0.56))); return s.length <= n ? s : n <= 1 ? '' : s.slice(0, n - 1).replace(/[\s,;-]+$/, '') + '…'; };
+  const shown = () => LN.el && !LN.el.hidden && LV.m === 'lanes';
+
+  function lnEl() {
+    if (LN.el) return LN.el;
+    const el = document.createElement('section'); el.id = 'lanesView'; el.className = 'xv'; el.setAttribute('aria-label', 'Place lanes'); el.hidden = true;
+    el.innerHTML = '<div class="xvtop"></div><div class="xvcame" hidden></div><div class="plbox" tabindex="-1"></div><div class="xvread" role="status" aria-live="polite"></div><div class="xvfoot"></div>';
+    document.body.appendChild(el); LN.el = el;
+    el.addEventListener('click', lnClick);
+    el.addEventListener('keydown', lnKey);
+    const box = el.querySelector('.plbox');
+    box.addEventListener('pointermove', lnMove); box.addEventListener('pointerleave', () => { LN.hov = null; LN.band = null; lnRead(); lnHot(null); });
+    box.addEventListener('focusin', e => { const g = e.target.closest && e.target.closest('.plp'); if (g) { LN.kb = g.dataset.k; LN.hov = null; lnRead(g.dataset.k); lnHot(g.dataset.k); } });
+    box.addEventListener('focusout', e => { if (e.target.closest && e.target.closest('.plp')) lnHot(null); });
+    box.addEventListener('wheel', e => { if (!(e.ctrlKey || e.metaKey) || LN.table) return; e.preventDefault(); lnZoom(LN.zoom * (e.deltaY < 0 ? 1.2 : 1 / 1.2)); }, { passive: false });
+    if (window.ResizeObserver) new ResizeObserver(() => { if (shown() && !LN.raf) LN.raf = requestAnimationFrame(() => { LN.raf = 0; if (box.clientWidth + 'x' + box.clientHeight !== LN.size) lnRender(); }); }).observe(box);
+    addEventListener('keydown', e => { if (shown() && (e.key === 'Delete' || e.key === 'Backspace') && el.contains(document.activeElement)) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
+    addEventListener('keydown', e => { if (e.key === 'Escape' && shown() && el.contains(document.activeElement) && !e.defaultPrevented) { e.preventDefault(); e.stopImmediatePropagation(); lensSet('canvas'); const b = $('#bLens'); if (b) b.focus(); } }, true);
+    return el;
+  }
+  function lnKeysOf() {
+    const sel = [...S.sel].filter(k => M.byKey.has(k));
+    return sel.length ? sel : (LV.root && M.byKey.has(LV.root) ? [LV.root] : []);
+  }
+
+  /* ---------------- the controls ---------------- */
+  function lnBar() {
+    const top = lnEl().querySelector('.xvtop'), g = group(), root = M.byKey.get(LV.root), m = LN.model;
+    const seg = (k, on, t, tip) => `<button type="button" class="fbs${on ? ' on' : ''}" data-ln="${k}" aria-pressed="${on}" title="${esc(tip || t)}">${t}</button>`;
+    top.innerHTML = `<div class="fbrow"><span class="fbt"><b>Place lanes of ${esc(root ? root.name : '')}</b><small>${m ? m.drawn.toLocaleString() + (m.drawn === 1 ? ' person' : ' people') + ' in ' + m.lanes.length + (g === 'country' ? ' countries' : ' places') : ''}</small></span>`
+      + `<span class="fbg" role="group" aria-label="A lane for each">${seg('place', g === 'place', 'Place', 'One lane for each place, with the Atlas’s rule over it behind')}${seg('country', g === 'country', 'Country', 'One lane for each country today; the bands are the rule over the place in it that most people were recorded at')}</span>`
+      + `<span class="fbg" role="group" aria-label="Whose line">${seg('line', LN.scope === 'line', 'Everyone', 'Ancestors, descendants and the other parent of each child')}${seg('anc', LN.scope === 'anc', 'Ancestors')}${seg('desc', LN.scope === 'desc', 'Descendants')}</span>`
+      + `<span class="fbg" role="group" aria-label="Zoom time"><button type="button" class="fbs" data-ln="zout" aria-label="Zoom out" ${LN.table ? 'disabled' : ''}>&minus;</button><span class="fbn" aria-live="polite">&times;${LN.zoom < 10 && Math.abs(LN.zoom - Math.round(LN.zoom)) > .05 ? LN.zoom.toFixed(1) : Math.round(LN.zoom)}</span><button type="button" class="fbs" data-ln="zin" aria-label="Zoom in" ${LN.table ? 'disabled' : ''}>+</button><button type="button" class="fbs" data-ln="zfit" ${LN.table ? 'disabled' : ''}>Fit</button></span>`
+      + `<span class="fbg" role="group" aria-label="Show as">${seg('draw', !LN.table, 'Lanes')}${seg('table', LN.table, 'Table', 'The same people as a table: person, place, years, what the record says')}</span>`
+      + `<button type="button" class="fbs fbc" data-ln="canvas" title="Close the lanes: the canvas comes back as you left it">Canvas</button></div>`;
+  }
+  function lnCame() {
+    const c = lnEl().querySelector('.xvcame'), r = M.byKey.get(LV.root);
+    c.hidden = !LV.came; c.innerHTML = LV.came ? `<div class="fbcame" role="status"><span>Your view came back: the Place lanes of ${esc(r ? r.name : 'this person')}.</span><button type="button" class="fbs" data-x="canvas">Back to the canvas</button><button type="button" class="fbx" data-x="ok" aria-label="Dismiss">${icon('x', '')}</button></div>` : '';
+  }
+  function lnClick(e) {
+    const b = e.target.closest('[data-ln]');
+    if (b) { lnAct(b.dataset.ln); return; }
+    const t = e.target.closest('[data-tk]'); if (t) { lnActivate(t.dataset.tk); return; }
+    if (e.target.closest('.xvcame [data-x="ok"]')) { LV.came = false; lnCame(); return; }
+    if (e.target.closest('.xvcame [data-x="canvas"]')) { lensSet('canvas'); return; }
+    if (e.target.closest('a')) return;
+    if (e.target.closest('.plbox') && !LN.table) { const k = lnHit(e, 22); if (k) lnActivate(k); }
+  }
+  function lnAct(a) {
+    if (a === 'canvas') { lensSet('canvas'); return; }
+    if (a === 'place' || a === 'country') { LV.o = LV.o[0] + (a === 'country' ? 'c' : 'p'); lnRender(); save(); return; }
+    if (a === 'line' || a === 'anc' || a === 'desc') { LN.scope = a; lnRender(); return; }
+    if (a === 'draw' || a === 'table') { LN.table = a === 'table'; lnRender(); return; }
+    if (a === 'zin') lnZoom(LN.zoom * 1.6); else if (a === 'zout') lnZoom(LN.zoom / 1.6); else if (a === 'zfit') lnZoom(1);
+  }
+  function lnZoom(z) {
+    z = Math.min(10, Math.max(1, z)); if (z === LN.zoom) return; const box = lnEl().querySelector('.plbox'), old = LN.zoom, sl = box.scrollLeft, cx = box.clientWidth / 2;
+    LN.zoom = z; lnRender(); box.scrollLeft = (sl + cx) * (z / old) - cx;
+  }
+
+  /* ---------------- drawing ---------------- */
+  function lnTokens() {
+    const t = lensTokens(); return { card: t.card, board: t.board, ink: t.ink, line: t.line, faint: t.faint, accent: t.accent, soft: TCV.mix(t.ink, t.card, 0.86) };
+  }
+  function lnRender() {
+    const el = lnEl(), keys = lnKeysOf(), box = el.querySelector('.plbox');
+    if (!keys.length) { box.innerHTML = '<p class="xvnone">Put a person on the canvas and select them: the lanes are drawn from them.</p>'; return; }
+    const L = SK.lineSet(M, keys, { scope: LN.scope }), model = PL.laneModel(M, L.idx, { group: group() });
+    LN.L = L; LN.model = model; if (M.byKey.has(keys[keys.length - 1])) LV.root = keys[keys.length - 1];
+    lnBar(); lnCame();
+    if (LN.table) { LN.items = []; box.classList.add('xvtab'); box.innerHTML = lnTable(model); LN.size = box.clientWidth + 'x' + box.clientHeight; lnFoot(); lnRead(); return; }
+    box.classList.remove('xvtab');
+    const tk = lnTokens(); LN.tk = tk; const sides = SK.sides(M, L.focus);
+    if (!model.lanes.length) { box.innerHTML = '<p class="xvnone">None of these people has a place with a year recorded, so there is nothing to put in a lane. The table lists them.</p>'; LN.items = []; LN.size = box.clientWidth + 'x' + box.clientHeight; lnFoot(); lnRead(); return; }
+    const LW = S.phone ? 112 : 176, AX = 26, HEAD = 18, RH = 16, FOOT = 9;
+    const avail = Math.max(360, box.clientWidth - LW - 18), base = avail / (model.hi - model.lo), ppy = base * LN.zoom, W = Math.ceil((model.hi - model.lo) * ppy + 14);
+    PL.pack(model, ppy, 8); const X = y => 6 + (y - model.lo) * ppy;
+    let y = 0; const geo = model.lanes.map(l => { const h = HEAD + l.rows * RH + 8 + FOOT, g = { l, y0: y, y1: y + h, h, bg: PL.laneBg(tk, l.i) }; y += h; return g; }); const H = y + 4;
+    LN.geo = geo;
+    const lanesBands = new Map(), ev = new Map();
+    geo.forEach(g => { lanesBands.set(g.l.key, PL.bands(M, g.l, model.lo, model.hi)); ev.set(g.l.key, PL.events(M, g.l, model.lo, model.hi)); });
+    LN.bandsOf = lanesBands; LN.evOf = ev;
+    /* ---- the body ---- */
+    let body = `<svg class="plbody" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="group" aria-label="Place lanes: ${model.drawn} people in ${model.lanes.length} ${group() === 'country' ? 'countries' : 'places'}, time across. The arrow keys move between people, Enter selects one on the canvas. The same people are in the table.">`
+      + `<defs><pattern id="plEv" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="${tk.card}" fill-opacity="0"/><line x1="0" y1="0" x2="0" y2="6" stroke="${TCV.mix(tk.ink, tk.card, 0.62)}" stroke-width="2.2"/></pattern>`
+      + `<pattern id="plNo" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" stroke="${tk.faint}" stroke-width="1" stroke-opacity=".55"/></pattern></defs>`;
+    geo.forEach(g => { body += `<rect x="0" y="${f1(g.y0)}" width="${W}" height="${f1(g.h)}" fill="${g.bg}"/>`; });
+    /* the Atlas behind each lane: tinted bands with the flag of the day */
+    geo.forEach(g => {
+      const b = lanesBands.get(g.l.key);
+      if (!b.g) { body += `<rect x="0" y="${f1(g.y0)}" width="${W}" height="${f1(g.h)}" fill="url(#plNo)"/>`; return; }
+      b.bands.forEach(bd => {
+        const x1 = X(bd.from), x2 = X(bd.to), w = x2 - x1, fill = PL.bandFill(bd.col, g.bg, PL.BAND_STRENGTH), ink = TCV.inkFor(fill, tk.ink);
+        const tip = (bd.label ? bd.label + ' (' + bd.from + '–' + bd.to + ')' : 'Flag only: no ruler recorded for these years') + ' · ' + b.place + ' · Record Atlas';
+        let s = `<g class="plb"${b.reg ? ` data-reg="${esc(b.reg)}"` : ''}><title>${esc(tip)}</title><rect x="${f1(x1)}" y="${f1(g.y0 + 1)}" width="${f1(Math.max(1, w))}" height="${f1(g.h - 2)}" fill="${fill}"/><rect x="${f1(x1)}" y="${f1(g.y0 + 1)}" width="${f1(Math.max(1, w))}" height="2.5" fill="${bd.col || tk.faint}"/><line x1="${f1(x1)}" x2="${f1(x1)}" y1="${f1(g.y0 + 1)}" y2="${f1(g.y1 - 1)}" stroke="${tk.ink}" stroke-opacity=".22"/>`;
+        if (bd.fi >= 0 && w > 24) { const f = M.flags[bd.fi], vb = (f && f[1] || '0 0 3 2').split(/\s+/).map(Number), fw = f1(13 * (vb[2] / vb[3])); s += `<use href="#fl${bd.fi}" x="${f1(x1 + 3)}" y="${f1(g.y0 + 5)}" width="${fw}" height="13"/>`; if (bd.short && w > 40 + fw) s += `<text class="plbt" x="${f1(x1 + 7 + fw)}" y="${f1(g.y0 + 15.5)}" fill="${ink}">${esc(clipTo(bd.short, w - fw - 12, 11))}</text>`; }
+        body += s + '</g>';
+      });
+    });
+    /* the Atlas's events: a hatched strip along the foot of the lane */
+    geo.forEach(g => (ev.get(g.l.key) || []).forEach(e => { const x1 = X(Math.max(model.lo, e.from)), x2 = X(Math.min(model.hi, e.to + 1)); body += `<rect class="ple" x="${f1(x1)}" y="${f1(g.y1 - FOOT)}" width="${f1(Math.max(3, x2 - x1))}" height="${FOOT - 1}" fill="url(#plEv)"><title>${esc(e.name + ' (' + e.from + '–' + e.to + ')' + (e.toll ? ': ' + e.toll : '') + ' · Record Atlas event')}</title></rect>`; }));
+    /* year grid */
+    PL.ticks(model.lo, model.hi, ppy).forEach(t => { body += `<line x1="${f1(X(t))}" x2="${f1(X(t))}" y1="0" y2="${H}" stroke="${tk.ink}" stroke-opacity=".12"/>`; });
+    /* people: for each, the connectors then the marks, one focusable group */
+    const rowOf = new Map(); model.items.forEach(it => { if (it.kind !== 'join') rowOf.set(it.lane + '\u0001' + it.k, it.row); });
+    const laneG = new Map(geo.map(g => [g.l.key, g])), yAt = (lane, k) => { const g = laneG.get(lane); return g.y0 + HEAD + (rowOf.get(lane + '\u0001' + k) || 0) * RH + RH / 2 - 1; };
+    const byPerson = new Map(); model.items.forEach(it => { if (!byPerson.has(it.k)) byPerson.set(it.k, []); byPerson.get(it.k).push(it); });
+    LN.items = []; const segs = []; const order = [...byPerson.keys()];
+    const kb = order.includes(LN.kb) ? LN.kb : (order.find(k => S.sel.has(k)) || order.find(k => M.byKey.get(k).i === L.focus) || order[0]); LN.kb = kb;
+    order.forEach(k => {
+      const its = byPerson.get(k), p = M.byKey.get(k), side = sides.get(p.i) || 'o', sel = S.sel.has(k);
+      const colAt = lane => PL.markColour(side, laneG.get(lane).bg, tk.ink), plain = its.filter(t => t.kind !== 'join').sort((a, b) => a.a - b.a || (a.kind === 'mark') - (b.kind === 'mark'));
+      let s = `<g class="plp${sel ? ' sel' : ''}" data-k="${esc(k)}" tabindex="${k === kb ? 0 : -1}" role="button" aria-label="${esc(lnAria(M.P[p.i], its))}"${sel ? ' aria-pressed="true"' : ''}>`;
+      /* a move between lanes: a short curve at the year of arrival */
+      for (let q = 1; q < plain.length; q++) { const a = plain[q - 1], b = plain[q]; if (a.lane === b.lane || a.kind === 'span' || b.kind === 'span') continue; const ya = yAt(a.lane, k), yb = yAt(b.lane, k), xb = X(b.a); s += `<path class="plc" d="M${f1(xb)} ${f1(ya)}C${f1(xb + 14)} ${f1(ya)} ${f1(xb + 14)} ${f1(yb)} ${f1(xb)} ${f1(yb)}" stroke="${colAt(b.lane)}"/>`; }
+      its.filter(t => t.kind === 'join').forEach(j => { const ya = yAt(j.lane, k), yb = yAt(j.lane2, k), xa = X(j.a), xb = X(j.b), mx = (xa + xb) / 2; s += `<path class="plj" d="M${f1(xa)} ${f1(ya)}C${f1(mx)} ${f1(ya)} ${f1(mx)} ${f1(yb)} ${f1(xb)} ${f1(yb)}" stroke="${colAt(j.lane)}"/>`; });
+      plain.forEach(t => {
+        const g = laneG.get(t.lane), cy = f1(yAt(t.lane, k)), col = colAt(t.lane), x1 = X(t.a), x2 = Math.max(X(t.b), x1 + 3), bgc = g.bg;
+        if (t.kind === 'bar') s += `<rect class="plm" x="${f1(x1)}" y="${f1(cy - 3.5)}" width="${f1(x2 - x1)}" height="7" rx="3.5" fill="${col}"${t.est ? ' fill-opacity=".6" stroke-dasharray="3 2"' : ''} stroke="${t.est ? col : bgc}" stroke-width="1.4"/>`;
+        else if (t.kind === 'span') s += `<rect class="plm plsp" x="${f1(x1)}" y="${f1(cy - 3.5)}" width="${f1(x2 - x1)}" height="7" rx="3.5" fill="${col}" fill-opacity=".22" stroke="${col}" stroke-width="1.8" stroke-dasharray="1.6 3.2" stroke-linecap="round"/>`;
+        else if (t.role === 'born') s += `<circle class="plm" cx="${f1(x1)}" cy="${cy}" r="4.6" fill="${col}" stroke="${bgc}" stroke-width="1.6"${t.est ? ' fill-opacity=".6"' : ''}/>`;
+        else if (t.role === 'died') s += `<path class="plm" d="M${f1(x1)} ${cy - 5.6}l5.6 5.6-5.6 5.6-5.6-5.6z" fill="${col}" stroke="${bgc}" stroke-width="1.5"${t.est ? ' fill-opacity=".6"' : ''}/>`;
+        else s += `<circle class="plm" cx="${f1(x1)}" cy="${cy}" r="3.6" fill="${bgc}" stroke="${col}" stroke-width="2"/>`;
+        segs.push({ k, x1, x2: t.kind === 'bar' || t.kind === 'span' ? x2 : x1, y: cy });
+      });
+      body += s + '</g>';
+    });
+    body += '</svg>';
+    LN.items = segs;
+    /* ---- the axis and the labels ---- */
+    let axis = `<svg class="plaxis" width="${W}" height="${AX}" viewBox="0 0 ${W} ${AX}" aria-hidden="true"><rect width="${W}" height="${AX}" fill="${tk.card}"/>`;
+    PL.ticks(model.lo, model.hi, ppy).forEach(t => { axis += `<line x1="${f1(X(t))}" x2="${f1(X(t))}" y1="${AX - 6}" y2="${AX}" stroke="${tk.ink}" stroke-opacity=".5"/><text class="plat" x="${f1(X(t))}" y="${AX - 10}" text-anchor="middle" fill="${tk.ink}">${t}</text>`; });
+    axis += '</svg>';
+    let lab = `<svg class="pllab" width="${LW}" height="${H}" viewBox="0 0 ${LW} ${H}" role="group" aria-label="${group() === 'country' ? 'Countries' : 'Places'}, oldest first">`;
+    geo.forEach(g => {
+      const b = lanesBands.get(g.l.key), pl = TC.placeAt(M, M.P[(model.items.find(t => t.lane === g.l.key) || {}).i || 0], b.place, model.hi), midY = g.y0 + g.h / 2;
+      const flag = (pl && pl.fi >= 0 && M.flags[pl.fi]) ? (() => { const vb = (M.flags[pl.fi][1] || '0 0 3 2').split(/\s+/).map(Number), fw = f1(20 * (vb[2] / vb[3])); return `<use href="#fl${pl.fi}" x="8" y="${f1(g.y0 + 8)}" width="${fw}" height="20"/>`; })() : '';
+      const nm = group() === 'country' ? cnName(g.l.label) : g.l.label, sub1 = group() === 'country' ? 'regime shown for ' + b.place : cnName(g.l.cn);
+      const sub2 = g.l.n + (g.l.n === 1 ? ' person' : ' people') + (g.l.first !== Infinity ? ' · from ' + g.l.first : '') + (b.g && !b.surveyed ? ' · flags only' : !b.g ? ' · not in the Atlas' : '');
+      const tx = flag ? 40 : 10, link = (group() === 'place' && b.id) ? `https://recordatlas.org/place/${encodeURIComponent(b.id)}/` : '';
+      const name = `<text class="pln" x="${tx}" y="${f1(g.y0 + 19)}" fill="${tk.ink}">${esc(clipTo(nm, LW - tx - 6, 12.5))}</text>`;
+      lab += `<rect x="0" y="${f1(g.y0)}" width="${LW}" height="${f1(g.h)}" fill="${g.bg}"/>${flag}${link ? `<a href="${link}" target="_blank" rel="noopener"><title>Open ${esc(g.l.label)} in the Record Atlas</title>${name}</a>` : name}`
+        + `<text class="plc2" x="${tx}" y="${f1(g.y0 + 33)}" fill="${tk.soft}">${esc(clipTo(sub1, LW - tx - 6, 10.5))}</text>`
+        + (g.h > 52 ? `<text class="plc2" x="${tx}" y="${f1(g.y0 + 46)}" fill="${tk.soft}">${esc(clipTo(sub2, LW - tx - 6, 10.5))}</text>` : '') + `<title>${esc(nm + ' · ' + sub1 + ' · ' + sub2)}</title>`;
+    });
+    lab += '</svg>';
+    box.innerHTML = `<div class="plgrid" style="grid-template-columns:${LW}px ${W}px"><div class="plcorner" style="height:${AX}px;background:${tk.card}"></div>${axis}${lab}${body}</div>`;
+    LN.size = box.clientWidth + 'x' + box.clientHeight; LN.W = W; LN.H = H; LN.LW = LW; LN.X = X;
+    lnFoot(); lnRead(); lnSelClass();
+  }
+  const lnAria = (p, its) => {
+    if (!its.length) return p.name;
+    const a = Math.min(...its.map(t => t.a)), b = Math.max(...its.map(t => t.b)), places = [...new Set(its.filter(t => t.kind !== 'join').map(t => t.place))];
+    return `${p.name}, ${PL.yearsText(a, b)}${places.length ? ', recorded in ' + places.slice(0, 4).join(', ') + (places.length > 4 ? ' and ' + (places.length - 4) + ' more' : '') : ''}`;
+  };
+  function lnSelClass() {
+    const box = lnEl().querySelector('.plbox'); box.classList.toggle('plhas', S.sel.size > 0 && [...S.sel].some(k => LN.items.some(t => t.k === k)));
+  }
+  function lnFoot() {
+    const f = lnEl().querySelector('.xvfoot'), m = LN.model, tk = LN.tk || lnTokens(); if (!m) { f.innerHTML = ''; return; }
+    const root = M.byKey.get(LV.root), sides = SK.sides(M, LN.L ? LN.L.focus : -1);
+    const mk = (kind, side) => { const c = PL.markColour(side, tk.card, tk.ink), bg = tk.card; const shape = kind === 'born' ? `<circle cx="9" cy="8" r="4.6" fill="${c}" stroke="${bg}" stroke-width="1.6"/>` : kind === 'died' ? `<path d="M9 2.4l5.6 5.6-5.6 5.6-5.6-5.6z" fill="${c}" stroke="${bg}" stroke-width="1.5"/>` : kind === 'bar' ? `<rect x="1" y="4.5" width="16" height="7" rx="3.5" fill="${c}"/>` : kind === 'span' ? `<rect x="1" y="4.5" width="16" height="7" rx="3.5" fill="${c}" fill-opacity=".22" stroke="${c}" stroke-width="1.8" stroke-dasharray="1.6 3.2" stroke-linecap="round"/>` : kind === 'join' ? `<path d="M1 12C9 12 9 4 17 4" fill="none" stroke="${c}" stroke-width="1.5" stroke-dasharray="2 3.5"/>` : `<rect x="1" y="3" width="16" height="10" fill="${side === 'x' ? tk.card : tk.card}" stroke="${c}"/>`; return `<svg class="plsw" width="18" height="16" viewBox="0 0 18 16" aria-hidden="true">${shape}</svg>`; };
+    f.innerHTML = `<details class="xvleg"${innerHeight >= 1100 && !S.phone ? ' open' : ''}><summary><span class="xvsum"><span class="xvi"><b>Across</b> time</span><span class="xvi"><b>Down</b> ${group() === 'country' ? 'country' : 'place'}</span><span class="xvi">${mk('born', 'o')}born</span><span class="xvi">${mk('died', 'o')}died</span><span class="xvi">${mk('bar', 'o')}years there</span><span class="xvi">${mk('span', 'o')}year not given</span><span class="xvi"><b>Behind</b> the Atlas’s rulers, with flags</span><span class="xvmore">What the lanes mean</span></span></summary><div class="xvlg">`
+      + `<p><b>Across</b>: time. <b>Down</b>: ${group() === 'country' ? 'a lane for each country today' : 'a lane for each place the line was recorded in'}, the place where the line began on top. Behind a lane: the Record Atlas’s rule over the place in each stretch of years, tinted with the colour of its flag and headed by the flag (the words are the Atlas’s; hover a band to read them).${group() === 'country' ? ' In a country lane the bands are the rule over the place in it that most people were recorded at (named under the country).' : ''}</p>`
+      + `<div class="xvrow"><span class="xvi">${mk('born', 'o')}born</span><span class="xvi">${mk('died', 'o')}died</span><span class="xvi">${mk('bar', 'o')}years the record places them here (both ends dated)</span><span class="xvi">${mk('span', 'o')}recorded here, year not given: across the years it could have been</span><span class="xvi">${mk('join', 'o')}a birthplace and a deathplace, nothing says when they moved</span></div>`
+      + `<div class="xvrow"><b>Colour</b>: the side of the family <span class="xvi">${mk('bar', 'f')}father’s side</span><span class="xvi">${mk('bar', 'm')}mother’s side</span><span class="xvi">${mk('bar', 'c')}the centre</span><span class="xvi">${mk('bar', 'o')}descendants and partners</span> A faint dashed outline: an estimated year (<b>~</b>).</div>`
+      + `<div class="xvrow"><span class="xvi"><svg class="plsw" width="22" height="16" viewBox="0 0 22 16" aria-hidden="true"><rect x="1" y="3" width="20" height="10" fill="url(#plEv)" stroke="${TCV.mix(tk.ink, tk.card, 0.62)}"/></svg>a hatched strip at the foot of a lane: an Atlas event there (a war, an epidemic, a change of rule)</span><span class="xvi"><svg class="plsw" width="22" height="16" viewBox="0 0 22 16" aria-hidden="true"><rect x="1" y="2" width="20" height="12" fill="none" stroke="${tk.faint}" stroke-dasharray="3 2"/></svg>a lane with no record in the Atlas yet (no bands)</span></div>`
+      + `<p class="xvnote">${esc(PL.caption(m))} Drag or swipe to scroll; Ctrl or &#8984; and the wheel zooms time.</p></div></details>`;
+  }
+  /* the reading line: a person under the pointer (or focused, or selected), else the Atlas's words for the band under the pointer */
+  function lnRead(k) {
+    const r = lnEl().querySelector('.xvread'), m = LN.model; if (!m) { r.innerHTML = ''; return; }
+    const key = k || LN.hov || (S.sel.size === 1 ? [...S.sel][0] : null), its = key ? m.items.filter(t => t.k === key) : [];
+    if (key && !LN.hov && !k && !its.length) { /* the selected person is not in a lane */ }
+    if (LN.band && !k && !LN.hov) { r.innerHTML = LN.band; return; }
+    if (!key || !M.byKey.has(key)) { r.innerHTML = '<span class="xvhelp">Hover, focus or tap a person for where they were; hover a band for the Atlas’s words about it. Click, or press Enter, to select that person on the canvas.</span>'; return; }
+    const p = M.byKey.get(key), pp = M.P[p.i];
+    if (SK.hidden(pp)) { r.innerHTML = `<b>${esc(p.name)}</b> <span class="xvk">${pp.living ? 'May be living: only the name and the family are shown.' : 'Named only: no dates recorded.'}</span>`; return; }
+    const rows = PL.tableRows(M, { items: m.items.filter(t => t.k === key), lanes: m.lanes, undrawn: [] });
+    r.innerHTML = `<b>${esc(p.name)}</b> <span class="xvk">${esc(TC.years(pp))}</span> ` + (rows.length ? rows.map(x => `<span class="xvl"><b>${esc(x.place)}</b> ${esc(x.years)} <span class="xvk">${esc(x.what)}</span></span>`).join(' ') : '<span class="xvk">no place with a year recorded</span>') + (S.sel.has(key) ? ' <span class="xvk">&middot; selected</span>' : '');
+  }
+  function lnHot(k) { const b = lnEl().querySelector('.plbody'); if (b) b.querySelectorAll('.plp').forEach(g => g.classList.toggle('hot', !!k && g.dataset.k === k)); }
+  function lnHit(e, tol) {
+    const body = lnEl().querySelector('.plbody'); if (!body) return null; const b = body.getBoundingClientRect();
+    return PL.nearestSeg(LN.items, e.clientX - b.left, e.clientY - b.top, tol);
+  }
+  function lnMove(e) {
+    if (e.pointerType === 'touch' || LN.table) return; const body = lnEl().querySelector('.plbody'); if (!body) return;
+    const k = lnHit(e, 14), box = lnEl().querySelector('.plbox'); box.style.cursor = k ? 'pointer' : '';
+    let band = null;
+    if (!k && LN.geo) {   /* over no person: the Atlas's words for the band under the pointer */
+      const b = body.getBoundingClientRect(), x = e.clientX - b.left, y = e.clientY - b.top, g = LN.geo.find(q => y >= q.y0 && y < q.y1);
+      if (g) { const yr = LN.model.lo + (x - 6) / ((LN.W - 14) / (LN.model.hi - LN.model.lo)), B = LN.bandsOf.get(g.l.key), bd = B && B.bands.find(q => yr >= q.from && yr < q.to), flagH = bd && bd.fi >= 0 ? flagHTML({ fi: bd.fi, name: B.place, cn: '' }, Math.round(yr), 'The flag in force then (Record Atlas)') : '';
+        const evs = (LN.evOf.get(g.l.key) || []).filter(q => yr >= q.from && yr <= q.to + 1), evH = evs.map(q => ` <span class="xvl"><b>${esc(q.name)}</b> ${q.from}&ndash;${q.to}${q.toll ? ' <span class="xvk">' + esc(q.toll) + '</span>' : ''} <span class="xvk">Atlas event</span></span>`).join('');
+        if (bd || evs.length) band = `<b>${esc(B.place)}</b> <span class="xvk">${Math.round(yr)}</span> ${bd ? `<span class="xvl">${flagH}${bd.label ? esc(bd.label) + ' <span class="xvk">(' + bd.from + '&ndash;' + bd.to + ', Record Atlas)</span>' : '<span class="xvk">flag only: no ruler recorded for these years</span>'}</span>` : ''}${evH}`;
+        else if (!B.g) band = `<b>${esc(g.l.label)}</b> <span class="xvk">This place is not in the Record Atlas yet, so there are no bands.</span>`; }
+    }
+    if (k !== LN.hov || band !== LN.band) { LN.hov = k; LN.band = band; lnRead(); lnHot(k); }
+  }
+  function lnTable(m) {
+    const rows = PL.tableRows(M, m), regs = m.lanes.map(l => ({ l, b: PL.bands(M, l, m.lo, m.hi) }));
+    return `<table class="xvt"><caption>${m.drawn} people by ${group() === 'country' ? 'country' : 'place'}, in the order of the lanes. Years marked ~ are estimates. ${esc(PL.caption(m))}</caption><thead><tr><th scope="col">Person</th><th scope="col">${group() === 'country' ? 'Country' : 'Place'}</th><th scope="col">Years</th><th scope="col">What the record gives</th></tr></thead><tbody>`
+      + rows.map(r => `<tr class="${S.sel.has(r.key) ? 'on' : ''}"><th scope="row"><button type="button" data-tk="${esc(r.key)}"${S.sel.has(r.key) ? ' aria-current="true"' : ''}>${esc(r.name)}</button></th><td>${esc(r.place)}</td><td>${esc(r.years)}</td><td>${esc(r.what)}</td></tr>`).join('')
+      + `</tbody></table><table class="xvt"><caption>Who ruled each place, from the Record Atlas</caption><thead><tr><th scope="col">${group() === 'country' ? 'Country (place used)' : 'Place'}</th><th scope="col">Years</th><th scope="col">Rule</th></tr></thead><tbody>`
+      + regs.map(({ l, b }) => b.bands.length ? b.bands.map((bd, k) => `<tr><th scope="row">${k === 0 ? esc(l.label) + (group() === 'country' ? ' (' + esc(b.place) + ')' : '') : ''}</th><td>${bd.from}&ndash;${bd.to}</td><td>${esc(bd.label || 'flag only: no ruler recorded')}</td></tr>`).join('') : `<tr><th scope="row">${esc(l.label)}</th><td></td><td>${b.g ? 'nothing recorded for these years' : 'not in the Record Atlas yet'}</td></tr>`).join('')
+      + `</tbody></table>`;
+  }
+
+  /* ---------------- using it ---------------- */
+  function lnActivate(k) {
+    const p = M.byKey.get(k); if (!p) return; LN.kb = k;
+    const c = fanEnsureCard(p); select([k]); if (c) { fit([c], { maxK: 1 }); pulseCard(c); }
+  }
+  function lnKey(e) {
+    const g = e.target.closest && e.target.closest('.plp'); if (!g) return;
+    const k = g.dataset.k, dir = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down' }[e.key];
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); lnActivate(k); return; }
+    if (!dir) return;
+    const anchors = []; const seen = new Set(); LN.items.forEach(t => { if (!seen.has(t.k)) { seen.add(t.k); anchors.push({ k: t.k, x: t.x1, y: t.y }); } });
+    const to = SK.neighbour(anchors, k, dir); e.preventDefault(); if (to == null) return;
+    const el = LN.el.querySelector(`.plp[data-k="${CSS.escape(to)}"]`);
+    if (el) { LN.el.querySelectorAll('.plp[tabindex="0"]').forEach(x => x.setAttribute('tabindex', '-1')); el.setAttribute('tabindex', '0'); el.focus(); LN.kb = to;
+      const a = anchors.find(t => t.k === to), box = LN.el.querySelector('.plbox'); if (a && box) { const bl = box.scrollLeft + LN.LW, br = box.scrollLeft + box.clientWidth; if (LN.LW + a.x < box.scrollLeft + LN.LW + 8 || LN.LW + a.x > br - 12) box.scrollLeft = Math.max(0, a.x - box.clientWidth / 2); } }
+  }
+
+  VIEWX.lanes = {
+    id: 'lanes', title: 'Place lanes', sub: 'Time across, a lane for each place: the Atlas’s rulers and flags behind, each life as marks and bars',
+    open(key, o) { o = o || {}; const el = lnEl(); LN.zoom = 1; LN.table = false; LN.scope = 'line'; LN.hov = null; LN.band = null; LN.kb = null; LV.came = !!o.came || !!o.boot; el.hidden = false; lnRender(); lensBtn(); trailRender(); },
+    close() { if (LN.el) LN.el.hidden = true; LN.hov = null; },
+    onSelect() {
+      if (!shown()) return; const keys = lnKeysOf(), m = LN.model, L = LN.L; if (!keys.length) return;
+      const inside = L && keys.every(k => M.byKey.has(k) && L.idx.includes(M.byKey.get(k).i));
+      if (!inside) { LV.came = false; lnRender(); save(); return; }
+      LV.root = keys[keys.length - 1];
+      if (LN.table) { lnRender(); return; }
+      const body = LN.el.querySelector('.plbody'); if (body) body.querySelectorAll('.plp').forEach(g => { const on = S.sel.has(g.dataset.k); g.classList.toggle('sel', on); if (on) g.setAttribute('aria-pressed', 'true'); else g.removeAttribute('aria-pressed'); });
+      lnSelClass(); lnBar(); lnRead();
+    },
+    onTheme() { if (shown()) lnRender(); },
+  };
+})();
 
 /* findui.js — Find: the search. It lives in two places that share one query:
  *   - the FIND TAB, the first tab of the right-hand pane: the box, one button for the archives (a small menu of ticks), the people brought on recently, and the results, which can
@@ -9451,7 +10483,7 @@ function syncButtons() {
 function syncUi() { hideHint(); syncButtons(); }
 function clearCanvas() {
   if (!S.cards.size) return;
-  if (typeof fanIsOn === 'function' && fanIsOn()) lensSet('canvas');
+  if (typeof fanIsOn === 'function' && (fanIsOn() || lensExtraOn())) lensSet('canvas');
   snapshot(); clearAll(); refreshAll(); drawEdges(); hideHint(); renderInfo(); save(); runSearchMarks();
   startSync();   /* a cleared canvas starts again: the centred search comes back */
   toast('Cleared. Undo brings it back.');

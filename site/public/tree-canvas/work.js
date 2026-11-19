@@ -84,15 +84,17 @@ export function pack(plain, key) {
    The centre is named only by a hash, as every person is; nothing else here is about anyone. Nothing is kept when every choice is as it starts, so an untouched tree's record is exactly what it was. */
 /* The Surnames and Lifespans views are modes of the View button too (m: 'surnames' | 'lifespans'), each with a short setting string (xs, xl: letters and digits, up to 8, e.g. the colour choice). Nothing else is allowed through. */
 const LENS_X = /^[a-z0-9]{1,8}$/;
-const lensMode = m => m === 'fan' || m === 'surnames' || m === 'lifespans' || m === 'gen' || m === 'house' ? m : 'canvas';
+const lensMode = m => m === 'fan' || m === 'surnames' || m === 'lifespans' || m === 'gen' || m === 'house' || m === 'sky' || m === 'lanes' ? m : 'canvas';
+/* Night sky and Place lanes (m: 'sky' | 'lanes') keep two choices as two letters, o: the sky's colouring (s side of the family, p flag of the birthplace) then the lanes' grouping (p place, c country); kept only when it is not the start, 'sp'. Their centre is a hash `r`, as the Fan's is. */
+const lensO = o => typeof o.o === 'string' && /^[sp][pc]$/.test(o.o) && o.o !== 'sp' ? { o: o.o } : {};
 /* Generations (gu: 1..5 ancestor lanes, gd: 1..4 descendant lanes) and Household (hk: 0 leaves the brothers and sisters out) are kept only when they differ from how they start (3, 2, and on), as the canvas keeps them */
 const lensG = o => { const u = Number.isInteger(o.gu) ? Math.max(1, Math.min(5, o.gu)) : 3, d = Number.isInteger(o.gd) ? Math.max(1, Math.min(4, o.gd)) : 2; return { ...(u !== 3 ? { gu: u } : {}), ...(d !== 2 ? { gd: d } : {}), ...(o.hk === 0 ? { hk: 0 } : {}) }; };
-const lensX = o => ({ ...(typeof o.xs === 'string' && LENS_X.test(o.xs) ? { xs: o.xs } : {}), ...(typeof o.xl === 'string' && LENS_X.test(o.xl) ? { xl: o.xl } : {}), ...lensG(o) });
+const lensX = o => ({ ...(typeof o.xs === 'string' && LENS_X.test(o.xs) ? { xs: o.xs } : {}), ...(typeof o.xl === 'string' && LENS_X.test(o.xl) ? { xl: o.xl } : {}), ...lensG(o), ...lensO(o) });
 export function packLens(l, key) {
   if (!l || typeof l !== 'object') return {};
   const m = lensMode(l.m), g = Number.isInteger(l.g) ? Math.max(FAN_MIN, Math.min(FAN_MAX, l.g)) : FAN_DEFAULT, c = l.c === 'place' ? 'place' : 'side', t = l.t === 0 || l.t === 1 ? l.t : 2, x = lensX(l);
   if (m === 'canvas' && g === FAN_DEFAULT && c === 'side' && t === 2 && !Object.keys(x).length) return {};
-  const r = m === 'fan' && typeof l.r === 'string' && l.r ? H(key, l.r) : '';
+  const r = (m === 'fan' || m === 'sky' || m === 'lanes') && typeof l.r === 'string' && l.r ? H(key, l.r) : '';
   return { vw: { m, g, c, t, ...(r ? { r } : {}), ...x } };
 }
 /* known: the real person keys of the tree that is open; bridges: the real bridge ids. Returns the canvas's own serialise() shape, or null. `matched`: how many people were found. */

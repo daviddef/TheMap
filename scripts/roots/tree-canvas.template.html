@@ -184,9 +184,6 @@ button{font-family:inherit}
 .lk-ibtn[disabled]{opacity:.4;pointer-events:none}
 .lk-ibtn .t{font:400 20px/1 "Lilita One",system-ui}
 .lk-ibtn.on{border-color:var(--lk-accent);color:var(--lk-accent)}
-#hint{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);font:400 28px "Lilita One",system-ui;color:var(--lk-faint);pointer-events:none;transition:opacity .5s;text-align:center;max-width:80vw;z-index:1}
-#hint small{display:block;font:700 14px Nunito,system-ui;margin-top:8px;color:var(--lk-faint);line-height:1.5}
-#hint.off{opacity:0}
 #toast{position:fixed;left:50%;top:16px;--lk-toast-from:-10px;z-index:30}
 /* ---------- cards ---------- */
 .card{position:absolute;left:0;top:0;width:184px;height:92px;z-index:2}
@@ -244,27 +241,12 @@ button{font-family:inherit}
 .card:hover .hd.hov,.card.sel .hd.hov{opacity:1;pointer-events:auto}
 .hd.brs{position:absolute}
 .ph .hd.hov{opacity:0}.ph .card.sel .hd.hov{opacity:1}
-/* ---------- the dock: Loam's shelf and tabs ---------- */
+/* ---------- the dock: now only the two relate slots, shown while they are open ---------- */
 .dock{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);width:min(calc(100vw - 440px),900px);min-width:min(94vw,560px);background:var(--lk-card);border:2px solid var(--lk-line);border-radius:22px;box-shadow:0 5px 0 var(--lk-line),0 18px 40px rgba(0,0,0,.14);padding:8px 10px 4px;z-index:8;transition:transform .3s cubic-bezier(.3,1.5,.5,1)}
-.srow{display:flex;align-items:center;gap:8px;margin-bottom:6px;position:relative}
-.srow .si{position:absolute;left:11px;top:50%;margin-top:-9px;width:18px;height:18px;color:var(--lk-mute);pointer-events:none}
-.srow .si svg{width:18px;height:18px}
-.srow .cnt{font:800 11px Nunito;color:var(--lk-mute);flex:none;white-space:nowrap}
-#q{flex:1;min-width:0;border:2px solid var(--lk-line);border-radius:12px;background:var(--lk-paper);padding:8px 12px 8px 36px;font:700 15px Nunito,system-ui;color:var(--lk-ink);outline:none;transition:border-color .2s,background .2s;user-select:text;-webkit-user-select:text}
-#q:focus{border-color:var(--lk-accent);background:var(--lk-card)}
-.tabs{display:flex;gap:2px;align-items:center;margin-bottom:0;overflow-x:auto;scrollbar-width:none}
-.tabs::-webkit-scrollbar{display:none}
-.tabs .lk-tab{flex:none;display:flex;align-items:center;gap:5px;padding:6px 8px}
-.tabs .lk-tab i{width:9px;height:9px;border-radius:50%;background:var(--ac);display:inline-block;flex:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--ac) 25%,transparent)}
-.tabs .lk-tab.off{opacity:.45}.tabs .lk-tab.off i{background:transparent;box-shadow:inset 0 0 0 2px var(--ac)}
-.shelf{display:flex;gap:8px;overflow-x:auto;padding:10px 6px 8px;scrollbar-width:none;min-height:84px;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 14px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 14px),transparent 100%)}
-.shelf::-webkit-scrollbar{display:none}
-.shelf .none .rs-l{font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;margin-right:6px}.shelf .none .link-quiet{background:none;border:0;padding:0 6px;font:inherit;font-size:12px;color:var(--lk-faint);text-decoration:underline;cursor:pointer}.shelf .none .link-quiet:hover{color:var(--lk-ink)}
-.shelf .none{padding:14px 12px;color:var(--lk-faint);font-weight:700;font-size:13.5px;line-height:1.9;white-space:nowrap}
-.res{position:relative;flex:0 0 236px;height:70px;border-radius:16px;border:2px solid transparent;background:transparent;padding:6px 8px 6px 18px;text-align:left;cursor:grab;color:var(--lk-ink);
-  transition:transform .18s cubic-bezier(.3,1.7,.5,1),background .15s;touch-action:pan-x;overflow:hidden}
+.res{position:relative;list-style:none;min-height:62px;border-radius:16px;border:2px solid transparent;background:transparent;padding:6px 8px 6px 18px;text-align:left;cursor:grab;color:var(--lk-ink);
+  transition:transform .18s cubic-bezier(.3,1.7,.5,1),background .15s;touch-action:pan-y;overflow:hidden;user-select:none;-webkit-user-select:none}
 .res::before{content:"";position:absolute;left:5px;top:8px;bottom:8px;width:6px;border-radius:4px;background:var(--ac)}
-.res:hover{transform:translateY(-5px) scale(1.04) rotate(-1deg);background:var(--lk-hover);border-color:var(--lk-line)}
+.res:hover,.res.act{background:var(--lk-hover);border-color:var(--lk-line)}.res.act{outline:2px solid var(--lk-accent);outline-offset:-2px}
 .res.on{background:var(--lk-accent-soft);border-color:var(--lk-line)}
 .res .n{font:400 16px/1.15 "Lilita One",system-ui;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:18px}
 .res .y{font:800 11px/1.4 Nunito;color:var(--lk-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:5px}.res .y .ac{flex:none}
@@ -336,22 +318,17 @@ button{font-family:inherit}
 .ph .top .xtra{display:none}.ph .top.more .xtra{display:inline-grid}
 .ph .zoombar{left:8px;top:54px}
 .ph .dock{left:8px;right:8px;width:auto;min-width:0;transform:none;bottom:calc(8px + env(safe-area-inset-bottom));padding:4px 6px;border-radius:16px}
-.shelfoff .dock{transform:translate(-50%,calc(100% + 40px))}.ph.shelfoff .dock{transform:translateY(calc(100% + 40px))}
-.ph .tabs .lk-tab{padding:5px 7px;font-size:12px}.ph #q{padding:6px 8px 6px 32px;font-size:16px}.ph .srow{margin-bottom:3px}
-.ph .shelf{padding:8px 4px 4px;min-height:64px}.ph .res{flex-basis:200px;height:60px;padding-top:4px}
-.ph #info{left:8px;right:8px;top:auto;width:auto;bottom:calc(var(--dock-h,130px) + 20px + env(safe-area-inset-bottom));max-height:min(44vh,calc(100vh - var(--dock-h,130px) - 120px))}
-.ph.shelfoff #info{bottom:calc(16px + env(safe-area-inset-bottom));max-height:60vh}
-.shelfoff #info{max-height:calc(100vh - 90px)}
+.ph #info{left:8px;right:8px;top:auto;width:auto;bottom:calc(16px + env(safe-area-inset-bottom));max-height:min(44vh,calc(100vh - 140px))}
+.ph.rzopen #info{bottom:calc(var(--dock-h,130px) + 20px + env(safe-area-inset-bottom));max-height:min(44vh,calc(100vh - var(--dock-h,130px) - 120px))}
 .ph #mini{display:none!important}.ph #zIn,.ph #zOut{display:none}
-.ph #hint{font-size:21px;top:34%}.ph #hint small{font-size:12.5px}
 .ph .hd{height:30px;min-width:30px;font-size:12px}.ph .hd.rm,.ph .hd.op,.ph .hd.rl{width:28px;min-width:28px;height:28px}
 .ph .hd.up,.ph .hd.upall{top:-30px}.ph .hd.dn,.ph .hd.dnall{bottom:-30px}.ph .hd.sp{left:-30px;margin-top:-15px}.ph .hd.rm{right:-30px;top:-14px}.ph .hd.op{right:-30px;bottom:-14px}.ph .hd.rl{left:-30px;top:-14px}
 .ph #pop{left:8px!important;right:8px;width:auto;top:auto!important;bottom:130px}
 @media (max-width:1100px){.dock{width:94vw;min-width:0}}
 @media (prefers-reduced-motion:reduce){.card.pop .cb,.card.pulse .cb,#info.on,#pop.on{animation:none}.cb{transition:none}#edges .pathline{animation:none;stroke-dashoffset:0}}
 .ph #bMore{display:inline-grid!important}
-/* short windows (a laptop with the browser's own chrome, a small pane): a lower shelf so the canvas keeps room */
-@media (max-height:620px){.dock{bottom:8px}.shelf{min-height:0;padding:6px 6px 4px}.res{height:60px;padding-top:4px}.shelf .none{padding:6px 12px;line-height:1.4}}
+/* short windows (a laptop with the browser's own chrome, a small pane): a lower dock so the canvas keeps room */
+@media (max-height:620px){.dock{bottom:8px}}
 
 /* the relate zone: drop two people in, the whole path between them is drawn */
 #rz{position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:6;display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--lk-card);border:2px solid var(--lk-line);border-radius:22px;box-shadow:0 4px 0 var(--lk-line),0 12px 26px rgba(0,0,0,.12);max-width:calc(100vw - 600px)}
@@ -711,10 +688,10 @@ html:not(.ph):has(#info.on) #playBar{left:calc((100vw - 340px) / 2);width:min(64
 
 /* the side pane's tabs hang off its left edge, in the same style as the collapse handle: small vertical tabs stacked under it, no column of their own (the phone keeps its row of tabs along the top of the sheet) */
 html:not(.ph) #info{overflow:visible}
-html:not(.ph) #info .ih{position:absolute;left:-26px;top:108px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;width:auto;padding:0;border:0;background:transparent;overflow:visible;cursor:auto;touch-action:auto;-webkit-mask-image:none!important;mask-image:none!important}
-html:not(.ph) #info .ih .lk-tab{writing-mode:vertical-rl;text-orientation:mixed;width:24px;padding:12px 0;border:2px solid var(--lk-line);border-right:0;border-radius:12px 0 0 12px;background:var(--lk-paper);color:var(--lk-mute);font:800 12px/1 Nunito,system-ui;white-space:nowrap;text-align:center;box-shadow:-2px 2px 0 var(--lk-line);flex:none}
+html:not(.ph) #info .ih{position:absolute;left:-28px;top:108px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;width:auto;padding:0;border:0;background:transparent;overflow:visible;cursor:auto;touch-action:auto;-webkit-mask-image:none!important;mask-image:none!important}
+html:not(.ph) #info .ih .lk-tab{writing-mode:vertical-rl;text-orientation:mixed;width:26px;padding:12px 0;border:2px solid var(--lk-line);border-right:0;border-radius:12px 0 0 12px;background:var(--lk-paper);color:var(--lk-mute);font:800 13px/1 Nunito,system-ui;white-space:nowrap;text-align:center;box-shadow:-2px 2px 0 var(--lk-line);flex:none}
 html:not(.ph) #info .ih .lk-tab:hover{background:var(--lk-accent-soft);color:var(--lk-accent)}
-html:not(.ph) #info .ih .lk-tab.on{width:28px;background:var(--lk-card);color:var(--lk-ink);margin-right:-2px;padding-right:2px;box-shadow:-2px 2px 0 var(--lk-line)}
+html:not(.ph) #info .ih .lk-tab.on{width:30px;background:var(--lk-card);color:var(--lk-ink);margin-right:-2px;padding-right:2px;box-shadow:-2px 2px 0 var(--lk-line)}
 html:not(.ph) #info .ih span,html:not(.ph) #info .ih .lk-tab[data-tab="close"]{display:none}
 html:not(.ph):has(#info.on) #infoTab{top:92px;transform:none}
 
@@ -767,11 +744,7 @@ html:not(.ph):has(#info.on) #namesCap{left:calc((100vw - 340px) / 2)}
 
 #lanehead .tt .tg{pointer-events:all;cursor:pointer}#lanehead .tt .tg:hover .tomb,#lanehead .tt .tg:focus-visible .tomb{fill:#FFF3E0;stroke-width:2.6}#lanehead .tt .tg:focus-visible{outline:none}
 
-/* the search button floats at the bottom right, see-through until it is pointed at; it follows the side panel's edge and, on a phone, sits above the search shelf */
-#bShelf{position:fixed;right:16px;bottom:16px;z-index:9;background:rgba(255,255,255,.38);border-color:rgba(31,37,48,.14);box-shadow:none;color:var(--lk-ink);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);opacity:.8;transition:background .15s,opacity .15s,right .2s}
-#bShelf:hover,#bShelf:focus-visible{background:var(--lk-card);opacity:1;border-color:var(--lk-accent)}
-html:not(.ph):has(#info.on) #bShelf{right:356px}
-.ph #bShelf{right:10px;bottom:calc(var(--dock-h,130px) + 12px)}.ph.shelfoff #bShelf{bottom:calc(14px + env(safe-area-inset-bottom))}
+/* (the search button that floated at the bottom right is gone: Find is a tab in the side panel and a button in the toolbar) */
 
 /* the two relate slots stay out of the way until the how-are-they-related button opens them */
 html:not(.rzopen) #rz{display:none}
@@ -1094,7 +1067,7 @@ html{--tr-soft:color-mix(in srgb,var(--lk-ink) 86%,var(--lk-card))}   /* the kit
 .ph #lensMenu{top:auto;bottom:calc(var(--dock-h,130px) + 16px);left:8px;right:8px;width:auto}
 
 /* the Fan: it sits in the canvas's own world, so pan, zoom and Fit work on it; the cards are only hidden while it is open */
-body.vwfan #cards,body.vwfan #edges,body.vwfan #genbands,body.vwfan #lanes,body.vwfan #lanehead,body.vwfan #namesview,body.vwfan #mini,body.vwfan #pairs,body.vwfan #hint,body.vwfan #markBar,body.vwfan #playBar{display:none!important}
+body.vwfan #cards,body.vwfan #edges,body.vwfan #genbands,body.vwfan #lanes,body.vwfan #lanehead,body.vwfan #namesview,body.vwfan #mini,body.vwfan #pairs,body.vwfan #start,body.vwfan #markBar,body.vwfan #playBar{display:none!important}
 body.vwlist #fan{display:none}
 #fan{position:absolute;left:0;top:0;overflow:visible}
 #fan .fw path{stroke:var(--lk-board);stroke-width:2;stroke-linejoin:round;cursor:pointer;transition:filter .12s}
@@ -1139,7 +1112,7 @@ html:not(.ph):has(#info.on) #fanList{left:calc((100vw - 340px) / 2)}
 #fanList button:hover{background:var(--lk-accent-soft)}#fanList button:focus-visible{outline:3px solid var(--lk-accent);outline-offset:1px}#fanList button.on{outline:3px solid var(--lk-accent);outline-offset:-1px}
 #fanList .flk{display:block;font:800 11px Nunito;color:var(--tr-soft);text-transform:capitalize}#fanList .flk small{text-transform:none;font-weight:700}#fanList .fly{color:var(--tr-soft)}#fanList .flp{color:var(--tr-soft)}#fanList .flp::before{content:"\00b7 "}
 
-/* the Trail band: the bottom-most thing on the canvas, along the very bottom edge. Whatever else sits at the bottom (the search dock, the little map, the buttons over it, the menus that open upward) is lifted by its height, --trail-h, which viewsui.js keeps up to date (and --dock-h includes it).
+/* the Trail band: the bottom-most thing on the canvas, along the very bottom edge. Whatever else sits at the bottom (the relate dock, the little map, the buttons over it, the menus that open upward) is lifted by its height, --trail-h, which viewsui.js keeps up to date (and --dock-h includes it).
    Open, it is the direct line as big cards in a row with the focus person's places fanning out to the right; folded, it is one slim line, a handle. */
 html{--trail-h:0px;--tr-link:#9C3B28}
 #trail{--trs:1;position:fixed;left:0;right:0;bottom:0;z-index:7;box-sizing:border-box;background:var(--lk-card);color:var(--lk-ink);border-top:2px solid var(--lk-line);box-shadow:0 -6px 18px rgba(0,0,0,.09);padding:8px 18px calc(8px + env(safe-area-inset-bottom))}
@@ -1153,12 +1126,9 @@ html.ph:has(#info.on) #trail{display:none}
 .dock{bottom:calc(16px + var(--trail-h,0px))}
 .ph .dock{bottom:calc(8px + env(safe-area-inset-bottom) + var(--trail-h,0px))}
 @media (max-height:620px){.dock{bottom:calc(8px + var(--trail-h,0px))}}
-.shelfoff .dock{transform:translate(-50%,calc(100% + 40px + var(--trail-h,0px)))}.ph.shelfoff .dock{transform:translateY(calc(100% + 40px + var(--trail-h,0px)))}
 #mini{bottom:calc(16px + var(--trail-h,0px))}
-#bShelf{bottom:calc(16px + var(--trail-h,0px))}
-.ph #bShelf{bottom:calc(var(--dock-h,130px) + 12px)}.ph.shelfoff #bShelf{bottom:calc(14px + env(safe-area-inset-bottom) + var(--trail-h,0px))}
+.ph #info{bottom:calc(16px + env(safe-area-inset-bottom))}   /* the Trail band is folded away on a phone while the panel is open, so the sheet stands on the edge */.ph.rzopen #info{bottom:calc(var(--dock-h,130px) + 20px + env(safe-area-inset-bottom))}
 #playBar{bottom:calc(230px + var(--trail-h,0px))}
-.ph.shelfoff #info{bottom:calc(16px + env(safe-area-inset-bottom) + var(--trail-h,0px))}
 #prLegend,.trlift{margin-bottom:var(--trail-h,0px)}
 /* the handle */
 .trtab{display:flex;align-items:center;gap:9px;width:100%;box-sizing:border-box;min-height:38px;padding:0 18px;border:0;background:transparent;color:var(--lk-ink);font:800 13px/1 Nunito,system-ui;cursor:pointer;text-align:left}
@@ -1213,12 +1183,113 @@ html.ph:has(#info.on) #trail{display:none}
 #trailTip{position:fixed;z-index:9;display:none;max-width:min(300px,calc(100vw - 16px));box-sizing:border-box;padding:8px 12px;border-radius:12px;background:var(--lk-pop-bg,var(--lk-card));color:var(--lk-pop-ink,var(--lk-ink));border:2px solid var(--lk-line);box-shadow:0 6px 18px rgba(0,0,0,.22);font:700 12.5px/1.4 Nunito,system-ui;pointer-events:none}
 #trailTip.on{display:block}#trailTip b{font:400 16px/1.15 "Lilita One",Impact,system-ui;display:block;margin-bottom:2px}#trailTip .fl{height:12px;vertical-align:-1px;margin-right:5px}
 @media (prefers-reduced-motion:reduce){#fan .fw path{transition:none}}
+
+/* ---------- Find: the search tab in the side panel, and the centred search on an empty canvas (findui.js) ---------- */
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+/* the dock is only the relate slots now: it is there while they are open */
+html:not(.rzopen) .dock{display:none}
+
+.fv{display:flex;flex-direction:column;min-height:0;position:relative}
+.fv-row{display:flex;gap:6px;align-items:center}
+.fv-box{position:relative;flex:1;min-width:0}
+.fv-si{position:absolute;left:11px;top:50%;margin-top:-9px;width:18px;height:18px;color:var(--lk-mute);pointer-events:none}
+.fv-si svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.fv-q{width:100%;box-sizing:border-box;border:2px solid var(--lk-line);border-radius:12px;background:var(--lk-paper);padding:8px 10px 8px 36px;font:700 14.5px Nunito,system-ui;color:var(--lk-ink);outline:none;transition:border-color .2s,background .2s;user-select:text;-webkit-user-select:text;-webkit-appearance:none;appearance:none}
+.fv-q:focus{border-color:var(--lk-accent);background:var(--lk-card)}
+.fv-q:focus-visible{outline:3px solid var(--lk-accent);outline-offset:1px}
+.fv-q::-webkit-search-cancel-button{cursor:pointer}
+/* the one button for the archives: it says how many are being searched, and opens the ticks */
+.fv-arch{flex:none;display:inline-flex;align-items:center;gap:4px;border:2px solid var(--lk-line);border-radius:12px;background:var(--lk-card);color:var(--lk-ink);padding:7px 9px;font:800 11.5px Nunito,system-ui;cursor:pointer;white-space:nowrap;box-shadow:0 1.5px 0 var(--lk-line)}
+.fv-arch:hover,.fv-arch[aria-expanded=true]{border-color:var(--lk-accent)}
+.fv-arch:focus-visible{outline:3px solid var(--lk-accent);outline-offset:1px}
+.fv-arch.some{background:var(--lk-accent-soft)}
+.fv-arch[hidden]{display:none}
+.fv-car{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}
+.fv-arch[aria-expanded=true] .fv-car{transform:rotate(180deg)}
+.fv-menu{margin:8px 0 0;padding:8px;border:2px solid var(--lk-line);border-radius:14px;background:var(--lk-paper)}
+.fv-menu[hidden]{display:none}
+.fv-mh{display:flex;gap:6px;margin-bottom:6px}
+.fv-mb{border:1.5px solid var(--lk-line);border-radius:99px;background:var(--lk-card);color:var(--lk-ink);padding:3px 12px;font:800 11.5px Nunito,system-ui;cursor:pointer}
+.fv-mb[aria-pressed=true]{background:var(--lk-ink);color:var(--lk-card);border-color:var(--lk-ink)}
+.fv-mb:focus-visible{outline:3px solid var(--lk-accent);outline-offset:1px}
+.fv-mg{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px}
+.fv-mi{display:flex;align-items:center;gap:7px;padding:5px 6px;border-radius:9px;font:800 12.5px Nunito,system-ui;color:var(--lk-ink);cursor:pointer;min-width:0}
+.fv-mi:hover{background:var(--lk-hover)}
+.fv-mi input{accent-color:var(--lk-accent);margin:0;width:15px;height:15px;flex:none}
+.fv-mi i{flex:none;width:11px;height:11px;border-radius:50%;background:var(--ac);box-shadow:0 0 0 2px color-mix(in srgb,var(--ac) 25%,transparent)}
+.fv-mi span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fv-mi:focus-within{outline:2px solid var(--lk-accent)}
+.fv-help{margin:10px 0 0;text-align:center;font:800 14px Nunito,system-ui;color:var(--lk-soft)}
+.fv-help[hidden]{display:none}
+.fv-recent{margin:10px 0 0;font-weight:700;font-size:13px;color:var(--lk-faint);line-height:2}
+.fv-recent[hidden]{display:none}
+.fv-recent .rs-l{font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;margin-right:6px}
+.fv-recent .lk-btn{margin:0 2px 2px 0}
+.fv-recent .link-quiet{background:none;border:0;padding:0 6px;font:inherit;font-size:12px;color:var(--lk-soft);text-decoration:underline;cursor:pointer}.fv-recent .link-quiet:hover{color:var(--lk-ink)}
+.fv-list{list-style:none;margin:8px 0 0;padding:0 0 6px;display:flex;flex-direction:column;gap:4px;overflow-y:auto;min-height:0;flex:1 1 auto;scrollbar-width:thin;touch-action:pan-y}
+.fv-list[hidden]{display:none}
+.fv-list .res{flex:none}
+.fv-list .res .n{font-size:15.5px}
+.fv-list .res .y,.fv-list .res .e{white-space:normal}
+.fv-list .res .y{flex-wrap:wrap}
+.fv-note{margin:10px 2px 0;font:700 12.5px/1.45 Nunito,system-ui;color:var(--lk-soft)}
+.fv-note[hidden]{display:none}
+.fv-note.bad{color:var(--lk-ink)}
+/* in the pane, the tab fills the panel: the box stays put and the list scrolls */
+#info .ib.ibf{overflow:hidden;display:flex;flex-direction:column;padding-bottom:6px}
+#info .ib.ibf .fh{display:flex;flex-direction:column;min-height:0;flex:1}
+#info .ib.ibf .fv{flex:1}
+.ph #info.isfind{max-height:min(54vh,calc(100vh - 140px))}
+.ph.rzopen #info.isfind{max-height:min(54vh,calc(100vh - var(--dock-h,130px) - 120px))}
+.ph .fv-q{font-size:16px}
+
+/* the centred search: on a canvas with no one on it */
+#start{position:fixed;left:50%;top:max(110px,26vh);transform:translateX(-50%);z-index:4;width:min(600px,calc(100vw - 32px));pointer-events:none}
+#start[hidden]{display:none}
+#start .st-in{pointer-events:none;text-align:center}
+#start .st-in>*{pointer-events:auto}
+html:not(.ph):has(#info.on) #start{left:calc((100vw - 340px) / 2);width:min(600px,calc(100vw - 340px - 48px))}
+#stH{margin:0 0 14px;font:400 30px/1.15 "Lilita One",system-ui;color:var(--lk-ink)}
+#start .fv{text-align:left}
+#start .fv-q{padding:15px 14px 15px 46px;font-size:19px;border-radius:18px;border-width:2.5px;box-shadow:0 4px 0 var(--lk-line),0 14px 34px rgba(0,0,0,.10)}
+#start .fv-si{left:15px;margin-top:-11px;width:22px;height:22px}#start .fv-si svg{width:22px;height:22px}
+#start .fv-arch{padding:11px 12px;font-size:12.5px;border-radius:14px}
+#start .fv-menu{background:var(--lk-card)}
+#start .fv-recent{text-align:center}
+#start .fv-list{max-height:min(54vh,470px);background:var(--lk-card);border:2px solid var(--lk-line);border-radius:16px;padding:6px;box-shadow:0 3px 0 var(--lk-line);margin-top:12px}
+#start .fv-list[hidden]{display:none}
+#start .fv-note{text-align:center}
+#start .st-note{margin:12px auto 0;max-width:460px;font:700 13.5px/1.5 Nunito,system-ui;color:var(--lk-soft)}
+#start .st-note[hidden]{display:none}
+#start .st-ex{margin-top:16px}
+body.vwfan #start,body.pr #start,[data-theme="names"] #start{display:none}
+.ph #start{top:max(104px,16vh);width:calc(100vw - 20px)}
+.ph #stH{font-size:23px;margin-bottom:10px}
+.ph #start .fv-q{padding:12px 10px 12px 40px;font-size:16px;border-radius:15px}
+.ph #start .fv-si{left:12px}
+.ph #start .fv-list{max-height:38vh}
+@media (max-height:560px){#start{top:84px}#stH{font-size:22px;margin-bottom:8px}.st-ex{display:none}}
+@media (prefers-reduced-motion:reduce){.fv-car,.fv-q{transition:none}}
+
+/* the side panel's tab row on a phone: touch-sized (44px tall, 15px type), it scrolls sideways inside itself and snaps, the open tab is marked with a bar and kept in view, the close
+   button stays at the right edge. The words are never shrunk to make them fit: the row scrolls instead. */
+.ph #info .ih{flex:none;gap:4px;padding:6px 8px 0;scroll-snap-type:x proximity;scroll-padding:0 44px;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;align-items:stretch}
+.ph #info .ih .lk-tab{min-height:44px;padding:0 15px;font:800 15px/1 Nunito,system-ui;color:var(--lk-soft);border-radius:12px 12px 0 0;scroll-snap-align:center;display:inline-flex;align-items:center}
+.ph #info .ih .lk-tab.on{background:var(--lk-paper);color:var(--lk-ink);box-shadow:inset 0 -4px 0 var(--lk-accent)}
+.ph #info .ih .lk-tab[data-tab="close"]{position:sticky;right:0;min-width:44px;padding:0;justify-content:center;font-size:24px;font-weight:700;background:var(--lk-card);border-radius:12px}
+.ph #info .ih .lk-tab:focus-visible{outline:3px solid var(--lk-accent);outline-offset:-3px}
+
+/* the Find tab is the magnifying glass (the same icon as the toolbar's Find button); its name is "Find" for a screen reader and the hover text */
+.fvti{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;display:block;flex:none}
+html:not(.ph) #info .ih .lk-tab[data-tab="find"]{padding:12px 0;display:flex;align-items:center;justify-content:center}
+html:not(.ph) #info .ih .lk-tab[data-tab="find"] .fvti{width:16px;height:16px}
+.ph #info .ih .lk-tab[data-tab="find"]{min-width:48px;padding:0 12px;justify-content:center}
+.ph #info .ih .lk-tab[data-tab="find"] .fvti{width:20px;height:20px}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
 <div class="logo">TREE<b> CANVAS</b><small>prototype</small></div>
 <div class="zoombar"><button class="lk-ibtn" id="zIn" title="Zoom in" aria-label="Zoom in"></button><button class="lk-ibtn" id="zOut" title="Zoom out" aria-label="Zoom out"></button><button class="lk-ibtn" id="bFit" title="Fit everything in view (F)" aria-label="Fit to view"></button></div>
-<button class="lk-ibtn" id="bShelf" title="Show or hide the search shelf" aria-label="Search shelf" aria-pressed="true"></button>
 <div class="top">
   <button class="lk-ibtn" id="bRel" title="How are they related? Opens two slots: put one person in each" aria-label="How are they related"></button>
   <button class="lk-ibtn" id="bBlood" title="Bloodline: add blood relatives, remove the rest, or colour them differently" aria-label="Bloodline" aria-haspopup="true" aria-expanded="false"></button>
@@ -1226,6 +1297,7 @@ html.ph:has(#info.on) #trail{display:none}
   <button class="lk-ibtn" id="bGen" title="Generations: numbered bands behind each row (I is the oldest)" aria-label="Generations" aria-pressed="false"></button>
   <button class="lk-ibtn" id="bArrange" title="Arrange: tidy every card on the canvas into one neat family tree" aria-label="Arrange"></button>
   <button class="lk-ibtn" id="bUndo" title="Undo (Ctrl/Cmd Z)" aria-label="Undo"></button>
+  <button class="lk-ibtn xtra" id="bFind" title="Find people: search every archive and drop them on the canvas (press /)" aria-label="Find people" aria-keyshortcuts="/"></button>
   <button class="lk-ibtn" id="bInfo" title="Side panel: person, where next, path" aria-label="Panel"></button>
   <button class="lk-ibtn xtra" id="bClear" title="Clear the canvas (Undo brings it back)" aria-label="Clear"></button>
   <button class="lk-ibtn" id="bFix" title="Fix list" aria-label="Fix list" hidden></button>
@@ -1235,14 +1307,16 @@ html.ph:has(#info.on) #trail{display:none}
   <button class="lk-ibtn" id="bMore" title="More" aria-label="More" style="display:none"></button>
 </div>
 <div id="flagsprite" aria-hidden="true"></div>
-<div id="hint">Search anyone, from any archive, and drop them here
-  <small>Pull up their parents, all the way back, one generation at a time.<br>Press the &#8644; button to ask how two people are related.<br>Solid means read from a register; dashed means not proven; dotted means the archive records no grade.</small>
-  <div style="margin-top:14px;pointer-events:auto"><button class="lk-btn is-primary" id="exDemo">Show me an example</button></div></div>
+<section id="start" aria-label="Find someone to put on the canvas"><div class="st-in">
+  <h2 id="stH">Who are you looking for?</h2>
+  <div id="stBox"></div>
+  <p class="st-note" id="stNote" hidden></p>
+  <div class="st-ex"><button class="lk-btn is-small" id="exDemo" type="button">Show me an example</button></div></div></section>
 <div id="info" aria-live="polite"></div>
 <div id="pop"></div>
 <div id="mini" title="Click to move there"><canvas></canvas></div>
 <div id="toast" class="lk-toast"></div>
-<div class="dock"><div class="srow"><span class="si" id="si"></span><input id="q" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Search people"><span class="cnt" id="cnt"></span></div><div id="rz" aria-label="Relate two people"><div class="rzs" data-s="0" tabindex="0" role="button"></div><div class="rzm" title="Drop two people here and the whole path between them is drawn">&#8644;<small>how related</small></div><div class="rzs" data-s="1" tabindex="0" role="button"></div><div class="rzx"><span id="rzmsg"></span><button class="lk-btn is-small" id="rzClr" type="button">Clear</button></div></div><div class="tabs" id="tabs"></div><div class="shelf" id="shelf"></div></div>
+<div class="dock"><div id="rz" aria-label="Relate two people"><div class="rzs" data-s="0" tabindex="0" role="button"></div><div class="rzm" title="Drop two people here and the whole path between them is drawn">&#8644;<small>how related</small></div><div class="rzs" data-s="1" tabindex="0" role="button"></div><div class="rzx"><span id="rzmsg"></span><button class="lk-btn is-small" id="rzClr" type="button">Clear</button></div></div></div>
 <script type="application/json" id="corpus">null</script>
 <script type="application/json" id="lines">null</script>
 <script type="application/json" id="period">{
@@ -3578,6 +3652,102 @@ html.ph:has(#info.on) #trail{display:none}
     SIDE_BASE, STEP, sideFill, flagColour, flagCandidates, flagPalette, placeFlag, placeFill, textW, boxInWedge, labelLevels, fanLabel, fanList, cleanLens, lensIsDefault, lifeText, fullName, hidden, LENS_DEFAULT };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCV = API;
 })(typeof window !== 'undefined' ? window : globalThis);
+
+/* find.js — the pure parts of Find, the search that lives in the right-hand pane (and, while the canvas is empty, in the middle of the canvas). No DOM; tested by test/test-find.js.
+ *
+ * WHAT IT DECIDES: what the results area says (nothing yet, no archive switched on, no one matches, or the list and how many were left out); the archive menu (which archives are
+ * ticked, and what its button says); when the centred search is shown (only when the canvas has no one on it, and no other whole-canvas view is up); what the "/" key does; which
+ * way a dragged result is dropped (onto the canvas, into the relate slot, or nowhere because it is over a panel); and how the arrow keys walk the results.
+ * Nothing here is about a person: the words are only counts, and names are the visitor's own query and the archives' names.
+ */
+(function (root) {
+  'use strict';
+  const num = n => Number(n || 0).toLocaleString('en-US');
+  const plural = (n, one, many) => n === 1 ? one : many;
+
+  /* ---------------- the archive menu ---------------- */
+  /* `on` is the Set of archive indexes being searched; an empty Set searches nothing (that is "None") */
+  const archLabel = (n, NA) => NA === 1 ? '1 archive' : n + ' of ' + NA + ' archives';
+  function archMenu(archives, on) {
+    const NA = archives.length, set = on instanceof Set ? on : new Set(on || []);
+    return {
+      label: archLabel(set.size, NA), all: set.size === NA, none: set.size === 0,
+      items: archives.map((a, i) => ({ i, name: a.name, color: a.color, n: a.n || 0, graded: !!a.graded, checked: set.has(i) })),
+    };
+  }
+  function archToggle(on, i, NA) { const s = new Set(on); if (i < 0 || i >= NA) return s; if (s.has(i)) s.delete(i); else s.add(i); return s; }
+  const archAll = NA => new Set(Array.from({ length: NA }, (_, i) => i));
+  const archNone = () => new Set();
+  /* what the menu button's tip says */
+  function archTip(archives, on) {
+    const m = archMenu(archives, on);
+    return m.none ? 'No archive is being searched. Choose which to search.' : m.all ? 'Searching all ' + archives.length + ' archives. Choose which to search.' : 'Searching ' + m.items.filter(x => x.checked).map(x => x.name).join(', ') + '. Choose which to search.';
+  }
+
+  /* ---------------- the line under the box ---------------- */
+  /* archives: [{k, name, n}]; on: Set; embed: the page is inside Roots & Routes (the people are the visitor's own file, perhaps beside one archive) */
+  function helpLine(archives, on, embed) {
+    const NA = archives.length, set = on instanceof Set ? on : archAll(NA), k = set.size;
+    const total = archives.reduce((s, a, i) => s + (set.has(i) ? a.n || 0 : 0), 0);
+    if (!k) return 'No archive is switched on. Choose which archives to search.';
+    if (k < NA) return 'Search ' + num(total) + ' people across ' + k + ' of ' + NA + ' archives';
+    if (embed) {
+      if (NA === 1 && archives[0].k !== 'you') return 'Search ' + num(total) + ' people in the ' + archives[0].name + ' archive';
+      if (NA === 2) return 'Search ' + num(total) + ' people in your file and the ' + archives[1].name + ' archive';
+      return 'Search ' + num(total) + ' people in your file';
+    }
+    return NA === 1 ? 'Search ' + num(total) + ' people in your file' : 'Search ' + num(total) + ' people across all ' + NA + ' archives';
+  }
+
+  /* ---------------- the results ---------------- */
+  /* r is what TC.search gave: {list, total, perArchive}; onSize how many archives are ticked; NA how many there are; cap (optional) shows only the first few (the centred list) */
+  function resultsModel(q, r, onSize, NA, cap) {
+    const t = String(q || '').trim(), base = { kind: 'idle', q: t, shown: 0, total: 0, more: 0, hidden: 0, text: '', say: '' };
+    if (!t) return base;
+    if (!onSize) return Object.assign(base, { kind: 'noarch', text: 'No archive is switched on. Open the archives button and choose which to search.', say: 'No archive is switched on' });
+    const total = (r && r.total) || 0, listed = r && r.list ? r.list.length : 0, shown = cap ? Math.min(cap, listed) : listed;
+    if (!listed) {
+      const per = r && r.perArchive ? r.perArchive.reduce((s, n) => s + n, 0) : 0, hidden = Math.max(0, per - total);
+      return Object.assign(base, { kind: 'none', hidden, text: 'No one matches “' + t + '” in the ' + onSize + ' ' + plural(onSize, 'archive', 'archives') + ' being searched' + (hidden ? '; ' + hidden + ' match in archives that are switched off' : '') + '. Accents, case, spaces and hyphens do not matter.', say: 'No one matches ' + t });
+    }
+    const more = total - shown;
+    return Object.assign(base, { kind: 'some', shown, total, more, text: more > 0 ? '+' + more + ' more: type more of the name' : '', say: num(total) + ' ' + plural(total, 'person', 'people') + ' found' + (more > 0 ? ', showing the first ' + shown : '') });
+  }
+  /* the arrow keys over the results: -1 means "none chosen", so the first Down chooses the first one and Up from the first goes back to the box */
+  function stepActive(act, n, dir) {
+    if (!n) return -1;
+    if (dir === 'down') return Math.min(n - 1, act + 1);
+    if (dir === 'up') return act <= 0 ? -1 : act - 1;
+    if (dir === 'home') return 0;
+    if (dir === 'end') return n - 1;
+    return act;
+  }
+  /* Enter adds the one chosen with the arrows, else the first */
+  const enterPick = (act, n) => n ? (act >= 0 && act < n ? act : 0) : -1;
+
+  /* ---------------- when is the centred search shown ---------------- */
+  /* Only when no one is on the canvas, and nothing else is standing in for the canvas (the Fan, Compare, the Names look, Research lines, Play). */
+  function startShown(f) { f = f || {}; return !(f.cards > 0) && !f.fan && !f.compare && !f.names && !f.lines && !f.play; }
+
+  /* ---------------- the "/" key ---------------- */
+  /* typing: the focus is in a box that takes text */
+  const isTyping = (tag, editable) => /^(INPUT|TEXTAREA|SELECT)$/i.test(tag || '') || !!editable;
+  /* 'start' = focus the centred box; 'pane' = open the right-hand pane on Find and focus its box; null = leave the key alone */
+  function slashPlan(f) { f = f || {}; if (f.key !== '/' || f.ctrl || f.meta || f.alt || f.typing) return null; return f.start ? 'start' : 'pane'; }
+
+  /* ---------------- a dragged result ---------------- */
+  const inRect = (x, y, r, pad) => !!r && x >= r.left - (pad || 0) && x <= r.right + (pad || 0) && y >= r.top - (pad || 0) && y <= r.bottom + (pad || 0);
+  /* f: {x, y, rz: rect|null (the relate slots, when open), info: rect|null (the pane, when open), dock: rect|null (the dock, when open)}.
+     'rz' = the relate slots, 'canvas' = drop a card here, 'none' = over a panel: the drag is cancelled */
+  function dropZone(f) {
+    if (inRect(f.x, f.y, f.rz, 6)) return 'rz';
+    if (inRect(f.x, f.y, f.info, 0) || inRect(f.x, f.y, f.dock, 0)) return 'none';
+    return 'canvas';
+  }
+
+  const API = { archLabel, archMenu, archToggle, archAll, archNone, archTip, helpLine, resultsModel, stepActive, enterPick, startShown, isTyping, slashPlan, dropZone, inRect };
+  if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCFIND = API;
+})(typeof window !== 'undefined' ? window : globalThis);
 </script>
 <script>(function(){'use strict';
 /* core.js — state, persistence, undo, geometry, the card elements. Everything below shares one scope (build.py wraps the files in one IIFE). */
@@ -3887,7 +4057,7 @@ function zoomAt(f, px, py) {
 }
 function usable() { /* the part of the screen not covered by the dock and the info panel */
   const dock = $('.dock'), info = $('#info');
-  const bottom = (S.phone && document.documentElement.classList.contains('shelfoff')) ? innerHeight - 8 : dock.getBoundingClientRect().top - 12;
+  const bottom = document.documentElement.classList.contains('rzopen') ? dock.getBoundingClientRect().top - 12 : innerHeight - 8;   /* the dock is only the relate slots, and only while they are open */
   const right = info.classList.contains('on') && !S.phone ? info.getBoundingClientRect().left - 12 : innerWidth - 8;
   const top = 58, left = S.phone ? 8 : 64, th = typeof trailHeight === 'function' ? trailHeight() : 0;   /* the Trail band, when it is up, is not canvas either */
   const b0 = S.phone && info.classList.contains('on') ? Math.min(bottom, info.getBoundingClientRect().top - 8) : bottom;
@@ -4930,7 +5100,7 @@ document.addEventListener('change', e => {
 });
 
 /* play.js — Play: build one person's tree up on the canvas a generation at a time (the Roots & Routes "Generations" idea): the oldest generation first,
-   then each one below it, with the numbered bands on. A bar over the shelf plays, pauses and scrubs. Undo puts the canvas back as it was. */
+   then each one below it, with the numbered bands on. A bar along the bottom plays, pauses and scrubs. Undo puts the canvas back as it was. */
 const PLAY = { on: false, playing: false, k: 0, set: null, focus: -1, speed: 1, timer: 0, token: 0, mode: 'out' };
 /* the steps of a play. 'out' (the default) starts with the person and adds a generation above AND below them each step; 'oldest' (the reverse) starts with the
    earliest ancestor and builds down through every generation, as the Roots & Routes Generations view does. */
@@ -4956,7 +5126,7 @@ function playBar() {
   $('#plRange', b).addEventListener('input', e => { pausePlay(); playTo(+e.target.value); });
   return b;
 }
-function playPlace() { const b = $('#playBar'), d = $('.dock'); if (!b || !d) return; const top = document.documentElement.classList.contains('shelfoff') ? innerHeight : d.getBoundingClientRect().top; b.style.bottom = Math.max(12, Math.round(innerHeight - top + 10)) + 'px'; }
+function playPlace() { const b = $('#playBar'), d = $('.dock'); if (!b || !d) return; const th = typeof trailHeight === 'function' ? trailHeight() : 0, top = document.documentElement.classList.contains('rzopen') ? d.getBoundingClientRect().top : innerHeight - th; b.style.bottom = Math.max(12, Math.round(innerHeight - top + 10)) + 'px'; }
 function playSync() {
   const b = $('#playBar'); if (!b || !PLAY.set) return;
   const G = PLAY.set.gens.length, k = PLAY.k, g = PLAY.set.gens[k] || [];
@@ -6182,7 +6352,7 @@ function trailLink(el) {
   const m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(getComputedStyle(el).backgroundColor || ''), hx = m ? '#' + [1, 2, 3].map(k => (+m[k]).toString(16).padStart(2, '0')).join('') : '#ffffff';
   el.style.setProperty('--tr-link', TCV.contrast('#9C3B28', hx) >= 3.2 ? '#9C3B28' : '#E58A72');
 }
-/* the band is the bottom-most thing: the search dock and the controls over it are lifted by its height (--trail-h, and --dock-h includes it) */
+/* the band is the bottom-most thing: the relate dock and the controls over it are lifted by its height (--trail-h, and --dock-h includes it) */
 function trailMeasure() { document.documentElement.style.setProperty('--trail-h', Math.ceil(trailHeight()) + 'px'); if (typeof dockH === 'function') dockH(); trailLiftSoon(); }
 /* a fold or an open replaces the band's buttons; the keyboard stays on the one that took its place */
 let trailFocus = '';
@@ -6222,7 +6392,7 @@ function trailLift() {
     for (const e of document.querySelectorAll('body > *')) {
       if (e.id === 'trail' || e.id === 'trailTip' || e.classList.contains('dock') || e.id === 'stage') { continue; }
       const had = e.classList.contains('trlift'), cs = getComputedStyle(e);
-      if (cs.position !== 'fixed' || cs.display === 'none' || cs.visibility === 'hidden' || /^(mini|bShelf|playBar|info|infoTab|fan|fanBar|fanLegend|fanTip|fanList|linesView|toast|prLegend)$/.test(e.id)) { if (had) e.classList.remove('trlift'); continue; }
+      if (cs.position !== 'fixed' || cs.display === 'none' || cs.visibility === 'hidden' || /^(mini|playBar|info|infoTab|fan|fanBar|fanLegend|fanTip|fanList|linesView|toast|prLegend)$/.test(e.id)) { if (had) e.classList.remove('trlift'); continue; }
       const r = e.getBoundingClientRect(); if (!r.width || !r.height || r.height > innerHeight * 0.7) { if (had) e.classList.remove('trlift'); continue; }
       const bottom = r.bottom + (had ? h : 0), want = h > 0 && r.top + (had ? h : 0) > innerHeight * 0.35 && bottom > innerHeight - h - 4 && bottom <= innerHeight + 2 && cs.bottom !== 'auto';
       if (want !== had) e.classList.toggle('trlift', want);
@@ -6260,52 +6430,17 @@ function lensBoot(d) {
 }
 addEventListener('resize', () => { trailMeasure(); });
 
-/* ui.js — the shelf and search, pan / zoom / drag, the side panel, pathways, themes, phone mode, start-up. */
+/* findui.js — Find: the search. It lives in two places that share one query:
+ *   - the FIND TAB, the first tab of the right-hand pane: the box, one button for the archives (a small menu of ticks), the people brought on recently, and the results, which can
+ *     be clicked (they drop onto the canvas) or dragged from the pane onto it (or into the "how related" slots);
+ *   - the CENTRED SEARCH, in the middle of the canvas while it has no one on it: the same box, a short list under it, and it goes away as soon as anyone is on the canvas.
+ * The pure decisions (what the results say, the archive menu, when the centred box shows, the "/" key, where a drag may be dropped) are in find.js (TCFIND, tested by test/test-find.js). */
 
-/* ---------------- selection ---------------- */
-function select(keys, add) {
-  if (!add) S.sel.clear();
-  keys.forEach(k => S.sel.has(k) && add ? S.sel.delete(k) : S.sel.add(k));
-  S.cards.forEach(c => c.el.classList.toggle('sel', S.sel.has(c.key)));
-  if (S.sel.size && S.tab !== 'path' && S.tab !== 'options' && S.tab !== 'next' && S.tab !== 'sources' && S.tab !== 'ai' && S.tab !== 'fix' && S.tab !== 'compare') S.tab = 'person';
-  if (S.sel.size && S.tab === 'path' && !S.path) S.tab = 'person';
-  if (typeof prOnSelect === 'function') prOnSelect(keys);
-  renderInfo(); syncButtons();
-  if (typeof lensOnSelect === 'function') lensOnSelect();
-  /* the side panel is folded away: say where the person's details are */
-  if (S.sel.size && !S.phone && !$('#info').classList.contains('on')) { const t = $('#infoTab'); if (t) { t.classList.remove('nudge'); void t.offsetWidth; t.classList.add('nudge'); } }
-}
-function hideHint() { $('#hint').classList.toggle('off', S.cards.size > 0); }
-
-/* ---------------- the shelf: search results ---------------- */
 let lastResults = [];
-function renderTabs() {
-  const on = S.filter.size;
-  $('#tabs').innerHTML = M.archives.map((a, i) => `<button class="lk-tab${S.filter.has(i) ? '' : ' off'}" style="--ac:${a.color}" data-a="${i}" title="${S.filter.has(i) ? 'Searching' : 'Not searching'} ${esc(a.name)} (${a.n.toLocaleString()} people${a.graded ? ', graded links' : ', no evidence grades'})"><i></i>${esc(a.name)}</button>`).join('') +
-    `<button class="lk-tab" data-a="all" title="Toggle all archives">${on === NA ? 'none' : 'all'}</button>`;
-  $('#cnt').textContent = `${on} of ${NA} archives`;
-  const q = $('#q'); q.placeholder = `Search ${M.P.length.toLocaleString()} ${EMBED ? (M.archives.length === 1 && M.archives[0].k !== 'you' ? 'people in the ' + M.archives[0].name + ' archive' : M.archives.length === 2 ? 'people in your file and the ' + M.archives[1].name + ' archive' : 'people in your file') : 'people'}: any order, accents optional`;
-}
-$('#q').addEventListener('input', () => runSearch());
-$('#q').addEventListener('keydown', e => { if (e.key === 'Enter' && lastResults[0]) addFromResult(lastResults[0]); if (e.key === 'Escape') { e.target.value = ''; runSearch(); e.target.blur(); } });
-function resHTML(p, via) {
-  const on = S.cards.has(p.key), a = M.archives[p.a];
-  return `<div class="res${on ? ' on' : ''}" data-i="${p.i}" style="--ac:${a.color}" title="${esc(p.name)} · ${esc(a.name)} · ${esc(TC.evidenceSummary(M, p))}"><div class="n">${esc(p.name)}</div>${via ? `<div class="via" title="Found as another form of this name, from the Record Atlas's name catalogue">as “${esc(via.charAt(0).toUpperCase() + via.slice(1))}”</div>` : ''}<div class="y">${a.k === 'you' ? '' : `<span class="ac">${esc(a.name)}</span>`}${TC.years(p)}${p.bp ? ' · ' + esc(p.bp) : ''}</div><div class="e">${esc(TC.evidenceSummary(M, p))}</div><button class="rplay" data-i="${p.i}" title="Play: build ${esc(p.name)}'s tree a generation at a time" aria-label="Play the tree of ${esc(p.name)}">${icon('play', 'lk-icon')}</button>${on ? '<span class="mk">&#10003;</span>' : ''}</div>`;
-}
-/* the search box tidies itself away about 10 seconds after a search has been made, so it stops covering the canvas. It waits while the cursor is in the box or the pointer is over it,
-   and the eye button brings it back. */
-let shelfT = 0, shelfToldOnce = false;
-function shelfArm() {
-  clearTimeout(shelfT);
-  shelfT = setTimeout(function tick() {
-    const h = document.documentElement.classList, dock = $('.dock');
-    if (h.contains('shelfoff') || !dock) return;
-    if (!S.cards.size) return;   /* nothing on the canvas: the search is the only way to start, so it stays */
-    if (document.activeElement === $('#q') || dock.matches(':hover') || S.rzArm != null) { shelfT = setTimeout(tick, 4000); return; }
-    h.add('shelfoff'); $('#bShelf').setAttribute('aria-pressed', 'false'); dockH();
-    if (!shelfToldOnce) { shelfToldOnce = true; toast('Search tucked away. The eye button brings it back.', 3200); }
-  }, 10000);
-}
+const FV = { q: '', r: null, act: -1, views: {}, menu: { pane: false, start: false }, dr: null, startOn: false };
+const START_CAP = 6;   /* the centred list is short: the first few, then "type more of the name" */
+
+/* ---------------- the last people brought onto the canvas ---------------- */
 /* THE LAST PEOPLE YOU BROUGHT ONTO THE CANVAS FROM THE SEARCH (replaces the old "Try ..." examples). Kept in memory for this visit; kept on this device only while
    Remember is ticked (the same switch as recent files), because the names come from the visitor's own file. A name that finds no one in the tree now open is not shown. */
 const RS_KEY = 'tcRecentPeople', RS_MAX = 6;
@@ -6323,75 +6458,220 @@ function recentAdd(name) {
   rsMem = [n, ...rsLoad().filter(x => x.toLowerCase() !== n.toLowerCase())].slice(0, RS_MAX); rsSave();
 }
 function recentClear() { rsMem = []; try { localStorage.removeItem(RS_KEY); } catch (e) { /* ignore */ } }
-function runSearch() {
-  const q = $('#q').value;
-  if (q.trim()) shelfArm();
-  const r = TC.search(M, q, { archives: S.filter, limit: 80 });
-  lastResults = r.list;
-  const sh = $('#shelf');
-  if (!q.trim()) {
-    const rc = recentSearches();
-    sh.innerHTML = `<div class="none">${rc.length ? `<span class="rs-l">Recent</span> ${rc.map(n => `<button class="lk-btn is-small" data-ex="${esc(n)}">${esc(n)}</button>`).join(' ')} <button class="link-quiet" data-rsclear="1" title="Forget these searches">Clear</button>` : `Search any name across ${NA === 1 ? 'your file' : 'all ' + NA + ' archives'}, then click or drag the person onto the canvas.`}</div>`;
-    return;
-  }
-  sh.innerHTML = r.list.length ? r.list.map(p => resHTML(p, r.via && r.via.get(p.i))).join('') + (r.total > r.list.length ? `<div class="none">+${r.total - r.list.length} more: type more of the name</div>` : '')
-    : `<div class="none">No one matches “${esc(q)}” in the ${S.filter.size} archive${S.filter.size === 1 ? '' : 's'} being searched${S.filter.size < NA ? '; ' + (r.perArchive.reduce((s, n) => s + n, 0) - r.total) + ' match in archives that are switched off' : ''}. Accents, case, spaces and hyphens do not matter.</div>`;
-  sh.scrollLeft = 0;
+
+/* ---------------- one result ---------------- */
+function resHTML(p, via, vid, k) {
+  const on = S.cards.has(p.key), a = M.archives[p.a], ev = TC.evidenceSummary(M, p);
+  const lab = p.name + ', ' + (a.k === 'you' ? 'your file' : a.name) + (TC.years(p) ? ', ' + TC.years(p) : '') + (on ? ', already on the canvas' : '');
+  return `<li class="res${on ? ' on' : ''}" role="option" id="${vid}O${p.i}" data-i="${p.i}" aria-selected="false" aria-label="${esc(lab)}" style="--ac:${a.color}" title="${esc(p.name)} · ${esc(a.name)} · ${esc(ev)}"><div class="n">${esc(p.name)}</div>${via ? `<div class="via" title="Found as another form of this name, from the Record Atlas's name catalogue">as “${esc(via.charAt(0).toUpperCase() + via.slice(1))}”</div>` : ''}<div class="y">${a.k === 'you' ? '' : `<span class="ac">${esc(a.name)}</span>`}${TC.years(p)}${p.bp ? ' · ' + esc(p.bp) : ''}</div><div class="e">${esc(ev)}</div><button class="rplay" type="button" data-i="${p.i}" title="Play: build ${esc(p.name)}'s tree a generation at a time" aria-label="Play the tree of ${esc(p.name)}">${icon('play', 'lk-icon')}</button>${on ? '<span class="mk" aria-hidden="true">&#10003;</span>' : ''}</li>`;
+}
+
+/* ---------------- one view of Find (the pane's, or the centred one) ---------------- */
+function findMake(kind) {
+  const big = kind === 'start', vid = big ? 'fs' : 'fp';
+  const el = document.createElement('div'); el.className = 'fv fv-' + kind;
+  el.innerHTML = `<div class="fv-row"><div class="fv-box"><span class="fv-si" aria-hidden="true">${icon('search', '')}</span><input class="fv-q" id="${vid}Q" type="search" role="combobox" aria-expanded="false" aria-controls="${vid}L" aria-autocomplete="list" aria-label="Search people" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"></div><button class="fv-arch" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="${vid}M"><span class="fv-al"></span><svg class="fv-car" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></div>`
+    + `<div class="fv-menu" id="${vid}M" role="group" aria-label="Archives to search" hidden></div>`
+    + `<p class="fv-help"></p><div class="fv-recent"></div>`
+    + `<ul class="fv-list" id="${vid}L" role="listbox" aria-label="Search results"></ul><p class="fv-note"></p><div class="sr-only" role="status" aria-live="polite"></div>`;
+  const v = { kind, vid, el, box: el.querySelector('.fv-q'), arch: el.querySelector('.fv-arch'), al: el.querySelector('.fv-al'), menu: el.querySelector('.fv-menu'), help: el.querySelector('.fv-help'),
+    recent: el.querySelector('.fv-recent'), list: el.querySelector('.fv-list'), note: el.querySelector('.fv-note'), live: el.querySelector('[role=status]'), shown: [] };
+  v.box.placeholder = big ? 'Type a name, in any order' : 'Search people: any order, accents optional';
+  v.box.addEventListener('input', () => { FV.q = v.box.value; runSearch(v.kind); });
+  v.box.addEventListener('keydown', e => findKey(e, v));
+  v.arch.addEventListener('click', () => findMenu(v, !FV.menu[kind]));
+  v.menu.addEventListener('change', e => { const c = e.target.closest('[data-fai]'); if (!c) return; S.filter = TCFIND.archToggle(S.filter, +c.dataset.fai, NA); findFilterChanged(); });
+  v.menu.addEventListener('click', e => { const b = e.target.closest('[data-fa]'); if (!b) return; S.filter = b.dataset.fa === 'all' ? TCFIND.archAll(NA) : TCFIND.archNone(); findFilterChanged(); });
+  v.menu.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); findMenu(v, false); v.arch.focus(); } });
+  v.recent.addEventListener('click', e => {
+    if (e.target.closest('[data-rsclear]')) { recentClear(); findRender(); return; }
+    const b = e.target.closest('[data-fx]'); if (b) { FV.q = b.dataset.fx; runSearch(); v.box.focus(); }
+  });
+  v.list.addEventListener('click', e => {   /* a click with no pointer behind it (a screen reader's, or Enter on a focused result) adds; a mouse or finger goes through findDrag */
+    const pb = e.target.closest('.rplay'); if (pb) { e.stopPropagation(); e.preventDefault(); startPlay(+pb.dataset.i); return; }
+    const r = e.target.closest('.res'); if (r && e.detail === 0) pickResult(+r.dataset.i);
+  });
+  findDrag(v);
+  return v;
+}
+function pickResult(i) { if (S.rzArm != null) rzDrop(i); else addFromResult(i); }
+
+/* the keys in the box: Down and Up walk the results (the focus stays in the box, aria-activedescendant says which), Enter drops the chosen one (else the first),
+   Esc gives the focus back to the canvas (and leaves what was typed) */
+function findKey(e, v) {
+  if (e.key === 'Escape') { e.stopPropagation(); e.preventDefault(); findBlur(); return; }
+  const n = v.shown.length;
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { if (!n) return; e.preventDefault(); FV.act = TCFIND.stepActive(FV.act, n, e.key === 'ArrowDown' ? 'down' : 'up'); findActive(v, true); return; }
+  if (e.key === 'Enter') { const k = TCFIND.enterPick(FV.act, n); if (k >= 0) { e.preventDefault(); pickResult(v.shown[k].i); } }
+}
+function findActive(v, scroll) {
+  v.list.querySelectorAll('.res').forEach((r, k) => { const on = k === FV.act; r.classList.toggle('act', on); r.setAttribute('aria-selected', String(on)); if (on && scroll) r.scrollIntoView({ block: 'nearest' }); });
+  const cur = FV.act >= 0 && v.shown[FV.act] ? v.vid + 'O' + v.shown[FV.act].i : '';
+  if (cur) v.box.setAttribute('aria-activedescendant', cur); else v.box.removeAttribute('aria-activedescendant');
+}
+function findBlur() { const a = document.activeElement; if (a && a.blur) a.blur(); const st = $('#stage'); if (st) st.focus({ preventScroll: true }); }
+
+/* the archive menu: one button that says how many archives are being searched, and under it a tick for each, with All and None */
+function findMenu(v, open) {
+  FV.menu[v.kind] = open && NA > 1;
+  v.arch.setAttribute('aria-expanded', String(FV.menu[v.kind]));
+  v.menu.hidden = !FV.menu[v.kind];
+  if (FV.menu[v.kind]) findMenuDraw(v);
+}
+function findMenuDraw(v) {
+  const m = TCFIND.archMenu(M.archives, S.filter);
+  v.menu.innerHTML = `<div class="fv-mh"><button type="button" class="fv-mb" data-fa="all"${m.all ? ' aria-pressed="true"' : ''}>All</button><button type="button" class="fv-mb" data-fa="none"${m.none ? ' aria-pressed="true"' : ''}>None</button></div><div class="fv-mg">`
+    + m.items.map(x => `<label class="fv-mi" style="--ac:${x.color}" title="${esc(x.name)}: ${x.n.toLocaleString()} people${x.graded ? ', graded links' : ', no evidence grades'}"><input type="checkbox" data-fai="${x.i}"${x.checked ? ' checked' : ''}><i aria-hidden="true"></i><span>${esc(x.name)}</span></label>`).join('') + '</div>';
+}
+function findFilterChanged() { runSearch(); save(); }
+
+/* ---------------- drawing ---------------- */
+function findRender() {
+  const q = FV.q, m = M.archives, on = S.filter, anyFocus = Object.values(FV.views).find(v => v.el.contains(document.activeElement));
+  const target = anyFocus || (FV.startOn ? FV.views.start : FV.views.pane);
+  Object.values(FV.views).forEach(v => {
+    const big = v.kind === 'start', cap = big ? START_CAP : 0, mod = TCFIND.resultsModel(q, FV.r, on.size, NA, cap), list = FV.r ? FV.r.list.slice(0, mod.shown) : [];
+    v.shown = mod.kind === 'some' ? list : [];
+    if (v.box.value !== q) v.box.value = q;
+    v.arch.hidden = NA < 2; v.al.textContent = TCFIND.archLabel(on.size, NA); v.arch.title = TCFIND.archTip(m, on); v.arch.classList.toggle('some', on.size < NA);
+    if (NA < 2) { FV.menu[v.kind] = false; v.menu.hidden = true; } else if (FV.menu[v.kind]) findMenuDraw(v);
+    v.help.hidden = !big; if (big) v.help.textContent = TCFIND.helpLine(m, on, EMBED);
+    const rc = mod.kind === 'idle' ? recentSearches() : [];
+    v.recent.hidden = !rc.length;
+    v.recent.innerHTML = rc.length ? `<span class="rs-l">Recent</span> ${rc.map(n => `<button class="lk-btn is-small" type="button" data-fx="${esc(n)}">${esc(n)}</button>`).join(' ')} <button class="link-quiet" type="button" data-rsclear="1" title="Forget these searches">Clear</button>` : '';
+    v.list.innerHTML = v.shown.map(p => resHTML(p, FV.r.via && FV.r.via.get(p.i), v.vid)).join('');
+    v.list.hidden = !v.shown.length;
+    v.note.textContent = mod.text; v.note.hidden = !mod.text; v.note.classList.toggle('bad', mod.kind === 'none' || mod.kind === 'noarch');
+    v.box.setAttribute('aria-expanded', String(!!v.shown.length));
+    v.live.textContent = v === target ? mod.say : '';
+    findActive(v, false);
+  });
+}
+function runSearch(src) {
+  const q = FV.q;
+  FV.r = TC.search(M, q, { archives: S.filter, limit: 80 });
+  lastResults = FV.r.list; FV.act = -1;
+  findRender();
+}
+function runSearchMarks() {
+  Object.values(FV.views).forEach(v => v.list.querySelectorAll('.res').forEach(el => {
+    const on = S.cards.has(M.P[+el.dataset.i].key); el.classList.toggle('on', on);
+    const lab = el.getAttribute('aria-label') || '', has = /, already on the canvas$/.test(lab);
+    if (on && !has) el.setAttribute('aria-label', lab + ', already on the canvas'); else if (!on && has) el.setAttribute('aria-label', lab.replace(/, already on the canvas$/, ''));
+    const mk = el.querySelector('.mk'); if (on && !mk) el.insertAdjacentHTML('beforeend', '<span class="mk" aria-hidden="true">&#10003;</span>'); if (!on && mk) mk.remove();
+  }));
 }
 function addFromResult(p, pt) {
-  shelfArm();
   const i = p.i !== undefined ? p.i : p;
   if (M.P[i] && M.P[i].name) recentAdd(M.P[i].name);
   const rel = S.relateFrom, wasEmpty = !S.cards.size;
-  const c = pt ? dropPerson(i, pt.x, pt.y) : (() => { const v = viewCentre(); const sel = [...S.sel].map(k => S.cards.get(k)).filter(Boolean)[0]; return dropPerson(i, sel ? sel.x + W / 2 + W + 60 : v.x, sel ? sel.y + H / 2 + 30 : v.y); })();
+  S.keepFind = S.tab === 'find';   /* someone searching in the pane stays on Find while they bring people in; clicking a card afterwards shows that person as usual */
+  let c;
+  try { c = pt ? dropPerson(i, pt.x, pt.y) : (() => { const v = viewCentre(); const sel = [...S.sel].map(k => S.cards.get(k)).filter(Boolean)[0]; return dropPerson(i, sel ? sel.x + W / 2 + W + 60 : v.x, sel ? sel.y + H / 2 + 30 : v.y); })(); }
+  finally { S.keepFind = false; }
   refreshAll();
   if (c) { if (wasEmpty && S.view.k < 0.7) fit([c], { maxK: 1, ms: 380 }); else if (!pt) ensureVisible([c]); if (rel && rel !== c.key) showPath(rel, c.key); }
-  runSearchMarks();
+  runSearchMarks(); findRender();
 }
-function runSearchMarks() { document.querySelectorAll('#shelf .res').forEach(el => { const on = S.cards.has(M.P[+el.dataset.i].key); el.classList.toggle('on', on); const mk = el.querySelector('.mk'); if (on && !mk) el.insertAdjacentHTML('beforeend', '<span class="mk">&#10003;</span>'); if (!on && mk) mk.remove(); }); }
 
-/* drag a result onto the canvas, or tap to drop it */
-(function shelfDrag() {
-  const sh = $('#shelf'); let d = null;
-  sh.addEventListener('click', e => { const b = e.target.closest('.rplay'); if (b) { e.stopPropagation(); e.preventDefault(); startPlay(+b.dataset.i); } });
-  sh.addEventListener('pointerdown', e => {
+/* ---------------- drag a result onto the canvas, or tap to drop it ---------------- */
+function findZone(x, y) {
+  const h = document.documentElement.classList, rect = e => { if (!e) return null; const r = e.getBoundingClientRect(); return { left: r.left, right: r.right, top: r.top, bottom: r.bottom }; };
+  const info = $('#info'), dock = $('.dock');
+  return TCFIND.dropZone({ x, y, rz: h.contains('rzopen') ? rect($('#rz')) : null, info: info.classList.contains('on') ? rect(info) : null, dock: h.contains('rzopen') ? rect(dock) : null });
+}
+function findDrag(v) {
+  v.list.addEventListener('pointerdown', e => {
     if (e.target.closest('.rplay')) return;
     const el = e.target.closest('.res'); if (!el) return;
-    d = { el, id: e.pointerId, x: e.clientX, y: e.clientY, ghost: null, touch: e.pointerType === 'touch', pan: false, sl: sh.scrollLeft };
+    FV.dr = { el, id: e.pointerId, x: e.clientX, y: e.clientY, ghost: null, touch: e.pointerType === 'touch', v };
   });
-  /* the strip scrolls sideways: the wheel (a mouse's up/down turns it), and a mostly-sideways drag with a mouse; pulling a card UP or out still drops it on the canvas */
-  sh.addEventListener('wheel', e => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { sh.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false });
-  let bg = null;
-  sh.addEventListener('pointerdown', e => { if (e.pointerType === 'touch' || e.target.closest('.res')) return; bg = { id: e.pointerId, x: e.clientX, sl: sh.scrollLeft }; sh.setPointerCapture(e.pointerId); });
-  sh.addEventListener('pointermove', e => { if (bg && e.pointerId === bg.id) sh.scrollLeft = bg.sl - (e.clientX - bg.x); });
-  sh.addEventListener('pointerup', () => { bg = null; });
-  window.addEventListener('pointermove', e => {
-    if (!d || e.pointerId !== d.id || d.touch) return;
-    if (!d.ghost && !d.pan && Math.abs(e.clientX - d.x) > 7 && Math.abs(e.clientX - d.x) > 2 * Math.abs(e.clientY - d.y)) d.pan = true;
-    if (d.pan) { sh.scrollLeft = d.sl - (e.clientX - d.x); return; }
-    if (!d.ghost && Math.hypot(e.clientX - d.x, e.clientY - d.y) > 7) { d.ghost = d.el.cloneNode(true); d.ghost.className = 'res ghost'; d.ghost.style.setProperty('--ac', d.el.style.getPropertyValue('--ac')); document.body.appendChild(d.ghost); }
-    if (d.ghost) { d.ghost.style.left = e.clientX + 'px'; d.ghost.style.top = e.clientY + 'px'; const zo = rzOver(e.clientX, e.clientY); $('#rz').classList.toggle('over', zo); const over = !zo && !e.target.closest('.dock'); $('#stage').classList.toggle('dropok', over); }
+}
+window.addEventListener('pointermove', e => {
+  const d = FV.dr; if (!d || e.pointerId !== d.id || d.touch) return;
+  if (!d.ghost && Math.hypot(e.clientX - d.x, e.clientY - d.y) > 7) { d.ghost = d.el.cloneNode(true); d.ghost.removeAttribute('id'); d.ghost.className = 'res ghost'; d.ghost.style.setProperty('--ac', d.el.style.getPropertyValue('--ac')); document.body.appendChild(d.ghost); }
+  if (d.ghost) { d.ghost.style.left = e.clientX + 'px'; d.ghost.style.top = e.clientY + 'px'; const z = findZone(e.clientX, e.clientY); $('#rz').classList.toggle('over', z === 'rz'); $('#stage').classList.toggle('dropok', z === 'canvas'); }
+});
+window.addEventListener('pointerup', e => {
+  const d = FV.dr; if (!d || e.pointerId !== d.id) return;
+  FV.dr = null;
+  const i = +d.el.dataset.i;
+  $('#stage').classList.remove('dropok'); $('#rz').classList.remove('over');
+  if (d.ghost) { d.ghost.remove(); const z = findZone(e.clientX, e.clientY); if (z === 'rz') rzDrop(i); else if (z === 'canvas') addFromResult(i, toWorld(e.clientX, e.clientY)); }
+  else pickResult(i);
+});
+window.addEventListener('pointercancel', () => { const d = FV.dr; FV.dr = null; if (d && d.ghost) d.ghost.remove(); $('#stage').classList.remove('dropok'); $('#rz').classList.remove('over'); });
+
+/* ---------------- the pane's tab ---------------- */
+/* renderInfo draws the pane again on every selection, so the Find view is made once and put back each time: what was typed, which result is chosen, where the list was
+   scrolled and whether the box had the focus all survive */
+function findPanel() { return '<div id="findHost" class="fh"></div>'; }
+function findKeep() {
+  const v = FV.views.pane; if (!v) return null;
+  return { focus: document.activeElement === v.box, s: v.box.selectionStart, e: v.box.selectionEnd, top: v.list.scrollTop, mtop: v.el.scrollTop };
+}
+function findMount(keep) {
+  const host = $('#findHost'), v = FV.views.pane; if (!host || !v) return;
+  host.appendChild(v.el); runSearchMarks();
+  if (keep) { v.list.scrollTop = keep.top; if (keep.focus) { v.box.focus({ preventScroll: true }); try { v.box.setSelectionRange(keep.s, keep.e); } catch (x) { /* ignore */ } } }
+}
+/* open the right-hand pane on Find; with focus, the cursor goes in the box */
+function findOpen(focus) {
+  S.tab = 'find'; S.infoOpen = true; renderInfo(); syncButtons();
+  const v = FV.views.pane; if (focus && v) { v.box.focus(); v.box.select(); }
+}
+const startVisible = () => !!FV.startOn;
+/* "find someone": the centred box when the canvas is empty, else the pane's Find tab */
+function findFocus(focus) {
+  if (startVisible()) { if (focus !== false) { const v = FV.views.start; v.box.focus(); v.box.select(); } return; }
+  findOpen(focus !== false);
+}
+
+/* ---------------- the centred search ---------------- */
+function startSync() {
+  const h = document.documentElement.classList;
+  const want = TCFIND.startShown({ cards: S.cards.size, fan: typeof fanIsOn === 'function' && fanIsOn(), compare: document.body.classList.contains('pr'), names: document.documentElement.getAttribute('data-theme') === 'names',
+    lines: !!($('#linesView') && $('#linesView').classList.contains('on')), play: typeof PLAY !== 'undefined' && PLAY.on });
+  const s = $('#start'); if (!s) return;
+  if (want !== FV.startOn) { FV.startOn = want; s.hidden = !want; h.toggle('startOn', want); if (want) findRender(); if (typeof trailRender === 'function') trailRender(); }   /* an emptied canvas has no direct line: the band comes down with it */
+}
+function startTexts() {
+  const h = $('#stH'), note = $('#stNote');
+  if (SA && QS.get('ex') === '1') { h.textContent = 'An invented example family'; note.hidden = false; note.textContent = 'Press the folder button (top right) to open a GEDCOM and draw your own tree: it is read in this browser and never uploaded.'; }
+  else if (EMBED) h.textContent = M.archives.length === 1 && M.archives[0].k !== 'you' ? 'Who are you looking for in the ' + M.archives[0].name + ' archive?' : 'Who are you looking for in your tree?';
+}
+
+function findBoot() {
+  FV.views.pane = findMake('pane'); FV.views.start = findMake('start');
+  $('#stBox').appendChild(FV.views.start.el);
+  startTexts();
+  const b = $('#bFind'); if (b) { b.innerHTML = icon('search'); b.onclick = () => findFocus(true); }
+  document.addEventListener('pointerdown', e => {   /* a click anywhere else closes an open archive menu */
+    Object.values(FV.views).forEach(v => { if (FV.menu[v.kind] && !v.arch.contains(e.target) && !v.menu.contains(e.target)) findMenu(v, false); });
   });
-  window.addEventListener('pointerup', e => {
-    if (!d || e.pointerId !== d.id) return;
-    if (d.pan) { d = null; return; }
-    const el = d.el, ghost = d.ghost; d = null;
-    $('#stage').classList.remove('dropok');
-    const i = +el.dataset.i;
-    $('#rz').classList.remove('over');
-    if (ghost) { ghost.remove(); const dock = $('.dock').getBoundingClientRect(); if (rzOver(e.clientX, e.clientY)) rzDrop(i); else if (e.clientY < dock.top) addFromResult(i, toWorld(e.clientX, e.clientY)); }
-    else if (S.rzArm != null) rzDrop(i);
-    else addFromResult(i);
-  });
-  window.addEventListener('pointercancel', () => { if (d && d.ghost) d.ghost.remove(); d = null; $('#stage').classList.remove('dropok'); $('#rz').classList.remove('over'); });
-  $('#shelf').addEventListener('click', e => { if (e.target.closest('[data-rsclear]')) { recentClear(); runSearch(); return; } const b = e.target.closest('[data-ex]'); if (b) { $('#q').value = b.dataset.ex; runSearch(); } });
-  $('#tabs').addEventListener('click', e => {
-    const b = e.target.closest('.lk-tab[data-a]'); if (!b) return;
-    if (b.dataset.a === 'all') S.filter = S.filter.size === NA ? new Set() : new Set(M.archives.map((_, i) => i));
-    else { const a = +b.dataset.a; S.filter.has(a) ? S.filter.delete(a) : S.filter.add(a); }
-    renderTabs(); runSearch(); save();
-  });
-})();
+  runSearch(); startSync();
+  { const mo = new MutationObserver(startSync); mo.observe(document.body, { attributes: true, attributeFilter: ['class'] }); mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] }); const lv = $('#linesView'); if (lv) mo.observe(lv, { attributes: true, attributeFilter: ['class'] }); }
+  if (FV.startOn && !EMBED && !S.phone) { const v = FV.views.start; setTimeout(() => { if (FV.startOn && document.activeElement === document.body) v.box.focus({ preventScroll: true }); }, 60); }
+}
+
+/* ui.js — (the search is findui.js)  pan / zoom / drag, the side panel, pathways, themes, phone mode, start-up. */
+
+/* ---------------- selection ---------------- */
+function select(keys, add) {
+  if (!add) S.sel.clear();
+  keys.forEach(k => S.sel.has(k) && add ? S.sel.delete(k) : S.sel.add(k));
+  S.cards.forEach(c => c.el.classList.toggle('sel', S.sel.has(c.key)));
+  if (S.sel.size && !(S.tab === 'find' && S.keepFind) && S.tab !== 'path' && S.tab !== 'options' && S.tab !== 'next' && S.tab !== 'sources' && S.tab !== 'ai' && S.tab !== 'fix' && S.tab !== 'compare') S.tab = 'person';
+  if (S.sel.size && S.tab === 'path' && !S.path) S.tab = 'person';
+  if (typeof prOnSelect === 'function') prOnSelect(keys);
+  renderInfo(); syncButtons();
+  if (typeof lensOnSelect === 'function') lensOnSelect();
+  /* the side panel is folded away: say where the person's details are */
+  if (S.sel.size && !S.phone && !$('#info').classList.contains('on')) { const t = $('#infoTab'); if (t) { t.classList.remove('nudge'); void t.offsetWidth; t.classList.add('nudge'); } }
+}
+function hideHint() { startSync(); }   /* the centred search is there while the canvas has no one on it (findui.js) */
+
+/* ---------------- Find: the search, in the right-hand pane and (while the canvas is empty) in the middle of the canvas: see findui.js ---------------- */
 
 /* ---------------- canvas: pan, zoom, drag cards ---------------- */
 (function canvasInput() {
@@ -6751,7 +7031,7 @@ function goHTML(p) {
 }
 function personPanel() {
   const keys = [...S.sel];
-  if (!keys.length) return `<h3>Nobody selected</h3><p style="color:var(--lk-soft);font-weight:700">Click a card to see what the archives hold about them, or search above and drop someone in.</p>${S.cards.size ? `<div class="row"><button class="lk-btn is-small" data-do="legend">How to read the lines</button></div>` : ''}`;
+  if (!keys.length) return `<h3>Nobody selected</h3><p style="color:var(--lk-soft);font-weight:700">Click a card to see what the archives hold about them, or open Find (press /) and drop someone in.</p>${S.cards.size ? `<div class="row"><button class="lk-btn is-small" data-do="legend">How to read the lines</button></div>` : ''}`;
   if (keys.length >= 2) {
     const a = M.byKey.get(keys[0]), b = M.byKey.get(keys[1]);
     return `<h3>Two people selected</h3><p><b>${esc(a.name)}</b> (${esc(M.archives[a.a].name)}) and <b>${esc(b.name)}</b> (${esc(M.archives[b.a].name)})</p><div class="row"><button class="lk-btn is-primary" data-do="relate2">How are they related?</button></div>`;
@@ -7046,9 +7326,11 @@ function optionsPanel() {
 function renderInfo() {
   const prevScroll = S.pr && S.tab === 'compare' && $('#info .ib') ? $('#info .ib').scrollTop : null;
   const prevFocus = (() => { const a = document.activeElement, inf = $('#info'); if (!(S.pr && S.tab === 'compare' && a && inf && inf.contains(a))) return null; for (const k of ['data-pr-dc', 'data-pr-slot', 'data-pr-copy', 'data-pr-showa']) { const v = a.getAttribute(k); if (v) return [k, v]; } return null; })();   /* the paired Compare list keeps its place when it is drawn again */
-  const el = $('#info'), tabs = [['person', 'Person'], ['sources', 'Sources'], ['next', 'Where next'], ['ai', 'AI prompt'], ...(fixList() ? [['fix', 'Fix list' + fixTabN()]] : []), ...(cmpAvail() ? [['compare', 'Compare']] : []), ['path', 'Path'], ...(S.tab === 'options' ? [['options', 'Options']] : [])];
-  const body = S.tab === 'person' ? personPanel() : S.tab === 'sources' ? sourcesPanel() : S.tab === 'next' ? nextPanel() : S.tab === 'ai' ? aipPanel() : S.tab === 'fix' ? fixPanel() : S.tab === 'compare' ? comparePanel() : S.tab === 'path' ? pathPanel() : optionsPanel();
-  el.innerHTML = `<div class="ih">${tabs.map(([k, n]) => `<button class="lk-tab${S.tab === k ? ' on' : ''}" data-tab="${k}">${n}${k === 'path' && S.path ? ' &bull;' : ''}</button>`).join('')}<span style="flex:1"></span><button class="lk-tab" data-tab="close" title="Close panel" aria-label="Close panel">&times;</button></div><div class="ib">${body}</div>`;
+  const keepF = findKeep(), el = $('#info'), tabs = [['find', 'Find'], ['person', 'Person'], ['sources', 'Sources'], ['next', 'Where next'], ['ai', 'AI prompt'], ...(fixList() ? [['fix', 'Fix list' + fixTabN()]] : []), ...(cmpAvail() ? [['compare', 'Compare']] : []), ['path', 'Path'], ...(S.tab === 'options' ? [['options', 'Options']] : [])];
+  const body = S.tab === 'find' ? findPanel() : S.tab === 'person' ? personPanel() : S.tab === 'sources' ? sourcesPanel() : S.tab === 'next' ? nextPanel() : S.tab === 'ai' ? aipPanel() : S.tab === 'fix' ? fixPanel() : S.tab === 'compare' ? comparePanel() : S.tab === 'path' ? pathPanel() : optionsPanel();
+  el.innerHTML = `<div class="ih" role="tablist" aria-label="Side panel">${tabs.map(([k, n]) => `<button class="lk-tab${S.tab === k ? ' on' : ''}" data-tab="${k}" role="tab" id="itab-${k}" aria-selected="${S.tab === k}" aria-controls="ipanel"${k === 'find' ? ' aria-keyshortcuts="/" aria-label="Find" title="Find people (press /)"' : ''}>${k === 'find' ? icon('search', 'fvti') : n}${k === 'path' && S.path ? ' &bull;' : ''}</button>`).join('')}<span style="flex:1"></span><button class="lk-tab" data-tab="close" title="Close panel" aria-label="Close panel">&times;</button></div><div class="ib${S.tab === 'find' ? ' ibf' : ''}" id="ipanel" role="tabpanel" aria-labelledby="itab-${S.tab}">${body}</div>`;
+  el.classList.toggle('isfind', S.tab === 'find');
+  if (S.tab === 'find') findMount(keepF);
   if (S.infoOpen !== false) el.classList.add('on');
   if (typeof prPostRender === 'function') prPostRender(prevScroll, prevFocus);
   if (S.tab === 'fix') fixMount();
@@ -7067,6 +7349,11 @@ function tabEdges(ih) { if (!ih) return; ih.classList.toggle('mr', ih.scrollLeft
   addEventListener('pointerup', () => { if (d && d.moved) dragged = Date.now(); d = null; });
   info.addEventListener('click', e => { if (Date.now() - dragged < 250 && e.target.closest('.ih')) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
 })();
+$('#info').addEventListener('keydown', e => {   /* the tabs: the arrow keys move between them */
+  const tb = e.target.closest && e.target.closest('[role=tab]'); if (!tb || !/^Arrow(Left|Right|Up|Down)$/.test(e.key)) return;
+  const all = [...$('#info').querySelectorAll('[role=tab]')], k = all.indexOf(tb) + (/Right|Down/.test(e.key) ? 1 : -1), nx = all[(k + all.length) % all.length];
+  e.preventDefault(); S.tab = nx.dataset.tab; renderInfo(); const f = $('#info [data-tab="' + S.tab + '"]'); if (f) f.focus();
+});
 $('#info').addEventListener('click', e => {
   const sg = e.target.closest('[data-srgo]'); if (sg) { const t = $('#' + sg.dataset.srgo); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
   const go = e.target.closest('[data-tab-go]'); if (go) { e.preventDefault(); S.tab = go.dataset.tabGo; renderInfo(); return; }
@@ -7148,7 +7435,7 @@ $('#pop').addEventListener('click', e => {
 });
 
 /* ---------------- toolbar, themes, phone ---------------- */
-function dockH() { const d = $('.dock'); document.documentElement.style.setProperty('--dock-h', (document.documentElement.classList.contains('shelfoff') ? 0 : d.offsetHeight) + (typeof trailHeight === 'function' ? Math.ceil(trailHeight()) : 0) + 'px'); }   /* the Trail band, when it is up, is the bottom-most thing: everything that stands on the dock stands on it too */
+function dockH() { const d = $('.dock'), on = document.documentElement.classList.contains('rzopen'); document.documentElement.style.setProperty('--dock-h', (on ? d.offsetHeight : 0) + (typeof trailHeight === 'function' ? Math.ceil(trailHeight()) : 0) + 'px'); }   /* the dock is only the two relate slots now, and only while they are open; the Trail band, when it is up, is the bottom-most thing: everything that stands on the dock stands on it too */
 function syncGenButton() { const b = $('#bGen'); if (b) { b.classList.toggle('on', !!S.opts.gens); b.setAttribute('aria-pressed', String(!!S.opts.gens)); } }
 function toggleGens() {
   S.opts.gens = !S.opts.gens; syncGenButton(); drawBands(); save();
@@ -7170,7 +7457,7 @@ function clearCanvas() {
   if (!S.cards.size) return;
   if (typeof fanIsOn === 'function' && fanIsOn()) lensSet('canvas');
   snapshot(); clearAll(); refreshAll(); drawEdges(); hideHint(); renderInfo(); save(); runSearchMarks();
-  clearTimeout(shelfT); { const h = document.documentElement.classList; h.remove('shelfoff'); $('#bShelf').setAttribute('aria-pressed', 'true'); dockH(); }   /* a cleared canvas starts again: the search box comes back and stays until something is searched and added */
+  startSync();   /* a cleared canvas starts again: the centred search comes back */
   toast('Cleared. Undo brings it back.');
 }
 const THEMES = ['sticker', 'paper', 'ground', 'lanes', 'countries', 'names'];
@@ -7187,7 +7474,7 @@ function setTheme(t) {
   try { localStorage.setItem('loamTheme', t); } catch (e) { /* ignore */ }
   if (typeof prOnTheme === 'function') prOnTheme();
   if (typeof lensOnTheme === 'function') lensOnTheme();
-  drawEdges(); miniDraw(); if (typeof drawNames === 'function') drawNames(true); if (S.tab === 'options') renderInfo();
+  drawEdges(); miniDraw(); if (typeof drawNames === 'function') drawNames(true); if (S.tab === 'options') renderInfo(); startSync();
 }
 function initTheme() {
   let t = null; try { t = localStorage.getItem('loamTheme'); } catch (e) { /* ignore */ }
@@ -7235,7 +7522,7 @@ function wireToolbar() {
   set('#bViews', 'views'); { const mm = document.createElement('div'); mm.id = 'viewsMenu'; mm.setAttribute('role', 'dialog'); mm.setAttribute('aria-label', 'Saved views'); document.body.appendChild(mm); $('#bViews').onclick = () => openViewsMenu(); if (!viewsOn()) $('#bViews').style.display = 'none'; }
   set('#bBlood', 'blood'); { const mm = document.createElement('div'); mm.id = 'bloodMenu'; mm.setAttribute('role', 'dialog'); mm.setAttribute('aria-label', 'Bloodline'); document.body.appendChild(mm); $('#bBlood').onclick = () => openBloodMenu(); }
   set('#bMenu', 'menu'); { const mm = document.createElement('div'); mm.id = 'mainMenu'; mm.setAttribute('role', 'menu'); mm.setAttribute('aria-label', 'Menu'); document.body.appendChild(mm); $('#bMenu').onclick = () => openMainMenu(); const lc = document.createElement('div'); lc.id = 'legendCard'; lc.setAttribute('role', 'dialog'); lc.setAttribute('aria-label', 'How to read the lines'); document.body.appendChild(lc); }
-  set('#bArrange', 'arrange'); set('#bGen', 'layers'); set('#bShelf', 'search'); $('#si').innerHTML = icon('search', ''); set('#bUndo', 'undo'); set('#bFit', 'fit'); set('#bRel', 'relate'); set('#bInfo', 'info'); set('#bClear', 'clear'); set('#bMore', 'more');
+  set('#bArrange', 'arrange'); set('#bGen', 'layers'); set('#bUndo', 'undo'); set('#bFit', 'fit'); set('#bRel', 'relate'); set('#bInfo', 'info'); set('#bClear', 'clear'); set('#bMore', 'more');
   set('#zIn', 'plus'); set('#zOut', 'minus');
   { const b = $('#bFix'); if (b) { b.hidden = !SA; b.innerHTML = icon('fix') + '<span class="fxn" aria-hidden="true"></span>'; fixBtn(); b.onclick = () => { try { window.parent.postMessage({ tcFixList: true }, location.origin); } catch (e) { /* no page around */ } }; } }
   if (typeof lensWire === 'function') lensWire();
@@ -7249,7 +7536,6 @@ function wireToolbar() {
   if (Array.isArray(e.data.tcShow)) { fixShow(e.data.tcShow); return; }   // "Show on canvas" on the Fix list page
   if (!e.data.tcFix) return; refreshAll(); renderInfo(); syncButtons(); fixBtn();
 });
-  $('#bShelf').onclick = () => { clearTimeout(shelfT); const h = document.documentElement.classList; h.toggle('shelfoff'); $('#bShelf').setAttribute('aria-pressed', String(!h.contains('shelfoff'))); dockH(); };
   $('#bUndo').onclick = undo;
   $('#bArrange').onclick = () => { if (!S.busy) doArrange(); };
   $('#bGen').onclick = toggleGens;
@@ -7287,14 +7573,12 @@ function wireToolbar() {
     for (const ev of ['dragenter', 'dragover']) document.addEventListener(ev, e => e.preventDefault());
     document.addEventListener('drop', e => { e.preventDefault(); send(e.dataTransfer && e.dataTransfer.files[0]); });
   }
-  if (EMBED) { const h = $('#hint'); h.firstChild.textContent = (M.archives.length === 1 && M.archives[0].k !== 'you' ? 'Search anyone in the ' + M.archives[0].name + ' archive, and drop them here ' : 'Search anyone in your tree, and drop them here '); const sm = h.querySelector('small'); if (sm) sm.innerHTML = 'Pull up their parents, all the way back, one generation at a time.<br>Click anyone, then "Where to from here" for the order to look for their records.'; }   // the example people are in the eight archives, not in a visitor's own file
-  if (SA && QS.get('ex') === '1') { const h = $('#hint'); h.firstChild.textContent = 'This is an invented example family. '; const sm = h.querySelector('small'); if (sm) sm.innerHTML = 'Press the folder button (top right) to open a GEDCOM and draw your own tree: it is read in this browser and never uploaded.<br>Search anyone, drop them here, then click them and choose "Where to from here".'; }
   addEventListener('keydown', e => {
-    const typing = /INPUT|TEXTAREA/.test(document.activeElement.tagName);
+    const ae = document.activeElement, typing = TCFIND.isTyping(ae && ae.tagName, ae && ae.isContentEditable);
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z' && !typing) { e.preventDefault(); undo(); }
     else if (e.key === 'Escape') { if (S.relateFrom) cancelRelate(); closePop(); select([]); }
     else if (typing) return;
-    else if (e.key === '/') { e.preventDefault(); $('#q').focus(); }
+    else if (TCFIND.slashPlan({ key: e.key, ctrl: e.ctrlKey, meta: e.metaKey, alt: e.altKey, typing, start: startVisible() })) { e.preventDefault(); findFocus(true); }
     else if (e.key.toLowerCase() === 'f') fit();
     else if ((e.key === 'Delete' || e.key === 'Backspace') && S.sel.size) { snapshot(); [...S.sel].forEach(k => { const c = S.cards.get(k); if (c) removeCard(c); }); S.path = null; clearPathUi(); refreshAll(); drawEdges(); hideHint(); save(); runSearchMarks(); renderInfo(); }
   });
@@ -7320,9 +7604,8 @@ function rzToggle(show) {
   const h = document.documentElement.classList, on = show == null ? !h.contains('rzopen') : !!show;
   h.toggle('rzopen', on); $('#bRel').setAttribute('aria-pressed', String(on));
   if (on) {
-    h.remove('shelfoff'); $('#bShelf').setAttribute('aria-pressed', 'true');
     if (S.rz[0] == null && S.rz[1] == null && S.sel.size === 1) { const c = S.cards.get([...S.sel][0]); if (c) { S.rz[0] = personOf(c).i; S.rzArm = 1; } }
-    rzRender();
+    rzRender(); if (S.rzArm != null) findFocus(true); else if (!startVisible()) findOpen(false);
   } else S.rzArm = null;
   dockH(); syncButtons();
 }
@@ -7369,7 +7652,7 @@ function rzClear() {
     const x = e.target.closest('[data-rx]');
     if (x) { const k = +x.dataset.rx; S.rz[k] = null; S.rzArm = null; if (S.path || S.noPath) { S.path = null; S.noPath = null; clearPathUi(); refreshAll(); drawEdges(); S.tab = 'person'; renderInfo(); syncButtons(); } rzRender(); e.stopPropagation(); return; }
     if (e.target.closest('#rzClr')) { rzClear(); return; }
-    const s = e.target.closest('.rzs.empty'); if (s) { S.rzArm = S.rzArm === +s.dataset.s ? null : +s.dataset.s; rzRender(); if (S.rzArm != null) { document.documentElement.classList.remove('shelfoff'); dockH(); $('#q').focus(); } }
+    const s = e.target.closest('.rzs.empty'); if (s) { S.rzArm = S.rzArm === +s.dataset.s ? null : +s.dataset.s; rzRender(); if (S.rzArm != null) findFocus(true); }
   });
   z.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('empty')) { e.preventDefault(); e.target.click(); } });
   rzRender();
@@ -7441,7 +7724,7 @@ function ibtn(act, ic, tip, on) { return `<button type="button" class="ibtn${on 
 /* ---------------- start-up ---------------- */
 function boot() {
   buildFlagSprite();
-  initTheme(); setPhone(); if (S.phone) S.infoOpen = false; wireToolbar(); wireLines(); renderTabs(); runSearch(); dockH();
+  initTheme(); setPhone(); if (S.phone) S.infoOpen = false; wireToolbar(); wireLines(); findBoot(); dockH();
   loadMark();
   const d = loadSaved();
   if (d && d.look) setTheme(d.look);   /* a saved or shared view remembers its look; set before the cards come, as the Countries look re-arranges any that are there */

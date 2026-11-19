@@ -251,3 +251,38 @@ test("a wife who is from somewhere else keeps her own place, on her own card", (
   const joe = (p.kin || []).filter((k) => k.key === "S")[0];
   assert.ok(joe && joe.stops.some((s) => s.row.n === "Leeds"), "Leeds is on the husband's card");
 });
+
+/* THE FAMILY TOLD WITH UNNAMED GRANDPARENTS. David's story: his father's parents have no name ("his mother was a singer ... his father"), and "they" is that couple. */
+const kinStory = "my father ivan defranceski was from senj, croatia and move to johannesburg. his mother was a singer at a hotel in crikvenica, croatia and met his father there who was born in crikvenica. they moved to harare in rhodesia and then my dad moved to johannesburg and met my mum cheryl.";
+const kinCtx = () => { const base = rows.concat([P("Crikvenica", "HR", 14.69, 45.18)]); return { ...ctx, map: A.buildMap(base), countries: { ...countries, ZW: "Zimbabwe" } }; };
+const stopsOf = (p, key) => ((p.kin || []).filter((k) => k.key === key)[0] || { stops: [] }).stops.map((s) => s.row.n);
+
+test("unnamed grandparents: 'his mother was a singer ... met his father there who was born in X' makes both, unnamed, with their places", () => {
+  const p = F.parseStory(kinStory, kinCtx());
+  const by = (r) => (p.people || []).filter((x) => x.key === r)[0];
+  assert.ok(by("FM") && by("FF"), "Ivan's mother and father are on the tree: " + (p.people || []).map((x) => x.key).join());
+  assert.equal(by("FM").name, "", "not named, and not given a name");
+  assert.equal(by("FM").occupation, "singer", "kept as told");
+  assert.equal(by("FM").role, "mother", "the subject's mother, as the card for any subject's parents says"); assert.equal(by("FF").role, "father");
+  const ff = by("FF"); assert.ok(ff.events.some((e) => e.type === "born" && e.place && e.place.row.n === "Crikvenica"), "the father was born in Crikvenica");
+  assert.equal(stopsOf(p, "FM")[0], "Crikvenica");
+});
+
+test("'they moved to Harare in Rhodesia' is the couple just introduced, not the teller's father", () => {
+  const p = F.parseStory(kinStory, kinCtx());
+  assert.deepEqual(stopsOf(p, "FM"), ["Crikvenica", "Harare"]);
+  assert.deepEqual(stopsOf(p, "FF"), ["Crikvenica", "Harare"]);
+  assert.ok(!places({ stops: p.stops }).includes("Harare"), "Ivan's own route does not borrow his parents' move");
+  assert.deepEqual(places({ stops: p.stops }), ["Senj", "Johannesburg"], "and Johannesburg is said once");
+});
+
+test("'my dad ... met my mum Cheryl' still gives the father a wife named Cheryl, and the earlier readings hold", () => {
+  const p = F.parseStory(kinStory, kinCtx());
+  assert.ok((p.people || []).some((x) => x.role === "spouse" && x.name === "Cheryl"), "Cheryl is Ivan's wife");
+  assert.equal(p.people.filter((x) => x.key === "F").length, 1, "Ivan is one person, not two");
+});
+
+test("grandparents who are named, or 'his parents moved', are read the same way", () => {
+  const a = F.parseStory("My father is Ivan from Senj. His mother was Hedviga born in Zagreb and his father was Anton born in Zagreb. They moved to Harare.", kinCtx());
+  assert.deepEqual(stopsOf(a, "FM"), ["Zagreb", "Harare"]); assert.deepEqual(stopsOf(a, "FF"), ["Zagreb", "Harare"]);
+});

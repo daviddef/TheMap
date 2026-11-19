@@ -949,6 +949,15 @@
     var hist = [];
     function mention(k) { var i = hist.indexOf(k); if (i > -1) hist.splice(i, 1); hist.push(k); }
     function sexOf(k) { var q = people[k]; if (q && q.sex) return q.sex; return /F$/.test(k) ? "M" : /M$/.test(k) ? "F" : null; }
+    /* "THEY" is the couple just told of: the last two people mentioned, when one is a man and one a woman ("his mother ... his father ... They moved to Harare") */
+    var THEY = /^\W*(?:(?:and|then|later)\s+)?they\b/i;
+    function couple() { var a = hist[hist.length - 1], b = hist[hist.length - 2], sa = a && sexOf(a), sb = b && sexOf(b); return sa && sb && sa !== sb ? [a, b] : null; }
+    /* a word that can be a person's given name after "my dad" / "his mother": written with a capital, or a given name the Atlas knows when typed in lower case */
+    function nameWord(w) {
+      var f = S.fold(w);
+      if (!w || STOP[f] || COMMON[f] || OCC[f] || MONTHS[f] || EV_BORN.test(f) || EV_DIED.test(f) || EV_WED.test(f) || EV_MOVE.test(f) || EV_CAUSE.test(f) || KINW.test(f) || REL.test(f) || (ctx.map && ctx.map[f] && !(ctx.given && ctx.given[f]))) return false;
+      return /^\p{Lu}/u.test(w) || !!(ctx.given && S.givenIn(w, ctx.given, ctx.skip).length);
+    }
     /* WHO "SHE" IS: the last person mentioned who can be a woman; a man's sentence is never given to her */
     function heFor(pro) { var want = /^he$/i.test(pro) ? "M" : "F"; for (var i = hist.length - 1; i >= 0; i--) { var sx = sexOf(hist[i]); if (!sx || sx === want) return hist[i]; } return null; }
     /* "was married to Hedviga": a wife (or husband) of that person, a person of her own. The subject's is S, anyone else's is their key and S. */
@@ -963,21 +972,39 @@
       if (!sent.trim()) return;
       var re = new RegExp(INTRO.source, "giu"), ms = [], m;
       while ((m = re.exec(sent))) ms.push({ at: m.index, end: m.index + m[0].length, poss: (m[1] || "").toLowerCase(), steps: stepsOf(m[2]), name: m[3] });
+      /* "his mother ... met his father there", "my dad moved to Johannesburg": a parent named without a verb after the word. The first one is only the subject when it is "my dad Ivan". */
+      { var bre = /\b(my|his|her|their)\s+((?:(?:father|dad|mother|mum|mom)(?:'?s)?\s+)*(?:father|dad|mother|mum|mom))\b(?!(?:'?s)?\s+(?:name\s+)?(?:was|is|named|called)\b)/giu, bm;
+        while ((bm = bre.exec(sent))) {
+          var bs = bm.index, be = bm.index + bm[0].length;
+          if (ms.some(function (o) { return bs < o.end && be > o.at; })) continue;
+          if (/'s\s*$/i.test(sent.slice(0, bs))) continue;
+          ms.push({ at: bs, end: be, poss: bm[1].toLowerCase(), steps: stepsOf(bm[2]), name: "", bare: true });
+        }
+        ms.sort(function (x, y) { return x.at - y.at; }); }
       if (!ms.length) {
         if (!cur) return;
+        if (THEY.test(sent) && couple()) { couple().forEach(function (k) { people[k].chunks.push(sent); }); return; }
         var hp = /^\W*(?:(?:also|after|before|then|later|in|by|when|until|once|now)\b[^,.]{0,40},?\s+)?(he|she)\b/i.exec(sent), who = hp ? heFor(hp[1]) : null, to = who || cur;
         people[to].chunks.push(sent); spouseOf(to, sent); mention(to); return;
       }
-      if (cur && ms[0].at > 0) people[cur].chunks.push(sent.slice(0, ms[0].at));
+      if (cur && ms[0].at > 0) { var pre = sent.slice(0, ms[0].at), cp = THEY.test(pre) ? couple() : null; if (cp) cp.forEach(function (k) { people[k].chunks.push(pre); }); else people[cur].chunks.push(pre); }
       ms.forEach(function (x, i) {
-        if (!x.steps || /^(a|the|an|my|his|her|their|not|also|now)$/i.test(x.name) || STOP[S.fold(x.name)] || COMMON[S.fold(x.name)] || OCC[S.fold(x.name)] || MONTHS[S.fold(x.name)] || EV_BORN.test(S.fold(x.name)) || EV_DIED.test(S.fold(x.name)) || EV_WED.test(S.fold(x.name)) || EV_MOVE.test(S.fold(x.name)) || /^(?:murdered|killed|drowned|executed|hanged|shot|lost|ill|sick|dead|buried|married|single|widowed|divorced|alive|old|young|tall|short|poor|rich)$/.test(S.fold(x.name))) return;   /* "my father was from Cork": from is not his name */
+        var unnamed = !!subject && !x.bare && x.steps && /^(?:a|an|the)$/i.test(x.name);   /* "his mother was a singer": a person with no name, and the words after "a" are about her */
+        if (x.bare && !x.steps) return;
+        if (x.bare && !subject && !(x.poss === "my" && x.steps.length === 1)) return;
+        if (!unnamed && !x.bare && (!x.steps || /^(a|the|an|my|his|her|their|not|also|now)$/i.test(x.name) || STOP[S.fold(x.name)] || COMMON[S.fold(x.name)] || OCC[S.fold(x.name)] || MONTHS[S.fold(x.name)] || EV_BORN.test(S.fold(x.name)) || EV_DIED.test(S.fold(x.name)) || EV_WED.test(S.fold(x.name)) || EV_MOVE.test(S.fold(x.name)) || /^(?:murdered|killed|drowned|executed|hanged|shot|lost|ill|sick|dead|buried|married|single|widowed|divorced|alive|old|young|tall|short|poor|rich)$/.test(S.fold(x.name)))) return;   /* "my father was from Cork": from is not his name */
         var base = x.poss === "my" || !subject ? "" : subject, key = base + x.steps;
         if (!subject) { if (x.poss !== "my" || x.steps.length !== 1) return; subject = key; }
-        var rest = sent.slice(x.end, i + 1 < ms.length ? ms[i + 1].at : sent.length), nm = x.name;
-        var sx = /^\s+([\p{Lu}][\p{L}'’-]{2,})(?=\s|,|$)/u.exec(rest);
+        var rest = sent.slice(x.end, i + 1 < ms.length ? ms[i + 1].at : sent.length), nm = unnamed ? "" : x.name;
+        if (x.bare) { var nx = /^\s+([\p{L}'’-]{2,})(?=\s|,|$)/u.exec(rest); if (nx && nameWord(nx[1])) { nm = nx[1]; rest = rest.slice(nx[0].length); } }
+        var sx = nm ? /^\s+([\p{Lu}][\p{L}'’-]{2,})(?=\s|,|$)/u.exec(rest) : null;
         if (sx && !STOP[S.fold(sx[1])] && !COMMON[S.fold(sx[1])] && !(ctx.map && ctx.map[S.fold(sx[1])]) && !(ctx.given && ctx.given[S.fold(sx[1])])) { nm += " " + sx[1]; rest = rest.slice(sx[0].length); }
         var pk = (subject === "F" && key === "M") || (subject === "M" && key === "F") ? "S" : key;
-        var p = person(pk, nm); p.chunks.push(rest); cur = pk; mention(pk); spouseOf(pk, rest);
+        var p = person(pk, nm);
+        /* "met his father there who was born in X" / "married my mother Cheryl in 1975": a person met, not the one the next words are about, unless "who" says so */
+        var objOf = x.bare && cur && cur !== pk && /\b(?:married|marry|wed|met|meet|to|with)\s*$/i.test(sent.slice(0, x.at)) && !/^\s*(?:there\s*)?,?\s*(?:who|that)\b/i.test(rest);
+        if (objOf) { people[cur].chunks.push(rest); spouseOf(cur, rest); mention(pk); return; }
+        p.chunks.push(rest); cur = pk; mention(pk); spouseOf(pk, rest);
       });
     });
     if (!subject || order.length < 2) return null;

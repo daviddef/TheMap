@@ -126,13 +126,13 @@ const GROUPS = [
 
   <h2 class="k-h" id="doors">Pick your door <span class="k-count">what you want to do</span></h2>
   <ul class="k-tiles cx-doors">
-    <li><a href="#places"><b>1 · What sources can I read for a place?</b></a><span>Archives, registers and year-ranges for one village. Read-only, no login.</span></li>
-    <li><a href="#research"><b>2 · Keep my own research progress</b></a><span>Write "I searched this book, found it" from your own tool. Needs the six words.</span></li>
-    <li><a href="#names"><b>3 · Use every spelling of a name</b></a><span>Ivan is Johann is Giovanni. Ask once, search them all.</span></li>
-    <li><a href="#eras"><b>4 · Who governed this place in 1850?</b></a><span>Places, countries, flags and their eras, with the years, the polity and the archive that filed them.</span></li>
-    <li><a href="#country"><b>5 · Everything for one country</b></a><span>A walk-through for Croatia: find the archives, years, places, eras and flag, with each address and what comes back.</span></li>
-    <li><a href="#files"><b>6 · Every file, with its curl</b></a><span>Names, places, wars and plagues, archives, cemeteries. One line each, and providers or collections explained.</span></li>
-    <li><a href="#api"><b>7 · How each API works</b></a><span>Addresses, formats, how a POST works, the MCP server, and what each one answers when it goes wrong.</span></li>
+    <li><a href="#places"><svg class="cx-ic" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg><b><i>1</i> Sources for a place</b><span>Archives, registers and year-ranges for one village. Read-only.</span></a></li>
+    <li><a href="#research"><svg class="cx-ic" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4.5L6 21z"/><path d="m9.2 9.6 2 2 3.6-3.8"/></svg><b><i>2</i> Save my research</b><span>Write “I searched this book” from your own tool. Needs the six words.</span></a></li>
+    <li><a href="#names"><svg class="cx-ic" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h14m-3-3 3 3-3 3"/><path d="M20 16H6m3-3-3 3 3 3"/></svg><b><i>3</i> Spellings of a name</b><span>Ivan is Johann is Giovanni. Ask once, search them all.</span></a></li>
+    <li><a href="#eras"><svg class="cx-ic" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h12l-2.5 4L17 12H5"/></svg><b><i>4</i> Who governed it</b><span>Places, countries, flags and their eras, with the years and polity.</span></a></li>
+    <li><a href="#country"><svg class="cx-ic" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.7 3.9 5.7 3.9 9s-1.3 6.3-3.9 9c-2.6-2.7-3.9-5.7-3.9-9S9.400 5.700 12 3z"/></svg><b><i>5</i> A whole country</b><span>A walk-through for Croatia: archives, years, places, eras and flag.</span></a></li>
+    <li><a href="#files"><svg class="cx-ic" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.500 4C6.800 4 6.500 5 6.500 6.500v2.200c0 1.200-.7 2-2 2.300 1.300.3 2 1.100 2 2.300v2.200c0 1.500.3 2.500 2 2.500"/><path d="M15.500 4c1.700 0 2 1 2 2.500v2.200c0 1.200.7 2 2 2.300-1.300.3-2 1.100-2 2.300v2.200c0 1.500-.3 2.500-2 2.500"/></svg><b><i>6</i> Every file</b><span>Names, places, wars, archives, cemeteries. One curl line each.</span></a></li>
+    <li><a href="#api"><svg class="cx-ic" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.500" width="18" height="15" rx="2.500"/><path d="m7.500 10 3 2.500-3 2.500"/><path d="M13 15h3.500"/></svg><b><i>7</i> How the APIs work</b><span>Addresses, formats, POST, the MCP server, and what goes wrong.</span></a></li>
   </ul>
 
   <h2 class="k-h" id="files">Every file, and the one line that fetches it <span class="k-count">no key, no login</span></h2>
@@ -585,6 +585,49 @@ console.log(era.regime, era.polity, era.filedUnder);`}></pre></details>
 </Base>
 
 <script is:inline src={u("/js/research-sync.js")}></script>
+<script is:inline>
+(function () {
+  "use strict";
+  var COPY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>';
+  var OK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.500 4.500 4.500L19 7.500"/></svg>';
+  function textOf(pre) {
+    var t = pre.textContent.replace(/\s+$/, "");
+    if (pre.closest(".cx-walk") && /^curl /.test(t)) return t.split("\n")[0];
+    return t;
+  }
+  function fallback(pre) {
+    try { var r = document.createRange(); r.selectNodeContents(pre); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); } catch (e) { /* ignore */ }
+  }
+  function add(pre) {
+    if (pre.dataset.copyDone || pre.closest(".cx-out") || !pre.textContent.trim()) return;
+    pre.dataset.copyDone = "1";
+    var wrap = document.createElement("div");
+    wrap.className = "cx-copyable";
+    pre.parentNode.insertBefore(wrap, pre);
+    wrap.appendChild(pre);
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "cx-copy"; b.innerHTML = COPY;
+    b.setAttribute("aria-label", "Copy to clipboard"); b.title = "Copy";
+    var live = document.createElement("span");
+    live.setAttribute("aria-live", "polite"); live.style.cssText = "position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)";
+    var timer;
+    function flash(ok) {
+      b.classList.toggle("done", ok); if (ok) b.innerHTML = OK; live.textContent = ok ? "Copied" : "Press Ctrl or Cmd C to copy";
+      clearTimeout(timer); timer = setTimeout(function () { b.classList.remove("done"); b.innerHTML = COPY; live.textContent = ""; }, 1600);
+    }
+    b.addEventListener("click", function () {
+      var t = textOf(pre);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(t).then(function () { flash(true); }, function () { fallback(pre); flash(false); });
+      } else { fallback(pre); flash(false); }
+    });
+    wrap.appendChild(b); wrap.appendChild(live);
+  }
+  function run() { document.querySelectorAll("pre").forEach(add); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", run); else run();
+  /* the dry-run output is built later and holds throwaway values; the enhancer leaves .cx-out alone */
+})();
+</script>
 <script is:inline define:vars={{ API: api, SYNC: syncHost, AI: aiHost, P: u("/p/"), REG: u("/regions.json"), WORDS: u("/sync-words.json"), PROV: u("/providers.json") }}>
 (function () {
   "use strict";
@@ -736,9 +779,21 @@ console.log(era.regime, era.polity, era.filedUnder);`}></pre></details>
   .cx-walk .cx-pre { margin: 8px 0 6px; white-space: pre-wrap; word-break: break-word; font-size: 12px; }
   .cx-note { margin: 8px 0 0; }
   .cx-files .cx-pre.cx-cmd { margin: 0; white-space: pre-wrap; word-break: break-all; font-size: 11.5px; min-width: 16em; }
-  .cx-doors { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); max-width: 1000px; }
-  .cx-doors a { display: block; font-family: var(--serif); font-size: 17px; line-height: 1.3; }
-  .cx-doors li > span { display: block; margin-top: 6px; font-size: 13px; color: var(--ink-2); }
+  .cx-doors { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+  .cx-doors > li { padding: 0; }
+  .cx-doors a { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; height: 100%; box-sizing: border-box; padding: 12px 12px 13px; }
+  .cx-doors .cx-ic { color: var(--accent); flex: none; }
+  .cx-doors b { font-family: var(--serif); font-weight: 500; font-size: 15px; line-height: 1.25; }
+  .cx-doors b i { font: 600 11px var(--mono, monospace); font-style: normal; color: var(--ink-3); margin-right: 4px; }
+  .cx-doors a > span { display: block; font-size: 12px; line-height: 1.4; color: var(--ink-2); font-weight: 400; }
+  @media (max-width: 1180px) { .cx-doors { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  @media (max-width: 720px) { .cx-doors { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .cx-copyable { position: relative; }
+  .cx-copy { position: absolute; top: 6px; right: 6px; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; border: 1px solid var(--rule); border-radius: 7px; background: var(--panel); color: var(--ink-2); cursor: pointer; opacity: .75; }
+  .cx-copy:hover, .cx-copy:focus-visible, .cx-copyable:hover .cx-copy { opacity: 1; color: var(--accent); border-color: var(--accent); }
+  .cx-copy.done { color: #1d7a45; border-color: #1d7a45; opacity: 1; }
+  .cx-copyable > pre { padding-right: 42px; }
+  .cx-copy svg { width: 15px; height: 15px; }
   #cx-status b.ok { color: #1d7a45; } #cx-status b.bad { color: #b3261e; }
   .cx-fig { margin: 0 0 26px; max-width: 920px; }
   .cx-fig svg { width: 100%; height: auto; display: block; background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; }

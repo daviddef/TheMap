@@ -69,7 +69,7 @@ export function namesNews(cats) {
       listed(fams.map((n) => `${n} (${d.fams[n].sort().join(", ")})`), 4);
     out.push({ date, kind: "research", headline: clip(headline), href: "/surname-families/",
       what: "The spellings below are now treated as the same family name when you search, with the evidence for each on its family page.",
-      items: fams.slice(0, 60).map((n) => ({ t: n, w: d.fams[n].sort().join(", "), q: "s" })), more: Math.max(0, fams.length - 60), how: howText(d.src, "spelling") });
+      items: fams.slice(0, 250).map((n) => ({ t: n, w: d.fams[n].sort().join(", "), q: "s" })), more: Math.max(0, fams.length - 250), how: howText(d.src, "spelling") });
   }
 
   for (const [date, d] of Object.entries(byDay(c.given, ["not-same"]))) {
@@ -79,7 +79,7 @@ export function namesNews(cats) {
     else headline = `New ${d.forms === 1 ? "form" : "forms"} of a given name: ` + listed(fams.map((n) => `${n} (${d.fams[n].sort().join(", ")})`), 4);
     out.push({ date, kind: "research", headline: clip(headline), href: "/your-name/",
       what: "Each name below is now searched in all its forms (Ivan, Johann and Giovanni are one name), so a register is not missed for the form a clerk used.",
-      items: fams.slice(0, 60).map((n) => ({ t: n, w: d.fams[n].sort().join(", "), q: "n" })), more: Math.max(0, fams.length - 60), how: howText(d.src, "form") });
+      items: fams.slice(0, 250).map((n) => ({ t: n, w: d.fams[n].sort().join(", "), q: "n" })), more: Math.max(0, fams.length - 250), how: howText(d.src, "form") });
   }
 
   const pdays = {};

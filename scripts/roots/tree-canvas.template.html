@@ -4129,7 +4129,7 @@ html:not(.ph):has(#info.on) .xv{right:352px}
   const tint = (base, card, t) => V.mix(base, card, t);
 
   const API = { PLACE, OTHER, RAMP, DIR, SIM, simulate, deltaE, minDistance, bands, bandOf, tint };
-  if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCC = API;
+  if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCVC = API;
 })(typeof window !== 'undefined' ? window : globalThis);
 
 /* surnames.js — the pure parts of the Surnames view: who is counted, how spellings are grouped, the numbers behind each name, sizes, colours, the table and the kept choice. No DOM; tested by test/test-surnames.js.
@@ -4146,7 +4146,7 @@ html:not(.ph):has(#info.on) .xv{right:352px}
 (function (root) {
   'use strict';
   const V = root.TCV || (typeof require !== 'undefined' ? require('./views.js') : null);
-  const C = root.TCC || (typeof require !== 'undefined' ? require('./viewcolour.js') : null);
+  const C = root.TCVC || (typeof require !== 'undefined' ? require('./viewcolour.js') : null);
   const LG = root.TC || (typeof require !== 'undefined' ? require('./logic.js') : null);
 
   const clean = s => String(s == null ? '' : s).replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim();
@@ -4308,7 +4308,7 @@ html:not(.ph):has(#info.on) .xv{right:352px}
 (function (root) {
   'use strict';
   const V = root.TCV || (typeof require !== 'undefined' ? require('./views.js') : null);
-  const C = root.TCC || (typeof require !== 'undefined' ? require('./viewcolour.js') : null);
+  const C = root.TCVC || (typeof require !== 'undefined' ? require('./viewcolour.js') : null);
   const LG = root.TC || (typeof require !== 'undefined' ? require('./logic.js') : null);
 
   const clean = s => String(s == null ? '' : s).replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim();
@@ -8235,7 +8235,7 @@ function slvTip(html, at) {
  * THE LIST. A name picked in the cloud lists its people, oldest first; each is a button that puts them on the canvas (if they are not there) and selects them; "Put these on the canvas" brings a small family across at once.
  * THE TABLE is the same facts as text (surname, people, where born, earliest and latest birth, spellings), reachable with "Show as: Table".
  * Whole file by default; "Ancestors of" the selected person, with 4, 6, 8 or all generations, narrows it. A living person counts toward their surname and shows no place or year. */
-const TCS = window.TCS, TCC = window.TCC;
+const TCS = window.TCS, TCVC = window.TCVC;
 const SNV = { id: 'surnames', field: 'xs', title: 'Surnames', sub: 'The surnames in the file, sized by the number of people, coloured by where they were born', c: 'place', gens: null, scope: 'file', view: 'cloud', root: null, sn: null, cty: null, kb: null, reveal: false, D: null, set: new Set() };
 const SN_CAP = 160, SN_TABLE_CAP = 600;
 const snGiven = p => (p.given || p.sur || p.name || '').split(' ')[0];
@@ -8267,13 +8267,13 @@ function snLegend(D, pc, bs) {
   if (SNV.c === 'place') {
     let h = '<span class="slvlgt">Where born (most common place of birth for each name; the bar under a name shows the mix):</span>';
     pc.legend.forEach(l => { h += btn(l.code, slvSwatch(l.col), esc(l.code), l.n, l.name + ': ' + l.n + (l.n === 1 ? ' person' : ' people') + '. Press to show only the names with someone born here'); });
-    if (pc.other.n) h += btn('~other', slvSwatch(TCC.OTHER), 'other', pc.other.n, 'Other countries: ' + pc.other.codes.map(TCS.regionName).join(', '));
+    if (pc.other.n) h += btn('~other', slvSwatch(TCVC.OTHER), 'other', pc.other.n, 'Other countries: ' + pc.other.codes.map(TCS.regionName).join(', '));
     if (pc.none) h += btn('~none', slvSwatch('none'), 'no place shown', pc.none, 'People with no birthplace recorded, and anyone who may be living (their place is never shown)');
     return h;
   }
   const what = SNV.c === 'back' ? 'How far back (the earliest birth year of anyone with the name; the bar under a name is its band):' : 'When (the middle birth year of the people with the name; the bar under a name is its band):';
   let h = `<span class="slvlgt">${what}</span>`;
-  bs.forEach((b, k) => { const n = D.list.filter(g => TCC.bandOf(bs, TCS.orderValue(g, SNV.c)) === k).length; h += `<span class="sllg" title="${n} names"><i class="slsw" style="background:${b.col}"></i><span>${esc(b.label)}</span><b>${n}</b></span>`; });
+  bs.forEach((b, k) => { const n = D.list.filter(g => TCVC.bandOf(bs, TCS.orderValue(g, SNV.c)) === k).length; h += `<span class="sllg" title="${n} names"><i class="slsw" style="background:${b.col}"></i><span>${esc(b.label)}</span><b>${n}</b></span>`; });
   const nn = D.list.filter(g => TCS.orderValue(g, SNV.c) == null).length;
   if (nn) h += `<span class="sllg" title="${nn} names with no birth year known"><i class="slsw hatch"></i><span>no year known</span><b>${nn}</b></span>`;
   return h;
@@ -8433,12 +8433,12 @@ LFV.render = () => {
   if (byDir) {
     const cnt = k => rows.filter(r => r.kind === k).length, step = k => [1, 3, 5].map(g => `<i class="slsw" style="background:${TCLF.dirFill({ kind: k, gen: k === 'anc' ? -g : g }, tk.card)}"></i>`).join('');
     legend = '<span class="slvlgt">Colour is direction; paler is further from the selected person:</span>'
-      + `<span class="sllg"><i class="slsw" style="background:${TCC.DIR.self}"></i><span>selected</span><b>${cnt('self')}</b></span>` + (cnt('spouse') ? `<span class="sllg"><i class="slsw" style="background:${TCC.DIR.spouse}"></i><span>spouse</span><b>${cnt('spouse')}</b></span>` : '')
+      + `<span class="sllg"><i class="slsw" style="background:${TCVC.DIR.self}"></i><span>selected</span><b>${cnt('self')}</b></span>` + (cnt('spouse') ? `<span class="sllg"><i class="slsw" style="background:${TCVC.DIR.spouse}"></i><span>spouse</span><b>${cnt('spouse')}</b></span>` : '')
       + (cnt('anc') ? `<span class="sllg">${step('anc')}<span>ancestors</span><b>${cnt('anc')}</b></span>` : '') + (cnt('desc') ? `<span class="sllg">${step('desc')}<span>descendants</span><b>${cnt('desc')}</b></span>` : '');
   } else {
     legend = '<span class="slvlgt">' + (LFV.scope === 'canvas' ? 'Country of birth (direction needs a selected person; this is the people on the canvas):' : 'Country of birth:') + '</span>'
       + pc.top.map(c => `<span class="sllg" title="${esc(TCS.regionName(c))}: ${pc.counts.get(c)}">${slvSwatch(pc.colour(c))}<span>${esc(c)}</span><b>${pc.counts.get(c)}</b></span>`).join('')
-      + (pc.rest ? `<span class="sllg">${slvSwatch(TCC.OTHER)}<span>other</span><b>${pc.rest}</b></span>` : '') + (pc.none ? `<span class="sllg" title="No birthplace recorded, or may be living (a place is never shown for them)">${slvSwatch('none')}<span>no place shown</span><b>${pc.none}</b></span>` : '');
+      + (pc.rest ? `<span class="sllg">${slvSwatch(TCVC.OTHER)}<span>other</span><b>${pc.rest}</b></span>` : '') + (pc.none ? `<span class="sllg" title="No birthplace recorded, or may be living (a place is never shown for them)">${slvSwatch('none')}<span>no place shown</span><b>${pc.none}</b></span>` : '');
   }
 
   let body;

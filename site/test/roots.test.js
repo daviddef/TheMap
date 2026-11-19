@@ -587,3 +587,29 @@ test("a person under an Unknown parent is in the main tree (not an orphan), and 
   for (const n of [["Unknown", "Grach"], ["Unknown", ""], ["Grah's for Investigation (not real)", ""], ["", ""]]) assert.ok(isPlaceholderName("", ...n), JSON.stringify(n) + " is a placeholder");
   for (const n of [["Maria", "Krosnjak"], ["Antonius", "Grah"]]) assert.ok(!isPlaceholderName("", ...n), JSON.stringify(n) + " is a person");
 });
+
+test("a family that hangs off an Unknown placeholder is counted in its whole group, and nobody under one is a dead end", need, async () => {
+  /* The drawn links stop at anyone with no year or no place. A person whose own place was borrowed from a relative cannot lend it to their parent (only a place the file
+     states is borrowed), so an «Unknown» parent below the dated tree stays undrawn, the links to it were cleared, and the Orphans tab called everyone below it a detached
+     family and a dead end. The groups are counted on the whole file now: gi is the group, cg its size, up is 1 where a parent is in the file but not drawn. */
+  const { Session } = await import(R + "js/pipeline.js");
+  const ind = (id, name, sex, y, place) => `0 @${id}@ INDI\n1 NAME ${name}\n1 SEX ${sex}\n` + (y ? `1 BIRT\n2 DATE ${y}\n` + (place ? "2 PLAC Kimberley, South Africa\n" : "") + `1 DEAT\n2 DATE ${y + 60}\n` : "");
+  const fam = (id, h, w, ...c) => `0 @${id}@ FAM\n` + (h ? `1 HUSB @${h}@\n` : "") + (w ? `1 WIFE @${w}@\n` : "") + c.map(x => `1 CHIL @${x}@\n`).join("");
+  let g = "0 HEAD\n1 CHAR UTF-8\n";
+  for (let k = 1; k <= 21; k++) g += ind("M" + k, `Main${k} /Chain/`, "M", 1700 + 8 * k, true);       // a main tree of 21, a father-to-son chain
+  for (let k = 1; k < 21; k++) g += fam("FM" + k, "M" + k, null, "M" + (k + 1));
+  g += ind("U0", "Unknown /Chain/", "M") + ind("U1", "Unknown /Chain/", "M");                        // two placeholders: no year, no place
+  g += ind("C1", "Child /Chain/", "M", 1850, false) + ind("D1", "Grandchild /Chain/", "M", 1880, true);   // C1 has a year but no place of their own
+  g += fam("FU0", "M1", null, "U0") + fam("FU1", "U0", null, "U1") + fam("FU2", "U1", null, "C1") + fam("FC1", "C1", null, "D1");
+  g += ind("E1", "Alone /Pair/", "M", 1800, true) + ind("E2", "Alone /Pair/", "F", 1802, true) + fam("FE", "E1", "E2");   // two people with nothing to do with the rest
+  g += "0 TRLR\n";
+  const out = await new Session(io).load(enc(g));
+  const by = Object.fromEntries(out.tree.people.map(p => [p.id, p]));
+  assert.ok(!by.U1, "the placeholder with nothing to borrow a place from is not drawn");
+  assert.ok(by.C1 && by.D1, "the child and grandchild are drawn");
+  assert.equal(by.C1.father, null, "so the drawn link from the child to it is cleared");
+  for (const id of ["C1", "D1"]) assert.ok(by[id].cg >= 24, id + " is in a group of at least 24 (the main tree and the placeholders), not the 2 that are drawn");
+  assert.equal(by.C1.gi, by.M1.gi, "the child below the placeholder is in the main tree's group");
+  assert.equal(by.C1.up, 1, "a parent is in the file but not drawn"); assert.equal(by.D1.up, 0, "the grandchild's parent is drawn"); assert.equal(by.M1.up, 0);
+  assert.equal(by.E1.cg, 2); assert.equal(by.E1.gi, by.E2.gi); assert.notEqual(by.E1.gi, by.M1.gi, "a family with no link to the rest is still its own, small group");
+});

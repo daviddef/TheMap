@@ -124,3 +124,12 @@ test("the Fix list's colours are the canvas's own for each look, and its fonts a
   assert.match(page, /font-src 'self';/);
   assert.doesNotMatch(page, /font-src[^;]*(https?:|\*)/);
 });
+
+test("Settings: the Layout tiles at the top map to real looks and wire to the one write path", () => {
+  const tiles = [...page.matchAll(/data-sglook="([a-z]+)"/g)].map(m => m[1]);
+  assert.deepEqual(tiles, ["tree", "lanes", "countries", "names"]);
+  for (const t of tiles.filter(x => x !== "tree")) assert.ok(ST.LOOKS.includes(t), t + " is a look the settings know");
+  assert.ok(page.indexOf('id="sgLayT"') < page.indexOf('id="sgLivT"'), "the Layout section comes first");
+  assert.match(app, /document\.querySelectorAll\('#sg \.sglk'\)[\s\S]*lookSet\(look\)/, "a tile uses lookSet, like the Look button");
+  assert.match(page, /<button type="button" class="sglk"[^>]*aria-pressed="false"/, "tiles are plain pressed-state buttons");
+});

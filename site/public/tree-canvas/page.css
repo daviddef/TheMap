@@ -202,6 +202,13 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 #sg .stsub { font-size: 13px; line-height: 1.45; color: var(--soft); }
 .sgsec { display: grid; gap: 8px; align-content: start; padding-top: 16px; border-top: 2px dotted var(--line); }
 .sgsec:first-of-type { border-top: 0; padding-top: 0; }
+.sglks { display: grid; grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: 10px; }
+.sglk { display: grid; justify-items: center; gap: 6px; padding: 10px 6px 8px; border-radius: 16px; border: 2px solid var(--line); background: var(--card); color: var(--ink); box-shadow: 0 3px 0 var(--line); font: 700 13px/1.1 system-ui, sans-serif; cursor: pointer; }
+.sglk svg { width: 100%; max-width: 64px; height: auto; fill: currentColor; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
+.sglk:hover { border-color: var(--accent); }
+.sglk:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.sglk[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); box-shadow: 0 3px 0 var(--accent); }
+.sglk:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
 .sgsw { display: flex; gap: 12px; align-items: flex-start; cursor: pointer; }
 .sgsw input { margin: 3px 0 0; flex: none; width: 18px; height: 18px; accent-color: var(--accent); }
 .sgsw b { display: block; font: 700 15px/1.3 system-ui, sans-serif; }

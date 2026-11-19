@@ -87,7 +87,9 @@ test("the canvas template has one Appearance button (View and Look together) and
   assert.match(template, /id = 'lensMenu'|id="lensMenu"/, "one menu holds both sections");
   assert.match(template, /aria-label="Look" class="lkgrid"/, "the Look section has its four chips");
   assert.match(template, /Appearance\. View: /, "the button's name says the View and the Look now worn");
-  assert.match(template, /const lensAvail = \(\) => \(!EMBED \|\| SA\)/, "shown on the standalone file and on the Atlas page (?sa), as the View button always was");
+  assert.match(template, /const lookAvail = \(\) => !EMBED \|\| SA;/, "shown on the standalone file and on the Atlas page (?sa), as the Look and View buttons were");
+  assert.match(template, /const lensAvail = \(\) => lookAvail\(\) && !S\.pr;/, "the button stays in Compare; only the View choices wait");
+  assert.match(template, /Compare is laying the people out, so the views wait\. Stop comparing to choose one\./, "in Compare the View items say why they are disabled");
   assert.match(template, /postMessage\(\{ tcLookSet: k \}/, "a chip asks the page around the canvas, which keeps the Look, as the old button did");
   assert.match(template, /set\('#bMore',\s*'more'\)/, "the phone-width More button no longer wears a gear that looks like a sun");
 });

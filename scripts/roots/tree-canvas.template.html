@@ -7692,7 +7692,8 @@ $('#info').addEventListener('change', e => { const pk = e.target.closest && e.ta
  * A person who may be living is shown by name and family only, here as everywhere. Nothing here is stored or sent. */
 const TCV = window.TCV;
 const LV = { m: 'canvas', o: 'sp', g: TCV.FAN_DEFAULT, c: 'side', t: 2, root: null, cv: null, list: false, stack: [], kb: null, bucket: -99, came: false, side: null, tf: null, hov: null, flagCache: new Map(), model: null };
-const lensAvail = () => (!EMBED || SA) && !S.pr;
+const lookAvail = () => !EMBED || SA;   /* the Appearance button (the Look chips) stays while a comparison is on; only the View choices wait for it */
+const lensAvail = () => lookAvail() && !S.pr;
 const fanIsOn = () => LV.m === 'fan';
 /* the other Views (skyui.js, placelanesui.js) register here: id -> { title, sub, open(key, opts), close(), onSelect(), onTheme() }. They are drawn over the canvas, which keeps its cards, pan, zoom and selection. */
 const VIEWX = {};
@@ -7727,7 +7728,7 @@ const LOOK_SUB = { auto: 'light by day, dark at night', sticker: 'light', paper:
 function lensViewName() { return fanIsOn() ? 'Fan' : slvOn() ? slvName() : typeof gvName === 'function' && gvName() || (xOn() ? xOn().title : 'Canvas'); }
 function lensWire() {
   const b = $('#bLens'); if (!b) return;
-  if (!lensAvail()) { b.hidden = true; return; }
+  if (!lookAvail()) { b.hidden = true; return; }
   b.hidden = false; lensBtn();
   const m = document.createElement('div'); m.id = 'lensMenu'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', 'Appearance: View and Look'); document.body.appendChild(m);
   b.onclick = () => openLensMenu();
@@ -7758,7 +7759,7 @@ function lensBtn() {
 function lensMenu() {
   const m = $('#lensMenu'); if (!m) return;
   const was = document.activeElement, wk = was && m.contains(was) ? (was.dataset.lv || was.dataset.lk || '') : '', st = m.scrollTop;
-  const item = (k, t, sub, on, dis) => `<button type="button" role="menuitemradio" class="lvi${on ? ' on' : ''}" data-lv="${k}" aria-checked="${on}"${dis ? ' disabled' : ''}><span class="lvd" aria-hidden="true"></span><span><b>${t}</b><small>${sub}</small></span></button>`;
+  const item = (k, t, sub, on, dis) => `<button type="button" role="menuitemradio" class="lvi${on ? ' on' : ''}" data-lv="${k}" aria-checked="${on}"${dis || S.pr ? ' disabled' : ''}><span class="lvd" aria-hidden="true"></span><span><b>${t}</b><small>${sub}</small></span></button>`;
   const cur = lookChosen(), swatch = k => k === 'auto' ? '<span class="lks lksa" aria-hidden="true"><i data-theme="sticker"></i><i data-theme="ground"></i></span>' : `<span class="lks" data-theme="${k}" aria-hidden="true"></span>`;
   const look = k => `<button type="button" role="menuitemradio" class="lki${cur === k ? ' on' : ''}" data-lk="${k}" aria-checked="${cur === k}" title="${LOOK_SHORT[k]}: ${LOOK_SUB[k]}">${swatch(k)}<b>${LOOK_SHORT[k]}</b></button>`;
   /* LOOK first, because it is short and then always in view; the long View list scrolls under it */
@@ -7766,6 +7767,7 @@ function lensMenu() {
     + `<div role="menu" aria-label="Look" class="lkgrid">` + LOOK_CYCLE.map(look).join('') + `</div>`
     + (LOOK_CYCLE.includes(cur) ? '' : `<p class="plines lkon"><small>${LOOK_SHORT[cur]} is on now; pick a look to leave it.</small></p>`)
     + `<h4 class="lvh2">View <small>how the people are drawn</small></h4>`
+    + (S.pr ? `<p class="plines lkon"><small>Compare is laying the people out, so the views wait. Stop comparing to choose one.</small></p>` : '')
     + `<div role="menu" aria-label="View">`
     + item('canvas', 'Canvas', 'Free: the cards sit where you put them', LV.m === 'canvas')
     + item('fan', 'Fan', 'The ancestors of the selected person as a half circle, a ring a generation', fanIsOn())
@@ -8229,7 +8231,7 @@ const slvView = () => (SLV.m ? SLV.views[SLV.m] : null);
 function slvMenuItems() {
   return Object.values(SLV.views).map(v => {
     const on = SLV.m === v.id;
-    return `<button type="button" role="menuitemradio" class="lvi${on ? ' on' : ''}" data-lv="${v.id}" aria-checked="${on}"><span class="lvd" aria-hidden="true"></span><span><b>${esc(v.title)}</b><small>${esc(v.sub)}</small></span></button>`;
+    return `<button type="button" role="menuitemradio" class="lvi${on ? ' on' : ''}" data-lv="${v.id}" aria-checked="${on}"${S.pr ? ' disabled' : ''}><span class="lvd" aria-hidden="true"></span><span><b>${esc(v.title)}</b><small>${esc(v.sub)}</small></span></button>`;
   }).join('');
 }
 const slvName = () => (slvView() ? slvView().title : '');

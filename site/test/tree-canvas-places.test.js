@@ -174,9 +174,9 @@ test("the page: People and Places are tabs of the Fix list (ARIA tablist), the P
   assert.match(html, /value="enriched" checked/); assert.match(html, /value="shareable"/); assert.match(html, /value="faithful"/);
 });
 
-test("Roots & Routes keeps working: its Places to review tab and its session-only picks are untouched", () => {
+test("Roots & Routes no longer has a Places to review tab (removed 19 Nov 2026); the reader still knows a pick, and no page offers one", () => {
   const rr = read("public/roots/js/app.js"), w = read("public/roots/js/worker.js"), pl = read("public/roots/js/pipeline.js");
-  assert.match(rr, /function drawReview\(items, q\)/); assert.match(rr, /worker\.postMessage\(\{ cmd: 'pick', raw, cand \}\)/);
+  assert.doesNotMatch(rr, /function drawReview\(items, q\)/); assert.doesNotMatch(rr, /cmd: 'pick'/);
   assert.match(w, /m\.cmd === 'pick' && session/); assert.match(w, /session\.pick\(m\.raw, m\.cand\)/); assert.match(pl, /cleaned: \{ coords: true, apply: true \}/);   // the session still knows the mode; no page offers it
 });
 

@@ -244,9 +244,9 @@ const BASE_ = u("/");
 
   <div class="rs-panel mr-panel" id="mr-p-fixes" role="tabpanel" aria-labelledby="mr-t-fixes" hidden>
     <h2 class="mr-h">GEDCOM research still to fix</h2>
-    <p class="cap">What the fix list in <a href={BASE_ + "roots/"}>Roots &amp; Routes</a> found in your family tree file, kept here so the work is part of your research.
-    It is kept automatically each time you open a tree in Roots &amp; Routes (switch <b>Remember my decisions on this device</b> off on the Fix list to stop). Places are listed as typed in your file; people are only counted,
-    and nothing leaves this browser. Open the file in Roots &amp; Routes to see who.</p>
+    <p class="cap">What the fix list in the <a href={BASE_ + "tree-canvas/"}>Tree Canvas</a> found in your family tree file, kept here so the work is part of your research.
+    It is kept automatically each time you open a tree in the Tree Canvas and its Fix list (switch <b>Remember my decisions on this device</b> off on the Fix list to stop). Places are listed as typed in your file; people are only counted,
+    and nothing leaves this browser. Open the file in the Tree Canvas to see who.</p>
     <div id="mr-fixes"></div>
   </div>
 
@@ -364,8 +364,8 @@ const BASE_ = u("/");
         names.forEach(function (n) { (d.trees[n].sections || []).forEach(function (s) { open += Math.max(0, s.total - s.done - s.asis); }); });
         var badge = document.getElementById("mr-n-fixes"); if (badge) { badge.hidden = !open; badge.textContent = open; }
         if (!names.length) {
-          var e = el("div", null, "mr-fx-empty"); e.append(el("p", "No fix list is kept here yet."), el("p", "Open your tree in Roots & Routes once and go to its Fix list. What is left to fix is kept here from then on, and ticks you make there are counted. If you had switched \u201cRemember my decisions on this device\u201d off, switch it back on.", "cap"));
-          var a = el("a", "Open Roots & Routes", "mr-fx-go"); a.href = BASE + "roots/"; e.append(a); box.append(e); return;
+          var e = el("div", null, "mr-fx-empty"); e.append(el("p", "No fix list is kept here yet."), el("p", "Open your tree in the Tree Canvas once and go to its Fix list. What is left to fix is kept here from then on, and ticks you make there are counted. If you had switched \u201cRemember my decisions on this device\u201d off, switch it back on.", "cap"));
+          var a = el("a", "Open the Tree Canvas", "mr-fx-go"); a.href = BASE + "tree-canvas/"; e.append(a); box.append(e); return;
         }
         names.forEach(function (n) {
           var t = d.trees[n], card = el("article", null, "mr-fx"), head = el("header", null, "mr-fx-head");
@@ -385,9 +385,9 @@ const BASE_ = u("/");
           if (pl.length) {
             var det = el("details", null, "mr-fx-places"), sm = el("summary"); sm.append(el("b", "Places to correct or choose "), el("span", "(" + pl.length + (pl.length >= 150 ? "+" : "") + ")", "muted")); det.append(sm);
             var ul = el("ul"); pl.slice(0, 60).forEach(function (p) { var li = el("li"); li.append(el("span", p.t, "mr-fx-raw")); if (p.to) li.append(" \u2192 ", el("b", p.to)); ul.append(li); });
-            det.append(ul); if (pl.length > 60) det.append(el("p", "and " + (pl.length - 60) + " more in Roots & Routes", "cap")); card.append(det);
+            det.append(ul); if (pl.length > 60) det.append(el("p", "and " + (pl.length - 60) + " more in the Tree Canvas", "cap")); card.append(det);
           }
-          var foot = el("p", null, "mr-fx-foot"), go = el("a", "Open Roots & Routes"); go.href = BASE + "roots/"; foot.append(go, " and load this file again to work down the list. ");
+          var foot = el("p", null, "mr-fx-foot"), go = el("a", "Open the Tree Canvas"); go.href = BASE + "tree-canvas/"; foot.append(go, " and load this file again to work down the list. ");
           var fg = el("button", "Forget this list"); fg.type = "button"; fg.className = "link"; fg.onclick = function () { var x = read(); delete x.trees[n]; try { if (Object.keys(x.trees).length) localStorage.setItem(FKEY, JSON.stringify(x)); else localStorage.removeItem(FKEY); } catch (e) { /* blocked */ } draw(); };
           foot.append(fg); card.append(foot); box.append(card);
         });

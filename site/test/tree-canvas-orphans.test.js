@@ -274,9 +274,9 @@ test("the explanation: orphan, detached family, dead end and not drawn yet, in p
   assert.match(v, /aria-expanded/); assert.match(v, /aria-controls/);
 });
 
-test("Roots & Routes is untouched: its Orphans tab, its viewer view and the shared strip rules still work", () => {
-  const rr = read("public/roots/js/app.js"), tpl = TPL;
-  assert.match(rr, /data-tab=orphans/); assert.match(rr, /viewerView\(name === 'orphans'/); assert.match(tpl, /function renderOrphans\(\)/); assert.match(tpl, /data-view="orphans"/);
+test("Roots & Routes has no Orphans tab now (removed 19 Nov 2026); the viewer's own view, the shared strip rules and the Fix list's overlap still work", () => {
+  const rr = read("public/roots/js/app.js"), tpl = read("../scripts/roots/tree-views.template.html");
+  assert.doesNotMatch(rr, /data-tab=orphans|viewerView\(/); assert.match(tpl, /function renderOrphans\(\)/); assert.match(tpl, /data-view="orphans"/);
   assert.match(read("public/roots/js/metrics.js"), /export function treeMetrics/);
   /* the People list's two sections the Orphans tab overlaps are still there, unchanged */
   const cl = read("public/roots/js/checklist.js"); assert.match(cl, /key: 'apart', title: 'Groups not joined to the main tree'/); assert.match(cl, /key: 'dupes', title: 'Maybe the same person'/);

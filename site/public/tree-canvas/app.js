@@ -494,6 +494,7 @@ function drawSG(open) {
   const sel = $('#sgAnc'); if (open || sel !== document.activeElement) sel.value = L.ancSite;
   $('#sgAncSt').textContent = L.anc ? 'This file is an Ancestry export (tree ' + L.ancTree + '), so every person already links into it on ancestry.' + L.ancSite + '. Nothing is sent.' : 'Used for the “Open on Ancestry” links of an Ancestry export; not needed for other files.';
   const lk = $('#sgLook'); if (open || lk !== document.activeElement) lk.value = e.look;
+  drawLayoutTiles(e.look);
   $('#sgRem').checked = e.remember;
   const ok = storageOk() && !sgWriteFailed;
   $('#sgStore').textContent = ok ? '' : 'This browser is not letting the page keep settings, so your choices last until you close the page.';
@@ -534,6 +535,23 @@ function lookSet(look) {
   if (sgWriteFailed) { say('This browser is not letting the page keep the look, so it lasts until you close the page.'); setTimeout(() => say(''), 5000); }
   if (!$('#sg').hidden) drawSG();
 }
+/* the Layout tiles: Lanes, Countries and Names are looks of their own; Tree goes back to the last colour look worn (or Automatic) */
+const LAYOUTS = ['lanes', 'countries', 'names'];
+let lastColour = 'auto';
+function drawLayoutTiles(look) {
+  if (!LAYOUTS.includes(look)) lastColour = look;
+  document.querySelectorAll('#sg .sglk').forEach(b => {
+    const want = b.dataset.sglook, on = want === 'tree' ? !LAYOUTS.includes(look) : want === look;
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+}
+document.querySelectorAll('#sg .sglk').forEach(b => {
+  b.onclick = () => {
+    const want = b.dataset.sglook;
+    const look = want === 'tree' ? (LAYOUTS.includes(ST.effective().look) ? lastColour : ST.effective().look) : want;
+    lookSet(look);
+  };
+});
 $('#sgLook').onchange = e => {
   sgWriteFailed = !ST.write({ look: e.target.value }).ok;
   wearLook(e.target.value);

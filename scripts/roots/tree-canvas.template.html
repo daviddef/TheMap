@@ -1084,6 +1084,7 @@ html{--tr-soft:color-mix(in srgb,var(--lk-ink) 86%,var(--lk-card))}   /* the kit
 #lensMenu.on{display:block}
 #lensMenu h4{margin:0 0 4px}#lensMenu h4 small{font:700 12px Nunito,system-ui;color:var(--tr-soft);margin-left:6px}
 #lensMenu .lkon{margin:6px 0 0}
+#lensMenu .lvstop{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:6px 0 10px}#lensMenu .lvstop small{flex:1 1 12em;font-weight:700}
 #lensMenu h4.lvh2{margin-top:14px;padding-top:12px;border-top:2px solid var(--lk-line)}
 html:not(.ph):has(#info.on) #lensMenu{right:352px;width:min(340px,calc(100vw - 376px))}   /* the side panel stays clear: the menu opens to its left */
 .lvi{all:unset;box-sizing:border-box;display:flex;gap:10px;align-items:flex-start;width:100%;min-height:44px;margin:6px 0;padding:8px 10px;border:2px solid var(--lk-line);border-radius:12px;cursor:pointer;color:var(--lk-ink)}
@@ -7733,6 +7734,7 @@ function lensWire() {
   const m = document.createElement('div'); m.id = 'lensMenu'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', 'Appearance: View and Look'); document.body.appendChild(m);
   b.onclick = () => openLensMenu();
   m.addEventListener('click', e => {
+    if (e.target.closest('[data-cmp-off]')) { openLensMenu(false); cmpAsk(null); return; }   // the views wait while Compare lays the people out: one button here ends Compare, rather than a hunt for the Compare tab
     const lk = e.target.closest('[data-lk]'); if (lk) { lookSet(lk.dataset.lk); return; }   // the menu stays open: the Look can be seen at once, and the View chosen next
     const t = e.target.closest('[data-lv]'); if (!t || t.disabled) return;
     if (t.dataset.lv === 'trail') { lensTrailSize(LV.t ? 0 : 2); lensMenu(); return; }
@@ -7767,7 +7769,7 @@ function lensMenu() {
     + `<div role="menu" aria-label="Look" class="lkgrid">` + LOOK_CYCLE.map(look).join('') + `</div>`
     + (LOOK_CYCLE.includes(cur) ? '' : `<p class="plines lkon"><small>${LOOK_SHORT[cur]} is on now; pick a look to leave it.</small></p>`)
     + `<h4 class="lvh2">View <small>how the people are drawn</small></h4>`
-    + (S.pr ? `<p class="plines lkon"><small>Compare is laying the people out, so the views wait. Stop comparing to choose one.</small></p>` : '')
+    + (S.pr ? `<div class="lkon lvstop"><small>Compare is laying the people out, so the views wait.</small><button type="button" class="lk-btn is-small is-primary" data-cmp-off="1">Stop comparing</button></div>` : '')
     + `<div role="menu" aria-label="View">`
     + item('canvas', 'Canvas', 'Free: the cards sit where you put them', LV.m === 'canvas')
     + item('fan', 'Fan', 'The ancestors of the selected person as a half circle, a ring a generation', fanIsOn())

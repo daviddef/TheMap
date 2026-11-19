@@ -54,3 +54,10 @@ test("the canvas carries the View button, the Trail band and the Fan, and keeps 
   assert.match(TPL, /class="trtab"[^>]*aria-expanded="false"/);
   assert.doesNotMatch(TPL, /fetch\([^)]*trail/i, "no network from the band");
 });
+
+test("while Compare lays the people out, the View menu offers one Stop comparing button instead of dead rows and a hunt for the Compare tab", () => {
+  const menu = /function lensMenu\(\)[\s\S]*?\n}\n/.exec(TPL)[0];
+  assert.match(menu, /S\.pr \? `<div class="lkon lvstop">[^`]*data-cmp-off="1"[^`]*Stop comparing/, "the button sits in the View section, only while comparing");
+  const wire = /m\.addEventListener\('click', e => \{[\s\S]{0,400}/.exec(TPL)[0];
+  assert.match(wire, /data-cmp-off[\s\S]*cmpAsk\(null\)/, "the menu's own click handler ends Compare (the right pane's handler does not cover the menu)");
+});

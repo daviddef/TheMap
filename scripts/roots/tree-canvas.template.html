@@ -535,6 +535,8 @@ ul.srx small{flex-basis:100%;font-weight:600;color:var(--lk-soft)}
 /* lines between cards were too faint: heavier strokes, tighter dashes, full opacity */
 .ev-def{stroke-width:5}.ev-sup{stroke-width:4}.ev-np{stroke-width:4;stroke-dasharray:10 6}.ev-ug{stroke-width:4.5;stroke-dasharray:.5 6.5}
 #edges path.ev-def,#edges path.ev-sup,#edges path.ev-np,#edges path.ev-ug{opacity:1}
+/* not-graded links: real round dots. The generic "#edges path{stroke-linecap:butt}" outranks .ev-ug, so the dots were drawn as hairline ticks 0.5px long; an ID selector here wins, and the dots are fatter and further apart so they read as dots */
+#edges path.ev-ug{stroke-linecap:round;stroke-width:6;stroke-dasharray:1 12}
 #edges path.ev-def.dimmed,#edges path.ev-sup.dimmed,#edges path.ev-np.dimmed,#edges path.ev-ug.dimmed{opacity:.4}
 
 /* the marked person: a star on the card, and a bar that says how the selected person is related to them */

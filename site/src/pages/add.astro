@@ -126,6 +126,55 @@ const iss = site.repo + "/issues/new";
     </script>
   )}
 
+  {site.contact && site.contact.email && (
+    <div class="one addform" style="margin:22px 0 0;border-left-color:var(--accent)">
+      <div class="lab">Several at once</div>
+      <p class="addlead">Have a list, or an AI assistant that has made one? Paste it here as
+      blocks of <code>Name:</code>, <code>Web address:</code>, <code>Country:</code>,
+      <code>What it holds:</code>, <code>What it costs to look:</code> and <code>Notes:</code>,
+      a blank line between sources. This makes <b>one</b> message. As with the form above,
+      nothing is sent from this page. An assistant can read the exact format at
+      <a href={u("/add-sources.txt")}>add-sources.txt</a>.</p>
+      <div class="addgrid">
+        <label class="addwide">Your list
+          <textarea id="bf-text" rows="8" placeholder={"Name: Portsmouth History Centre\nWeb address: https://…\nCountry: United Kingdom\nWhat it holds: …\n\nName: Vestfold-slekt\n…"}></textarea></label>
+      </div>
+      <p class="addbtns">
+        <a id="bf-send" href="#">Open this in my mail app</a>
+        <button type="button" id="bf-copy">Copy the message</button>
+        <span id="bf-said" role="status" aria-live="polite"></span>
+      </p>
+    </div>
+  )}
+
+  {site.contact && site.contact.email && (
+    <script is:inline define:vars={{ TO: site.contact.email }}>
+      (function () {
+        /* The same rule as the form above: no server, nothing sent from here. A long list does not always survive a mailto: link (mail apps and
+           browsers cut them), so a long one says to copy instead of quietly losing its end. */
+        var box = document.getElementById("bf-text"), send = document.getElementById("bf-send"), said = document.getElementById("bf-said");
+        if (!box || !send) return;
+        function count(t) { var m = t.match(/^\s*name\s*:/gim); return m ? m.length : 0; }
+        function subject(t) { var n = count(t); return "Record Atlas - " + (n || "a list of") + (n === 1 ? " source" : " sources"); }
+        function refresh() {
+          var t = box.value.trim();
+          send.href = "mailto:" + TO + "?subject=" + encodeURIComponent(subject(t)) + "&body=" + encodeURIComponent(t ? t + "\n\nSent from the Add a source page on Record Atlas." : "");
+          send.setAttribute("aria-disabled", t ? "false" : "true");
+          said.textContent = t && send.href.length > 1800 ? "This is long: use \u201cCopy the message\u201d and paste it into an email, in case your mail app cuts it." : "";
+        }
+        box.addEventListener("input", refresh); refresh();
+        send.addEventListener("click", function (e) { if (!box.value.trim()) { e.preventDefault(); said.textContent = "Paste your list first."; } });
+        document.getElementById("bf-copy").addEventListener("click", function () {
+          var t = box.value.trim(); if (!t) { said.textContent = "Paste your list first."; return; }
+          var text = "To: " + TO + "\nSubject: " + subject(t) + "\n\n" + t;
+          function ok() { said.textContent = "Copied \u2014 paste it into any email."; }
+          if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok, function () { said.textContent = TO; });
+          else said.textContent = TO;
+        });
+      })();
+    </script>
+  )}
+
   <div class="ways">
     <a class="way" href={`${iss}?template=add-source.yml`}>
       <div class="lab">Most useful</div>
@@ -193,21 +242,21 @@ const iss = site.repo + "/issues/new";
     outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-wash); }
   .addbtns { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px;
              margin: 22px 0 0; }
-  .addbtns #af-send, .addbtns #af-copy {
+  .addbtns #af-send, .addbtns #af-copy, .addbtns #bf-send, .addbtns #bf-copy {
     font-family: var(--sans); font-size: 13.5px; font-weight: 600; line-height: 1;
     padding: 11px 18px; border-radius: 999px; cursor: pointer; text-decoration: none; }
-  .addbtns #af-send { background: var(--accent); color: #fff; border: 1px solid var(--accent); }
-  .addbtns #af-send:hover { background: var(--accent-2); border-color: var(--accent-2); }
-  .addbtns #af-send[aria-disabled="true"] { opacity: .6; }
-  .addbtns #af-copy { background: transparent; color: var(--ink);
+  .addbtns #af-send, .addbtns #bf-send { background: var(--accent); color: #fff; border: 1px solid var(--accent); }
+  .addbtns #af-send:hover, .addbtns #bf-send:hover { background: var(--accent-2); border-color: var(--accent-2); }
+  .addbtns #af-send[aria-disabled="true"], .addbtns #bf-send[aria-disabled="true"] { opacity: .6; }
+  .addbtns #af-copy, .addbtns #bf-copy { background: transparent; color: var(--ink);
                       border: 1px solid var(--rule-strong); }
-  .addbtns #af-copy:hover { border-color: var(--accent); color: var(--accent); }
-  #af-said { font-family: var(--sans); font-size: 12.5px; color: var(--ink-3); }
+  .addbtns #af-copy:hover, .addbtns #bf-copy:hover { border-color: var(--accent); color: var(--accent); }
+  #af-said, #bf-said { font-family: var(--sans); font-size: 12.5px; color: var(--ink-3); }
   .addto { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--rule); }
   @media (max-width: 640px) {
     .addform { padding: 18px 16px 16px; }
     .addgrid { grid-template-columns: 1fr; }
-    .addbtns #af-send, .addbtns #af-copy { flex: 1 1 100%; text-align: center; padding: 13px 18px; }
+    .addbtns #af-send, .addbtns #af-copy, .addbtns #bf-send, .addbtns #bf-copy { flex: 1 1 100%; text-align: center; padding: 13px 18px; }
   }
   .ways { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
           gap: 14px; margin-top: 22px; }

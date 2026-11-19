@@ -32,11 +32,81 @@ const api = "https://api.recordatlas.org";
 const syncHost = "https://sync.recordatlas.org";
 const aiHost = "https://ai.recordatlas.org";
 const ver = (ctx.contract && ctx.contract.version) || "";
+
+/* THE FILE LIST ON THIS PAGE. One row per file somebody could want, grouped by the QUESTION they have, each with a command that
+   was run against the live site on 19 Nov 2026 and answered. Sizes are read from the shipped files at build time, never typed.
+   A file that is in the repository but has no address on recordatlas.org is in HELD_BACK, said plainly, with the address that does work. */
+const H = "https://recordatlas.org";
+const sz = (f) => { try { const n = fs.statSync(path.join(PUB, f)).size; return n >= 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB"; } catch { return ""; } };
+const nMort = (() => { try { return JSON.parse(fs.readFileSync(path.join(PUB, "mortality.json"), "utf8")).events.length; } catch { return 0; } })();
+const GROUPS = [
+  { id: "f-records", q: "Where can I look for records?", rows: [
+    { f: "providers.json", what: `WHO. One row per archive or website (${N(provs.providers.length)}): what it holds and what it costs to look. Start here for "which archives exist for Croatia, and which are free?".`,
+      cmd: `curl -s ${H}/providers.json | jq '.providers[] | select(.countries | index("HR")) | {name, access, url}'` },
+    { f: "p/senj.json", what: "WHAT, for one place. The collections (sets of records) and the individual books (volumes) that cover it, with years, cost and a link. One small file per place; the id is the end of the place page's address.",
+      cmd: `curl -s ${H}/p/senj.json | jq '.collections[] | {provider, title, from, to, access}'` },
+    { f: "coverage-by-country.json", what: "For each country: the years the books cover, and how many volumes and places. Where you could look, not where your family was.",
+      cmd: `curl -s ${H}/coverage-by-country.json | jq '.countries.HR | {from, to, volumes, places}'` },
+    { f: "provider-contacts.json", what: "Where to write to an archive that does not publish its images (only what Wikidata states). Keyed by the provider's Wikidata id.",
+      cmd: `curl -s ${H}/provider-contacts.json | jq '.counts'` },
+  ] },
+  { id: "f-eras", q: "Who governed this place, in which year?", rows: [
+    { f: "regions.json", what: "Record regions, each a table of eras: the polity that held the ground and the archives its paper went to. The part nobody else publishes.",
+      cmd: `curl -s ${H}/regions.json | jq '.regions[] | select(.id == "kvarner") | .eras[] | {from, to, polity, filedUnder}'` },
+    { f: "context.json", what: "The same eras with permanent ids, evidence and a list of gaps. Use this one if you are building something that must not break.",
+      cmd: `curl -s ${H}/context.json | jq '.contract'` },
+    { f: "flag-index.json", what: "Every country's flag page, with the region and the hub it is filed under. Era detail is in flag-eras.json and era-flags.json.",
+      cmd: `curl -s ${H}/flag-index.json | jq '.counts'` },
+    { f: "history.json", what: "Conquests, occupations, migrations, voyages and expeditions, each with dates, a start and an end point, and sources.",
+      cmd: `curl -s ${H}/history.json | jq '.moves | length'` },
+  ] },
+  { id: "f-names", q: "What else might this name be called?", rows: [
+    { f: "given-names.json", what: "Given names, every form in every language (Ivan, Johann, Giovanni, Zuane, Joannes). Each form says whether a record showed it, it is only a lead, or a grammar rule makes it.",
+      cmd: `curl -s ${H}/given-names.json | jq '.rows[] | select(.id == "giovanni") | {canon, forms, langs: (.langs | keys)}'` },
+    { f: "surname-families.json", what: "Surname spellings that are one family (Lerena, Llerena, Serena…), and the look-alikes that are NOT.",
+      cmd: `curl -s ${H}/surname-families.json | jq '.rows[] | select(.name == "Lerena") | .forms'` },
+    { f: "s/leh.json", what: "The big surname register, in small files named by the first three letters of a name: which countries have it, and which spellings are linked to it.",
+      cmd: `curl -s ${H}/s/leh.json | jq '.[] | select(.n == "Lehmann") | {n, variants: [.variants[].n]}'` },
+    { f: "surnames.csv.gz", what: "The whole surname register in one file, for a spreadsheet or a database. A JSON copy sits beside it (surnames.json.gz).",
+      cmd: `curl -O ${H}/surnames.csv.gz` },
+    { f: "API: given-name/Ivan", url: "https://api.recordatlas.org/v1/given-name/Ivan", what: "One given name answered directly, without downloading the file. Also register words (/v1/term) and old date styles (/v1/date).",
+      cmd: `curl -s https://api.recordatlas.org/v1/given-name/Ivan | jq '.matches[0]'` },
+  ] },
+  { id: "f-places", q: "What was this place called, and where is it?", rows: [
+    { f: "g/zag.json", what: "The place-name search: every other name a place is known by (Zagreb is also Agram and Zagabria). Small files named by the first three letters of a name.",
+      cmd: `curl -s ${H}/g/zag.json | jq '.[0] | {name: .[0], country: .[3], also: .[4]}'` },
+    { f: "index.json", what: "The map's list of places (id, name, position, how many books). The busiest places only; the rest are in the pi/ files and index-quiet.json.",
+      cmd: `curl -s ${H}/index.json | jq '.places[0:3]'` },
+  ] },
+  { id: "f-mass", q: "What wars, plagues and famines touched this place?", rows: [
+    { f: "mortality.json", what: `${nMort ? N(nMort) + " " : ""}mass-death events (epidemics, famines, wars, massacres, forced removals): the years, a map outline, the countries, the estimated deaths with the range scholars give, and the sources. The outline is a rough area, not a boundary.`,
+      cmd: `curl -s ${H}/mortality.json | jq '.events[] | select((.cc // []) | index("HR")) | {n, ty, f, t}'` },
+  ] },
+  { id: "f-points", q: "Which archives, churches, cemeteries and libraries are near here?", rows: [
+    { f: "world-archives.json", what: "Archives at their street address.", cmd: `curl -s ${H}/world-archives.json | jq 'keys'` },
+    { f: "archives-wikidata.json", what: "A wider set of archives from Wikidata. Not checked by hand.", cmd: `curl -s ${H}/archives-wikidata.json | jq 'keys'` },
+    { f: "archives-osm.json", what: "Archives from OpenStreetMap. Share-alike licence: see the licence list on the data page.", cmd: `curl -s ${H}/archives-osm.json | jq 'keys'` },
+    { f: "cemeteries-wikidata.json", what: "Cemeteries from Wikidata. A second set, from OpenStreetMap, is cemeteries-osm.json (share-alike).", cmd: `curl -s ${H}/cemeteries-wikidata.json | jq 'keys'` },
+    { f: "churches-wikidata.json", what: "Churches from Wikidata, useful for finding a parish.", cmd: `curl -s ${H}/churches-wikidata.json | jq 'keys'` },
+    { f: "libraries-wikidata.json", what: "Libraries from Wikidata.", cmd: `curl -s ${H}/libraries-wikidata.json | jq 'keys'` },
+  ] },
+  { id: "f-mine", q: "What have researchers already done?", rows: [
+    { f: "research-sessions.json", what: "The books and sources the family archives have searched and what they found: marks only, no names. Your own copy is a different thing: see door 2.",
+      cmd: `curl -s ${H}/research-sessions.json | jq '.archives | keys'` },
+  ] },
+];
+/* In the repository, not at a recordatlas.org address. The GitHub address works today. */
+const RAW = "https://raw.githubusercontent.com/daviddef/TheMap/main/data/";
+const HELD_BACK = [
+  { f: "collections.json", what: "3,504 FamilySearch record collections, each with its years and how many records and images it holds. Country-wide ones (the IGI, a whole country's church books) live only here." },
+  { f: "place-names.json", what: "What a place was called in a given year (Salisbury 1890–1982 is Harare). Dated, with the page that dates it." },
+  { f: "directory.json", what: "969 collections that people and archives contributed, one row per named collection at a named repository." },
+];
 ---
 <Base
   title="Connect to the Atlas"
   eyebrow="Read it · write your research to it · from a spreadsheet, a script, or an AI assistant"
-  dek="Four things you can do with the Atlas's data without opening the website, each as a short recipe you can try on this page. And the things that do not work yet, listed honestly.">
+  dek="Five things you can do with the Atlas's data without opening the website, each as a short recipe you can try on this page. And the things that do not work yet, listed honestly.">
 
   <div class="k-stats" id="cx-status" aria-live="polite">
     <span class="k-tag">Read API <b id="st-api">checking…</b></span>
@@ -59,7 +129,56 @@ const ver = (ctx.contract && ctx.contract.version) || "";
     <li><a href="#research"><b>2 · Keep my own research progress</b></a><span>Write "I searched this book, found it" from your own tool. Needs the six words.</span></li>
     <li><a href="#names"><b>3 · Use every spelling of a name</b></a><span>Ivan is Johann is Giovanni. Ask once, search them all.</span></li>
     <li><a href="#eras"><b>4 · Who governed this place in 1850?</b></a><span>Places, countries, flags and their eras, with the years, the polity and the archive that filed them.</span></li>
+    <li><a href="#files"><b>5 · Every file, with its curl</b></a><span>Names, places, wars and plagues, archives, cemeteries. One line each, and providers or collections explained.</span></li>
   </ul>
+
+  <h2 class="k-h" id="files">Every file, and the one line that fetches it <span class="k-count">no key, no login</span></h2>
+  <p class="k-lede">Everything the Atlas shows is a plain file with a web address. To use one, paste its line into a terminal (<code>curl</code> fetches the file;
+    <code>jq</code> picks out the part you want), or paste just the address into a browser. Each line below was run against the live site and answers.
+    A file's size is shown so you are not surprised.</p>
+
+  <div class="k-hi is-plain" id="which">
+    <p><b>Providers or collections?</b> They are two different things.</p>
+    <ul class="cx-simple">
+      <li><b><code>providers.json</code> is WHO.</b> An archive or website, such as FamilySearch or a state archive, with what it costs to look.</li>
+      <li><b>A collection is WHAT.</b> One set of records inside a provider, such as "Croatia, Catholic Church Books 1678–1941", with its years and size. Each row in a place file's <code>collections</code> names its provider by the id in <code>providers.json</code>.</li>
+      <li><b>So:</b> starting from a <i>place</i>? Read <code>/p/&lt;id&gt;.json</code>. Starting from an <i>archive</i> or a <i>cost</i>? Read <code>providers.json</code>. Want the country-wide FamilySearch collections? Read <code>collections.json</code> (below: it is on GitHub, not on this site).</li>
+    </ul>
+  </div>
+
+  {GROUPS.map((g) => (
+    <>
+      <h3 class="cx-h3" id={g.id}>{g.q}</h3>
+      <div class="scroll"><table class="cx-tbl cx-files">
+        <thead><tr><th>File</th><th>What it is</th><th>Fetch it</th></tr></thead>
+        <tbody>
+          {g.rows.map((r) => (
+            <tr>
+              <td><a href={r.url || (H + "/" + r.f)} rel="noopener"><code>{r.f}</code></a>{sz(r.f) && <><br /><span class="cx-hint">{sz(r.f)}</span></>}</td>
+              <td>{r.what}</td>
+              <td><pre class="cx-pre cx-cmd">{r.cmd}</pre></td>
+            </tr>
+          ))}
+        </tbody>
+      </table></div>
+    </>
+  ))}
+
+  <h3 class="cx-h3" id="f-held">In the repository, not on this site yet</h3>
+  <p class="k-lede">These exist, but have no recordatlas.org address. They are public on GitHub, and that address works now.</p>
+  <div class="scroll"><table class="cx-tbl cx-files">
+    <thead><tr><th>File</th><th>What it is</th><th>Fetch it</th></tr></thead>
+    <tbody>
+      {HELD_BACK.map((r) => (
+        <tr>
+          <td><a href={RAW + r.f} rel="noopener"><code>{r.f}</code></a></td>
+          <td>{r.what}</td>
+          <td><pre class="cx-pre cx-cmd">{`curl -s ${RAW}${r.f} | jq 'keys'`}</pre></td>
+        </tr>
+      ))}
+    </tbody>
+  </table></div>
+  <p class="cx-see"><b>Licences and the full list</b> (including the small per-place and per-name files): <a href={u("/data/")}>Use the data</a>. Files change shape when the site needs them to; read the field you need and ignore the rest.</p>
 
   <h2 class="k-h">The whole picture <span class="k-count">four services, one website built on them</span></h2>
   <figure class="cx-fig">
@@ -490,6 +609,9 @@ console.log(era.regime, era.polity, era.filedUnder);`}></pre></details>
 </script>
 
 <style is:global>
+  .cx-simple { margin: 6px 0 0; padding-left: 18px; } .cx-simple li { margin: 5px 0; }
+  .cx-files td:first-child { white-space: nowrap; } .cx-files td:nth-child(2) { min-width: 15em; }
+  .cx-files .cx-pre.cx-cmd { margin: 0; white-space: pre-wrap; word-break: break-all; font-size: 11.5px; min-width: 16em; }
   .cx-doors { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); max-width: 1000px; }
   .cx-doors a { display: block; font-family: var(--serif); font-size: 17px; line-height: 1.3; }
   .cx-doors li > span { display: block; margin-top: 6px; font-size: 13px; color: var(--ink-2); }

@@ -324,6 +324,41 @@ test("the Surnames and Lifespans views ride in `vw` too: m, plus the short setti
   assert.deepEqual(dec.w.vw, { m: "surnames", g: 5, c: "side", t: 2 });
 });
 
+test("the Generations and Household views ride in `vw` too: m gen or house, plus gu 1 to 5, gd 1 to 4 and hk 0, only when they differ from the start", async () => {
+  const src = { t: "link", ref: LINK }, mk = lens => W.makeRecord(src, W.linkLabel(LINK), { ...plain(), lens }, 1.7e12);
+  const base = { g: 5, c: "side", t: 2 };
+  const gn = mk({ m: "gen", ...base, gu: 5, gd: 4 }), hs = mk({ m: "house", ...base, hk: 0 });
+  assert.deepEqual(gn.w.vw, { m: "gen", ...base, gu: 5, gd: 4 });
+  assert.deepEqual(hs.w.vw, { m: "house", ...base, hk: 0 });
+  /* a mode alone is a choice worth keeping; the starting values (3 back, 2 forward, brothers and sisters on) are not written */
+  assert.deepEqual(mk({ m: "gen" }).w.vw, { m: "gen", ...base });
+  assert.deepEqual(mk({ m: "gen", gu: 3, gd: 2 }).w.vw, { m: "gen", ...base });
+  assert.deepEqual(mk({ m: "house", hk: 1 }).w.vw, { m: "house", ...base });
+  assert.deepEqual(mk({ m: "gen", gu: 1 }).w.vw, { m: "gen", ...base, gu: 1 });
+  /* out of range values are held to the range; anything that is not a whole number is dropped */
+  assert.deepEqual(mk({ m: "gen", gu: 9, gd: 0 }).w.vw, { m: "gen", ...base, gu: 5, gd: 1 });
+  for (const bad of ["4", 2.5, null, NaN, ["3"], { a: 1 }, "Anna Example"]) {
+    const v = mk({ m: "gen", gu: bad, gd: bad, hk: bad }).w.vw;
+    assert.deepEqual(v, { m: "gen", ...base }, JSON.stringify(bad));
+  }
+  /* the default view is untouched by a stray Generations setting that is not a choice */
+  assert.equal("vw" in mk({ m: "canvas", gu: 3, gd: 2 }).w, false);
+  /* they come back */
+  assert.deepEqual(W.unpack(gn.w, gn.k, known(), bridges()).lens, { m: "gen", ...base, r: "", gu: 5, gd: 4 });
+  assert.deepEqual(W.unpack(hs.w, hs.k, known(), bridges()).lens, { m: "house", ...base, r: "", hk: 0 });
+  /* the six-word copy keeps them, and cleans anything odd */
+  for (const rec of [gn, hs]) assert.deepEqual(RF.cleanCanvas({ v: 1, items: { [rec.k]: rec }, gone: {} }).items[rec.k], rec);
+  const odd = JSON.parse(JSON.stringify(gn)); odd.w.vw = { m: "gen", ...base, gu: 9, gd: "Anna", hk: 7, zz: "Anna" };
+  assert.deepEqual(RF.cleanCanvas({ v: 1, items: { [odd.k]: odd }, gone: {} }).items[odd.k].w.vw, { m: "gen", ...base, gu: 5 });
+  const odd2 = JSON.parse(JSON.stringify(gn)); odd2.w.vw = { m: "nightsky", ...base, gu: 3 };
+  assert.deepEqual(RF.cleanCanvas({ v: 1, items: { [odd2.k]: odd2 }, gone: {} }).items[odd2.k].w.vw, { m: "canvas", ...base });
+  /* a shared link applies the same rules */
+  const sh = JSON.parse(JSON.stringify(hs)); sh.w.vw.hk = 5; sh.w.vw.gu = "x";
+  const dec = await W.shareDecode(await W.shareEncode({ name: "x", src, w: sh.w }));
+  assert.ok(dec, "the link decodes");
+  assert.deepEqual(dec.w.vw, { m: "house", ...base });
+});
+
 test("the Backup page says the chosen View is kept", () => {
   assert.match(read("../src/pages/backup.astro"), /<b>View<\/b> you chose/);
 });

@@ -7,6 +7,8 @@
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #cp { --bg: #291A0A; --ink: #D8C8B1; --soft: #A3937E; --card: #3D2F21; --line: #554636; --accent: #DD7D17; --accent-ink: #291A0A; --focus: #7db4f0; --warn: #e8836b; --sea: #2c2a28; --needle: #EE8F76; } }
 :root[data-theme="dark"] #cp { --bg: #291A0A; --ink: #D8C8B1; --soft: #A3937E; --card: #3D2F21; --line: #554636; --accent: #DD7D17; --accent-ink: #291A0A; --focus: #7db4f0; --warn: #e8836b; --sea: #2c2a28; --needle: #EE8F76; }
 #cp[hidden] { display: none; }
+/* the switcher sits in a row along the top on a wide screen, in the same place as over the canvas: Compass starts below it */
+@media (min-width: 761px) { #cp { padding-top: 58px; } }
 #cp { position: fixed; inset: 0; z-index: 20; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; background: var(--bg); color: var(--ink); font: 600 14px/1.4 var(--body); }
 #cp::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 118px; z-index: -1; pointer-events: none; background-image: radial-gradient(circle, color-mix(in srgb, var(--soft) 38%, transparent) 1.3px, transparent 1.6px); background-size: 26px 26px; -webkit-mask-image: linear-gradient(#000 55%, transparent); mask-image: linear-gradient(#000 55%, transparent); }
 #cp *, #cp *::before, #cp *::after { box-sizing: border-box; }

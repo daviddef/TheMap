@@ -391,7 +391,7 @@ addEventListener('message', e => {
   if (d.tcCompass !== undefined) { clearTimeout(askT); askT = 0; const quiet = swQuiet; swQuiet = false; const q = d.tcCompass && typeof d.tcCompass === 'object' ? d.tcCompass : {}; openCP(q.person != null ? { person: String(q.person).slice(0, 120), a: Number.isInteger(q.a) && q.a >= 0 && q.a < 20 ? q.a : undefined } : null, { quiet }); return; }   // the switcher's Compass (it asked the canvas for the selected person first), or the canvas's own button; the selected person, if one, is where it starts
   if (d.tcSettings) { openSG(); return; }   // the canvas menu's "Settings"
   if (d.tcRestored) { onRestored(d.tcRestored); return; }
-  if (d.tcHome) { flushWork(); $('#cv').hidden = true; showStart(); return; }   // the canvas's folder button: back to the opening screen (the canvas keeps its own state)
+  if (d.tcHome) { flushWork(); $('#cv').hidden = true; showStart(); return; }   // the canvas's TREE CANVAS title: back to the opening screen (the canvas keeps its own state)
   if (d.tcCompare !== undefined && !d.tcOpen) { const q = d.tcCompare || {}; compareWith(Array.isArray(q.keys) ? q.keys : q.key ? [q.key] : null, q.mark); return; }
   if (typeof d.tcLookSet === 'string' && ST.LOOKS.includes(d.tcLookSet)) { lookSet(d.tcLookSet); return; }   // the Look chips in the canvas's Appearance menu
   if (d.tcOpen && d.tcOpen.bytes instanceof ArrayBuffer) { example = false; start(d.tcOpen.bytes, d.tcOpen.name); }

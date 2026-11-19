@@ -12,12 +12,16 @@
 #sw .sw-b:hover .sw-i { transform: translateY(-1px); }
 #sw .sw-b:active .sw-i, #sw .sw-b[aria-current="page"] .sw-i { transform: translateY(3px); box-shadow: 0 0 0 3px color-mix(in srgb, var(--sw-orange) 35%, transparent); }
 #sw .sw-b:focus-visible { outline: 3px solid var(--sw-focus); outline-offset: 3px; }
-#sw .sw-l { padding: 4px 9px; border: 2px solid var(--sw-line); border-radius: 10px; background: var(--sw-card); box-shadow: 0 2px 0 var(--sw-line); white-space: nowrap; }
-#sw .sw-b[aria-current="page"] .sw-l { background: var(--sw-ink); border-color: var(--sw-ink); color: var(--sw-card); box-shadow: none; }
+/* ICONS ONLY: the words are the button's hover text and its accessible name, not a pill beside it */
+#sw .sw-l { position: absolute; width: 1px; height: 1px; padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 #sw .sw-vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+/* on a wide screen the three sit in a row beside the TREE CANVAS title (the toolbar is on the other side); on a phone they stay in a column at the left, as there is no room beside the title */
+@media (min-width: 761px) {
+  #sw { top: 10px; left: 196px; transform: none; flex-direction: row; gap: 8px; }
+  #sw .sw-i { width: 42px; height: 42px; }
+}
 @media (max-width: 760px) {
   #sw { left: 6px; gap: 8px; }
   #sw .sw-i { width: 40px; height: 40px; }
-  #sw .sw-l { position: absolute; width: 1px; height: 1px; padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
 @media (prefers-reduced-motion: reduce) { #sw .sw-i { transition: none; } }

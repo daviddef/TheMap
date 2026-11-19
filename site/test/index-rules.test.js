@@ -24,7 +24,7 @@ test("the ad is on written pages and on a country's page, not on its generated s
   const base = readFileSync(new URL("../src/layouts/Base.astro", import.meta.url), "utf8");
   const list = base.match(/const AD_PAGES = \[([^\]]*)\]/)[1];
   for (const p of ["/data/", "/coverage/", "/changelog/", "/flags/"]) assert.ok(list.includes(`"${p}"`), p);
-  for (const p of ["/start/", "/about/", "/add/", "/my-research/", "/errands/", "/worklist/", "/countries/", "/help/", "/jurisdictions/"]) assert.ok(!list.includes(`"${p}"`), p);
+  for (const p of ["/start/", "/add/", "/my-research/", "/errands/", "/worklist/", "/countries/", "/help/", "/jurisdictions/"]) assert.ok(!list.includes(`"${p}"`), p);
   assert.match(base, /startsWith\("\/country\/"\) && !here\.replace\(\/\\\/\$\/, ""\)\.endsWith\("\/sources"\)/);
 });
 

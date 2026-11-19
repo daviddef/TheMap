@@ -233,7 +233,7 @@ test("Connection & Backup explains the canvas: what is kept, what is not, the si
 
 test("the page's security policy did not widen, the canvas's own did not change, and the canvas hands over its state in memory only", () => {
   const html = read("../src/pages/tree-canvas/index.astro"), csp = /Content-Security-Policy" content="([^"]+)"/.exec(html)[1];
-  assert.match(csp, /default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' https: https:\/\/archive\.defranceski\.com/);
+  assert.match(csp, /default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https:\/\/server\.arcgisonline\.com; connect-src 'self' https: https:\/\/archive\.defranceski\.com/);   // Compass's map tiles are the one widening: the tile host, for images only
   assert.equal(/unsafe/.test(csp), false);
   const py = fs.readFileSync(path.join(here, "../../scripts/build-roots-data.py"), "utf8");
   assert.ok(py.includes("script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data: blob:; \"\n           \"font-src data:; connect-src 'self'; form-action 'none'; base-uri 'none'"));

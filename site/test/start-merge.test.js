@@ -99,12 +99,12 @@ test("the What's new entry for the tour points at a page that exists", () => {
 });
 
 test("the handwriting font is self-hosted, licensed, declared only when the tour opens, and never fetched from Google", () => {
-  for (const f of ["public/fonts/caveat-latin-500.woff2", "public/fonts/Caveat-OFL.txt"]) assert.ok(fs.existsSync(path.join(site, f)), f);
+  for (const f of ["public/fonts/caveat-latin-500.woff2", "public/fonts/caveat-latin-ext-500.woff2", "public/fonts/Caveat-OFL.txt"]) assert.ok(fs.existsSync(path.join(site, f)), f);
   assert.match(read("public/fonts/Caveat-OFL.txt"), /SIL OPEN FONT LICENSE Version 1\.1/);
   assert.match(read("public/fonts/Caveat-OFL.txt"), /Copyright 2014 The Caveat Project Authors/);
   const gate = read("public/js/start-tour-gate.js").replace(/\/\*[\s\S]*?\*\//g, "");
   const load = gate.slice(gate.indexOf("function load()"), gate.indexOf("function open("));
-  assert.ok(load.includes("fonts/caveat-latin-500.woff2") && load.includes("font-display:swap"), "declared inside load(), with swap");
+  assert.ok(load.includes("caveat-latin-500.woff2") && load.includes("caveat-latin-ext-500.woff2") && load.includes("font-display:swap") && load.includes("unicode-range"), "both files declared inside load(), with swap and unicode ranges");
   assert.ok(!gate.replace(load, "").includes("caveat"), "Caveat is named outside load()");
   assert.ok(!/Caveat/.test(read("src/layouts/Base.astro")), "Base.astro must not ask for Caveat");
   assert.match(read("public/start-tour.css"), /--hand:"Caveat","Segoe Script","Bradley Hand",cursive/, "fallback unchanged");

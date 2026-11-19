@@ -1,5 +1,5 @@
 ---
-/* Roots & Routes from your GEDCOM. An Atlas page with the Atlas menu, but NOT the Base layout: Base carries the visitor counter, the ad slot,
+/* Roots & Routes from your GEDCOM: Tree views only (since 19 Nov 2026; the Fix list, Orphans, Places, the import report and the export are in the Tree Canvas, /tree-canvas/). An Atlas page with the Atlas menu, but NOT the Base layout: Base carries the visitor counter, the ad slot,
    Google Fonts and the language script, none of which this page may have (the file never leaves the device; the meta CSP below enforces it).
    The menu list is shared with Base (src/lib/nav.js); the page's own files live in public/roots/. */
 import { nav } from "../../lib/nav.js";
@@ -27,9 +27,9 @@ const here = Astro.url.pathname;
     <a class="brand" href={u("/")}>Record <em>Atlas</em></a>
     <button class="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Menu"><span class="bars" aria-hidden="true"></span></button>
     <nav class="topnav" aria-label="Main">
-      {nav.map(([label, links]) => (
+      {nav.map(([label, links, opt]) => (
         typeof links === "string"
-          ? <a class:list={["menulink", here === u(links) ? "on" : ""]} href={u(links)}>{label}</a>
+          ? <a class:list={["menulink", here === u(links) ? "on" : ""]} href={u(links)} target={opt?.newTab ? "_blank" : undefined} rel={opt?.newTab ? "noopener" : undefined}>{label}</a>
           : <details class="menu"><summary>{label}</summary><div class:list={["panel", links.length > 14 ? "long" : ""]}>{links.map(([h, l]) => h === null ? <span class="ph">{l}</span> : <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}</div></details>
       ))}
       <a class="findbtn" href={u("/add/")}>Add source</a>
@@ -37,9 +37,9 @@ const here = Astro.url.pathname;
     </nav>
   </div>
   <div class="drawer" id="drawer" hidden>
-    <div class="wrap">{nav.map(([label, links]) => (
+    <div class="wrap">{nav.map(([label, links, opt]) => (
       typeof links === "string"
-        ? <div class="dgrp"><a href={u(links)} class={here === u(links) ? "on" : ""}>{label}</a></div>
+        ? <div class="dgrp"><a href={u(links)} class={here === u(links) ? "on" : ""} target={opt?.newTab ? "_blank" : undefined} rel={opt?.newTab ? "noopener" : undefined}>{label}</a></div>
         : <div class="dgrp"><span class="gl">{label}</span>{links.map(([h, l]) => h === null ? <span class="gl gl2">{l}</span> : <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}</div>
     ))}
       <div class="dgrp"><span class="gl">Contribute</span><a href={u("/add/")}>Add a source</a></div>
@@ -53,7 +53,7 @@ const here = Astro.url.pathname;
 </header>
 
 <main>
-<p id="exportmoved" class="small moved" role="status" hidden>Exporting your GEDCOM has moved. Open your file in the <a href="../tree-canvas/">Tree Canvas</a> and choose <b>Your file</b> from its menu: the same four ways to export are there.</p>
+<p id="canvasnote" class="canvasnote" role="note"><span>Fix list, Orphans, Places, the import report and export are now in the Tree Canvas.</span> <a class="btn" id="canvasgo" href={u("/tree-canvas/")}>Open the Tree Canvas</a> <span id="rrhint" class="small" role="status" aria-live="polite"></span></p>
 <section id="start">
   <div class="promise" role="note">
     <h2>Your file never leaves this computer</h2>
@@ -62,8 +62,7 @@ const here = Astro.url.pathname;
       <li>So you do not have to find it again, the last few files you open are kept in this browser only, on this device and never online. Forget one, or all, with a click, or untick the box under the file picker and nothing is kept.</li>
       <li>This page has no analytics, no cookies and no third-party scripts, and the browser is told not to let it contact any other site.</li>
       <li>To place your people it downloads the Atlas's own place files for the countries your tree mentions. Our server can see which countries were asked for; it never sees your file or a name from it.</li>
-      <li>In the Tree canvas, "Where to from here" asks our server for the Atlas's own record of each place in that person's life, the powers that ruled it and the places near it. Our server can see which places were asked for, and when; it never sees a name, a date or your file. Nothing is kept on this device by the canvas.</li>
-      <li>People who may be alive are shown on your own screen. The shareable export (in the Tree Canvas, under Your file) leaves them out, and you can hide them with one tick.</li>
+      <li>People who may be alive are shown on your own screen. You can hide them with one tick.</li>
     </ul>
   </div>
 
@@ -74,12 +73,6 @@ const here = Astro.url.pathname;
   </div>
   <p class="or"><button id="sample" class="link">or try an invented sample family</button></p>
   <p class="small or"><label><input type="checkbox" id="autokeep" checked> Keep the last files I open on this device, in this browser only</label></p>
-  <div id="savedfix" class="recent" hidden>
-    <h2>Your saved fix list</h2>
-    <p id="savedfixtxt"></p>
-    <p class="small">Only counts and the place text as typed are kept, never a name. You do not need to open the file to see it.</p>
-    <p><a id="savedfixgo" class="btn" href="../my-research/#fixes">See it in My research</a></p>
-  </div>
   <div id="recent" class="recent" hidden>
     <h2>Kept on this device</h2>
     <ul id="recentlist"></ul>
@@ -104,57 +97,12 @@ const here = Astro.url.pathname;
       <p class="small"><b>Ancestry</b> · <label>site <select id="mhanc" aria-label="Which Ancestry site the links open"><option value="com.au">ancestry.com.au</option><option value="com">ancestry.com</option><option value="co.uk">ancestry.co.uk</option><option value="ca">ancestry.ca</option></select></label></p>
       <p id="ancstat" role="status" class="small"></p></div>
     </details>
-    <nav class="tabs" role="tablist">
-      <button role="tab" data-tab="canvas" aria-selected="true">Tree canvas</button>
-      <button role="tab" data-tab="tree" aria-selected="false">Tree views</button>
-      <button role="tab" data-tab="orphans" aria-selected="false" title="Records joined to no one, small families outside every tree, and where to start looking">Orphans <span id="orcount" class="count"></span></button>
-      <button role="tab" data-tab="report">Import report</button>
-      <button role="tab" data-tab="review">Places to review <span id="rcount" class="count"></span></button>
-      <button role="tab" data-tab="fix">Fix list <span id="fxcount" class="count"></span></button>
-    </nav>
+    <h2 class="vtitle">Tree views</h2>
     <button id="keep" class="link" title="Keep this file in this browser so you can reopen it with one click. It stays on this device. The last few files are kept automatically unless you untick the box on the start screen.">Keep on this device</button>
     <button id="again" class="link">Open another file</button>
   </div>
 
-  <div id="p-canvas" class="panel"><iframe id="canvasv" title="Your tree on a free canvas, with where to look next for each person"></iframe></div>
-  <div id="p-tree" class="panel" hidden><iframe id="viewer" title="Roots and Routes views of your tree"></iframe></div>
-  <div id="p-report" class="panel" hidden></div>
-  <div id="p-review" class="panel" hidden>
-    <div class="rbar">
-      <input id="rfilter" type="search" placeholder="Filter places" aria-label="Filter places">
-      <span id="rnote" class="small"></span>
-    </div>
-    <p class="small">Places you pick here redraw your tree on this page only. The “Cleaned” export, which wrote picks into a downloaded file, is gone: exporting lives in the <a href="../tree-canvas/">Tree Canvas</a> under Your file. Places to review is moving to the canvas’s Fix list as a cleanup checklist: copy the suggestion, open the person in your own tree program and fix it there.</p>
-    <div id="rlist"></div>
-  </div>
-  <div id="p-fix" class="panel" hidden>
-    <h2>Fix list</h2>
-    <p class="small">Work down each list in the tree you keep elsewhere: copy, paste, tick. Ticks and "left as is" are kept on this device, so they are still there next time; untick the box below to stop, or save the decisions to a file. Each row says why, what to do next, and what the Atlas holds for that place, year and name. “Generate PDF” opens your browser’s own print window over a copy made here: choose “Save as PDF”. Nothing is uploaded.</p>
-    <div class="ftool">
-      <label class="small"><input type="checkbox" id="fliving" checked> Include living people</label>
-      <input id="ffilter" type="search" placeholder="Filter by name or place" aria-label="Filter the fix list">
-      <label class="small"><input type="checkbox" id="fcollapse"> Fold the Atlas notes</label>
-      <label class="small">Ancestry links go to <select id="fanc" aria-label="Which Ancestry site the outside-search links use"><option value="com.au">ancestry.com.au</option><option value="com">ancestry.com</option><option value="co.uk">ancestry.co.uk</option><option value="ca">ancestry.ca</option></select></label>
-    </div>
-    <div class="fbar" role="group" aria-label="Save or share the fix list">
-      <span class="fbl">Take it with you</span>
-      <button class="ibtn" id="fpdf" title="Opens your browser’s print window over a print-ready copy made on this device. Choose “Save as PDF”."><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V3h10v6M7 17H4v-7h16v7h-3M7 14h10v7H7z"/></svg><span>PDF</span></button>
-      <button class="ibtn" id="ftext" title="Download the fix list as a plain text file"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 16h6"/></svg><span>Text</span></button>
-      <button class="ibtn" id="fcsv" title="Download the fix list as a CSV file, for a spreadsheet"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 10h16M4 15h16M10 5v14"/></svg><span>CSV</span></button>
-      <span class="fbsep" aria-hidden="true"></span>
-      <span class="fbl">Your ticks</span>
-      <button class="ibtn" id="dec-save" title="Save your ticks and “left as is” choices to a file"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6"/></svg><span>Save</span></button>
-      <button class="ibtn" id="dec-load" title="Load ticks and choices you saved earlier"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a1 1 0 0 1 1-1h5l2 2h8a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg><span>Load</span></button>
-      <button class="ibtn ibtn-del" id="dec-forget" title="Forget the decisions kept on this device"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 7V4h4v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg><span>Forget</span></button>
-      <input type="file" id="dec-file" accept="application/json,.json" hidden>
-    </div>
-    <div class="dec">
-      <label class="small"><input type="checkbox" id="dec-on"> Remember my decisions on this device</label>
-      <span class="small" id="dec-said"></span>
-    </div>
-    <p class="small">What is kept for matching is a scrambled fingerprint of each row, with the day (not encryption), so the same tree finds its decisions again. For <a href="../my-research/#fixes">My research</a> a short summary is kept too: the file name, how many fixes are left of each kind, and the place texts as typed in your file. People are only counted, never named. All of it stays in this browser; switching the box off, or “Forget”, removes it.</p>
-    <div id="fsecs"></div>
-  </div>
+  <div id="p-tree" class="panel"><iframe id="viewer" title="Roots and Routes views of your tree"></iframe></div>
 </section>
 
 <p id="err" class="err" role="alert" hidden></p>

@@ -418,7 +418,7 @@ function drawYF() {
   if (lastM && lastM.report) {
     reportInto(lastM, rep, { h: 'h3' });
     const need = (lastM.review || []).filter(i => REVIEW_TIERS.includes(i.tier)).length;
-    if (need) { const p = el('p', 'small', n0(need) + ' place texts need a look: the Atlas could not settle them. Choosing a place for each is done on Places to review in Roots & Routes, where you open the same file again. '); const a = el('a', null, 'Open Roots & Routes'); a.href = '/roots/'; a.target = '_blank'; a.rel = 'noopener'; p.append(a); rep.append(p); }
+    if (need) { const p = el('p', 'small', n0(need) + ' place texts need a look: the Atlas could not settle them. They are listed on the Places tab of the Fix list, each with the Atlas’s suggestions to copy; the correction is made in your own tree program. '); rep.append(p); }
   } else rep.append(el('p', 'small', RR.archive ? 'An archive publishes its tree already read, so there is no import report for it: its own site holds the sources and the method.' : 'There is no report for this file.'));
   /* the export: a GEDCOM read here has one; a tree.json and an archive's tree do not */
   const on = !!(lastM && lastM.kind !== 'tree' && worker), off = $('#yfExpOff');

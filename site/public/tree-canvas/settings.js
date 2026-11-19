@@ -21,8 +21,8 @@ export const LOOKS = ['auto', 'sticker', 'paper', 'ground', 'lanes', 'countries'
 const THEMES = LOOKS.slice(1);                     // the names the canvas itself uses (loamTheme)
 export const LOOK_NAMES = { auto: 'Automatic: light or dark to suit this device', sticker: 'Sticker', paper: 'Paper', ground: 'Ground (dark)', lanes: 'Lanes', countries: 'Countries', names: 'Names' };
 
-/* The one-click Look button on the canvas (the canvas draws it, public/tree-canvas/app.js keeps the choice). It cycles the COLOUR looks; Lanes, Countries and Names are layouts and
-   are chosen in the drawer, and from one of those the button goes to automatic. The canvas holds its own copy of this list (LOOK_CYCLE); test/tree-canvas-theme.test.js checks they agree. */
+/* The Look chips in the canvas's Appearance menu (the canvas draws them, public/tree-canvas/app.js keeps the choice). They offer the COLOUR looks; Lanes, Countries and Names are layouts and
+   are chosen in the drawer; while one of those is on the menu says so and any chip leaves it (nextLook, the old one-button cycle, is kept for the tests). The canvas holds its own copy of this list (LOOK_CYCLE); test/tree-canvas-theme.test.js checks they agree. */
 export const CYCLE = ['auto', 'sticker', 'paper', 'ground'];
 export const nextLook = cur => { const i = CYCLE.indexOf(cur); return i < 0 ? 'auto' : CYCLE[(i + 1) % CYCLE.length]; };
 /* what the page around the canvas wears for a look: 'dark' for Ground, 'light' for every other look, null (the device decides) for automatic or anything unknown.

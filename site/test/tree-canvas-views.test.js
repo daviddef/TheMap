@@ -1,4 +1,4 @@
-/* The Tree Canvas's View button, the Trail band and the Fan. The pure parts (the direct line, the places of a life, the fan's geometry and colour) are cut out of the vendored canvas
+/* The Tree Canvas's View (in its Appearance button), the Trail band and the Fan. The pure parts (the direct line, the places of a life, the fan's geometry and colour) are cut out of the vendored canvas
    (scripts/roots/tree-canvas.template.html) and run in a VM, so what is tested is what ships; every person here is invented. */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -46,7 +46,7 @@ test("the View lens is kept only when it is not the default, and is cleaned", ()
 });
 
 test("the canvas carries the View button, the Trail band and the Fan, and keeps the band at the very bottom", () => {
-  assert.match(TPL, /id="bLens"[^>]*aria-label="View"/);
+  assert.match(TPL, /id="bLens"[^>]*aria-label="Appearance: View and Look"/);
   assert.match(TPL, /<svg id="fan"|createElementNS\([^)]*'svg'\)[\s\S]{0,200}id = 'fan'|id="fan"/);
   assert.match(TPL, /#trail\{[^}]*bottom:0/, "the band is docked to the very bottom edge");
   assert.match(TPL, /\.dock\{bottom:calc\(16px \+ var\(--trail-h,0px\)\)\}/, "the search dock rides above it");

@@ -1,4 +1,4 @@
-/* The Tree Canvas's one-click Look button. Three files each hold a copy of the same small rule, because they run in three places (the canvas iframe, the page around it,
+/* The Tree Canvas's Look (a section of its Appearance menu). Three files each hold a copy of the same small rule, because they run in three places (the canvas iframe, the page around it,
    and a classic script that runs before paint). These tests hold the copies together:
    - the canvas template's cycle (LOOK_CYCLE) is the shell's CYCLE, in the same order;
    - the button walks that cycle and comes back to the start; a layout (lanes, countries, names) goes to automatic;
@@ -80,11 +80,17 @@ test("the boot script leaves the page alone when nothing is kept, the record is 
   assert.deepEqual(runBoot({}, { blocked: true }), {});
 });
 
-test("the canvas template has one plain labelled Look button, hidden unless this is the standalone page, and a three-dot More button", () => {
-  assert.equal((template.match(/id="bTheme"/g) || []).length, 1);
-  assert.match(template, /<button[^>]*id="bTheme"[^>]*aria-label="Look"[^>]*hidden/);
-  assert.doesNotMatch(template, /id="bTheme"[^>]*aria-pressed/, "a button that names its own state and the next one does not also claim to be pressed");
-  assert.match(template, /b\.hidden\s*=\s*!SA/, "shown only on the standalone Atlas page");
+test("the canvas template has one Appearance button (View and Look together) and no separate Look button, and a three-dot More button", () => {
+  assert.equal((template.match(/id="bTheme"/g) || []).length, 0, "the half-sun Look button is gone: the Look is a section of the Appearance menu");
+  assert.equal((template.match(/id="bLens"/g) || []).length, 1);
+  assert.match(template, /<button[^>]*id="bLens"[^>]*aria-label="Appearance: View and Look"[^>]*hidden/, "named for both, hidden until the canvas knows it can show it");
+  assert.match(template, /id = 'lensMenu'|id="lensMenu"/, "one menu holds both sections");
+  assert.match(template, /aria-label="Look" class="lkgrid"/, "the Look section has its four chips");
+  assert.match(template, /Appearance\. View: /, "the button's name says the View and the Look now worn");
+  assert.match(template, /const lookAvail = \(\) => !EMBED \|\| SA;/, "shown on the standalone file and on the Atlas page (?sa), as the Look and View buttons were");
+  assert.match(template, /const lensAvail = \(\) => lookAvail\(\) && !S\.pr;/, "the button stays in Compare; only the View choices wait");
+  assert.match(template, /Compare is laying the people out, so the views wait\. Stop comparing to choose one\./, "in Compare the View items say why they are disabled");
+  assert.match(template, /postMessage\(\{ tcLookSet: k \}/, "a chip asks the page around the canvas, which keeps the Look, as the old button did");
   assert.match(template, /set\('#bMore',\s*'more'\)/, "the phone-width More button no longer wears a gear that looks like a sun");
 });
 

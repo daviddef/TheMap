@@ -180,7 +180,6 @@ button{font-family:inherit}
 .top{position:fixed;right:16px;top:12px;display:flex;gap:8px;z-index:6}
 .zoombar{position:fixed;left:16px;top:60px;display:flex;flex-direction:column;gap:6px;z-index:5}
 .lk-ibtn{width:42px;height:42px}
-#bTheme[hidden]{display:none}
 .lk-ibtn[disabled]{opacity:.4;pointer-events:none}
 .lk-ibtn .t{font:400 20px/1 "Lilita One",system-ui}
 .lk-ibtn.on{border-color:var(--lk-accent);color:var(--lk-accent)}
@@ -467,16 +466,6 @@ select.lk-input{width:auto;padding:4px 8px}
 #info .ih.mr{-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 26px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 26px),transparent)}
 #info .ih.ml{-webkit-mask-image:linear-gradient(to left,#000 calc(100% - 26px),transparent);mask-image:linear-gradient(to left,#000 calc(100% - 26px),transparent)}
 #info .ih.ml.mr{-webkit-mask-image:linear-gradient(to right,transparent,#000 26px,#000 calc(100% - 26px),transparent);mask-image:linear-gradient(to right,transparent,#000 26px,#000 calc(100% - 26px),transparent)}
-/* the Bloodline button's menu */
-#bloodMenu{display:none;position:fixed;top:64px;right:12px;z-index:40;width:290px;max-width:calc(100vw - 24px);box-sizing:border-box;background:var(--lk-card);border:2px solid var(--lk-ink);border-radius:16px;box-shadow:0 5px 0 var(--lk-line),0 14px 30px rgba(0,0,0,.18);padding:12px 14px 14px}
-#bloodMenu.on{display:block}
-#bloodMenu h4{margin:0 0 4px}
-#bloodMenu .bmlab{display:block;font-size:12.5px;font-weight:800;margin:10px 0 4px}
-#bloodMenu select{display:block;width:100%;box-sizing:border-box;margin-top:4px;font:inherit;font-size:12.5px;padding:6px 8px;border:2px solid var(--lk-ink);border-radius:10px;background:var(--lk-card);color:var(--lk-ink)}
-#bloodMenu .bmrow{margin:8px 0}
-#bloodMenu .bmrow .lk-btn{width:100%;justify-content:center}
-#bloodMenu .lk-toggle{margin-top:10px}
-.ph #bloodMenu{top:auto;bottom:calc(var(--dock-h,130px) + 16px);left:8px;right:8px;width:auto}
 /* Saved views */
 #viewsMenu{display:none;position:fixed;top:64px;right:12px;z-index:40;width:320px;max-width:calc(100vw - 24px);box-sizing:border-box;background:var(--lk-card);color:var(--lk-ink);border:2px solid var(--lk-ink);border-radius:16px;box-shadow:0 5px 0 var(--lk-line),0 14px 30px rgba(0,0,0,.18);padding:12px 14px 12px;max-height:calc(100vh - 140px);overflow:auto}
 #viewsMenu.on{display:block}
@@ -507,6 +496,42 @@ ul.vwlist li{display:flex;align-items:center;gap:4px;padding:3px 0;border-top:1.
 #backMenu .bmo span{display:block;margin-top:2px;font:600 11.5px/1.25 Nunito,system-ui;color:var(--lk-soft)}
 #backMenu .bmo:hover,#backMenu .bmo:focus-visible{background:color-mix(in srgb,var(--lk-accent) 14%,var(--lk-card));outline:none}
 #backMenu .bmo[disabled]{opacity:.45;cursor:not-allowed}
+#backMenu{overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--lk-faint,#aaa) transparent}
+#backMenu .bmo{min-height:44px}
+#backMenu .bmo:focus-visible{outline:2px solid var(--lk-accent);outline-offset:-2px}
+/* the blood-relatives section of the same menu */
+#backMenu .bmsec{margin:12px 4px 4px;padding-top:10px;border-top:2px solid var(--lk-line);font:800 13px/1.25 Nunito,system-ui;letter-spacing:0;text-transform:none;color:var(--lk-ink)}
+#backMenu .bmnote{margin:2px 4px 6px;font:600 11.5px/1.3 Nunito,system-ui;color:var(--lk-soft)}
+#backMenu .bmlab{margin:8px 4px 4px;font:800 12px/1.2 Nunito,system-ui}
+#backMenu .bmscopes{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0 0 6px}
+#backMenu .bmsc{border:2px solid var(--lk-line);padding:5px 8px}
+#backMenu .bmsc[aria-checked="true"]{border-color:var(--lk-accent);background:var(--lk-accent-soft)}
+#backMenu .bmsc b{font-size:12px}
+#backMenu .bmsc span{font-weight:800;color:var(--lk-ink)}
+#backMenu .bmadd{margin-top:2px;background:var(--lk-accent);color:var(--lk-on-accent,#fff);text-align:center;display:flex;align-items:center;justify-content:center}
+#backMenu .bmadd:hover,#backMenu .bmadd:focus-visible{background:var(--lk-accent);filter:brightness(1.08)}
+#backMenu .bmdanger{margin-top:6px;border:2px solid currentColor;color:var(--lk-danger,#C2452D);text-align:center;display:flex;align-items:center;justify-content:center}
+#backMenu .bmdanger b{color:inherit}
+#backMenu .bmtog{display:flex;align-items:center;gap:10px;margin-top:6px;border:2px solid var(--lk-line);padding:6px 10px}
+#backMenu .bmtog .stx{flex:1;min-width:0}
+#backMenu .bmtog .stx b{display:block}
+#backMenu .bmtog .knob{flex:none;position:relative;width:40px;height:23px;border-radius:99px;background:var(--lk-track);border:1px solid var(--lk-line)}
+#backMenu .bmtog .knob::after{content:'';position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:var(--lk-mute)}
+#backMenu .bmtog.on{border-color:var(--lk-accent);background:var(--lk-accent-soft)}
+#backMenu .bmtog.on .knob{background:var(--lk-accent);border-color:var(--lk-accent)}
+#backMenu .bmtog.on .knob::after{transform:translateX(17px);background:var(--lk-on-accent,#fff)}
+/* "Colouring relative to <name>  Stop": first in the top row while the non-blood tint is on */
+.blchip{min-width:0;display:flex;align-items:center;gap:8px;align-self:center;max-width:min(360px,45vw);padding:3px 4px 3px 10px;background:var(--lk-card);color:var(--lk-ink);border:2px dashed #8a78b8;border-radius:99px;box-shadow:0 2px 0 var(--lk-line);font:800 12px/1.2 Nunito,system-ui;min-height:36px;box-sizing:border-box}
+.blchip[hidden]{display:none}
+.blchip .lk-icon{flex:none;width:16px;height:16px}
+.blchip .lk-icon path{fill:#d2493a;stroke:currentColor}
+.blchip .bltx{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.blchip .blnm{font-weight:900}
+.blchip .blstop{all:unset;box-sizing:border-box;flex:none;min-height:30px;padding:0 12px;border-radius:99px;background:var(--lk-accent);color:var(--lk-on-accent,#fff);font:800 12px/30px Nunito,system-ui;cursor:pointer}
+.blchip .blstop:hover{filter:brightness(1.1)}.blchip .blstop:focus-visible{outline:2px solid var(--lk-ink);outline-offset:2px}
+/* on a phone it takes its own row under the icons (and under the extras when More is open), clear of the zoom buttons on the left */
+.ph .top .blchip{order:6;flex:0 0 calc(100vw - 64px);max-width:none;justify-content:space-between;min-height:44px}
+.ph .top .blchip .blstop{min-height:36px;line-height:36px}
 /* the Sources tab */
 .srtiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 10px}
 .srt{all:unset;box-sizing:border-box;cursor:pointer;border:2px solid var(--lk-line);border-radius:12px;background:var(--lk-card);padding:8px 4px;text-align:center;min-height:58px;display:flex;flex-direction:column;justify-content:center}
@@ -529,8 +554,6 @@ ul.srx small{flex-basis:100%;font-weight:600;color:var(--lk-soft)}
 /* a card that is not a blood relative of the person colouring starts from */
 .card.nb .cb{border-style:dashed;border-color:#8a78b8;background:color-mix(in srgb,var(--lk-card) 78%,#9b86d4)}
 .card.nb .cb::before{background:repeating-linear-gradient(135deg,var(--ac) 0 4px,#9b86d4 4px 8px)}
-/* the Bloodline button is a drop of blood: filled red inside the outline */
-#bBlood .lk-icon path{fill:#d2493a;stroke:currentColor}
 
 /* lines between cards were too faint: heavier strokes, tighter dashes, full opacity */
 .ev-def{stroke-width:5}.ev-sup{stroke-width:4}.ev-np{stroke-width:4;stroke-dasharray:10 6}.ev-ug{stroke-width:4.5;stroke-dasharray:.5 6.5}
@@ -1056,11 +1079,14 @@ button.prbey.go{background:transparent;cursor:pointer;padding:1px 7px;color:var(
 /* View, the Fan and the Trail band. Its own file (after style.css) so it is not lost when style.css is edited elsewhere. Every colour is a --lk-* token of the look, so Sticker, Paper, Ground, Lanes and Countries all read. */
 #bLens[hidden]{display:none}
 html{--tr-soft:color-mix(in srgb,var(--lk-ink) 86%,var(--lk-card))}   /* the kit's soft ink is too faint for small print in the dark look; this is the ink, a little softened (tested at 4.5:1 on the card, test/test-fan-contrast.js) */
-/* the View menu */
-#lensMenu{display:none;position:fixed;top:64px;right:12px;z-index:40;width:318px;max-width:calc(100vw - 24px);box-sizing:border-box;background:var(--lk-card);color:var(--lk-ink);border:2px solid var(--lk-ink);border-radius:16px;box-shadow:0 5px 0 var(--lk-line),0 14px 30px rgba(0,0,0,.18);padding:12px 14px 14px}
+/* the Appearance menu: View and Look in one. It scrolls inside itself (never the page), keeps 44px targets, and sits under the button (viewsui.js sets --lm-top to just below the toolbar). */
+#lensMenu{--lm-top:64px;scroll-padding:44px 0 12px;display:none;position:fixed;top:var(--lm-top);right:12px;z-index:40;width:340px;max-width:calc(100vw - 24px);max-height:calc(100vh - var(--lm-top) - 12px);max-height:calc(100dvh - var(--lm-top) - 12px);overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;box-sizing:border-box;background:var(--lk-card);color:var(--lk-ink);border:2px solid var(--lk-ink);border-radius:16px;box-shadow:0 5px 0 var(--lk-line),0 14px 30px rgba(0,0,0,.18);padding:12px 14px 14px}
 #lensMenu.on{display:block}
-#lensMenu h4{margin:0 0 4px}
-.lvi{all:unset;box-sizing:border-box;display:flex;gap:10px;align-items:flex-start;width:100%;margin:6px 0;padding:8px 10px;border:2px solid var(--lk-line);border-radius:12px;cursor:pointer;color:var(--lk-ink)}
+#lensMenu h4{margin:0 0 4px}#lensMenu h4 small{font:700 12px Nunito,system-ui;color:var(--tr-soft);margin-left:6px}
+#lensMenu .lkon{margin:6px 0 0}
+#lensMenu h4.lvh2{margin-top:14px;padding-top:12px;border-top:2px solid var(--lk-line)}
+html:not(.ph):has(#info.on) #lensMenu{right:352px;width:min(340px,calc(100vw - 376px))}   /* the side panel stays clear: the menu opens to its left */
+.lvi{all:unset;box-sizing:border-box;display:flex;gap:10px;align-items:flex-start;width:100%;min-height:44px;margin:6px 0;padding:8px 10px;border:2px solid var(--lk-line);border-radius:12px;cursor:pointer;color:var(--lk-ink)}
 .lvi:hover{border-color:var(--lk-accent)}.lvi:focus-visible{outline:3px solid var(--lk-accent);outline-offset:2px}
 .lvi .lvd{flex:none;width:16px;height:16px;margin-top:2px;border-radius:50%;border:2px solid var(--lk-ink)}
 .lvi.on{border-color:var(--lk-accent);background:var(--lk-accent-soft)}
@@ -1069,8 +1095,21 @@ html{--tr-soft:color-mix(in srgb,var(--lk-ink) 86%,var(--lk-card))}   /* the kit
 .lvi small{display:block;margin-top:2px;font:700 11.5px/1.3 Nunito,system-ui;color:var(--tr-soft)}
 .lvi[disabled]{opacity:.55;cursor:not-allowed}
 .lvsoon{font-style:normal;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;background:var(--lk-line);color:var(--lk-ink);border-radius:8px;padding:1px 6px;margin-left:4px;vertical-align:1px}
-#lensMenu .lk-toggle{margin-top:10px}
-.ph #lensMenu{top:auto;bottom:calc(var(--dock-h,130px) + 16px);left:8px;right:8px;width:auto}
+#lensMenu .lk-toggle{margin-top:10px;min-height:44px}
+/* the Look section: four choices in a 2 x 2 grid, each with a swatch painted in that look's own colours */
+.lkgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}
+.lki{all:unset;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:56px;padding:6px 2px;border:2px solid var(--lk-line);border-radius:12px;cursor:pointer;color:var(--lk-ink);text-align:center}
+.lki:hover{border-color:var(--lk-accent)}.lki:focus-visible{outline:3px solid var(--lk-accent);outline-offset:2px}
+.lki.on{border-color:var(--lk-accent);background:var(--lk-accent-soft)}
+.lki .lks{width:26px;height:26px;flex:none;border-radius:50%;box-sizing:border-box;border:2px solid var(--lk-ink);background:linear-gradient(135deg,var(--lk-board) 50%,var(--lk-card) 50%);display:block;overflow:hidden;position:relative}
+.lki .lks::after{content:"";position:absolute;left:50%;top:50%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:var(--lk-accent);border:1.5px solid var(--lk-ink);box-sizing:border-box}
+.lki .lks.lksa{display:flex}.lki .lks.lksa::after{display:none}
+.lki .lks.lksa i{flex:1;background:linear-gradient(135deg,var(--lk-board) 50%,var(--lk-card) 50%);display:block;height:100%}
+.lki b{font:800 12.5px/1.15 Nunito,system-ui}
+/* the button: the fan, with the Look as a small badge at its corner */
+#bLens .lvbadge{position:absolute;right:-3px;bottom:-3px;width:19px;height:19px;padding:2px;box-sizing:border-box;border-radius:50%;background:var(--lk-card);border:2px solid var(--lk-ink);color:var(--lk-ink);stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.ph #bLens .lvbadge{right:-4px;bottom:-4px}
+.ph #lensMenu{left:8px;right:8px;width:auto;max-width:none;padding:10px 12px 12px}
 
 /* the Fan: it sits in the canvas's own world, so pan, zoom and Fit work on it; the cards are only hidden while it is open */
 body.vwfan #cards,body.vwfan #edges,body.vwfan #genbands,body.vwfan #lanes,body.vwfan #lanehead,body.vwfan #namesview,body.vwfan #mini,body.vwfan #pairs,body.vwfan #start,body.vwfan #markBar,body.vwfan #playBar{display:none!important}
@@ -1301,7 +1340,6 @@ body.slvon #trail,body.slvon #trailTip{display:none!important}
 body.slv-lifespans #slvPanel{--slv-max:58vh}
 html:not(.ph):has(#info.on) #slvPanel{right:340px}
 html.ph:has(#info.on) #slvPanel{display:none}
-#lensMenu{max-height:calc(100vh - 84px);overflow:auto}
 .slvcame{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;padding:5px 14px;background:var(--lk-accent-soft);border-bottom:2px solid var(--lk-accent);font:800 12.5px/1.3 Nunito,system-ui;flex:none}
 .slvh{display:flex;align-items:center;gap:8px;padding:0 10px 0 0;flex:none;min-height:44px}
 #slvPanel:not(.folded) .slvh{border-bottom:2px solid var(--lk-line)}
@@ -1678,7 +1716,6 @@ html:not(.ph):has(#info.on) .xv{right:352px}
 <div class="zoombar"><button class="lk-ibtn" id="zIn" title="Zoom in" aria-label="Zoom in"></button><button class="lk-ibtn" id="zOut" title="Zoom out" aria-label="Zoom out"></button><button class="lk-ibtn" id="bFit" title="Fit everything in view (F)" aria-label="Fit to view"></button></div>
 <div class="top">
   <button class="lk-ibtn" id="bRel" title="How are they related? Opens two slots: put one person in each" aria-label="How are they related"></button>
-  <button class="lk-ibtn" id="bBlood" title="Bloodline: add blood relatives, remove the rest, or colour them differently" aria-label="Bloodline" aria-haspopup="true" aria-expanded="false"></button>
   <button class="lk-ibtn" id="bViews" title="Saved views: keep this arrangement under a name, open it again, share it as a link" aria-label="Saved views" aria-haspopup="true" aria-expanded="false"></button>
   <button class="lk-ibtn" id="bGen" title="Generations: numbered bands behind each row (I is the oldest)" aria-label="Generations" aria-pressed="false"></button>
   <button class="lk-ibtn" id="bArrange" title="Arrange: tidy every card on the canvas into one neat family tree" aria-label="Arrange"></button>
@@ -1687,8 +1724,7 @@ html:not(.ph):has(#info.on) .xv{right:352px}
   <button class="lk-ibtn" id="bInfo" title="Side panel: person, where next, path" aria-label="Panel"></button>
   <button class="lk-ibtn xtra" id="bClear" title="Clear the canvas (Undo brings it back)" aria-label="Clear"></button>
   <button class="lk-ibtn" id="bFix" title="Fix list" aria-label="Fix list" hidden></button>
-  <button class="lk-ibtn" id="bTheme" title="Look" aria-label="Look" hidden></button>
-  <button class="lk-ibtn" id="bLens" title="View: how the people are drawn" aria-label="View" aria-haspopup="true" aria-expanded="false" hidden></button>
+  <button class="lk-ibtn" id="bLens" title="Appearance: View and Look" aria-label="Appearance: View and Look" aria-haspopup="true" aria-expanded="false" hidden></button>
   <button class="lk-ibtn" id="bMenu" title="Menu: how to read the lines, options" aria-label="Menu" aria-haspopup="true" aria-expanded="false"></button>
   <button class="lk-ibtn" id="bMore" title="More" aria-label="More" style="display:none"></button>
 </div>
@@ -2411,6 +2447,21 @@ html:not(.ph):has(#info.on) .xv{right:352px}
   }
 
 
+  /* What the "Blood relatives" section of the up arrow's menu offers for person i. `onCanvas` is the Set of person indexes already drawn, `cap` the most cards the canvas
+     will hold. Each choice is how far back to start (parents, grandparents, great-grandparents, everyone), how many cards it would add (+N), and whether that would pass
+     the cap; `nonBlood` is how many drawn cards are not blood relatives of i (what "Remove N non-bloodline cards" would take away). */
+  const BLOOD_SCOPES = [[1, 'parents'], [2, 'grandparents'], [3, 'great-grandparents'], [Infinity, 'everyone']];
+  function bloodChoices(M, i, onCanvas, cap) {
+    const all = bloodSet(M, i, Infinity), n = onCanvas.size;
+    const choices = BLOOD_SCOPES.map(([back, name]) => {
+      const set = back === Infinity ? all : bloodSet(M, i, back); let add = 0; set.forEach(j => { if (!onCanvas.has(j)) add++; });
+      return { back, name, add, over: n + add > cap };
+    });
+    let nonBlood = 0; onCanvas.forEach(j => { if (!all.has(j)) nonBlood++; });
+    return { choices, nonBlood };
+  }
+
+
   /* everyone above, below and beside a person, for the Person panel: ancestors and descendants by generation, and siblings (anyone who shares a parent) */
   function family(M, i) {
     const anc = new Map(), desc = new Map(), sibs = new Set(), p = M.P[i];
@@ -2614,7 +2665,7 @@ html:not(.ph):has(#info.on) .xv{right:352px}
     const N = [...nodes.values()].map(n => ({ ...n, depth: depth.get(n.key), parent: parent.get(n.key) || null }));
     return { root: rk, nodes: N, edges: E, desc: D, people: mem.size, ancestors: gen.size, scope: scope === 'all' ? 'all' : blood ? 'blood' : 'anc' };
   }
-  const API = { nameTree, playSet, playSteps, family, lifeEvents, eraChanges, lines, arrange, bloodSet, fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful, dupsOf,
+  const API = { nameTree, playSet, playSteps, family, lifeEvents, eraChanges, lines, arrange, bloodSet, bloodChoices, fold, foldSplit, squash, build, search, attachNames, buildNames, variantsOf, nameForms, findPath, weakest, describePath, strengthSentence, bridgeState, bridgeOther, bridgeNotes, bridgeDoubtful, dupsOf,
     placeAt, dateText, neighbours, edgeCost, parentLinks, ancestorStats, stopReason, otherSideHasParents, evidenceSummary, years, url, corrUrl, wikitreeUrl, searchLinks, levelOfGrade, LEVELS, playSteps, kinshipOps, opsOf, reverseOps, bloodTerm, siblingKind, archivesOnPath, ord };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TC = API;
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -3778,7 +3829,7 @@ html:not(.ph):has(#info.on) .xv{right:352px}
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCP = API;
 })(typeof window !== 'undefined' ? window : globalThis);
 
-/* views.js — the pure parts of the View button, the Trail band and the Fan. No DOM; tested by test/test-views.js (and, for colour, test/test-fan-contrast.js).
+/* views.js — the pure parts of the Appearance button (View and Look), the Trail band and the Fan. No DOM; tested by test/test-views.js (and, for colour, test/test-fan-contrast.js).
  *
  * THE TRAIL: one person's direct line (one ancestor a generation, through the fathers or through the mothers), and the places the person's own life touched.
  * THE FAN: a person's ancestors as a half circle, rings = generations, a wedge = an ancestor, a faint outline where nobody is recorded. The geometry is in world
@@ -4054,7 +4105,12 @@ html:not(.ph):has(#info.on) .xv{right:352px}
   }
   const lensIsDefault = l => { const c = cleanLens(l); return c.m === 'canvas' && c.g === FAN_DEFAULT && c.c === 'side' && c.t === 2 && c.o === 'sp' && !c.xs && !c.xl && c.gu === undefined && c.gd === undefined && c.hk === undefined; };
 
-  const API = { contrast, mix, inkFor, lum, hex2, lineIdx, defaultSide, trailCard, trailModel, genTag, placeTrail, FAN_MIN, FAN_MAX, FAN_DEFAULT, RING, ringR, fanRadius, wedge, wedgePath, pt, fanSlots, routeWords, kinWord, genName,
+  /* THE APPEARANCE BUTTON: one round button that holds the View (how the people are drawn) and the Look (the colours). Its words, for its tooltip and its accessible name, state both current choices. */
+  const LOOK_CHOICES = ['auto', 'sticker', 'paper', 'ground'];
+  const LOOK_SHORT = { auto: 'Automatic', sticker: 'Sticker', paper: 'Paper', ground: 'Ground', lanes: 'Lanes', countries: 'Countries', names: 'Names' };
+  const appearanceLabel = (view, look) => 'Appearance. View: ' + (view || 'Canvas') + '. Look: ' + (LOOK_SHORT[look] || LOOK_SHORT.auto) + '.';
+
+  const API = { LOOK_CHOICES, LOOK_SHORT, appearanceLabel, contrast, mix, inkFor, lum, hex2, lineIdx, defaultSide, trailCard, trailModel, genTag, placeTrail, FAN_MIN, FAN_MAX, FAN_DEFAULT, RING, ringR, fanRadius, wedge, wedgePath, pt, fanSlots, routeWords, kinWord, genName,
     SIDE_BASE, STEP, sideFill, flagColour, flagCandidates, flagPalette, placeFlag, placeFill, textW, boxInWedge, labelLevels, fanLabel, fanList, cleanLens, lensIsDefault, VIEW_IDS, lifeText, fullName, hidden, LENS_DEFAULT };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCV = API;
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -6169,12 +6225,51 @@ async function doAllBack(c, force, mode) {
   } finally { walking = false; }
 }
 
-/* The up arrow's "all": ask which way to go back, so the paternal line (or the maternal) can be taken without the rest of the family. */
-function closeBackMenu() { const m = document.getElementById('backMenu'); if (m) m.classList.remove('on'); }
+/* Colour the people who are not blood relatives of `ref` (a person index) dashed and lilac, or stop. The status chip in the top row says so for as long as it is on,
+   so it can be switched off with nothing selected and the menu closed. Not stored: it starts off every visit, as it always has. */
+function setTint(on, ref) {
+  S.blood.tint = on; S.blood.ref = on ? ref : null; S.blood.set = on ? TC.bloodSet(M, ref, Infinity) : null;
+  refreshAll(); syncBloodChip();
+}
+function syncBloodChip() {
+  const el = document.getElementById('blChip'); if (!el) return;
+  const ref = S.blood.tint && S.blood.ref != null ? M.P[S.blood.ref] : null;
+  el.hidden = !ref;
+  if (ref) { el.querySelector('.blnm').textContent = ref.name; el.title = 'Colouring relative to ' + ref.name; }
+}
+/* The blood-relatives part of the up arrow's menu. Everything is worked out for the person whose arrow was pressed (c), not for whoever is selected. */
+let blScope = Infinity;
+function bloodSectionHTML(c) {
+  const p = personOf(c), ref = S.blood.tint && S.blood.ref != null ? M.P[S.blood.ref] : null;
+  const bc = TC.bloodChoices(M, c.i, new Set([...S.cards.values()].map(x => x.i)), BLOOD_CAP), nb = bc.nonBlood;
+  const tintOn = !!ref && S.blood.ref === c.i, other = !!ref && S.blood.ref !== c.i;
+  return `<div class="bmsep bmsec" id="blTitle">Blood relatives of ${esc(p.name)}</div>`
+    + `<p class="bmnote">They share an ancestor with ${esc(p.name)}, through parents and children only. Spouses and in-laws are not blood unless they are also descended from the same people.</p>`
+    + `<div class="bmlab" id="blAddLab">Add blood relatives, starting from</div>`
+    + `<div class="bmscopes" role="group" aria-labelledby="blAddLab">` + bc.choices.map(x => `<button type="button" class="bmo bmsc" role="menuitemradio" aria-checked="${x.back === blScope}" data-bl="scope" data-back="${x.back === Infinity ? 'all' : x.back}"${x.over ? ' disabled title="That would pass the limit of ' + BLOOD_CAP + ' cards"' : ''}><b>${x.back === Infinity ? 'All' : 'Back to ' + x.name}</b><span>+${x.add.toLocaleString()}${x.over ? ' (too many)' : ''}</span></button>`).join('') + `</div>`
+    + `<button type="button" class="bmo bmadd" role="menuitem" data-bl="add"><b>Add them to the canvas</b></button>`
+    + `<button type="button" class="bmo bmdanger" role="menuitem" data-bl="strip"${nb ? '' : ' disabled'}><b>Remove ${nb ? nb.toLocaleString() + ' ' : ''}non-bloodline card${nb === 1 ? '' : 's'}</b></button>`
+    + `<button type="button" class="bmo bmtog${tintOn ? ' on' : ''}" role="menuitemcheckbox" aria-checked="${tintOn}" data-bl="tint"><span class="stx"><b>Colour non-blood relatives</b><span>Cards of people who are not blood relatives of ${esc(p.name)} turn dashed and lilac.</span></span><span class="knob" aria-hidden="true"></span></button>`
+    + (other ? `<p class="bmnote">Colouring is relative to ${esc(ref.name)} now.</p>` : '');
+}
+
+/* The up arrow's "all": ask which way to go back, so the paternal line (or the maternal) can be taken without the rest of the family. The same menu holds the
+   blood-relatives controls (add them, remove everyone else, colour everyone else), which used to be a button of their own in the top row. */
+let backFor = null;   /* the card the open menu belongs to */
+function closeBackMenu(refocus) {
+  const m = document.getElementById('backMenu'); if (!m) return; const was = m.classList.contains('on'); m.classList.remove('on');
+  if (askBack._off) { removeEventListener('pointerdown', askBack._off, true); removeEventListener('keydown', askBack._off, true); askBack._off = null; }
+  if (refocus && was && backFor) {   /* the arrow may have been redrawn while the menu was open: find it again */
+    const k = backFor.key, a = (askBack._anchor && askBack._anchor.isConnected && askBack._anchor) || document.querySelector('.card[data-k="' + (window.CSS && CSS.escape ? CSS.escape(k) : k) + '"] [data-act="upall"]') || document.querySelector('#info [data-do="upall"]');
+    if (a) a.focus({ preventScroll: true });
+  }
+}
 function askBack(c, anchor) {
   const p = personOf(c), f = p.f >= 0 ? M.P[p.f] : null, m = p.m >= 0 ? M.P[p.m] : null;
+  backFor = c; askBack._anchor = anchor;
   let el = document.getElementById('backMenu');
   if (!el) { el = document.createElement('div'); el.id = 'backMenu'; el.setAttribute('role', 'menu'); document.body.appendChild(el); }
+  el.setAttribute('aria-label', 'Go back from ' + p.name);
   const opt = (mode, head, sub, ok, why) => `<button class="bmo" role="menuitem" data-mode="${mode}"${ok ? '' : ' disabled title="' + esc(why) + '"'}><b>${head}</b><span>${ok ? sub : esc(why)}</span></button>`;
   el.innerHTML = `<h4>Go back from ${esc(p.name)}</h4>`
     + opt('both', 'Everyone', 'Both parents, and theirs, until the records stop', !!(f || m), 'No parents on record')
@@ -6183,16 +6278,36 @@ function askBack(c, anchor) {
     + opt('mside', "Mother's side", m ? esc(m.name) + ' and all her ancestors' : '', !!m, 'No mother on record')
     + `<div class="bmsep">One person a generation</div>`
     + opt('fline', 'Paternal line', 'Father, his father, his father…', !!f, 'No father on record')
-    + opt('mline', 'Maternal line', 'Mother, her mother, her mother…', !!m, 'No mother on record');
-  el.onclick = e => { const b = e.target.closest('.bmo'); if (!b || b.disabled) return; closeBackMenu(); doAllBack(c, false, b.dataset.mode); };
+    + opt('mline', 'Maternal line', 'Mother, her mother, her mother…', !!m, 'No mother on record')
+    + (p.ghost ? '' : `<div id="blSec" role="group" aria-labelledby="blTitle">${bloodSectionHTML(c)}</div>`);
+  const items = () => [...el.querySelectorAll('.bmo:not([disabled])')];
+  el.onclick = async e => {
+    const b = e.target.closest('.bmo'); if (!b || b.disabled) return;
+    if (b.dataset.mode) { closeBackMenu(); doAllBack(c, false, b.dataset.mode); return; }
+    const act = b.dataset.bl;
+    if (act === 'scope') { blScope = b.dataset.back === 'all' ? Infinity : +b.dataset.back; el.querySelectorAll('[data-bl="scope"]').forEach(x => x.setAttribute('aria-checked', String(x === b))); }
+    else if (act === 'tint') { if (S.blood.tint && S.blood.ref === c.i) setTint(false); else setTint(true, c.i); const h = el.scrollTop; const sec = el.querySelector('#blSec'); if (sec) sec.innerHTML = bloodSectionHTML(c); el.scrollTop = h; const t = el.querySelector('[data-bl="tint"]'); if (t) t.focus({ preventScroll: true }); }
+    else if (act === 'add') { closeBackMenu(true); await doBlood(c, blScope); }
+    else if (act === 'strip') { closeBackMenu(true); doStripBlood(c); }
+  };
+  el.onkeydown = e => {   /* the arrow keys walk every item; Home and End jump; Tab leaves the menu */
+    const k = e.key, list = items(); if (!list.length) return; const at = list.indexOf(document.activeElement);
+    let to = null;
+    if (k === 'ArrowDown' || k === 'ArrowRight') to = list[(at + 1) % list.length];
+    else if (k === 'ArrowUp' || k === 'ArrowLeft') to = list[(at < 1 ? list.length : at) - 1];
+    else if (k === 'Home') to = list[0]; else if (k === 'End') to = list[list.length - 1];
+    else if (k === 'Tab') { e.preventDefault(); closeBackMenu(true); return; }
+    if (to) { e.preventDefault(); to.focus(); }
+  };
+  el.style.maxHeight = (innerHeight - 16) + 'px'; el.scrollTop = 0;
   el.classList.add('on');
-  /* above the button when there is room (the button sits on the card's top edge), below it otherwise; kept inside the window */
+  /* above the button when there is room (the button sits on the card's top edge), below it otherwise; kept inside the window; the menu scrolls inside when it is taller than the window */
   const r = anchor.getBoundingClientRect(), w = el.offsetWidth, h = el.offsetHeight;
   const left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2));
   const top = r.top - h - 8 >= 8 ? r.top - h - 8 : Math.min(innerHeight - h - 8, r.bottom + 8);
   el.style.left = left + 'px'; el.style.top = Math.max(8, top) + 'px';
-  const first = el.querySelector('.bmo:not([disabled])'); if (first) first.focus({ preventScroll: true });
-  const off = ev => { if (ev.type === 'keydown' ? ev.key === 'Escape' : !el.contains(ev.target)) { closeBackMenu(); removeEventListener('pointerdown', off, true); removeEventListener('keydown', off, true); } };
+  const first = items()[0]; if (first) first.focus({ preventScroll: true });
+  const off = ev => { if (ev.type === 'keydown' ? ev.key === 'Escape' : !el.contains(ev.target)) { if (ev.type === 'keydown') { ev.stopPropagation(); ev.preventDefault(); } closeBackMenu(ev.type === 'keydown'); } };
   if (askBack._off) { removeEventListener('pointerdown', askBack._off, true); removeEventListener('keydown', askBack._off, true); }
   askBack._off = off; addEventListener('pointerdown', off, true); addEventListener('keydown', off, true);
 }
@@ -7111,7 +7226,7 @@ function openLines(on) {
   const el = $('#linesView'); if (!el) return;
   if (on == null) on = !el.classList.contains('on');
   if (on && !lnData()) { toast('This archive has not published its lines.', 3000); return; }
-  if (on) { openMainMenu(false); openBloodMenu(false); const keep = el.scrollTop; el.innerHTML = linesHTML(); el.scrollTop = keep; }
+  if (on) { openMainMenu(false); const keep = el.scrollTop; el.innerHTML = linesHTML(); el.scrollTop = keep; }
   el.classList.toggle('on', on); document.documentElement.classList.toggle('lines-on', on);
   if (on) { const x = el.querySelector('[data-ln-x]'); if (x) x.focus({ preventScroll: true }); }
 }
@@ -7566,7 +7681,7 @@ $('#info').addEventListener('click', e => {
 }, true);
 $('#info').addEventListener('change', e => { const pk = e.target.closest && e.target.closest('[data-pr-pick]'); if (pk) { const [a, i] = pk.dataset.prPick.split(':').map(Number); if (S.pr) S.pr.pick[a] = i; } });
 
-/* viewsui.js — the View button, the Fan, and the Trail band. The pure parts (the direct line, the places of a life, the fan's geometry, colour and labels) are in views.js and are tested there.
+/* viewsui.js — the Appearance button (View and Look in one menu), the Fan, and the Trail band. The pure parts (the direct line, the places of a life, the fan's geometry, colour and labels) are in views.js and are tested there.
  *
  * VIEW is how the selection is drawn: Canvas (the free canvas, as it always was) or Fan. A view is a LENS: it never replaces the canvas, it is drawn over it, and the canvas underneath keeps its cards,
  * its pan and zoom (put back when the lens closes), and its selection. The choice is one small field of the tree's saved record (`lens` here, `vw` in the record: see public/tree-canvas/work.js), opaque
@@ -7577,7 +7692,8 @@ $('#info').addEventListener('change', e => { const pk = e.target.closest && e.ta
  * A person who may be living is shown by name and family only, here as everywhere. Nothing here is stored or sent. */
 const TCV = window.TCV;
 const LV = { m: 'canvas', o: 'sp', g: TCV.FAN_DEFAULT, c: 'side', t: 2, root: null, cv: null, list: false, stack: [], kb: null, bucket: -99, came: false, side: null, tf: null, hov: null, flagCache: new Map(), model: null };
-const lensAvail = () => (!EMBED || SA) && !S.pr;
+const lookAvail = () => !EMBED || SA;   /* the Appearance button (the Look chips) stays while a comparison is on; only the View choices wait for it */
+const lensAvail = () => lookAvail() && !S.pr;
 const fanIsOn = () => LV.m === 'fan';
 /* the other Views (skyui.js, placelanesui.js) register here: id -> { title, sub, open(key, opts), close(), onSelect(), onTheme() }. They are drawn over the canvas, which keeps its cards, pan, zoom and selection. */
 const VIEWX = {};
@@ -7605,36 +7721,53 @@ function lensTokens() {
   return { card: g('--lk-card', '#FFFCF3'), board: g('--lk-board', '#F1E8D2'), ink: g('--lk-ink', '#2b2118'), line: g('--lk-line', '#E3D6B8'), faint: g('--lk-faint', '#b9a98c'), accent: g('--lk-accent', '#D9822B') };
 }
 
-/* ---------------- the View button and its menu ---------------- */
+/* ---------------- the Appearance button and its menu ---------------- */
+/* ONE round button (the fan, with a small badge for the Look) opens ONE menu in two sections: LOOK, the colours (four chips, always in view), and VIEW, how the people are drawn (the long list, which scrolls). Both keep working exactly as they did
+   as two buttons: the View is kept in the tree's record (`vw`), the Look where it has always been kept (the page around the canvas, or loamTheme when there is none: ui.js lookSet). */
+const LOOK_SUB = { auto: 'light by day, dark at night', sticker: 'light', paper: 'light, soft', ground: 'dark' };
+function lensViewName() { return fanIsOn() ? 'Fan' : slvOn() ? slvName() : typeof gvName === 'function' && gvName() || (xOn() ? xOn().title : 'Canvas'); }
 function lensWire() {
   const b = $('#bLens'); if (!b) return;
-  if (!lensAvail()) { b.hidden = true; return; }
-  b.hidden = false; b.innerHTML = icon('fan'); lensBtn();
-  const m = document.createElement('div'); m.id = 'lensMenu'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', 'View'); document.body.appendChild(m);
+  if (!lookAvail()) { b.hidden = true; return; }
+  b.hidden = false; lensBtn();
+  const m = document.createElement('div'); m.id = 'lensMenu'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', 'Appearance: View and Look'); document.body.appendChild(m);
   b.onclick = () => openLensMenu();
   m.addEventListener('click', e => {
+    const lk = e.target.closest('[data-lk]'); if (lk) { lookSet(lk.dataset.lk); return; }   // the menu stays open: the Look can be seen at once, and the View chosen next
     const t = e.target.closest('[data-lv]'); if (!t || t.disabled) return;
     if (t.dataset.lv === 'trail') { lensTrailSize(LV.t ? 0 : 2); lensMenu(); return; }
     lensSet(t.dataset.lv); openLensMenu(false); b.focus();
   });
   m.addEventListener('keydown', e => {
-    const its = [...m.querySelectorAll('[role="menuitemradio"]:not([disabled])')], k = its.indexOf(document.activeElement);
-    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); if (k >= 0) its[(k + (e.key === 'ArrowDown' ? 1 : its.length - 1)) % its.length].focus(); else if (its[0]) its[0].focus(); }
+    const its = [...m.querySelectorAll('[role="menuitemradio"]:not([disabled])')], k = its.indexOf(document.activeElement);   // both sections are ONE list
+    const fwd = e.key === 'ArrowDown' || e.key === 'ArrowRight', back = e.key === 'ArrowUp' || e.key === 'ArrowLeft';
+    if (fwd || back) { e.preventDefault(); if (k >= 0) its[(k + (fwd ? 1 : its.length - 1)) % its.length].focus(); else if (its[0]) its[0].focus(); }
     else if (e.key === 'Home' && its[0]) { e.preventDefault(); its[0].focus(); }
     else if (e.key === 'End' && its.length) { e.preventDefault(); its[its.length - 1].focus(); }
   });
-  document.addEventListener('click', e => { if (m.classList.contains('on') && !m.contains(e.target) && !e.target.closest('#bLens')) openLensMenu(false); });
+  document.addEventListener('click', e => { const inside = e.composedPath().includes(m) || e.composedPath().includes(b); if (m.classList.contains('on') && !inside) openLensMenu(false); });   // composedPath: a choice redraws the menu, so e.target may no longer be in it
   addEventListener('keydown', e => { if (e.key === 'Escape' && m.classList.contains('on')) { openLensMenu(false); b.focus(); } });
 }
 function lensBtn() {
   const b = $('#bLens'); if (!b || b.hidden) return;
-  const txt = 'View: ' + (fanIsOn() ? 'Fan' : slvOn() ? slvName() : typeof gvName === 'function' && gvName() || (xOn() ? xOn().title : 'Canvas')) + '. Choose how the people are drawn.';
-  b.title = txt; b.setAttribute('aria-label', txt); b.classList.toggle('on', fanIsOn() || slvOn() || (typeof gvOn === 'function' && gvOn()) || !!xOn());
+  const c = lookChosen(), txt = TCV.appearanceLabel(lensViewName(), c);
+  b.title = txt + ' Click to change either.'; b.setAttribute('aria-label', txt); b.classList.toggle('on', fanIsOn() || slvOn() || (typeof gvOn === 'function' && gvOn()) || !!xOn());
+  const ic = c === 'ground' ? 'moon' : c === 'sticker' || c === 'paper' ? 'sun' : 'theme';   // the badge shows the Look: a sun, a moon, or the half-filled circle (Automatic, and the layouts)
+  if (b.dataset.badge !== ic) { b.dataset.badge = ic; b.innerHTML = icon('fan') + icon(ic, 'lvbadge'); }
+  const m = $('#lensMenu'); if (m && m.classList.contains('on')) lensMenu();   // an open menu follows a choice made anywhere (the page's Settings, the Menu's chips)
 }
 function lensMenu() {
   const m = $('#lensMenu'); if (!m) return;
-  const item = (k, t, sub, on, dis) => `<button type="button" role="menuitemradio" class="lvi${on ? ' on' : ''}" data-lv="${k}" aria-checked="${on}"${dis ? ' disabled' : ''}><span class="lvd" aria-hidden="true"></span><span><b>${t}</b><small>${sub}</small></span></button>`;
-  m.innerHTML = `<h4>View</h4><p class="plines"><small>How the people are drawn. <b>Look</b>, the half-sun button, is the colours.</small></p>`
+  const was = document.activeElement, wk = was && m.contains(was) ? (was.dataset.lv || was.dataset.lk || '') : '', st = m.scrollTop;
+  const item = (k, t, sub, on, dis) => `<button type="button" role="menuitemradio" class="lvi${on ? ' on' : ''}" data-lv="${k}" aria-checked="${on}"${dis || S.pr ? ' disabled' : ''}><span class="lvd" aria-hidden="true"></span><span><b>${t}</b><small>${sub}</small></span></button>`;
+  const cur = lookChosen(), swatch = k => k === 'auto' ? '<span class="lks lksa" aria-hidden="true"><i data-theme="sticker"></i><i data-theme="ground"></i></span>' : `<span class="lks" data-theme="${k}" aria-hidden="true"></span>`;
+  const look = k => `<button type="button" role="menuitemradio" class="lki${cur === k ? ' on' : ''}" data-lk="${k}" aria-checked="${cur === k}" title="${LOOK_SHORT[k]}: ${LOOK_SUB[k]}">${swatch(k)}<b>${LOOK_SHORT[k]}</b></button>`;
+  /* LOOK first, because it is short and then always in view; the long View list scrolls under it */
+  m.innerHTML = `<h4>Look <small>the colours</small></h4>`
+    + `<div role="menu" aria-label="Look" class="lkgrid">` + LOOK_CYCLE.map(look).join('') + `</div>`
+    + (LOOK_CYCLE.includes(cur) ? '' : `<p class="plines lkon"><small>${LOOK_SHORT[cur]} is on now; pick a look to leave it.</small></p>`)
+    + `<h4 class="lvh2">View <small>how the people are drawn</small></h4>`
+    + (S.pr ? `<p class="plines lkon"><small>Compare is laying the people out, so the views wait. Stop comparing to choose one.</small></p>` : '')
     + `<div role="menu" aria-label="View">`
     + item('canvas', 'Canvas', 'Free: the cards sit where you put them', LV.m === 'canvas')
     + item('fan', 'Fan', 'The ancestors of the selected person as a half circle, a ring a generation', fanIsOn())
@@ -7643,13 +7776,21 @@ function lensMenu() {
     + item('house', 'Household', 'Parents, brothers and sisters, partners and children on a timeline of years', LV.m === 'house')
     + Object.keys(VIEWX).map(k => item(k, VIEWX[k].title, VIEWX[k].sub, LV.m === k)).join('') + `</div>`
     + `<button type="button" class="lk-toggle${LV.t ? ' on' : ''}" role="switch" aria-checked="${!!LV.t}" data-lv="trail"><span class="stx"><b>Direct-line strip open</b><i>A band along the very bottom: the selected person’s line, one ancestor a generation, and where they lived. Off folds it to a thin handle.</i></span><span class="knob"></span></button>`;
+  m.scrollTop = st;
+  if (wk) { const q = m.querySelector(`[data-lv="${wk}"],[data-lk="${wk}"]`); if (q) q.focus({ preventScroll: true }); }
 }
+/* the menu hangs just under the toolbar, wherever that ends (a phone wraps it onto two rows), and never runs past the bottom of the window: the menu scrolls inside itself instead */
+function lensMenuTop() {
+  const m = $('#lensMenu'), t = document.querySelector('.top'); if (!m || !t) return;
+  const r = t.getBoundingClientRect(); m.style.setProperty('--lm-top', Math.max(8, Math.ceil(r.bottom + 8)) + 'px');
+}
+addEventListener('resize', () => { const m = $('#lensMenu'); if (m && m.classList.contains('on')) lensMenuTop(); });
 function openLensMenu(on) {
   const m = $('#lensMenu'), b = $('#bLens'); if (!m || !b) return;
   if (on == null) on = !m.classList.contains('on');
-  if (on) { openMainMenu(false); openBloodMenu(false); openViewsMenu(false); lensMenu(); }
+  if (on) { openMainMenu(false); openViewsMenu(false); lensMenuTop(); lensMenu(); }
   m.classList.toggle('on', on); b.setAttribute('aria-expanded', String(on));
-  if (on) { const c = m.querySelector('.lvi.on') || m.querySelector('.lvi'); if (c && !S.phone) c.focus({ preventScroll: true }); }
+  if (on) { m.scrollTop = 0; const c = m.querySelector('.lvi.on') || m.querySelector('.lvi'); if (c && !S.phone) c.focus(); }
 }
 
 /* ---------------- choosing a view ---------------- */
@@ -8090,7 +8231,7 @@ const slvView = () => (SLV.m ? SLV.views[SLV.m] : null);
 function slvMenuItems() {
   return Object.values(SLV.views).map(v => {
     const on = SLV.m === v.id;
-    return `<button type="button" role="menuitemradio" class="lvi${on ? ' on' : ''}" data-lv="${v.id}" aria-checked="${on}"><span class="lvd" aria-hidden="true"></span><span><b>${esc(v.title)}</b><small>${esc(v.sub)}</small></span></button>`;
+    return `<button type="button" role="menuitemradio" class="lvi${on ? ' on' : ''}" data-lv="${v.id}" aria-checked="${on}"${S.pr ? ' disabled' : ''}><span class="lvd" aria-hidden="true"></span><span><b>${esc(v.title)}</b><small>${esc(v.sub)}</small></span></button>`;
   }).join('');
 }
 const slvName = () => (slvView() ? slvView().title : '');
@@ -9808,7 +9949,7 @@ function viewsMenu() {
 function openViewsMenu(on) {
   const m = $('#viewsMenu'), b = $('#bViews'); if (!m || !b) return;
   if (on == null) on = !m.classList.contains('on');
-  if (on) { if (typeof openMainMenu === 'function') openMainMenu(false); openBloodMenu(false); if (typeof openLensMenu === 'function') openLensMenu(false); viewsMenu(); }
+  if (on) { if (typeof openMainMenu === 'function') openMainMenu(false); if (typeof openLensMenu === 'function') openLensMenu(false); viewsMenu(); }
   m.classList.toggle('on', on); b.setAttribute('aria-expanded', String(on)); b.classList.toggle('on', on);
   if (on) { const i = $('#vwName'); if (i && !S.phone) i.focus({ preventScroll: true }); }
 }
@@ -9934,7 +10075,7 @@ function legendHTML() {
     <div class="legend">${rows.map(r => `${swatch(r[0], col)}<div><b>${r[1]}</b><small>${r[2]}</small></div>`).join('')}</div>
     <h4>Cards</h4><p>The coloured edge and chip say which archive. <b>&uarr; n</b> shows the parents (“how is this made”), <b>&uarr;&uarr; all</b> goes all the way back one generation at a time, <b>&darr;</b> shows the children (“what this made”), <b>&#9901;</b> the spouses, <b>&asymp; Archive</b> pulls in the suggested same person from another archive. Drag any card; a dragged card stays where you put it.</p>
     <p>The small seals at the bottom of a card are its father and mother links (a link with no grade shows none).</p>
-    <h4>Bloodline</h4><p>The <b>drop</b> button in the top row works from the selected person. A <b>dashed lilac</b> card is not a blood relative of the person you are colouring from: a spouse, in-law or someone from another family.</p>`;
+    <h4>Bloodline</h4><p>Press <b>&uarr;&uarr; all</b> on a card and the menu ends with <b>Blood relatives of</b> that person: add them, remove everyone else, or colour everyone else. A <b>dashed lilac</b> card is not a blood relative of the person you are colouring from: a spouse, in-law or someone from another family. While colouring is on, the top row says so and has a <b>Stop</b> button.</p>`;
 }
 
 /* ---- the Person panel's family sections: counts you can open, the line bar, parents / spouse / children, what happened around their life, sources ---- */
@@ -10220,14 +10361,14 @@ function recentHTML() {
 function openMainMenu(on) {
   const m = $('#mainMenu'), b = $('#bMenu'); if (!m) return;
   if (on == null) on = !m.classList.contains('on');
-  if (on) { openBloodMenu(false); openViewsMenu(false); if (typeof openLensMenu === 'function') openLensMenu(false); mainMenu(); if (SA) recentLoad(); }
+  if (on) { openViewsMenu(false); if (typeof openLensMenu === 'function') openLensMenu(false); mainMenu(); if (SA) recentLoad(); }
   m.classList.toggle('on', on); b.setAttribute('aria-expanded', String(on)); b.classList.toggle('on', on);
 }
 /* the line key is an overlay in the same corner as the menu, not a tab in the side panel */
 function openLegend(on) {
   const c = $('#legendCard'); if (!c) return;
   if (on == null) on = !c.classList.contains('on');
-  if (on) { openBloodMenu(false); c.innerHTML = `<button type="button" class="lgx" data-lgx aria-label="Close">${icon('x', 'lk-icon')}</button>` + legendHTML(); c.scrollTop = 0; }
+  if (on) { c.innerHTML = `<button type="button" class="lgx" data-lgx aria-label="Close">${icon('x', 'lk-icon')}</button>` + legendHTML(); c.scrollTop = 0; }
   c.classList.toggle('on', on);
 }
 /* a tombstone in the Countries look: who it was. Select them, show their details, and bring them into focus. */
@@ -10254,56 +10395,6 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('change', e => { const c = e.target; if (!c || c.id !== 'mmRem') return; try { localStorage.setItem('tcRemember', c.checked ? '1' : '0'); } catch (x) { /* ignore */ } if (!c.checked) { recentForget(); try { localStorage.removeItem(RS_KEY); } catch (x) { /* ignore */ } } else mainMenu(); });
 addEventListener('keydown', e => { if (e.key !== 'Escape') return; if ($('#mainMenu') && $('#mainMenu').classList.contains('on')) openMainMenu(false); else if ($('#legendCard') && $('#legendCard').classList.contains('on')) openLegend(false); });
-
-/* ---------- the Bloodline menu: add blood relatives / take away the rest / colour the rest ---------- */
-const BL_SCOPES = [[1, 'parents'], [2, 'grandparents'], [3, 'great-grandparents'], [Infinity, 'everyone']];
-let blScope = Infinity;
-function bloodMenu() {
-  const m = $('#bloodMenu'), key = [...S.sel][0], c = key && S.cards.get(key), p = c && personOf(c);
-  const ref = S.blood.ref != null ? M.P[S.blood.ref] : null;
-  if (!c || p.ghost) {
-    m.innerHTML = `<h4>Bloodline</h4><p class="plines">Click a card first: the bloodline is worked out from that person. Blood relatives are the people they share an ancestor with, reached through parents and children only, never through a marriage.</p>`
-      + (S.blood.tint && ref ? `<div class="bmrow"><button class="lk-btn is-small is-primary" data-bm="tint-off">Stop colouring (was relative to ${esc(ref.name)})</button></div>` : '');
-    return;
-  }
-  const opts = BL_SCOPES.map(([b, n]) => { const set = TC.bloodSet(M, c.i, b), add = [...set].filter(i => !S.cards.has(M.P[i].key)).length, over = S.cards.size + add > BLOOD_CAP;
-    return `<option value="${b === Infinity ? 'all' : b}"${b === blScope ? ' selected' : ''}${over ? ' disabled' : ''}>${b === Infinity ? 'All' : 'Back to ' + n}: +${add.toLocaleString()}${over ? ' (too many)' : ''}</option>`; }).join('');
-  const all = TC.bloodSet(M, c.i, Infinity), nonBlood = [...S.cards.values()].filter(x => !all.has(x.i)).length;
-  const tintOn = S.blood.tint && S.blood.ref === c.i, other = S.blood.tint && ref && S.blood.ref !== c.i;
-  m.innerHTML = `<h4>Bloodline of ${esc(p.name)}</h4>
-    <p class="plines"><small>Blood relatives share an ancestor with ${esc(p.name)}, through parents and children only. Spouses and in-laws are not blood unless they are also descended from the same people.</small></p>
-    <label class="bmlab">Add blood relatives<select id="bmScope" aria-label="How far back to start">${opts}</select></label>
-    <div class="bmrow"><button class="lk-btn is-small is-primary" data-bm="add">Add them to the canvas</button></div>
-    <div class="bmrow"><button class="lk-btn is-small is-danger" data-bm="strip"${nonBlood ? '' : ' disabled'}>Remove ${nonBlood ? nonBlood.toLocaleString() + ' ' : ''}non-bloodline card${nonBlood === 1 ? '' : 's'}</button></div>
-    <button class="lk-toggle${tintOn ? ' on' : ''}" role="switch" aria-checked="${tintOn}" data-bm="tint"><span class="stx"><b>Colour non-blood relatives</b><i>Cards of people who are not blood relatives of ${esc(p.name)} turn dashed and lilac.</i></span><span class="knob"></span></button>
-    ${other ? `<p class="plines"><small>Colouring is relative to ${esc(ref.name)}.</small></p>` : ''}`;
-  const sel = $('#bmScope'); if (sel) sel.onchange = () => { blScope = sel.value === 'all' ? Infinity : +sel.value; };
-}
-function openBloodMenu(on) {
-  const m = $('#bloodMenu'), b = $('#bBlood'); if (!m) return;
-  if (on == null) on = !m.classList.contains('on');
-  if (on) { if (typeof openMainMenu === 'function') openMainMenu(false); openViewsMenu(false); if (typeof openLensMenu === 'function') openLensMenu(false); bloodMenu(); }
-  m.classList.toggle('on', on); b.setAttribute('aria-expanded', String(on)); b.classList.toggle('on', on || S.blood.tint);
-}
-function setTint(on, ref) {
-  S.blood.tint = on; S.blood.ref = on ? ref : null; S.blood.set = on ? TC.bloodSet(M, ref, Infinity) : null;
-  refreshAll(); $('#bBlood').classList.toggle('on', on);
-}
-document.addEventListener('click', async e => {
-  const m = $('#bloodMenu'); if (!m) return;
-  const t = e.target.closest('[data-bm]');
-  if (t && m.contains(t)) {
-    const key = [...S.sel][0], c = key && S.cards.get(key), act = t.dataset.bm;
-    if (act === 'tint-off') { setTint(false); bloodMenu(); return; }
-    if (!c) return;
-    if (act === 'add') { openBloodMenu(false); await doBlood(c, blScope); }
-    else if (act === 'strip') { openBloodMenu(false); doStripBlood(c); }
-    else if (act === 'tint') { if (S.blood.tint && S.blood.ref === c.i) setTint(false); else setTint(true, c.i); bloodMenu(); }
-    return;
-  }
-  if (m.classList.contains('on') && !m.contains(e.target) && !e.target.closest('#bBlood')) openBloodMenu(false);
-});
-addEventListener('keydown', e => { if (e.key === 'Escape' && $('#bloodMenu') && $('#bloodMenu').classList.contains('on')) openBloodMenu(false); });
 
 /* Links back to the tree the visitor's file came from (EMBED only): the Roots & Routes page, or the standalone page, owns the link and the file's header and hands
    a small object over in memory (window.parent.RR.links). The canvas asks it for a person's address and, from Options, passes a pasted link back. Nothing is sent. */
@@ -10503,19 +10594,33 @@ function setTheme(t) {
   if (typeof prOnTheme === 'function') prOnTheme();
   if (typeof lensOnTheme === 'function') lensOnTheme();
   drawEdges(); miniDraw(); if (typeof drawNames === 'function') drawNames(true); if (S.tab === 'options') renderInfo(); startSync();
+  if (typeof lensBtn === 'function') lensBtn();   /* the Appearance button names the Look, and its menu ticks it */
 }
 function initTheme() {
   let t = null; try { t = localStorage.getItem('loamTheme'); } catch (e) { /* ignore */ }
   if (!THEMES.includes(t)) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'ground' : 'sticker';
   document.documentElement.setAttribute('data-theme', t);
 }
-/* the one-click Look button (the standalone page only; the Settings drawer holds the whole list). It only ASKS the page around it, which keeps the choice (settings.js, and the
-   six words when they are on) and tells us back (tcLook), so the canvas, the page and the drawer cannot disagree. The cycle is the colour looks; Lanes, Countries and Names
-   are layouts and are chosen in Settings (the button leaves them for Automatic). settings.js CYCLE is the page's copy of this list; test/tree-canvas-theme.test.js checks they agree. */
-const LOOK_CYCLE = ['auto', 'sticker', 'paper', 'ground'];
+/* THE LOOK is a section of the Appearance menu (viewsui.js: the one button that holds View and Look). The menu only ASKS the page around it, which keeps the choice (settings.js, and the
+   six words when they are on) and tells us back (tcLook), so the canvas, the page and the drawer cannot disagree; with no page around (the standalone file) it sets the Look itself, in the same
+   key as ever (loamTheme). The choices are the colour looks; Lanes, Countries and Names are layouts and are chosen in Settings (or the Menu). settings.js CYCLE is the page's copy of this list;
+   test/tree-canvas-theme.test.js checks they agree. */
+const LOOK_CYCLE = ['auto', 'sticker', 'paper', 'ground'];   /* views.js LOOK_CHOICES is its twin; test/test-appearance.js checks they agree */
 const LOOK_WORD = { auto: 'Automatic', sticker: 'Sticker (light)', paper: 'Paper (light)', ground: 'Ground (dark)', lanes: 'Lanes', countries: 'Countries', names: 'Names' };
+const LOOK_SHORT = TCV.LOOK_SHORT;
 function lookChosen() { if (S.lookChosen) return S.lookChosen; let t = null; try { t = localStorage.getItem('loamTheme'); } catch (e) { /* storage blocked */ } return THEMES.includes(t) ? t : 'auto'; }
-const lookNext = c => { const i = LOOK_CYCLE.indexOf(c); return i < 0 ? 'auto' : LOOK_CYCLE[(i + 1) % LOOK_CYCLE.length]; };
+/* put a Look on the canvas (k: 'auto' or a theme) */
+function lookApply(k) {
+  if (k === 'auto') { try { localStorage.removeItem('loamTheme'); } catch (x) { /* ignore */ } initTheme(); if (typeof prOnTheme === 'function') prOnTheme(); if (typeof lensOnTheme === 'function') lensOnTheme(); drawEdges(); miniDraw(); if (typeof drawNames === 'function') drawNames(true); if (S.tab === 'options') renderInfo(); }
+  else setTheme(k);
+  lensBtn();
+}
+/* the visitor chose a Look in the menu */
+function lookSet(k) {
+  if (!LOOK_CYCLE.includes(k)) return;
+  if (SA) { S.lookChosen = k; lensBtn(); try { window.parent.postMessage({ tcLookSet: k }, location.origin); } catch (e) { /* no page around */ } }
+  else lookApply(k);
+}
 /* the round Fix button: how many rows are still to do, from the Fix list page (fixApi); the number is a badge, the words are in its label */
 let fixT = 0;
 function fixBtn() {
@@ -10535,12 +10640,7 @@ function fixShow(keys) {
   const p = M.byKey.get(k); if (!p) return; const v = viewCentre(); dropPerson(p.i, v.x, v.y);
   const c2 = S.cards.get(k); if (c2) { select([k]); fit([c2], { maxK: 1 }); pulseCard(c2); }
 }
-function lookBtn() {
-  const b = $('#bTheme'); if (!b || b.hidden) return;
-  const c = lookChosen(), n = lookNext(c), txt = 'Look: ' + LOOK_WORD[c] + '. Click for ' + LOOK_WORD[n] + '.';
-  b.innerHTML = icon(c === 'ground' ? 'moon' : c === 'sticker' || c === 'paper' ? 'sun' : 'theme'); b.title = txt; b.setAttribute('aria-label', txt); b.dataset.look = c;
-}
-if (EMBED) addEventListener('message', e => { if (e.origin === location.origin && e.data && e.data.tcLook) { S.lookChosen = e.data.tcLook; lookBtn(); } });
+if (EMBED) addEventListener('message', e => { if (e.origin === location.origin && e.data && e.data.tcLook) { S.lookChosen = e.data.tcLook; lensBtn(); } });
 function setPhone() {
   S.phone = matchMedia('(max-width:700px), (pointer:coarse) and (max-height:520px)').matches;
   document.documentElement.classList.toggle('ph', S.phone);
@@ -10548,7 +10648,10 @@ function setPhone() {
 function wireToolbar() {
   const set = (id, name) => { const b = $(id); if (b) b.innerHTML = icon(name); };
   set('#bViews', 'views'); { const mm = document.createElement('div'); mm.id = 'viewsMenu'; mm.setAttribute('role', 'dialog'); mm.setAttribute('aria-label', 'Saved views'); document.body.appendChild(mm); $('#bViews').onclick = () => openViewsMenu(); if (!viewsOn()) $('#bViews').style.display = 'none'; }
-  set('#bBlood', 'blood'); { const mm = document.createElement('div'); mm.id = 'bloodMenu'; mm.setAttribute('role', 'dialog'); mm.setAttribute('aria-label', 'Bloodline'); document.body.appendChild(mm); $('#bBlood').onclick = () => openBloodMenu(); }
+  { const top = $('.top'), ch = document.createElement('div'); ch.id = 'blChip'; ch.className = 'blchip'; ch.hidden = true; ch.setAttribute('role', 'status');   /* says that colouring is on, and stops it */
+    ch.innerHTML = `${icon('blood', 'lk-icon')}<span class="bltx">Colouring relative to <b class="blnm"></b></span><button type="button" class="blstop" aria-label="Stop colouring non-blood relatives">Stop</button>`;
+    ch.querySelector('.blstop').onclick = () => setTint(false);
+    if (top) top.insertBefore(ch, top.firstChild); }
   set('#bMenu', 'menu'); { const mm = document.createElement('div'); mm.id = 'mainMenu'; mm.setAttribute('role', 'menu'); mm.setAttribute('aria-label', 'Menu'); document.body.appendChild(mm); $('#bMenu').onclick = () => openMainMenu(); const lc = document.createElement('div'); lc.id = 'legendCard'; lc.setAttribute('role', 'dialog'); lc.setAttribute('aria-label', 'How to read the lines'); document.body.appendChild(lc); }
   set('#bArrange', 'arrange'); set('#bGen', 'layers'); set('#bUndo', 'undo'); set('#bFit', 'fit'); set('#bRel', 'relate'); set('#bInfo', 'info'); set('#bClear', 'clear'); set('#bMore', 'more');
   set('#zIn', 'plus'); set('#zOut', 'minus');
@@ -10556,10 +10659,9 @@ function wireToolbar() {
   /* Compass: the page around the canvas draws the map workspace over the canvas, from its own switcher (Canvas, Compass, Atlas). It asks, and the canvas answers (tcCompass) with the selected person, if there is one, which is where Compass starts. */
   if (EMBED) addEventListener('message', e => { if (e.origin === location.origin && e.data && e.data.tcAskCompass) { let q = true; try { const k = S.sel.size === 1 ? [...S.sel][0] : null, p = k && M.byKey.get(k); if (p) q = { person: String(p.id), a: p.a }; } catch (x) { /* nothing selected */ } try { window.parent.postMessage({ tcCompass: q }, location.origin); } catch (x) { /* no page around */ } } });
   if (typeof lensWire === 'function') lensWire();
-  { const b = $('#bTheme'); if (b) { b.hidden = !SA; lookBtn(); b.onclick = () => { const n = lookNext(lookChosen()); S.lookChosen = n; lookBtn(); try { window.parent.postMessage({ tcLookSet: n }, location.origin); } catch (e) { /* no page around */ } }; } }
   if (EMBED) addEventListener('message', e => {
   if (e.origin !== location.origin || !e.data) return;
-  if (e.data.tcLook) { const k = e.data.tcLook; if (k === 'auto') { try { localStorage.removeItem('loamTheme'); } catch (x) { /* ignore */ } initTheme(); if (typeof prOnTheme === 'function') prOnTheme(); if (typeof lensOnTheme === 'function') lensOnTheme(); drawEdges(); miniDraw(); if (typeof drawNames === 'function') drawNames(true); if (S.tab === 'options') renderInfo(); } else setTheme(k); return; }   // the Look was changed in Settings
+  if (e.data.tcLook) { lookApply(e.data.tcLook); return; }   // the Look was changed in Settings
   if (e.data.tcKeep) { const mm = $('#mainMenu'); if (mm && mm.classList.contains('on')) mainMenu(); return; }   // the six words were turned on, or a save finished
   if (e.data.tcLinks) { if (S.tab !== 'options') renderInfo(); return; }   // not while the Options box is being typed in: a redraw would take the cursor away
   if (e.data.tcFixCount !== undefined) { fixBtn(); clearTimeout(fixT); fixT = setTimeout(() => { refreshAll(); if (S.tab === 'fix') fixTabLabel(); }, 120); return; }   // a tick or "left as is" on the Fix list page: the badge, the "!" marks, the tab's number

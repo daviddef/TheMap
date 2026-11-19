@@ -39,7 +39,10 @@ test("the Trail and the Fan never show a living person's dates or places", () =>
 test("the View lens is kept only when it is not the default, and is cleaned", () => {
   assert.equal(V.lensIsDefault({ m: "canvas", g: 5, c: "side", t: 2 }), true);
   assert.equal(V.lensIsDefault({ m: "canvas", g: 5, c: "side", t: 0 }), false, "a folded strip is a choice");
-  assert.deepEqual(J(V.cleanLens({ m: "spiral", g: 99, c: "evil", t: 7 })), { m: "canvas", g: 7, c: "side", t: 2, r: "" });
+  assert.deepEqual(J(V.cleanLens({ m: "spiral", g: 99, c: "evil", t: 7 })), { m: "canvas", g: 7, c: "side", t: 2, r: "", o: "sp" });
+  /* the Night sky and Place lanes: two letters (sky colouring s or p, then lanes grouping p or c); the start is sp and anything else is a choice */
+  assert.equal(V.cleanLens({ m: "sky", o: "pc" }).o, "pc"); assert.equal(V.cleanLens({ m: "lanes", o: "ps" }).o, "sp"); assert.equal(V.cleanLens({ m: "moon" }).m, "canvas");
+  assert.equal(V.lensIsDefault({ m: "canvas", g: 5, c: "side", t: 2, o: "sc" }), false);
 });
 
 test("the canvas carries the View button, the Trail band and the Fan, and keeps the band at the very bottom", () => {

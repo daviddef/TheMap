@@ -48,7 +48,7 @@ Phase: 0 inventory, 1 Your file, 2 Settings, 3 Tree lenses, 4 Places and the fix
 | View | Verdict | Where it goes | Phase | Size | Dep. |
 |---|---|---|---|---|---|
 | hourglass | Move the value | **Done as the Trail band** (see below): the selected person's direct line as cards along the very bottom, with their places. The descendants half is not built | 3 | M | lens frame |
-| fan | Move the value | **Done** as a View (the View button: Canvas, Fan, Surnames, Lifespans, Generations, Household) | 3 | M | lens frame |
+| fan | Move the value | **Done** as a View (the View button: Canvas, Fan, Surnames, Lifespans, Generations, Household, Night sky, Place lanes) | 3 | M | lens frame |
 | close (close family) | Probably there | The canvas's Bloodline menu draws a person's blood relatives; confirm side by side, then retire | 3 | S | none |
 | map (whole-tree map) | Already there | The canvas's whole-tree look; retire | 3 | S | none |
 | atlasmap | Replaced by Compass | The selection's birthplaces on the Atlas map: Compass draws every person on the map by year, from the same loaded file | 3 | M | Compass (`/tree-canvas/`, the switcher) |
@@ -62,8 +62,8 @@ Phase: 0 inventory, 1 Your file, 2 Settings, 3 Tree lenses, 4 Places and the fix
 
 **Open items for the twelve views (R&R keeps them until each is in the canvas or retired).** Status on 19 Nov 2026, from David:
 
-- **Moved into the canvas View menu (19 Nov 2026):** Surnames, Lifespans (timeline), Generations and Household. Per-tree record `vw`: `m` may be `surnames`, `lifespans`, `gen` or `house`, with the short settings `xs` / `xl` and, for Generations and Household, `gu` (1-5), `gd` (1-4) and `hk` (0), each kept only when it differs from the start. Not ported: R&R's per-view zoom and pan, any tree editing, the surname-variants write path.
-- **Still to be built in the canvas:** Night sky, Place lanes.
+- **Moved into the canvas View menu (19 Nov 2026):** Surnames, Lifespans (timeline), Generations, Household, Night sky and Place lanes. Per-tree record `vw`: `m` may be `surnames`, `lifespans`, `gen`, `house`, `sky` or `lanes`, with the short settings `xs` / `xl`; for Generations and Household, `gu` (1-5), `gd` (1-4) and `hk` (0); for Night sky and Place lanes, `o` (two letters: the sky's colouring s or p, then the lanes' grouping p or c) and the centre person as the hash `r`, each kept only when it differs from the start. Not ported: R&R's per-view zoom and pan, any tree editing, the surname-variants write path; Painted Lines' animated rail with event and banner playback; R&R's Family line grouping and its Focus, Siblings and Whole-tree scopes; the move-year reading of `p.my`.
+- **Still to be built in the canvas:** nothing of the twelve; the ones under Undecided below remain.
 - **Deprecated, not moving:** Where they lived, Eras, Kinship.
 - **Undecided:** Whole tree, Close family, Atlas map, Movements, Ink ledger, Hourglass descendants (the Trail band has the direct line only).
 - **Already in the canvas:** Fan (View button), the hourglass's direct line (Trail band).

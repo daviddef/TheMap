@@ -359,6 +359,46 @@ test("the Generations and Household views ride in `vw` too: m gen or house, plus
   assert.deepEqual(dec.w.vw, { m: "house", ...base });
 });
 
+test("the Night sky and Place lanes views ride in `vw` too: m sky or lanes, the centre as a hash r, and o (two letters) only when it differs from the start", async () => {
+  const src = { t: "link", ref: LINK }, mk = lens => W.makeRecord(src, W.linkLabel(LINK), { ...plain(), lens }, 1.7e12);
+  const base = { g: 5, c: "side", t: 2 }, centre = "defranceski:" + NAMES[0];
+  const sk = mk({ m: "sky", ...base, r: centre, o: "pp" }), ln = mk({ m: "lanes", ...base, r: centre, o: "sc" });
+  assert.deepEqual(sk.w.vw, { m: "sky", ...base, r: sk.w.vw.r, o: "pp" });
+  assert.deepEqual(ln.w.vw, { m: "lanes", ...base, r: ln.w.vw.r, o: "sc" });
+  /* the centre is a hash, never the key itself */
+  for (const rec of [sk, ln]) { assert.match(rec.w.vw.r, /^[0-9a-z]{1,16}$/); assert.ok(!JSON.stringify(rec).includes(NAMES[0])); }
+  /* a mode alone is a choice worth keeping; the start (sp) is not written, and a stray o on the canvas that is not the start is itself a choice */
+  assert.deepEqual(mk({ m: "sky" }).w.vw, { m: "sky", ...base });
+  assert.deepEqual(mk({ m: "lanes", o: "sp" }).w.vw, { m: "lanes", ...base });
+  assert.deepEqual(mk({ m: "canvas", o: "pc" }).w.vw, { m: "canvas", ...base, o: "pc" });
+  assert.equal("vw" in mk({ m: "canvas", o: "sp" }).w, false, "the start leaves the record as it was");
+  /* only the four two-letter codes get in */
+  for (const bad of ["ps", "ss", "pcx", "p", "", "PC", "p c", 7, null, ["pc"], { a: 1 }, "Anna Example"]) {
+    assert.equal("o" in mk({ m: "sky", o: bad }).w.vw, false, JSON.stringify(bad));
+    assert.equal("vw" in mk({ m: "canvas", o: bad }).w, false, JSON.stringify(bad));
+  }
+  /* the centre of the other views is still not kept */
+  assert.equal("r" in mk({ m: "gen", r: centre }).w.vw, false);
+  /* they come back, the centre as the real key */
+  const back = W.unpack(sk.w, sk.k, known(), bridges()).lens;
+  assert.equal(back.m, "sky"); assert.equal(back.o, "pp"); assert.equal(back.r, centre);
+  assert.equal(W.unpack(ln.w, ln.k, known(), bridges()).lens.o, "sc");
+  assert.equal(W.unpack(sk.w, sk.k, known().filter(k => k !== centre), bridges()).lens.r, "", "a centre no one matches comes back empty");
+  /* the six-word copy keeps them, and cleans anything odd */
+  for (const rec of [sk, ln]) assert.deepEqual(RF.cleanCanvas({ v: 1, items: { [rec.k]: rec }, gone: {} }).items[rec.k], rec);
+  const odd = JSON.parse(JSON.stringify(ln)); odd.w.vw = { ...odd.w.vw, o: "zz", extra: "Anna" };
+  assert.deepEqual(RF.cleanCanvas({ v: 1, items: { [odd.k]: odd }, gone: {} }).items[odd.k].w.vw, { m: "lanes", ...base, r: ln.w.vw.r });
+  const odd2 = JSON.parse(JSON.stringify(ln)); odd2.w.vw = { m: "moon", ...base, o: "pc" };
+  assert.deepEqual(RF.cleanCanvas({ v: 1, items: { [odd2.k]: odd2 }, gone: {} }).items[odd2.k].w.vw, { m: "canvas", ...base, o: "pc" });
+  /* a shared link applies the same rules */
+  const sh = JSON.parse(JSON.stringify(sk)); sh.w.vw.o = "xx";
+  const dec = await W.shareDecode(await W.shareEncode({ name: "x", src, w: sh.w }));
+  assert.ok(dec, "the link decodes");
+  assert.deepEqual(dec.w.vw, { m: "sky", ...base, r: sk.w.vw.r });
+  const ok = await W.shareDecode(await W.shareEncode({ name: "x", src, w: sk.w }));
+  assert.deepEqual(ok.w.vw, sk.w.vw);
+});
+
 test("the Backup page says the chosen View is kept", () => {
   assert.match(read("../src/pages/backup.astro"), /<b>View<\/b> you chose/);
 });

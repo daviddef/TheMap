@@ -45,9 +45,8 @@ export const nav = [
      want. /your-name/ is the one page now (a Given name / Surname switch, the finder that answers on the map, the spellings
      and what each rests on); /surnames/ stays at its address as the dataset page it always was. */
   ["Names", "/your-name/"],
-  /* ROOTS & ROUTES NOW OPENS THE TREE CANVAS (19 Nov 2026, David: "yes, i want that"). R&R kept only its twelve Tree views once the Fix list, Orphans, Places to review, the import report and the
-     export were in the canvas, so the menu's front door is the canvas. The label stays for now (David still says Roots & Routes). /roots/ is still there, reached from the canvas page ("Tree views (older page)"). */
-  ["Roots & Routes", "/tree-canvas/"],
+  /* NO ROOTS & ROUTES ENTRY (19 Nov 2026, David: "remove roots and Routes from the header"). The Tree Canvas took over everything it did; its door is the orange canvas button in the icon row (Base.astro, dq-canvas),
+     and /roots/ is still reached from the canvas page ("Tree views (older page)"). */
   /* THE RECORD READER HAS ITS OWN DOOR. David: «can we add a icon in our top menu for the "Record Reader"?» It was filed under About as
      "Reading old records", three clicks from the person holding a register line. It is one page, so it is a link, not a disclosure; the
      icon is drawn by styles.css on the href, so a label that changes still has it. */

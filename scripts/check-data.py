@@ -1283,6 +1283,14 @@ def whats_new_gate():
                 err(f"{where}: href {href!r} must be a path inside the atlas, starting with /")
             elif first and first not in pages:
                 err(f"{where}: href {href!r} points at a page that does not exist")
+        for l in e.get("links") or []:
+            lh = (l.get("href") or "")
+            if not (l.get("t") or "").strip():
+                err(f"{where}: a link with no words")
+            if not lh.startswith("/"):
+                err(f"{where}: link {lh!r} must be a path inside the atlas, starting with /")
+            elif lh.strip("/").split("/")[0].split("#")[0].split("?")[0] not in pages and lh.strip("/").split("/")[0]:
+                err(f"{where}: link {lh!r} points at a page that does not exist")
         spot = e.get("spot")
         if spot:
             # "show me where": /?spot=<id>&tip=<text>. The id must be a plain token that the site's own source mentions, and a spot

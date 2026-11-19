@@ -21,6 +21,19 @@ function read(rel) {
   catch (e) { return null; }
 }
 
+/* WHERE A FORM CAME FROM, in words: the host of a public page it rests on (Wikipedia, Wiktionary), or the family archive that met it. Only the
+   kind of source, never the evidence text (which is free text), so nothing about a person can come through. */
+const HOSTS = { "en.wikipedia.org": "Wikipedia", "en.wiktionary.org": "Wiktionary", "www.wikidata.org": "Wikidata", "commons.wikimedia.org": "Wikimedia Commons" };
+function origin(ref) {
+  const r = String(ref || "");
+  const a = /^archive:(.+)$/i.exec(r); if (a) return `the ${a[1].trim()} family archive`;
+  try { const h = new URL(r).hostname; return HOSTS[h] || h.replace(/^www\./, ""); } catch (e) { return "a researcher's note"; }
+}
+function howText(src, what) {
+  const parts = Object.entries(src).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${k} (${n.toLocaleString("en")})`);
+  if (!parts.length) return "";
+  return `Each ${what} carries the source it rests on: ${parts.join("; ")}.`;
+}
 const earliest = (ev) => (ev || []).map((e) => e && e.added).filter((d) => DAY.test(d || "")).sort()[0] || "";
 const plural = (n, w) => `${n.toLocaleString("en")} ${w}${n === 1 ? "" : "s"}`;
 const listed = (xs, max) => (xs.length <= max ? xs.join(", ") : xs.slice(0, max).join(", ") + " and " + (xs.length - max) + " more");
@@ -33,8 +46,9 @@ function byDay(cat, skipStatus) {
       if (skipStatus && skipStatus.includes(m.status)) continue;
       const d = earliest(m.evidence);
       if (!d) continue;
-      const day = (days[d] = days[d] || { forms: 0, fams: {} });
+      const day = (days[d] = days[d] || { forms: 0, fams: {}, src: {} });
       day.forms++;
+      for (const e of m.evidence || []) if (e && e.added === d) { const o = origin(e.ref); day.src[o] = (day.src[o] || 0) + 1; }
       (day.fams[f.name] = day.fams[f.name] || []).push(m.form);
     }
   }
@@ -53,7 +67,9 @@ export function namesNews(cats) {
     if (d.forms > BULK) headline = `${plural(d.forms, "spelling")} of ${plural(fams.length, "surname")} added to the catalogue`;
     else headline = `New ${d.forms === 1 ? "spelling" : "spellings"}: ` +
       listed(fams.map((n) => `${n} (${d.fams[n].sort().join(", ")})`), 4);
-    out.push({ date, kind: "research", headline: clip(headline), href: "/surname-families/" });
+    out.push({ date, kind: "research", headline: clip(headline), href: "/surname-families/",
+      what: "The spellings below are now treated as the same family name when you search, with the evidence for each on its family page.",
+      items: fams.slice(0, 250).map((n) => ({ t: n, w: d.fams[n].sort().join(", "), q: "s" })), more: Math.max(0, fams.length - 250), how: howText(d.src, "spelling") });
   }
 
   for (const [date, d] of Object.entries(byDay(c.given, ["not-same"]))) {
@@ -61,7 +77,9 @@ export function namesNews(cats) {
     let headline;
     if (d.forms > BULK) headline = `${plural(d.forms, "form")} of ${plural(fams.length, "given name")} added: Ivan, Johann, Giovanni and the like, found as one name`;
     else headline = `New ${d.forms === 1 ? "form" : "forms"} of a given name: ` + listed(fams.map((n) => `${n} (${d.fams[n].sort().join(", ")})`), 4);
-    out.push({ date, kind: "research", headline: clip(headline), href: "/your-name/" });
+    out.push({ date, kind: "research", headline: clip(headline), href: "/your-name/",
+      what: "Each name below is now searched in all its forms (Ivan, Johann and Giovanni are one name), so a register is not missed for the form a clerk used.",
+      items: fams.slice(0, 250).map((n) => ({ t: n, w: d.fams[n].sort().join(", "), q: "n" })), more: Math.max(0, fams.length - 250), how: howText(d.src, "form") });
   }
 
   const pdays = {};

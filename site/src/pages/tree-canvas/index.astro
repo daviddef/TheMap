@@ -35,7 +35,7 @@ import { u } from "../../lib/url.js";
         <rect class="stnode c2" x="78" y="42" width="36" height="20" rx="6"/>
       </svg>
       <h1 id="stTitle">Tree Canvas</h1>
-      <p class="stlead">Draw a family tree on one canvas, with the Atlas's places and records for each person. Your file is read in this browser and never uploaded.</p>
+      <p class="stlead">Draw your family tree. Your file stays in this browser.</p>
     </header>
 
     <section id="stCur" class="stcard stcur" hidden aria-labelledby="stCurTitle">
@@ -45,27 +45,27 @@ import { u } from "../../lib/url.js";
     </section>
 
     <section id="stDrop" class="stcard stdrop" aria-labelledby="stDropTitle">
-      <h2 id="stDropTitle">Open a file</h2>
-      <p class="stsub">Drop it anywhere on this page, or choose it from your device. A <b>GEDCOM</b> (the industry standard) or a <b>tree.json</b> (our own format; <a href="/tree-canvas/publish/#format">what is in it</a>).</p>
+      <svg class="stup" viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 16V4m0 0-4.500 4.500M12 4l4.500 4.500"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+      <h2 id="stDropTitle">Drop a family tree here</h2>
+      <p class="stsub">GEDCOM or tree.json &middot; <a href="/tree-canvas/publish/#format">what is in it</a></p>
       <button type="button" class="stbtn primary" id="stOpen">Choose a file</button>
       <input type="file" id="stFile" accept=".ged,.gedcom,.txt,.json,text/plain,application/json" hidden>
     </section>
 
-    <section id="stLink" class="stcard" aria-labelledby="stLinkTitle">
-      <h2 id="stLinkTitle">Or paste a link</h2>
+    <section id="stLink" class="stplain stlinksec" aria-labelledby="stLinkTitle">
+      <h2 id="stLinkTitle" class="stvh">Or paste a link</h2>
       <div class="stlinkrow">
         <label for="stUrl" class="stvh">Web address of a public GEDCOM or tree.json</label>
-        <input type="url" id="stUrl" class="stlinkin" inputmode="url" autocomplete="off" spellcheck="false" maxlength="2000" placeholder="https://raw.githubusercontent.com/you/family/main/tree.json">
+        <input type="url" id="stUrl" class="stlinkin" inputmode="url" autocomplete="off" spellcheck="false" maxlength="2000" placeholder="or paste a link to a GEDCOM or tree.json">
         <button type="button" class="stbtn" id="stGo">Open link</button>
       </div>
       <p id="stLinkMsg" class="stmsg" role="status" aria-live="polite" hidden></p>
-      <p class="stex">No link handy? Try an invented example:
-        <button type="button" class="stlink" data-ex="/examples/example-family.ged">GEDCOM</button> or
+      <p class="stex">Try an example: <button type="button" class="stlink" data-ex="/examples/example-family.ged">GEDCOM</button> &middot;
         <button type="button" class="stlink" data-ex="/examples/example-family.tree.json">tree.json</button></p>
     </section>
 
     <section id="stArch" class="stplain" aria-labelledby="stArchTitle">
-      <h2 id="stArchTitle">Or just look around</h2>
+      <h2 id="stArchTitle">Look around</h2>
       <div class="starch" id="stArchBtns">
         <button type="button" class="stchip" data-k="defranceski">Defranceski</button>
         <button type="button" class="stchip" data-k="booyzen">Booyzen</button>
@@ -76,31 +76,30 @@ import { u } from "../../lib/url.js";
         <button type="button" class="stchip" data-k="darcy">D'Arcy</button>
         <button type="button" class="stchip" data-k="mazza">Mazza</button>
       </div>
-      <p class="stsub">Each family archive's published tree, with its living people left out. Or <button type="button" class="stlink" id="stDemo">draw an invented family</button> to see how it works.</p>
+      <button type="button" class="stchip stdemo" id="stDemo" title="An invented family, to see how it works">Invented family</button>
     </section>
 
     <section id="stKeep" class="stplain" aria-labelledby="stKeepTitle">
       <a id="stKeepBtn" class="stkeep" href={u("/backup/#canvas")} target="_blank" rel="noopener" aria-describedby="stKeepSt">
         <span class="stdisc" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M5 3h11l4 4v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M7 3v5h8V3M7 21v-7h10v7"/></svg></span>
-        <span class="stkcap"><b id="stKeepTitle">Keep your work</b><small id="stKeepSt">Saved in this browser. Six words keep it on every device: no email, no account.</small></span>
+        <span class="stkcap"><b id="stKeepTitle">Keep your work</b><small id="stKeepSt">Saved in this browser</small></span>
       </a>
     </section>
 
     <section id="stFixSaved" class="stplain" hidden aria-labelledby="stFixTitle">
       <h2 id="stFixTitle">Your saved fix list</h2>
       <p id="stFixTxt"></p>
-      <p class="stsub">Only counts and the place text as typed are kept, never a name. Open the file again to work on it, or <a href={u("/my-research/#fixes")}>see it in My research</a>.</p>
+      <a class="stsub stfixlink" href={u("/my-research/#fixes")} title="Only counts and the place text as typed are kept, never a name">See it in My research</a>
     </section>
 
     <section id="stRecent" class="stplain" hidden aria-labelledby="stRecTitle">
       <h2 id="stRecTitle">Your trees</h2>
-      <p class="stsub trintro">Each tree you opened, with the views you saved of it underneath. Rename a view or add a note with the pencil, as for a file.</p>
       <ul id="stList"></ul>
-      <p class="stsub">Kept in this browser only. For a view, only where the cards sit is kept, never the file. A file from your device is matched when you open it again. <button type="button" class="stlink" id="stForget">Forget the kept files</button></p>
+      <p class="stsub stkept"><button type="button" class="stlink" id="stForget">Forget the kept files</button></p>
     </section>
 
-    <p class="stsettings"><button type="button" class="stlink" id="stSettings">Settings</button> <span class="stsub">living people, links to MyHeritage and Ancestry, the look, remembering files</span></p>
-    <p class="stsettings stsub" id="stRoots">The tree views not brought here yet (Surnames, Lifespans, Place lanes and more) are still on <a href={u("/roots/")}>Tree views (older page)</a>.</p>
+    <p class="stsettings"><button type="button" class="stlink" id="stSettings">Settings</button>
+      <span class="stsub" id="stRoots"><a href={u("/roots/")}>Older tree views</a></span></p>
 
     <details class="sthelp" id="stHelp">
       <summary>About these files and links</summary>
@@ -136,7 +135,7 @@ import { u } from "../../lib/url.js";
       <h2 id="yfKeepT">Keeping your work</h2>
       <a id="yfKeepBtn" class="stkeep" href={u("/backup/#canvas")} target="_blank" rel="noopener" aria-describedby="yfKeepSt">
         <span class="stdisc" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M5 3h11l4 4v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M7 3v5h8V3M7 21v-7h10v7"/></svg></span>
-        <span class="stkcap"><b>Keep your work</b><small id="yfKeepSt">Saved in this browser. Six words keep it on every device: no email, no account.</small></span>
+        <span class="stkcap"><b>Keep your work</b><small id="yfKeepSt">Saved in this browser</small></span>
       </a>
       <p class="stsub">Where the cards sit, per tree. Never the file itself.</p>
     </section>

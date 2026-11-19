@@ -747,7 +747,7 @@ function loadTree(T){
   while(FAMS.length<8)FAMS.push({sur:'Other',host:'',m:[],f:[],places:[]});
   const P={},list=[];
   for(const r of T.people){
-    const p={id:r.id,sex:r.sex==='f'?'f':'m',fi:r.line==null?7:r.line,sur:r.sur||'',given:r.given||'',by:r.by,bp:r.bp,dy:r.dy==null?null:r.dy,hid:r.hid===1?1:0,dp:r.dp||r.bp,my:r.my||null,occ:r.occ||null,
+    const p={id:r.id,sex:r.sex==='f'?'f':'m',fi:r.line==null?7:r.line,sur:r.sur||'',given:r.given||'',by:r.by,bp:r.bp,dy:r.dy==null?null:r.dy,hid:r.hid===1?1:0,cg:r.cg==null?null:r.cg,gi:r.gi==null?null:r.gi,up:r.up===1?1:0,dp:r.dp||r.bp,my:r.my||null,occ:r.occ||null,
       father:r.father||null,mother:r.mother||null,spouse:r.spouse||[],kids:r.kids||[],g:0,src:(r.srcs||[]).length,srcs:r.srcs||null,slug:r.slug||null,href:r.href||null,page:r.page||null,route:r.route||null,mye:!!r.mye,bye:!!r.bye,dye:!!r.dye,bpe:!!r.bpe,bpr:r.bpr||null,dpr:r.dpr||null,sk:r.sk||null,note:r.note||null,fg:r.fg==null?null:r.fg,mg:r.mg==null?null:r.mg,gaps:r.gaps||null};
     if(p.dy==null)p.dp=null;
     P[p.id]=p;list.push(p);
@@ -871,7 +871,10 @@ MOVES.sort((a,b)=>mvYear(a)-mvYear(b));
     sizes.push(n);
   }
   // a connected tree is a component of 20 or more people; smaller ones are detached families
-  for(const p of list){const c=comp.get(p.id);p._comp=c;p._main=sizes[c]>=20;p._orph=sizes[c]===1;p._clus=sizes[c]>1&&sizes[c]<20;p._dead=p._main&&!p.father&&!p.mother}
+  /* THE GROUP IS THE WHOLE FILE'S, WHEN THE DATA SAYS SO. The drawn links stop at anyone with no year or no place (every «Unknown» placeholder), so a family
+     that hangs off one looked cut off: a detached family, its members dead ends. The builder counts the groups before it drops them and sends each
+     person cg (the size of their group) and gi (its id); up is 1 where a parent is in the file but not drawn. Older data has neither, and falls back to the drawn graph. */
+  for(const p of list){const c=comp.get(p.id),n=p.cg!=null?p.cg:sizes[c];p._comp=p.gi!=null?'g'+p.gi:c;p._main=n>=20;p._orph=n===1;p._clus=n>1&&n<20;p._dead=p._main&&!p.father&&!p.mother&&!p.up}
 })();
 
 const ICO={person:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-4 3.6-6 7-6s6.2 2 7 6"/></svg>',tree:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9.5" y="3" width="5" height="4" rx="1"/><rect x="3" y="17" width="5" height="4" rx="1"/><rect x="16" y="17" width="5" height="4" rx="1"/><path d="M12 7v5M5.5 17v-5h13v5"/></svg>',back:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',copy:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg>',check:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'};
@@ -1086,6 +1089,7 @@ function renderPanel(){
     byLine.forEach((n,i)=>{if(n)h+='<span style="flex:'+n+';background:var(--l'+i+')" title="'+esc(FAMS[i].sur)+': '+n+'"></span>'});
     h+='</div>';
   }
+  if(p.up&&!p.father&&!p.mother)h+='<div class="note"><b>Parent not drawn.</b> A parent is in the file but has no year or no place, so no pin or link is drawn for them. Give them either and the link appears.</div>';
   if(p._orph||p._clus||p._dead){
     const lk=recLink(p.bp,p.by);
     h+='<div class="note"><b>'+(p._orph?'Orphan record.':p._clus?'Detached family.':'Dead end.')+'</b> '+(p._orph?'Not joined to anyone in the tree.':p._clus?'Not connected to any tree.':'No parents recorded.')+' To connect: search '+esc(p.bp)+' records around '+p.by+'. <a href="'+lk.u+'" target="_blank" rel="noopener">'+esc(clip(lk.t,48))+' ↗</a> <a href="#" data-goto="orphans" data-okind="'+(p._orph?'orph':p._clus?'clus':'dead')+'">More places to start</a></div>';
@@ -2073,8 +2077,35 @@ function renderUndrawn(){
   const U=(TREE&&TREE.undrawn)||[],noYear=U.filter(u=>u.why==='year'),noPlace=U.filter(u=>u.why==='place');
   $('#orsum').innerHTML='<b>'+U.length.toLocaleString('en')+'</b> people the archive holds are not drawn on the maps: no birth or death year and no relative with one ('+noYear.length+'), or a year but no place the archive can put on a map ('+noPlace.length+'). Each links to their page on the site. Finding a year or a place for them is the quickest way to grow the tree.';
   $('#orsug').innerHTML='<div class="sg"><div class="sgh"><div><b>No year</b><small>cannot be placed in time</small></div><span class="sgn">'+noYear.length+'</span></div><p class="sgp">Look for a baptism, burial or census entry, or any relative with a year, then add it to the roster.</p></div><div class="sg"><div class="sgh"><div><b>No place</b><small>cannot be put on a map</small></div><span class="sgn">'+noPlace.length+'</span></div><p class="sgp">A parish, town or country is enough. The archive atlas supplies the coordinates.</p></div>';
-  const row=u=>'<a class="plink" href="'+(FAMS[0].host&&u.id&&TREE?'https://'+FAMS[0].host+'/person/'+u.id+'/':'#')+'" '+(FAMS[0].host?'target="_blank" rel="noopener"':'')+'><i style="background:var(--hair)"></i><span>'+esc(u.name)+'</span><small>'+esc((u.b?'b. '+u.b+' · ':'')+(u.place||u.why))+'</small></a>';
-  $('#orlist').innerHTML='<h3>Not drawn yet ('+U.length+')</h3><div class="orgrid">'+U.slice(0,400).map(row).join('')+'</div>'+(U.length>400?'<p class="amsub">and '+(U.length-400)+' more in the data</p>':'');
+  UND.clear();U.forEach(u=>UND.set(u.id,u));
+  /* A ROW IS A BUTTON THAT OPENS THE PERSON'S PANEL. It used to be a link to the archive's own page for the person, which exists only on a page that was given a host and only
+     for people who have a page, so on most pages a click did nothing. The panel shows what the file holds, why they are not drawn, who they are related to, and every link
+     the page can honestly build: the MyHeritage profile and tree (when the page around this one was given a MyHeritage link) and the Atlas's records for the place and year. */
+  const row=u=>'<button class="plink" data-und="'+esc(u.id)+'"><i style="background:var(--hair)"></i><span>'+esc(u.name)+'</span><small>'+esc((u.b?'b. '+u.b+' · ':'')+(u.place||u.why))+'</small></button>';
+  const n=st.undN||400;
+  $('#orlist').innerHTML='<h3>Not drawn yet ('+U.length+')</h3><div class="orgrid">'+U.slice(0,n).map(row).join('')+'</div>'+(U.length>n?'<p class="amsub">Showing '+n+' of '+U.length+'. <button class="btn" data-undmore="1">Show 400 more</button></p>':'');
+}
+const UND=new Map();   // id -> a person the archive holds but cannot draw (no year, or no place)
+function undRel(id){
+  const q=P[id];if(q)return '<button class="plink" data-id="'+q.id+'"><i style="background:'+colorOf(q)+'"></i><span>'+esc(nm(q))+'</span><small>'+esc(yrs(q))+'</small></button>';
+  const w=UND.get(id);return w?'<button class="plink" data-und="'+esc(w.id)+'"><i style="background:var(--hair)"></i><span>'+esc(w.name)+'</span><small>not drawn</small></button>':'';
+}
+function showUndrawn(id){
+  const u=UND.get(id);if(!u)return;
+  const hid=u.given===undefined,by=u.by!=null?u.by:u.b;
+  let h='<div class="head"><div class="swatch" style="background:var(--hair)"></div><div><h2>'+esc(u.name)+'</h2><div class="meta">'+esc(u.id)+' · not drawn on the maps</div></div></div>';
+  if(hid)h+='<p class="note">Living person. Name and details are withheld on the public site.</p>';
+  else{
+    h+='<dl>'+(u.occ?'<dt>Occupation</dt><dd>'+esc(u.occ)+'</dd>':'')+'<dt>Born</dt><dd>'+(by!=null?(u.bye?'about ':'')+by:'no year recorded')+'</dd><dt>Died</dt><dd>'+(u.dy==null?'no death recorded':u.dye?'not recorded':u.dy)+'</dd>'+(u.place?'<dt>Place, as written</dt><dd>'+esc(u.place)+'</dd>':'')+'</dl>';
+    h+='<p class="note"><b>Why not drawn.</b> '+(u.why==='year'?'There is no birth or death year, and no relative with one, so there is nothing to place them in time.':'There is a year, but no place the archive can put on a map'+(u.place?' (the text recorded is “'+esc(u.place)+'”)':'')+'.')+' Give them '+(u.why==='year'?'a year (a baptism, burial or census entry will do)':'a place (a parish, a town or a country is enough)')+' and they join the maps.</p>';
+    const rel=[['Father',u.father?[u.father]:[]],['Mother',u.mother?[u.mother]:[]],['Spouse',u.spouse||[]],['Children',u.kids||[]]].map(([t,ids])=>{const r=ids.map(undRel).join('');return r?'<h3>'+t+'</h3><div class="openlist">'+r+'</div>':''}).join('');
+    h+=rel||'<p class="note">No relatives are recorded for them in the file.</p>';
+  }
+  const links=[];
+  const mh=mhLinks({id:u.id,given:hid?'':u.given,sur:hid?'':u.sur,hid:hid?1:0});if(mh)links.push('<div class="mhl">On MyHeritage:'+mh+'</div>');
+  if(!hid&&u.place&&by!=null){const lk=recLink(u.place,by);links.push('<div><a href="'+lk.u+'" target="_blank" rel="noopener">'+esc(lk.t)+' ↗</a> <small>'+esc(lk.w)+' for '+esc(u.place)+' around '+by+'</small></div>')}
+  h+='<h3>Where to look</h3>'+(links.length?links.join(''):'<p class="note">No link to build yet: there is no place to search, and this page was not given a MyHeritage tree link. Add a year or a place and a records link appears here.</p>');
+  $('#panel').innerHTML=h;
 }
 function renderOrphans(){
   if(st.okind==='undrawn')return renderUndrawn();
@@ -2303,6 +2334,10 @@ document.addEventListener('click',e=>{
   if(pk){selectPlace(pk.dataset.pick);return}
   const so=e.target.closest('[data-open]');
   if(so){st.open=st.open===so.dataset.open?null:so.dataset.open;renderPanel();return}
+  const ud=e.target.closest('[data-und]');
+  if(ud){showUndrawn(ud.dataset.und);return}
+  const um=e.target.closest('[data-undmore]');
+  if(um){st.undN=(st.undN||400)+400;render();return}
   const seg=e.target.closest('.seg button');
   if(seg){const v=seg.dataset.v;st[seg.parentNode.dataset.key]=isNaN(+v)?v:+v;render();return}
   const tab=e.target.closest('.tab');

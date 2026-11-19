@@ -27,6 +27,7 @@ export const MAX_VIEWS_PER_TREE = 12;  // for one tree
 export const isViewKey = k => typeof k === 'string' && /^v:[0-9a-z]{1,16}$/.test(k);
 export const LOOKS = ['sticker', 'paper', 'ground', 'lanes', 'countries', 'names'];   // the canvas's looks; a view remembers one
 export const MAX_CARDS = 3000;         // people on one canvas that are kept
+export const FAN_MIN = 3, FAN_MAX = 7, FAN_DEFAULT = 5;   // the View button's Fan: how many generations it may show
 export const MAX_PAIR_DEC = 400;       // accepted / rejected pairings kept per tree (Compare in pairs)
 export const ARCHIVES = ['defranceski', 'booyzen', 'luwinski', 'lerena', 'falco', 'blazevic', 'darcy', 'mazza'];
 
@@ -75,7 +76,18 @@ export function pack(plain, key) {
     opts: { stopAtNotProven: !!(p.opts && p.opts.stopAtNotProven), suggested: !(p.opts && p.opts.suggested === false), gens: !!(p.opts && p.opts.gens) },
     filter: (Array.isArray(p.filter) ? p.filter : []).filter(i => Number.isInteger(i) && i >= 0 && i < 9).slice(0, 9),
     ...(LOOKS.includes(p.look) ? { look: p.look } : {}),
+    ...packLens(p.lens, key),
   };
+}
+/* ---- the View button: how the selection is drawn (field `vw`), kept in the same record ----
+   l: the canvas's {m: 'canvas' | 'fan', g: generations the Fan shows, c: 'side' | 'place' (what colours it), t: 0 | 1 | 2 (the direct-line strip along the very bottom: folded to a handle, one line, whole), r: the person key at the Fan's centre}.
+   The centre is named only by a hash, as every person is; nothing else here is about anyone. Nothing is kept when every choice is as it starts, so an untouched tree's record is exactly what it was. */
+export function packLens(l, key) {
+  if (!l || typeof l !== 'object') return {};
+  const m = l.m === 'fan' ? 'fan' : 'canvas', g = Number.isInteger(l.g) ? Math.max(FAN_MIN, Math.min(FAN_MAX, l.g)) : FAN_DEFAULT, c = l.c === 'place' ? 'place' : 'side', t = l.t === 0 || l.t === 1 ? l.t : 2;
+  if (m === 'canvas' && g === FAN_DEFAULT && c === 'side' && t === 2) return {};
+  const r = m === 'fan' && typeof l.r === 'string' && l.r ? H(key, l.r) : '';
+  return { vw: { m, g, c, t, ...(r ? { r } : {}) } };
 }
 /* known: the real person keys of the tree that is open; bridges: the real bridge ids. Returns the canvas's own serialise() shape, or null. `matched`: how many people were found. */
 export function unpack(w, key, known, bridges) {
@@ -85,7 +97,8 @@ export function unpack(w, key, known, bridges) {
   const cards = [];
   for (const r of w.c) { const k = back.get(r[0]); if (k) cards.push([k, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8] ? (back.get(r[8]) || '') : '']); }
   const path = w.path && back.get(w.path[0]) && back.get(w.path[1]) ? [back.get(w.path[0]), back.get(w.path[1])] : null;
-  return { v: 1, cards, view: w.view, decisions: (w.dec || []).filter(r => bb.has(r[0])).map(r => [bb.get(r[0]), r[1]]), opts: w.opts || {}, path, filter: w.filter || [], look: LOOKS.includes(w.look) ? w.look : '', matched: cards.length, of: w.c.length };
+  const lens = w.vw && typeof w.vw === 'object' ? { m: w.vw.m === 'fan' ? 'fan' : 'canvas', g: Number.isInteger(w.vw.g) ? Math.max(FAN_MIN, Math.min(FAN_MAX, w.vw.g)) : FAN_DEFAULT, c: w.vw.c === 'place' ? 'place' : 'side', t: w.vw.t === 0 || w.vw.t === 1 ? w.vw.t : 2, r: back.get(w.vw.r) || '' } : null;
+  return { v: 1, cards, view: w.view, decisions: (w.dec || []).filter(r => bb.has(r[0])).map(r => [bb.get(r[0]), r[1]]), opts: w.opts || {}, path, filter: w.filter || [], look: LOOKS.includes(w.look) ? w.look : '', ...(lens ? { lens } : {}), matched: cards.length, of: w.c.length };
 }
 
 /* ---- Compare in pairs: the visitor's own pairing choices, kept beside the canvas arrangement in the same record (field `pr`) ----
@@ -248,7 +261,14 @@ export function normW(w) {
     opts: { stopAtNotProven: !!o.stopAtNotProven, suggested: o.suggested !== false, gens: !!o.gens },
     filter: (Array.isArray(w.filter) ? w.filter : []).filter(i => Number.isInteger(i) && i >= 0 && i < 9).slice(0, 9),
     ...(LOOKS.includes(w.look) ? { look: w.look } : {}),
+    ...normLens(w.vw),
   };
+}
+/* the View field from outside (a link, a copy): the same rules as packLens, for one that is already packed */
+function normLens(v) {
+  if (!v || typeof v !== 'object') return {};
+  const m = v.m === 'fan' ? 'fan' : 'canvas', g = Number.isInteger(v.g) ? Math.max(FAN_MIN, Math.min(FAN_MAX, v.g)) : FAN_DEFAULT, c = v.c === 'place' ? 'place' : 'side', t = v.t === 0 || v.t === 1 ? v.t : 2;
+  return { vw: { m, g, c, t, ...(typeof v.r === 'string' && ID_RE.test(v.r) ? { r: v.r } : {}) } };
 }
 const b64u = bytes => { let s = ''; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')); const b = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) b[i] = s.charCodeAt(i); return b; };

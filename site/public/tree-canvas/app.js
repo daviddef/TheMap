@@ -393,7 +393,7 @@ addEventListener('message', e => {
   if (d.tcRestored) { onRestored(d.tcRestored); return; }
   if (d.tcHome) { flushWork(); $('#cv').hidden = true; showStart(); return; }   // the canvas's folder button: back to the opening screen (the canvas keeps its own state)
   if (d.tcCompare !== undefined && !d.tcOpen) { const q = d.tcCompare || {}; compareWith(Array.isArray(q.keys) ? q.keys : q.key ? [q.key] : null, q.mark); return; }
-  if (typeof d.tcLookSet === 'string' && ST.LOOKS.includes(d.tcLookSet)) { lookSet(d.tcLookSet); return; }   // the canvas's Look button
+  if (typeof d.tcLookSet === 'string' && ST.LOOKS.includes(d.tcLookSet)) { lookSet(d.tcLookSet); return; }   // the Look chips in the canvas's Appearance menu
   if (d.tcOpen && d.tcOpen.bytes instanceof ArrayBuffer) { example = false; start(d.tcOpen.bytes, d.tcOpen.name); }
   else if (typeof d.tcLiving === 'boolean') setLiving(d.tcLiving);   // the canvas's eye button: the same setting as in Settings
 });
@@ -528,14 +528,14 @@ $('#sgLiv').onchange = e => setLiving(e.target.checked);
 $('#sgMh').oninput = e => { $('#sgMhSt').textContent = links.set(e.target.value) || (e.target.value.trim() ? '' : 'Off: no link yet.'); };
 $('#sgAnc').onchange = e => { links.setSite(e.target.value); drawSG(); };
 /* the look, worn by the page around the canvas (Ground is dark, the other looks light, Automatic follows the device) and handed to the canvas. One function for the drawer, a setting that
-   arrived from another device, and the canvas's own Look button, so the three cannot disagree. */
+   arrived from another device, and the canvas's own Look chips (Appearance menu), so the three cannot disagree. */
 function wearLook(look) {
   const s = ST.shellScheme(look), r = document.documentElement;
   if (s) r.setAttribute('data-theme', s); else r.removeAttribute('data-theme');
   if (look === 'sticker' || look === 'paper' || look === 'ground') r.setAttribute('data-look', look); else r.removeAttribute('data-look');   // the Fix list wears the canvas's palette, not just light or dark
   const f = $('#cv'); if (f && f.contentWindow && !f.hidden) f.contentWindow.postMessage({ tcLook: look }, location.origin);
 }
-/* the canvas's Look button asked for the next look: keep it like the drawer does, wear it, and say so if this browser would not keep it */
+/* the canvas's Appearance menu asked for a look: keep it like the drawer does, wear it, and say so if this browser would not keep it */
 function lookSet(look) {
   sgWriteFailed = !ST.write({ look }).ok; wearLook(look);
   if (sgWriteFailed) { say('This browser is not letting the page keep the look, so it lasts until you close the page.'); setTimeout(() => say(''), 5000); }

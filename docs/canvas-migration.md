@@ -48,8 +48,8 @@ Phase: 0 inventory, 1 Your file, 2 Settings, 3 Tree lenses, 4 Places and the fix
 | View | Verdict | Where it goes | Phase | Size | Dep. |
 |---|---|---|---|---|---|
 | hourglass | Move the value | **Done as the Trail band** (see below): the selected person's direct line as cards along the very bottom, with their places. The descendants half is not built | 3 | M | lens frame |
-| fan | Move the value | **Done** as a View (the View button: Canvas, Fan, Surnames, Lifespans, Generations, Household, Night sky, Place lanes) | 3 | M | lens frame |
-| close (close family) | Probably there | The canvas's Bloodline menu draws a person's blood relatives; confirm side by side, then retire | 3 | S | none |
+| fan | Move the value | **Done** as a View (the View section of the Appearance button: Canvas, Fan, Surnames, Lifespans, Generations, Household, Night sky, Place lanes) | 3 | M | lens frame |
+| close (close family) | Probably there | The canvas's "Blood relatives of …" section (at the end of a card's up-arrow menu) draws a person's blood relatives; confirm side by side, then retire | 3 | S | none |
 | map (whole-tree map) | Already there | The canvas's whole-tree look; retire | 3 | S | none |
 | atlasmap | Replaced by Compass | The selection's birthplaces on the Atlas map: Compass draws every person on the map by year, from the same loaded file | 3 | M | Compass (`/tree-canvas/`, the switcher) |
 | movements | Replaced by Compass | The places over time: Compass plays the years and draws the moves as arcs, with "Under way" and the books for a place | 3 | M | Compass |

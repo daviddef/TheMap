@@ -200,3 +200,25 @@ test("compare: a start of two generations back, a Back choice, and Arrange that 
   assert.match(TPL, /prDraw\(\{ fit: true, keep: keep\.size \? keep : null \}\)/, "Arrange keeps to the cards on the canvas");
   assert.match(TPL, /\(!keep \|\| keep\.has\(M\.P\[s\.f\]\.key\)\)/, "each side is drawn only if its card is still there");
 });
+
+test("Walk from here: a new walk starts at a place's person with every record that shares it, goes past the old generation limit, and never starts from a living person", () => {
+  const M = build([arch("one", "#1B6E99", ONE()), arch("two", "#2E8B57", TWO())]);
+  const R = go(M, "I5", { one: "x5", two: "y5" }, { up: 1 });
+  assert.ok(!R.owner.has(at(M, "one:x1")), "one generation up from Edric stops before Corin's father");
+  const s = slotOf(R, M, "you:I3");
+  assert.ok(s.more && s.more.up > 0, "…and the place says there is more beyond it (that is the '+N beyond' on its row)");
+  const w = TCP.walkFrom(M, s);
+  assert.equal(w.an.f, at(M, "you:I3")); assert.equal(w.an.a[1], at(M, "one:x3")); assert.equal(w.an.a[2], at(M, "two:y3"), "the file's person and every archive's entry in the place");
+  const R2 = TCP.pair(M, w.an, { up: 1 });
+  assert.ok(R2.slots.find(x => x.anchor) === slotOf(R2, M, "you:I3"), "the new walk is anchored on that place");
+  assert.ok(R2.owner.has(at(M, "one:x1")), "and reaches the father the old walk stopped short of");
+  /* the choices are keyed by the two people, not by the walk, so they carry over */
+  const key = TCP.dkey(M, at(M, "you:I5"), at(M, "two:y5")), dec = new Map([[key, "y"]]);
+  const R3 = TCP.pair(M, w.an, { up: 1, decisions: dec }), e5 = slotOf(R3, M, "you:I5");
+  assert.ok(e5 && e5.arch[2] && e5.arch[2].i === at(M, "two:y5"), "an accepted pairing is still joined in the new walk");
+  /* nobody there, or somebody living: no walk */
+  assert.equal(TCP.walkFrom(M, null).why, "none"); assert.equal(TCP.walkFrom(M, { f: -1, arch: {} }).why, "none");
+  const lv = TCF.corpus({ meta: { title: "Mine", source: "tree.json" }, people: link([per("p", "m", "Pat", "Lyle", 1900, "Perth", 1970, "Perth"), per("lv", "f", "Liv", "Lyle", null, null, null, null, { father: "p", living: true })]) }, { places: [] });
+  const Ml = TC.build(TCF.mergeAll([lv]));
+  assert.equal(TCP.walkFrom(Ml, { f: at(Ml, "you:lv"), arch: {} }).why, "living", "a living person is never compared, so no walk starts at one");
+});

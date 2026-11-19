@@ -1067,6 +1067,9 @@ html.rm #pairs *{transition:none!important;animation:none!important}
 .prnm{flex:1 1 0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:800}
 .prnm .pryr{margin-left:3px}
 .prbey{flex:none;font:800 10px Nunito,system-ui;color:var(--lk-soft);border:1.5px solid var(--lk-line);border-radius:99px;padding:0 5px}
+.prhead{display:flex;align-items:center;gap:6px}.prhead .prsel{flex:1 1 auto;width:auto;min-width:0}
+button.prbey.go{background:transparent;cursor:pointer;padding:1px 7px;color:var(--psel);border-color:var(--psel);font-size:10.5px}button.prbey.go:hover,button.prbey.go:focus-visible{background:color-mix(in srgb,var(--psel) 14%,var(--lk-card));outline:2px solid var(--psel);outline-offset:1px}
+.prwalk{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:4px 0 6px}.prwalk small{color:var(--lk-mute)}
 .prsqs{flex:none;display:inline-flex;gap:3px}.prsqs .prsq{margin:0;width:10px;height:10px}
 .prsr{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 .prent .prsq{margin-right:5px;vertical-align:-1px}
@@ -3161,7 +3164,19 @@ html.rm #pairs *{transition:none!important;animation:none!important}
     if (end <= vb) return 0;
     return Math.max(0, Math.min(end - vb + pad, rt - vt - pad));
   }
-  const API = { scrollDelta, decisionInfo, personText, addPeople, fixItems, offerable, genLabel, groupByGen, archLines, contrast, ensure, lum, pair, layout, alternatives, dkey, judgeD, matchLists, placeholder, isPlaceholderName, statusInfo, statusHtml, statusIconHtml, byState };
+  /* WALK FROM HERE. The starting people for a new walk that begins at this place: the file's person and every archive's entry that share the slot. A living person is never
+     compared, so a place with anyone living in it cannot start a walk; nor can a place that holds only placeholders ("Unknown"). Returns {an} or {why}. */
+  const walkFrom = (M, s) => {
+    if (!s) return { why: 'none' };
+    const ids = [], an = { f: s.f, a: {} };
+    if (s.f >= 0) ids.push(s.f);
+    Object.keys(s.arch).forEach(a => { an.a[a] = s.arch[a].i; ids.push(s.arch[a].i); });
+    if (!ids.length) return { why: 'none' };
+    if (ids.some(i => M.P[i].living)) return { why: 'living' };
+    if (ids.every(i => placeholder(M.P[i]))) return { why: 'placeholder' };
+    return { an };
+  };
+  const API = { scrollDelta, decisionInfo, walkFrom, personText, addPeople, fixItems, offerable, genLabel, groupByGen, archLines, contrast, ensure, lum, pair, layout, alternatives, dkey, judgeD, matchLists, placeholder, isPlaceholderName, statusInfo, statusHtml, statusIconHtml, byState };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.TCP = API;
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
@@ -5199,6 +5214,7 @@ function prResult() {
   const P = S.pr, R = P.res, sm = R.summary;
   const an = R.slots.find(x => x.anchor), anq = an ? (an.f >= 0 ? M.P[an.f] : an.arch[an.primary] ? M.P[an.arch[an.primary].i] : null) : null;
   let h = anq ? `<p class="plines prstart">Starting from <b>${esc(anq.name)}</b> <small>${esc(prYears(anq))}</small></p>` : '';
+  if (P.back && P.back.length) h += `<p class="plines prwalk"><button type="button" class="lk-btn is-small" data-pr-back="1">‹ Back to ${esc(P.back[P.back.length - 1].name)}</button><small>${P.back.length === 1 ? 'the start you came from' : P.back.length + ' starts to go back through'}</small></p>`;
   h += prCounts(sm);
   const needHint = !!RL() && R.slots.some(s => s.f >= 0 && !M.P[s.f].living) && !R.slots.some(s => s.f >= 0 && prExt(M.P[s.f]).length);
   if (needHint) h += `<small class="prhint"><button type="button" class="lk-linkbtn" data-gsettings="1">Add your MyHeritage link</button> to link these.</small>`;
@@ -5221,7 +5237,7 @@ function prList() {
     Object.keys(s.arch).map(Number).sort((x, y) => x - y).forEach(x => who.push([prArch(x).name, prArch(x).color]));
     const aria = `${REL[s.rel] || 'Person'}, ${TCPe().genLabel(s.gen)}: ${q ? q.name : ''}. ${sr.tip || sr.word}. In: ${who.map(w => w[0]).join(', ')}. ${on ? 'Close' : 'Open'} the details`;
     const bey = s.more ? (s.more.up || 0) + (s.more.down || 0) : 0;
-    let h = `<li class="prli${on ? ' on' : ''}" data-pr-row="${esc(nm)}"><button type="button" class="prsel" data-pr-slot="${esc(nm)}" aria-expanded="${on}"${on ? ` aria-controls="prd-${esc(s.id)}"` : ''} aria-label="${esc(aria)}"><span class="prrel" title="${esc(REL[s.rel] || 'Person')}">${esc(s.rel === 'self' ? 'Start' : REL[s.rel] || 'Person')}</span>${TCPe().statusIconHtml(s.state, pn, esc)}<span class="prnm">${q ? esc(q.name) : ''} <small class="pryr">${q ? esc(prYears(q)) : ''}</small></span>${s.ph ? prPH(s) : ''}${bey ? `<span class="prbey" title="${bey} more recorded beyond here">+${bey} beyond</span>` : ''}<span class="prsqs" aria-hidden="true">${who.map(w => `<i class="prsq" style="--ac:${esc(w[1])}" title="${esc(w[0])}"></i>`).join('')}</span></button>`;
+    let h = `<li class="prli${on ? ' on' : ''}" data-pr-row="${esc(nm)}"><div class="prhead"><button type="button" class="prsel" data-pr-slot="${esc(nm)}" aria-expanded="${on}"${on ? ` aria-controls="prd-${esc(s.id)}"` : ''} aria-label="${esc(aria)}"><span class="prrel" title="${esc(REL[s.rel] || 'Person')}">${esc(s.rel === 'self' ? 'Start' : REL[s.rel] || 'Person')}</span>${TCPe().statusIconHtml(s.state, pn, esc)}<span class="prnm">${q ? esc(q.name) : ''} <small class="pryr">${q ? esc(prYears(q)) : ''}</small></span>${s.ph ? prPH(s) : ''}<span class="prsqs" aria-hidden="true">${who.map(w => `<i class="prsq" style="--ac:${esc(w[1])}" title="${esc(w[0])}"></i>`).join('')}</span></button>${bey && TCPe().walkFrom(M, s).an ? `<button type="button" class="prbey go" data-pr-walk="${esc(nm)}" title="${bey} more recorded beyond this place. Walk from here: start the comparison at this person" aria-label="${bey} more recorded beyond. Walk from ${esc(q ? q.name : 'here')}">+${bey} beyond ›</button>` : bey ? `<span class="prbey" title="more recorded beyond here">+${bey} beyond</span>` : ''}</div>`;
     if (on) h += prSlotPanel(s);
     return h + '</li>';
   };
@@ -5251,6 +5267,9 @@ function prSlotPanel(s) {
   const P = S.pr, R = P.res, nmk = prSlotName(s), si = TCPe().statusInfo(s.state, s.pnotes);
   const sq = (label, colour) => `<i class="prsq" style="--ac:${esc(colour)}" aria-hidden="true"></i><span class="prsr">${esc(label)}:</span>`;
   let h = `<div class="prdet ${esc(si.cls)}" id="prd-${esc(s.id)}" role="region" aria-label="Details: ${esc(REL[s.rel] || 'Person')}, ${esc(TCPe().genLabel(s.gen))}">`;
+  /* going further: the walk stops at the generation limit and at 300 places, and every place says how many more are recorded beyond it. A new walk from here goes there. */
+  if (!s.anchor && TCPe().walkFrom(M, s).an) { const bey = s.more ? (s.more.up || 0) + (s.more.down || 0) : 0;
+    h += `<div class="prwalk"><button type="button" class="lk-btn is-small is-primary" data-pr-walk="${esc(nmk)}">Walk from here</button><small>${bey ? bey.toLocaleString() + ' more ' + (bey === 1 ? 'person is' : 'people are') + ' recorded beyond this place. ' : ''}Starts a new comparison at this person, keeping your accepted and rejected pairings.</small></div>`; }
   if (s.f >= 0) h += `<div class="prent file"><span class="prwho">${sq('Your file', PAIRFILE)} ${prNameLink(M.P[s.f])}</span></div>`;
   Object.keys(s.arch).map(Number).sort((a, b) => a - b).forEach(a => {
     const e = s.arch[a], q = M.P[e.i], ar = prArch(a), offer = s.f < 0 && a === prShown(s) && TCPe().offerable(M, s);
@@ -5280,6 +5299,28 @@ function prDecide(i, j, v) {
   const P = S.pr, k = TCPe().dkey(M, i, j);
   if (v) { P.dec.set(k, v); while (P.dec.size > PR_MAXDEC) P.dec.delete(P.dec.keys().next().value); } else P.dec.delete(k);
   prRun(); prDraw();
+}
+/* the name of the person the current walk starts from, for the Back button */
+function prAnchorName() {
+  const P = S.pr, R = P && P.res, an = R && R.slots.find(x => x.anchor); if (!an) return 'the start';
+  const q = an.f >= 0 ? M.P[an.f] : an.arch[an.primary] ? M.P[an.arch[an.primary].i] : null; return q ? q.name : 'the start';
+}
+/* WALK FROM HERE: begin the comparison again at this place's person. Only the starting people and the generations change; the visitor's accepted and rejected pairings are kept (they are
+   keyed by the two people, not by the walk), as are Direct line / Whole family and how far back. The old start is kept so Back can return to it. */
+function prWalk(k) {
+  const P = S.pr; if (!P || !P.res) return;
+  const s = P.res.slots.find(x => prSlotName(x) === k); if (!s) return;
+  const w = TCPe().walkFrom(M, s);
+  if (!w.an) { toast(w.why === 'living' ? 'Living people are never compared, so a walk cannot start here' : 'A walk cannot start from here', 3200); return; }
+  (P.back = P.back || []).push({ an: P.an, name: prAnchorName() }); while (P.back.length > 20) P.back.shift();
+  P.an = w.an; P.sel = null; P.listAll = false; P.flt = null; prRun(); prDraw({ fit: true });
+  prLive('Walking from ' + prAnchorName() + '. ' + P.res.slots.length + ' places.'); toast('Walking from ' + prAnchorName(), 2600);
+  const b = $('#info .prstart'); if (b && b.scrollIntoView) b.scrollIntoView({ block: 'nearest' });
+}
+function prBack() {
+  const P = S.pr; if (!P || !P.back || !P.back.length) return;
+  const was = P.back.pop(); P.an = was.an; P.sel = null; P.listAll = false; P.flt = null; prRun(); prDraw({ fit: true });
+  prLive('Back to ' + prAnchorName()); toast('Back to ' + prAnchorName(), 2200);
 }
 function prStart() {
   const P = S.pr, p = markedPerson(); if (!p) return;
@@ -5352,6 +5393,8 @@ $('#info').addEventListener('click', e => {
   const fl = t.closest('[data-pr-flt]'); if (fl) { if (fl.disabled) return; const k = fl.dataset.prFlt; P.flt = P.flt === k ? null : k; renderInfo(); const b = $('#info [data-pr-flt="' + k + '"]'); if (b) b.focus({ preventScroll: true }); prLive(P.flt ? 'Showing only these' : 'Showing all'); return; }
   const pk = t.closest('[data-pr-pick]'); if (pk) { const [a, i] = pk.dataset.prPick.split(':').map(Number); P.pick[a] = i; return; }
   if (t.closest('[data-pr-anchor]')) { prStart(); return; }
+  const wk = t.closest('[data-pr-walk]'); if (wk) { prWalk(wk.dataset.prWalk); return; }
+  if (t.closest('[data-pr-back]')) { prBack(); return; }
   const bk = t.closest('[data-pr-up]'); if (bk) { P.up = +bk.dataset.prUp; prRun(); prDraw({ fit: true }); return; }
   const wh = t.closest('[data-pr-whole]'); if (wh) { P.whole = wh.dataset.prWhole === '1'; prRun(); prDraw({ fit: true }); return; }
   if (t.closest('a[href]:not([href="#"])')) return;   /* a link out follows itself */

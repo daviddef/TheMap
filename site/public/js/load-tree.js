@@ -1,7 +1,11 @@
 /* The loading screen for reading a family tree file: a tree grows and the people it finds fly onto it as cards that turn into leaves, near-identical cards are stamped
    and merged, flags go up at the end. It follows the reader's real progress messages (public/roots/js/pipeline.js says them), so a slow step is a slow step; the real
    message stays in small type under the bar. Everything drawn here is invented: the names on the cards are a fixed list, never a name from the visitor's file, and
-   nothing from the file reaches this script except the progress message, which names a stage and a country code and a count.
+   nothing from the file reaches this script except the progress message, which names a stage and a country code and a count. After the tree is built the scene turns to
+   a dotted map of the world: pins drop on it (the step that puts the places on the map), then dashed routes draw themselves between them and a little suitcase travels
+   along (the step that counts who moved). The pins and routes are a fixed set of well-known cities, the same for everybody, and never a place from the visitor's file.
+   The stage on show follows the real stage but one step at a time, each for at least DWELL seconds, so a step the reader does in a few milliseconds can still be seen;
+   the real message under the bar is never delayed.
    Used by /tree-canvas/ and /roots/. Both pages' policy is script-src and style-src 'self', so this is a plain script and a stylesheet it links itself.
    API: RALoad.say(message) shows or updates the screen (after a short delay, so a quick read never flashes it), RALoad.hide() lets the tree finish and fades it. */
 (function () {
@@ -11,13 +15,20 @@
     { k: 'Unrolling the map', s: 'Atlas', j: ['Asking the Atlas what Fiume was called in 1910.', 'Dusting off a few hundred thousand villages.', 'The Atlas is putting its glasses on.'] },
     { k: 'Pinning places', s: 'Place', j: ['Salisbury or Harare? Yes.', 'Five spellings, one village. Diplomacy in progress.', 'Telling the Austro-Hungarian Empire we’ve moved.'] },
     { k: 'Crunching relationships', s: 'Build', j: ['Checking nobody is their own grandfather.', 'Merging the two Marias who were obviously the same Maria.', 'Introducing second cousins at a safe distance.'] },
+    { k: 'Drawing the map', s: 'Map', j: ['Teaching the Atlas where Imotski is.', 'Pins go in, strings come out.', 'Checking that nobody was born in the sea. Mostly.'] },
+    { k: 'Tracing the journeys', s: 'Moves', j: ['Great-grandfather: three borders, one ocean.', 'How far will a family go for a better harvest?', 'Counting everyone who packed a suitcase.'] },
     { k: 'Raising the flags', s: 'Flags', j: ['Whose flag flew over the church that year? Ahem.', 'Borders have moved. Again.', 'Ironing the flags.'] }];
   var SAY = ['Allegedly born 1872.', 'I moved twice. Nobody asked me.', 'Please stop calling me “unknown”.', 'Yes, that is my real surname.', 'I had eleven siblings and one ledger.', 'My spelling is a work in progress.', 'Spotted in two registers. Suspicious.', 'I was never in Salisbury. Probably.'];
   var NM = ['Maria', 'Ivan', 'Giovanni', 'Anna', 'Josip', 'Katarina', 'Johann', 'Rosa', 'Luka', 'Elisabeth', 'Marija', 'Antonio'];
   var SN = ['Kovač', 'Rossi', 'Novak', 'Bianchi', 'Horvat', 'Mayer'];
   var PL = ['Senj', 'Rijeka', 'Imotski', 'Trieste', 'Gallignana', 'Pomer'];
-  var PAL = ['#6FB3C4', '#D2A860', '#7CC293', '#E08A76', '#B79AE0', '#E7E5DE'];
-  var W = 680, H = 300, DELAY = 350;
+  var PAL = ['#6FB3C4', '#D2A860', '#7CC293', '#E08A76', '#B79AE0', '#7DD3C0', '#F2A65A', '#E7E5DE'];
+  var W = 680, H = 300, DELAY = 350, DWELL = 0.45;
+  /* the world, as dots: 38 rows of 100 columns (3.6 degrees each, from 80 N), one hex string per row; then the fixed pins (lon, lat) and the routes between them (pin, pin) */
+  var MASK = ["000001fbfff80380000e00000", "0000eaf03ff80000707fe0c00", "07c3ff7e1ff000c047fffffc2", "cfffffe71fc003fbfffffffff", "0fffffa71e0c0ffffffffffff", "0fffff0e04001efffffffffbc", "000fffcf8000ceffffffff860", "0003ffffc001dfffffffffc40", "0001ffffe0007fffffffffc00", "0001ffff00007fffffffff800", "0001fffc0001e7f7fffffe000", "0000fff80001c2ff7ffff4800", "0000fff80000f80ffffff5800", "00007ff00001fffffffff0000", "00003e100003fffffffff0000", "00001e100007ffffdfffe0000", "000006400007ffffe3ef80000", "000003c00007fffbc38f10000", "000000600007fffe018780000", "000000378003fffd010508000", "0000000fe001ffff000220000", "0000000ff0000ffe000660000", "0000000ff8000ffc0002f0800", "0000001fff0007f8000211e00", "0000000fff0007f80000c0200", "0000000fff0007fc000003400", "00000007fe0007f900000f400", "00000003fe0007f300001fe00", "00000003fe0003f300003ff00", "00000003f80003e000007ff80", "00000003f00001e000003ff80", "00000003e00001c0000039f00", "00000003c0000000000000f00", "0000000780000000000000002", "000000070000000000000000c", "0000000700000000000000000", "0000000600000000000000000", "0000000200000000000000000"];
+  var PINS = [[14.4, 45.3], [-6.3, 53.3], [10, 53.5], [-74, 40.7], [-87.6, 41.9], [-58.4, -34.6], [28, -26.2], [151.2, -33.9], [115.9, -32]];
+  var ARCS = [[0, 3], [0, 5], [1, 4], [2, 7], [0, 6], [3, 4], [6, 8], [0, 8]];
+  var MX = 20, MY = 10, MK = 640 / 360;      /* where the map sits on the canvas, and pixels per degree */
 
   /* which stage a progress message belongs to, and how far through it is (only the places step says); null for any other message (it is shown, and the tree waits) */
   function stageOf(msg) {
@@ -28,15 +39,18 @@
     if ((r = /^Loading the \S+ places \((\d+) of (\d+)\)/.exec(m))) return { i: 3, p: Math.min(0.95, (+r[1]) / Math.max(1, +r[2])) };
     if (/^Placing /.test(m)) return { i: 3 };
     if (/^Building the tree/.test(m)) return { i: 4 };
-    if (/^Drawing flags/.test(m)) return { i: 5 };
+    if (/^Putting .+ on the map/.test(m)) return { i: 5 };
+    if (/^Tracing journeys/.test(m)) return { i: 6 };
+    if (/^Drawing flags/.test(m)) return { i: 7 };
     return null;
   }
-  if (typeof module !== 'undefined' && module.exports) module.exports = { stageOf: stageOf, STAGES: STAGES };
+  if (typeof module !== 'undefined' && module.exports) module.exports = { stageOf: stageOf, STAGES: STAGES, WORLD: { mask: MASK, pins: PINS, arcs: ARCS } };
   if (typeof window === 'undefined' || typeof document === 'undefined') return;
 
   var el = null, cv, ctx, ttl, jk, bar, real, scale = 1, raf = 0, timer = 0, outT = 0;
   var shown = false, pending = false, ending = false, endAt = 0;
   var stage = 0, sub = 0.3, gd = 0, tm = 0, last = 0, launch = {}, leaves = [], sel = null, say_ = '', sayT = 0, msg = 'Starting';
+  var ss = 0, ssAt = 0, tAt = [], la = 0, doneAt = -1, land = null, nPins = 0, nArcs = 0;      /* ss: the stage on show; tAt: when each was reached; la: how much of the map is showing */
   var still = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   var cl = function (x, a, b) { return Math.max(a, Math.min(b, x)); }, ez = function (x) { return 1 - Math.pow(1 - x, 3); };
 
@@ -62,21 +76,59 @@
   }
   function rr(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, r) : ctx.rect(x, y, w, h); }
 
+  /* the map: a veil over the tree, the world in dots, pins that drop one after another, then dashed routes that draw themselves with a suitcase travelling along */
+  function pinAt(i) { return [MX + (PINS[i][0] + 180) * MK, MY + (80 - PINS[i][1]) * MK]; }
+  function bez(a, b, t) {
+    var cx = (a[0] + b[0]) / 2, cy = Math.min(a[1], b[1]) - Math.hypot(a[0] - b[0], a[1] - b[1]) * 0.28 - 8, u = 1 - t;
+    return [u * u * a[0] + 2 * u * t * cx + t * t * b[0], u * u * a[1] + 2 * u * t * cy + t * t * b[1]];
+  }
+  function mapLayer() {
+    if (la < 0.01) return;
+    if (!land) {
+      land = [];
+      MASK.forEach(function (row, r) { for (var c = 0; c < 100; c++) if (parseInt(row.charAt(c >> 2), 16) >> (3 - (c & 3)) & 1) land.push([MX + (c + 0.5) * 6.4, MY + (r + 0.5) * 6.4]); });
+    }
+    var mt = tm - (tAt[5] === undefined ? tm : tAt[5]), jt = tAt[6] === undefined ? -1 : tm - tAt[6], i, k, q;
+    ctx.fillStyle = 'rgba(32,28,23,' + (0.74 * la) + ')'; ctx.fillRect(0, 0, W, H - 22);
+    ctx.globalAlpha = la; ctx.fillStyle = '#5E6B73';
+    for (i = 0; i < land.length; i++) ctx.fillRect(land[i][0] - 1.1, land[i][1] - 1.1, 2.2, 2.2);
+    nPins = 0; nArcs = 0;
+    for (k = 0; k < ARCS.length; k++) {
+      q = cl((jt - k * 0.04) / 0.45, 0, 1); if (q <= 0) continue; nArcs++;
+      var a = pinAt(ARCS[k][0]), b = pinAt(ARCS[k][1]), n = Math.max(2, Math.round(q * 30)), e = ez(q);
+      ctx.strokeStyle = '#6FB3C4'; ctx.lineWidth = 1.4; ctx.setLineDash([4, 4]); ctx.lineDashOffset = -tm * 14; ctx.beginPath(); ctx.moveTo(a[0], a[1]);
+      for (i = 1; i <= n; i++) { var pt = bez(a, b, e * i / n); ctx.lineTo(pt[0], pt[1]); }
+      ctx.stroke(); ctx.setLineDash([]);
+      var tp = q < 1 ? e : (tm * 0.32 + k * 0.29) % 1, c = bez(a, b, tp);
+      ctx.fillStyle = 'rgba(242,166,90,.28)'; ctx.beginPath(); ctx.arc(c[0], c[1], 6, 0, 7); ctx.fill();
+      ctx.fillStyle = '#F2A65A'; rr(c[0] - 4, c[1] - 3, 8, 6, 1.2); ctx.fill();
+      ctx.strokeStyle = '#F2A65A'; ctx.lineWidth = 1.1; ctx.beginPath(); ctx.moveTo(c[0] - 1.6, c[1] - 3); ctx.lineTo(c[0] - 1.6, c[1] - 4.6); ctx.lineTo(c[0] + 1.6, c[1] - 4.6); ctx.lineTo(c[0] + 1.6, c[1] - 3); ctx.stroke();
+    }
+    for (i = 0; i < PINS.length; i++) {
+      var t0 = 0.03 + i * 0.045; q = cl((mt - t0) / 0.28, 0, 1); if (q <= 0) continue; nPins++;
+      var pp = pinAt(i), py = pp[1] - Math.pow(1 - q, 2) * 46, rq = cl((mt - t0 - 0.28) / 0.6, 0, 1);
+      if (q >= 1 && rq < 1) { ctx.strokeStyle = 'rgba(224,100,78,' + (0.8 * (1 - rq)) + ')'; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.ellipse(pp[0], pp[1], 3 + rq * 11, 1.5 + rq * 5, 0, 0, 7); ctx.stroke(); }
+      ctx.fillStyle = '#E0644E'; ctx.beginPath(); ctx.arc(pp[0], py - 6.5, 3.6, Math.PI * 0.78, Math.PI * 2.22); ctx.lineTo(pp[0], py); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#F1E9D6'; ctx.beginPath(); ctx.arc(pp[0], py - 6.5, 1.3, 0, 7); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
   function scene(g) {
     leaves = []; var ord = 0, landed = 0, merged = 0, pend = [];
     ctx.fillStyle = '#2A251E'; ctx.fillRect(0, H - 22, W, 22);
     (function br(x, y, a, len, d, sd) {
-      var f = cl((g * 1.1 - d * 0.11) / 0.11, 0, 1); if (f <= 0) return;
+      var f = cl((g * 1.4 - d * 0.11) / 0.11, 0, 1); if (f <= 0) return;
       var e = ez(f), ang = a + Math.sin(tm * 1.1 + d + sd) * 0.018 * d, x2 = x + Math.sin(ang) * len * e, y2 = y - Math.cos(ang) * len * e;
       ctx.strokeStyle = '#8A6A3D'; ctx.lineWidth = Math.max(1.2, (6 - d) * 1.7); ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x2, y2); ctx.stroke();
       if (f >= 1 && d >= 2) {
-        if (launch[sd] === undefined) launch[sd] = { t: tm + (sd % 7) * 0.11, c: PAL[stage] };
+        if (launch[sd] === undefined) launch[sd] = { t: tm + (sd % 7) * 0.11, c: PAL[ss] };
         pend.push({ x: x2, y: y2, sd: sd, d: d, o: d === 5 ? ord++ : -1 });
       }
       if (d < 5) { br(x2, y2, ang - 0.42 - (sd % 3) * 0.05, len * 0.74, d + 1, sd * 2 + 1); br(x2, y2, ang + 0.42 + (sd % 2) * 0.05, len * 0.74, d + 1, sd * 2 + 2); }
     })(W / 2, H - 22, 0, H * 0.25, 0, 1);
     pend.forEach(function (p) {
-      var L = launch[p.sd], q = (tm - L.t) / 0.9; if (q < 0) return;
+      var L = launch[p.sd], q = (tm - L.t) / 0.9; if (q < 0) return; if (la > 0.3) q = 1;      /* a card still in the air when the map comes up lands at once, under the veil */
       var gx = p.x, gy = p.y;
       if (q < 1) {
         var e = ez(q), sx = -70, sy = 50 + (p.sd * 37) % 150, x = sx + (gx - sx) * e, y = sy + (gy - sy) * e - Math.sin(q * Math.PI) * 40, s = 1 - 0.88 * e, cw = 84 * s, ch = 58 * s;
@@ -91,7 +143,7 @@
       landed++; var r = (p.d === 5 ? 5.5 : 3.8) * (0.85 + 0.15 * Math.sin(tm * 3 + p.sd));
       ctx.fillStyle = L.c; ctx.beginPath(); ctx.arc(gx, gy, r, 0, 7); ctx.fill(); leaves.push({ x: gx, y: gy, r: r + 5, i: p.sd });
       if (p.o >= 0 && p.o % 10 === 3) {
-        var m = cl((g - 0.63) / 0.06, 0, 1);
+        var m = tAt[4] === undefined ? (ss > 4 ? 1 : 0) : cl((tm - tAt[4]) / 0.5, 0, 1);
         if (m > 0) {
           var ox = 24 * (1 - ez(m)), oy = -16 * (1 - ez(m));
           ctx.fillStyle = '#E0644E'; ctx.globalAlpha = 1 - 0.7 * ez(m); ctx.beginPath(); ctx.arc(gx + ox, gy + oy, 4.2, 0, 7); ctx.fill(); ctx.globalAlpha = 1;
@@ -101,15 +153,19 @@
           } else { merged++; ctx.strokeStyle = '#E0644E'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(gx, gy, 9, 0, 7); ctx.stroke(); ctx.fillStyle = '#E0644E'; ctx.font = '500 9px sans-serif'; ctx.fillText('×2', gx + 10, gy - 8); }
         }
       }
-      if (g > 0.84 && p.d === 5) {
+      if (ss >= 7 && p.d === 5) {
         ctx.strokeStyle = '#CFC6B4'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(gx, gy); ctx.lineTo(gx, gy - 13); ctx.stroke();
         var fc = [['#C8372D', '#fff', '#1F4E9C'], ['#2E8B57', '#fff', '#C8372D'], ['#1F4E9C', '#E7C640', '#C8372D']][p.sd % 3];
         fc.forEach(function (c, k) { ctx.fillStyle = c; ctx.fillRect(gx + 1, gy - 13 + k * 3, 8, 3); });
       }
     });
+    mapLayer();
     if (sel && sayT > 0) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(sel.x, sel.y, sel.r + 2, 0, 7); ctx.stroke(); }
-    ctx.fillStyle = '#CFC6B4'; ctx.font = '500 12px sans-serif'; ctx.fillText(landed + ' people', 14, H - 30);
-    if (merged) { ctx.fillStyle = '#E0644E'; ctx.fillText(merged + ' duplicates merged', 14, H - 46); }
+    var cy = H - 30;
+    ctx.fillStyle = '#CFC6B4'; ctx.font = '500 12px sans-serif'; ctx.fillText(landed + ' people', 14, cy);
+    if (merged) { ctx.fillStyle = '#E0644E'; ctx.fillText(merged + ' duplicates merged', 14, cy -= 16); }
+    if (la > 0.3 && nPins) { ctx.fillStyle = '#7DD3C0'; ctx.fillText(nPins + (nPins === 1 ? ' place pinned' : ' places pinned'), 14, cy -= 16); }
+    if (la > 0.3 && nArcs) { ctx.fillStyle = '#F2A65A'; ctx.fillText(nArcs + (nArcs === 1 ? ' journey traced' : ' journeys traced'), 14, cy -= 16); }
     if (sel && sayT > 0) {
       ctx.font = '500 13px sans-serif'; var tw = ctx.measureText(say_).width + 20, bx = cl(sel.x, tw / 2 + 6, W - tw / 2 - 6), by = cl(sel.y - 30, 20, H - 20);
       ctx.fillStyle = '#F1E9D6'; rr(bx - tw / 2, by - 14, tw, 26, 6); ctx.fill(); ctx.fillStyle = '#2B2620'; ctx.textAlign = 'center'; ctx.fillText(say_, bx, by + 4); ctx.textAlign = 'left';
@@ -118,22 +174,27 @@
   function frame(ts) {
     if (!shown) { raf = 0; return; }
     var dt = Math.min(0.05, ((ts - last) / 1000) || 0); last = ts; tm += dt; if (sayT > 0) sayT -= dt;
-    var target = ending ? 1 : (stage + sub) / 6; if (target > gd) gd = Math.min(target, gd + Math.max(0.0006, (target - gd) * dt * 2.2));
-    var S = STAGES[stage]; ttl.textContent = S.k + '…'; jk.textContent = S.j[Math.floor(tm / 2.4) % 3]; bar.style.width = (gd * 100) + '%'; bar.style.background = PAL[stage]; real.textContent = msg + '…';
+    /* the stage on show follows the real one, a step at a time and each for DWELL seconds (not at all for a reader who asked for less motion) */
+    if (still) ss = stage;
+    else { if (ss > stage) { ss = stage; tAt.length = ss + 1; } if (ss < stage && tm - ssAt >= DWELL) { ss++; ssAt = tm; tAt[ss] = tm; } }
+    var caught = ss >= stage; if (ending && caught && doneAt < 0) doneAt = tm;
+    var target = ending && caught ? 1 : (ss + (caught ? sub : 0.95)) / STAGES.length; if (target > gd) gd = Math.min(target, gd + Math.max(0.0006, (target - gd) * dt * 2.2));
+    la += ((ss === 5 || ss === 6 ? 1 : 0) - la) * Math.min(1, dt * 6);
+    var S = STAGES[ss]; ttl.textContent = S.k + '…'; jk.textContent = S.j[Math.floor(tm / 2.4) % 3]; bar.style.width = (gd * 100) + '%'; bar.style.background = PAL[ss]; real.textContent = msg + '…';
     if (!still && Math.abs((cv.clientWidth || W) / W - scale) > 0.005) fit();      /* the stylesheet may arrive after the first frame */
     if (!still) { ctx.clearRect(0, 0, W, H); ctx.fillStyle = '#201C17'; ctx.fillRect(0, 0, W, H); scene(gd); }
-    if (ending && (gd > 0.97 || tm - endAt > 0.9)) { finish(); return; }
+    if (ending && ((caught && (gd > 0.97 || tm - doneAt > 0.9)) || tm - endAt > 3)) { finish(); return; }
     raf = requestAnimationFrame(frame);
   }
   function reveal() {
-    pending = false; build(); shown = true; el.classList.remove('out'); el.hidden = false; fit(); last = 0;
+    pending = false; build(); shown = true; el.classList.remove('out'); el.hidden = false; fit(); last = 0; ss = stage; ssAt = tm; tAt = []; tAt[ss] = tm;
     if (!raf) raf = requestAnimationFrame(frame);
   }
   function finish() {
     el.classList.add('out'); clearTimeout(outT);
     outT = setTimeout(function () { el.hidden = true; shown = false; ending = false; }, 260);
   }
-  function reset() { stage = 0; sub = 0.3; gd = 0; tm = 0; launch = {}; leaves = []; sel = null; sayT = 0; ending = false; }
+  function reset() { stage = 0; sub = 0.3; gd = 0; tm = 0; ss = 0; ssAt = 0; tAt = []; la = 0; doneAt = -1; nPins = 0; nArcs = 0; launch = {}; leaves = []; sel = null; sayT = 0; ending = false; }
   /* the messages that are work in progress; anything else (a note that the file loaded, say) is not the loading screen's to show */
   function wants(text) { return !!stageOf(text) || /^(Starting|Hiding living people|Showing everyone|Redrawing)/.test(String(text || '')); }
   window.RALoad = {

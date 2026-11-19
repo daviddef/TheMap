@@ -12,7 +12,7 @@ import { u } from "../../lib/url.js";
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' https: https://archive.defranceski.com https://booyzen.defranceski.com https://luwinski.defranceski.com https://lerena.defranceski.com https://falco.defranceski.com https://blazevic.defranceski.com https://darcy.defranceski.com https://mazza.defranceski.com; font-src 'self'; worker-src 'self'; frame-src 'self'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://server.arcgisonline.com; connect-src 'self' https: https://archive.defranceski.com https://booyzen.defranceski.com https://luwinski.defranceski.com https://lerena.defranceski.com https://falco.defranceski.com https://blazevic.defranceski.com https://darcy.defranceski.com https://mazza.defranceski.com; font-src 'self'; worker-src 'self'; frame-src 'self'; form-action 'none'; base-uri 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex">
 <title>Tree Canvas · Record Atlas</title>
@@ -20,6 +20,7 @@ import { u } from "../../lib/url.js";
 <link rel="icon" href="/favicon.svg">
 <link rel="stylesheet" href="/tree-canvas/page.css">
 <link rel="stylesheet" href="/tree-canvas/fixrows.css">
+<link rel="stylesheet" href="/tree-canvas/compass.css">
 <script is:inline src="/tree-canvas/theme-boot.js"></script>
 </head>
 <body>
@@ -115,6 +116,7 @@ import { u } from "../../lib/url.js";
       <h1 id="yfTitle" tabindex="-1">Your file</h1>
       <p class="stsub" id="yfWhat"></p>
       <p class="stsub"><button type="button" class="stlink" id="yfSettings">Settings</button>: living people, links, the look, remembering files.</p>
+      <p class="stsub"><button type="button" class="stlink" id="yfCompass">Compass</button>: your family on the map through time.</p>
       <p class="stsub">The views not brought here yet are still on <a id="yfRoots" href={u("/roots/")}>Tree views (older page)</a>, where you can open this file again.</p>
     </header>
 
@@ -217,6 +219,7 @@ import { u } from "../../lib/url.js";
     <div id="fxpane-orphans" class="fxpane" role="tabpanel" aria-labelledby="fxt-orphans" hidden></div>
   </div>
 </main>
+<main id="cp" hidden aria-labelledby="cpTitle"></main>
 <aside id="sg" hidden role="dialog" aria-modal="true" aria-labelledby="sgTitle">
   <div class="sgback" id="sgBack"></div>
   <div class="sgpanel">

@@ -17,6 +17,7 @@ import { store as dec, fixes } from '/roots/js/decisions.js';   // the Fix list'
 import { createWorkspace } from '/tree-canvas/fixlist-view.js';   // the full Fix list page
 import { rowEl, mk as fxMk } from '/tree-canvas/fixlist-rows.js';   // the Fix list's row, drawn here and, for one person, in the canvas's side panel
 import { personIndex } from '/tree-canvas/fixlist.js';
+import { createCompass } from '/tree-canvas/compass-view.js';   // Compass: your family on the map through time (a workspace over the canvas, like the Fix list)
 import { buildOrphans } from '/roots/js/orphans.js';   // the Orphans tab: who is in no tree, by birthplace, with the Atlas's collections
 
 const $ = s => document.querySelector(s);
@@ -230,7 +231,7 @@ function mount() {
   const old = $('#cv'), f = document.createElement('iframe');
   f.id = 'cv'; f.title = old.title;
   f.src = '/roots/canvas.html?sa=1&v=' + STAMP + (hide ? '&liv=1' : '') + (example ? '&ex=1' : '');
-  f.hidden = false; old.replaceWith(f); if (!$('#yf').hidden || !$('#sg').hidden || !$('#fx').hidden) f.inert = true;
+  f.hidden = false; old.replaceWith(f); if (!$('#yf').hidden || !$('#sg').hidden || !$('#fx').hidden || !$('#cp').hidden) f.inert = true;
 }
 
 let curName = null, curHead = null, curVia = null;   // curVia: the site a file was fetched from, when it came from a link
@@ -239,7 +240,7 @@ const isTreeJson = bytes => { try { return /^\uFEFF?\s*\{/.test(new TextDecoder(
 let curLink = null, curSize = 0;   // the address a file was fetched from (if it was), and the file's size
 let openTo = null;   // the page to land on once the file is read: 'fix' is the "Fix list" button on a kept file (as on /roots/); it opens the Fix list as soon as the reader has made it
 function start(bytes, name, via, link, to) {
-  closeYF(true); closeFX(true); lastM = null; fixMsg = null; cmpFix = null; placesMsg = null; pw.setData(null, null, ''); orw.setData(null, null, ''); openTo = to || null;
+  closeYF(true); closeFX(true); closeCP(true); lastM = null; fixMsg = null; cmpFix = null; placesMsg = null; pw.setData(null, null, ''); orw.setData(null, null, ''); openTo = to || null;
   const json = isTreeJson(bytes);
   curName = name || null; curVia = via || null; curLink = link || null; curSize = bytes.byteLength; curHead = name && !json ? headInfo(bytes) : (json ? { from: 'tree.json', tree: '' } : null);
   if (curVia && curHead) curHead = { ...curHead, from: curVia };   // the last-used list says where a file came from
@@ -331,7 +332,7 @@ async function fetchLines(a) {
 }
 async function openArchive(key) {
   const a = ARCH[key]; if (!a) return;
-  closeYF(true); closeFX(true); lastM = null;
+  closeYF(true); closeFX(true); closeCP(true); lastM = null;
   curName = null; curHead = null; example = false;
   $('#start').hidden = true; say('Opening the ' + a.name + ' archive…');
   try {
@@ -385,6 +386,7 @@ addEventListener('message', e => {
   if (d.tcYourFile) { openYF(); return; }   // the canvas menu's "Your file"
   if (d.tcFixList !== undefined) { const q = d.tcFixList && typeof d.tcFixList === 'object' ? d.tcFixList : {}; openFX(q.person != null ? { id: String(q.person).slice(0, 120), name: String(q.name || '').slice(0, 200) } : null); return; }   // the Fix button, or "Open the full Fix list"
   if (d.tcFixCompare !== undefined) { cmpFix = d.tcFixCompare && typeof d.tcFixCompare === 'object' ? d.tcFixCompare : null; fixRefresh(false); return; }   // what the Compare view found, in memory only
+  if (d.tcCompass !== undefined) { const q = d.tcCompass && typeof d.tcCompass === 'object' ? d.tcCompass : {}; openCP(q.person != null ? { person: String(q.person).slice(0, 120), a: Number.isInteger(q.a) && q.a >= 0 && q.a < 20 ? q.a : undefined } : null); return; }   // the Compass button; the selected person, if one, is where it starts
   if (d.tcSettings) { openSG(); return; }   // the canvas menu's "Settings"
   if (d.tcRestored) { onRestored(d.tcRestored); return; }
   if (d.tcHome) { flushWork(); $('#cv').hidden = true; showStart(); return; }   // the canvas's folder button: back to the opening screen (the canvas keeps its own state)
@@ -855,6 +857,44 @@ function closeFX(quiet) {
 $('#fx-back').onclick = () => closeFX();
 addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#fx').hidden && $('#sg').hidden) { e.preventDefault(); closeFX(); } });
 addEventListener('pagehide', () => { fxw.st.flush(); pw.st.flush(); orw.st.flush(); });
+
+/* ---- Compass: your family on the map through time. A page over the canvas, like the Fix list: it reads the SAME loaded file (window.RR) and the SAME archive selection as Compare (the archives the
+   canvas holds in window.RR.compares, and any more read here through the same archCache, so an archive is never read twice). Nothing is uploaded; the map's tiles and the Atlas's own files are the
+   only requests. The drawing is compass-view.js, every rule in compass-model.js (tested). ---- */
+const cpSources = () => {
+  const R = window.RR; if (!R || !R.tree) return [];
+  const main = { key: R.archive ? R.archive.key : 'file', name: R.archive ? R.archive.name + ' archive' : (curName ? 'Your file' : 'Your file'), ck: 'you', tree: R.tree, atlas: R.atlas };
+  return [main, ...(R.compares || []).filter(c => c && c.tree && c.archive).map(c => ({ key: c.archive.key, name: c.archive.name, ck: c.archive.key, tree: c.tree, atlas: c.atlas }))];
+};
+const cpw = createCompass({
+  root: $('#cp'), sources: cpSources, archives: ARCH,
+  chosen: () => ((window.RR && window.RR.compares) || []).filter(c => c && c.archive).map(c => c.archive.key),
+  loadArchive: async key => {
+    const res = await CS.loadSet([key], (k, signal) => fetchArchive(k, signal, { lines: false }), { cache: archCache, concurrency: 1, allowed: Object.keys(ARCH) });
+    if (!res.ok.length) throw new Error(res.failed[0] ? res.failed[0].why : 'error');
+    const v = res.ok[0].value; return { tree: v.tree, atlas: v.atlas };
+  },
+  showOnCanvas: key => { closeCP(); toCanvas({ tcShow: [key] }); },
+  close: () => closeCP(),
+});
+let cpFrom = null, cpWas = null;
+function openCP(want) {
+  if (!window.RR) return;
+  const f = $('#cp'); cpFrom = document.activeElement;
+  cpWas = { cv: $('#cv').inert, yf: $('#yf').inert, start: $('#start').inert, fx: $('#fx').inert };
+  $('#cv').inert = $('#yf').inert = $('#start').inert = $('#fx').inert = true;
+  cpw.open(want || null);
+}
+function closeCP(quiet) {
+  const f = $('#cp'); if (!f || f.hidden) return;
+  cpw.close(); const w = cpWas || {}; $('#cv').inert = !!w.cv; $('#yf').inert = !!w.yf; $('#start').inert = !!w.start; $('#fx').inert = !!w.fx;
+  if (!quiet) { const c = $('#cv'); if (c && !c.hidden) { try { c.focus(); } catch (e) { /* no focus to give */ } } else if (cpFrom && cpFrom.isConnected) { try { cpFrom.focus(); } catch (e) { /* ok */ } } }
+}
+addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !$('#cp').hidden && $('#sg').hidden) { e.preventDefault(); closeCP(); return; }
+  if (!$('#cp').hidden) cpw.onKey(e);
+});
+$('#yfCompass').onclick = () => { closeYF(true); openCP(null); };
 
 {
   /* from an archive: its icon sends ?archive=<key>; failing that, the page the visitor came from (some browsers send only its origin, which is enough) */

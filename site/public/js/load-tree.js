@@ -225,13 +225,14 @@
     la += ((ss === 5 || ss === 6 ? 1 : 0) - la) * Math.min(1, dt * 6);
     var S = STAGES[ss]; ttl.textContent = S.k + '…'; jk.textContent = S.j[Math.floor(tm / 2.4) % 3]; bar.style.width = (gd * 100) + '%'; bar.style.background = PAL[ss]; real.textContent = msg + '…';
     if (!still && Math.abs((cv.clientWidth || W) / W - scale) > 0.005) fit();      /* the stylesheet may arrive after the first frame */
-    if (!still) { ctx.clearRect(0, 0, W, H); ctx.fillStyle = '#201C17'; ctx.fillRect(0, 0, W, H); scene(gd); }
-    if (ending && ((caught && (gd > 0.97 || tm - doneAt > 0.9)) || tm - endAt > 3)) { finish(); return; }
+    if (!still) { try { ctx.clearRect(0, 0, W, H); ctx.fillStyle = '#201C17'; ctx.fillRect(0, 0, W, H); scene(gd); } catch (e) { /* a drawing fault must never leave the card frozen over the tree: the loop goes on and the screen still ends */ } }
+    if (ending && ((caught && (gd > 0.97 || tm - doneAt > 0.9)) || tm - endAt > 3)) { raf = 0; finish(); return; }      /* raf back to 0: the NEXT load (a saved view opened after a tree) must be able to start the animation again */
     raf = requestAnimationFrame(frame);
   }
   function reveal() {
     pending = false; build(); shown = true; el.classList.remove('out'); el.hidden = false; fit(); last = 0; ss = stage; ssAt = tm; tAt = []; tAt[ss] = tm;
-    if (!raf) raf = requestAnimationFrame(frame);
+    if (raf && window.cancelAnimationFrame) cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(frame);
   }
   function finish() {
     el.classList.add('out'); clearTimeout(outT);
@@ -253,6 +254,6 @@
       if (!shown || ending) return;
       ending = true; endAt = tm; if (still) finish();
     },
-    off: function () { clearTimeout(timer); clearTimeout(outT); pending = false; ending = false; shown = false; if (el) el.hidden = true; }
+    off: function () { clearTimeout(timer); clearTimeout(outT); pending = false; ending = false; shown = false; if (raf && window.cancelAnimationFrame) cancelAnimationFrame(raf); raf = 0; if (el) el.hidden = true; }
   };
 })();

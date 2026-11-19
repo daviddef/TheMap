@@ -1,24 +1,50 @@
 ---
-/* Onboarding, because a first-time visitor lands on a world map with seven
-   layers and no idea what to do with it. Written as three questions rather
-   than a feature list, because a feature list is what the site already is. */
+/* START HERE IS THE ONE PAGE THAT SAYS WHAT THIS IS. /start/ (three ways in) and /about/ (what it is, where it came from, what it does not
+   know) were two pages with one job, and a visitor had to guess which to open. They are one page now, and /about/ redirects here.
+
+   EVERY NUMBER ON THIS PAGE IS COUNTED, not typed (lib/start-data.js reads them from the same files the map and the other pages read). The page
+   says what the map does not know, and a hand-written figure on it goes stale the first time a harvest runs, which is the failure it exists to
+   catch. The same numbers fill the story tour (public/js/start-tour-gate.js opens it; /start-tour.html is its chapters).
+
+   Everything is plain HTML in the page body: it reads, links and indexes with no script. The tour is an addition, not a gate. */
 import Base from "../layouts/Base.astro";
 import { u } from "../lib/url.js";
-import { atlas as idx } from "../lib/atlas.js";
-import regions from "../../public/regions.json";
-const places = idx.places.length;
+import { startNumbers } from "../lib/start-data.js";
+import { countries } from "../lib/inventory.js";
+const n = startNumbers({ countriesKnown: countries });
 ---
 <Base
   title="Start here"
-  eyebrow="Three ways in, depending on what you are holding"
-  dek="One question: my people came from here, who holds the paper? Start with whatever you have in your hand.">
+  eyebrow="What this is, where it came from, and what it does not know"
+  dek="Where genealogical records are, who holds them and what it costs to look. Search by any name a place has ever had.">
+
+  <div class="k-hi" id="the-whole-page">
+    <p>My great-grandfather was born in Gallignana in 1863: where is that record, and can I see it tonight?</p>
+    <p>That one question is what this atlas answers. It began as one family's archive and was opened to the world. It is early, and it says so.</p>
+  </div>
+
+  <div class="k-stats" aria-label="The atlas in numbers">
+    <span><b>{n.places}</b> places</span>
+    <span><b>{n.countries}</b> countries and territories</span>
+    <span><b>{n.regions}</b> record regions</span>
+    <span><b>{n.eras}</b> eras</span>
+    <span><b>{n.volumes}</b> volumes</span>
+    <span class="k-tag is-new">{n.unsurveyedPct}% not yet surveyed</span>
+  </div>
+
+  <p class="st-play" id="story">
+    <button type="button" class="bigl st-playbtn" data-tour-open aria-haspopup="dialog">Play the story <span class="st-key" aria-hidden="true">T</span></button>
+    <span class="st-playnote">Two minutes, thirteen short scenes, about an invented grandmother and one word on the back of a photograph. It is the same
+      page you are reading, told as a picture. <a href={u("/")}>Or go straight to the map →</a></span>
+  </p>
 
   <p class="st-story"><a href={u("/looking-for/")}><b>Not sure where to start?</b> Tell us who you are looking for, in one sentence, and see their journey and a short plan →</a></p>
 
+  <h2 class="k-h">Three ways in, depending on what you are holding</h2>
   <ul class="k-tiles st-tiles">
     <li class="is-link"><a href={u("/?q=Gallignana")}><span class="st-lab">You have a place name</span>
       <b>Type it, even the old name</b></a>
-      <span>Gallignana finds Gračišće, Fiume finds Rijeka, Breslau finds Wrocław. {places.toLocaleString()} places, not just those with a shelf.</span></li>
+      <span>Gallignana finds Gračišće, Fiume finds Rijeka, Breslau finds Wrocław. {n.places} places, not just those with a shelf.</span></li>
     <li class="is-link"><a href={u("/?q=Xubrinich")}><span class="st-lab">You have a surname and nothing else</span>
       <b>Type that instead</b></a>
       <span>It gives the other spellings and the countries where the name is attested, then the archives for them. Xubrinich answers Žubrinić.</span></li>
@@ -27,21 +53,73 @@ const places = idx.places.length;
       <span>An 1863 baptism is in a Croatian archive; a 1930 one from the same village is filed under <em>Italy</em>. A range that crosses a handover is where records get lost.</span></li>
   </ul>
 
-  <div class="k-hi">
-    <p><b>A blank on this map is a gap in the map, not a gap in the record.</b></p>
-    <p>The shelf is deep for Croatia and thin elsewhere. A grey dot means nobody has looked, never that nothing is there.
-      <a href={u("/coverage/")}>See exactly how incomplete it is →</a></p>
-  </div>
+  <h2 class="k-h">Four things stand between you and the record</h2>
+  <ol class="st-four">
+    <li><b>The name changed.</b> Gallignana is Gračišće. Fiume is Rijeka. The find box matches every name a place has had, for the whole world: {n.altPlaces} places and {n.altNames} other names.</li>
+    <li><b>The jurisdiction changed.</b> A 1930 record from the same village may be filed under <em>Italy</em>. It is the commonest reason a record cannot be found. <a href={u("/providers/#regions")}>See the table →</a></li>
+    <li><b>“Online” is eight different things.</b> Free images, a login, an index only, part paid, paywall, a catalogue card, in the building, and, for {n.unsurveyedPct}% of the places on the map, nobody has looked.</li>
+    <li><b>The record is not always a register.</b> Australia has no parish registers. {n.newspapers} digitised newspapers are the record for most ancestors before 1950.</li>
+  </ol>
 
   <div class="k-hi is-plain">
     <p>What the colours mean</p>
-    <p>Every dot is coloured by what it would cost you to look right now: free images, a free login, an index only, a paywall, a catalogue card, or paper in a building. Nothing else is ever coloured.</p>
+    <p>Every dot is coloured by what it would cost you to look right now: free images, a free login, an index only, a paywall, a catalogue card, or paper in a building. Nothing else is ever coloured. The colour is never the only signal: each panel says the same in words.</p>
   </div>
 
-  <p class="st-go"><a class="bigl" href={u("/")}>Open the map →</a></p>
-  <p class="k-lede"><a href={u("/providers/#regions")}>{regions.regions.length} record regions</a> ·
-    <a href={u("/surnames/")}>the surname dataset</a> ·
-    <a href={u("/coverage/")}>what is missing</a></p>
+  <h2 class="k-h">Three doors</h2>
+  <ul class="k-tiles st-tiles st-doors">
+    <li class="is-link"><a href={u("/your-name/")}><span class="st-lab">Type a name</span><b>A place, a surname, a first name</b></a>
+      <span>{n.surnameFamilies} families of spellings and {n.givenNames} given names in {n.givenForms} forms: Ivan, Johann and Giovanni are one name.</span></li>
+    <li class="is-link"><a href={u("/tree-canvas/")}><span class="st-lab">Drop in a tree</span><b>A GEDCOM, read in your browser</b></a>
+      <span>See your own tree as a tree, a fan, a night sky, lifespans or place lanes, and where it needs tidying.</span></li>
+    <li class="is-link"><a href={u("/looking-for/")}><span class="st-lab">Tell a story</span><b>Who you are looking for, in a sentence</b></a>
+      <span>It reads the sentence, draws the journey and gives a short plan.</span></li>
+  </ul>
+  <p class="k-lede">Also: <a href={u("/")}>the map</a> · <a href={u("/read/")}>the Record Reader</a> ({n.terms} sourced terms for old registers) · <a href={u("/flags/")}>flags</a> · <a href={u("/history/")}>history</a> · <a href={u("/connect/")}>connect to the data</a> · <a href={u("/providers/#regions")}>{n.regions} record regions</a> · <a href={u("/surnames/")}>the surname dataset</a></p>
+
+  <h2 class="k-h">Whose flag flew over it</h2>
+  <div class="k-hi is-plain">
+    <p>{n.flagPages} pages of flag history say who governed which ground, and when. This atlas knows which archive each regime’s paper went to, for {n.eras} eras in {n.regions} regions, and groups the flags into {n.hubs} hubs by region.</p>
+    <p>The two sit side by side and are not yet one search. <a href={u("/flags/")}>Open the flags →</a></p>
+  </div>
+
+  <h2 class="k-h">Where it came from</h2>
+  <div class="k-hi is-plain">
+    <p>Out of <a href="https://daviddef.github.io/TheDefranceski/map/">one family’s archive</a>. Its Croatian depth ({n.hrPlaces} places, {n.hrVolumes} volumes) is that archive’s work, imported once. What was family-specific was dropped, including its colouring by how far one researcher had got.</p>
+    <p>There are <a href={u("/my-work/")}>{n.archivesWord} such archives</a>, and what they share is why this atlas exists.</p>
+  </div>
+
+  <h2 class="k-h">What it does not know</h2>
+  <div class="k-hi">
+    <p><b>{n.unsurveyedPct}% of the ground on this map has never been surveyed.</b></p>
+    <p>Of {n.places} dots in {n.countriesWithDots} countries, only {n.walked} (in {n.walkedCountries} countries) have been walked volume by volume. A grey dot means nobody has looked, never that nothing is there.</p>
+  </div>
+  <ul class="k-tiles st-tiles">
+    <li><b>Regions follow the research</b><span>Each was written because someone was stuck on that ground and needed to know whose archive to write to.</span></li>
+    <li><b>Unopened sources are listed as such</b><span>{n.sourcesUnopened} of {n.sources} listed sources are there because a register or open dataset named them, and nobody has opened them yet. {n.sourcesOpened} have had their door tried; none is called surveyed until someone has read it.</span></li>
+    <li><b>Declined after looking is a result</b><span>{n.declined} sources were assessed and turned down with the reason written out. A bot gate is never worked around.</span></li>
+  </ul>
+  <details class="k-more st-more">
+    <summary><span class="k-mt">The longer account</span></summary>
+    <div class="prose">
+      <p>The regions were chosen by where research is being done, not by what would look impressive on a map. A place outside a mapped region says so in its own panel rather than guessing.</p>
+      <p>Keeping “nobody has surveyed it” apart from “nothing is there” is worth more than coverage: a map that quietly implies completeness sends people home when they should keep looking.</p>
+      <p>An archive that refuses a robot is stating terms, and an atlas that asks archives to trust it cannot be the thing that ignores them.</p>
+    </div>
+  </details>
+  <p class="k-lede"><a href={u("/coverage/")}>See exactly how incomplete it is →</a> · <a href={u("/add/")}>Add a source we lack</a></p>
+
+  <h2 class="k-h">How it is built</h2>
+  <ul class="k-tiles st-tiles">
+    <li><b>A static site</b><span>No server, no database, no account. The data is plain JSON <a href={n.repo}>in a public repository</a>. Your research stays in your own browser unless you choose to back it up.</span></li>
+    <li><b>Gated before it ships</b><span>The build refuses a source with no date, a provider that does not resolve, or coordinates in the wrong country. That last gate caught the Carnia comuni filed as Croatian.</span></li>
+    <li><b>Downloaded, not scraped</b><span>Country outlines are Natural Earth, the gazetteer is GeoNames (CC BY 4.0), maps are OpenStreetMap. Historical regions are drawn by hand, roughly, to say which filing system applied, not to settle a border.</span></li>
+  </ul>
+
+  <div class="k-foot">
+    <p>Behind the atlas</p>
+    <p><a href={u("/worklist/")}>What is being done</a> · <a href={u("/errands/")}>Letters to send</a> · <a href={u("/my-work/")}>My work</a> · <a href={u("/changelog/")}>What changed</a></p>
+  </div>
 </Base>
 
 <style>
@@ -52,6 +130,17 @@ const places = idx.places.length;
   .st-tiles li b { font-family: var(--serif); font-size: 18px; font-weight: 500; color: var(--ink); }
   .st-story { max-width: 1000px; margin: 0 0 18px; padding: 14px 18px; background: var(--accent-wash); border-radius: 10px; font: 400 17px/1.45 var(--sans); }
   .st-story a { color: var(--ink); text-decoration: none; } .st-story b { color: var(--accent); }
-  .st-go { margin: 26px 0 6px; }
-  .bigl { font-family: var(--serif); font-size: 20px; }
+  .st-play { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; max-width: 1000px; margin: 4px 0 20px; scroll-margin-top: 80px; }
+  .st-playbtn { font: 600 16px/1 var(--sans); display: inline-flex; align-items: center; gap: 10px; cursor: pointer; border: 0; background: var(--accent); color: var(--on-accent, #fff); border-radius: 999px; padding: 12px 22px; min-height: 48px; }
+  .st-playbtn:hover { filter: brightness(1.08); }
+  .st-playbtn:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+  .st-key { font: 500 11px/1 var(--mono, monospace); border: 1px solid currentColor; border-radius: 4px; padding: 3px 6px; opacity: .85; }
+  .st-playnote { flex: 1 1 22rem; font: 400 14px/1.5 var(--sans); color: var(--ink-2); }
+  .st-four { max-width: 78ch; margin: 0 0 24px; padding-left: 1.3em; font: 400 15.5px/1.55 var(--sans); }
+  .st-four li { margin: 0 0 8px; }
+  .st-four b { font-family: var(--serif); font-weight: 500; color: var(--ink); }
+  .st-doors .st-lab { color: var(--accent); }
+  .st-more { margin: -8px 0 14px; max-width: 78ch; }
+  .st-more .prose p { font-size: 14px; line-height: 1.65; color: var(--ink-2); margin: 0 0 10px; }
+  .k-stats > span { white-space: nowrap; }
 </style>

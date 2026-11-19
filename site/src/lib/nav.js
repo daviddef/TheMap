@@ -71,10 +71,13 @@ export const nav = [
   ["About", [
     [null, "Learn"],
     ["/whats-new/", "What's new"],
+    /* START HERE IS THE ABOUT PAGE TOO (what this is, where it came from, what it does not know); /about/ redirects to it, so there is one row, not two.
+       "The story" plays the two-minute tour: public/js/start-tour-gate.js turns this link into the tour wherever the script is loaded, and without
+       script the link lands on the Play button on /start/. The round play icon in the bar and the T key do the same. */
     ["/start/", "Start here"],
+    ["/start/#story", "The story (key T)"],
     ["/looking-for/", "Who are you looking for?"],
     ["/help/", "Help"],
-    ["/about/", "About the atlas"],
     [null, "The sources"],
     ["/providers/", "Who holds records"],
     ["/coverage/", "What's missing"],

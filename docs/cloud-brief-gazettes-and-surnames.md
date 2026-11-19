@@ -184,7 +184,7 @@ harvest actual volume counts and date coverage rather than describing it by
 hand — **more volumes is an explicit goal**, and a gazette run is often tens of
 thousands of issues.
 
-Add a short section to `site/src/pages/about.astro` explaining what gazettes are
+Add a short section to `site/src/pages/start.astro` (the merged Start here / About page) explaining what gazettes are
 and why a researcher should care, in the voice of the surrounding prose. Read
 several existing pages first; the writing is plain, specific, and never boastful.
 

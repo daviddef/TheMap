@@ -91,7 +91,7 @@ test("a reader who asks for less motion gets the words and the bar, not the draw
   assert.match(src, /prefers-reduced-motion: reduce/);
   assert.match(src, /if \(still\) cv\.hidden = true/);
   assert.match(src, /if \(still\) ss = stage;/, "no dwelling on a stage, so no map, no travelling suitcase and no waiting");
-  assert.match(src, /if \(!still\) \{ ctx\.clearRect/, "nothing is drawn");
+  assert.match(src, /if \(!still\) \{ try \{ ctx\.clearRect/, "nothing is drawn");
 });
 
 test("the stage on show never runs ahead of the real one, and the map belongs to the map and journey stages", () => {
@@ -147,4 +147,22 @@ test("a tree.json says the same steps, and counts a route of several stops as a 
   assert.ok(said.includes("Putting 3 places on the map"));
   assert.ok(said.includes("Tracing journeys (2 people moved)"), "the traveller with a route and the one who died elsewhere: " + said.join(" | "));
   assert.ok(idx.indexOf(5) < idx.indexOf(6) && idx.indexOf(6) < idx.indexOf(7));
+});
+
+test("a second load in the same page (a saved view opened after a tree) animates and ends, as the first did", async () => {
+  /* the bug: the first load's last frame left its frame id behind, so the next load never restarted the animation and the card sat frozen over the canvas for good */
+  const ctx = new Proxy({}, { get: (t, k) => k in t ? t[k] : (k === "measureText" ? () => ({ width: 50 }) : () => {}), set: (t, k, v) => { t[k] = v; return true; } });
+  const mkEl = () => ({ style: {}, classList: { add() {}, remove() {}, toggle() {} }, hidden: false, clientWidth: 680, textContent: "", appendChild() {}, addEventListener() {}, querySelector: () => mkEl(), getContext: () => ctx, getBoundingClientRect: () => ({ left: 0, top: 0 }) });
+  let q = [], now = 0, ids = 0; const timers = [];
+  const win = { matchMedia: () => ({ matches: false }), devicePixelRatio: 1, addEventListener() {}, requestAnimationFrame: f => { q.push(f); return ++ids; }, cancelAnimationFrame() {}, setTimeout: f => { timers.push(f); return 1; }, clearTimeout() {} };
+  const doc = { createElement: mkEl, head: { appendChild() {} }, body: { appendChild() {} } };
+  new Function("window", "document", "requestAnimationFrame", "setTimeout", "clearTimeout", src)(win, doc, win.requestAnimationFrame, win.setTimeout, win.clearTimeout);
+  const L = win.RALoad, run = n => { for (let i = 0; i < n; i++) { now += 33; const f = q; q = []; f.forEach(fn => fn(now)); } };
+  const load = () => { L.say("Reading your file…"); timers.splice(0).forEach(f => f()); run(30); L.say("Drawing flags and regimes…"); run(30); L.hide(); run(200); timers.splice(0).forEach(f => f()); };
+  load();
+  assert.equal(q.length, 0, "the first load has ended: no frame left running");
+  L.say("Reading your file…"); timers.splice(0).forEach(f => f());
+  assert.equal(q.length, 1, "the second load starts its animation");
+  run(30); L.say("Drawing flags and regimes…"); run(30); L.hide(); run(200);
+  assert.equal(q.length, 0, "and the second load ends too, instead of sitting frozen");
 });

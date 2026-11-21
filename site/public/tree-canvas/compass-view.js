@@ -28,6 +28,16 @@ const btn = (cls, txt, fn, attrs) => { const b = h('button', cls, txt, { type: '
 const ico = (d, cls) => { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('aria-hidden', 'true'); s.setAttribute('focusable', 'false'); if (cls) s.setAttribute('class', cls); const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', d); s.append(p); return s; };
 const yrs = (a, b) => (a == null && b == null ? 'years not given' : a === b || b == null ? String(a) : (a == null ? '' : a) + '–' + (b == null ? '' : b));
 
+let basemapsP = null;
+function loadBasemaps() {
+  if (window.raBasemaps) return Promise.resolve();
+  if (basemapsP) return basemapsP;
+  basemapsP = new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = '/js/basemaps.js'; s.onload = () => res(); s.onerror = () => { basemapsP = null; rej(new Error('basemaps.js could not be loaded')); };
+    document.head.append(s);
+  });
+  return basemapsP;
+}
 let leafletP = null;
 function loadLeaflet() {
   if (window.L) return Promise.resolve();
@@ -82,7 +92,7 @@ export function createCompass(deps) {
   const root = deps.root;
   const st = { open: false, year: 1900, span: [1500, 2000], playing: false, speed: 2, win: 10, colour: 'side', filter: { ...M.DEFAULT_FILTER }, on: new Set(), extra: new Map(), idx: null, ctx: null, focus: null, srcs: [],
     sel: null, tab: 'under', showAll: false, ground: true, hist: null, mort: null, shapes: null, placeCache: new Map(), loading: '', notes: [], more: {}, planNote: '' };
-  let map = null, layers = {}, timer = 0, raf = 0, travellers = [], built = false, groundKey = '', mapOk = false, lastDraw = null, el = {};
+  let map = null, basemap = null, layers = {}, timer = 0, raf = 0, travellers = [], built = false, groundKey = '', mapOk = false, lastDraw = null, el = {};
 
   /* ---------------- the page ---------------- */
   function build() {
@@ -243,9 +253,13 @@ export function createCompass(deps) {
     const L = window.L;
     map = L.map(el.mapBox, { worldCopyJump: true, minZoom: 2, maxZoom: 12, zoomControl: false, keyboard: true, zoomSnap: 0.5, attributionControl: true }).setView([35, 10], 3);
     L.control.zoom({ position: 'topright', zoomInTitle: 'Zoom in', zoomOutTitle: 'Zoom out' }).addTo(map);
-    L.tileLayer(TILE + 'World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', { maxZoom: 8, maxNativeZoom: 8, attribution: 'Esri, HERE, Garmin &middot; &copy; OpenStreetMap contributors' }).addTo(map);
+    const light = [L.tileLayer(TILE + 'World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', { maxZoom: 8, maxNativeZoom: 8, attribution: 'Esri, HERE, Garmin &middot; &copy; OpenStreetMap contributors' })];
     map.createPane('cpLabels').style.zIndex = 250; map.getPane('cpLabels').style.pointerEvents = 'none';
-    L.tileLayer(TILE + 'World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}', { pane: 'cpLabels', maxZoom: 8, maxNativeZoom: 8 }).addTo(map);
+    light.push(L.tileLayer(TILE + 'World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}', { pane: 'cpLabels', maxZoom: 8, maxNativeZoom: 8 }));
+    /* Map | Night dots, the same two-button switcher and the same layer code as the Atlas map (public/js/basemaps.js, loaded as a same-origin
+       script, which this page's CSP allows). Dark theme opens on Night dots, light on the light grey, a choice made with the switcher wins, and
+       if the map library file is missing the light grey is drawn as before. */
+    try { await loadBasemaps(); basemap = window.raBasemaps.attach(L, map, { light, labelsPane: 'cpLabels' }); } catch (e) { light.forEach(l => l.addTo(map)); }
     map.createPane('cpGround').style.zIndex = 300; map.getPane('cpGround').style.pointerEvents = 'none';
     map.createPane('cpArcs').style.zIndex = 420;
     layers = { ground: L.layerGroup().addTo(map), arcs: L.layerGroup().addTo(map), route: L.layerGroup().addTo(map), dots: L.layerGroup().addTo(map) };

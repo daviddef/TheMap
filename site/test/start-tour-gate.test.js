@@ -74,12 +74,32 @@ test("T opens the tour, unless the visitor is typing or holding a modifier", () 
 
 test("the always-on loader stays small and loads the heavy files only on open", () => {
   const raw = fs.readFileSync(new URL("../public/js/start-tour-gate.js", import.meta.url), "utf8");
-  assert.ok(raw.length < 12000, `loader is ${raw.length} bytes before minifying`);
   const src = raw.replace(/\/\*[\s\S]*?\*\//g, "");
+  assert.ok(src.length < 9500, `loader is ${src.length} bytes without comments, before minifying`);
   // the heavy files are named inside load(), which only open() calls
   const loadFn = src.slice(src.indexOf("function load()"), src.indexOf("function open("));
   for (const f of ["start-tour.css", "start-tour.html", "start-tour-land.txt", "js/start-tour.js"]) assert.ok(loadFn.includes(f), f);
   const outside = src.replace(loadFn, "");
   for (const f of ["start-tour.css", "start-tour.html", "start-tour-land.txt", "js/start-tour.js"]) assert.ok(!outside.includes(f), `${f} is fetched outside load()`);
   assert.ok(!/localStorage[^;]*;/.test(src.replace(/try\s*{[^}]*}/g, "")), "every storage call is inside try/catch");
+});
+
+test("the first-visit auto-open is switched off: a fresh visit to / or /start/ never opens it", () => {
+  assert.equal(G.AUTO_OPEN, false, "AUTO_OPEN is the one line to turn it on later");
+  assert.equal(G.autoOpenNow(fresh()), false);
+  assert.equal(G.autoOpenNow(fresh({ path: "/start/" })), false);
+  assert.equal(G.autoOpenNow(fresh({ path: "/start/index.html" })), false);
+  assert.equal(G.shouldAutoOpen(fresh()), true, "the first-visit rules are kept, for when it is switched on");
+});
+
+test("boot() asks the switch, opens only from a request, and marks it seen only when it opens", () => {
+  const raw = fs.readFileSync(new URL("../public/js/start-tour-gate.js", import.meta.url), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  const bootSrc = raw.slice(raw.indexOf("function boot("));
+  assert.ok(bootSrc.includes("autoOpenNow(here)") && !/shouldAutoOpen\(here\)/.test(bootSrc), "boot goes through the switch");
+  // the requests that still open it: a button or link, the T key, /start/#story
+  assert.ok(bootSrc.includes("[data-tour-open]") && bootSrc.includes("isTourKey(e)") && bootSrc.includes('"#story"'));
+  // "seen" is written in one place, inside open(), never on a page view
+  assert.equal((raw.match(/markSeen\(\)/g) || []).length, 2, "the definition and the one call in open()");
+  const open = raw.slice(raw.indexOf("function open("), raw.indexOf("w.raTour ="));
+  assert.ok(open.includes("markSeen()"));
 });

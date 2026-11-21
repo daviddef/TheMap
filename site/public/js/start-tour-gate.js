@@ -2,7 +2,7 @@
    button in the header and the drawer, and listens for the T key. The tour itself (start-tour.css, start-tour.js, the land mask and the
    chapters at /start-tour.html) is fetched only when the tour opens, so a visitor who never opens it never downloads it.
 
-   WHEN IT OPENS BY ITSELF. Once per browser, on the two front doors only: the home page and /start/, with no query string and no
+   WHEN IT OPENS BY ITSELF (switched off for now: see AUTO_OPEN below; these are the rules for when it is switched on). Once per browser, on the two front doors only: the home page and /start/, with no query string and no
    hash. A deep link (a place, a surname, a tool, a map view, ?q=, ?spot=) is somebody who already knows where they are going, and is
    never interrupted. Never for a robot or an automated browser, and never when this browser cannot remember that it has been shown
    (storage blocked): a tour that reopens on every visit is worse than none. It is marked seen the moment it appears, so a reload,
@@ -16,6 +16,11 @@
   if (root && root.document) api.boot(root);
 })(typeof window !== "undefined" ? window : this, function () {
   "use strict";
+  /* THE FIRST-VISIT AUTO-OPEN IS OFF. David, 22 Nov 2026: the tour stays a button for now. Everything else works as it did: the header "The story"
+     button, the drawer and About-menu rows, the T key, /start/#story and "Play the story" on /start/ all open it. The first-visit logic below
+     (shouldAutoOpen, "seen" once opened) is kept and tested; turning it on later is this one line: AUTO_OPEN = true. While it is false a page
+     view never opens the tour and never writes "ra-tour-seen". */
+  var AUTO_OPEN = false;
   var SEEN = "ra-tour-seen";
   var BOT = /bot\b|crawl|spider|slurp|bingpreview|facebookexternalhit|embedly|lighthouse|pagespeed|headlesschrome|phantomjs|wget|curl\//i;
   /* query keys that say nothing about where the visitor is going */
@@ -46,6 +51,8 @@
     if (c.seen) return false;
     return true;
   }
+  /* what boot() asks: the first-visit rules, and the switch above */
+  function autoOpenNow(c) { return AUTO_OPEN && shouldAutoOpen(c); }
   /* "t" opens it unless the visitor is typing or has a modifier down */
   function isTourKey(e) {
     if (!e || e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return false;
@@ -152,10 +159,10 @@
     var here = { path: w.location.pathname, base: base, search: w.location.search, hash: w.location.hash, seen: seen(), canStore: !!store,
                  webdriver: !!(w.navigator && w.navigator.webdriver), ua: w.navigator && w.navigator.userAgent };
     if (w.location.hash === "#story" && isFrontDoor(here.path, base)) { w.setTimeout(function () { open(null, false); }, 0); }
-    else if (shouldAutoOpen(here)) {
+    else if (autoOpenNow(here)) {
       var go = function () { (w.requestIdleCallback || function (f) { w.setTimeout(f, 300); })(function () { if (!seen()) open(null, true); }, { timeout: 2500 }); };
       if (d.readyState === "complete") go(); else w.addEventListener("load", go);
     }
   }
-  return { shouldAutoOpen: shouldAutoOpen, isFrontDoor: isFrontDoor, plainQuery: plainQuery, cleanPath: cleanPath, isTourKey: isTourKey, boot: boot, SEEN: SEEN };
+  return { AUTO_OPEN: AUTO_OPEN, autoOpenNow: autoOpenNow, shouldAutoOpen: shouldAutoOpen, isFrontDoor: isFrontDoor, plainQuery: plainQuery, cleanPath: cleanPath, isTourKey: isTourKey, boot: boot, SEEN: SEEN };
 });

@@ -27,6 +27,7 @@
 import cols from "../data/collections-full.json";
 import full from "../data/places-full.json";
 import provs from "../../public/providers.json";
+import regions from "../../public/regions.json";
 import { atlas as idx } from "./atlas.js";
 import { flagFor } from "./flags.js";
 import { corpus } from "./surname-corpus.js";
@@ -65,11 +66,17 @@ export function countryMetrics() {
     if (p.via === "geonames-admin") r.divs++;
     else if ((p.collections || []).length) r.walked++;
   }
-  for (const a of worldArchives()) if (a.cc && CN[a.cc]) at(a.cc).nat++;
+  /* A COUNTRY THE ATLAS KNOWS ONLY THROUGH A RECORD REGION IS STILL A COUNTRY. /coverage/ counted these (237) and this list did not
+     (212), so the Gaps tab and the Countries tab disagreed about how many countries there are. */
+  for (const r of regions.regions) for (const cc of (r.countries || [])) at(cc);
   for (const p of provs.providers) {
     for (const k of p.countries) if (k !== "*") at(k).arch++;
   }
+  /* A NATIONAL ARCHIVE NAMES A COUNTRY'S ARCHIVE; IT DOES NOT MAKE THE COUNTRY (same rule as /coverage/). */
+  for (const a of worldArchives()) if (row[a.cc]) row[a.cc].nat++;
 
+  /* SURNAME COUNTS ARE ADDED LAST AND NEVER MAKE A COUNTRY: a country is a country because it has collections, places, archives or
+     a record region, which is the rule /coverage/ counts by, so the two pages give one number. */
   /* A name counts ONCE per country however many rows attest it — the question
      is «how many names does this country's register name», not «how many
      attestations are on file», and the second is a fact about our harvest
@@ -79,7 +86,8 @@ export function countryMetrics() {
     for (const c of r.countries || []) {
       if (!c.cc || seen.has(c.cc)) continue;
       seen.add(c.cc);
-      const t = at(c.cc);
+      const t = row[c.cc];
+      if (!t) continue;
       if (c.how === "register") t.reg++;
       else if (c.how === "archive" || c.how === "curated") t.arc++;
     }

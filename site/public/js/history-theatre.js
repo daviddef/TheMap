@@ -939,12 +939,16 @@
       L.control.zoom({ position: "topright" }).addTo(map);
       /* The same quiet grey ground as the records map (see RecordMap.astro): OpenStreetMap's standard style
          draws mountain peaks, roads and icons that compete with the arrows. */
-      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
-        maxZoom: 8, attribution: "Esri, HERE, Garmin &middot; &copy; OpenStreetMap contributors" }).addTo(map);
+      var light = [L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+        maxZoom: 8, attribution: "Esri, HERE, Garmin &middot; &copy; OpenStreetMap contributors" })];
       map.createPane("baseLabels").style.zIndex = 250;
       map.getPane("baseLabels").style.pointerEvents = "none";
-      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}", {
-        pane: "baseLabels", maxZoom: 8 }).addTo(map);
+      light.push(L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}", {
+        pane: "baseLabels", maxZoom: 8 }));
+      /* Map | Night dots, the same switcher and layer code as the records map (public/js/basemaps.js). Dark theme opens on Night dots, light
+         on the light grey; a choice made with the switcher is remembered and wins. Without that file the light grey is drawn as before. */
+      if (window.raBasemaps) window.raBasemaps.attach(L, map, { light: light, labelsPane: "baseLabels" });
+      else light.forEach(function (l) { l.addTo(map); });
       map.scrollWheelZoom.disable();
       map.on("click focus", function () { map.scrollWheelZoom.enable(); });
       map.on("mouseout", function () { map.scrollWheelZoom.disable(); });

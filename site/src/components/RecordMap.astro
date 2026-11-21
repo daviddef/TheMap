@@ -471,6 +471,9 @@ try {
     this project has already paid twice for the build and the client working
     the key out separately. */}
 <script is:inline src={base.replace(/\/$/, "") + "/js/shard-key.js"}></script>
+{/* WHICH BASEMAP OPENS, DECIDED BEFORE THE MAP IS BUILT. A small classic script, so the answer (the reader's own choice, else the
+    theme's default: Night dots in dark theme) is known when the first tile is asked for and the light map never flashes up first. */}
+<script is:inline src={base.replace(/\/$/, "") + "/js/basemaps.js"}></script>
 
 <script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, BSURN: belgiumBase, WDA: wikidataUrl, OSMA: osmUrl, FEAT: featureBase, SETT: settlementBase, DIST: districtBase, CTRY: countryBase, TOWN: townlandBase, COMU: comuneBase, ESTO: estoniaBase, SCOT: scotlandBase, WARCH: worldArchivesUrl, CPTS: countryPointsUrl, BASE: base, SHARDS: SHARDMAP }}>
 /* ASK FOR THE DATA NOW, NOT AFTER EVERYTHING ELSE HAS LOADED.
@@ -659,13 +662,25 @@ window.addEventListener("load", async function () {
     satellite: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
       { attribution: "Esri, Maxar, Earthstar Geographics", maxZoom: 18 })
   };
+  /* NIGHT DOTS, A FOURTH BASEMAP, BUILT ONLY IF SOMEBODY ASKS FOR IT. A dark ground with the land drawn as a grid of quiet navy
+     dots, so the colours of the data are the only bright thing on the map. Everything it needs (public/js/night-dots.js, 55 KB
+     of land outlines and, from zoom 4, 546 KB more) is fetched when it is first chosen, so a visitor who never chooses it
+     downloads none of it: this shim is all the page carries. It opens first in dark theme and never in light (public/js/basemaps.js holds that one constant).
+     Its dots are navy, about 1.85:1 against the ground and well under half the width of the smallest data marker, because here a GREY
+     dot means «nobody has looked» and the ground must never be mistaken for that; test/night-dots.test.js enforces it. */
+  BASES.night = window.raBasemaps.nightLayer(L, { labelsPane: "baseLabels", onFail: function () { setBase("map"); } });
   map.createPane("baseLabels"); map.getPane("baseLabels").style.zIndex = 250;
   map.getPane("baseLabels").style.pointerEvents = "none";
   var baseLabels = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}",
     { pane: "baseLabels", maxNativeZoom: 16, maxZoom: 18 });
   BASES.map.on("add", function () { baseLabels.addTo(map); });
   BASES.map.on("remove", function () { map.removeLayer(baseLabels); });
-  var baseNow = Q.get("base") && BASES[Q.get("base")] ? Q.get("base") : "map";
+  /* WHICH ONE OPENS. The reader's own choice wins: ?base= in the address bar, else the one they last picked with the switcher (kept in
+     this browser); only with neither does the theme decide (dark opens on Night dots, light on the light map), and then it follows the
+     theme if that is toggled. An unknown ?base= (or "constructor") is no choice at all. All of this is settled before the first tile. */
+  var BM = window.raBasemaps;
+  var pick = BM.choose({ keys: BM.ATLAS_KEYS, url: Q.get("base"), stored: BM.stored(BM.ATLAS_KEYS), theme: BM.themeNow() });
+  var baseNow = pick.key, baseExplicit = pick.explicit;
   BASES[baseNow].addTo(map);
 
   /* ---- the jurisdiction layer -------------------------------------------
@@ -5106,7 +5121,7 @@ window.addEventListener("load", async function () {
     /* Read the token rather than hard-coding the teal: Leaflet paints these
        into a canvas, where a CSS variable would come out as nothing, and
        dark mode moves --accent from #1F5C6B to #6FB6C6. */
-    var ink = getComputedStyle(document.documentElement)
+    var ink = baseNow === "night" ? "#6FB6C6" : getComputedStyle(document.documentElement)
       .getPropertyValue("--accent").trim() || "#1F5C6B";
     var cells = {}, top = 1;
     visible.forEach(function (m) {
@@ -7607,29 +7622,47 @@ window.addEventListener("load", async function () {
 
   /* ---- basemap switch, home, and the view in the address bar -------------- */
   var bctl = L.control({ position: "topright" });
+  var baseBar = null;
+  /* explicit: the reader chose it (the switcher), so it is remembered and written to the address bar. Not explicit: the theme changed
+     and nobody had chosen, so the map just follows, and nothing is written. */
+  function setBase(k, explicit) {
+    if (explicit) { baseExplicit = true; BM.remember(k); setQ("base", k); }
+    if (k === baseNow || !BASES[k]) return;
+    map.removeLayer(BASES[baseNow]);
+    baseNow = k; BASES[k].addTo(map); BASES[k].bringToBack();
+    if (baseBar) baseBar.querySelectorAll("a").forEach(function (x) {
+      var on = x.getAttribute("data-b") === k;
+      x.classList.toggle("on", on); x.setAttribute("aria-pressed", String(on)); });
+    /* The cluster discs are inked for the ground they sit on. */
+    drawClusters(lastVisible);
+  }
+  BM.watchTheme(function (t) { if (!baseExplicit) setBase(BM.defaultFor(t), false); });
   bctl.onAdd = function () {
-    var b = L.DomUtil.create("div", "leaflet-bar ra-base");
-    b.innerHTML = ["map", "terrain", "satellite"].map(function (k) {
+    var b = baseBar = L.DomUtil.create("div", "leaflet-bar ra-base");
+    b.setAttribute("role", "group"); b.setAttribute("aria-label", "Basemap");
+    b.innerHTML = BM.ATLAS_KEYS.map(function (k) {
       /* Each of the three had no hover text at all — «Map», «Terrain» and
          «Satellite» are a guess unless you click them. */
       var what = { map: "Plain map — place names and borders, easiest to read",
                    terrain: "Terrain — hills and rivers, which is often why a "
                           + "parish is where it is",
-                   satellite: "Satellite — what the ground looks like now" };
-      return '<a href="#" data-b="' + k + '" title="' + esc(what[k] || k) + '"' +
-             (k === baseNow ? ' class="on"' : "") + ">" + T(k) + "</a>";
+                   satellite: "Satellite — what the ground looks like now",
+                   night: "Night dots: a quiet dark map so the colours stand out" };
+      return '<a href="#" role="button" data-b="' + k + '" title="' + esc(what[k] || k) + '"' +
+             ' aria-pressed="' + (k === baseNow) + '"' +
+             (k === baseNow ? ' class="on"' : "") + ">" + T(k === "night" ? "Night dots" : k) + "</a>";
     }).join("");
     L.DomEvent.disableClickPropagation(b);
     L.DomEvent.on(b, "click", function (e) {
       var a = e.target.closest("a[data-b]"); if (!a) return;
       L.DomEvent.stop(e);
-      var k = a.getAttribute("data-b");
-      if (k === baseNow) return;
-      map.removeLayer(BASES[baseNow]);
-      baseNow = k; BASES[k].addTo(map); BASES[k].bringToBack();
-      b.querySelectorAll("a").forEach(function (x) {
-        x.classList.toggle("on", x.getAttribute("data-b") === k); });
-      setQ("base", k === "map" ? "" : k);
+      setBase(a.getAttribute("data-b"), true);
+    });
+    /* A link with role=button answers Enter by itself and Space not at all; a button answers both. */
+    L.DomEvent.on(b, "keydown", function (e) {
+      if (e.key !== " " && e.key !== "Spacebar") return;
+      var a = e.target.closest("a[data-b]"); if (!a) return;
+      L.DomEvent.stop(e); setBase(a.getAttribute("data-b"), true);
     });
     return b;
   };
@@ -9829,6 +9862,14 @@ window.addEventListener("load", async function () {
   :global(.ra-base a) { width: auto !important; padding: 0 9px; font: 500 11px/26px var(--sans);
                         text-transform: capitalize; }
   :global(.ra-base a.on) { background: var(--accent-wash); color: var(--accent); font-weight: 600; }
+  :global(.ra-base a[data-b="night"]) { text-transform: none; }
+  /* NIGHT DOTS: the ground is a deliberate dark in either site theme (the option is a dark map, not a theme). The dots and the
+     Esri dark tiles above it are layers; this is only what shows behind and between them. */
+  /* Night dots: the ground at first paint (before basemaps.css, which carries the rest, has loaded). In dark theme it is the ground the
+     map opens on, so there is no flash of grey before the dots. */
+  :global(.leaflet-container.ra-night) { background: #121b22; }
+  :global(:root[data-theme="dark"] #ra-map) { background: #121b22; }
+  @media (prefers-color-scheme: dark) { :global(:root:not([data-theme="light"]) #ra-map) { background: #121b22; } }
 
   .at-hint { color: var(--ink-3) !important; font-size: 12px !important; }
   :global(.at-h) { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }

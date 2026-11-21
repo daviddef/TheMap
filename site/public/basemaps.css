@@ -1,0 +1,13 @@
+/* Night dots, for the maps that load it lazily (Compass, the History map, and the Atlas map once Night dots is first chosen).
+   Plain same-origin CSS, so it is allowed by Compass's CSP (style-src 'self').
+   !important only where a page filters or paints its own tile pane for its own dark theme: those rules are for the light grey tiles. */
+.leaflet-container.ra-night { background: #121b22 !important; }
+.leaflet-container.ra-night .leaflet-tile-pane,
+.leaflet-container.ra-night .leaflet-baseLabels-pane,
+.leaflet-container.ra-night .leaflet-cpLabels-pane { filter: none !important; opacity: 1 !important; }
+/* Esri's dark grey is a neutral; tinted toward the ground's navy so the hand-over at zoom 8 is not a change of palette. */
+.ra-nd-dark { filter: sepia(1) hue-rotate(180deg) saturate(.9) brightness(.75) contrast(1.1); }
+.ra-nd-dots { transition: opacity .35s ease; }
+@media (prefers-reduced-motion: reduce) {
+  .ra-nd-dots, .ra-nd-dark, .ra-nd-names, .ra-nd-dark .leaflet-tile, .ra-nd-names .leaflet-tile { transition: none !important; }
+}

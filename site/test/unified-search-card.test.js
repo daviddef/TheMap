@@ -23,3 +23,9 @@ test("Esc steps back one level: the card folds, the typing and the story stay", 
   assert.match(src, /e\.key === "Escape" && storyMode\) \{ e\.stopImmediatePropagation\(\); compact = true/);
   assert.match(src, /if \(compact\) compact = false;\s+\/\* typing opens the card again/);
 });
+
+test("a story is read when the typing pauses, not every 0.8 s while it goes", () => {
+  assert.match(src, /tmr = setTimeout\(read, 900\)/, "a pause of 0.9 s reads it");
+  assert.doesNotMatch(src, /now - lastRead > 800/, "no read in the middle of a sentence");
+  assert.match(src, /e\.key === "Enter" && looksLikeStory\(q\.value\)\) \{[^}]*read\(\)/, "Enter reads it at once");
+});

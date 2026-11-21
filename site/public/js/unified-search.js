@@ -116,9 +116,10 @@
       var sug = document.getElementById("ra-sug"); if (sug) { sug.hidden = true; sug.innerHTML = ""; }
       var rc = document.getElementById("ra-recent"); if (rc) rc.hidden = true;
       if (pills.hidden || !pills.children.length) { thinking = true; mirror(); }   /* "Reading…" at once, before the reader has answered */
-      /* a pause of a third of a second reads it; and while the typing keeps going it is read at least every 0.8s, so pills form as you type */
-      clearTimeout(tmr); var now = Date.now(); if (!lastRead) lastRead = now;
-      tmr = setTimeout(read, now - lastRead > 800 ? 0 : 300);
+      /* THE STORY IS READ WHEN THE TYPING PAUSES, NOT WHILE IT GOES. It was read every 0.8 s mid-sentence plus after every third-of-a-second gap, and
+         each read redraws the card, the tree and the map, so the box lagged behind the fingers. Now a pause of 0.9 s reads it; Enter reads it at once. */
+      clearTimeout(tmr);
+      tmr = setTimeout(read, 900);
     } else if (storyMode) {                                                       /* the typing stopped reading as a story: take the story off */
       storyMode = false; fromBox = false; clearTimeout(tmr); thinking = false; lastRead = 0;
       if (window.raStoryBox) window.raStoryBox.clear().then(function () { mirror(); });

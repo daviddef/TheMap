@@ -2438,13 +2438,30 @@ window.addEventListener("load", async function () {
     }
     return n;
   }
+  /* ONE PASS OVER THE MARKS, NOT ONE PER PLACE. progressOf(id) above walks every mark for every place, so repainting the rings was
+     (places x marks): about 12,000 x 3,000 string tests, run again after every story read. It was most of the lag while typing a
+     story (a 2 second freeze per read). This counts each place's marked volumes once, in a table keyed by the place's own href, and the
+     repaint looks each place up. The rule is progressOf's, unchanged. */
+  function progressCounts() {
+    var out = Object.create(null);
+    if (!window.raProgress) return out;
+    var marks = window.raProgress.all(), slug = window.raProgress.active();
+    for (var k in marks) {
+      if (k.indexOf("volume:") !== 0) continue;
+      var h = marks[k].href;
+      if (!h) continue;
+      if (window.raProgress.coverage(k, slug).length) out[h] = (out[h] || 0) + 1;
+    }
+    return out;
+  }
   function paintProgressRings() {
     if (!window.raProgress) return { done: 0, part: 0 };
     var tally = { done: 0, part: 0 };
+    var counts = progressCounts();
     markers.forEach(function (m) {
       var p = m._p;
       if (!p || !p.i) return;
-      var done = progressOf(p.i);
+      var done = counts[BASE + "place/" + p.i + "/"] || 0;
       var total = p.v || 0;
       var state = !done ? null : (total && done >= total ? "done" : "part");
       if (m._prog === state) return;
@@ -2486,7 +2503,12 @@ window.addEventListener("load", async function () {
     }
     if (box) box.addEventListener("change", function () { rcSet(box.checked); });
     if (tog) tog.addEventListener("click", function () { rcSet(!RC.on); });
-    document.addEventListener("ra-progress-changed", function () { paintProgressRings(); if (RC.on) rcRepaint(); });
+    /* COALESCED: a story read, a sync and a mark can each announce a change within a moment of one another. One repaint after they settle. */
+    var paintT = 0;
+    document.addEventListener("ra-progress-changed", function () {
+      clearTimeout(paintT);
+      paintT = setTimeout(function () { paintProgressRings(); if (RC.on) rcRepaint(); }, 250);
+    });
   })();
   window.raPaintProgress = function () { var r = paintProgressRings(); if (RC.on) rcRepaint(); return r; };
   setTimeout(function () { paintProgressRings(); rcRepaint(); }, 0);

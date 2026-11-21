@@ -286,3 +286,33 @@ test("grandparents who are named, or 'his parents moved', are read the same way"
   const a = F.parseStory("My father is Ivan from Senj. His mother was Hedviga born in Zagreb and his father was Anton born in Zagreb. They moved to Harare.", kinCtx());
   assert.deepEqual(stopsOf(a, "FM"), ["Zagreb", "Harare"]); assert.deepEqual(stopsOf(a, "FF"), ["Zagreb", "Harare"]);
 });
+
+/* "has a mother X and a father Y", and "when my father was 3 they moved": David's own sentence, which drew a chart with a grandfather and no grandmother. */
+const hasStory = "my father Ivan Defranceski has a mother Hedviga and a father Ivan . from Senj Croatia. when my father was around 3 they moved to Botswana, and later settled in Salisbury, Rhodesia.";
+const hasCtx = () => { const base = rows.concat([P("Botswana", "BW", 24.7, -22.3), P("Salisbury", "ZW", 31.05, -17.83)]); return { ...ctx, map: A.buildMap(base), countries: { ...countries, BW: "Botswana", ZW: "Zimbabwe" } }; };
+
+test("'has a mother Hedviga and a father Ivan' makes both parents of the man just named, with their own first names", () => {
+  const p = F.parseStory(hasStory, hasCtx());
+  const by = (r) => (p.people || []).filter((x) => x.key === r)[0];
+  assert.ok(by("FM") && by("FF"), "his mother and his father: " + (p.people || []).map((x) => x.key).join());
+  assert.equal(by("FM").name, "Hedviga"); assert.equal(by("FF").name, "Ivan");
+  assert.equal(by("F").name, "Ivan Defranceski", "the man they belong to is one person, not three");
+  assert.equal((p.people || []).length, 3, "nobody else is invented");
+});
+
+test("a stray ' .' before 'from Senj' still puts Senj on the grandfather just named", () => {
+  const p = F.parseStory(hasStory, hasCtx());
+  assert.equal(stopsOf(p, "FF")[0], "Senj");
+});
+
+test("'when my father was around 3 they moved to Botswana, and later settled in Salisbury' is the parents' move, and the child's too", () => {
+  const p = F.parseStory(hasStory, hasCtx());
+  assert.deepEqual(stopsOf(p, "FM"), ["Botswana", "Salisbury"]);
+  assert.deepEqual(stopsOf(p, "FF"), ["Senj", "Botswana", "Salisbury"]);
+  assert.deepEqual(places({ stops: p.stops }), ["Botswana", "Salisbury"], "the boy went with them");
+});
+
+test("'his mother was Hedviga and his father was Anton' still reads as before", () => {
+  const p = F.parseStory("My father is Ivan from Senj. His mother was Hedviga born in Zagreb and his father was Anton born in Zagreb.", kinCtx());
+  assert.deepEqual(stopsOf(p, "FM"), ["Zagreb"]); assert.deepEqual(stopsOf(p, "FF"), ["Zagreb"]);
+});

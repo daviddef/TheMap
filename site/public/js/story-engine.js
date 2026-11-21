@@ -981,6 +981,27 @@
           ms.push({ at: bs, end: be, poss: bm[1].toLowerCase(), steps: stepsOf(bm[2]), name: "", bare: true });
         }
         ms.sort(function (x, y) { return x.at - y.at; }); }
+      /* "HAS A MOTHER HEDVIGA AND A FATHER IVAN": the parents of the person just named, told as a list instead of "his mother was ... his father was ...".
+         The person they belong to is the one named just before "has" (the entry before them), so each is a parent of THAT person. */
+      { var hre = /\b(?:has|had|have)\s+(?:a|an)\s+(mother|mum|mom|father|dad)\s+(?:named\s+|called\s+)?([\p{L}'’-]+)/giu, hm, hasAt = -1;
+        while ((hm = hre.exec(sent))) {
+          if (hasAt < 0) hasAt = hm.index;
+          ms.push({ at: hm.index, end: hm.index + hm[0].length, poss: "has", steps: KIN_STEP[hm[1].toLowerCase()], name: hm[2] });
+        }
+        if (hasAt > -1) {
+          var lre = /(?:,|\band)\s+(?:a|an)\s+(mother|mum|mom|father|dad)\s+(?:named\s+|called\s+)?([\p{L}'’-]+)/giu, lm;
+          while ((lm = lre.exec(sent))) if (lm.index > hasAt && !ms.some(function (o) { return lm.index < o.end && lm.index + lm[0].length > o.at; }))
+            ms.push({ at: lm.index, end: lm.index + lm[0].length, poss: "has", steps: KIN_STEP[lm[1].toLowerCase()], name: lm[2] });
+          ms.sort(function (x, y) { return x.at - y.at; });
+        } }
+      /* "WHEN MY FATHER WAS AROUND 3 THEY MOVED TO BOTSWANA": the move is the couple's (his parents), and the child went with them, so it is told of him too */
+      { var wm = /^\W*(?:when|while|once|after)\s+(my|his|her)\s+(father|dad|mother|mum|mom)\s+was\s+(?:(?:only|just|about|around|aged?|nearly|almost)\s+)*\d{1,2}(?:\s+years?(?:\s+old)?)?\s*,?\s+(?=they\b)(.*)$/i.exec(sent);
+        if (wm && subject && couple()) {
+          var ck = (/^my$/i.test(wm[1]) ? "" : subject) + KIN_STEP[wm[2].toLowerCase()];
+          couple().forEach(function (k) { people[k].chunks.push(wm[3]); });
+          if (people[ck] && couple().indexOf(ck) < 0) people[ck].chunks.push(wm[3]);
+          return;
+        } }
       if (!ms.length) {
         if (!cur) return;
         if (THEY.test(sent) && couple()) { couple().forEach(function (k) { people[k].chunks.push(sent); }); return; }
@@ -988,12 +1009,15 @@
         people[to].chunks.push(sent); spouseOf(to, sent); mention(to); return;
       }
       if (cur && ms[0].at > 0) { var pre = sent.slice(0, ms[0].at), cp = THEY.test(pre) ? couple() : null; if (cp) cp.forEach(function (k) { people[k].chunks.push(pre); }); else people[cur].chunks.push(pre); }
+      var prevKey = null;
       ms.forEach(function (x, i) {
         var unnamed = !!subject && !x.bare && x.steps && /^(?:a|an|the)$/i.test(x.name);   /* "his mother was a singer": a person with no name, and the words after "a" are about her */
         if (x.bare && !x.steps) return;
         if (x.bare && !subject && !(x.poss === "my" && x.steps.length === 1)) return;
         if (!unnamed && !x.bare && (!x.steps || /^(a|the|an|my|his|her|their|not|also|now)$/i.test(x.name) || STOP[S.fold(x.name)] || COMMON[S.fold(x.name)] || OCC[S.fold(x.name)] || MONTHS[S.fold(x.name)] || EV_BORN.test(S.fold(x.name)) || EV_DIED.test(S.fold(x.name)) || EV_WED.test(S.fold(x.name)) || EV_MOVE.test(S.fold(x.name)) || /^(?:murdered|killed|drowned|executed|hanged|shot|lost|ill|sick|dead|buried|married|single|widowed|divorced|alive|old|young|tall|short|poor|rich)$/.test(S.fold(x.name)))) return;   /* "my father was from Cork": from is not his name */
-        var base = x.poss === "my" || !subject ? "" : subject, key = base + x.steps;
+        var base = x.poss === "my" || !subject ? "" : subject, key;
+        if (x.poss === "has") { if (!prevKey) return; base = prevKey; }   /* prevKey stays the person the list belongs to: "has a mother X and a father Y" are both HIS */
+        key = base + x.steps;
         if (!subject) { if (x.poss !== "my" || x.steps.length !== 1) return; subject = key; }
         var rest = sent.slice(x.end, i + 1 < ms.length ? ms[i + 1].at : sent.length), nm = unnamed ? "" : x.name;
         if (x.bare) { var nx = /^\s+([\p{L}'’-]{2,})(?=\s|,|$)/u.exec(rest); if (nx && nameWord(nx[1])) { nm = nx[1]; rest = rest.slice(nx[0].length); } }
@@ -1001,6 +1025,7 @@
         if (sx && !STOP[S.fold(sx[1])] && !COMMON[S.fold(sx[1])] && !(ctx.map && ctx.map[S.fold(sx[1])]) && !(ctx.given && ctx.given[S.fold(sx[1])])) { nm += " " + sx[1]; rest = rest.slice(sx[0].length); }
         var pk = (subject === "F" && key === "M") || (subject === "M" && key === "F") ? "S" : key;
         var p = person(pk, nm);
+        if (x.poss !== "has") prevKey = pk;
         /* "met his father there who was born in X" / "married my mother Cheryl in 1975": a person met, not the one the next words are about, unless "who" says so */
         var objOf = x.bare && cur && cur !== pk && /\b(?:married|marry|wed|met|meet|to|with)\s*$/i.test(sent.slice(0, x.at)) && !/^\s*(?:there\s*)?,?\s*(?:who|that)\b/i.test(rest);
         if (objOf) { people[cur].chunks.push(rest); spouseOf(cur, rest); mention(pk); return; }

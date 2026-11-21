@@ -409,7 +409,10 @@ def no_blob_repeated_on_every_page(pages):
 # (60 per kind, after the surname-section and place-collections caps): a place page 81,168 -> about 66,000, a surname page 89,843 -> 51,057.
 # The ceiling is the measure plus about 15%, so noise passes and a section that doubles a page does not. Raise one only after saying why in this
 # comment, because every byte here is multiplied by 100,000 pages and by every release, and the R2 bucket and the 15-45 minute publish pay for it.
-PAGE_BUDGET = {"place": 76_000, "surname": 60_000}
+# 22 Nov 2026: place 76,000 -> 77,000. PR 130 made the 4,903 FamilySearch volume links open the book (ark of the first image + ?wc=waypoint instead
+# of the bare waypoint, which opened an empty viewer), about 20 bytes a link; the full build then measured 76,137 and the gate stopped every deploy
+# from 8181ad0 on. The links are the fix for "links go nowhere", so the budget moves by 1.3% rather than the links shrinking.
+PAGE_BUDGET = {"place": 77_000, "surname": 60_000}
 
 
 def page_weight_within_budget(pages):

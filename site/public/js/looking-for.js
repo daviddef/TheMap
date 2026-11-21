@@ -45,14 +45,31 @@
     }
     picker("from", $("lf-from"), $("lf-from-list")); picker("to", $("lf-to"), $("lf-to-list"));
 
+    /* the atlas writes «Senj (Senj)» when a town and its municipality share a name: the part in brackets is a label, not a different name */
+    function same(s, t) { return S.fold(s.r.n) === t || S.fold(String(s.r.n).replace(/\s*\([^)]*\)\s*$/, "")) === t || s.via === t; }
     function resolve(key, input) {
       if (chosen[key]) return chosen[key];
-      var t = S.fold(input.value.split(",")[0]);
+      var parts = input.value.split(","), t = S.fold(parts[0]);
       if (!t) return null;
-      var hits = E.suggest(data.rows, t, 8).filter(function (s) { return S.fold(s.r.n) === t || s.via === t; });
+      var hits = E.suggest(data.rows, t, 50).filter(function (s) { return same(s, t); });
+      /* «Senj, Croatia» typed by hand: the words after the comma name the country, which settles a name shared by several places. The
+         menu writes the same shape when a row is picked, so a typed line and a picked one mean the same thing. */
+      var rest = S.fold(parts.slice(1).join(" "));
+      if (hits.length && rest) {
+        var isCountry = Object.keys(data.countries).some(function (k) { return S.fold(data.countries[k]) === rest || S.fold(k) === rest; });
+        var inCountry = hits.filter(function (s) {
+          var cn = S.fold(data.countries[s.r.cc] || ""), cc = S.fold(s.r.cc || "");
+          return cc === rest || (cn && cn === rest);
+        });
+        if (isCountry) hits = inCountry;   /* a named country must match: «Senj, Serbia» is not Croatia's Senj */
+      }
       return hits.length === 1 ? hits[0].r : null;
     }
 
+    function manyPlaces(d, v) {
+      var t = S.fold(String(v).split(",")[0]);
+      return !!t && E.suggest(d.rows, t, 50).filter(function (s) { return same(s, t); }).length > 1;
+    }
     var map = null, L = null;
     function getMap() {
       return S.loadLeaflet().then(function (LL) {
@@ -75,7 +92,7 @@
       LD.load().then(function (d) {
         data = d;
         var fromRow = resolve("from", $("lf-from")), toRow = resolve("to", $("lf-to"));
-        if (!fromRow && $("lf-from").value.trim()) { bad("The Atlas did not recognise \"" + $("lf-from").value.trim() + "\" as one place. Pick one from the list that appears as you type, or try an older name."); throw new Error("stop"); }
+        if (!fromRow && $("lf-from").value.trim()) { bad(manyPlaces(data, $("lf-from").value) ? "The Atlas found several places called \"" + $("lf-from").value.trim() + "\". Pick the right one from the list that appears as you type." : "The Atlas did not recognise \"" + $("lf-from").value.trim() + "\" as one place. Pick one from the list that appears as you type, or try an older name."); throw new Error("stop"); }
         var parsed = { rel: $("lf-rel").value, name: $("lf-name").value.trim().slice(0, 80), given: ($("lf-name").value.trim().split(/\s+/)[0] || ""), surname: ($("lf-name").value.trim().split(/\s+/).length > 1 ? $("lf-name").value.trim().split(/\s+/).slice(-1)[0] : ""), givenWord: ($("lf-name").value.trim().split(/\s+/)[0] || ""),
           holds: form.elements["holds"].value || "story", left: left, born: born, from: fromRow ? { row: fromRow } : null, to: toRow ? { row: toRow } : null };
         if (!toRow && $("lf-to").value.trim()) { bad("The Atlas found several places called \"" + $("lf-to").value.trim() + "\". Pick the right one from the list that appears as you type."); throw new Error("stop"); }

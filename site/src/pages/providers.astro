@@ -17,6 +17,7 @@ import fs from "node:fs";
 import provs from "../../public/providers.json";
 import regions from "../../public/regions.json";
 import { atlas as idx } from "../lib/atlas.js";
+import RecordsTabs from "../components/RecordsTabs.astro";
 import "../styles/kit.css";
 
 const P = provs.providers;
@@ -114,9 +115,11 @@ const conf = {
 };
 ---
 <Base
-  title="The sources"
+  title="Records by country — sources"
   eyebrow="Who holds the paper, and what it costs to look"
   dek="Every archive, library, index and portal this map can point at, what it actually costs to look, and whose archive holds the paper for a given ground and year. The access class is the ordinary visitor's experience, not the best case: FamilySearch is filed as needing an account because it does.">
+
+  <RecordsTabs current="sources" />
 
   <div class="pv-root" id="pv-root">
 

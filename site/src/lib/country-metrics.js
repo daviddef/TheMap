@@ -27,9 +27,24 @@
 import cols from "../data/collections-full.json";
 import full from "../data/places-full.json";
 import provs from "../../public/providers.json";
+import regions from "../../public/regions.json";
 import { atlas as idx } from "./atlas.js";
 import { flagFor } from "./flags.js";
 import { corpus } from "./surname-corpus.js";
+import fs from "node:fs";
+
+/* A COLLECTION «REACHES A PLACE» WHEN IT IS CATALOGUED UNDER A TOWN, COUNTY OR PROVINCE RATHER THAN UNDER THE COUNTRY.
+   Moved here from /coverage/, which counted it for its own table; the country cards now say the same thing, from the same
+   rule, so the two cannot disagree. */
+const LOCAL = new Set(["CITY","TOWN","COMMUNE","HAMLET","VILLAGE","PARISH","MUNICIPALITY",
+                       "BOROUGH","SUBURB","CIVIL_PARISH","TOWNSHIP","COUNTY","BR_COUNTY",
+                       "PROVINCE","DEPARTMENT","DISTRICT","SHIRE","CANTON"]);
+function worldArchives() {
+  for (const f of ["../data/world-archives.json", "data/world-archives.json"]) {
+    try { return JSON.parse(fs.readFileSync(f, "utf8")).archives || []; } catch { /* next */ }
+  }
+  return [];
+}
 
 let CACHE = null;
 
@@ -38,14 +53,30 @@ export function countryMetrics() {
   const CN = idx.countries || {};
   const row = {};
   const at = (cc) => (row[cc] = row[cc] ||
-    { cc, cols: 0, places: 0, arch: 0, reg: 0, arc: 0 });
+    { cc, cols: 0, local: 0, places: 0, walked: 0, divs: 0, arch: 0, nat: 0, reg: 0, arc: 0 });
 
-  for (const c of cols.collections) for (const k of c.countries) at(k).cols++;
-  for (const p of full.places) if (p.country) at(p.country).places++;
+  for (const c of cols.collections) {
+    const isLocal = (c.places || []).some((p) => LOCAL.has(p.type));
+    for (const k of c.countries) { at(k).cols++; if (isLocal) at(k).local++; }
+  }
+  /* A DRAWN DOT IS NOT A WALKED PLACE: a GeoNames district nobody has read counts as a dot, never as walked. */
+  for (const p of full.places) if (p.country) {
+    const r = at(p.country);
+    r.places++;
+    if (p.via === "geonames-admin") r.divs++;
+    else if ((p.collections || []).length) r.walked++;
+  }
+  /* A COUNTRY THE ATLAS KNOWS ONLY THROUGH A RECORD REGION IS STILL A COUNTRY. /coverage/ counted these (237) and this list did not
+     (212), so the Gaps tab and the Countries tab disagreed about how many countries there are. */
+  for (const r of regions.regions) for (const cc of (r.countries || [])) at(cc);
   for (const p of provs.providers) {
     for (const k of p.countries) if (k !== "*") at(k).arch++;
   }
+  /* A NATIONAL ARCHIVE NAMES A COUNTRY'S ARCHIVE; IT DOES NOT MAKE THE COUNTRY (same rule as /coverage/). */
+  for (const a of worldArchives()) if (row[a.cc]) row[a.cc].nat++;
 
+  /* SURNAME COUNTS ARE ADDED LAST AND NEVER MAKE A COUNTRY: a country is a country because it has collections, places, archives or
+     a record region, which is the rule /coverage/ counts by, so the two pages give one number. */
   /* A name counts ONCE per country however many rows attest it — the question
      is «how many names does this country's register name», not «how many
      attestations are on file», and the second is a fact about our harvest
@@ -55,7 +86,8 @@ export function countryMetrics() {
     for (const c of r.countries || []) {
       if (!c.cc || seen.has(c.cc)) continue;
       seen.add(c.cc);
-      const t = at(c.cc);
+      const t = row[c.cc];
+      if (!t) continue;
       if (c.how === "register") t.reg++;
       else if (c.how === "archive" || c.how === "curated") t.arc++;
     }
@@ -65,6 +97,7 @@ export function countryMetrics() {
     .map((r) => ({
       ...r,
       name: CN[r.cc] || r.cc,
+      reach: r.cols ? Math.round((100 * r.local) / r.cols) : 0,
       flag: flagFor(r.cc),
       /* The three states above, decided here so no page has to re-derive it
          and get a different answer. */
@@ -83,5 +116,7 @@ export function countryTotals() {
     archiveOnly: l.filter((r) => r.names === "archive").length,
     noNames: l.filter((r) => r.names === "none").length,
     withFlag: l.filter((r) => r.flag).length,
+    withWalked: l.filter((r) => r.walked > 0).length,
+    withNational: l.filter((r) => r.nat > 0).length,
   };
 }

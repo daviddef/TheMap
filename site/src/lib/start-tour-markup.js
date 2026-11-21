@@ -81,7 +81,7 @@ export function tourMarkup({ n, ex, sr, b, data }) {
         <p class="cap" data-at="2.2">Drag the years. Watch the name.</p>
         <p class="cap" data-at="9.6">Same place. Every name it has had.</p>
       </div>
-      <p class="atl">On the Atlas: <a href="${b}/places/">Every place</a> &middot; <a href="${b}/">The map</a></p>
+      <p class="atl">On the Atlas: <a href="${b}/places/">Records by country</a> &middot; <a href="${b}/">The map</a></p>
     </div>
   </section>
 
@@ -154,7 +154,7 @@ export function tourMarkup({ n, ex, sr, b, data }) {
         <p class="cap" data-at="7.2">Shelf by shelf, volume by volume.</p>
         <p class="cap" data-at="10.2">A grey dot: nobody has looked.</p>
       </div>
-      <p class="atl">On the Atlas: <a href="${b}/">The map</a> &middot; <a href="${b}/providers/">Who holds records</a> &middot; <a href="${b}/coverage/">What's missing</a></p>
+      <p class="atl">On the Atlas: <a href="${b}/">The map</a> &middot; <a href="${b}/places/">Records by country</a></p>
     </div>
   </section>
 

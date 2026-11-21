@@ -1,0 +1,34 @@
+---
+/* THE THREE PAGES OF «RECORDS BY COUNTRY», AS ONE THING.
+
+   David compared /providers/ and /places/ and found a lot of overlap, and /coverage/ made a third: all three walk the same
+   countries and each counted them again. Merging a 2,348-source directory and a 150-card country grid into one page would have been a
+   very heavy page, so they stay three URLs (nobody's bookmark breaks) and wear one header: a shared title and a tab bar that says
+   which of the three questions you are on.
+
+     Countries  where is there anything, and how deep does it go      /places/
+     Sources    who holds the paper, and what it costs to look        /providers/
+     Gaps       what this map does not know                           /coverage/
+
+   The numbers on the cards come from lib/country-metrics.js, the same ones the gaps page measures, so the tabs cannot disagree. */
+import { u } from "../lib/url.js";
+const { current = "countries" } = Astro.props;
+const TABS = [
+  ["countries", "/places/", "Countries", "Every country, how deep the collections go, and who holds its records"],
+  ["sources", "/providers/", "Sources", "Every archive, library and index, and what it costs to look"],
+  ["gaps", "/coverage/", "Gaps", "What this map does not know"],
+];
+---
+<nav class="rtabs" aria-label="Records by country">
+  {TABS.map(([k, href, label, tip]) => (
+    <a href={u(href)} title={tip} aria-current={k === current ? "page" : undefined} class={k === current ? "on" : ""}>{label}</a>
+  ))}
+</nav>
+
+<style>
+  .rtabs { display: flex; gap: 4px; margin: 0 0 18px; border-bottom: 1px solid var(--rule); font-family: var(--sans); }
+  .rtabs a { padding: 9px 16px 8px; font-size: 14px; color: var(--ink-2); text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .rtabs a:hover { color: var(--accent); }
+  .rtabs a.on { color: var(--accent); font-weight: 600; border-bottom-color: var(--accent); }
+  @media (max-width: 480px) { .rtabs a { flex: 1 1 0; text-align: center; padding: 9px 6px 8px; } }
+</style>

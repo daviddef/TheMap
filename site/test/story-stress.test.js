@@ -316,3 +316,29 @@ test("'his mother was Hedviga and his father was Anton' still reads as before", 
   const p = F.parseStory("My father is Ivan from Senj. His mother was Hedviga born in Zagreb and his father was Anton born in Zagreb.", kinCtx());
   assert.deepEqual(stopsOf(p, "FM"), ["Zagreb"]); assert.deepEqual(stopsOf(p, "FF"), ["Zagreb"]);
 });
+
+/* David's longer family, 22 Nov 2026: a great-grandfather told by "Ivan seniors fathers name was anton", a family line that is not anybody's route, a child's own move
+   after the family's, and the teller's own two children. */
+const longStory = "my father Ivan Defranceski has a mother Hedviga from senj, croatia and a father Ivan who was from crikvenica, Croatia. His father came from a long line of defranceschi family who were from gologoriga croatia and originally cam from carnia, in northern italy. Ivan seniors fathers name was anton. when my father was around 3 they moved to Botswana, and later settled in Salisbury, Rhodesia, and when he was around 18 he moved to johannesburg, south africa. He met my mother cheryl there and they has 1 son. i then has 2 children, alessio and mateo. My fathers dad ivan died in senj croatia, and was a mechanic his whole life. his mother hedviga was a singer in a hotel.";
+const longCtx = () => { const base = rows.concat([P("Crikvenica", "HR", 14.69, 45.18), P("Botswana", "BW", 24.7, -22.3), P("Salisbury", "ZW", 31.05, -17.83), P("Carnia", "IT", 12.95, 46.4), P("Northern Cape", "ZA", 21, -29, { c: 0 })]); return { ...ctx, map: A.buildMap(base), countries: { ...countries, BW: "Botswana", ZW: "Zimbabwe" } }; };
+
+test("'Ivan seniors fathers name was anton' is the great-grandfather, one step above the elder Ivan", () => {
+  const p = F.parseStory(longStory, longCtx());
+  const by = (r) => (p.people || []).filter((x) => x.key === r)[0];
+  assert.equal(by("FFF") && by("FFF").name, "Anton", "Ivan senior's father");
+  assert.equal(by("FF").name, "Ivan", "Anton did not take the grandfather's place");
+  assert.equal(by("FF").occupation, "mechanic"); assert.ok(by("FF").events.some((e) => e.type === "died" && e.place.row.n === "Senj"));
+});
+
+test("a move told 'and when he was around 18 he moved to Johannesburg' is the son's alone, not his parents'", () => {
+  const p = F.parseStory(longStory, longCtx());
+  assert.deepEqual(places({ stops: p.stops }), ["Botswana", "Salisbury", "Johannesburg"]);
+  assert.deepEqual(stopsOf(p, "FM"), ["Senj", "Botswana", "Salisbury"]);
+  assert.deepEqual(stopsOf(p, "FF"), ["Crikvenica", "Botswana", "Salisbury"], "and a long line from Carnia is not a route he took");
+});
+
+test("'i then has 2 children, alessio and mateo' puts the teller's two children on the tree", () => {
+  const p = F.parseStory(longStory, longCtx());
+  assert.deepEqual((p.people || []).filter((x) => x.role === "child").map((x) => x.name), ["Alessio", "Mateo"]);
+  assert.ok((p.people || []).some((x) => x.role === "spouse" && x.name === "Cheryl"), "Cheryl is still his wife");
+});

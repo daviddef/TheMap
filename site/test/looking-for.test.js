@@ -507,3 +507,10 @@ test("a country written after a place says which same-named place is meant", () 
   const p = F.parseStory("My grandfather arrived in New York, United States in 1920.", cs);
   assert.deepEqual(p.stops.map((s) => s.row.i), ["new-york-us"], "the US one, and 'States' is not a place");
 });
+
+test("the page resolves «Senj, Croatia» and «Senj (Senj)» typed by hand, and a named country must match", () => {
+  const js = src("looking-for.js");
+  assert.match(js, /function same\(s, t\)/, "a bracketed label (Senj (Senj)) is not a different name");
+  assert.match(js, /isCountry/, "the words after the comma are checked against the country");
+  assert.match(js, /found several places called/, "an ambiguous from-place says so, not 'did not recognise'");
+});

@@ -51,6 +51,16 @@
       if (location.pathname.replace(/\/+$/, "").slice(-12) === "/tree-canvas") cv.setAttribute("aria-current", "page");
       nav.appendChild(cv);
     }
+    /* WHAT'S NEW IS A ROUND SPARKLE ICON, like the other sites have: beside the Tree Canvas, before the toggle. Hover text only. It takes the
+       same orange dot as the About menu when there is news (raNewsDot in Base.astro). */
+    if (nav && !nav.querySelector(".ra-news")) {
+      var nw = document.createElement("a"), nbase = (root.getAttribute("data-base") || "/").replace(/\/?$/, "/");
+      nw.className = "ra-news"; nw.href = nbase + "whats-new/";
+      nw.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M10.5 6C11.2 11 12.2 12.3 17 13c-4.8.7-5.8 2-6.5 7C9.8 15 8.8 13.7 4 13c4.8-.7 5.8-2 6.5-7z" fill="currentColor"/><path d="M18 2.8c.3 2 .7 2.4 2.7 2.7-2 .3-2.4.7-2.7 2.7-.3-2-.7-2.4-2.7-2.7 2-.3 2.4-.7 2.7-2.7z" fill="currentColor"/></svg>';
+      var ntip = T("What's new: the latest changes to Record Atlas"); nw.title = ntip; nw.setAttribute("aria-label", ntip);
+      if (location.pathname.replace(/\/+$/, "").slice(-10) === "/whats-new") nw.setAttribute("aria-current", "page");
+      nav.appendChild(nw);
+    }
     if (nav && !nav.querySelector(".ra-theme")) nav.appendChild(make("ra-theme"));
     if (wrap && !wrap.querySelector(".ra-theme-row")) { var g = document.createElement("div"); g.className = "dgrp"; g.appendChild(make("ra-theme-row")); wrap.appendChild(g); }
     /* the quick row's button is in the page already (hidden until it can work): bind it the same way as the others */

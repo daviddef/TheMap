@@ -30,6 +30,20 @@ import provs from "../../public/providers.json";
 import { atlas as idx } from "./atlas.js";
 import { flagFor } from "./flags.js";
 import { corpus } from "./surname-corpus.js";
+import fs from "node:fs";
+
+/* A COLLECTION «REACHES A PLACE» WHEN IT IS CATALOGUED UNDER A TOWN, COUNTY OR PROVINCE RATHER THAN UNDER THE COUNTRY.
+   Moved here from /coverage/, which counted it for its own table; the country cards now say the same thing, from the same
+   rule, so the two cannot disagree. */
+const LOCAL = new Set(["CITY","TOWN","COMMUNE","HAMLET","VILLAGE","PARISH","MUNICIPALITY",
+                       "BOROUGH","SUBURB","CIVIL_PARISH","TOWNSHIP","COUNTY","BR_COUNTY",
+                       "PROVINCE","DEPARTMENT","DISTRICT","SHIRE","CANTON"]);
+function worldArchives() {
+  for (const f of ["../data/world-archives.json", "data/world-archives.json"]) {
+    try { return JSON.parse(fs.readFileSync(f, "utf8")).archives || []; } catch { /* next */ }
+  }
+  return [];
+}
 
 let CACHE = null;
 
@@ -38,10 +52,20 @@ export function countryMetrics() {
   const CN = idx.countries || {};
   const row = {};
   const at = (cc) => (row[cc] = row[cc] ||
-    { cc, cols: 0, places: 0, arch: 0, reg: 0, arc: 0 });
+    { cc, cols: 0, local: 0, places: 0, walked: 0, divs: 0, arch: 0, nat: 0, reg: 0, arc: 0 });
 
-  for (const c of cols.collections) for (const k of c.countries) at(k).cols++;
-  for (const p of full.places) if (p.country) at(p.country).places++;
+  for (const c of cols.collections) {
+    const isLocal = (c.places || []).some((p) => LOCAL.has(p.type));
+    for (const k of c.countries) { at(k).cols++; if (isLocal) at(k).local++; }
+  }
+  /* A DRAWN DOT IS NOT A WALKED PLACE: a GeoNames district nobody has read counts as a dot, never as walked. */
+  for (const p of full.places) if (p.country) {
+    const r = at(p.country);
+    r.places++;
+    if (p.via === "geonames-admin") r.divs++;
+    else if ((p.collections || []).length) r.walked++;
+  }
+  for (const a of worldArchives()) if (a.cc && CN[a.cc]) at(a.cc).nat++;
   for (const p of provs.providers) {
     for (const k of p.countries) if (k !== "*") at(k).arch++;
   }
@@ -65,6 +89,7 @@ export function countryMetrics() {
     .map((r) => ({
       ...r,
       name: CN[r.cc] || r.cc,
+      reach: r.cols ? Math.round((100 * r.local) / r.cols) : 0,
       flag: flagFor(r.cc),
       /* The three states above, decided here so no page has to re-derive it
          and get a different answer. */
@@ -83,5 +108,7 @@ export function countryTotals() {
     archiveOnly: l.filter((r) => r.names === "archive").length,
     noNames: l.filter((r) => r.names === "none").length,
     withFlag: l.filter((r) => r.flag).length,
+    withWalked: l.filter((r) => r.walked > 0).length,
+    withNational: l.filter((r) => r.nat > 0).length,
   };
 }

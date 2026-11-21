@@ -37,6 +37,7 @@
  */
 import Base from "../../layouts/Base.astro";
 import CountryCards from "../../components/CountryCards.astro";
+import RecordsTabs from "../../components/RecordsTabs.astro";
 import SmartFind from "../../components/SmartFind.astro";
 import { flagSearchRows } from "../../lib/flags.js";
 import { countryMetrics, countryTotals } from "../../lib/country-metrics.js";
@@ -109,9 +110,11 @@ const rows = page.data.map((p) => {
 });
 ---
 <Base
-  title={page.currentPage === 1 ? "Every place" : `Every place — ${page.currentPage} of ${page.lastPage}`}
-  eyebrow={`${full.places.length.toLocaleString()} places · ${countries} countries · ${withAny.toLocaleString()} with a collection over them`}
-  dek={`Every place this atlas holds. The number beside a name is how many collections cover it — ${covers.toLocaleString()} such coverings in all. Page ${page.currentPage} of ${page.lastPage}.`}>
+  title={page.currentPage === 1 ? "Records by country" : `Every place — ${page.currentPage} of ${page.lastPage}`}
+  eyebrow={`${ccTotals.countries} countries · ${full.places.length.toLocaleString()} places · ${ccTotals.withWalked} with a place walked · ${ccTotals.withNational} with a national archive named`}
+  dek={`Pick a country to see where this atlas reaches, how deep, and who holds its records. The number beside a place name is how many collections cover it — ${covers.toLocaleString()} such coverings in all. Page ${page.currentPage} of ${page.lastPage}.`}>
+
+  <RecordsTabs current="countries" />
 
   {/* SEARCH FIRST, because it is the answer to the question this page is
       actually asked. It is hidden until the script runs: a search box that

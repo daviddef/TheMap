@@ -60,8 +60,8 @@ export const nav = [
      the hubs (the Flags Atlas page's own hub section). They were listed here, 34 rows, and took the whole menu; the count is read from
      the Flags Atlas index at build time, so it stays right by itself. */
   hubs.length
-    ? ["Places", [["/places/", "Every place"], ["/countries/", "Countries"], [null, "Flags"], ["/flags/", "The Flags Atlas: every country"], ["/flags/#hubsHeadingEl", "The " + hubs.length + " hubs, by region"]]]
-    : ["Places", [["/places/", "Every place"], ["/countries/", "Countries"], ["/flags/", "The Flags Atlas"]]],
+    ? ["Places", [["/places/", "Records by country"], [null, "Flags"], ["/flags/", "The Flags Atlas: every country"], ["/flags/#hubsHeadingEl", "The " + hubs.length + " hubs, by region"]]]
+    : ["Places", [["/places/", "Records by country"], ["/flags/", "The Flags Atlas"]]],
   /* FOUR ROWS, NOT TEN. David, looking at the menu: «there are so many options here, and they're really just showing help stuff ... it
      needs to be neat, exciting and simple.» The four that help a reader are here. The project's own pages (what is being done, the
      letters, my work, what changed) and the fine print (the data, privacy) are in the footer, where a person who wants them looks,
@@ -79,8 +79,7 @@ export const nav = [
     ["/looking-for/", "Who are you looking for?"],
     ["/help/", "Help"],
     [null, "The sources"],
-    ["/providers/", "Who holds records"],
-    ["/coverage/", "What's missing"],
+    /* "Who holds records" and "What's missing" are tabs of Records by country now (Sources, Gaps), and the Places menu holds the one link. */
     /* The survey queue is a section of /providers/ now (Help check a source); /survey/ redirects there. */
     /* Moved here from the header bar, where it was a pill on every page. */
     ["/add/", "Add source"],

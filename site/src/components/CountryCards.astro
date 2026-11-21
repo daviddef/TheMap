@@ -42,13 +42,14 @@ const { list, totals, showFind = true } = Astro.props;
   <button type="button" class="sortby" data-k="places">Places</button>
   <button type="button" class="sortby" data-k="arch">Archives</button>
   <button type="button" class="sortby" data-k="cols">Collections</button>
+  <button type="button" class="sortby" data-k="walked">Walked</button>
   <button type="button" class="sortby" data-k="reg">Names in a register</button>
 </div>
 
 <ul class="ccgrid" id="ccgrid">
   {list.map((c) => (
     <li class="cccard" data-name={c.name} data-places={c.places}
-        data-arch={c.arch} data-cols={c.cols} data-reg={c.reg}
+        data-arch={c.arch} data-cols={c.cols} data-reg={c.reg} data-walked={c.walked}
         data-state={c.names}>
       <div class="cchead">
         {c.flag && (
@@ -67,6 +68,13 @@ const { list, totals, showFind = true } = Astro.props;
         <div><dt>Archives</dt><dd>{c.arch ? c.arch.toLocaleString() : "0"}</dd></div>
         <div><dt>Collections</dt><dd>{c.cols ? c.cols.toLocaleString() : "0"}</dd></div>
       </dl>
+      {/* WHAT /coverage/ USED TO SAY IN A TABLE, ONE LINE PER CARD: how far down to a named place the collections reach, how many places
+          somebody has walked volume by volume, and whether a national archive is named at all. The same rule, from lib/country-metrics.js. */}
+      <p class="cccov">
+        {c.cols ? <span title="Share of this country's collections catalogued under a town, county or province, not the country as a whole">{c.reach}% reach a place</span> : <span class="ccnil">no collections</span>}
+        {" · "}{c.walked ? <span>{c.walked.toLocaleString()} walked</span> : <span class="ccnil">none walked</span>}
+        {" · "}{c.nat ? <span>national archive named</span> : <span class="ccnil">no national archive named</span>}
+      </p>
       {/* THE NAMES LINE SAYS WHICH OF THE THREE STATES THIS IS, because the
           number alone would be read as a fact about the country. Croatia's
           141 against Denmark's 290,156 is a fact about our harvest. */}
@@ -81,6 +89,10 @@ const { list, totals, showFind = true } = Astro.props;
       {c.names === "none" && (
         <p class="ccnames ccnames-none"><b>0</b> names — no register harvested, and no archive names one</p>
       )}
+      {/* THE TWO DOORS OUT OF A CARD: the country's own page (its places and what covers them) and the directory of who holds its paper,
+          already narrowed to it, which is what the Sources tab is for. */}
+      <p class="ccgo"><a href={u(`/country/${c.cc.toLowerCase()}/`)}>Places</a>
+        {" · "}<a href={u(`/providers/?q=${encodeURIComponent(c.name)}`)}>{c.arch ? `${c.arch.toLocaleString()} ${c.arch === 1 ? "source" : "sources"}` : "Sources"}</a></p>
     </li>
   ))}
 </ul>
@@ -221,5 +233,8 @@ const { list, totals, showFind = true } = Astro.props;
   .ccnames { margin: 9px 0 0; font-family: var(--sans); font-size: 12px;
     line-height: 1.45; color: var(--ink-2); }
   .ccnames-thin, .ccnames-none { color: var(--ink-3); }
+  .cccov { margin: 8px 0 0; font-family: var(--sans); font-size: 12px; line-height: 1.5; color: var(--ink-2); }
+  .cccov .ccnil { color: var(--ink-3); }
+  .ccgo { margin: 8px 0 0; font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
   .ccfoot { margin: 14px 0 0; }
 </style>

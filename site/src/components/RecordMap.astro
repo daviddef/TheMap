@@ -29,8 +29,6 @@
 import { readFileSync } from "node:fs";
 import whatsNew from "../data/whats-new.json";
 import site from "../data/site.json";
-import { BASEMAP_KEYS, DEFAULT_BASEMAP } from "../lib/basemaps.js";
-const BASEMAPS = { keys: BASEMAP_KEYS, def: DEFAULT_BASEMAP };
 const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, belgiumBase, wikidataUrl, osmUrl, featureBase, settlementBase, districtBase, countryBase, townlandBase, comuneBase, estoniaBase, scotlandBase, worldArchivesUrl, countryPointsUrl, base } = Astro.props;
 
 /* The long explanation the idle panel used to carry in full now lives at
@@ -473,8 +471,11 @@ try {
     this project has already paid twice for the build and the client working
     the key out separately. */}
 <script is:inline src={base.replace(/\/$/, "") + "/js/shard-key.js"}></script>
+{/* WHICH BASEMAP OPENS, DECIDED BEFORE THE MAP IS BUILT. A small classic script, so the answer (the reader's own choice, else the
+    theme's default: Night dots in dark theme) is known when the first tile is asked for and the light map never flashes up first. */}
+<script is:inline src={base.replace(/\/$/, "") + "/js/basemaps.js"}></script>
 
-<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, BSURN: belgiumBase, WDA: wikidataUrl, OSMA: osmUrl, FEAT: featureBase, SETT: settlementBase, DIST: districtBase, CTRY: countryBase, TOWN: townlandBase, COMU: comuneBase, ESTO: estoniaBase, SCOT: scotlandBase, WARCH: worldArchivesUrl, CPTS: countryPointsUrl, BASE: base, SHARDS: SHARDMAP, BASEMAPS: BASEMAPS }}>
+<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, BSURN: belgiumBase, WDA: wikidataUrl, OSMA: osmUrl, FEAT: featureBase, SETT: settlementBase, DIST: districtBase, CTRY: countryBase, TOWN: townlandBase, COMU: comuneBase, ESTO: estoniaBase, SCOT: scotlandBase, WARCH: worldArchivesUrl, CPTS: countryPointsUrl, BASE: base, SHARDS: SHARDMAP }}>
 /* ASK FOR THE DATA NOW, NOT AFTER EVERYTHING ELSE HAS LOADED.
    Measured on the live site rather than reasoned about, which is what
    should have happened the first time:
@@ -662,52 +663,24 @@ window.addEventListener("load", async function () {
       { attribution: "Esri, Maxar, Earthstar Geographics", maxZoom: 18 })
   };
   /* NIGHT DOTS, A FOURTH BASEMAP, BUILT ONLY IF SOMEBODY ASKS FOR IT. A dark ground with the land drawn as a grid of quiet navy
-     dots, so the colours of the data are the only bright thing on the map. Everything it needs (public/js/night-dots.js, 20 KB
-     of land outlines and, from zoom 4, 170 KB more) is fetched when it is first chosen, so a visitor who never chooses it
-     downloads none of it: this shim is all the page carries. It is not the default (src/lib/basemaps.js holds that constant).
+     dots, so the colours of the data are the only bright thing on the map. Everything it needs (public/js/night-dots.js, 55 KB
+     of land outlines and, from zoom 4, 546 KB more) is fetched when it is first chosen, so a visitor who never chooses it
+     downloads none of it: this shim is all the page carries. It opens first in dark theme and never in light (public/js/basemaps.js holds that one constant).
      Its dots are navy, about 1.85:1 against the ground and well under half the width of the smallest data marker, because here a GREY
      dot means «nobody has looked» and the ground must never be mistaken for that; test/night-dots.test.js enforces it. */
-  var BASEP = BASE.replace(/\/?$/, "/");
-  var ndLoad = null;
-  function loadNight() {
-    return ndLoad || (ndLoad = new Promise(function (ok, no) {
-      var sc = document.createElement("script");
-      sc.src = BASEP + "js/night-dots.js";
-      sc.onload = function () { window.raNightDots ? ok(window.raNightDots) : no(new Error("night-dots")); };
-      sc.onerror = function () { no(new Error("night-dots")); };
-      document.head.appendChild(sc);
-    }).catch(function (e) { ndLoad = null; throw e; }));
-  }
-  function stillMotion() {
-    try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) { return false; }
-  }
-  BASES.night = new (L.Layer.extend({
-    onAdd: function (m) {
-      var me = this;
-      me._live = true;
-      m.getContainer().classList.add("ra-night");     /* the dark ground at once, while the dots are on their way */
-      loadNight().then(function (ND) {
-        if (!me._live) return;
-        me._in = ND.create(L, { dir: BASEP + "vendor/natural-earth/", labelsPane: "baseLabels", reduce: stillMotion });
-        me._in.addTo(m);
-      }, function () { if (me._live) setBase("map"); });
-    },
-    onRemove: function (m) {
-      this._live = false;
-      m.getContainer().classList.remove("ra-night");
-      if (this._in) m.removeLayer(this._in);
-      this._in = null;
-    },
-    bringToBack: function () { if (this._in) this._in.bringToBack(); return this; }
-  }))();
+  BASES.night = window.raBasemaps.nightLayer(L, { labelsPane: "baseLabels", onFail: function () { setBase("map"); } });
   map.createPane("baseLabels"); map.getPane("baseLabels").style.zIndex = 250;
   map.getPane("baseLabels").style.pointerEvents = "none";
   var baseLabels = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}",
     { pane: "baseLabels", maxNativeZoom: 16, maxZoom: 18 });
   BASES.map.on("add", function () { baseLabels.addTo(map); });
   BASES.map.on("remove", function () { map.removeLayer(baseLabels); });
-  /* ?base= is read through the list, so an unknown value (or "constructor") is the default rather than a crash. */
-  var baseNow = BASEMAPS.keys.indexOf(Q.get("base")) >= 0 ? Q.get("base") : BASEMAPS.def;
+  /* WHICH ONE OPENS. The reader's own choice wins: ?base= in the address bar, else the one they last picked with the switcher (kept in
+     this browser); only with neither does the theme decide (dark opens on Night dots, light on the light map), and then it follows the
+     theme if that is toggled. An unknown ?base= (or "constructor") is no choice at all. All of this is settled before the first tile. */
+  var BM = window.raBasemaps;
+  var pick = BM.choose({ keys: BM.ATLAS_KEYS, url: Q.get("base"), stored: BM.stored(BM.ATLAS_KEYS), theme: BM.themeNow() });
+  var baseNow = pick.key, baseExplicit = pick.explicit;
   BASES[baseNow].addTo(map);
 
   /* ---- the jurisdiction layer -------------------------------------------
@@ -7650,21 +7623,24 @@ window.addEventListener("load", async function () {
   /* ---- basemap switch, home, and the view in the address bar -------------- */
   var bctl = L.control({ position: "topright" });
   var baseBar = null;
-  function setBase(k) {
+  /* explicit: the reader chose it (the switcher), so it is remembered and written to the address bar. Not explicit: the theme changed
+     and nobody had chosen, so the map just follows, and nothing is written. */
+  function setBase(k, explicit) {
+    if (explicit) { baseExplicit = true; BM.remember(k); setQ("base", k); }
     if (k === baseNow || !BASES[k]) return;
     map.removeLayer(BASES[baseNow]);
     baseNow = k; BASES[k].addTo(map); BASES[k].bringToBack();
     if (baseBar) baseBar.querySelectorAll("a").forEach(function (x) {
       var on = x.getAttribute("data-b") === k;
       x.classList.toggle("on", on); x.setAttribute("aria-pressed", String(on)); });
-    setQ("base", k === BASEMAPS.def ? "" : k);
     /* The cluster discs are inked for the ground they sit on. */
-    if (typeof drawClusters === "function" && typeof lastVisible !== "undefined") drawClusters(lastVisible);
+    drawClusters(lastVisible);
   }
+  BM.watchTheme(function (t) { if (!baseExplicit) setBase(BM.defaultFor(t), false); });
   bctl.onAdd = function () {
     var b = baseBar = L.DomUtil.create("div", "leaflet-bar ra-base");
     b.setAttribute("role", "group"); b.setAttribute("aria-label", "Basemap");
-    b.innerHTML = BASEMAPS.keys.map(function (k) {
+    b.innerHTML = BM.ATLAS_KEYS.map(function (k) {
       /* Each of the three had no hover text at all — «Map», «Terrain» and
          «Satellite» are a guess unless you click them. */
       var what = { map: "Plain map — place names and borders, easiest to read",
@@ -7680,13 +7656,13 @@ window.addEventListener("load", async function () {
     L.DomEvent.on(b, "click", function (e) {
       var a = e.target.closest("a[data-b]"); if (!a) return;
       L.DomEvent.stop(e);
-      setBase(a.getAttribute("data-b"));
+      setBase(a.getAttribute("data-b"), true);
     });
     /* A link with role=button answers Enter by itself and Space not at all; a button answers both. */
     L.DomEvent.on(b, "keydown", function (e) {
       if (e.key !== " " && e.key !== "Spacebar") return;
       var a = e.target.closest("a[data-b]"); if (!a) return;
-      L.DomEvent.stop(e); setBase(a.getAttribute("data-b"));
+      L.DomEvent.stop(e); setBase(a.getAttribute("data-b"), true);
     });
     return b;
   };
@@ -9889,15 +9865,11 @@ window.addEventListener("load", async function () {
   :global(.ra-base a[data-b="night"]) { text-transform: none; }
   /* NIGHT DOTS: the ground is a deliberate dark in either site theme (the option is a dark map, not a theme). The dots and the
      Esri dark tiles above it are layers; this is only what shows behind and between them. */
+  /* Night dots: the ground at first paint (before basemaps.css, which carries the rest, has loaded). In dark theme it is the ground the
+     map opens on, so there is no flash of grey before the dots. */
   :global(.leaflet-container.ra-night) { background: #121b22; }
-  :global(.ra-nd-dots) { transition: opacity .35s ease; }
-  /* Esri's dark grey is a neutral; tinted toward the ground's navy so the hand-over at zoom 8 does not read as a change of
-     palette. The place names keep their own light text. */
-  :global(.ra-nd-dark) { filter: sepia(1) hue-rotate(180deg) saturate(.9) brightness(.75) contrast(1.1); }
-  @media (prefers-reduced-motion: reduce) {
-    :global(.ra-nd-dots), :global(.ra-nd-dark), :global(.ra-nd-names) { transition: none !important; }
-    :global(.ra-nd-dark.leaflet-tile-container .leaflet-tile), :global(.ra-nd-names .leaflet-tile) { transition: none !important; }
-  }
+  :global(:root[data-theme="dark"] #ra-map) { background: #121b22; }
+  @media (prefers-color-scheme: dark) { :global(:root:not([data-theme="light"]) #ra-map) { background: #121b22; } }
 
   .at-hint { color: var(--ink-3) !important; font-size: 12px !important; }
   :global(.at-h) { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }

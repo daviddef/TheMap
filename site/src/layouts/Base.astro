@@ -312,8 +312,8 @@ import { volumes as invVolumes } from "../lib/inventory.js";
         the browser because pages are built once and read for weeks. Seen-ness is a per-browser convenience, so storage may be blocked. */}
     <script is:inline defer src={u("/js/spot.js")}></script>
     <script is:inline defer src={u("/js/theme.js")}></script>
-    {/* THE STORY TOUR'S LOADER: about 4 KB, on every page. It opens the tour by itself once, on the home page and /start/ only, adds the round play icon
-        beside the Reader and Canvas icons, and listens for the T key. The tour proper (css, engine, land mask, chapters) is fetched only when it opens.
+    {/* THE STORY TOUR'S LOADER: about 4 KB, on every page. It adds the round play icon
+        beside the Reader and Canvas icons and listens for the T key (the first-visit auto-open is switched off: AUTO_OPEN in the loader). The tour proper (css, engine, land mask, chapters) is fetched only when it opens.
         After theme.js, so its icon lands in front of the icons that script makes. */}
     <script is:inline defer src={u("/js/start-tour-gate.js")}></script>
     <script is:inline defer src={u("/js/sources-pop.js")}></script>

@@ -1711,6 +1711,14 @@ def main():
             pass
         try:
             _fv = json.load(open("data/fs-volumes.json"))
+            # A WAYPOINT IS NOT AN IMAGE. /ark:/61903/3:1:9RK1-T3F (four characters, a dash, three) is a catalogue waypoint, and
+            # FamilySearch opens an empty viewer for it. 4,903 links were written that way and every one went nowhere. A volume link
+            # must be an image ark (3:1:XXXX-XXXX-XXXX) with the waypoint after wc=.
+            _wpa = re.compile(r"/ark:/61903/3:1:[0-9A-Z]{4}-[0-9A-Z]{3}(?:[?#]|$)")
+            _badl = [(k, v.get("url")) for k, vs in _fv["byPlace"].items() for v in vs if _wpa.search(v.get("url") or "")]
+            if _badl:
+                err(f"data/fs-volumes.json: {len(_badl)} volume links point at a waypoint written as an ark (e.g. {_badl[0][1]}), "
+                    "which opens an empty FamilySearch viewer. Use the volume's image ark + ?wc=<waypoint>.")
             count("fsVolumes", sum(len(v) for v in _fv["byPlace"].values()))
             count("fsVolumePlaces", len(_fv["byPlace"]))
         except OSError:

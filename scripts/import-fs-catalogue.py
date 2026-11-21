@@ -130,9 +130,14 @@ def main():
             if a:
                 rec["from"], rec["to"] = a, b
             if wp:
-                rec["url"] = "https://www.familysearch.org/ark:/61903/3:1:" + wp \
-                    if wp.count(":") == 0 else wp
                 rec["waypoint"] = wp
+                # THE LINK THAT OPENS THE BOOK IS THE FIRST IMAGE'S ARK WITH THE WAYPOINT AS wc=, NOT THE WAYPOINT AS AN ARK.
+                # This used to write /ark:/61903/3:1:<waypoint> (9RK1-T3F). A waypoint is a catalogue id, not an image, so
+                # FamilySearch opened an empty viewer ("Film #", a grey page) for every one of 4,903 links. David, 22 Nov 2026:
+                # «all your links to familysearch going nowhere». Opened in a signed-in browser: .../3:1:3QSQ-G99C-PV4W?wc=9RK1-T3F
+                # lands on Senj Births 1734-1755, image 1 of 115. With no image ark the link is left out, never invented.
+                if ark:
+                    rec["url"] = "https://www.familysearch.org/ark:/61903/" + ark + "?wc=" + wp.split(":")[0]
             if film:
                 rec["film"] = film
             if ark:

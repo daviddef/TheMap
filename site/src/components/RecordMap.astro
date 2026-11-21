@@ -29,6 +29,8 @@
 import { readFileSync } from "node:fs";
 import whatsNew from "../data/whats-new.json";
 import site from "../data/site.json";
+import { BASEMAP_KEYS, DEFAULT_BASEMAP } from "../lib/basemaps.js";
+const BASEMAPS = { keys: BASEMAP_KEYS, def: DEFAULT_BASEMAP };
 const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, belgiumBase, wikidataUrl, osmUrl, featureBase, settlementBase, districtBase, countryBase, townlandBase, comuneBase, estoniaBase, scotlandBase, worldArchivesUrl, countryPointsUrl, base } = Astro.props;
 
 /* The long explanation the idle panel used to carry in full now lives at
@@ -472,7 +474,7 @@ try {
     the key out separately. */}
 <script is:inline src={base.replace(/\/$/, "") + "/js/shard-key.js"}></script>
 
-<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, BSURN: belgiumBase, WDA: wikidataUrl, OSMA: osmUrl, FEAT: featureBase, SETT: settlementBase, DIST: districtBase, CTRY: countryBase, TOWN: townlandBase, COMU: comuneBase, ESTO: estoniaBase, SCOT: scotlandBase, WARCH: worldArchivesUrl, CPTS: countryPointsUrl, BASE: base, SHARDS: SHARDMAP }}>
+<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, BSURN: belgiumBase, WDA: wikidataUrl, OSMA: osmUrl, FEAT: featureBase, SETT: settlementBase, DIST: districtBase, CTRY: countryBase, TOWN: townlandBase, COMU: comuneBase, ESTO: estoniaBase, SCOT: scotlandBase, WARCH: worldArchivesUrl, CPTS: countryPointsUrl, BASE: base, SHARDS: SHARDMAP, BASEMAPS: BASEMAPS }}>
 /* ASK FOR THE DATA NOW, NOT AFTER EVERYTHING ELSE HAS LOADED.
    Measured on the live site rather than reasoned about, which is what
    should have happened the first time:
@@ -659,13 +661,53 @@ window.addEventListener("load", async function () {
     satellite: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
       { attribution: "Esri, Maxar, Earthstar Geographics", maxZoom: 18 })
   };
+  /* NIGHT DOTS, A FOURTH BASEMAP, BUILT ONLY IF SOMEBODY ASKS FOR IT. A dark ground with the land drawn as a grid of quiet navy
+     dots, so the colours of the data are the only bright thing on the map. Everything it needs (public/js/night-dots.js, 20 KB
+     of land outlines and, from zoom 4, 170 KB more) is fetched when it is first chosen, so a visitor who never chooses it
+     downloads none of it: this shim is all the page carries. It is not the default (src/lib/basemaps.js holds that constant).
+     Its dots are navy, about 1.85:1 against the ground and well under half the width of the smallest data marker, because here a GREY
+     dot means «nobody has looked» and the ground must never be mistaken for that; test/night-dots.test.js enforces it. */
+  var BASEP = BASE.replace(/\/?$/, "/");
+  var ndLoad = null;
+  function loadNight() {
+    return ndLoad || (ndLoad = new Promise(function (ok, no) {
+      var sc = document.createElement("script");
+      sc.src = BASEP + "js/night-dots.js";
+      sc.onload = function () { window.raNightDots ? ok(window.raNightDots) : no(new Error("night-dots")); };
+      sc.onerror = function () { no(new Error("night-dots")); };
+      document.head.appendChild(sc);
+    }).catch(function (e) { ndLoad = null; throw e; }));
+  }
+  function stillMotion() {
+    try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) { return false; }
+  }
+  BASES.night = new (L.Layer.extend({
+    onAdd: function (m) {
+      var me = this;
+      me._live = true;
+      m.getContainer().classList.add("ra-night");     /* the dark ground at once, while the dots are on their way */
+      loadNight().then(function (ND) {
+        if (!me._live) return;
+        me._in = ND.create(L, { dir: BASEP + "vendor/natural-earth/", labelsPane: "baseLabels", reduce: stillMotion });
+        me._in.addTo(m);
+      }, function () { if (me._live) setBase("map"); });
+    },
+    onRemove: function (m) {
+      this._live = false;
+      m.getContainer().classList.remove("ra-night");
+      if (this._in) m.removeLayer(this._in);
+      this._in = null;
+    },
+    bringToBack: function () { if (this._in) this._in.bringToBack(); return this; }
+  }))();
   map.createPane("baseLabels"); map.getPane("baseLabels").style.zIndex = 250;
   map.getPane("baseLabels").style.pointerEvents = "none";
   var baseLabels = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}",
     { pane: "baseLabels", maxNativeZoom: 16, maxZoom: 18 });
   BASES.map.on("add", function () { baseLabels.addTo(map); });
   BASES.map.on("remove", function () { map.removeLayer(baseLabels); });
-  var baseNow = Q.get("base") && BASES[Q.get("base")] ? Q.get("base") : "map";
+  /* ?base= is read through the list, so an unknown value (or "constructor") is the default rather than a crash. */
+  var baseNow = BASEMAPS.keys.indexOf(Q.get("base")) >= 0 ? Q.get("base") : BASEMAPS.def;
   BASES[baseNow].addTo(map);
 
   /* ---- the jurisdiction layer -------------------------------------------
@@ -5106,7 +5148,7 @@ window.addEventListener("load", async function () {
     /* Read the token rather than hard-coding the teal: Leaflet paints these
        into a canvas, where a CSS variable would come out as nothing, and
        dark mode moves --accent from #1F5C6B to #6FB6C6. */
-    var ink = getComputedStyle(document.documentElement)
+    var ink = baseNow === "night" ? "#6FB6C6" : getComputedStyle(document.documentElement)
       .getPropertyValue("--accent").trim() || "#1F5C6B";
     var cells = {}, top = 1;
     visible.forEach(function (m) {
@@ -7607,29 +7649,44 @@ window.addEventListener("load", async function () {
 
   /* ---- basemap switch, home, and the view in the address bar -------------- */
   var bctl = L.control({ position: "topright" });
+  var baseBar = null;
+  function setBase(k) {
+    if (k === baseNow || !BASES[k]) return;
+    map.removeLayer(BASES[baseNow]);
+    baseNow = k; BASES[k].addTo(map); BASES[k].bringToBack();
+    if (baseBar) baseBar.querySelectorAll("a").forEach(function (x) {
+      var on = x.getAttribute("data-b") === k;
+      x.classList.toggle("on", on); x.setAttribute("aria-pressed", String(on)); });
+    setQ("base", k === BASEMAPS.def ? "" : k);
+    /* The cluster discs are inked for the ground they sit on. */
+    if (typeof drawClusters === "function" && typeof lastVisible !== "undefined") drawClusters(lastVisible);
+  }
   bctl.onAdd = function () {
-    var b = L.DomUtil.create("div", "leaflet-bar ra-base");
-    b.innerHTML = ["map", "terrain", "satellite"].map(function (k) {
+    var b = baseBar = L.DomUtil.create("div", "leaflet-bar ra-base");
+    b.setAttribute("role", "group"); b.setAttribute("aria-label", "Basemap");
+    b.innerHTML = BASEMAPS.keys.map(function (k) {
       /* Each of the three had no hover text at all — «Map», «Terrain» and
          «Satellite» are a guess unless you click them. */
       var what = { map: "Plain map — place names and borders, easiest to read",
                    terrain: "Terrain — hills and rivers, which is often why a "
                           + "parish is where it is",
-                   satellite: "Satellite — what the ground looks like now" };
-      return '<a href="#" data-b="' + k + '" title="' + esc(what[k] || k) + '"' +
-             (k === baseNow ? ' class="on"' : "") + ">" + T(k) + "</a>";
+                   satellite: "Satellite — what the ground looks like now",
+                   night: "Night dots: a quiet dark map so the colours stand out" };
+      return '<a href="#" role="button" data-b="' + k + '" title="' + esc(what[k] || k) + '"' +
+             ' aria-pressed="' + (k === baseNow) + '"' +
+             (k === baseNow ? ' class="on"' : "") + ">" + T(k === "night" ? "Night dots" : k) + "</a>";
     }).join("");
     L.DomEvent.disableClickPropagation(b);
     L.DomEvent.on(b, "click", function (e) {
       var a = e.target.closest("a[data-b]"); if (!a) return;
       L.DomEvent.stop(e);
-      var k = a.getAttribute("data-b");
-      if (k === baseNow) return;
-      map.removeLayer(BASES[baseNow]);
-      baseNow = k; BASES[k].addTo(map); BASES[k].bringToBack();
-      b.querySelectorAll("a").forEach(function (x) {
-        x.classList.toggle("on", x.getAttribute("data-b") === k); });
-      setQ("base", k === "map" ? "" : k);
+      setBase(a.getAttribute("data-b"));
+    });
+    /* A link with role=button answers Enter by itself and Space not at all; a button answers both. */
+    L.DomEvent.on(b, "keydown", function (e) {
+      if (e.key !== " " && e.key !== "Spacebar") return;
+      var a = e.target.closest("a[data-b]"); if (!a) return;
+      L.DomEvent.stop(e); setBase(a.getAttribute("data-b"));
     });
     return b;
   };
@@ -9829,6 +9886,18 @@ window.addEventListener("load", async function () {
   :global(.ra-base a) { width: auto !important; padding: 0 9px; font: 500 11px/26px var(--sans);
                         text-transform: capitalize; }
   :global(.ra-base a.on) { background: var(--accent-wash); color: var(--accent); font-weight: 600; }
+  :global(.ra-base a[data-b="night"]) { text-transform: none; }
+  /* NIGHT DOTS: the ground is a deliberate dark in either site theme (the option is a dark map, not a theme). The dots and the
+     Esri dark tiles above it are layers; this is only what shows behind and between them. */
+  :global(.leaflet-container.ra-night) { background: #121b22; }
+  :global(.ra-nd-dots) { transition: opacity .35s ease; }
+  /* Esri's dark grey is a neutral; tinted toward the ground's navy so the hand-over at zoom 8 does not read as a change of
+     palette. The place names keep their own light text. */
+  :global(.ra-nd-dark) { filter: sepia(1) hue-rotate(180deg) saturate(.9) brightness(.75) contrast(1.1); }
+  @media (prefers-reduced-motion: reduce) {
+    :global(.ra-nd-dots), :global(.ra-nd-dark), :global(.ra-nd-names) { transition: none !important; }
+    :global(.ra-nd-dark.leaflet-tile-container .leaflet-tile), :global(.ra-nd-names .leaflet-tile) { transition: none !important; }
+  }
 
   .at-hint { color: var(--ink-3) !important; font-size: 12px !important; }
   :global(.at-h) { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }

@@ -20,12 +20,15 @@ on:
       slices:
         description: "How many parallel slices"
         default: "16"
+      dry_run:
+        description: "true = build and run every gate but upload NOTHING to R2 (for testing workflow changes; uses its own queue so it never displaces a production run)"
+        default: "false"
 
 permissions:
   contents: read
 
 concurrency:
-  group: r2-publish
+  group: r2-publish${{ github.event.inputs.dry_run == 'true' && '-dry-run' || '' }}
   cancel-in-progress: false
 
 env:
@@ -271,16 +274,25 @@ jobs:
         working-directory: site
         env:
           RA_SHARD: ${{ matrix.i }}/${{ env.SLICES }}
+      # THE BUILT-OUTPUT GATES, WHICH ONLY THE RETIRED PAGES DEPLOY RAN. scripts/check-built.py reads site/dist (shipped CSS, the nav rules, the
+      # sitemaps, the page-weight budget, no script repeated on every page) and used to run as the last step of the 73-minute single build. Slice 0
+      # holds every static page plus its share of the generated ones, and the gates sample what they find (a kind with fewer than 20 pages is
+      # skipped), so it is the one slice that runs them, before anything is uploaded.
+      - name: Built-output gates (slice 0)
+        if: matrix.i == 0
+        run: python3 ../scripts/check-built.py
+        working-directory: site
       - name: Install the uploader
         run: python3 -m pip install --quiet boto3
       - name: Upload this slice's pages
+        if: github.event.inputs.dry_run != 'true'
         run: python3 scripts/r2_sync.py --dist site/dist --part slice-${{ matrix.i }} --only place surname name
         env:
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
       - name: Upload everything else (slice 0 only)
-        if: matrix.i == 0
+        if: matrix.i == 0 && github.event.inputs.dry_run != 'true'
         run: python3 scripts/r2_sync.py --dist site/dist --part static --skip place surname name
         env:
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}

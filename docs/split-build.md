@@ -35,6 +35,7 @@ redirects match the live site; the Worker refuses `//host/x` paths and stops an 
    404 and `x-served-from: origin` (that one proves there is no loop). Re-run the 600-URL sample against the real domain.
 7. **Rollback at any time:** comment the `routes` block out and `npx wrangler deploy` again (or delete the route in Cloudflare,
    Workers, record-atlas-pages, Settings, Domains and Routes). Requests go straight to GitHub Pages again within seconds.
+9. (Done 22 Nov) `deploy.yml` no longer runs on push: it is a manual run only, so GitHub Pages is refreshed by hand when wanted. `scripts/check-built.py` (the built-output gates) now runs in slice 0 of the sliced workflow before any upload. *Build and publish to R2 (sliced)* has a `dry_run` input (builds and gates, uploads nothing, own queue) for testing workflow changes.
 8. (Done 10 Nov) *Build and publish to R2 (sliced)* now runs on every push to main; that is the production deploy. Retire `deploy.yml`'s upload step only after a week of the new path being quiet.
 
 **Not yet done.** Moving the roughly 3,500 static pages out of the slice builds (each slice rebuilds them, about 90 s), and a smoke test

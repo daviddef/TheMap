@@ -142,7 +142,8 @@
   }
   function still() { try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) { return false; } }
   function webglOk() {
-    try { var c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); } catch (e) { return false; }
+    /* MapLibre GL JS 5 needs WebGL 2 (a device with only WebGL 1 gets the standard Map and the sentence, not a blank map). */
+    try { var c = document.createElement("canvas"); return !!c.getContext("webgl2"); } catch (e) { return false; }
   }
 
   var nightLoading = null;
@@ -249,10 +250,13 @@
         if (!webglOk()) { me._fail("webgl"); return; }
         loadMaplibre(L, o).then(function () {
           if (!me._live) return;
-          var inner = window.L.maplibreGL({ style: styleUrl(key, o.root), fadeDuration: reduced ? 0 : 200, maxZoom: 20, updateInterval: 32 });
-          inner.getAttribution = function () { return ""; };   /* the attribution is ours, so it is there before the first piece and for every look */
-          me._in = inner;
-          inner.addTo(m);
+          var inner;
+          try {
+            inner = window.L.maplibreGL({ style: styleUrl(key, o.root), fadeDuration: reduced ? 0 : 200, maxZoom: 20, updateInterval: 32 });
+            inner.getAttribution = function () { return ""; };   /* the attribution is ours, so it is there before the first piece and for every look */
+            me._in = inner;
+            inner.addTo(m);
+          } catch (e) { me._in = null; me._fail("webgl"); return; }   /* MapLibre could not start a WebGL context */
           me._watch(inner.getMaplibreMap());
           /* A page that gives the map a new height after it is built (the Atlas does) never tells Leaflet, and the vector canvas would stop short.
              While this look is on, a resize of the container is passed on to Leaflet, which tells the canvas; if the size is unchanged it does nothing. */

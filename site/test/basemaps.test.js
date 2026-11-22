@@ -210,6 +210,10 @@ test("failure handling: no WebGL means the standard Map and a plain sentence, at
     layer.onRemove(env.map);
     assert.equal(env.classes.size, 0, "everything it put on the container is taken off");
     assert.equal(BM.webglOk(), false);
+    doc.createElement = () => ({ getContext: (t) => (t === "webgl" ? {} : null), setAttribute() {} });
+    assert.equal(BM.webglOk(), false, "WebGL 1 alone is not enough for MapLibre 5");
+    doc.createElement = () => ({ getContext: (t) => (t === "webgl2" ? {} : null), setAttribute() {} });
+    assert.equal(BM.webglOk(), true);
   } finally { delete globalThis.document; delete globalThis.localStorage; }
 });
 
@@ -219,7 +223,7 @@ test("a vector look fails over when its style, its tile index or its tiles do no
   const emit = (ev, e) => (handlers[ev] || []).forEach((f) => f(e));
   const inner = { addTo() {}, getMaplibreMap: () => gl, getContainer: () => null, getAttribution: null };
   globalThis.window = { maplibregl: {}, L: { maplibreGL: () => inner }, matchMedia: () => ({ matches: false }) };
-  globalThis.document = { querySelectorAll: () => [], createElement: () => ({ getContext: () => ({}), setAttribute() {} }), head: { appendChild() {} } };
+  globalThis.document = { querySelectorAll: () => [], createElement: () => ({ getContext: (t) => (t === "webgl2" ? {} : null), setAttribute() {} }), head: { appendChild() {} } };
   try {
     const run = async (events) => {
       for (const k of Object.keys(handlers)) delete handlers[k];
@@ -232,6 +236,9 @@ test("a vector look fails over when its style, its tile index or its tiles do no
       return failed;
     };
     assert.equal(await run(() => emit("error", { error: new Error("style 404") })), "tiles", "the style file would not load");
+    /* MapLibre throwing as it starts (a context it cannot get) is a WebGL failure, not a blank map */
+    const was = inner.addTo; inner.addTo = () => { throw new Error("Failed to initialize WebGL"); };
+    try { assert.equal(await run(() => {}), "webgl"); } finally { inner.addTo = was; }
     assert.equal(await run(() => { emit("styledata", {}); emit("error", { sourceId: "openmaptiles" }); }), "tiles", "the tile index would not load");
     assert.equal(await run(() => { emit("styledata", {}); for (let i = 0; i < 3; i++) emit("error", { sourceId: "openmaptiles", tile: {} }); }), null, "three lost pieces are not yet a failure");
     assert.equal(await run(() => { emit("styledata", {}); for (let i = 0; i < 4; i++) emit("error", { sourceId: "openmaptiles", tile: {} }); }), "tiles", "four lost and none arrived is");

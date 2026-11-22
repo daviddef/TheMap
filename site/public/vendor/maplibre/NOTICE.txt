@@ -1,0 +1,14 @@
+MapLibre GL JS 5.24.1 (BSD-3-Clause, licence text in LICENSE-maplibre-gl.txt), the CSP build, copied unmodified from the npm package
+`maplibre-gl@5.24.1` /dist/: maplibre-gl-csp.js, maplibre-gl-csp-worker.js and maplibre-gl.css. The only change is that the trailing
+"sourceMappingURL" comment line was deleted from the two .js files, so a browser's developer tools do not ask for source maps we do not ship.
+
+maplibre-gl-leaflet 0.1.4 (ISC, LICENSE-maplibre-gl-leaflet.txt): leaflet-maplibre-gl.js, copied unmodified from the npm package
+`@maplibre/maplibre-gl-leaflet@0.1.4` /dist/. It draws a MapLibre vector map as one Leaflet layer, so the Atlas's Leaflet markers and layers
+sit on top of it unchanged.
+
+Used only by the vector basemap looks (Liberty, Smooth, Smooth dark, Ink, Ink dark), loaded by public/js/basemaps.js the first time one of
+them is shown. A visitor who never picks one downloads none of it. The CSP build is used because Compass's policy (worker-src 'self') does not
+allow the blob: worker the ordinary build starts; basemaps.js points MapLibre at maplibre-gl-csp-worker.js, a same-origin file, instead.
+
+To update: `npm pack maplibre-gl@X @maplibre/maplibre-gl-leaflet@Y` in an empty folder, copy the same files, delete the sourceMappingURL lines,
+change the versions above and in public/js/basemaps.js (MAPLIBRE_VERSION), and look at every vector look on the Atlas map, Compass and History.

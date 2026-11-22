@@ -67,7 +67,7 @@ test("on the dark ground every marker rim is clearly visible: the white halo, th
   for (const [name, hex] of Object.entries({ "white halo": "#ffffff", "hollow rim": "#8A8E86", "dashed rim": "#6B7780", "cluster ink on night": "#6FB6C6", "search ring (magenta)": "#E0218A" })) {
     assert.ok(contrast(hex, ND.GROUND) >= 3, name + " " + contrast(hex, ND.GROUND).toFixed(2) + ":1 against the night ground");
   }
-  assert.match(map, /baseNow === "night" \? "#6FB6C6"/, "the cluster discs are inked for the night ground");
+  assert.match(map, /window\.raBasemaps\.isDark\(baseNow\) \? "#6FB6C6"/, "the cluster discs are inked for every dark ground");
 });
 
 test("the grid is a whole number of cells to a tile, so tiles join without a seam", () => {

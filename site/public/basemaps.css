@@ -1,13 +1,28 @@
-/* Night dots, for the maps that load it lazily (Compass, the History map, and the Atlas map once Night dots is first chosen).
+/* The looks that are not the plain light map, for the maps that load them lazily (Compass, the History map, and the Atlas map once one is first chosen).
    Plain same-origin CSS, so it is allowed by Compass's CSP (style-src 'self').
-   !important only where a page filters or paints its own tile pane for its own dark theme: those rules are for the light grey tiles. */
+   !important only where a page filters or paints its own tile pane for its own dark theme: those rules are for the light grey tiles, and would
+   invert or fade a look that is already drawn for the ground it sits on. */
 .leaflet-container.ra-night { background: #121b22 !important; }
-.leaflet-container.ra-night .leaflet-tile-pane,
-.leaflet-container.ra-night .leaflet-baseLabels-pane,
-.leaflet-container.ra-night .leaflet-cpLabels-pane { filter: none !important; opacity: 1 !important; }
+.leaflet-container.ra-look .leaflet-tile-pane,
+.leaflet-container.ra-look .leaflet-baseLabels-pane,
+.leaflet-container.ra-look .leaflet-cpLabels-pane { filter: none !important; opacity: 1 !important; }
+/* The ground of each look, behind the tiles while they are on their way (and below the world's edge); the same colour as its style's background. */
+.leaflet-container.ra-look-smooth { background: #e9edf2 !important; }
+.leaflet-container.ra-look-liberty { background: #f8f4f0 !important; }
+.leaflet-container.ra-look-ink { background: #ffffff !important; }
+.leaflet-container.ra-look-smoothdark { background: #4a5567 !important; }
+.leaflet-container.ra-look-inkdark { background: #0a0a0a !important; }
+.leaflet-container.ra-look-imagenight { background: #0b1522 !important; }
+.leaflet-container.ra-look-satellite { background: #0b1522 !important; }
+/* MapLibre's canvas sits in Leaflet's tile pane: it must not take the pointer from the map, and a vector look needs no Leaflet tile fade. */
+.leaflet-container .leaflet-gl-layer { pointer-events: none; }
+.leaflet-container .leaflet-gl-layer .maplibregl-canvas { outline: none; }
+/* Imagery at night: Esri's imagery pulled to a deep navy by a filter on that one tile layer (not the markers, not the map). Desaturated and
+   darkened enough that the colours of the data are the bright thing; light enough that coasts and cities stay readable. */
+.ra-imgnight { filter: grayscale(1) sepia(.7) hue-rotate(178deg) saturate(1.5) brightness(.68) contrast(1.15); }
 /* Esri's dark grey is a neutral; tinted toward the ground's navy so the hand-over at zoom 8 is not a change of palette. */
 .ra-nd-dark { filter: sepia(1) hue-rotate(180deg) saturate(.9) brightness(.75) contrast(1.1); }
 .ra-nd-dots { transition: opacity .35s ease; }
 @media (prefers-reduced-motion: reduce) {
-  .ra-nd-dots, .ra-nd-dark, .ra-nd-names, .ra-nd-dark .leaflet-tile, .ra-nd-names .leaflet-tile { transition: none !important; }
+  .ra-nd-dots, .ra-nd-dark, .ra-nd-names, .ra-nd-dark .leaflet-tile, .ra-nd-names .leaflet-tile, .ra-imgnight .leaflet-tile { transition: none !important; }
 }

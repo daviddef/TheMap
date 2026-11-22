@@ -1,6 +1,29 @@
-/* The two-button Map | Night dots switcher of Compass and the History map (public/js/basemaps.js attach()); the Atlas map has its own, in RecordMap.astro.
-   Plain same-origin CSS, so Compass's CSP (style-src 'self') allows it. Colours come from each page's own variables, with fallbacks. */
-.ra-base a { width: auto !important; padding: 0 9px; font: 500 11px/26px var(--sans, system-ui, sans-serif); text-transform: none; text-align: center; height: 26px; }
-.ra-base a.on { background: var(--accent-wash, #e3eef1); color: var(--accent, #1F5C6B); font-weight: 600; }
-.ra-base { border: 2px solid var(--line, rgba(0,0,0,.2)) !important; border-radius: 8px !important; overflow: hidden; box-shadow: none !important; }
-.ra-base a { background: var(--panel, var(--card, #fff)); color: var(--ink, #16222A); }
+/* The basemap switcher of every map (public/js/basemaps.js switcher()): the Atlas map, Compass and the History map.
+   Real <button>s, so Enter and Space work without help; the pressed one is bold, underlined and tinted (not colour alone), and every one has a visible focus ring.
+   Plain same-origin CSS, so Compass's CSP (style-src 'self') allows it. Colours come from each page's own variables, with fallbacks.
+   The bar wraps: on a phone the looks for this theme sit on one line and the rest on the next, instead of one row running off the screen. */
+.ra-base { display: flex !important; flex-direction: column; align-items: stretch; gap: 0; max-width: calc(100vw - 76px); width: max-content;
+  border: 2px solid var(--line, var(--card-border, rgba(0,0,0,.2))) !important; border-radius: 8px !important; overflow: hidden; box-shadow: none !important;
+  background: var(--panel, var(--card, #fff)); }
+.ra-base-row { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: stretch; }
+.ra-base-more { border-top: 1px solid var(--line, var(--card-border, rgba(0,0,0,.2))); }
+.ra-base button { width: auto; margin: 0; padding: 0 9px; height: 26px; border: 0; border-radius: 0; cursor: pointer; text-transform: none; text-align: center;
+  font: 500 11px/26px var(--sans, system-ui, sans-serif); background: var(--panel, var(--card, #fff)); color: var(--ink, #16222A); }
+.ra-base button:hover { background: var(--accent-wash, #e3eef1); }
+.ra-base button.on { background: var(--accent-wash, #e3eef1); color: var(--accent, var(--adriatic, #1F5C6B)); font-weight: 700; box-shadow: inset 0 -2px 0 currentColor; }
+.ra-base button:focus-visible { outline: 2px solid var(--focus, var(--accent, #1F5C6B)); outline-offset: -3px; position: relative; z-index: 1; }
+.ra-base button:disabled { cursor: default; opacity: .7; }
+.ra-base .ra-base-morebtn { font-weight: 600; border-left: 1px solid var(--line, var(--card-border, rgba(0,0,0,.2))); }
+.ra-base .ra-base-morebtn::after { content: " \25BE"; }
+.ra-base .ra-base-morebtn[aria-expanded="true"]::after { content: " \25B4"; }
+.ra-base-lbl { font: 600 10px/26px var(--sans, system-ui, sans-serif); padding: 0 8px; color: var(--muted, var(--soft, #606C72)); text-transform: uppercase; letter-spacing: .06em; }
+.ra-base-note { margin: 0; padding: 5px 9px; max-width: 250px; font: 500 11px/1.35 var(--sans, system-ui, sans-serif); color: var(--ink, #16222A);
+  border-top: 1px solid var(--line, var(--card-border, rgba(0,0,0,.2))); background: var(--panel, var(--card, #fff)); }
+.ra-base-note[hidden], .ra-base-row[hidden] { display: none; }
+@media (max-width: 640px) {
+  /* clear of the zoom buttons (top left) on a map that sits inside the page's own side margins: the looks wrap onto a second line */
+  .ra-base { max-width: calc(100vw - 130px); }
+  .ra-base button { padding: 0 6px; height: 24px; font-size: 10px; line-height: 24px; }
+  .ra-base-lbl { line-height: 24px; padding: 0 6px; font-size: 9px; }
+  .ra-base-note { max-width: 210px; font-size: 10px; }
+}

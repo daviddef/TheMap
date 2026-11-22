@@ -1252,8 +1252,18 @@ def whats_new_gate():
     exist, which is a card that sends a reader nowhere on the first screen.
     """
     p = "site/src/data/whats-new.json"
+    # A KEY WRITTEN TWICE IN ONE ENTRY IS REFUSED, because json.load quietly keeps the last one. Twice (#132, #134, fixed in #133 and
+    # #141) two pull requests that each added an entry at the top of this file merged into ONE object with a second `kind` and
+    # `headline`: the file still parsed, every check below passed, and one of the two entries simply vanished from /whats-new/.
+    def _no_dup_keys(pairs):
+        seen = set()
+        for k, _ in pairs:
+            if k in seen:
+                raise ValueError(f"a key written twice in one object: {k!r} (two entries merged into one: split them, each needs its own braces)")
+            seen.add(k)
+        return dict(pairs)
     try:
-        entries = json.load(open(p, encoding="utf-8"))["entries"]
+        entries = json.load(open(p, encoding="utf-8"), object_pairs_hook=_no_dup_keys)["entries"]
     except Exception as e:
         err(f"cannot read {p}: {e}")
         return

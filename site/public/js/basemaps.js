@@ -280,17 +280,19 @@
         if (c && c.parentNode && c.parentNode.firstChild !== c) c.parentNode.insertBefore(c, c.parentNode.firstChild);
         return this;
       },
-      /* Watching for a look that is not coming: a style that cannot be read, a map host that does not answer. A single lost piece is not
-         a failure (the others draw); none at all in 12 seconds, or four lost and none arrived, is. */
+      /* Watching for a look that is not coming: a style that cannot be read, a tile index (TileJSON) that does not answer, map pieces that
+         do not arrive. One lost piece is not a failure (the others draw), and a lost label font or picture only costs the labels; no piece at
+         all in 12 seconds, or four lost and none arrived, is a failure. */
       _watch: function (gl) {
-        var me = this, got = 0, lost = 0;
+        var me = this, got = 0, lost = 0, styled = false;
         me._timer = setTimeout(function () { if (!got) me._fail("tiles"); }, 12000);
+        gl.on("styledata", function () { styled = true; });
         gl.on("data", function (e) { if (e.dataType === "source" && e.tile && !got) { got = 1; clearTimeout(me._timer); } });
         gl.on("error", function (e) {
           if (!me._live || got) return;
-          var src = e && e.sourceId;
-          if (!src) { me._fail("tiles"); return; }               /* the style itself, or its tile index, would not load */
-          if (++lost >= 4) me._fail("tiles");
+          if (!styled) { me._fail("tiles"); return; }                      /* the style file itself would not load */
+          if (e && e.sourceId && !e.tile) { me._fail("tiles"); return; }   /* the source's tile index would not load */
+          if (e && e.tile && ++lost >= 4) me._fail("tiles");
         });
       },
       _fail: function (reason) {

@@ -213,6 +213,33 @@ test("failure handling: no WebGL means the standard Map and a plain sentence, at
   } finally { delete globalThis.document; delete globalThis.localStorage; }
 });
 
+test("a vector look fails over when its style, its tile index or its tiles do not arrive, and not for a lost font or one lost piece", async () => {
+  const handlers = {};
+  const gl = { on(ev, f) { (handlers[ev] = handlers[ev] || []).push(f); } };
+  const emit = (ev, e) => (handlers[ev] || []).forEach((f) => f(e));
+  const inner = { addTo() {}, getMaplibreMap: () => gl, getContainer: () => null, getAttribution: null };
+  globalThis.window = { maplibregl: {}, L: { maplibreGL: () => inner }, matchMedia: () => ({ matches: false }) };
+  globalThis.document = { querySelectorAll: () => [], createElement: () => ({ getContext: () => ({}), setAttribute() {} }), head: { appendChild() {} } };
+  try {
+    const run = async (events) => {
+      for (const k of Object.keys(handlers)) delete handlers[k];
+      const env = fakeEnv(); let failed = null;
+      const layer = BM.lookLayer(env.L, "smooth", { onFail: (t, r) => { failed = r; } });
+      layer.onAdd(env.map);
+      await new Promise((r) => setTimeout(r, 5));        /* the library promise resolves, the inner map is built and watched */
+      events(); await new Promise((r) => setTimeout(r, 5));
+      layer.onRemove(env.map);
+      return failed;
+    };
+    assert.equal(await run(() => emit("error", { error: new Error("style 404") })), "tiles", "the style file would not load");
+    assert.equal(await run(() => { emit("styledata", {}); emit("error", { sourceId: "openmaptiles" }); }), "tiles", "the tile index would not load");
+    assert.equal(await run(() => { emit("styledata", {}); for (let i = 0; i < 3; i++) emit("error", { sourceId: "openmaptiles", tile: {} }); }), null, "three lost pieces are not yet a failure");
+    assert.equal(await run(() => { emit("styledata", {}); for (let i = 0; i < 4; i++) emit("error", { sourceId: "openmaptiles", tile: {} }); }), "tiles", "four lost and none arrived is");
+    assert.equal(await run(() => { emit("styledata", {}); emit("data", { dataType: "source", tile: {} }); for (let i = 0; i < 9; i++) emit("error", { sourceId: "openmaptiles", tile: {} }); }), null, "once pieces are arriving, a few lost ones are only gaps");
+    assert.equal(await run(() => { emit("styledata", {}); emit("error", { error: new Error("glyph range") }); }), null, "a lost label font costs the labels, not the map");
+  } finally { delete globalThis.window; delete globalThis.document; }
+});
+
 test("the failure sentences are short, plain and name the look and the fallback", () => {
   for (const k of BM.VECTOR_KEYS) for (const r of ["webgl", "tiles", "library"]) {
     const t = BM.failMessage(k, r);

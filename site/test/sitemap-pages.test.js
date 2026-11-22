@@ -20,6 +20,9 @@ const LEFT_OUT = {
   "roots": "the GEDCOM page works on a file only the visitor has; the page is noindex",
   "jurisdictions": "redirects to the Whose archive view of /providers/; noindex",
   "survey": "redirects to Help check a source on /providers/; noindex",
+  "worklist": "the atlas's own to-do list, public for transparency but not a page for a search engine; noindex (22 Nov 2026)",
+  "errands": "drafted letters to archives, and which have been sent; noindex (22 Nov 2026)",
+  "changelog": "a generated commit log; noindex (22 Nov 2026)",
   "about": "redirects to /start/, which is the one page for what the atlas is; canonical points there",
 };
 

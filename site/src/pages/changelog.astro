@@ -12,6 +12,7 @@ for (const c of log.commits) (byDay[c.date] = byDay[c.date] || []).push(c);
 const days = Object.entries(byDay).sort((a, b) => b[0].localeCompare(a[0]));
 ---
 <Base
+  noindex
   title="What changed"
   eyebrow={`${log.commits.length} commits · ${days.length} days`}
   dek="Generated from the git history, not kept by hand — so it records what happened rather than what somebody remembered to write down. Every entry that names a bug names one of mine.">

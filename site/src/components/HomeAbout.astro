@@ -1,0 +1,83 @@
+---
+/* WHAT THE ATLAS IS, IN WORDS, BELOW THE MAP ON THE FRONT PAGE.
+ *
+ * The front page is the map, and the map is drawn by JavaScript. Read as HTML (which is how a search engine's first pass reads it) the page was
+ * a header, a «Loading the atlas…» line and about 370 words, and AdSense reviewed that and called the site «low-value content». This section is
+ * ordinary server-rendered text, in the HTML the server sends, below the map: nothing above the fold moves, the map keeps its size and its
+ * address parameters, and a visitor who scrolls finds a plain account of what the atlas is and is not.
+ *
+ * EVERY NUMBER IS COUNTED FROM THE DATA AT BUILD, by the same module that prints the volumes pill (lib/inventory.js), so this text cannot say
+ * 57,000 places when the pill says 57,354. Nothing here is typed in as a figure. No ad is placed in or near it (the front page is not in the
+ * ad list in Base.astro), and no person is named.
+ *
+ * test/home-about.test.js reads the built page and fails if the section or its words are missing from the static HTML.
+ */
+import { u } from "../lib/url.js";
+import { places, volumes, countries, archives, archiveCountries } from "../lib/inventory.js";
+import regions from "../../public/regions.json";
+import { corpus } from "../lib/surname-corpus.js";
+import gnFamilies from "../../../data/given-name-families.json";
+import placeNames from "../../../data/place-names.json";
+
+const n = (x) => Number(x).toLocaleString("en-GB");
+const sur = corpus().surnames;
+const surnames = Array.isArray(sur) ? sur.length : Object.keys(sur || {}).length;
+const datedNames = Object.keys(placeNames.places || {}).length;
+---
+<section class="ra-about" id="about-the-atlas" aria-labelledby="ra-about-h">
+  <h2 id="ra-about-h">What the Record Atlas is, and how to use it</h2>
+
+  <p>The Record Atlas is a map of where family-history records are kept. Pick a place and it shows which archives and online registers
+  cover it, for which years, and what it costs to open them: free, an account, a subscription, or a visit in person. It lists
+  <b>{n(places)}</b> places in <b>{n(countries)}</b> countries and territories, <b>{n(volumes)}</b> register volumes, <b>{n(archives.length)}</b>
+  archives and <b>{n(regions.regions.length)}</b> regions whose rulers changed over the centuries.</p>
+
+  <p>It is made for anyone who holds a name, a village and a rough date and does not know which door to knock on, especially where a border
+  moved and the record may sit in a country the village is no longer in. If you are new to this, <a href={u("/start/")}>Start here</a> is a
+  short tour.</p>
+
+  <h3>Four things to try</h3>
+  <ul>
+    <li><b>Find a place and see who covers it.</b> Search the map above, or <a href={u("/places/")}>browse every place</a>. Each page lists the
+    archives and registers that cover it. The <a href={u("/countries/")}>country pages</a> do the same for a whole country.</li>
+    <li><b>Check what a place was called in the year of the record.</b> A register that says Fiume before 1945 is describing today's Rijeka.
+    <a href={u("/place-names/")}>Place names by year</a> holds {n(datedNames)} places whose names changed, with the dates.</li>
+    <li><b>Follow a surname's spellings.</b> <a href={u("/surnames/")}>Surnames</a> covers {n(surnames)} names, the spellings registers have
+    used and the countries that record them. <a href={u("/your-name/")}>Given names</a> work the same way: Ivan, Johann and Giovanni are one
+    name.</li>
+    <li><b>Open your own tree.</b> The <a href={u("/tree-canvas/")}>Tree Canvas</a> draws a GEDCOM file on one canvas and joins each person's
+    places to this atlas, and its Compass view plays the family across the map through the years. Your file is read in your browser and is
+    never uploaded.</li>
+  </ul>
+
+  <h3>What it does not do</h3>
+  <p>It is not a database of people, and it holds no scans of records. It points to the archives and sites that hold them, and it cannot say
+  whether your ancestor is in any particular book. Coverage is uneven: some countries are walked volume by volume, others have only their
+  national archives. A place with no volumes listed means the atlas has none <i>yet</i>, not that none exist.</p>
+
+  <h3>Where it is going, and where the data comes from</h3>
+  <p>Next are more places walked book by book, more spellings and old place names, and fuller pages for countries covered thinly;
+  <a href={u("/whats-new/")}>What's new</a> lists each change. The records come from the catalogues of the archives and sites themselves, and
+  the gazetteers and name lists from open datasets, each credited on <a href={u("/data/")}>Use the data</a>, where every file the map draws can
+  be downloaded. Every number here is counted from those files when the site is built. There are no accounts;
+  <a href={u("/privacy/")}>the privacy page</a> says what your browser fetches from elsewhere.</p>
+</section>
+
+<style>
+  .ra-about { max-width: 74ch; margin: 56px 0 8px; padding: 28px 0 0; border-top: 1px solid var(--rule); color: var(--ink);
+              font-family: var(--sans); font-size: 16px; line-height: 1.65; overflow-wrap: break-word; }
+  .ra-about h2 { font-family: var(--serif, inherit); font-size: 26px; line-height: 1.2; margin: 0 0 14px; color: var(--ink); }
+  .ra-about h3 { font-family: var(--serif, inherit); font-size: 19px; line-height: 1.3; margin: 26px 0 8px; color: var(--ink); }
+  .ra-about p, .ra-about li { color: var(--ink-2); }
+  .ra-about p { margin: 0 0 14px; }
+  .ra-about ul { margin: 0 0 14px; padding-left: 1.2em; }
+  .ra-about li { margin: 0 0 10px; }
+  .ra-about b { color: var(--ink); font-weight: 600; }
+  .ra-about a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+  .ra-about a:hover { text-decoration-thickness: 2px; }
+  .ra-about a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  @media (max-width: 600px) {
+    .ra-about { margin-top: 40px; font-size: 16px; }
+    .ra-about h2 { font-size: 23px; }
+  }
+</style>

@@ -29,6 +29,7 @@ import { atlas as idx } from "../../lib/atlas.js";
 import WhereToBegin from "../../components/WhereToBegin.astro";
 import PlaceGlance from "../../components/PlaceGlance.astro";
 import Neighbourhood from "../../components/Neighbourhood.astro";
+import { placeDescription } from "../../lib/place-description.js";
 
 export async function getStaticPaths() {
   const full = (await import("../../data/places-full.json")).default;
@@ -199,16 +200,18 @@ const titleName = sameName > 1 && adm1 ? `${place.name}, ${adm1}` : place.name;
 /* IN THE DESCRIPTION ALWAYS, because «in County Limerick, Ireland» is a better
    answer than «in Ireland» even when nothing is ambiguous — it is the line
    that tells a reader whether this is their parish before they click. */
-const whereFull = adm1 && adm1 !== where ? `${adm1}, ${where}` : where;
+const whereFull = adm1 && adm1 !== where && adm1 !== place.name ? `${adm1}, ${where}` : where;
 
 /* The sentence a search engine gets, and the one a human reads first. It has
-   to carry the former names, because that is what people type. */
-const dek = older.length
-  ? `${place.name} in ${whereFull}, also written ${older.join(", ")}. ` +
-    `${cs.length} record volume${cs.length === 1 ? "" : "s"} covering ` +
-    (span ? `${span[0]}–${span[1]}` : "no dated years") + `, and who holds them.`
-  : `${place.name} in ${whereFull}. ${cs.length} record volume${cs.length === 1 ? "" : "s"} ` +
-    (span ? `covering ${span[0]}–${span[1]}, ` : "") + "and who holds them.";
+   to carry the former names, because that is what people type.
+   THE COUNT IS THE ONE THE BODY PRINTS. PlaceGlance says «The atlas holds N record
+   volumes» from the detail file's volumesTotal, falling back to the collections;
+   this line used `cs.length` — the collections listed on the page, capped at 20,
+   and often none for a place whose books are in the detail file — so a search
+   result said «0 record volumes» above a page that said nine. One number, `volN`,
+   feeds the sentence, the eyebrow and PlaceGlance. See lib/place-description.js. */
+const volN = volumesTotal || csAll.length;
+const dek = placeDescription({ name: place.name, whereFull, older, volumes: volN, span });
 /* The FamilySearch collections that cover this ground, and how nearly. */
 /* From the detail file, not from places-full.json. The collections are 81 MB
    across 10,355 places and nine pages import that file; only this one reads
@@ -245,7 +248,7 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
   title={titleName}
   flag={flagFor(place.country)}
   eyebrow={[adm.adm2, adm.adm1, where,
-            `${cs.length} volume${cs.length === 1 ? "" : "s"}`,
+            `${volN} volume${volN === 1 ? "" : "s"}`,
             span ? `${span[0]}–${span[1]}` : null].filter(Boolean).join(" · ")}
   dek={dek}>
 
@@ -268,7 +271,7 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
       every build. */}
   {/* THE SUMMARY FIRST: where it is, the country and flags pages, and the flags that flew. */}
   <PlaceGlance place={place} region={region} eras={region ? region.eras : []} countryName={countryName}
-    adm={adm} volumeCount={volumesTotal || csAll.length} span={span} older={older} mapLink={mapLink} u={u} />
+    adm={adm} volumeCount={volN} span={span} older={older} mapLink={mapLink} u={u} />
 
   {place.last && (
     <p class="cap ra-when">

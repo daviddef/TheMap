@@ -59,7 +59,11 @@ const here = Astro.url.pathname;
 /* /about/ held the ad; it is now a redirect to /start/, and David's decision (19 Nov 2026) is that /start/ carries none: it is the first page a
    newcomer sees and it opens the story tour. The ad is only ever written by the aside below, on a page in this list, so a page that is not
    here has no ad unit and no ad script (there is no Auto ads loader anywhere in the site). The tour loads nothing from an ad network. */
-const AD_PAGES = ["/data/", "/coverage/", "/changelog/", "/flags/"];
+/* 22 Nov 2026, after the second AdSense review came back «Low-value content»: /data/ (a methods and credits page), /coverage/ (a table
+   of gaps) and /changelog/ (a generated commit log, now noindex) were taken off this list. They are pages about the atlas rather than
+   pages a visitor came to read, and an ad beside them is an ad on a screen without publisher content. What is left is the flag
+   pages and the country pages (below), which are written and carry their own content. */
+const AD_PAGES = ["/flags/"];
 /* A country's page carries the ad and its generated /sources/ page does not (95% one template, measured 10 Nov 2026), and the
    tool screens (the map, /add/, /my-research/, /errands/, /worklist/) and the pages kept out of search (/countries/,
    /jurisdictions/) have none: an ad on a screen that is a form or a list is «ads on screens without publisher content». */

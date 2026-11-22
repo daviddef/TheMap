@@ -248,6 +248,73 @@ def sitemaps_are_submittable():
             err(f"{name}: listed in the index and holds no URLs")
 
 
+def search_quality_gate():
+    """What a search engine, and an ad reviewer, reads in the pages that ship (AdSense review of 22 Nov 2026, «Low-value content»).
+
+    1. The atlas's own working pages (/worklist/, /errands/, /changelog/) are noindex in the built HTML and in no sitemap.
+    2. A place page's meta description (and og:description) says the same number of record volumes as the paragraph under its title, and never
+       «0 record volumes». It read the collections listed on the page, capped at 20, while the paragraph read the detail file's total.
+    3. The front page's static HTML holds the written section below the map, with real words and no ad in it.
+    """
+    # 1
+    for name in ("worklist", "errands", "changelog"):
+        f = os.path.join(DIST, name, "index.html")
+        if not os.path.exists(f):
+            err(f"/{name}/ was not built")
+            continue
+        if not re.search(r'<meta name="robots" content="noindex', open(f, encoding="utf-8").read()):
+            err(f"/{name}/ is a working page and is not marked noindex")
+    for sm in glob.glob(os.path.join(DIST, "sitemap-*.xml")):
+        body = open(sm, encoding="utf-8").read()
+        for name in ("worklist", "errands", "changelog"):
+            if f"/{name}/<" in body:
+                err(f"{os.path.basename(sm)} lists /{name}/, a working page")
+
+    # 2: a spread of built place pages, not a walk of 49,000 files
+    places = sorted(glob.glob(os.path.join(DIST, "place", "*", "index.html")))
+    step = max(1, len(places) // 400)
+    dec = lambda x: x.replace("&#39;", "'").replace("&#x27;", "'").replace("&quot;", '"').replace("&amp;", "&")
+    bad, n = [], 0
+    for f in places[::step]:
+        html = open(f, encoding="utf-8").read()
+        m = re.search(r'<meta name="description" content="([^"]*)"', html)
+        if not m:
+            continue
+        desc = dec(m.group(1))
+        og = re.search(r'<meta property="og:description" content="([^"]*)"', html)
+        body = re.search(r'The atlas holds <a href="#ra-vols"[^>]*>([\d,]+) record volume', html)
+        said = re.search(r"\b([\d,]+) record volume", desc)
+        pid = os.path.basename(os.path.dirname(f))
+        n += 1
+        if re.search(r"\b0 record volume", desc):
+            bad.append(f"{pid}: description says 0 record volumes")
+        if (body.group(1) if body else None) != (said.group(1) if said else None):
+            bad.append(f"{pid}: body says {body.group(1) if body else 'none'}, description {said.group(1) if said else 'none'}")
+        if og and dec(og.group(1)) != desc:
+            bad.append(f"{pid}: og:description differs from the description")
+        if not 70 <= len(desc) <= 175:
+            bad.append(f"{pid}: description is {len(desc)} characters")
+    if bad:
+        err(f"{len(bad)} of {n} sampled place pages: " + "; ".join(bad[:5]))
+    elif n:
+        print(f"place descriptions: {n} sampled, count agrees with the body on every one")
+
+    # 3
+    home = open(os.path.join(DIST, "index.html"), encoding="utf-8").read()
+    sec = re.search(r'<section class="[^"]*ra-about[^"]*" id="about-the-atlas".*?</section>', home, re.S)
+    if not sec:
+        err("the front page's static HTML has no 'about the atlas' section")
+    else:
+        text = re.sub(r"<[^>]+>", " ", re.sub(r"<style.*?</style>", " ", sec.group(0), flags=re.S))
+        words = len(text.split())
+        if not 300 <= words <= 520:
+            err(f"the front page's written section is {words} words (wanted 300 to 520)")
+        if re.search(r"adsbygoogle|adslot", sec.group(0)):
+            err("the front page's written section carries an ad")
+        if len(re.findall(r"<h2", sec.group(0))) != 1:
+            err("the front page's written section should have exactly one h2")
+
+
 def runtime_fetches_exist():
     """Every file the PAGE fetches at runtime has to be in the built output.
 
@@ -500,6 +567,7 @@ def main():
         err("the page renders an ad slot but never loads adsbygoogle.js")
 
     sitemaps_are_submittable()
+    search_quality_gate()
     runtime_fetches_exist()
     evidence_reaches_pages()
 

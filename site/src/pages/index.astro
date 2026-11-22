@@ -4,6 +4,7 @@ import RecordMap from "../components/RecordMap.astro";
 import ProgressKit from "../components/ProgressKit.astro";
 import VolumeMarks from "../components/VolumeMarks.astro";
 import StoryDrawer from "../components/StoryDrawer.astro";
+import HomeAbout from "../components/HomeAbout.astro";
 import { u } from "../lib/url.js";
 import { atlas as idx } from "../lib/atlas.js";
 import regions from "../../public/regions.json";
@@ -151,6 +152,8 @@ import { places, NEWS_KIND, latestNews, newsDay, volumes, placeCountries, countr
   <p id="ra-mywork" data-href={u("/my-research/")} hidden></p>
   <VolumeMarks />
   <StoryDrawer />
+  {/* THE PAGE IN WORDS, in the server-rendered HTML below the map. See components/HomeAbout.astro. */}
+  <HomeAbout />
 </Base>
 
 <style>

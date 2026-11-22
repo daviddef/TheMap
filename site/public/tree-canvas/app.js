@@ -209,14 +209,16 @@ function renderKeep() {
 }
 function savedWhere(r) { return r.src.t === 'link' ? 'from a link' : r.src.t === 'archive' ? 'an archive' : 'from a file on this device'; }
 /* open the tree a saved canvas or view came from: an archive and a link by themselves (a link only fills the box until the visitor presses Open link, as for any link), a file from this device's recent files or by asking for it */
-async function reopenSrc(src, kept) {
-  if (src.t === 'archive') return openArchive(src.ref);
-  if (src.t === 'link') { $('#stUrl').value = src.ref; return openLink(src.ref); }
+async function reopenSrc(src, kept, to) {   // to: 'compass' lands on Compass once the tree is open (the card's Compass button)
+  if (src.t === 'archive') return openArchive(src.ref, to);
+  if (src.t === 'link') { $('#stUrl').value = src.ref; return openLink(src.ref, false, to); }
   const k = (kept || []).find(x => x.name === src.ref);
-  if (k) { try { const db = await rdb(), bytes = await rreq(db.transaction('b').objectStore('b').get(k.name)); db.close(); if (bytes) { example = false; start(bytes, k.name); return; } } catch (e) { /* fall through to the picker */ } }
+  if (k) { try { const db = await rdb(), bytes = await rreq(db.transaction('b').objectStore('b').get(k.name)); db.close(); if (bytes) { example = false; start(bytes, k.name, undefined, undefined, to); return; } } catch (e) { /* fall through to the picker */ } }
   closeYF(true); if ($('#start').hidden) showStart();
-  linkMsg('Choose ' + src.ref + ' to bring this back. It is matched by its name, size and number of people.'); $('#stFile').click();
+  pickTo = to || null;
+  linkMsg('Choose ' + src.ref + ' to bring this back' + (to === 'compass' ? ', and the Compass opens on it' : '') + '. It is matched by its name, size and number of people.'); $('#stFile').click();
 }
+let pickTo = null;   // where the file chosen next should land (a card whose file is not kept asked for it): only ever 'compass' or null
 function renderSaved() { return drawLists(); }   // one list on the opening screen and the file page: drawLists (below) draws the trees and what was saved of each
 document.addEventListener('ra-canvas-changed', () => { checkNewer(); renderSaved(); renderKeep(); });
 document.addEventListener('ra-sync-done', e => { syncFailed = !(e.detail && e.detail.ok); renderKeep(); });
@@ -240,7 +242,7 @@ let curName = null, curHead = null, curVia = null;   // curVia: the site a file 
 /* A Roots & Routes tree.json is JSON; a GEDCOM never starts with a brace. Told apart by the first character, not the name, so a renamed file still opens. */
 const isTreeJson = bytes => { try { return /^\uFEFF?\s*\{/.test(new TextDecoder('utf-8').decode(new Uint8Array(bytes, 0, Math.min(64, bytes.byteLength)))); } catch (e) { return false; } };
 let curLink = null, curSize = 0;   // the address a file was fetched from (if it was), and the file's size
-let openTo = null;   // the page to land on once the file is read: 'fix' is the "Fix list" button on a kept file (as on /roots/); it opens the Fix list as soon as the reader has made it
+let openTo = null;   // the page to land on once the file is read: 'fix' is the "Fix list" button on a kept file (as on /roots/); it opens the Fix list as soon as the reader has made it. 'compass' is a card's Compass button: Compass opens as soon as the canvas is mounted
 function start(bytes, name, via, link, to) {
   closeYF(true); closeFX(true); closeCP(true); lastM = null; fixMsg = null; cmpFix = null; placesMsg = null; pw.setData(null, null, ''); orw.setData(null, null, ''); openTo = to || null;
   const json = isTreeJson(bytes);
@@ -276,10 +278,11 @@ function start(bytes, name, via, link, to) {
       if (m.first || !cur) { const ppl = m.report && m.report.people && m.report.people.individuals | 0; setCur(example ? null : curLink ? { t: 'link', ref: curLink } : curName ? { t: 'file', ref: curName, size: curSize, people: ppl } : null, curLink ? W.linkLabel(curLink) : curName); }
       else flushWork();
       attachKeep();
-      if (m.kind === 'tree') openTo = null;   // a tree.json has no GEDCOM to check, so no Fix list to land on
+      if (m.kind === 'tree' && openTo === 'fix') openTo = null;   // a tree.json has no GEDCOM to check, so no Fix list to land on
       if (curName && m.report && m.report.people) recentMeta(curName, { people: m.report.people.individuals, from: curHead ? curHead.from : '', tree: curHead ? curHead.tree : '' });
       say('');
       { const pw = m.first ? pairsWanted() : null; if (pw) compareWith(pw.ar, null, { resume: true }).then(ok => { if (!ok) mount(); }); else mount(); }
+      if (openTo === 'compass') { openTo = null; openCP(null); }   // a card's Compass button, or "Watch a family move across the map": the canvas is mounted underneath, Compass over it
       /* where it came from (a link) and what was left out of a tree.json, in the visitor's words; it clears itself, the canvas keeps the screen */
       const said = [curVia ? 'Loaded from ' + curVia + '. Read in this browser; nothing from it was sent anywhere.' : '', m.kind === 'tree' && m.say && m.say.length ? 'Opened as a tree.json: ' + m.say.join('; ') + '.' : ''].filter(Boolean).join(' ');
       if (said) { say(said); setTimeout(() => say(''), curVia ? 14000 : 9000); }
@@ -332,7 +335,7 @@ async function fetchLines(a) {
     return j && j.kind === 'lines' && j.v === 1 && Array.isArray(j.lanes) ? j : null;
   } catch (e) { return null; }
 }
-async function openArchive(key) {
+async function openArchive(key, to) {
   const a = ARCH[key]; if (!a) return;
   closeYF(true); closeFX(true); closeCP(true); lastM = null;
   curName = null; curHead = null; example = false;
@@ -347,6 +350,7 @@ async function openArchive(key) {
     /* ?p=<slug>: an archive's link to one person's page; the canvas puts that person on and selects them (only a plain slug is passed on) */
     { const pp = new URLSearchParams(location.search).get('p'); if (pp && /^[a-z0-9-]{1,120}$/.test(pp)) window.RR.carryPerson = pp; }
     say(''); mount();
+    if (to === 'compass') openCP(null);
   } catch (err) { say('The ' + a.name + ' archive could not be opened just now (' + (err && err.message || 'error') + '). You can open a GEDCOM instead.', true); showStart(); }
 }
 
@@ -565,7 +569,7 @@ $('#sgLook').onchange = e => {
 };
 $('#sgRem').onchange = async e => {
   sgWriteFailed = !ST.write({ remember: e.target.checked ? 1 : 0 }).ok;
-  if (!e.target.checked) await recentForget();   // as before: turning it off forgets the files kept now
+  if (!e.target.checked) await forgetFiles('You turned this off. ');   // as before: turning it off forgets the files kept now, and now says so
   drawLists(); drawSG();
 };
 /* a setting arrived from the six-word copy, or was changed in another tab: take it up. The living filter only ever goes towards hiding here, because a copy only fills a choice not made on this device. */
@@ -617,8 +621,13 @@ function headInfo(bytes) {
     return { from: from.slice(0, 40), tree: tree.slice(0, 60) };
   } catch (e) { return { from: '', tree: '' }; }
 }
+/* forget the kept copy of one file (by name) or of every file; how many were forgotten. The visitor's own file on their device is never touched; this is only the copy this browser kept. */
 async function recentForget(name) {
-  try { const db = await rdb(), tx = db.transaction(['m', 'b'], 'readwrite'); if (name) { tx.objectStore('m').delete(name); tx.objectStore('b').delete(name); } else { tx.objectStore('m').clear(); tx.objectStore('b').clear(); } await done(tx); db.close(); } catch (e) { /* ignore */ }
+  try {
+    const n = name ? 1 : (await recentList()).length, db = await rdb(), tx = db.transaction(['m', 'b'], 'readwrite');
+    if (name) { tx.objectStore('m').delete(name); tx.objectStore('b').delete(name); } else { tx.objectStore('m').clear(); tx.objectStore('b').clear(); }
+    await done(tx); db.close(); return n;
+  } catch (e) { return 0; }
 }
 const fmtBytes = n => n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + ' MB' : Math.max(1, Math.round(n / 1e3)) + ' KB';
 const fmtWhen = t => { const d = new Date(t), same = d.toDateString() === new Date().toDateString(); return same ? 'today ' + d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : d.toLocaleDateString([], { day: 'numeric', month: 'short' }); };
@@ -635,10 +644,18 @@ function savedFix() {
 }
 /* THE LIST OF TREES, on the opening screen and on the "Your file" page: one card per tree (a file kept on this device, an archive, or a link), and under each card
    what was saved of that tree: where the visitor left off, and the named views, each of which can be renamed and given a note. The kept files are this browser's own
-   tcRecent (the same database as "Last used" in the canvas menu); the arrangements are work.js's records. W.groupTrees says which belongs to which. */
+   tcRecent (the same database as "Last used" in the canvas menu); the arrangements are work.js's records. W.groupTrees says which belongs to which.
+   WHAT EACH REMOVAL TAKES (nothing is taken without it being said first, and nothing quietly):
+     "Forget the kept files" (under the list): only the kept copies of the files. Where you left off and the saved views stay, so those cards stay, and a message says so.
+     a card's "Remove...": asks, saying what goes (its kept file, where you left off, its saved views), and offers "Only forget the file" when that is not all there is.
+     "Clear this whole list...": asks, saying how many of each, then takes every card off.
+     a view's ×: asks once ("Delete?"), and takes that one view. */
+let lastGroups = [], lastKept = [];
 async function drawLists() {
   const kept = rememberOn() ? await recentList() : [], groups = W.groupTrees(kept, W.list(), W.listViews());
+  lastGroups = groups; lastKept = kept;
   for (const [boxId, ulId] of [['stRecent', 'stList'], ['yfRecent', 'yfList']]) drawTrees($('#' + boxId), $('#' + ulId), groups, kept);
+  for (const id of ['stForget', 'yfForget']) { const b = $('#' + id); if (b) b.hidden = !kept.length; }   // nothing kept: nothing to forget, so no button that would seem to do nothing
   savedFix(); noFiles();
 }
 const mk = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
@@ -650,45 +667,48 @@ function treeTitle(g) {
   if (g.kind === 'link') { try { return new URL(g.ref).host; } catch (e) { return String(g.ref).slice(0, 60); } }
   return g.ref;
 }
-/* open a kept file again, on the canvas or (to === 'fix') straight on its Fix list */
+/* open a kept file again, on the canvas or (to === 'fix') straight on its Fix list or (to === 'compass') straight on Compass */
 async function openKept(r, to) {
   try { const db = await rdb(), bytes = await rreq(db.transaction('b').objectStore('b').get(r.name)); db.close(); if (!bytes) throw 0; example = false; recentSave(r.name, bytes.slice(0)); start(bytes, r.name, undefined, r.url, to); }
   catch (e) { say('That file is no longer kept here. Open it again from your device.', true); await recentForget(r.name); drawLists(); }
 }
 function drawTrees(box, ul, groups, kept) {
   if (!box || !ul) return; ul.textContent = ''; box.hidden = !groups.length;
-  const reopen = (g, to) => g.kept ? openKept(g.kept, to) : reopenSrc(g.src, kept);
+  const reopen = (g, to) => g.kept ? openKept(g.kept, to) : reopenSrc(g.src, kept, to);
   for (const g of groups) {
     const r = g.kept, card = mk('li', 'trcard'), head = mk('div', 'trhead'), title = treeTitle(g);
-    const main = btn('tropen', '', r ? 'Open ' + r.name + ' again' : 'Open this tree', () => reopen(g, null));
+    card.dataset.kind = g.kind; if (g.kind === 'archive' && ARCH[g.ref]) card.dataset.k = g.ref;
+    const main = btn('tropen', '', r ? 'Open ' + r.name + ' again' : 'Open ' + title, () => { pend = null; reopen(g, null); });
     const bits = r ? [r.people ? ppl(r.people) : '', r.tree || (r.from ? 'from ' + r.from : ''), fmtBytes(r.size || 0), fmtWhen(r.when)]
-      : [savedWhere({ src: g.src }), g.kind === 'file' ? 'the file is not kept on this device' : ''];
+      : [savedWhere({ src: g.src }), g.kind === 'file' ? 'file not kept here: you will be asked for it' : ''];
     main.append(mk('b', null, title), mk('small', null, bits.filter(Boolean).join(' · ')));
     if (r && r.note) main.append(mk('em', 'trnote', r.note));
+    main.append(mk('span', 'trgo', 'Open'));
     head.append(main);
-    if (r) {
-      const side = mk('div', 'trside');
-      if (r.from !== 'tree.json') side.append(btn('trbtn', 'Fix list', 'Open ' + r.name + ' straight on its Fix list', () => openKept(r, 'fix')));   // a tree.json has no GEDCOM to check
-      side.append(btn('trbtn trico', '✎', (r.note ? 'Edit the note' : 'Add a note') + ' for ' + r.name, () => {
-        const inp = mk('input', 'trin'); inp.type = 'text'; inp.maxLength = 80; inp.value = r.note || ''; inp.placeholder = 'A note, e.g. Mum\'s side, from MyHeritage'; inp.setAttribute('aria-label', 'Note for ' + r.name);
-        let fin = false; const save = async keep => { if (fin) return; fin = true; if (keep) await recentMeta(r.name, { note: inp.value.trim() }); drawLists(); };
-        inp.onkeydown = e => { if (e.key === 'Enter') save(true); else if (e.key === 'Escape') save(false); };
-        inp.onblur = () => save(true);
-        main.replaceWith(inp); inp.focus(); inp.select();
-      }));
-      side.append(btn('trbtn trico', '×', 'Forget the file ' + r.name + (g.views.length || g.canvas ? ' (the views you saved of it stay)' : ''), async () => { await recentForget(r.name); drawLists(); }));
-      head.append(side);
-    }
     card.append(head);
+    const acts = mk('div', 'tracts');
+    acts.append(btn('trbtn', 'Compass', 'Open ' + title + ' on the Compass, your family on the map through time', () => { pend = null; reopen(g, 'compass'); }));
+    if (r) { if (r.from !== 'tree.json') acts.append(btn('trbtn', 'Fix list', 'Open ' + r.name + ' straight on its Fix list', () => openKept(r, 'fix')));   // a tree.json has no GEDCOM to check
+    acts.append(btn('trbtn trico', '✎', (r.note ? 'Edit the note' : 'Add a note') + ' for ' + r.name, () => {
+      const inp = mk('input', 'trin'); inp.type = 'text'; inp.maxLength = 80; inp.value = r.note || ''; inp.placeholder = 'A note, e.g. Mum\'s side, from MyHeritage'; inp.setAttribute('aria-label', 'Note for ' + r.name);
+      let fin = false; const save = async keep => { if (fin) return; fin = true; if (keep) await recentMeta(r.name, { note: inp.value.trim() }); drawLists(); };
+      inp.onkeydown = e => { if (e.key === 'Enter') save(true); else if (e.key === 'Escape') save(false); };
+      inp.onblur = () => save(true);
+      main.replaceWith(inp); inp.focus(); inp.select();
+    })); }
+    const ask = mk('div', 'trask'); ask.hidden = true; ask.setAttribute('role', 'group'); ask.setAttribute('aria-label', 'Remove ' + title);
+    acts.append(btn('trbtn trdel', 'Remove…', 'Remove ' + title + ' from this list: it asks what goes first', () => askRemove(g, title, ask, acts.lastChild)));
+    card.append(acts, ask);
     if (g.canvas || g.views.length) {
-      const vl = mk('ul', 'trviews'), gone = g.kind === 'file' && !r ? 'open the same file to bring it back' : '';
+      const fold = mk('details', 'trmore'), vl = mk('ul', 'trviews'), gone = g.kind === 'file' && !r ? 'open the same file to bring it back' : '';
+      fold.append(mk('summary', null, [g.canvas ? 'Where you left off' : '', g.views.length ? (g.views.length === 1 ? '1 saved view' : g.views.length + ' saved views') : ''].filter(Boolean).join(' · ')));
       if (g.canvas) {
         const c = g.canvas, row = mk('li', 'trview trlast'), o = btn('tropen', '', 'Open this tree where you left off', () => { pend = null; reopen(g, null); });
         o.append(mk('b', null, 'Where you left off'), mk('small', null, [c.n ? ppl(c.n) + ' on the canvas' : 'your pairing choices (no canvas)', 'saved ' + W.agoText(c.upd), gone].filter(Boolean).join(' · ')));
         row.append(o); vl.append(row);
       }
       for (const v of g.views) vl.append(viewRow(v, g, reopen, gone));
-      card.append(vl);
+      fold.append(vl); card.append(fold);
     }
     ul.append(card);
   }
@@ -708,19 +728,73 @@ function viewRow(v, g, reopen, gone) {
     f.onkeydown = e => { if (e.key === 'Escape') drawLists(); };
     row.textContent = ''; row.append(f); nm.focus(); nm.select();
   }));
-  let sure = 0; const del = btn('trbtn trico', '×', 'Delete the view ' + v.name, () => {
+  let sure = 0; const del = btn('trbtn trico', '×', 'Delete the view ' + v.name + ' (asks once more)', () => {
     if (!sure) { sure = 1; del.textContent = 'Delete?'; del.classList.add('trsure'); setTimeout(() => { sure = 0; del.textContent = '×'; del.classList.remove('trsure'); }, 3000); return; }
-    W.remove(v.k); document.dispatchEvent(new CustomEvent('ra-progress-changed')); drawLists();
+    W.remove(v.k); document.dispatchEvent(new CustomEvent('ra-progress-changed')); note('Deleted the view “' + v.name + '”.', [], 6000); drawLists();
   });
   side.append(del); row.append(o, side); return row;
+}
+
+/* ---- taking things off the list. Each one says what goes before it goes (work.js removalWords), and says afterwards what went. ---- */
+const sixWords = () => syncState().on ? ' and from your six-word copy' : '';
+/* "Forget the kept files": only the kept copies. The saved views and where-you-left-off are in other stores and stay; say so, so the cards that remain are not a puzzle. */
+async function forgetFiles(why) {
+  const n = lastKept.length || (await recentList()).length;
+  if (!n) { note('No files are kept on this device, so there is nothing to forget.', [], 6000); return; }
+  await recentForget(); await drawLists();
+  const left = lastGroups.length;
+  note((why || '') + 'Forgot ' + (n === 1 ? '1 kept file' : n + ' kept files') + '. ' + (left ? 'Your saved views and where you left off are still here, so ' + (left === 1 ? 'that tree stays' : 'those trees stay') + ' on the list: remove a tree with its Remove button.' : 'Nothing else had been saved, so the list is empty.') + ' Your own files on this device were not touched.', [], 12000);
+}
+/* a card's Remove: the panel under the card says what goes and offers the choices */
+function askRemove(g, title, box, opener) {
+  if (!box.hidden) { box.hidden = true; box.textContent = ''; return; }
+  const all = W.removalPlan(g, 'all'), onlyFile = W.removalPlan(g, 'files'), words = W.removalWords(all.n), more = all.n.canvases || all.n.views;
+  box.textContent = ''; box.hidden = false;
+  box.append(mk('p', null, (all.n.files && !more ? 'Forget the kept copy of ' + title + '?' : 'Remove ' + title + ' from this list?') + ' This takes ' + words + ' from this browser' + sixWords() + '. '
+    + (all.n.files ? 'Your own file on this device is not touched. ' : '') + (more ? 'It cannot be undone.' : 'You can open the file again any time.')));
+  const row = mk('div', 'traskbtns');
+  const go = btn('trbtn trdanger', all.n.files && !more ? 'Forget the file' : more ? 'Remove it all' : 'Remove', null, () => doRemove(all, title));
+  row.append(go);
+  if (all.n.files && more) row.append(btn('trbtn', 'Only forget the file', 'Only forget the kept file of ' + title + ', and keep where you left off and the saved views', () => doRemove(onlyFile, title)));
+  const no = btn('trbtn', 'Keep it', null, () => { box.hidden = true; box.textContent = ''; if (opener && opener.isConnected) opener.focus(); });
+  row.append(no); box.append(row); no.focus();
+  box.onkeydown = e => { if (e.key === 'Escape') { e.stopPropagation(); no.click(); } };
+}
+/* the whole list, after asking: how many of each go */
+function askClear(pfx) {
+  const box = $('#' + pfx + 'Ask'); if (!box) return;
+  if (!box.hidden) { box.hidden = true; box.textContent = ''; return; }
+  const plan = W.removalPlanAll(lastGroups, 'all'), more = plan.n.canvases || plan.n.views;
+  box.textContent = ''; box.hidden = false;
+  box.append(mk('p', null, 'Clear this whole list? This takes ' + (W.removalWords(plan.n) || 'every tree') + ' (' + (plan.trees === 1 ? '1 tree' : plan.trees + ' trees') + ') from this browser' + sixWords() + '. Your own files on this device are not touched. ' + (more ? 'It cannot be undone.' : '')));
+  const row = mk('div', 'traskbtns'), no = btn('trbtn', 'Keep the list', null, () => { box.hidden = true; box.textContent = ''; $('#' + pfx + 'Clear').focus(); });
+  row.append(btn('trbtn trdanger', 'Clear everything', null, () => doRemove({ ...plan, all: true }, null)), no); box.append(row); no.focus();
+  box.onkeydown = e => { if (e.key === 'Escape') { e.stopPropagation(); no.click(); } };
+}
+/* do a removal plan (work.js removalPlan): the kept files, then the records, then say what went. The open tree, if it is one of them, is not closed; moving anything on its canvas keeps it again. */
+async function doRemove(plan, title) {
+  let ok = true;
+  if (plan.all) await recentForget(); else for (const name of plan.files) await recentForget(name);
+  if (plan.all) plan.keys = [...new Set([...plan.keys, ...W.allKeys()])];
+  if (plan.keys.length) {
+    clearTimeout(wt);
+    ok = W.removeKeys(plan.keys) >= 0;
+    if (cur && plan.keys.includes(cur.key)) { cur.loadedUpd = ''; cur.saw = false; cur.dirty = false; cur.plain = null; cur.pairing = null; attachKeep(); }
+    document.dispatchEvent(new CustomEvent('ra-progress-changed'));   // sync-auto.js: the six-word copy is saved again, with these deletions dated so another device does not bring them back
+  }
+  renderKeep(); await drawLists();
+  const open = cur && plan.keys.includes(cur.key) ? ' This tree is open right now: it stays on the canvas, and is kept again if you change it.' : '';
+  if (!ok) note('This browser would not let the page remove the saved canvas (its storage is blocked). Any kept file was forgotten.', [], 12000);
+  else if (plan.scope === 'files') note('Forgot the kept file of ' + title + '. Where you left off and the saved views stay, so the card stays. Your own file on this device was not touched.', [], 10000);
+  else note((plan.all ? 'Cleared the list: ' : 'Removed ' + title + ': ') + (W.removalWords(plan.n) || 'nothing was kept') + ' taken away.' + open, [], 12000);
 }
 /* the file page says so when nothing at all is kept, rather than showing an empty heading */
 function noFiles() { const n = $('#yfNoFiles'); if (n) n.hidden = !$('#yfRecent').hidden; }
 /* ---- a file from a link. The visitor's own browser asks the other site for the file (nothing goes through this site), after the address has been checked
    (openlink.js: https only, a public name, no sign-in details). The site it came from is shown while the canvas opens. A link on the page's own address
    (/tree-canvas/?url=…) only fills the box: nothing is fetched until the visitor presses Open link. ---- */
-const linkMsg = (t, err) => { const m = $('#stLinkMsg'); m.textContent = t || ''; m.hidden = !t; m.classList.toggle('err', !!err); };
-async function openLink(text, own) {   // own: the page's own example files, allowed by origin
+const linkMsg = (t, err) => { const m = $('#stLinkMsg'); m.textContent = t || ''; m.hidden = !t; m.classList.toggle('err', !!err); if (t) $('#stLink').open = true; };   // the link box is folded away; anything said about a link unfolds it
+async function openLink(text, own, to) {   // own: the page's own example files, allowed by origin; to: 'compass' lands on Compass (a card's Compass button)
   const opt = own ? { origin: location.origin } : {}, p = parseFileLink(text, opt);
   if (!p.ok) return linkMsg(p.error, true);
   const go = $('#stGo'); go.disabled = true; go.textContent = 'Opening…'; linkMsg('Asking ' + p.host + ' for the file…');
@@ -729,23 +803,26 @@ async function openLink(text, own) {   // own: the page's own example files, all
     if (!r.ok) return linkMsg(r.error, true);
     example = false; linkMsg('');
     const name = fileNameOf(p.url, p.host), via = r.finalHost && r.finalHost !== r.host ? r.host + ' (via ' + r.finalHost + ')' : r.host;
-    recentSave(name, r.bytes.slice(0)).then(() => recentMeta(name, { url: p.url })); start(r.bytes, name, via, p.url);
+    recentSave(name, r.bytes.slice(0)).then(() => recentMeta(name, { url: p.url })); start(r.bytes, name, via, p.url, to);
   } catch (e) { linkMsg('That link could not be opened: ' + String(e && e.message || e).slice(0, 160), true); }
   finally { go.disabled = false; go.textContent = 'Open link'; }
 }
 $('#stGo').onclick = () => openLink($('#stUrl').value);
-document.querySelectorAll('#stLink [data-ex]').forEach(b => { b.onclick = () => openLink(new URL(b.dataset.ex, location.origin).href, true); });
+document.querySelectorAll('#stArch [data-ex]').forEach(b => { b.onclick = () => openLink(new URL(b.dataset.ex, location.origin).href, true); });
 $('#stUrl').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); openLink($('#stUrl').value); } };
 $('#stUrl').oninput = () => { const p = $('#stUrl').value.trim() ? parseFileLink($('#stUrl').value) : null; linkMsg(p && p.ok && p.note ? p.note : '', false); };
-$('#stOpen').onclick = () => $('#stFile').click();
+$('#stOpen').onclick = () => { pickTo = null; $('#stFile').click(); };
 $('#stFile').onchange = async e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
-  try { const bytes = await f.arrayBuffer(); example = false; recentSave(f.name, bytes.slice(0)); start(bytes, f.name); } catch (err) { say('That file could not be read.', true); }
+  const to = pickTo; pickTo = null;
+  try { const bytes = await f.arrayBuffer(); example = false; recentSave(f.name, bytes.slice(0)); start(bytes, f.name, undefined, undefined, to); } catch (err) { say('That file could not be read.', true); }
 };
 $('#stDemo').onclick = () => { example = true; start(new TextEncoder().encode(makeSample()).buffer); };   // the invented family is only built when asked for
+$('#stDemoMap').onclick = () => { example = true; start(new TextEncoder().encode(makeSample()).buffer, undefined, undefined, undefined, 'compass'); };   // the same family, opened straight on Compass
 document.querySelectorAll('#stArchBtns button').forEach(b => { b.onclick = () => openArchive(b.dataset.k); });
-$('#stForget').onclick = async () => { await recentForget(); drawLists(); };
-$('#yfForget').onclick = async () => { await recentForget(); drawLists(); };
+$('#stForget').onclick = $('#yfForget').onclick = () => forgetFiles();
+$('#stClear').onclick = () => askClear('st');
+$('#yfClear').onclick = () => askClear('yf');
 /* the drop zone lights up while a file is dragged over the page (a class only; the drop itself is handled below) */
 const dragging = on => $('#stDrop').classList.toggle('over', on);
 for (const ev of ['dragenter', 'dragover']) addEventListener(ev, e => { if ($('#start').hidden) return; e.preventDefault(); dragging(!!e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files')); });

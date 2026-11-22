@@ -18,11 +18,12 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 
 /* The page the canvas opens on, before any tree. One type scale (13 / 15 / 17 / 40), two radii (10 / 16), cream ground, orange accent, and the canvas's own
    motif: cards joined by connectors. Colours are tokens so the dark theme is one block. */
-#start, #yf, #sg { --ink: #2b2118; --soft: #6a5a45; --card: #fff7e8; --line: #cdbf9f; --accent: #d9822b; --accent-ink: #fff; --focus: #2b6cb0; --err: #a5342a; --shadow: rgba(43, 33, 24, .14); }
+#start, #yf, #sg { --ink: #2b2118; --soft: #6a5a45; --card: #fff7e8; --line: #cdbf9f; --accent: #d9822b; --accent-ink: #fff; --focus: #2b6cb0; --err: #a5342a; --shadow: rgba(43, 33, 24, .14);
+  --btn: #a9520a; --btn-ink: #fff; --btn-ledge: #6f3406; --atxt: #a9520a; }   /* --btn: the orange that holds white text at 5.4:1 (the lighter --accent is for borders and fills) */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) #start, :root:not([data-theme="light"]) #yf, :root:not([data-theme="light"]) #sg { --ink: #f3e9d6; --soft: #c9bda5; --card: #2b2620; --line: #4a4034; --accent-ink: #1d1a16; --focus: #7db4f0; --err: #f08a80; --shadow: rgba(0, 0, 0, .4); }
+  :root:not([data-theme="light"]) #start, :root:not([data-theme="light"]) #yf, :root:not([data-theme="light"]) #sg { --ink: #f3e9d6; --soft: #c9bda5; --card: #2b2620; --line: #4a4034; --accent-ink: #1d1a16; --focus: #7db4f0; --err: #f08a80; --shadow: rgba(0, 0, 0, .4); --btn: #d9822b; --btn-ink: #1d1a16; --btn-ledge: #8a4f14; --atxt: #f0a35c; }
 }
-:root[data-theme="dark"] #start, :root[data-theme="dark"] #yf, :root[data-theme="dark"] #sg { --ink: #f3e9d6; --soft: #c9bda5; --card: #2b2620; --line: #4a4034; --accent-ink: #1d1a16; --focus: #7db4f0; --err: #f08a80; --shadow: rgba(0, 0, 0, .4); }
+:root[data-theme="dark"] #start, :root[data-theme="dark"] #yf, :root[data-theme="dark"] #sg { --ink: #f3e9d6; --soft: #c9bda5; --card: #2b2620; --line: #4a4034; --accent-ink: #1d1a16; --focus: #7db4f0; --err: #f08a80; --shadow: rgba(0, 0, 0, .4); --btn: #d9822b; --btn-ink: #1d1a16; --btn-ledge: #8a4f14; --atxt: #f0a35c; }
 #start[hidden] { display: none; }
 #start { position: fixed; inset: 0; display: flex; overflow: auto; padding: 28px 16px 40px; color: var(--ink); }
 .stwrap { width: min(560px, 100%); margin: auto; display: grid; gap: 16px; }
@@ -62,7 +63,7 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 /* buttons: one primary (orange), the rest quiet */
 .stbtn { font: 700 15px/1 system-ui, sans-serif; padding: 12px 20px; border-radius: 10px; border: 2px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; transition: transform .12s ease, filter .12s ease, border-color .12s ease; }
 .stbtn:hover { border-color: var(--accent); }
-.stbtn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.stbtn.primary { background: var(--btn, var(--accent)); border-color: var(--btn, var(--accent)); color: var(--btn-ink, var(--accent-ink)); }
 .stbtn.primary:hover { filter: brightness(1.06); }
 @media (prefers-reduced-motion: no-preference) { .stbtn:hover, .stchip:hover { transform: translateY(-1px); } }
 .stbtn:disabled { opacity: .6; cursor: progress; }
@@ -372,81 +373,155 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
 @media (max-width: 560px) { #fx { padding: 16px 12px 56px; } #fx h1 { font-size: 30px; } .fxf { flex: 1 1 130px; } .fxf input, .fxf select { min-width: 0; width: 100%; } }
 
 
-/* The list of trees: a card per tree (a kept file, an archive, a link) with what was saved of it nested underneath */
-#stRecent h2, #stRecent .trintro { text-align: center; }
-#stList, #yfList { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+/* The list of trees: a card per tree (a kept file, an archive, a link) with what was saved of it folded underneath. Used on the opening screen (a strip of cards) and on the "Your file" page (one column). */
+#stList, #yfList { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+#stList { grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr)); align-items: start; }
 #yfRecent { display: grid; gap: 8px; }
 .trcard, .trview, #stRecent, #stRecent > * { min-width: 0; }
-.trcard { display: grid; gap: 10px; padding: 12px; border: 2px solid var(--line); border-radius: 14px; background: var(--card); color: var(--ink); }
+.trcard { --dot: var(--accent); display: grid; gap: 8px; padding: 10px 12px 12px; border: 2px solid var(--line); border-top: 7px solid var(--dot); border-radius: 18px; box-shadow: 0 3px 0 var(--line); background: var(--card); color: var(--ink); transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+.trcard[data-kind="link"] { --dot: #3A74C9; }
+.trcard[data-k="defranceski"] { --dot: #D2493A; } .trcard[data-k="booyzen"] { --dot: #4E9A3E; } .trcard[data-k="luwinski"] { --dot: #3A74C9; } .trcard[data-k="lerena"] { --dot: #8A5CC2; }
+.trcard[data-k="falco"] { --dot: #D39A12; } .trcard[data-k="blazevic"] { --dot: #1E9C97; } .trcard[data-k="darcy"] { --dot: #C9508F; } .trcard[data-k="mazza"] { --dot: #8E7B5E; }
+@media (prefers-reduced-motion: no-preference) { .trcard:hover { transform: translateY(-2px); box-shadow: 0 6px 0 var(--line); } }
 .trhead, .trview { display: flex; align-items: stretch; gap: 6px; }
-.tropen { flex: 1 1 auto; min-width: 0; text-align: left; padding: 8px 10px; border-radius: 10px; border: 2px solid transparent; background: transparent; color: var(--ink); cursor: pointer; font: 400 14px/1.25 system-ui, sans-serif; transition: border-color .12s ease, background .12s ease; }
-.tropen:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
-.tropen b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 700 15px/1.2 system-ui, sans-serif; }
+.tropen { position: relative; flex: 1 1 auto; min-width: 0; text-align: left; padding: 6px 8px; border-radius: 12px; border: 2px solid transparent; background: transparent; color: var(--ink); cursor: pointer; font: 400 14px/1.25 system-ui, sans-serif; transition: border-color .12s ease, background .12s ease; }
+.tropen:hover { border-color: var(--dot, var(--accent)); background: color-mix(in srgb, var(--dot, var(--accent)) 9%, transparent); }
+.tropen b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 700 16px/1.2 system-ui, sans-serif; }
+.trhead .tropen { padding-right: 62px; }
+.trhead .tropen b { font-size: 17px; }
 .tropen small { display: block; margin-top: 3px; font: 400 13px/1.3 system-ui, sans-serif; color: var(--soft); }
 .trnote { display: block; margin-top: 4px; font: italic 400 13px/1.25 system-ui, sans-serif; color: var(--ink); white-space: normal; }
+.trgo { position: absolute; top: 6px; right: 6px; padding: 3px 10px; border-radius: 99px; background: var(--btn, var(--accent)); color: var(--btn-ink, var(--accent-ink)); font: 800 12px/1.2 system-ui, sans-serif; }
+.tracts { display: flex; flex-wrap: wrap; gap: 6px; }
 .trside { flex: 0 0 auto; display: flex; align-items: center; gap: 6px; }
-.trbtn { height: 34px; padding: 0 12px; border-radius: 10px; border: 2px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; font: 700 13px/1 system-ui, sans-serif; white-space: nowrap; }
+.trbtn { height: 32px; padding: 0 12px; border-radius: 99px; border: 2px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; font: 800 13px/1 system-ui, sans-serif; white-space: nowrap; transition: border-color .12s ease, transform .12s ease; }
 .trbtn:hover { border-color: var(--accent); }
-.trico { width: 34px; padding: 0; color: var(--soft); font-size: 15px; }
-.trico.trsure { width: auto; padding: 0 10px; border-color: var(--accent); color: var(--ink); }
+@media (prefers-reduced-motion: no-preference) { .trbtn:hover { transform: translateY(-1px); } }
+.tracts .trbtn:first-child { border-color: var(--accent); }
+.trdel { margin-left: auto; color: var(--soft); border-style: dashed; }
+.trdel:hover { border-color: var(--err); color: var(--err); }
+.trico { width: 34px; height: 34px; padding: 0; color: var(--soft); font-size: 15px; border-radius: 10px; }
+.trico.trsure { width: auto; padding: 0 10px; border-color: var(--err); color: var(--err); }
 .trin { flex: 1 1 auto; min-width: 0; padding: 9px 12px; border-radius: 10px; border: 2px solid var(--focus); background: var(--card); color: var(--ink); font: 15px/1.2 system-ui, sans-serif; }
-.trviews { list-style: none; margin: 0 0 0 10px; padding: 0 0 0 12px; border-left: 3px solid var(--keep, var(--line)); display: grid; gap: 6px; }
-.trview { align-items: center; border: 1px solid var(--line); border-radius: 10px; background: color-mix(in srgb, var(--card) 70%, transparent); }
-.trview .tropen:hover { border-color: var(--keep, var(--accent)); }
+/* what was saved of a tree, folded under its card */
+.trmore > summary { cursor: pointer; font: 700 13px/1.3 system-ui, sans-serif; color: var(--soft); padding: 2px 4px; border-radius: 8px; }
+.trmore > summary:hover { color: var(--ink); }
+.trmore[open] > summary { margin-bottom: 8px; }
+.trviews { list-style: none; margin: 0 0 0 6px; padding: 0 0 0 10px; border-left: 3px solid var(--keep, var(--line)); display: grid; gap: 6px; }
+.trview { align-items: center; border: 1px solid var(--line); border-radius: 12px; background: color-mix(in srgb, var(--card) 70%, transparent); }
 .trview .tropen b { font-size: 14px; }
 .trlast { border-style: dashed; }
 .trform { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 6px; padding: 6px; }
 .trform .trin { flex: 1 1 200px; }
-.tropen:focus-visible, .trbtn:focus-visible, .trin:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-@media (max-width: 480px) { .trhead { flex-wrap: wrap; } .trhead .tropen { flex: 1 1 100%; } .trview { flex-wrap: wrap; } .trview .tropen { flex: 1 1 100%; } .trviews { margin-left: 4px; padding-left: 8px; } .trside { margin-left: auto; } }
+/* the question a removal asks: what goes, then the buttons. A dashed, tinted box so it reads as "stop and read". */
+.trask { display: grid; gap: 8px; padding: 10px 12px; border: 2px dashed var(--err); border-radius: 12px; background: color-mix(in srgb, var(--err) 8%, var(--card)); text-align: left; }
+.trask[hidden] { display: none; }
+.trask p { margin: 0; font: 400 13.5px/1.45 system-ui, sans-serif; color: var(--ink); }
+.traskbtns { display: flex; flex-wrap: wrap; gap: 6px; }
+.trdanger { border-color: var(--err); background: var(--err); color: var(--accent-ink); }
+.trdanger:hover { border-color: var(--err); filter: brightness(1.08); }
+.tropen:focus-visible, .trbtn:focus-visible, .trin:focus-visible, .trmore > summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.trfoot { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 6px 20px; font-size: 13px; color: var(--soft); }
+.trfoot .stlink { font-size: 13px; color: var(--soft); }
+.trfoot .stlink:hover { color: var(--atxt); }
+.trfoot .stlink[hidden] { display: none; }
+.trfoot .trask { flex: 1 1 100%; }
+#yfRecent .trfoot { justify-content: flex-start; }
+@media (max-width: 480px) { .trview { flex-wrap: wrap; } .trview .tropen { flex: 1 1 100%; } .trviews { margin-left: 2px; padding-left: 8px; } .trview .trside { margin-left: auto; } }
 
 /* a line every row of a section would repeat, said once above the rows (hoistRepeats in fixlist-rows.js) */
 .fx-hoist { margin: 0 0 8px; padding: 0 0 6px; border-bottom: 1px dashed var(--line); }
 .fx-hoist > * { margin: 0 0 2px; font-size: 13px; font-weight: 500; }
 
 
-/* THE OPENING SCREEN, SHORT. It used to be eight blocks of explanation that ran well past one screen. Now: a title, one drop zone, one line for a link,
-   a row of chips, one line for keeping the work, and the trees you have opened. The explanations moved into the "About these files" fold and into tooltips. */
-.stwrap { width: min(620px, 100%); gap: 12px; }
-.sthead { grid-template-columns: auto auto; justify-content: center; align-items: center; column-gap: 12px; row-gap: 2px; margin-bottom: 0; }
-.sthead .sttree { width: 66px; height: 35px; grid-row: 1; }
-#start h1 { grid-row: 1; font-size: 34px; }
-#start .stlead { grid-column: 1 / -1; font-size: 14px; }
-.stdrop { justify-items: center; text-align: center; gap: 6px; padding: 16px 20px 18px; }
-.stdrop .stup { color: var(--accent); }
-.stdrop h2 { font-size: 18px; }
-.stdrop.over h2::after { content: ""; }
-.stdrop .stbtn { margin-top: 6px; }
-.stlinksec { gap: 4px; }
-.stlinksec .stlinkrow { flex-wrap: nowrap; width: 100%; }
-.stlinksec .stlinkin { flex: 1 1 auto; min-width: 0; }
-.stlinksec .stbtn { flex: none; }
-#start .stex { font-size: 12.5px; }
-#stArch { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; }
-#stArch h2 { flex: 1 1 100%; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
-#stArch .starch { display: contents; }
-#stArch .stchip { padding: 7px 12px; border-radius: 999px; font-size: 13px; }
-#stArch .stdemo::before { background: transparent; border: 2px dashed var(--soft); box-sizing: border-box; }
-#stArch .stdemo { border-style: dashed; color: var(--soft); }
-.stkeep { padding: 4px 14px 4px 4px; gap: 10px; }
-.stkeep .stdisc { width: 38px; height: 38px; border-width: 2.5px; }
-.stkeep .stdisc svg { width: 18px; height: 18px; }
-.stkeep .stkcap { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
-.stkeep .stkcap small { font-size: 12.5px; }
+/* THE OPENING SCREEN. One thing to do first (drop or choose a file), your trees as a strip of cards, a friendly "just looking" corner, and everything else folded into quiet rows.
+   The same chunky Lilita One, warm orange, rounded sticker cards and hard ledges as Compass and the loading screen. Every motion is CSS only and sits inside prefers-reduced-motion. */
+#start { background-image: radial-gradient(circle, color-mix(in srgb, var(--soft) 20%, transparent) 1.3px, transparent 1.6px); background-size: 26px 26px; }
+#start button:focus-visible, #start a:focus-visible, #start details > summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.stwrap { width: min(720px, 100%); gap: 22px; }
+.sthead { gap: 4px; margin-bottom: 0; }
+.sthead .sttree { width: 96px; height: 51px; }
+#start h1 { font-size: 48px; text-shadow: 0 3px 0 var(--card); }
+#start .stlead { max-width: 32em; font-size: 15px; }
+.stnode.c0 { fill: var(--accent); stroke: var(--ink); } .stnode.c1 { fill: #6fbf73; stroke: var(--ink); } .stnode.c2 { fill: #7db4f0; stroke: var(--ink); }
+#start h2 { font: 400 26px/1.1 "Lilita One", system-ui, sans-serif; letter-spacing: .01em; }
+#start .stsub { font-size: 14px; }
+#start a:hover, .stlink:hover { color: var(--atxt); }
+
+/* the one big thing: the drop zone */
+.stdrop { justify-items: center; text-align: center; gap: 8px; padding: 28px 20px 26px; border: 3px dashed var(--accent); border-radius: 24px; box-shadow: 0 4px 0 var(--line); background: color-mix(in srgb, var(--accent) 7%, var(--card)); }
+.stdrop:hover, .stdrop:focus-within { border-color: var(--accent); }
+.stdrop .stup { box-sizing: content-box; padding: 14px; border-radius: 50%; background: color-mix(in srgb, var(--accent) 20%, var(--card)); color: var(--atxt); }
+#start .stdrop h2 { font-size: 30px; }
+.stdrop.over h2::after { content: "\a0\2014\a0let go!"; color: var(--atxt); }
+.stdrop.over { border-style: solid; background: color-mix(in srgb, var(--accent) 16%, var(--card)); }
+.stdrop .stbtn.big { margin-top: 8px; padding: 14px 30px; border-radius: 99px; font: 800 17px/1 system-ui, sans-serif; box-shadow: 0 4px 0 var(--btn-ledge); }
+.stdrop .stbtn.big:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--btn-ledge); }
+@media (prefers-reduced-motion: no-preference) {
+  .stdrop .stup { animation: stbob 2.6s ease-in-out infinite; }
+  .stdrop.over .stup { animation: stjump .5s ease-in-out infinite alternate; }
+  @keyframes stbob { 50% { transform: translateY(-4px); } }
+  @keyframes stjump { to { transform: translateY(-9px) scale(1.08); } }
+  .stdrop.over { transform: scale(1.02); }
+  .stdrop .stbtn.big:hover { transform: translateY(-2px); }
+}
+
+/* your trees */
+.stshelf { justify-items: stretch; text-align: left; gap: 12px; }
+.stplain.stshelf h2 { text-align: left; font-size: 26px; color: var(--ink); }
+.stshelf .stsub { text-align: left; }
+
+/* looking around: the archives as coloured pills, then two friendly tiles */
+#stArch { justify-items: center; text-align: center; gap: 10px; }
+#start #stArch h2 { font-size: 26px; color: var(--ink); }
+.starch { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.stchip { padding: 8px 14px; border-radius: 99px; font-size: 13.5px; font-weight: 800; box-shadow: 0 2px 0 var(--line); }
+.stchip::before { width: 11px; height: 11px; }
+.sttiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 100%; margin-top: 4px; }
+.sttile { display: flex; align-items: center; gap: 14px; padding: 14px 16px; text-align: left; border: 2px solid var(--line); border-radius: 18px; background: var(--card); color: var(--ink); box-shadow: 0 3px 0 var(--line); cursor: pointer; transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+.sttile:hover { border-color: var(--accent); }
+.sttile svg { flex: none; fill: color-mix(in srgb, var(--accent) 55%, var(--card)); stroke: var(--ink); stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
+.sttile .sttxt { display: grid; gap: 3px; min-width: 0; }
+.sttile b { font: 800 15px/1.2 system-ui, sans-serif; }
+.sttile small { font: 400 13px/1.35 system-ui, sans-serif; color: var(--soft); }
+.sttile[id="stDemo"] { border-style: dashed; }
+@media (prefers-reduced-motion: no-preference) { .sttile:hover { transform: translateY(-2px) rotate(-.4deg); box-shadow: 0 6px 0 var(--line); } .sttile:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); } }
+#start .stex { font-size: 13px; }
+#start .stex .stlink { font-weight: 700; }
+
+/* the saved fix list: one quiet line, only when there is one */
+.stplain[hidden], #stFixSaved[hidden] { display: none; }
 #stFixSaved { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 2px 10px; }
 #stFixSaved h2 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 #stFixSaved #stFixTxt { font-size: 14px; }
-#stRecent { gap: 8px; }
-#stRecent h2 { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
-#stRecent #stList { width: 100%; gap: 8px; text-align: left; }
-#stRecent .trcard { padding: 8px 10px; gap: 6px; border-width: 1.5px; }
-#stRecent .tropen { padding: 4px 8px; }
-#stRecent .tropen small { margin-top: 1px; font-size: 12.5px; }
-#stRecent .trbtn { height: 30px; }
-#stRecent .trico { width: 30px; }
-#stRecent .trviews { gap: 4px; }
-#stRecent .stkept { font-size: 12.5px; }
-.stsettings { display: flex; justify-content: center; gap: 6px 16px; flex-wrap: wrap; }
-.stsettings .stlink { font-size: 14px; }
-.sthelp { padding-top: 8px; }
-@media (max-width: 480px) { .stlinksec .stlinkrow { flex-wrap: wrap; } .stlinksec .stlinkin { flex: 1 1 100%; } .stlinksec .stbtn { flex: 1 1 100%; } }
+
+/* the quiet row: keep your work, settings, the older views */
+.stfoot { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 26px; }
+.stfoot .stplain { display: block; }
+.stkeep { padding: 4px 14px 4px 4px; gap: 10px; max-width: 360px; }
+.stkeep .stdisc { width: 38px; height: 38px; border-width: 2.5px; }
+.stkeep .stdisc svg { width: 18px; height: 18px; }
+.stkeep .stkcap small { font-size: 12.5px; }
+.stsettings { display: flex; justify-content: center; align-items: baseline; gap: 6px 16px; flex-wrap: wrap; text-align: center; }
+.stsettings .stlink { font-weight: 800; font-size: 14px; }
+
+/* folded rows: the link box and the small print */
+.stfold { border: 2px solid var(--line); border-radius: 14px; font-size: 13px; line-height: 1.5; color: var(--soft); background: color-mix(in srgb, var(--card) 55%, transparent); }
+.stfold > summary { cursor: pointer; padding: 10px 14px; font: 800 13.5px/1.3 system-ui, sans-serif; color: var(--ink); border-radius: 12px; }
+.stfold[open] { border-color: var(--accent); background: var(--card); }
+.stfold > :not(summary) { margin: 0 14px 12px; }
+.stfold > p + p { margin-top: 8px; }
+.stlinkrow { display: flex; flex-wrap: wrap; gap: 8px; }
+.stlinkin { flex: 1 1 220px; min-width: 0; }
+.stfold #stLinkMsg { margin-top: 0; }
+
+@media (max-width: 560px) { .sttiles { grid-template-columns: 1fr; } }
+@media (max-width: 480px) {
+  #start { padding: 18px 14px 36px; }
+  .stwrap { gap: 18px; }
+  .sthead .sttree { width: 76px; height: 40px; } #start h1 { font-size: 38px; }
+  .stdrop { padding: 22px 14px 20px; } #start .stdrop h2 { font-size: 26px; }
+  .stlinkrow .stbtn { flex: 1 1 100%; }
+  .stfoot { flex-direction: column; }
+}
+@media (prefers-reduced-motion: reduce) { #start *, #yf * { transition: none !important; animation: none !important; } }

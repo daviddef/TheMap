@@ -231,19 +231,20 @@ export function editView(key, patch, st, now) {
 }
 
 /* ---------------- the opening page's list: one card per tree, its views nested under it ---------------- */
-/* kept: the files kept on this device ({name, when, ...}); recs: list(); views: listViews(). Returns [{id, kind: 'file'|'archive'|'link', ref, kept, canvas, views, last}] newest first.
+/* kept: the files kept on this device ({name, when, ...}); recs: list(); views: listViews(). Returns [{id, kind: 'file'|'archive'|'link', ref, kept, files, canvas, recs, views, last}] newest first
+   (`kept` and `canvas` are the newest of a card's `files` and `recs`: the same name can be kept twice, or saved under two sizes, and a removal must reach all of them).
    A file's views and canvas are matched to a kept file by its NAME (the same rule as reopening it); a tree whose file is not kept still gets a card, with `kept: null`. */
 export function groupTrees(kept, recs, views) {
   const g = new Map(), at = (src, label) => {
-    const id = src.t + ':' + src.ref; if (!g.has(id)) g.set(id, { id, kind: src.t, ref: src.ref, label: '', src, kept: null, canvas: null, views: [], last: 0 });
+    const id = src.t + ':' + src.ref; if (!g.has(id)) g.set(id, { id, kind: src.t, ref: src.ref, label: '', src, kept: null, files: [], canvas: null, recs: [], views: [], last: 0 });
     const x = g.get(id); if (label && !x.label) x.label = label; return x;
   };
   const ms = iso => Date.parse(iso) || 0;
   for (const k of kept || []) {
     const x = at(k.url ? { t: 'link', ref: String(k.url).split('#')[0] } : { t: 'file', ref: k.name });   // a file fetched from a link is that link's tree
-    if (!x.kept || (k.when || 0) > (x.kept.when || 0)) x.kept = k; x.last = Math.max(x.last, k.when || 0);
+    x.files.push(k); if (!x.kept || (k.when || 0) > (x.kept.when || 0)) x.kept = k; x.last = Math.max(x.last, k.when || 0);
   }
-  for (const r of recs || []) { if (!r.src) continue; const x = at(r.src, r.label); if (!x.canvas || ms(r.upd) > ms(x.canvas.upd)) x.canvas = r; x.last = Math.max(x.last, ms(r.upd)); }
+  for (const r of recs || []) { if (!r.src) continue; const x = at(r.src, r.label); x.recs.push(r); if (!x.canvas || ms(r.upd) > ms(x.canvas.upd)) x.canvas = r; x.last = Math.max(x.last, ms(r.upd)); }
   for (const v of views || []) { if (!v.src) continue; const x = at(v.src, v.label); x.views.push(v); x.last = Math.max(x.last, ms(v.upd)); }
   const out = [...g.values()];
   for (const x of out) x.views.sort((a, b) => String(b.upd).localeCompare(String(a.upd)));
@@ -303,3 +304,42 @@ export async function shareDecode(code) {
     return { name: cleanName(d.n) || 'A shared view', src, tk, w };
   } catch (e) { return null; }
 }
+
+
+/* ---------------- taking things off the list ----------------
+   Three different things sit on one card, and each has its own removal, so nothing is deleted by surprise:
+     the KEPT FILE  (the file's bytes in this browser's own database: not in this store, app.js forgets it),
+     WHERE YOU LEFT OFF  (the tree's record, key `l:...`, `a:...`, `f:...`: the canvas arrangement and any pairing choices), and
+     the NAMED VIEWS  (records `v:<id>` whose `tk` is the tree's key).
+   The last two are this store's, and a removal here is real: the record goes and its key is dated in `gone`, so the six-word copy (research-file.js mergeCanvas: a deletion
+   removes a record last changed before it) does not bring it back from another device that has not changed it since. Only a change made after the removal, on another device, wins. */
+const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many);
+/* what removing a card would take, and which keys and files that is. scope: 'files' (just the kept files) | 'all' (the files, where you left off, and every named view). */
+export function removalPlan(g, scope) {
+  const files = (g && g.files && g.files.length ? g.files : g && g.kept ? [g.kept] : []).map(f => f.name);
+  if (scope === 'files') return { scope, files, keys: [], n: { files: files.length, canvases: 0, views: 0 } };
+  const recs = ((g && g.recs && g.recs.length ? g.recs : g && g.canvas ? [g.canvas] : []).map(r => r.k)), views = ((g && g.views) || []).map(v => v.k);
+  return { scope: 'all', files, keys: [...new Set([...recs, ...views])], n: { files: files.length, canvases: recs.length, views: views.length } };
+}
+/* a plan for every card at once ("clear this whole list") */
+export function removalPlanAll(groups, scope) {
+  const ps = (groups || []).map(g => removalPlan(g, scope)), sum = f => ps.reduce((a, p) => a + f(p), 0);
+  return { scope, files: [...new Set(ps.flatMap(p => p.files))], keys: [...new Set(ps.flatMap(p => p.keys))], n: { files: sum(p => p.n.files), canvases: sum(p => p.n.canvases), views: sum(p => p.n.views) }, trees: ps.length };
+}
+/* "the kept file, where you left off and 2 saved views": what a removal takes, in a sentence's worth of words. Empty when it takes nothing. */
+export function removalWords(n) {
+  const bits = [];
+  if (n.files) bits.push(n.files === 1 ? 'the kept file' : plural(n.files, 'kept file', 'kept files'));
+  if (n.canvases) bits.push(n.canvases === 1 ? 'where you left off' : 'where you left off on ' + plural(n.canvases, 'tree', 'trees'));
+  if (n.views) bits.push(plural(n.views, 'saved view', 'saved views'));
+  return bits.length < 2 ? bits.join('') : bits.slice(0, -1).join(', ') + ' and ' + bits[bits.length - 1];
+}
+/* Remove records by key (canvases and named views alike) in one write, dating each deletion. Returns how many were removed, or -1 when the browser would not write. */
+export function removeKeys(keys, st, now) {
+  const d = readStore(st), at = new Date(now == null ? Date.now() : now).toISOString(); let n = 0;
+  for (const k of keys || []) { if (d.items[k]) { delete d.items[k]; n++; } d.gone[k] = at; }
+  if (!n) return 0;
+  return writeStore(d, st) ? n : -1;
+}
+/* every record in the store: where you left off on every tree, and every named view */
+export function allKeys(st) { return Object.keys(readStore(st).items); }

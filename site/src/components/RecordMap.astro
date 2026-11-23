@@ -4307,16 +4307,47 @@ window.addEventListener("load", async function () {
      ordered by the name's own evidence, not by distance, so a reader working
      down it is walking their family's countries in the order the name
      appears in them. */
+  /* «WHERE TO READ» IN THE CARD, DRAWN LIKE THE AREA LISTS. David: «can we make it aligned to our other overlay list? e.g. areas». A country is a
+     group (name, count), each archive a one-line row (a numbered dot that matches its pin on the map, the name, the access in small type at the
+     right), the same classes the area card uses. */
+  function nameCheckCard(byCC, order) {
+    var h = [], count = 0;
+    order.forEach(function (cc) {
+      var ps = byCC[cc];
+      h.push('<details class="ra-area-g ra-area-rd" open><summary><i style="background:#5B7A8C"></i>' +
+             (cc ? '<a href="' + BASE + "country/" + cc.toLowerCase() + '/">' + esc(CNAME[cc] || cc) + "</a>" : esc(T("Matched by name"))) +
+             " <b>" + ps.length + "</b></summary><ul>");
+      ps.slice(0, 3).forEach(function (pv) {
+        count++;
+        var dot = ACCESS_DOT(pv.access), note = (ACC[pv.access] || [0, pv.access])[1];
+        if (pv.at) checkPins.push({ n: count, y: pv.at.lat, x: pv.at.lon, name: pv.name, dot: dot });
+        h.push('<li><a class="ra-area-p" target="_blank" rel="noopener" href="' + esc(pv.url) + '" title="' + esc(note) + '">' +
+               '<span class="ra-ck-i"' + (dot ? ' style="background:' + dot + ";color:" + inkOn(dot) + '"' : "") + ">" + count + "</span>" +
+               "<span>" + esc(pv.name) + "</span><small>" + esc(note) + "</small></a></li>");
+      });
+      if (ps.length > 3) h.push('<li class="at-sub">' + esc(T("and") + " " + (ps.length - 3) + " " + T("more in") + " " + (CNAME[cc] || cc)) + "</li>");
+      h.push("</ul></details>");
+    });
+    return { html: h.join(""), count: count };
+  }
   function buildNameCheck(term, byCC, order, rank) {
     var pane = document.getElementById("ra-check");
     var body = document.getElementById("ra-check-b");
     if (!pane || !body) return "";
     clearCheckPins();
     if (!order.length) { pane.hidden = true; return ""; }
+    if (TSV2) {
+      var card = nameCheckCard(byCC, order);
+      pane.hidden = true;
+      if (!card.count) return "";
+      drawCheckPins();
+      if (checkPins.length) map.fitBounds(L.latLngBounds(checkPins.map(function (pp) { return [pp.y, pp.x]; })).pad(0.25), { maxZoom: 6, animate: false });
+      return '<details class="ra-check-b ra-in-card"><summary class="lab">' + esc(T("Where to read")) + " \u00b7 " + card.count + "</summary>" + card.html + "</details>";
+    }
     /* ON THE NEW FRONT DOOR THE LIST IS PART OF THE CARD. David: «the 2 overlays, is there a way we can bring them into one? we don't need
        "where to read" as a separate overlay». The same numbered rows, the same pins on the map, but returned to the caller as a section of the
        surname card instead of filling the side pane, which stays shut. */
-    var h = [TSV2 ? "" : '<p class="ra-hood ra-hood-n">' +
+    var h = ['<p class="ra-hood ra-hood-n">' +
              '<span class="ra-hood-k ra-hood-k-n"></span><span>' +
              esc(T("Where to read for") + " " + term) + " \u2014 " +
              esc(order.length + " " +
@@ -4346,16 +4377,10 @@ window.addEventListener("load", async function () {
     });
     h.push("</ul>");
     if (!count) { pane.hidden = true; return ""; }
-    var inCard = "";
-    if (TSV2) {
-      inCard = '<details class="ra-check-b ra-in-card"><summary class="lab">' + esc(T("Where to read")) + " \u00b7 " + count + "</summary>" + h.join("") + "</details>";
-      pane.hidden = true;
-    } else {
-      body.innerHTML = h.join("");
-      document.getElementById("ra-check-n").textContent = count;
-      (document.querySelector(".ra-check-w") || {}).textContent = T("Where to read");
-      pane.hidden = false;
-    }
+    body.innerHTML = h.join("");
+    document.getElementById("ra-check-n").textContent = count;
+    (document.querySelector(".ra-check-w") || {}).textContent = T("Where to read");
+    pane.hidden = false;
     drawCheckPins();
     /* AND FRAME THE MAP ON THEM, which is the other half of what makes Senj
        look answered and Lerena look ignored. A world view with a dozen grey
@@ -4367,7 +4392,7 @@ window.addEventListener("load", async function () {
       var b = L.latLngBounds(checkPins.map(function (pp) { return [pp.y, pp.x]; }));
       map.fitBounds(b.pad(0.25), { maxZoom: 6, animate: false });
     }
-    return inCard;
+    return "";
   }
 
   /* Shut by default, and it stays as the reader left it while they move from

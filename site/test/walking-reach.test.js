@@ -230,8 +230,8 @@ test("the surname card is dressed like the place and area cards on v2: flat hair
 });
 
 test("on v2 a surname's Where to read list is a section of its card; the side pane stays shut", () => {
-  assert.match(map, /var h = \[TSV2 \? "" : '<p class="ra-hood ra-hood-n">'/);
-  assert.match(map, /inCard = '<details class="ra-check-b ra-in-card"><summary class="lab">/, "folded until asked for");
+  assert.match(map, /return '<details class="ra-check-b ra-in-card"><summary class="lab">'/, "folded until asked for");
+  assert.match(map, /function nameCheckCard\(byCC, order\) \{[\s\S]*?class="ra-area-g ra-area-rd" open[\s\S]*?class="ra-area-p"/, "drawn with the area list's own classes");
   assert.match(map, /var inCardList = buildNameCheck\(canon \|\| term, byCC, order, rank\);\s*if \(TSV2 && inCardList\) h\.push\(inCardList\);/);
   assert.match(map, /if \(!TSV2\) h\.push\('<p class="at-sub at-sub-wide">'/, "the sentence that pointed at the pane is not needed");
   assert.match(map, /:global\(:is\(#ra-check-b, \.ra-in-card\) li\.ra-ck-r\)/, "the rows keep their look inside the card");
@@ -270,4 +270,9 @@ test("the card's fold control is a chevron, a surname's two icons share the plac
   assert.doesNotMatch(js, /textContent = f \? "\+" : "–"/, "no plus or minus");
   assert.match(map, /if \(TSV2\) h\.push\('<span class="at-tools">'\);[\s\S]*?if \(TSV2\) h\.push\("<\/span>"\);/);
   assert.match(js, /wrap\.className = "fd2-credits"; wrap\.setAttribute\("aria-label", "Map credits"\);\s*wrap\.appendChild\(at\); stage\.insertAdjacentElement\("afterend", wrap\);/);
+});
+
+test("the Year pill is spaced like its neighbours: no extra margin beside the flex gap", () => {
+  const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
+  assert.match(css, /order: 9; align-self: flex-start; max-width: none; margin: 0;/);
 });

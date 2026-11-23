@@ -323,19 +323,19 @@ def search_quality_gate():
         print(f"place descriptions: {n} sampled, count agrees with the body on every one")
 
     # 3
-    home = open(os.path.join(DIST, "index.html"), encoding="utf-8").read()
+    home = open(os.path.join(DIST, "help", "index.html"), encoding="utf-8").read()   # the section moved from the front page to /help/ on 23 Nov 2026
     sec = re.search(r'<section class="[^"]*ra-about[^"]*" id="about-the-atlas".*?</section>', home, re.S)
     if not sec:
-        err("the front page's static HTML has no 'about the atlas' section")
+        err("the Help page's static HTML has no 'about the atlas' section")
     else:
         text = re.sub(r"<[^>]+>", " ", re.sub(r"<style.*?</style>", " ", sec.group(0), flags=re.S))
         words = len(text.split())
         if not 300 <= words <= 520:
-            err(f"the front page's written section is {words} words (wanted 300 to 520)")
+            err(f"the Help page's written section is {words} words (wanted 300 to 520)")
         if re.search(r"adsbygoogle|adslot", sec.group(0)):
-            err("the front page's written section carries an ad")
+            err("the Help page's written section carries an ad")
         if len(re.findall(r"<h2", sec.group(0))) != 1:
-            err("the front page's written section should have exactly one h2")
+            err("the Help page's written section should have exactly one h2")
 
 
 def runtime_fetches_exist():

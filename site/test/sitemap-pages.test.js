@@ -23,7 +23,8 @@ const LEFT_OUT = {
   "worklist": "the atlas's own to-do list, public for transparency but not a page for a search engine; noindex (22 Nov 2026)",
   "errands": "drafted letters to archives, and which have been sent; noindex (22 Nov 2026)",
   "changelog": "a generated commit log; noindex (22 Nov 2026)",
-  "v2": "Front Door v2, a trial of a new way into the home map; noindex while it is a trial (23 Nov 2026)",
+  "v2": "the old trial address of the front door; it sends on to the home page and is noindex (23 Nov 2026)",
+  "classic": "the home page's old layout, kept for anyone who prefers it; the same map, noindex (23 Nov 2026)",
   "about": "redirects to /start/, which is the one page for what the atlas is; canonical points there",
 };
 

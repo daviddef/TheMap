@@ -9484,6 +9484,31 @@ window.addEventListener("load", async function () {
     new Ctl({ position: "topleft" }).addTo(map);
   })();
 
+  /* THE MAP LOOK, IN THE SAME ICON COLUMN (the front door). The strip of looks was taken off the front door at David's word («remove this all»), which
+     left a map nobody could re-dress: the home page had to be able to switch to Terrain or Satellite, or to Ink for a print. This one button opens
+     that same strip (the basemap switcher the map has always built; it is only hidden until asked for) and puts it away after a pick or Escape. */
+  (function () {
+    var stage = document.getElementById("fd2-stage");
+    if (!stage) return;
+    var Ctl = L.Control.extend({
+      onAdd: function () {
+        var d = L.DomUtil.create("div", "leaflet-bar ra-histctl ra-lookctl");
+        d.innerHTML = '<a href="#" role="button" aria-label="Choose the map look" aria-pressed="false" title="Map look: the plain map, Terrain, Satellite, Ink, Light dots">' +
+          '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.2 17 7l-7 3.8L3 7z"/><path d="M3 10.6l7 3.8 7-3.8"/><path d="M3 14l7 3.8L17 14"/></svg></a>';
+        L.DomEvent.disableClickPropagation(d);
+        return d;
+      }
+    });
+    var ctl = new Ctl({ position: "topleft" }).addTo(map), a = ctl.getContainer().querySelector("a");
+    function setOn(on) { stage.classList.toggle("fd2-looks-on", on); a.classList.toggle("on", on); a.setAttribute("aria-pressed", String(on)); }
+    a.addEventListener("click", function (e) { e.preventDefault(); setOn(!stage.classList.contains("fd2-looks-on")); });
+    stage.addEventListener("click", function (e) {
+      var b = e.target.closest && e.target.closest(".ra-base [data-b]");
+      if (b) setTimeout(function () { setOn(false); }, 0);
+    }, true);   /* capture: the switcher stops the click before it bubbles to the stage */
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && stage.classList.contains("fd2-looks-on")) setOn(false); });
+  })();
+
   /* ---- ONE SHAPE AT A TIME ---------------------------------------------------------------------------------------------
      David: «how can I remove 1 area? e.g. if I have 3? or edit that one area?»
      Every shape of the area on the map (the drafts being drawn, or the shapes of a saved group that is open) wears a small numbered badge, and the side

@@ -12,19 +12,21 @@
    monthly spend limit David sets with Anthropic on the key itself, and the bot check. Settings saved from the admin page are merged over
    the deployed vars once per request (one Durable Object call).
 
-   Beside the answers there are: POST /v1/plan (a research plan, Haiku, grounded against the Atlas records the browser sent) and the
+   Beside the answers there are: POST /v1/plan (a research plan, Haiku, grounded against the Atlas records the browser sent), POST /v1/tidy
+   ("AI ready": the reader's whole story rewritten as plain sentences, no fact added) and POST /v1/post (a forum post read as a request: what is
+   known, what is asked, the story to draw, a draft reply; the whole text is sent, so the page asks first) and the
    admin routes (admin.js: a page, a report of counts by day, the config), which exist only once the secret ADMIN_TOKEN is set. */
-import { TRANSLATE_SYSTEM, TRANSCRIBE_SYSTEM, DOCUMENT_SYSTEM, CASEFILE_SYSTEM, PLAN_SYSTEM, translateMessage, documentMessage, casefileMessage, planMessage, cleanPlanRequest, groundPlan, IMAGE_TYPES, parseJson } from "./prompt.js";
+import { TRANSLATE_SYSTEM, TRANSCRIBE_SYSTEM, DOCUMENT_SYSTEM, CASEFILE_SYSTEM, PLAN_SYSTEM, TIDY_SYSTEM, POST_SYSTEM, cleanTidyRequest, tidyMessage, groundTidy, cleanPostRequest, postMessage, groundPost, translateMessage, documentMessage, casefileMessage, planMessage, cleanPlanRequest, groundPlan, IMAGE_TYPES, parseJson } from "./prompt.js";
 import { json, sha256Hex, stub } from "./util.js";
 import { limit, pos, effectiveEnv, DEFAULTS } from "./config.js";
 import { handleAdmin } from "./admin.js";
 
 const ID_RE = /^[0-9a-f]{32}$/;
 const TOKEN_RE = /^[A-Za-z0-9_-]{43}$/;
-const MAX_JSON = 80 * 1024;
+const MAX_JSON = 80 * 1024;      // a tidy or a post is at most 8,000 characters, a plan's candidates a few thousand: all well inside this
 const MAX_IMAGE_B64 = 2_200_000;                     // about 1.6 MB of picture; the browser shrinks it first
 const IMAGE_COST = 3;
-const KINDS = ["translate", "transcribe", "document", "casefile", "plan"];
+const KINDS = ["translate", "transcribe", "document", "casefile", "plan", "tidy", "post"];
 const num = (v, d) => { const n = Number(v); return Number.isFinite(n) && n >= 0 ? n : d; };      // for the per-kind costs, which are not limits
 
 const allowed = env => String(env.ALLOW_ORIGINS || "").split(",").map(s => s.trim()).filter(Boolean);
@@ -135,7 +137,7 @@ export async function handle(request, env0, o = {}) {
   let body; try { body = JSON.parse(raw); } catch { return json({ error: "not json" }, 400, h); }
   if (!body || typeof body !== "object") return json({ error: "not json" }, 400, h);
 
-  let content, system, model = env.MODEL, maxTokens = Math.min(pos(env.MAX_OUT_TOKENS, DEFAULTS.MAX_OUT_TOKENS), 2000), planCands = null;
+  let content, system, model = env.MODEL, maxTokens = Math.min(pos(env.MAX_OUT_TOKENS, DEFAULTS.MAX_OUT_TOKENS), 2000), planCands = null, tidyOriginal = null;
   if (kind === "translate") {
     if (typeof body.text !== "string" || !body.text.trim()) return json({ error: "paste a line to read" }, 400, h);
     if (body.text.length > 4000) return refuse("too_large", json({ error: "that is too long: paste one entry at a time (up to 4,000 characters)" }, 413, h));
@@ -145,6 +147,16 @@ export async function handle(request, env0, o = {}) {
     if (p.error) return json({ error: p.error }, 400, h);
     planCands = p.candidates; system = PLAN_SYSTEM; content = planMessage(p);
     model = env.PLAN_MODEL || DEFAULTS.PLAN_MODEL; maxTokens = Math.min(pos(env.PLAN_MAX_TOKENS, DEFAULTS.PLAN_MAX_TOKENS), 16000);
+  } else if (kind === "tidy") {
+    const p = cleanTidyRequest(body);
+    if (p.error) return json({ error: p.error }, 400, h);
+    tidyOriginal = p.text; system = TIDY_SYSTEM; content = tidyMessage(p);
+    model = env.PLAN_MODEL || DEFAULTS.PLAN_MODEL; maxTokens = Math.min(pos(env.PLAN_MAX_TOKENS, DEFAULTS.PLAN_MAX_TOKENS), 6000);
+  } else if (kind === "post") {
+    const p = cleanPostRequest(body);
+    if (p.error) return json({ error: p.error }, 400, h);
+    planCands = p.candidates; system = POST_SYSTEM; content = postMessage(p);
+    model = env.PLAN_MODEL || DEFAULTS.PLAN_MODEL; maxTokens = Math.min(pos(env.PLAN_MAX_TOKENS, DEFAULTS.PLAN_MAX_TOKENS), 8000);
   } else if (kind === "casefile") {
     const docs = Array.isArray(body.docs) ? body.docs : [];
     if (docs.length < 2 || docs.length > 6) return json({ error: "send two to six documents that were read" }, 400, h);
@@ -196,6 +208,8 @@ export async function handle(request, env0, o = {}) {
   const left = used ? (lim.day == null ? null : Math.max(0, lim.day - used.day)) : (anon == null ? null : Math.max(0, anon - rip.day)), of = identity ? lim.day : anon;
   const unparsed = { unparsed: true, draft: String(out.text).slice(0, 4000) };
   if (kind === "plan") return json({ kind, result: (parsed && groundPlan(parsed, planCands)) || unparsed, model, left, of }, 200, h);
+  if (kind === "tidy") return json({ kind, result: (parsed && groundTidy(parsed, tidyOriginal)) || unparsed, model, left, of }, 200, h);
+  if (kind === "post") return json({ kind, result: (parsed && groundPost(parsed, planCands)) || unparsed, model, left, of }, 200, h);
   return json({ kind, result: parsed || unparsed, left, of }, 200, h);
 }
 

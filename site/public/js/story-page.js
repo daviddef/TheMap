@@ -357,6 +357,10 @@
   }
   $("sp-read").addEventListener("click", readPics);
 
+  /* WHAT THE PAGE HAS UNDERSTOOD, offered to story-ai.js ("AI ready" and "Paste a forum post"), which needs the places the reader found in order to
+     pick the Atlas records a draft reply may point at. Read only: nothing here changes the page. */
+  window.raStoryPage = { graph: function () { return last; }, countries: function () { return data && data.countries; }, base: BASE };
+
   /* ---- starting: the words handed over from the home page, or a draft kept in this tab ---------------------------------------- */
   (function boot() {
     var h = null; try { h = JSON.parse(localStorage.getItem(HAND) || "null"); localStorage.removeItem(HAND); } catch (e) { h = null; }

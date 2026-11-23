@@ -23,12 +23,12 @@
 
   var css = document.createElement("style");
   css.textContent =
-    ".ra-q-add{position:absolute;right:34px;top:50%;transform:translateY(-50%);width:28px;height:28px;border:0;border-radius:50%;background:none;color:var(--ink-3,#777);font-size:20px;line-height:1;cursor:pointer;display:grid;place-items:center}" +
+    ".ra-q-add{position:absolute;right:34px;top:calc(var(--ra-ctl,38px) / 2);transform:translateY(-50%);width:28px;height:28px;border:0;border-radius:50%;background:none;color:var(--ink-3,#777);font-size:20px;line-height:1;cursor:pointer;display:grid;place-items:center}" +
     ".ra-q-add:hover,.ra-q-add:focus-visible{color:var(--accent,#1f5c6b);background:var(--accent-wash,rgba(31,92,107,.12));outline:none}" +
     ".ra-find #ra-q,.ra-bar #ra-q,.ra-bar-find #ra-q{padding-right:64px!important;text-overflow:ellipsis}" +
     /* the box: a Story badge and an accent edge say which of the three things the box is doing */
     ".ra-find.ra-story-on #ra-q{border-color:var(--accent,#1f5c6b)!important;box-shadow:0 0 0 3px var(--accent-wash,rgba(31,92,107,.14));padding-right:128px!important}" +
-    ".ra-q-badge{position:absolute;right:64px;top:50%;transform:translateY(-50%);font:600 10.5px/1 var(--sans,system-ui,sans-serif);letter-spacing:.07em;text-transform:uppercase;color:var(--accent,#1f5c6b);background:var(--accent-wash,rgba(31,92,107,.12));border-radius:99px;padding:5px 9px;pointer-events:none}" +
+    ".ra-q-badge{position:absolute;right:64px;top:calc(var(--ra-ctl,38px) / 2);transform:translateY(-50%);font:600 10.5px/1 var(--sans,system-ui,sans-serif);letter-spacing:.07em;text-transform:uppercase;color:var(--accent,#1f5c6b);background:var(--accent-wash,rgba(31,92,107,.12));border-radius:99px;padding:5px 9px;pointer-events:none}" +
     ".ra-q-badge[hidden]{display:none}" +
     /* the empty-box panel: three doors */
     "#ra-doors{position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:41;background:var(--panel,#fff);border:1px solid var(--rule-strong,#bbb);border-radius:10px;box-shadow:0 10px 28px rgba(10,20,26,.22);padding:10px}" +
@@ -42,7 +42,7 @@
     "#ra-doors .rd-d em{font:italic 400 12.5px/1.3 var(--serif,Georgia,serif);color:var(--ink-2,#444)}" +
     "@media (max-width:640px){#ra-doors .rd-g{grid-template-columns:1fr}}" +
     /* the story card, instead of a pile of pills */
-    "#ra-pills{display:block;margin:-2px 0 12px;border:1px solid var(--accent,#1f5c6b);border-radius:12px;background:var(--panel,#fff);overflow:hidden}" +
+    "#ra-pills{display:block;margin:-2px 0 12px;border:1px solid var(--accent,#1f5c6b);border-radius:16px;background:var(--panel,#fff);overflow:hidden}" +
     "#ra-pills[hidden]{display:none}" +
     "#ra-pills .rs-top{display:flex;align-items:center;gap:10px;padding:9px 10px 9px 14px;cursor:pointer}" +
     "#ra-pills .rs-dot{flex:none;width:9px;height:9px;border-radius:50%;background:var(--accent,#1f5c6b);box-shadow:0 0 0 4px var(--accent-wash,rgba(31,92,107,.14))}" +
@@ -91,6 +91,14 @@
   q.addEventListener("paste", function (e) { var fs = e.clipboardData && e.clipboardData.files; if (fs && fs.length) { e.preventDefault(); addFiles(fs); } });
 
   /* typing: a story is taken out of the place search and read live; a place or a name goes on exactly as before */
+  /* The box grows with what is written, to about six lines, and goes back to one when it is emptied. A newline is only for a story: in a place search Enter searches (and Shift+Enter does nothing), and a pasted line break becomes a space. */
+  function grow() { q.style.height = "auto"; q.style.height = (q.scrollHeight + (q.offsetHeight - q.clientHeight)) + "px"; q.style.overflowY = q.scrollHeight > 156 ? "auto" : "hidden"; }
+  q.addEventListener("input", function () {
+    if (/\n/.test(q.value) && !looksLikeStory(q.value)) { var p = q.selectionStart; q.value = q.value.replace(/\s*\n\s*/g, " "); try { q.setSelectionRange(p, p); } catch (e) { /* no selection */ } }
+    grow();
+  }, true);
+  q.addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.isComposing && (!e.shiftKey || !looksLikeStory(q.value))) e.preventDefault(); }, true);
+  window.addEventListener("resize", grow);
   var fromBox = false, tmr = null, thinking = false, storyMode = false, lastText = "", thinkTmr = null;
   /* The place search runs on its own timers for whatever was typed before this turned into a story ("my n", "my na"). Empty the box for one
      beat so the map's own search clears itself, stop its pending timers, and put the story back. */
@@ -107,7 +115,7 @@
       q.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     } finally { resetting = false; }
     clearTimeout(q._t); clearTimeout(q._tf); clearTimeout(q._r);
-    q.value = v;
+    q.value = v; grow();
     try { if (a != null) q.setSelectionRange(a, b, d || "none"); } catch (e) { /* a type that has no selection */ }
   }
   /* "Reading what you wrote…" is for a read that is really taking time: it is shown only if the read is still going after 0.4 s, never on a key press.
@@ -203,7 +211,7 @@
     top.addEventListener("click", function (e) { if (e.target === ed || e.target === x || e.target === tg) return; flip(); });
     top.addEventListener("keydown", function (e) { if ((e.key === "Enter" || e.key === " ") && e.target === top) { e.preventDefault(); flip(); } });
     ed.addEventListener("click", function () { if (window.raStoryBox) window.raStoryBox.open(); });
-    x.addEventListener("click", function () { fromBox = false; storyMode = false; thinking = false; lastText = ""; clearTimeout(thinkTmr); compact = false; userToggled = false; q.value = ""; resetSearch(); if (window.raStoryBox) window.raStoryBox.clear().then(function () { mirror(); }); });
+    x.addEventListener("click", function () { fromBox = false; storyMode = false; thinking = false; lastText = ""; clearTimeout(thinkTmr); compact = false; userToggled = false; q.value = ""; grow(); resetSearch(); if (window.raStoryBox) window.raStoryBox.clear().then(function () { mirror(); }); });
     if (!compact) {
       var body = mk("div", "rs-body");
       if (q.value.trim()) { var w = mk("p", "rs-words" + (wordsOpen ? " open" : ""), q.value.trim()); w.title = "Your words. Click to show all of them."; w.addEventListener("click", function () { wordsOpen = !wordsOpen; w.classList.toggle("open", wordsOpen); }); body.append(w); }
@@ -258,6 +266,6 @@
 
   /* the one-box idea in a sentence, for the placeholder */
   var narrow = window.matchMedia && window.matchMedia("(max-width: 560px)");
-  function holder() { q.setAttribute("placeholder", narrow && narrow.matches ? "A place, a surname, or your story" : "Find a place or a surname, or tell a story — Gallignana · Žubrinić · my father is Ivan from Senj…"); }
+  function holder() { q.setAttribute("placeholder", narrow && narrow.matches ? "A place, surname or story" : "Find a place or a surname, or tell a story — Gallignana · Žubrinić · my father is Ivan from Senj…"); }
   holder(); if (narrow && narrow.addEventListener) narrow.addEventListener("change", holder);
 })();

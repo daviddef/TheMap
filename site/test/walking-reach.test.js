@@ -412,3 +412,12 @@ test("a year in the search narrows a place card's books, and the big add button 
   assert.match(css, /\.ra-grp-add \{ flex: none; margin: 0 25px 0 0; \}/);
   assert.match(css, /position: absolute; left: -15px/);
 });
+
+test("the era block (a year on the time strip) draws its sources as the card's shut folds, the worldwide list once", () => {
+  const src = readFileSync(join(root, "src/components/RecordMap.astro"), "utf8");
+  assert.match(src, /class="ra-area-g ra-area-cov ra-era-g"/);
+  assert.match(src, /function countrySources\(cc, hint, heading, lat, lon, id, noWw\)/);
+  assert.match(src, /TSV2 && i < all\.length - 1\)\);/);
+  const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
+  assert.match(css, /\.fd2-stage \.ra-era-lead-l \{ display: block;/);
+});

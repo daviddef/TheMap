@@ -882,7 +882,7 @@ window.addEventListener("load", async function () {
     });
   }
 
-  function countrySources(cc, hint, heading, lat, lon, id) {
+  function countrySources(cc, hint, heading, lat, lon, id, noWw) {
     if (!cc) return "";
     /* THE SAME FALLBACK THE PAGE MAKES, because the panel is the surface most
        readers actually meet. 134 of the 237 countries this atlas names have no
@@ -898,6 +898,22 @@ window.addEventListener("load", async function () {
     var ww = wwProviders();
     var nat = natProviders(cc, lat, lon);
     if (!nat.length) return "";
+    /* ON THE NEW FRONT DOOR THESE ARE THE SAME FOLDS AS EVERYWHERE ELSE ON THE CARD. David, on the era block: «everything doesnt align with the standards
+       weve been working on: indents, alignment, formats, fonts, spacings». The country's own archives and the ones that reach everywhere are two shut
+       sections of the same rows the place card draws (dot, name, access icon at the right, a + for the section and one on each row), not a second look. */
+    if (TSV2) {
+      var cg = function (title, hint, list, where, gid) {
+        var rows = list.map(function (p) {
+          return "<li" + srcAttrs(p.id, p.name, where, BASE + "archive/" + p.id + "/") + '><a class="ra-area-p" target="_blank" rel="noopener" href="' + BASE + "archive/" + esc(p.id) + '/"><i style="background:' +
+                 (ACC[p.access] || ["#7C8A91"])[0] + '"></i><span>' + esc(p.name) + "</span><small>" + accTxt(p.access) + "</small></a></li>";
+        }).join("");
+        return '<details class="ra-area-g ra-area-cov ra-era-g"' + (gid ? ' id="' + gid + '"' : "") + '><summary><i style="background:#5B7A8C"></i>' + esc(title) + " <b>" + nfl(list.length) + "</b></summary>" +
+               (hint ? '<p class="at-sub">' + esc(hint) + "</p>" : "") + "<ul>" + rows + "</ul></details>";
+      };
+      var o = [cg(heading || ("The sources for " + (CNAME[cc] || cc)), hint, nat, CNAME[cc] || cc, id)];
+      if (ww.length && !noWw) o.push(cg(T("Sources that cover everywhere"), "Not about " + (CNAME[cc] || cc) + " in particular \u2014 these reach most of the world, which includes here.", ww, "worldwide"));
+      return o.join("");
+    }
     var h = ['<div class="at-sec"' + (id ? ' id="' + id + '"' : "") +
              '><div class="lab">' +
              esc(heading || ("The sources for " + (CNAME[cc] || cc))) + "</div>"];
@@ -1865,7 +1881,7 @@ window.addEventListener("load", async function () {
           : "This ground was governed from " + (CNAME[cc] || cc) + " over " +
             years + ", so its archives are worth trying for those years.",
         (CNAME[cc] || cc) + " \u00b7 " + years,
-        entry.lat, entry.lon));
+        entry.lat, entry.lon, null, TSV2 && i < all.length - 1));   /* the worldwide list once, after the last country */
     });
     box.innerHTML = h.join("");
   }

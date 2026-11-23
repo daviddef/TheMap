@@ -55,6 +55,7 @@
                   title: "Liberty: a fuller map with roads, parks and place names (OpenFreeMap)" },
     ink:        { name: "Ink",              suits: "light", kind: "vector",  style: "basemap-styles/ink.json",         attribution: OFM, ground: "#ffffff",
                   title: "Ink: black on white, like a printed map" },
+    lightdots:  { name: "Light dots",      suits: "light", kind: "night",   light: true, title: "Light dots: land as a grid of soft dots on a pale ground, so the colours stand out" },
     terrain:    { name: "Terrain",          suits: "any",   kind: "raster",  title: "Terrain: hills and rivers, which is often why a parish is where it is" },
     satellite:  { name: "Satellite",        suits: "any",   kind: "raster",  title: "Satellite: what the ground looks like now" },
     night:      { name: "Night dots",       suits: "dark",  kind: "night",   title: "Night dots: a quiet dark map so the colours stand out" },
@@ -65,9 +66,9 @@
     imagenight: { name: "Imagery at night", suits: "dark",  kind: "imagery", ground: "#0b1522", dark: true,
                   title: "Imagery at night: satellite photographs, darkened, with place names" }
   };
-  var ATLAS_KEYS = ["map", "smooth", "liberty", "ink", "terrain", "satellite", "night", "smoothdark", "inkdark", "imagenight"];
+  var ATLAS_KEYS = ["map", "smooth", "liberty", "ink", "lightdots", "terrain", "satellite", "night", "smoothdark", "inkdark", "imagenight"];
   /* Compass and History: the same looks, minus Terrain, whose tile host (OpenTopoMap) is not on Compass's img-src list and is not worth loosening it for. */
-  var EMBED_KEYS = ["map", "smooth", "liberty", "ink", "satellite", "night", "smoothdark", "inkdark", "imagenight"];
+  var EMBED_KEYS = ["map", "smooth", "liberty", "ink", "lightdots", "satellite", "night", "smoothdark", "inkdark", "imagenight"];
   var VECTOR_KEYS = ATLAS_KEYS.filter(function (k) { return LOOKS[k].kind === "vector"; });
 
   /* ---------- pure rules ---------- */
@@ -92,7 +93,7 @@
     return key ? { key: key, explicit: true, from: u ? "url" : "saved" } : { key: defaultFor(o.theme), explicit: false, from: "theme" };
   }
   /* Is this look a dark ground? (The cluster discs and anything else inked for the ground ask.) */
-  function isDark(key) { return !!(LOOKS[key] && (LOOKS[key].dark || LOOKS[key].kind === "night")); }
+  function isDark(key) { return !!(LOOKS[key] && (LOOKS[key].dark || (LOOKS[key].kind === "night" && !LOOKS[key].light))); }
   function isVector(key) { return !!(LOOKS[key] && LOOKS[key].kind === "vector"); }
   /* What the switcher shows. `bar`: the looks for this theme, then the ones for either; `more`: the other theme's. The fold is open when
      the reader opened it or when the look in use is in it, so the pressed button is always on screen. */
@@ -182,6 +183,7 @@
     var c = m.getContainer(), names = ["ra-look", "ra-look-" + key];
     if (isDark(key)) names.push("ra-dark-look");
     if (key === "night") names.push("ra-night");
+    if (key === "lightdots") names.push("ra-lightdots");
     names.forEach(function (n) { c.classList[on ? "add" : "remove"](n); });
   }
   function baseCss(o) { addCss(o && o.css !== undefined ? o.css : ROOT + "basemaps.css"); }
@@ -193,17 +195,17 @@
       onAdd: function (m) {
         var me = this;
         me._live = true;
-        mark(m, "night", true);   /* the dark ground at once, while the dots are on their way */
+        mark(m, o.key || "night", true);   /* the ground at once, while the dots are on their way */
         baseCss(o);
         loadNightScript(o.script).then(function (ND) {
           if (!me._live) return;
-          me._in = ND.create(L, { dir: o.dir || ROOT + "vendor/natural-earth/", labelsPane: o.labelsPane, reduce: still });
+          me._in = ND.create(L, { dir: o.dir || ROOT + "vendor/natural-earth/", labelsPane: o.labelsPane, reduce: still, light: !!o.light });
           me._in.addTo(m);
         }, function () { if (me._live && o.onFail) o.onFail(failMessage("night", "library"), "library"); });
       },
       onRemove: function (m) {
         this._live = false;
-        mark(m, "night", false);
+        mark(m, o.key || "night", false);
         if (this._in) m.removeLayer(this._in);
         this._in = null;
       },
@@ -312,7 +314,7 @@
   /* Any look that is not one of the three plain tile layers, as a layer: night, imagery at night, or a vector look. */
   function lookLayer(L, key, o) {
     var k = LOOKS[key] && LOOKS[key].kind;
-    if (k === "night") return nightLayer(L, o);
+    if (k === "night") return nightLayer(L, Object.assign({ key: key, light: !!LOOKS[key].light }, o));
     if (k === "imagery") return imageryNightLayer(L, o);
     if (k === "vector") return vectorLayer(L, key, o);
     return null;

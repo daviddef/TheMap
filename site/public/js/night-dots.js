@@ -24,6 +24,8 @@
 
   var GROUND = "#121b22";   /* the dark ground behind everything on this basemap */
   var DOT = "#2a4868";      /* basemap dot: 1.85:1 against GROUND, chroma 22, hue 268 in Lab; nothing like an access colour */
+  var LIGHT_GROUND = "#e4e9ec";   /* Light dots: the same grid on a pale ground, for the light theme */
+  var LIGHT_DOT = "#aebcc6";      /* a cool blue-grey, 1.6:1 against LIGHT_GROUND: texture, not an access colour */
   var DOT_R = 1.3;          /* css px; the smallest data marker is radius 3 plus a 1.8 px ring */
   var SPACING = 8;          /* css px between dots; must divide 256 so tiles join */
   var SUB = 3;              /* samples per cell side */
@@ -198,6 +200,7 @@
       return m;
     }
 
+    var light = !!opts.light;
     function paint(tile, coords) {
       var which = setFor(coords.z);
       if (!sets[which]) return false;
@@ -205,7 +208,7 @@
       var g = tile.getContext("2d");
       g.setTransform(dpr, 0, 0, dpr, 0, 0);
       g.clearRect(0, 0, 256, 256);
-      g.fillStyle = DOT;
+      g.fillStyle = light ? LIGHT_DOT : DOT;
       g.beginPath();
       for (var j = 0; j < n; j++) for (var i = 0; i < n; i++) {
         if (!m[j * n + i]) continue;
@@ -236,15 +239,15 @@
       options: { attribution: "Land &copy; Natural Earth &middot; Esri, HERE, Garmin &middot; &copy; OpenStreetMap contributors" },
       initialize: function () {
         this._dots = new Dots({ attribution: "" });
-        this._dark = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
-          { className: "ra-nd-dark", maxNativeZoom: 16, maxZoom: 18 });
-        this._names = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}",
+        this._dark = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_" + (light ? "Light" : "Dark") + "_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+          { className: light ? "ra-nd-light" : "ra-nd-dark", maxNativeZoom: 16, maxZoom: 18 });
+        this._names = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_" + (light ? "Light" : "Dark") + "_Gray_Reference/MapServer/tile/{z}/{y}/{x}",
           { pane: opts.labelsPane || "overlayPane", minZoom: LABELS_FROM, maxNativeZoom: 16, maxZoom: 18, className: "ra-nd-names" });
         this._timer = null;
       },
       onAdd: function (map) {
         this._map = map;
-        map.getContainer().classList.add("ra-night");
+        map.getContainer().classList.add(light ? "ra-lightdots" : "ra-night");
         map.on("zoomanim", this._anim, this);
         map.on("zoomend", this._end, this);
         this._apply(map.getZoom(), true);
@@ -255,7 +258,7 @@
         clearTimeout(this._timer);
         map.off("zoomanim", this._anim, this);
         map.off("zoomend", this._end, this);
-        map.getContainer().classList.remove("ra-night");
+        map.getContainer().classList.remove(light ? "ra-lightdots" : "ra-night");
         [this._dots, this._dark, this._names].forEach(function (l) { if (map.hasLayer(l)) map.removeLayer(l); });
       },
       bringToBack: function () {
@@ -295,7 +298,7 @@
   }
 
   return {
-    GROUND: GROUND, DOT: DOT, DOT_R: DOT_R, SPACING: SPACING, SUB: SUB, COVER: COVER, FINE_FROM: FINE_FROM,
+    GROUND: GROUND, DOT: DOT, LIGHT_GROUND: LIGHT_GROUND, LIGHT_DOT: LIGHT_DOT, DOT_R: DOT_R, SPACING: SPACING, SUB: SUB, COVER: COVER, FINE_FROM: FINE_FROM,
     HAND_OVER: HAND_OVER, LABELS_FROM: LABELS_FROM,
     decode: decode, project: project, landCells: landCells, cellOf: cellOf, dotAt: dotAt, setFor: setFor, plan: plan, mercY: mercY,
     create: create

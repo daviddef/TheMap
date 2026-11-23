@@ -343,3 +343,9 @@ test("every foldable section of a v2 card carries the same chevron and no colour
   assert.match(css, /details\.ra-area-cov > summary > i, \.fd2-stage details\.ra-area-rd > summary > i \{ display: none; \}/);
   assert.doesNotMatch(css, /content: "\\25B8"/, "the old triangle is gone");
 });
+
+test("the count in a foldable card section's head sits at the right, in one style", () => {
+  const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
+  assert.match(css, /details\.ra-area-cov > summary > b, \.fd2-stage details\.ra-area-rd > summary > b, \.fd2-stage details\.ra-in-card > summary\.lab > b \{ margin-left: auto;/);
+  assert.match(map, /"<span>" \+ esc\(T\("Visiting"\)\) \+ "<\/span><b>" \+ count \+ "<\/b><\/summary>"/);
+});

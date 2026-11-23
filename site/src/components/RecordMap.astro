@@ -4339,7 +4339,7 @@ window.addEventListener("load", async function () {
       var mount = panel.querySelector("#ra-place-body");
       if (visitOld) visitOld.remove();
       if (mount) mount.insertAdjacentHTML("afterend", '<details class="ra-check-b ra-in-card ra-visit"' + (visitOpen ? " open" : "") + '><summary class="lab">' +
-        esc(T("Visiting")) + " \u00b7 " + count + "</summary>" + h.join("").replace(/<ul>/g, '<ul class="ra-vl">') + "</details>");
+        "<span>" + esc(T("Visiting")) + "</span><b>" + count + "</b></summary>" + h.join("").replace(/<ul>/g, '<ul class="ra-vl">') + "</details>");
       drawCheckPins();
       return;
     }
@@ -4409,7 +4409,7 @@ window.addEventListener("load", async function () {
       if (!card.count) return "";
       drawCheckPins();
       if (checkPins.length) map.fitBounds(L.latLngBounds(checkPins.map(function (pp) { return [pp.y, pp.x]; })).pad(0.25), { maxZoom: 6, animate: false });
-      return '<details class="ra-check-b ra-in-card"><summary class="lab">' + esc(T("Where to read")) + " \u00b7 " + card.count + "</summary>" + card.html + "</details>";
+      return '<details class="ra-check-b ra-in-card"><summary class="lab">' + "<span>" + esc(T("Where to read")) + "</span><b>" + card.count + "</b></summary>" + card.html + "</details>";
     }
     /* ON THE NEW FRONT DOOR THE LIST IS PART OF THE CARD. David: «the 2 overlays, is there a way we can bring them into one? we don't need
        "where to read" as a separate overlay». The same numbered rows, the same pins on the map, but returned to the caller as a section of the

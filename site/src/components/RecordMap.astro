@@ -4310,10 +4310,13 @@ window.addEventListener("load", async function () {
   function buildNameCheck(term, byCC, order, rank) {
     var pane = document.getElementById("ra-check");
     var body = document.getElementById("ra-check-b");
-    if (!pane || !body) return;
+    if (!pane || !body) return "";
     clearCheckPins();
-    if (!order.length) { pane.hidden = true; return; }
-    var h = ['<p class="ra-hood ra-hood-n">' +
+    if (!order.length) { pane.hidden = true; return ""; }
+    /* ON THE NEW FRONT DOOR THE LIST IS PART OF THE CARD. David: «the 2 overlays, is there a way we can bring them into one? we don't need
+       "where to read" as a separate overlay». The same numbered rows, the same pins on the map, but returned to the caller as a section of the
+       surname card instead of filling the side pane, which stays shut. */
+    var h = [TSV2 ? "" : '<p class="ra-hood ra-hood-n">' +
              '<span class="ra-hood-k ra-hood-k-n"></span><span>' +
              esc(T("Where to read for") + " " + term) + " \u2014 " +
              esc(order.length + " " +
@@ -4342,11 +4345,17 @@ window.addEventListener("load", async function () {
                (CNAME[cc] || cc)) + "</li>");
     });
     h.push("</ul>");
-    if (!count) { pane.hidden = true; return; }
-    body.innerHTML = h.join("");
-    document.getElementById("ra-check-n").textContent = count;
-    (document.querySelector(".ra-check-w") || {}).textContent = T("Where to read");
-    pane.hidden = false;
+    if (!count) { pane.hidden = true; return ""; }
+    var inCard = "";
+    if (TSV2) {
+      inCard = '<div class="ra-check-b ra-in-card"><div class="lab">' + esc(T("Where to read")) + " \u00b7 " + count + "</div>" + h.join("") + "</div>";
+      pane.hidden = true;
+    } else {
+      body.innerHTML = h.join("");
+      document.getElementById("ra-check-n").textContent = count;
+      (document.querySelector(".ra-check-w") || {}).textContent = T("Where to read");
+      pane.hidden = false;
+    }
     drawCheckPins();
     /* AND FRAME THE MAP ON THEM, which is the other half of what makes Senj
        look answered and Lerena look ignored. A world view with a dozen grey
@@ -4358,6 +4367,7 @@ window.addEventListener("load", async function () {
       var b = L.latLngBounds(checkPins.map(function (pp) { return [pp.y, pp.x]; }));
       map.fitBounds(b.pad(0.25), { maxZoom: 6, animate: false });
     }
+    return inCard;
   }
 
   /* Shut by default, and it stays as the reader left it while they move from
@@ -7527,7 +7537,7 @@ window.addEventListener("load", async function () {
            default and a reader should be told what is behind it rather than
            left to find the handle. */
         var totalCC = order.length + moreCC;
-        h.push('<p class="at-sub at-sub-wide">' +
+        if (!TSV2) h.push('<p class="at-sub at-sub-wide">' +
                '<b>' + (shown + moreInCC).toLocaleString() + " " +
                esc(T("archives reach the countries") + " " + (canon || term) + " " +
                    T("is attested in")) + "</b> \u2014 " +
@@ -7539,7 +7549,8 @@ window.addEventListener("load", async function () {
                    (moreCC ? ", " + T("the first") + " 12 " + T("of") + " " + totalCC : "") +
                    ". " + T("These are the archives of those COUNTRIES, not of a " +
                             "place of that name.")) + "</p>");
-        buildNameCheck(canon || term, byCC, order, rank);
+        var inCardList = buildNameCheck(canon || term, byCC, order, rank);
+        if (TSV2 && inCardList) h.push(inCardList);
         /* THE VOLUMES, WHICH A NAME CAN HAVE AFTER ALL. David: «why no volume
            data for the name work? we show it really well in the location
            work?» Senj prints «7 books catalogued for this place» and then the
@@ -10966,40 +10977,40 @@ window.addEventListener("load", async function () {
     font-family: var(--mono); font-size: 11px; line-height: 1; }
   /* AIR BETWEEN THEM. «and also allow an additional space between the icons» —
     two circles 2px apart read as one control with a hole in it. */
-  :global(#ra-check-b .srcmark) { margin-left: 0; margin-right: 10px; }
-  :global(#ra-check-b li.ra-ck-r) { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto;
+  :global(:is(#ra-check-b, .ra-in-card) .srcmark) { margin-left: 0; margin-right: 10px; }
+  :global(:is(#ra-check-b, .ra-in-card) li.ra-ck-r) { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto;
     column-gap: 10px; row-gap: 1px; align-items: start; margin: 0 -6px 2px; padding: 7px 6px;
     border-radius: 7px; transition: background .12s; }
-  :global(#ra-check-b li.ra-ck-r:hover) { background: var(--accent-wash); }
+  :global(:is(#ra-check-b, .ra-in-card) li.ra-ck-r:hover) { background: var(--accent-wash); }
   /* SEPARATE EACH NUMBER: a light tint on every second row and a little more air, so a number, its note and its mark read
      as one block and the next number starts a new one. */
-  :global(#ra-check-b li.ra-ck-r.ra-alt) { background: var(--panel-2); }
-  :global(#ra-check-b li.ra-ck-r.ra-alt:hover) { background: var(--accent-wash); }
-  :global(#ra-check-b li.ra-ck-r) { padding-block: 9px; }
-  :global(#ra-check-b li.ra-ck-r .ra-ck-i) { box-shadow: 0 0 0 1.5px var(--panel); }
-  :global(#ra-check-b li.ra-ck-nonum) { grid-template-columns: minmax(0, 1fr) auto; }
-  :global(#ra-check-b li.ra-ck-r .ra-ck-i) { grid-row: 1 / span 2; margin-right: 0; align-self: center; }
-  :global(#ra-check-b li.ra-ck-r .ra-ck-main) { grid-column: 2; font-size: 13px; line-height: 1.35;
+  :global(:is(#ra-check-b, .ra-in-card) li.ra-ck-r.ra-alt) { background: var(--panel-2); }
+  :global(:is(#ra-check-b, .ra-in-card) li.ra-ck-r.ra-alt:hover) { background: var(--accent-wash); }
+  :global(:is(#ra-check-b, .ra-in-card) li.ra-ck-r) { padding-block: 9px; }
+  :global(:is(#ra-check-b, .ra-in-card) li.ra-ck-r .ra-ck-i) { box-shadow: 0 0 0 1.5px var(--panel); }
+  :global(:is(#ra-check-b, .ra-in-card) li.ra-ck-nonum) { grid-template-columns: minmax(0, 1fr) auto; }
+  :global(:is(#ra-check-b, .ra-in-card) li.ra-ck-r .ra-ck-i) { grid-row: 1 / span 2; margin-right: 0; align-self: center; }
+  :global(:is(#ra-check-b, .ra-in-card) li.ra-ck-r .ra-ck-main) { grid-column: 2; font-size: 13px; line-height: 1.35;
     overflow-wrap: anywhere; }
-  :global(#ra-check-b li.ra-ck-nonum .ra-ck-main) { grid-column: 1; }
-  :global(#ra-check-b li.ra-ck-r .ra-ck-main a) { font-family: var(--serif); font-size: 14px; color: var(--accent);
+  :global(:is(#ra-check-b, .ra-in-card) li.ra-ck-nonum .ra-ck-main) { grid-column: 1; }
+  :global(:is(#ra-check-b, .ra-in-card) li.ra-ck-r .ra-ck-main a) { font-family: var(--serif); font-size: 14px; color: var(--accent);
     text-decoration: none; background-image: linear-gradient(currentColor, currentColor);
     background-size: 100% 1px; background-position: 0 100%; background-repeat: no-repeat; }
-  :global(#ra-check-b li.ra-ck-r .ra-ck-main a:hover) { color: var(--ink); }
-  :global(#ra-check-b li.ra-ck-r .ra-ck-meta) { grid-column: 2; display: flex; align-items: center; gap: 6px;
+  :global(:is(#ra-check-b, .ra-in-card) li.ra-ck-r .ra-ck-main a:hover) { color: var(--ink); }
+  :global(:is(#ra-check-b, .ra-in-card) li.ra-ck-r .ra-ck-meta) { grid-column: 2; display: flex; align-items: center; gap: 6px;
     font-size: 11.5px; color: var(--ink-3); }
-  :global(#ra-check-b li.ra-ck-nonum .ra-ck-meta) { grid-column: 1; }
-  :global(#ra-check-b li.ra-ck-r .ra-dot) { flex: none; margin: 0; width: 8px; height: 8px; }
-  :global(#ra-check-b li.ra-ck-r .srcmark) { grid-column: 3; grid-row: 1 / span 2; align-self: center; margin: 0; }
+  :global(:is(#ra-check-b, .ra-in-card) li.ra-ck-nonum .ra-ck-meta) { grid-column: 1; }
+  :global(:is(#ra-check-b, .ra-in-card) li.ra-ck-r .ra-dot) { flex: none; margin: 0; width: 8px; height: 8px; }
+  :global(:is(#ra-check-b, .ra-in-card) li.ra-ck-r .srcmark) { grid-column: 3; grid-row: 1 / span 2; align-self: center; margin: 0; }
   /* A MARK WITH WORDS GETS ITS OWN LINE. The «+» pill is 24px and sits in the third column; a
      recorded state carries a tick, «written, no reply», a note and a date, and as an `auto`
      track that is its full text width, so the name column was left at one letter and the
      archive's name ran down the pane a character per line. Under the name it wraps instead. */
-  :global(#ra-check-b li.ra-ck-r.src-has .srcmark) { grid-column: 2; grid-row: 3; align-self: start;
+  :global(:is(#ra-check-b, .ra-in-card) li.ra-ck-r.src-has .srcmark) { grid-column: 2; grid-row: 3; align-self: start;
     margin-top: 3px; min-width: 0; }
-  :global(#ra-check-b li.ra-ck-nonum.src-has .srcmark) { grid-column: 1; }
-  :global(#ra-check-b li.ra-ck-r.src-has .ra-ck-i) { grid-row: 1 / span 3; }
-  :global(#ra-check-b .ra-ck-more) { margin: 2px 0 0 34px; }
+  :global(:is(#ra-check-b, .ra-in-card) li.ra-ck-nonum.src-has .srcmark) { grid-column: 1; }
+  :global(:is(#ra-check-b, .ra-in-card) li.ra-ck-r.src-has .ra-ck-i) { grid-row: 1 / span 3; }
+  :global(:is(#ra-check-b, .ra-in-card) .ra-ck-more) { margin: 2px 0 0 34px; }
  :global(.ra-pin) { display: flex !important; align-items: center;
     justify-content: center; border-radius: 50%; background: #1B2A5B;
     color: #fff; font-family: var(--mono); font-size: 10px; font-weight: 500;

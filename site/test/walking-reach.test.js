@@ -228,3 +228,11 @@ test("the surname card is dressed like the place and area cards on v2: flat hair
   assert.match(css, /\.fd2-stage \.ra-surn \.lab \{ font: 700 11px\/1\.4 var\(--mono/);
   assert.match(css, /\.fd2-stage \.ra-surn \.ra-chip \{[^}]*background: transparent;/);
 });
+
+test("on v2 a surname's Where to read list is a section of its card; the side pane stays shut", () => {
+  assert.match(map, /var h = \[TSV2 \? "" : '<p class="ra-hood ra-hood-n">'/);
+  assert.match(map, /inCard = '<div class="ra-check-b ra-in-card">/);
+  assert.match(map, /var inCardList = buildNameCheck\(canon \|\| term, byCC, order, rank\);\s*if \(TSV2 && inCardList\) h\.push\(inCardList\);/);
+  assert.match(map, /if \(!TSV2\) h\.push\('<p class="at-sub at-sub-wide">'/, "the sentence that pointed at the pane is not needed");
+  assert.match(map, /:global\(:is\(#ra-check-b, \.ra-in-card\) li\.ra-ck-r\)/, "the rows keep their look inside the card");
+});

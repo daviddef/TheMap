@@ -1998,7 +1998,7 @@ window.addEventListener("load", async function () {
     var seg = ev.target.closest && ev.target.closest(".ra-tl-seg");
     if (!seg) return;
     var tl = seg.closest(".ra-tl");
-    if (tl) bandShow(tl, +seg.dataset.i);
+    if (tl) { bandShow(tl, +seg.dataset.i); if (TSV2) tl.classList.add("open"); }
   });
 
   /* A tablist that cannot be walked with the arrow keys is a row of buttons
@@ -2117,6 +2117,17 @@ window.addEventListener("load", async function () {
     var regs = regionsAt(d.lat, d.lon);
     if (!regs.length) return flagsOnly(d);
     var h = [];
+    /* ON THE NEW FRONT DOOR, ONE STRIP, NOT ONE PER REGION. David: «who held this ground - military frontier can stay out of here and go into the
+       standard places page». The place page already carries its own region's table (Whose archive this ground was), so the card shows a single
+       strip, from a region that page does not, and says where the rest is. The era's own text opens when a segment is tapped, not before. */
+    if (TSV2) {
+      var main = regs.filter(function (r) { return r.id !== d.region; })[0] || regs[0];
+      h.push('<p class="at-lab">' + esc(T("Who held this ground")) + " \u00b7 " + esc(String(main.label).split(" \u2014 ")[0]) + "</p>");
+      h.push(eraBand(main, d.country));
+      h.push('<p class="ra-held-more"><a href="' + BASE + "place/" + esc(d.id) + '/#held">' +
+             esc(regs.length > 1 ? T("The other region and the full table of who held it") : T("The full table of who held it")) + " \u2197</a></p>");
+      return h.join("");
+    }
     /* WHY TWO BANDS FOR ONE PLACE. David, looking at Senj under the Kvarner and the Military
        Frontier: «do we understand why they are different and can we explain it?» A region's
        eras are written for its own centre, and regions are allowed to overlap where two
@@ -3202,6 +3213,7 @@ window.addEventListener("load", async function () {
     panelAt = p.i; panelQ = qbox.value;
     TSEVT = null;
     panel.innerHTML = render(d);
+    if (TSV2) placeBody(d);
     if (window.raShelfScope) window.raShelfScope(null);
     if (window.raShelfPing) window.raShelfPing();
     bandsInit(panel);
@@ -3371,6 +3383,9 @@ window.addEventListener("load", async function () {
 
     /* The link to this place's own page moved up onto the heading line.
        Until these pages existed, 1,239 places had no address of their own. */
+    /* ON THE NEW FRONT DOOR THE BODY IS THE AREA SCREEN. David: «can we align look and feel of the places with the look and feel of the areas?»
+       The books, the catalogues and the sources are drawn by the same code as an area's, into this mount, once the card is on the page. */
+    if (TSV2) { h.push('<div class="ra-place-body" id="ra-place-body"></div>'); return h.join(""); }
 
     /* THE BOOKS THEMSELVES. «Croatia, Church Books, 1516–1994 covers this
        place» is true and one step short of what a researcher needs: which
@@ -3834,7 +3849,7 @@ window.addEventListener("load", async function () {
      answer and, a moment later, the shape of the ground you could walk in N hours: Tobler's hiking function over an elevation grid
      (js/walking-reach.js), sea impassable, steep ground impassable. It is a reach, not a parish or a jurisdiction: roads, rivers and
      bridges are not in it. If the terrain will not load the circle stays, and the note says so. */
-  var REACH = { h: 2, id: null, d: null, res: null, state: "", tok: 0 }, REACH_HOURS = [[1, "1 h"], [2, "2 h"], [4, "4 h"], [5, "5 h"]];
+  var REACH = { h: 2, id: null, d: null, res: null, state: "", tok: 0 }, REACH_HOURS = [[1, "1 h"], [2, "2 h"], [4, "4 h"], [6, "6 h"]];
   try { var rh0 = +localStorage.getItem("ra-reach-h"); if (REACH_HOURS.some(function (o) { return o[0] === rh0; })) REACH.h = rh0; } catch (e) { /* storage blocked */ }
   var reachJs = null;
   function reachOn(d) { return !!(TSV2 && REACH.res && REACH.id === d.id); }
@@ -4901,6 +4916,7 @@ window.addEventListener("load", async function () {
          The panel looked right and nothing in it worked until the reader
          picked the place again. */
       panel.innerHTML = render(cache[at]);
+      if (TSV2) placeBody(cache[at]);
       bandsInit(panel);
       paintIcoFlags(panel);
       buildCheck(cache[at], drawHood(cache[at]));
@@ -8427,6 +8443,14 @@ window.addEventListener("load", async function () {
   /* WHAT THE AREA SCREEN READS. Normally the shapes you drew (AREA.rows). The shelf can also ask for the same screen for the open place or for the
      map in view (AREA.ov, no shapes), so «see everything for Senj» looks and works like «see everything for my area». The drawn area is not touched. */
   function AR() { return AREA.ov || AREA.rows; }
+  /* THE PLACE CARD'S BODY: the area screen for one place, drawn into the card. The catalogue entries (other archives' holdings) join the books, once each. */
+  function placeBody(d) {
+    var mount = panel.querySelector("#ra-place-body"); if (!mount) return;
+    var pl = idx.places.filter(function (p) { return p.i === d.id; })[0] || { i: d.id, n: d.name, y: d.lat, x: d.lon, cc: d.country, v: (d.volumes || []).length, c: (d.collections || []).length };
+    AREA.ov = { rings: [], places: [pl], arch: [], vols: null, loading: false, title: d.name, note: "", mount: mount, place: d };
+    AREA.added = null; AREA.confirm = false;
+    areaRender(); areaLoadVolumes();
+  }
   function areaOverlay(title, note, places, arch) {
     AREA.ov = { rings: [], places: places, arch: arch, vols: null, loading: false, title: title, note: note };
     AREA.added = null; AREA.confirm = false;
@@ -8435,8 +8459,50 @@ window.addEventListener("load", async function () {
     var card = panel.closest ? panel.closest(".at-panel") : null;
     if (card && card.classList.contains("fd2-folded")) { var fb = card.querySelector(".fd2-fold"); if (fb) fb.click(); }
   }
+  /* ONE PLACE, IN THE CARD: the area screen without the area's headline, tally and groups: the add button, the books and catalogues of the place
+     (by record type, each markable), then the sources that cover its whole country. */
+  function areaRenderSolo(R) {
+    var d = R.place, pp = R.places[0], h = ['<div class="ra-area ra-area-solo">'];
+    h.push('<div class="ra-area-add" id="ra-area-add"></div>');
+    h.push('<details class="ra-area-pl ra-area-solo-l" data-vols="' + esc(pp.i) + '" open><summary><span>' + esc(T("The books and catalogues for") + " " + d.name) + '</span> <small><span class="ra-area-n"></span></small></summary><ul class="ra-vl"></ul></details>');
+    if (!(d.volumes || []).length && !(d.collections || []).length) h.push('<p class="at-sub">' + esc(T("No volumes recorded here yet.")) + "</p>");
+    areaCountrySources(R).forEach(function (c, ix, all) {
+      h.push('<details class="ra-area-g ra-area-cov"' + (all.length === 1 || c.list.length <= 8 ? " open" : "") + '><summary><i style="background:#5B7A8C"></i>Sources that cover all of ' + esc(CNAME[c.cc] || c.cc) + " <b>" + nfl(c.list.length) + "</b></summary><ul>");
+      c.list.forEach(function (a) {
+        var st = volStatus("source:" + a.id);
+        h.push('<li><a class="ra-area-p" target="_blank" rel="noopener" href="' + BASE + "archive/" + esc(a.id) + '/"><i style="background:' + RC_COL[st] + '"></i><span>' + esc(a.name) + "</span><small>" +
+               esc((ACC[a.access] || [0, a.access || ""])[1]) + "</small></a></li>");
+      });
+      h.push("</ul></details>");
+    });
+    h.push("</div>");
+    (R.mount && R.mount.isConnected ? R.mount : panel).innerHTML = h.join("");
+    areaFillVolumes();
+  }
+  /* a place's books, with its catalogue entries beside them once each (a book is the same book by waypoint, link or title) */
+  function areaPlaceVols(d) {
+    var vs = (d.volumes || []).slice();
+    if (!(AREA.ov && AREA.ov.place)) return vs;
+    /* the same book is found by its waypoint (its own, or read out of the link's wc=), else by title and years */
+    var keys = function (v) {
+      var wc = ((v.url || "").match(/[?&]wc=([^:&%]+)/) || [])[1], k = [];
+      if (v.waypoint) k.push("w" + v.waypoint);
+      if (wc) k.push("w" + wc);
+      k.push("t" + v.t + "|" + (v.from || "") + "|" + (v.to || ""));
+      return k;
+    };
+    var have = {}; vs.forEach(function (v) { keys(v).forEach(function (k) { have[k] = 1; }); });
+    (d.collections || []).forEach(function (c) {
+      var v = { t: c.title || "Untitled volume", url: c.url, from: c.from, to: c.to, waypoint: c.waypoint, src: PROV[c.provider] ? PROV[c.provider].name : c.provider };
+      var ks = keys(v);
+      if (ks.some(function (k) { return have[k]; })) return;
+      ks.forEach(function (k) { have[k] = 1; }); vs.push(v);
+    });
+    return vs;
+  }
   function areaRender() {
     var R = AR(); if (!R) return;
+    if (R.place) { areaRenderSolo(R); return; }
     if (window.raShelfPing) window.raShelfPing();
     var P = window.raProgress, line = P ? (P.lines().filter(function (l) { return l.active; })[0] || {}).name : "";
     var groups = { none: [], list: [], busy: [], done: [] }, vtot = 0;
@@ -8502,7 +8568,7 @@ window.addEventListener("load", async function () {
       h.push("</ul></details>");
     });
     h.push('<p class="at-sub">Only catalogued places are inside the area itself; the sources that cover a whole country are listed under it. Colours read the family line selected in the header.</p></div>');
-    panel.innerHTML = h.join("");
+    (AREA.ov && AREA.ov.mount && AREA.ov.mount.isConnected ? AREA.ov.mount : panel).innerHTML = h.join("");
     areaFillVolumes();
   }
   /* The sources that reach the area from outside it: for each country that has a place inside, the providers that name that country and are not
@@ -8529,7 +8595,7 @@ window.addEventListener("load", async function () {
       if (i >= want.length) return;
       var p = want[i++];
       (cache[p.i] ? Promise.resolve(cache[p.i]) : fetch(DETAIL + p.i + ".json").then(function (r) { return r.json(); }))
-        .then(function (d) { cache[p.i] = d; R.vols[p.i] = { p: p, vols: d.volumes || [] }; })
+        .then(function (d) { cache[p.i] = d; R.vols[p.i] = { p: p, vols: areaPlaceVols(d) }; })
         .catch(function () { R.vols[p.i] = { p: p, vols: [] }; })
         .then(function () {
           done++;
@@ -8556,7 +8622,7 @@ window.addEventListener("load", async function () {
         var vid = areaVolId(v), st = volStatus(vid);
         return '<li data-vol="' + esc(vid) + '" data-vol-t="' + esc(v.t) + '" data-vol-where="' + esc(where) + '" data-vol-href="' + esc(BASE + "place/" + e.p.i + '/') + '">' +
                '<i' + (st === "busy" ? ' class="pz"' : "") + ' style="background:' + RC_COL[st] + '"></i>' +
-               '<span class="ra-vt" title="' + esc(v.t) + '">' + (v.url ? '<a href="' + esc(v.url) + '" target="_blank" rel="noopener">' + esc(v.t) + "</a>" : esc(v.t)) + "</span>" +
+               '<span class="ra-vt" title="' + esc(v.t + (v.src ? " \u2014 " + v.src : "")) + '">' + (v.url ? '<a href="' + esc(v.url) + '" target="_blank" rel="noopener">' + esc(v.t) + "</a>" : esc(v.t)) + "</span>" +
                '<span class="ra-vy">' + (v.from ? v.from + "\u2013" + v.to : "") + "</span>" +
                '<span class="volmark"></span></li>';
       }).join("");
@@ -8610,7 +8676,7 @@ window.addEventListener("load", async function () {
         '<button type="button" data-a="yes">Yes, add them</button><button type="button" data-a="no">Cancel</button></p>';
       return;
     }
-    box.innerHTML = '<p class="at-sub ra-area-what">Not started in this area: <b>' + what + "</b>. The places above are only where they sit.</p>" +
+    box.innerHTML = '<p class="at-sub ra-area-what">' + (R.place ? "Not started here: <b>" + what + "</b>." : "Not started in this area: <b>" + what + "</b>. The places above are only where they sit.") + "</p>" +
       '<button type="button" class="ra-area-addb" data-a="add">Add ' + nfl(n) + (n === c.length ? "" : " of them") + " to " + esc(line) + "'s list</button>" +
       (c.length > ADD_CAP ? '<p class="at-sub">One click adds at most ' + nfl(ADD_CAP) + ". Draw a smaller area for the rest.</p>" : "") +
       (cap ? '<p class="at-sub">' + cap.trim() + "</p>" : "");

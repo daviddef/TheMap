@@ -109,8 +109,8 @@ test("villages are listed by walking time, with the time on foot, when a reach i
   assert.match(map, /vs\.sort\(function \(a, b\) \{ return RR \? a\.wt - b\.wt : a\.km - b\.km; \}\)/);
   assert.match(map, /window\.raReach\.hoursText\(x\.wt\)/);
 });
-test("the hours are 1, 2, 4 and 5, with no button to turn the shape into an area: the shelf's On foot scope is the area", () => {
-  assert.match(map, /REACH_HOURS = \[\[1, "1 h"\], \[2, "2 h"\], \[4, "4 h"\], \[5, "5 h"\]\]/);
+test("the hours are 1, 2, 4 and 6, with no button to turn the shape into an area: the shelf's On foot scope is the area", () => {
+  assert.match(map, /REACH_HOURS = \[\[1, "1 h"\], \[2, "2 h"\], \[4, "4 h"\], \[6, "6 h"\]\]/);
   assert.doesNotMatch(map, /Use as my area/);
   assert.match(map, /segs\.push\(\["walk", "On foot"\]\)/);
   assert.match(map, /if \(P\.act === "walk"\) \{\s*areaEnsureCells\(L\.polygon\(REACH\.res\.ring\)\.getBounds\(\)\)\.then[\s\S]*?areaOverlay\("Within a "/, "See the list opens it");
@@ -134,4 +134,22 @@ test("the shelf's \"See the list\" opens the area screen for the place, the view
   assert.match(map, /function shelfList\(\) \{[\s\S]*?areaShow\(\)[\s\S]*?areaOverlay\(short\(P\.pl\.n\)[\s\S]*?areaOverlay\("This view"/);
   assert.match(map, /function AR\(\) \{ return AREA\.ov \|\| AREA\.rows; \}/, "the drawn area is never overwritten by an overlay");
   assert.match(map, /areaAnalyse\(rings\) \{\s*AREA\.ov = null;/, "drawing an area retires the overlay");
+});
+
+/* THE PLACE CARD ON v2 is the area screen's look: one strip, the rest on the place page, the body drawn by the area code */
+test("on v2 the place card shows one who-held strip, links to the place page for the rest, and draws its body with the area code", () => {
+  assert.match(map, /if \(TSV2\) \{\s*var main = regs\.filter\(function \(r\) \{ return r\.id !== d\.region; \}\)\[0\] \|\| regs\[0\];/);
+  assert.match(map, /"place\/" \+ esc\(d\.id\) \+ '\/#held">'/, "links to the table on the place page");
+  assert.match(map, /if \(TSV2\) \{ h\.push\('<div class="ra-place-body" id="ra-place-body"><\/div>'\); return h\.join\(""\); \}/);
+  assert.match(map, /if \(TSV2\) placeBody\(d\);/);
+  assert.match(map, /if \(TSV2\) placeBody\(cache\[at\]\);/, "and again when the card is re-drawn for a year");
+  assert.match(map, /if \(R\.place\) \{ areaRenderSolo\(R\); return; \}/);
+  const page = readFileSync(join(root, "src/pages/place/[id].astro"), "utf8");
+  assert.match(page, /<section[^>]*id="held"/, "the place page has the anchor the card links to");
+});
+test("the era's own text opens when a segment is tapped, and the events are one-line rows in a scrolling drawer", () => {
+  const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
+  assert.match(css, /\.fd2-stage \.ra-tl-v2:not\(\.open\) \.ra-tl-detail \{ display: none; \}/);
+  assert.match(map, /tl\.classList\.add\("open"\)/);
+  assert.match(css, /\.fd2-stage \.ra-mortnote \{ max-height: 240px; overflow: auto;/);
 });

@@ -76,4 +76,17 @@ Sydney` reads Sydney as the place and also as a name). "Perth Australia" keeps A
 | A namesake via another name | "Clifden" gave Rathgarvan, a hamlet whose list of names includes Clifden | a place with the name as its own name comes before, and instead of, one that only lists it |
 | "His father" taken for the teller's | "my husband Tom was born in Galway. His father Sean ..." made Sean the person the story is about | the teller's relation is the spouse; `rel` is empty, the husband's parents stay parents; a name after "his father" is not the subject's unless the story is about that father |
 
-Still left: "My father Sydney lived in Sydney" reads the name but loses the stop; two people told in one story ("my husband Tom ... and my father ...") still share one list of stops; the husband himself is named only when he is in the given-name catalogue (Tom is not a catalogued form of Thomas).
+Second pass, the same day (stress harness: 149 pass, no known gaps):
+
+| What went wrong | Example | Now |
+|---|---|---|
+| A name that is a person and a place, the place found at the person | "My father Sydney lived in Sydney" lost the stop | the place is the occurrence a place marker stands before |
+| Two people's places in one list | "my grandfather was born in Cork. My wife was born in Sydney." gave the grandfather both | a place told of the teller's own husband, wife or partner is the spouse's: off the relation's journey, on the spouse (`people[].place`) and in `kin` as "your wife" / "your husband"; "my wife's grandmother" and "my wife and I" are not read this way |
+| A town only known as its county | "before moving to Peoria" gave Peoria County | the gazetteer is asked for a name the index holds only as its own county / district; the place itself comes first (the county is kept, marked `partial`, and ranks last). Regions such as Friuli (a name inside other names) are still left to "did you mean" |
+| The wrong namesake town | "Springfield Illinois" gave Springfield, Missouri | a US state after a town (with or without a comma) asks the gazetteer for the town's US namesakes and the one nearest the state is chosen; only where the index holds no records for that name |
+| "before / after / until / toward / via Peoria" | not looked up | those join in / at / from / near / to as words that mark a place for the gazetteer lookup |
+
+Still left:
+- A husband (or wife) is named only when the name is in the given-name catalogue: "Tom" is a *lead* for Thomas there, and leads are never used to name a person. Adding it as a catalogued form needs evidence from a record, not from this reader.
+- A story that tells several of the teller's own relations (a father, then a mother's father) is read by the family layer when it holds two or more; one that tells a single relation plus a spouse is now separated; three or more people in one clause without names are still one list.
+- "Boston, Massachusetts" picks South Boston from the index rows; it was so before and is left.

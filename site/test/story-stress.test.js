@@ -465,3 +465,35 @@ test("gazMerge: a place that has the name as its own name comes before, and inst
   const only = Object.create(null);
   assert.equal(F.gazMerge(only, { ph: "clifden", ccs: null }, [["Rathgarvan", 52.64, -7.15, "IE", ["Clifden"]]]), 1);
 });
+
+test("a name that is both a person and a place: 'My father Sydney lived in Sydney' is the man and the city", () => {
+  const p = parse("My father Sydney lived in Sydney.");
+  assert.deepEqual([p.stops.map((s) => s.row.n), p.name, p.rel], [["Sydney"], "Sydney", "father"]);
+});
+
+test("a place told of the teller's husband or wife is theirs, not the relation's journey", () => {
+  const p = parse("my grandfather was born in Cork and moved to Boston. My wife Anna was born in Zagreb.");
+  assert.deepEqual(p.route.map((s) => s.row.n), ["Cork", "Boston"]);
+  assert.deepEqual(p.stops.map((s) => s.row.n), ["Cork", "Boston"]);
+  const k = (p.kin || []).filter((x) => x.label === "your wife")[0];
+  assert.deepEqual(k && k.stops.map((s) => s.row.n), ["Zagreb"]);
+  assert.equal(p.people.filter((x) => x.role === "spouse")[0].name, "Anna");
+  const q = parse("my father was born in Cork. My husband Tom was born in Galway and his mother in Dublin.");
+  assert.deepEqual(q.route.map((s) => s.row.n), ["Cork"]);
+  assert.deepEqual(q.kin.filter((x) => x.label === "your husband")[0].stops.map((s) => s.row.n), ["Galway"]);
+});
+
+test("'my wife's grandmother ...' and 'my wife and I ...' are not a spouse's own places", () => {
+  assert.deepEqual(parse("My wife's grandmother was from Berlin. Her parents moved to Chicago.").stops.map((s) => s.row.n), ["Berlin", "Chicago"]);
+  assert.deepEqual(parse("my grandfather was born in Cork. My wife and I moved to Perth.").stops.map((s) => s.row.n), ["Cork", "Perth"]);
+});
+
+test("gazWants: a town known only as its county (Peoria County) is asked for in the gazetteer; a region (Friuli) is not", () => {
+  const map = A.buildMap(rows.concat([P("Peoria County", "US", -89.7, 40.8, { c: 0, v: 19, q: "Peoria County" }), P("Pozzuolo del Friuli", "IT", 13.2, 45.9, { c: 0, v: 3, q: "Pozzuolo del Friuli" })]));
+  assert.ok(F.gazWants("he lived in Springfield before moving to Peoria", map, {}).some((w) => w.ph === "peoria" && w.more));
+  assert.ok(!F.gazWants("from Friuli, in the north", map, {}).some((w) => w.ph === "friuli"));
+  const shard = [["Peoria", 33.58, -112.24, "US", []], ["Peoria", 40.69, -89.59, "US", []]];
+  assert.equal(F.gazMerge(map, { ph: "peoria", ccs: null, more: true }, shard), 2);
+  assert.deepEqual(map.peoria.map((r) => r.n + (r.partial ? "*" : "")), ["Peoria", "Peoria", "Peoria County*"]);
+});
+

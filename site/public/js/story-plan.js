@@ -13,6 +13,18 @@
   function clip(s, n) { s = String(s == null ? "" : s).replace(/\s+/g, " ").trim(); return s.length > n ? s.slice(0, n - 1) + "…" : s; }
   function hav(a, b, c, d) { var r = Math.PI / 180, dl = (c - a) * r, dn = (d - b) * r, x = Math.sin(dl / 2) * Math.sin(dl / 2) + Math.cos(a * r) * Math.cos(c * r) * Math.sin(dn / 2) * Math.sin(dn / 2); return 12742 * Math.asin(Math.sqrt(x)); }
 
+  /* The places the plan starts from: the person's own route; when the story only places the relatives (a father born here, a grandmother
+     buried there), their places and the ancestors' places stand in, so a story about "my father's village" still gets a plan. */
+  function stopsOf(g) {
+    var f = (g && g.facts) || {}, own = (f.route || []).filter(function (x) { return x && x.info; });
+    if (own.length) return own;
+    var out = [], seen = Object.create(null);
+    function add(s, role, label) { if (s && s.info && !seen[s.info.href || s.info.name]) { seen[s.info.href || s.info.name] = 1; out.push({ info: s.info, role: role || "family", year: s.year, age: s.age, label: label }); } }
+    (f.kin || []).forEach(function (k) { (k.stops || []).forEach(function (s) { add(s, "family", k.label); }); });
+    (f.ancestors || []).forEach(function (a) { add(a, "family", a.who); });
+    return out;
+  }
+
   /* The Atlas records matched to the story's places. `g` is the reader's gathered result (g.facts.route[].info), `countries` maps a code to
      today's country name, `base` is the site's base path. Archives within 150 km of a stop, the Atlas's own page for each place, the volumes
      it knows of around it, then the country-level sources. Each id is c1, c2, ... and is the only thing the model may tag "atlas". */
@@ -23,7 +35,7 @@
       var k = kind + "|" + url; if (seen[k]) return; seen[k] = 1;
       out.push({ id: "c" + (++n), kind: kind, name: clip(name, 120), where: clip(where, 120), what: clip(what, 240), url: String(url) });
     }
-    var route = ((g && g.facts && g.facts.route) || []).filter(function (x) { return x && x.info; });
+    var route = stopsOf(g);
     var cc = countries || {};
     route.forEach(function (x) {
       var i = x.info, here = i.name + (cc[i.cc] ? ", " + cc[i.cc] : "");
@@ -48,7 +60,7 @@
   /* What the story says, with no name in it: a relation word, a birth year, the route as told, the family's places and the facts as short phrases. */
   function facts(g, countries) {
     var f = (g && g.facts) || {}, cc = countries || {};
-    var route = (f.route || []).filter(function (x) { return x && x.info; }).slice(0, MAX_STOPS).map(function (x) {
+    var route = stopsOf(g).slice(0, MAX_STOPS).map(function (x) {
       return { place: clip(x.info.name, 80), country: clip(cc[x.info.cc] || "", 60), cc: String(x.info.cc || "").slice(0, 3), role: x.role || "move",
         age: typeof x.age === "number" ? x.age : null, year: typeof x.year === "number" ? x.year : null };
     });
@@ -113,7 +125,7 @@
     return L.join("\n").slice(0, 5800);
   }
 
-  var api = { candidates: candidates, facts: facts, payload: payload, render: render, asText: asText };
+  var api = { stopsOf: stopsOf, candidates: candidates, facts: facts, payload: payload, render: render, asText: asText };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (root) root.raStoryPlan = api;
 })(typeof window !== "undefined" ? window : (typeof globalThis !== "undefined" ? globalThis : this));

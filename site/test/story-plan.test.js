@@ -78,3 +78,13 @@ test("each place of the story is a line in the page's rail, jumping to that stop
   assert.match(p, /data-go", sec\.id|setAttribute\("data-go", sec\.id\)/);
   assert.match(r, /\.sp-rail a\.sub/);
 });
+
+test("a story that only places the relatives still gets a plan: their places stand in for an empty route", () => {
+  const info = { name: "Senj", cc: "HR", href: "/place/senj/", lat: 45, lon: 14.9, cols: [], provs: [], near: [] };
+  const g = { facts: { route: [], kin: [{ label: "his father", stops: [{ info, year: 1880, role: "born" }] }] } };
+  const body = P.payload(g, { HR: "Croatia" }, "/");
+  assert.equal(body.facts.route.length, 1);
+  assert.equal(body.facts.route[0].place, "Senj");
+  assert.ok(body.candidates.length >= 1);
+  assert.equal(P.payload({ facts: { route: [] } }, {}, "/").facts.route.length, 0, "no place at all still has nothing to plan from");
+});

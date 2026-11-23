@@ -209,7 +209,7 @@
     var g = last; aiBtn.disabled = true; aiStat.textContent = "Asking Claude Haiku… this takes up to half a minute."; aiStat.className = "sp-status";
     Promise.all([window.raStoryRead && window.raStoryRead.call ? null : loadScript("story-read.js"), window.raStoryPlan ? null : loadScript("story-plan.js")]).then(function () {
       var body = window.raStoryPlan.payload(g, data && data.countries, BASE);
-      if (!body.facts.route.length) throw new Error("Name at least one place first, then the plan has something to start from.");
+      if (!body.facts.route.length) throw new Error("The plan needs a place the Atlas knows. None in your story matched yet: add where it happened with the country (for example “Gallignana, Croatia”), and the plan will have somewhere to start.");
       return window.raStoryRead.call("plan", body);
     }).then(function (j) {
       lastPlan = j.result || null; aiOut.hidden = false; window.raStoryPlan.render(lastPlan, aiOut); aiStat.textContent = "";

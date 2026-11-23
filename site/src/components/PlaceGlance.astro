@@ -58,7 +58,7 @@ const names = (older || []).slice(0, 6);
     <b>{place.name}</b> is {within.length ? <>in {within.join(", ")}, </> : "in "}
     {cc ? <a href={u(`/country/${cc.toLowerCase()}/`)}>{countryName}</a> : countryName} today.
     {volumeCount > 0
-      ? <> The atlas holds <a href="#ra-vols">{volumeCount} record volume{volumeCount === 1 ? "" : "s"}</a>{span ? <> covering {span[0]}–{span[1]}</> : null}.</>
+      ? <> The atlas holds <a href="#ra-vols">{volumeCount.toLocaleString("en-GB")} record volume{volumeCount === 1 ? "" : "s"}</a>{span ? <> covering {span[0]}–{span[1]}</> : null}.</>
       : <> The atlas holds no record volumes for it yet, which is a gap in the atlas and not a finding about the records.</>}
     {countN > 1 ? <> {own ? "The ground" : countryName} has flown {countN} flags.</> : null}
   </p>

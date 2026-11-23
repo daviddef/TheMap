@@ -209,5 +209,5 @@ test("on v2 the Year strip moves into the search bar, right of the filter button
   assert.match(map, /fbar\.parentNode\.insertBefore\(timeEl, fbar\.nextSibling\)/);
   assert.match(map, /var host = document\.getElementById\("ra-map"\);/, "the theatre no longer assumes the strip's parent is the map");
   assert.match(css, /\.fd2-stage \.ra-bar-find \.ra-time \{ position: static !important;[^}]*order: 9;/);
-  assert.match(css, /body:has\(\.ra-th\) \.fd2-stage \.ra-bar-find \.ra-time \{ display: none; \}/);
+  assert.match(css, /\.fd2-stage:has\(\.ra-th\) \.ra-bar-find \.ra-time \{ display: none; \}/);
 });

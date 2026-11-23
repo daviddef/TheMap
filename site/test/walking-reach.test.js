@@ -118,3 +118,17 @@ test("clicking a drawn or saved area opens its area screen, and the card unfolds
   assert.match(map, /poly\.on\("click"[\s\S]*?areaOpenSaved\(id, true\)/, "a saved shape");
   assert.match(map, /pl\.bringToBack\(\)/, "behind the places, so a dot inside the shape is still the thing clicked");
 });
+
+/* THE SHELF: its place stays a scope when an area is added, and every scope opens the same area screen */
+test("an area added after a place does not take the place off the shelf", () => {
+  assert.match(map, /var lp = SH\.lastPl;\s*if \(lp && fold\(short\(typed\(\)\.text\)\) === fold\(short\(lp\.n\)\)\) return lp;/);
+  assert.match(map, /window\.raShelfScope\("area"\)/, "a drawn area is what the shelf then shows");
+  assert.match(map, /window\.raShelfScope\(null\);\s*if \(window\.raShelfPing\)/, "opening a place takes it back to the place");
+  assert.match(map, /SH\.user = a; SH\.areaNew = false/, "picking the place segment sticks");
+});
+test("the shelf's \"See the list\" opens the area screen for the place, the view or the area", () => {
+  assert.match(map, /data-sh="list"/);
+  assert.match(map, /function shelfList\(\) \{[\s\S]*?areaShow\(\)[\s\S]*?areaOverlay\(short\(P\.pl\.n\)[\s\S]*?areaOverlay\("This view"/);
+  assert.match(map, /function AR\(\) \{ return AREA\.ov \|\| AREA\.rows; \}/, "the drawn area is never overwritten by an overlay");
+  assert.match(map, /areaAnalyse\(rings\) \{\s*AREA\.ov = null;/, "drawing an area retires the overlay");
+});

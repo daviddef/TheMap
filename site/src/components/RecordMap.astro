@@ -3202,6 +3202,7 @@ window.addEventListener("load", async function () {
     panelAt = p.i; panelQ = qbox.value;
     TSEVT = null;
     panel.innerHTML = render(d);
+    if (window.raShelfScope) window.raShelfScope(null);
     if (window.raShelfPing) window.raShelfPing();
     bandsInit(panel);
     if (TSV2) tsPaintAll(true);
@@ -8266,7 +8267,7 @@ window.addEventListener("load", async function () {
     areaCancelDraw();
     areaDropDrafts();
     if (AREA.bar) AREA.bar.hidden = true;
-    AREA.rows = null; AREA.done = false;
+    AREA.rows = null; AREA.ov = null; AREA.done = false;
     if (window.raShelfPing) window.raShelfPing();
   }
   function areaStart(mode) {
@@ -8384,6 +8385,7 @@ window.addEventListener("load", async function () {
       });
     }
     AREA.meta = null;
+    if (window.raShelfScope) window.raShelfScope("area");
     AREA.bar.innerHTML = '<span id="ra-area-n">Reading the area…</span><button type="button" data-a="show">Show</button><button type="button" data-a="more" title="Draw another area and keep this one">Add area</button><button type="button" data-a="save">Save</button><button type="button" data-a="clear">Clear</button>';
     AREA.bar.hidden = false;
     areaAnalyse(AREA.rings.slice());
@@ -8411,6 +8413,7 @@ window.addEventListener("load", async function () {
   function areaInfo(p) { return { p: p, st: rcState(p) }; }
   var AREA_ORDER = ["none", "list", "busy", "done"];
   function areaAnalyse(rings) {
+    AREA.ov = null;
     empty.hidden = true; panel.hidden = false; setQ("at", "");
     panel.innerHTML = '<div class="ra-area"><p class="at-sub">Reading the places inside your area…</p></div>';
     /* cells are fetched shape by shape, not for the box round all of them: two shapes a country apart must not pull in the country between */
@@ -8425,25 +8428,37 @@ window.addEventListener("load", async function () {
     });
   }
   function nfl(n) { return n.toLocaleString(); }
+  /* WHAT THE AREA SCREEN READS. Normally the shapes you drew (AREA.rows). The shelf can also ask for the same screen for the open place or for the
+     map in view (AREA.ov, no shapes), so «see everything for Senj» looks and works like «see everything for my area». The drawn area is not touched. */
+  function AR() { return AREA.ov || AREA.rows; }
+  function areaOverlay(title, note, places, arch) {
+    AREA.ov = { rings: [], places: places, arch: arch, vols: null, loading: false, title: title, note: note };
+    AREA.added = null; AREA.confirm = false;
+    empty.hidden = true; panel.hidden = false;
+    areaRender(); areaLoadVolumes();
+    var card = panel.closest ? panel.closest(".at-panel") : null;
+    if (card && card.classList.contains("fd2-folded")) { var fb = card.querySelector(".fd2-fold"); if (fb) fb.click(); }
+  }
   function areaRender() {
-    var R = AREA.rows; if (!R) return;
+    var R = AR(); if (!R) return;
     if (window.raShelfPing) window.raShelfPing();
     var P = window.raProgress, line = P ? (P.lines().filter(function (l) { return l.active; })[0] || {}).name : "";
     var groups = { none: [], list: [], busy: [], done: [] }, vtot = 0;
     R.places.forEach(function (p) { groups[rcState(p)].push(p); vtot += (p.v || 0) || (p.c || 0); });
-    var n = document.getElementById("ra-area-n");
+    var n = AREA.ov ? null : document.getElementById("ra-area-n");
     var ns = R.rings.length, shapes = ns > 1 ? ns + " areas" : "Area";
     if (n) n.textContent = T(ns > 1 ? ns + " areas" : "Area") + ": " + nfl(R.places.length) + " " + T(R.places.length === 1 ? "place" : "places") + " · " + nfl(vtot) + " " + T(vtot === 1 ? "volume" : "volumes");
     var h = ['<div class="ra-area">'];
-    var M = AREA.meta, SV = M && !M.multi && MYA.areas[M.id], MULTI = M && M.multi;
-    h.push('<div class="at-h ra-area-hd"><h3 id="ra-area-title">' + esc(SV ? SV.name : MULTI ? M.names.length + " saved areas together" : (ns > 1 ? "Your " + ns + " areas" : "Your area")) + "</h3>" + (SV
+    var M = AREA.ov ? null : AREA.meta, SV = M && !M.multi && MYA.areas[M.id], MULTI = M && M.multi;
+    h.push('<div class="at-h ra-area-hd"><h3 id="ra-area-title">' + esc(AREA.ov ? AREA.ov.title : SV ? SV.name : MULTI ? M.names.length + " saved areas together" : (ns > 1 ? "Your " + ns + " areas" : "Your area")) + "</h3>" + (SV
       ? (AREA.delAsk ? '<span class="ra-area-ask">Delete this area? <button type="button" data-a="yesdel">Yes, delete</button><button type="button" data-a="nodel">Cancel</button></span>'
                      : '<span class="ra-area-ed"><button type="button" data-a="rename">Rename</button><button type="button" data-a="delete">Delete</button></span>')
       : "") + "</div>");
     if (SV && SV.line) h.push('<p class="ra-area-grp">Research group for <b>' + esc(SV.line) + "</b>" + (ns > 1 ? " · " + ns + " areas" : "") + "</p>");
-    if (MULTI) h.push('<p class="ra-area-grp">' + M.names.map(esc).join(" · ") + "</p>");
+    if (AREA.ov) h.push('<p class="at-sub">' + esc(AREA.ov.note) + '</p>');
+    else if (MULTI) h.push('<p class="ra-area-grp">' + M.names.map(esc).join(" · ") + "</p>");
     else if (!SV) h.push('<p class="at-sub">Not saved yet: use Save on the map to name ' + (ns > 1 ? "them as one group" : "it") + ' and keep ' + (ns > 1 ? "them" : "it") + '. Add area draws another and keeps this one.</p>');
-    if (!MULTI) h.push(areaShapeRows(R));
+    if (!MULTI && !AREA.ov) h.push(areaShapeRows(R));
     h.push('<p class="ra-area-sum"><b>' + nfl(R.places.length) + "</b> " + T(R.places.length === 1 ? "catalogued place" : "catalogued places") + " · <b>" + nfl(vtot) + "</b> " + T(vtot === 1 ? "volume" : "volumes") +
            " · <b>" + nfl(R.arch.length) + "</b> " + T(R.arch.length === 1 ? "archive" : "archives") + ". " + T("Colours show") + " <b>" + esc(line || T("your research")) + "</b>.</p>");
     h.push('<div class="ra-area-tally"><span class="ra-area-tl">Places:</span>' + ["done", "busy", "list", "none"].map(function (k) {
@@ -8453,7 +8468,7 @@ window.addEventListener("load", async function () {
     /* the add button, once the volumes are in */
     h.push('<div class="ra-area-add" id="ra-area-add"></div>');
     AREA_ORDER.slice().reverse().concat([]).forEach(function () {});
-    areaBadges(R);
+    if (!AREA.ov) areaBadges(R);
     ["busy", "list", "none", "done"].forEach(function (k) {
       var g = groups[k]; if (!g.length) return;
       g.sort(function (a, b) { return a.n.localeCompare(b.n); });
@@ -8507,14 +8522,14 @@ window.addEventListener("load", async function () {
   }
   /* The volumes of every place in the area that has any: one file per place, six at a time, up to AREA_CAP places. */
   function areaLoadVolumes() {
-    var R = AREA.rows; if (!R || R.loading) return;
+    var R = AR(); if (!R || R.loading) return;
     R.loading = true; R.vols = {};
     var want = R.places.filter(function (p) { return ((p.v || 0) || (p.c || 0)) > 0; }).sort(function (a, b) { return ((b.v || 0) - (a.v || 0)); }).slice(0, AREA_CAP);
     R.capped = R.places.filter(function (p) { return ((p.v || 0) || (p.c || 0)) > 0; }).length > want.length;
     var i = 0, done = 0, total = want.length, add = document.getElementById("ra-area-add");
     if (!total) { areaAddUi(); return; }
     function next() {
-      if (AREA.rows !== R) return;
+      if (AR() !== R) return;
       if (i >= want.length) return;
       var p = want[i++];
       (cache[p.i] ? Promise.resolve(cache[p.i]) : fetch(DETAIL + p.i + ".json").then(function (r) { return r.json(); }))
@@ -8523,8 +8538,8 @@ window.addEventListener("load", async function () {
         .then(function () {
           done++;
           var a = document.getElementById("ra-area-add");
-          if (a && AREA.rows === R && done < total) a.innerHTML = '<p class="at-sub">Reading the books… ' + done + " of " + total + " places</p>";
-          if (done >= total && AREA.rows === R) { R.loading = false; areaFillVolumes(); areaAddUi(); } else next();
+          if (a && AR() === R && done < total) a.innerHTML = '<p class="at-sub">Reading the books… ' + done + " of " + total + " places</p>";
+          if (done >= total && AR() === R) { R.loading = false; areaFillVolumes(); areaAddUi(); } else next();
         });
     }
     if (add) add.innerHTML = '<p class="at-sub">Reading the books… 0 of ' + total + " places</p>";
@@ -8534,7 +8549,7 @@ window.addEventListener("load", async function () {
   var AREA_KIND = [/birth|baptis|christen|nati|rođen|rodjen/i, /marri|wedding|vjen|matrim/i, /death|burial|buried|umrl|mort|sepolt/i];
   function areaKindRank(t) { for (var i = 0; i < AREA_KIND.length; i++) if (AREA_KIND[i].test(t)) return i; return 3; }
   function areaFillVolumes() {
-    var R = AREA.rows; if (!R || !R.vols) return;
+    var R = AR(); if (!R || !R.vols) return;
     var ids = Object.keys(R.vols), openAll = ids.length <= 8;
     ids.forEach(function (id) {
       var box = panel.querySelector('[data-vols="' + id + '"]'); if (!box) return;
@@ -8556,14 +8571,14 @@ window.addEventListener("load", async function () {
   }
   /* A mark made in the list recolours the dots at once; the groups themselves stay put until Show, so a row does not jump away under the pointer. */
   document.addEventListener("ra-progress-changed", function () {
-    if (!AREA.rows) return;
+    if (!AR()) return;
     [].forEach.call(panel.querySelectorAll(".ra-vl > li[data-vol]"), function (li) {
       var d = li.firstChild, st = volStatus(li.getAttribute("data-vol"));
       if (d && d.style) { d.style.background = RC_COL[st]; d.classList.toggle("pz", st === "busy"); }
     });
   });
   function areaCandidates() {
-    var R = AREA.rows, out = [];
+    var R = AR(), out = [];
     if (!R || !R.vols) return out;
     Object.keys(R.vols).forEach(function (id) {
       var p = R.vols[id].p;
@@ -8580,9 +8595,9 @@ window.addEventListener("load", async function () {
     return out;
   }
   function areaAddUi() {
-    var box = document.getElementById("ra-area-add"); if (!box || !AREA.rows) return;
+    var box = document.getElementById("ra-area-add"); if (!box || !AR()) return;
     var P = window.raProgress, line = (P.lines().filter(function (l) { return l.active; })[0] || {}).name || "my research";
-    var c = areaCandidates(), R = AREA.rows;
+    var c = areaCandidates(), R = AR();
     var cap = R.capped ? " Only the " + AREA_CAP + " places with the most books were read; draw a smaller area for the rest." : "";
     if (AREA.added) {
       box.innerHTML = '<p class="ra-area-ok">Added ' + nfl(AREA.added.length) + " to the list for <b>" + esc(line) + '</b>. <button type="button" data-a="undo">Undo</button></p>';
@@ -8660,7 +8675,7 @@ window.addEventListener("load", async function () {
       else if (a === "finish") { if (AREA.pts.length >= 3) areaFinish(AREA.pts.slice()); }
       else if (a === "clear") areaClear();
       else if (a === "more") areaStart(AREA.last || "box");
-      else if (a === "show") { if (AREA.rows) { areaRender(); areaAddUi(); } }
+      else if (a === "show") { if (AREA.rows) { AREA.ov = null; areaRender(); areaAddUi(); } }
       else if (a === "save") areaSaveForm();
       else if (a === "cancelsave") { AREA.bar.innerHTML = '<span id="ra-area-n"></span><button type="button" data-a="show">Show</button><button type="button" data-a="more" title="Draw another area and keep this one">Add area</button><button type="button" data-a="save">Save</button><button type="button" data-a="clear">Clear</button>'; areaRender(); }
     });
@@ -8719,12 +8734,20 @@ window.addEventListener("load", async function () {
         var f = fold(t.text), hit = idx.places.filter(function (p) { return (fold(p.n) === f || fold(String(p.n).replace(/\s*\(.*\)\s*$/, "")) === f) && nvol(p) > 0; }).sort(function (a, b) { return nvol(b) - nvol(a); })[0];
         if (hit) return hit;
       }
-      var id = Q.get("at"); if (!id) return null;
-      return idx.places.filter(function (p) { return p.i === id; })[0] || { i: id, n: (cache[id] && cache[id].name) || id };
+      var id = Q.get("at");
+      if (!id) {
+        /* AN AREA TAKES THE PANEL BUT NOT THE PLACE. David: «if i add an area after i look up senj, i dont see senj on the list any more». The place
+           is still what the box says, so it stays a scope until the box says something else. */
+        var lp = SH.lastPl;
+        if (lp && fold(short(typed().text)) === fold(short(lp.n))) return lp;
+        return null;
+      }
+      var pl = idx.places.filter(function (p) { return p.i === id; })[0] || { i: id, n: (cache[id] && cache[id].name) || id };
+      SH.lastPl = pl; return pl;
     }
     function areaOn() { return !!(AREA.rows && AREA.rows.places && AREA.rows.places.length); }
     function plan() {
-      var pl = placeNow(), has = areaOn(), def = pl ? "place" : has ? "area" : "view";
+      var pl = placeNow(), has = areaOn(), def = pl && !SH.areaNew ? "place" : has ? "area" : pl ? "place" : "view";
       var act = SH.user && (SH.user !== "place" || pl) && (SH.user !== "area" || has) ? SH.user : def;
       return { act: act, pl: pl, has: has };
     }
@@ -8759,6 +8782,7 @@ window.addEventListener("load", async function () {
       segs.push(["view", "This view"]); segs.push(["area", "My area"]);
       head = function (n) {
         return '<div class="ra-sh-head"><b>' + title + "</b>" + (n || "") +
+          '<button type="button" class="ra-sh-list" data-sh="list" title="Everything for this, as a list: every volume, source and archive">See the list</button>' +
           (yrs ? '<button type="button" class="ra-sh-yrchip" data-sh="noyears" title="Show every year again">' + yt(yrs) + " ×</button>" : "") +
           '<span class="ra-sh-seg" role="group" aria-label="Scope">' + segs.map(function (s) {
             return '<button type="button" data-sh="' + s[0] + '" aria-pressed="' + (s[0] === P.act) + '"' + (s[0] === "area" && !P.has ? ' title="Draw a box or a loop first"' : "") + ">" + esc(s[1]) + "</button>";
@@ -8824,6 +8848,24 @@ window.addEventListener("load", async function () {
         sized();
       });
     }
+    /* THE SAME SCREEN FOR EVERY SCOPE. Clicking the shelf showed nothing for the place or the view; now «See the list» opens the area screen for
+       whichever of the three is on: the place, the map in view, or the area you drew. */
+    function shelfList() {
+      var P = plan();
+      if (P.act === "area") { areaShow(); return; }
+      if (P.act === "place" && P.pl) {
+        var pl = idx.places.filter(function (p) { return p.i === P.pl.i; })[0] || P.pl;
+        areaOverlay(short(P.pl.n), "Everything the Atlas holds for " + short(P.pl.n) + ".", [pl], []);
+        return;
+      }
+      var b = map.getBounds();
+      if (b.getNorth() - b.getSouth() > 9) return;
+      areaEnsureCells(b).then(function () {
+        var ps = idx.places.filter(function (p) { return p.y != null && b.contains([p.y, p.x]) && nvol(p) > 0; });
+        var ar = archives.filter(function (a) { return a.at && a.at.lat != null && b.contains([a.at.lat, a.at.lon]); });
+        areaOverlay("This view", "The places and archives on the map as you see it now. Pan or zoom, then open the list again to refresh it.", ps, ar);
+      });
+    }
     function sized() { requestAnimationFrame(function () { stage.style.setProperty("--shh", el.offsetHeight + "px"); }); }
     function queue() { if (SH.t) clearTimeout(SH.t); SH.t = setTimeout(render, 280); }
     function setOn(v) {
@@ -8836,17 +8878,19 @@ window.addEventListener("load", async function () {
       if (s) {
         var a = s.getAttribute("data-sh");
         if (a === "hide") setOn(false);
+        else if (a === "list") shelfList();
         else if (a === "noyears") {
           if (yon && yon.checked && year) { yon.checked = false; readRange(); yearUI(); }
           else { var t = typed(); if (t.yrs) { qbox.value = t.text; qbox.dispatchEvent(new Event("input", { bubbles: true })); } }
           queue();
         } else if (a === "area" && !areaOn()) { return; }
-        else { SH.user = a === "place" ? null : a; render(); }
+        else { SH.user = a; SH.areaNew = false; render(); }
         return;
       }
       var c = e.target.closest("[data-sh-p]"); if (!c) return;
       var pid = c.getAttribute("data-sh-p"), P = plan();
       if (P.act === "place" && c.getAttribute("data-sh-u")) { window.open(c.getAttribute("data-sh-u"), "_blank", "noopener"); return; }
+      if (P.act === "place") { shelfList(); return; }
       var pl = idx.places.filter(function (p) { return p.i === pid; })[0];
       if (pl) { open(pl); if (pl.y != null) map.panTo([pl.y, pl.x]); }
     });
@@ -8854,6 +8898,8 @@ window.addEventListener("load", async function () {
     qbox.addEventListener("input", function () { if (on) queue(); });
     window.raShelfPing = function () { if (on) queue(); };
     window.raShelfOn = function () { setOn(true); };
+    /* a new area is what the reader is looking at; opening a place takes the shelf back to that place */
+    window.raShelfScope = function (a) { SH.areaNew = a === "area"; SH.user = null; if (on) queue(); };
     if (btn) { btn.setAttribute("aria-pressed", String(on)); btn.classList.toggle("on", on); }
     if (on) queue();
   })();
@@ -8916,6 +8962,7 @@ window.addEventListener("load", async function () {
   /* the area screen again: the same one the add ended on */
   function areaShow() {
     if (!AREA.rows) return;
+    AREA.ov = null;
     empty.hidden = true; panel.hidden = false; setQ("at", "");
     areaRender(); areaAddUi();
     /* on the new front door the card may have been folded away; the area screen is what was asked for */

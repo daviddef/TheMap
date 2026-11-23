@@ -361,3 +361,14 @@ test("'my mother Cheryl who's grandfather was from Argentina' does not make the 
   const m2 = (q.people || []).filter((x) => x.role === "mother")[0];
   assert.ok(m2 && m2.place && m2.place.row.n === "Argentina" || (q.kin || []).some((x) => /mother/.test(x.label || "") && x.stops.some((s) => s.row.n === "Argentina")));
 });
+
+test("a mother's given name is read in lower case, and before a 'who's grandfather' clause", () => {
+  for (const t of ["he married my mother cheryl who's grandfather was from Argentina.", "He married my mother Cheryl whose grandfather was from Argentina.", "he married my mother cheryl who was from Argentina.", "he married my mother cheryl."]) {
+    const p = F.parseStory("My dad was born in 1951 and moved from Senj, Croatia to Brisbane. " + t, ctx);
+    const mother = (p.people || []).filter((x) => x.role === "mother")[0];
+    assert.equal(mother && mother.name, "Cheryl", t);
+  }
+  /* a lower-case word that is not a given name is not taken for one */
+  const q = F.parseStory("My dad was born in Senj and moved to Brisbane. He married my mother worked in Perth.", ctx);
+  assert.ok(!(q.people || []).some((x) => x.name === "Worked"));
+});

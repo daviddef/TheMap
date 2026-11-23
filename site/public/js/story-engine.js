@@ -1163,6 +1163,11 @@
         }
         if (nm && okName(nm[1])) { person(x.key, nm[1]); rest = rest.slice(nm[0].length); }
         else if (nm) rest = rest.slice(nm[0].length - nm[1].length);
+        else {
+          /* "my mother Cheryl who's grandfather...", "my mother cheryl": the name follows with no "is/was", capitalised or typed in lower case but a given name the Atlas knows */
+          var bn = /^\s+([\p{L}'\u2019-]{2,})(?=\s|,|$)/u.exec(rest);
+          if (bn && okName(bn[1]) && !KINW.test(bn[1]) && !REL.test(bn[1]) && (/^\p{Lu}/u.test(bn[1]) || (ctx.given && S.givenIn(bn[1], ctx.given, ctx.skip).length))) { person(x.key, bn[1].charAt(0).toUpperCase() + bn[1].slice(1)); rest = rest.slice(bn[0].length); }
+        }
         rest = cutRelative(rest).own;   /* "my mother Cheryl who's grandfather was from X": that is HER grandfather, your great-grandfather, who the tree does not draw yet, so X is not put on her */
         merge(p, readEvents(rest, ctx)); p.occ = p.occ || occIn(rest); mention(x.key);
       });

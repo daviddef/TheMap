@@ -18,6 +18,7 @@
   var text = $("sp-text"), chips = $("sp-chips"), status = $("sp-status"), shots = $("sp-shots"), drop = $("sp-drop");
   var files = [], ov = Object.create(null), lastSig = "", parsed = null, token = 0, shown = Object.create(null), last = null, stopItems = [], lastPlan = null;
   var HINT = "My great-grandfather Ivan Kosina came from Gallignana to Hamilton around 1905. All I have is this photo.";
+  var LEDE0 = ($("sp-lede") && $("sp-lede").textContent) || "";
   var DRAFT = "ra-story-page-draft", HAND = "ra-story-handoff";
 
   function loadScript(src) { return new Promise(function (ok, fail) { var s = document.createElement("script"); s.src = BASE + "js/" + src; s.onload = ok; s.onerror = function () { fail(new Error(src)); }; document.head.appendChild(s); }); }
@@ -134,7 +135,7 @@
   }
   function lede(f) {
     var bits = (f.route || []).filter(function (x) { return x.info; }).map(function (x, i) {
-      var a = x.age != null ? (x.approx ? " at about age " : " at age ") + x.age : "";
+      var a = x.age > 0 ? (x.approx ? " at about age " : " at age ") + x.age : "";   /* an age of 0 is "no age told", not a newborn */
       return (i === 0 ? (x.role === "born" ? "born in " : "from ") : i === f.route.length - 1 ? "arriving in " : "then ") + x.info.name + (i ? a : "");
     });
     return bits.length ? bits.join(", ") + ". Change the words below and everything on this page follows." : "";
@@ -183,7 +184,7 @@
   function drawAll(g) {
     var f = g.facts;
     $("sp-title").textContent = f.name ? f.name + "’s story" : "Their story";
-    $("sp-lede").textContent = lede(f) || $("sp-lede").textContent;
+    $("sp-lede").textContent = lede(f) || LEDE0;   /* never the last story's route when this one tells none */
     rail.hidden = false;
     secShow("sp-places", true);
     var sb = J.stops(f, g.mort); stopItems = sb.items; var st = $("sp-stops"); st.textContent = ""; st.append(sb); placesRail();

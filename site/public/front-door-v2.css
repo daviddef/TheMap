@@ -145,6 +145,13 @@ body.fd2 .fd2-classic:hover, body.fd2 .fd2-classic:focus-visible { color: var(--
 .fd2-more a { color: var(--accent, #1f5c6b); text-decoration: none; }
 .fd2-more a:hover { text-decoration: underline; }
 
+/* THE AREA BARS MUST NOT SIT UNDER THE SEARCH ROW. The map puts "Area: 7 places · Show · Add area · Save · Clear" and the "Drag a corner / Done" bar 10px
+   from the top of the map. On v2 that is where the floating search row is, and the search row is on top, so Clear and Done could not be clicked and an
+   area could not be removed. They go below the search row, between the card on the left and the tools on the right, and wrap if the room is short. */
+@media (min-width: 900px) {
+  .fd2-stage .ra-area-hint, .fd2-stage .ra-area-bar, .fd2-stage .ra-area-hint.ra-lo { top: 88px; left: auto; right: 76px; transform: none; width: max-content; max-width: calc(100% - 650px); flex-wrap: wrap; justify-content: flex-end; }
+}
+
 /* a short window keeps the doors and drops the counts, so the card never has to scroll just to show them */
 @media (min-width: 900px) and (max-height: 820px) { .fd2-stats { display: none; } .fd2-h { font-size: 26px; } .fd2-tile { padding: 9px 11px; } }
 

@@ -41,7 +41,8 @@ test("the front door is the indexed home page and the classic view is its not-in
   assert.match(v2, /title="Record Atlas"/);
   assert.doesNotMatch(v2, /Front door v2|fd2-top/, "no trial labels on the home page");
   assert.match(v2, /"@type": "SearchAction"/, "the structured data moved with the home page");
-  assert.match(v2, /<HomeAbout \/>/, "the page's words are in the server-rendered HTML");
+  assert.doesNotMatch(v2, /<HomeAbout/, "the page's words moved to Help so the map has the room");
+  assert.match(read("src/pages/help.astro"), /<HomeAbout \/>/, "...and are on the Help page");
   assert.doesNotMatch(home, /SearchAction|<HomeAbout/, "the classic view carries neither");
   const old = read("src/pages/v2.astro");
   assert.match(old, /location\.replace\(home \+ location\.search \+ location\.hash\)/, "an old /v2/ link keeps its query");

@@ -4,14 +4,13 @@
    It was /v2/ while it was a trial and became the home page on 23 Nov 2026. The old layout is kept at /classic/ (the same map and tools,
    not indexed). The map, search, filters, layers, saved views and areas, the year control, the visiting checklist, My research colouring,
    the story panel and the basemaps are the one RecordMap component both pages render; /front-door-v2.css and /js/front-door-v2.js lay the
-   shell over it. The server-rendered words below the map (HomeAbout) and the structured data are here because this is the page a search
-   engine meets first. */
+   shell over it. The page's words (components/HomeAbout.astro) used to sit under the map and now live on /help/, so the map has the screen; the
+   structured data stays here because this is the page a search engine meets first. */
 import Base from "../layouts/Base.astro";
 import RecordMap from "../components/RecordMap.astro";
 import ProgressKit from "../components/ProgressKit.astro";
 import VolumeMarks from "../components/VolumeMarks.astro";
 import StoryDrawer from "../components/StoryDrawer.astro";
-import HomeAbout from "../components/HomeAbout.astro";
 import InventoryPill from "../components/InventoryPill.astro";
 import { u } from "../lib/url.js";
 import { places, volumes, countries, archives } from "../lib/inventory.js";
@@ -85,8 +84,6 @@ const base = u("/");
   <p id="ra-mywork" data-href={u("/my-research/")} hidden></p>
   <VolumeMarks />
   <StoryDrawer />
-  {/* THE PAGE IN WORDS, in the server-rendered HTML below the map. See components/HomeAbout.astro. */}
-  <HomeAbout />
   <p class="fd2-classic-foot">Prefer the old layout? <a href={u("/classic/")}>Classic view</a></p>
 
   <link rel="stylesheet" href={base + "front-door-v2.css"} />

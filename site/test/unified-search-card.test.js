@@ -51,7 +51,7 @@ test("starting a story closes the place card the first words opened, and the sav
   assert.match(fn, /#ra-body \.at-h h3/, "the place card heading is compared with what was typed");
   assert.match(fn, /ra-sheet-x/, "the map's own close button closes it");
   const sd = readFileSync(new URL("../src/components/StoryDrawer.astro", import.meta.url), "utf8");
-  assert.match(sd, /<a href=\{u\("\/my-research\/#story"\)\}>My story<\/a>/, "My story is a link");
+  assert.match(sd, /<a href=\{u\("\/my-research\/#story"\)\}>My research<\/a>/, "the saved stories are a link");
   assert.doesNotMatch(sd, /Roots &amp; Routes/, "the tree page is called the Tree Canvas");
 });
 

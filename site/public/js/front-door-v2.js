@@ -79,13 +79,27 @@
     else if (a === "names") location.href = url("/your-name/");
     else if (a === "history") location.href = url("/history/");
     else if (a === "looking") location.href = url("/looking-for/");
-    else if (a === "play") timeOn(true);
+    else if (a === "play") location.href = historyUrl();
     else if (a === "handoff") {
       if (q && q.value.trim() && window.raStoryBox) window.raStoryBox.handoff();
       else { toast("Write a few words about who you are looking for in the box first."); q && q.focus(); }
     }
   }
 
+  /* PLAY IS THE HISTORY MAP'S. The records map used to open the History playback over itself, which on this page meant a second panel on top of the
+     card. The playback has its own page, so the play button and the "What was happening" door go there, carrying the year if the reader had set one. */
+  function historyUrl() {
+    var on = document.getElementById("ra-yon"), y = document.getElementById("ra-year"), n = y ? parseInt(y.value, 10) : NaN;
+    return url("/history/") + (on && on.checked && n >= 600 && n <= 2026 ? "?y=" + n : "");
+  }
+  var pb = document.getElementById("ra-play");
+  if (pb) { pb.title = "Watch history play on the history map"; pb.setAttribute("aria-label", "Watch history play on the history map"); }
+  document.addEventListener("click", function (e) {
+    var b = e.target && e.target.closest ? e.target.closest("#ra-play") : null;
+    if (!b) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    location.href = historyUrl();
+  }, true);
   /* the year control: switch it on, set a year, and press play */
   function timeOn(play) {
     var on = document.getElementById("ra-yon"), y = document.getElementById("ra-year"), y2 = document.getElementById("ra-year2");

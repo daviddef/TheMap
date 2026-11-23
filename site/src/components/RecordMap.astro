@@ -600,6 +600,23 @@ window.addEventListener("load", async function () {
     unsurveyed:[_acc("unsurveyed","#B6B2A6"), T("Nobody has walked this one yet")]
   };
   var RANK = idx.rank || Object.keys(ACC);
+  /* ACCESS AS A PICTURE, ON THE FRONT DOOR V2. David: «"on paper in the building" show a building icon, etc, with hover text, rather than lengthy words».
+     One small drawing per kind of access, in the colour of the ink; the words are its tooltip and its accessible name. Anywhere else the words stay. */
+  var ACC_SVG = {
+    free: '<rect x="3" y="4" width="14" height="12" rx="2"/><circle cx="7.5" cy="8.5" r="1.3"/><path d="M3.5 14l4-3.5 3 2.5 2.5-2 3.5 3"/>',
+    account: '<circle cx="10" cy="7" r="3"/><path d="M4 16.5c.8-3 3.2-4.5 6-4.5s5.2 1.5 6 4.5"/>',
+    index: '<path d="M4 6h12M4 10h12M4 14h8"/>',
+    mixed: '<circle cx="10" cy="10" r="6.5"/><path d="M10 3.5a6.5 6.5 0 0 0 0 13z" fill="currentColor"/>',
+    paid: '<rect x="4.5" y="9" width="11" height="7.5" rx="1.8"/><path d="M7 9V6.8a3 3 0 0 1 6 0V9"/>',
+    catalogue: '<path d="M10 5.5C8.5 4.3 6 4 3.5 4.5v10c2.5-.5 5-.2 6.5 1 1.5-1.2 4-1.5 6.5-1v-10C14 4 11.5 4.3 10 5.5zM10 5.5v10"/>',
+    onsite: '<path d="M3 8l7-4 7 4M4.5 8v7M8 8v7M12 8v7M15.5 8v7M3 16.5h14"/>',
+    unsurveyed: '<circle cx="10" cy="10" r="6.5" stroke-dasharray="2.2 2.2"/><path d="M8.3 8.2a1.8 1.8 0 1 1 2.6 1.6c-.6.3-.9.7-.9 1.4M10 13.6v.1"/>'
+  };
+  function accTxt(a) {
+    var m = ACC[a], label = (m || [0, a || ""])[1];
+    if (!TSV2 || !ACC_SVG[a]) return esc(label);
+    return '<span class="ra-acc" role="img" title="' + esc(label) + '" aria-label="' + esc(label) + '"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ACC_SVG[a] + "</svg></span>";
+  }
 
   /* ---- URL as state ------------------------------------------------------
      Every view of this map is a link: the layers, the basemap, the year, what
@@ -891,7 +908,7 @@ window.addEventListener("load", async function () {
              esc(p.name) + " &#8599;</a> " +
              '<span class="ra-who"><i class="at-dot" style="background:' +
              (ACC[p.access] || ["#7C8A91"])[0] + '"></i>' +
-             esc((ACC[p.access] || [0, p.access])[1]) + "</span></li>");
+             accTxt(p.access) + "</span></li>");
     });
     if (nat.length > 10)
       h.push('<li class="ra-who">…and ' + (nat.length - 10) + " more on the " +
@@ -914,7 +931,7 @@ window.addEventListener("load", async function () {
                esc(p.name) + " &#8599;</a> " +
                '<span class="ra-who"><i class="at-dot" style="background:' +
                (ACC[p.access] || ["#7C8A91"])[0] + '"></i>' +
-               esc((ACC[p.access] || [0, p.access])[1]) + "</span></li>");
+               accTxt(p.access) + "</span></li>");
       });
       h.push("</ul></div>");
     }
@@ -951,7 +968,7 @@ window.addEventListener("load", async function () {
        has surveyed. As a tag on every row it said nothing about the row. */
     if (!access || access === "unsurveyed") return "";
     return '<i class="at-dot" style="background:' + (ACC[access] || ["#7C8A91"])[0] +
-           '"></i>' + esc((ACC[access] || [0, access])[1]);
+           '"></i>' + accTxt(access);
   }
   var volInFS = false;   /* set by placeSources when it drew "the volumes themselves" inside the FamilySearch column */
   var fsMoved = [];   /* the volumes placeSources drew in the FamilySearch column, so the cost-grouped lists skip them */
@@ -4321,7 +4338,7 @@ window.addEventListener("load", async function () {
         count++;
         var dot = ACCESS_DOT(pv.access), note = (ACC[pv.access] || [0, pv.access])[1];
         if (pv.at) checkPins.push({ n: count, y: pv.at.lat, x: pv.at.lon, name: pv.name, dot: dot });
-        h.push('<li><a class="ra-area-p" target="_blank" rel="noopener" href="' + esc(pv.url) + '" title="' + esc(note) + '">' +
+        h.push('<li' + (pv.id ? srcAttrs(pv.id, pv.name, CNAME[cc] || cc, BASE + "archive/" + pv.id + "/") : "") + '><a class="ra-area-p" target="_blank" rel="noopener" href="' + esc(pv.url) + '" title="' + esc(note) + '">' +
                '<span class="ra-ck-i"' + (dot ? ' style="background:' + dot + ";color:" + inkOn(dot) + '"' : "") + ">" + count + "</span>" +
                "<span>" + esc(pv.name) + "</span><small>" + esc(note) + "</small></a></li>");
       });
@@ -4487,7 +4504,7 @@ window.addEventListener("load", async function () {
       nat.slice(0, 8).forEach(function (p) {
         h.push('<li><a href="' + esc(p.url) + '" target="_blank" rel="noopener">' +
                esc(p.name) + " &#8599;</a> " + '<span class="ra-who">' +
-               esc((ACC[p.access] || [0, p.access])[1]) + "</span></li>");
+               accTxt(p.access) + "</span></li>");
       });
       h.push("</ul></div>");
     }
@@ -7114,7 +7131,8 @@ window.addEventListener("load", async function () {
                nalso.map(function (x) { return "<em>" + esc(x) + "</em>"; })
                     .join(" \u00b7 ") + "</span>");
       if (nrow.pg) {
-        h.push('<a class="at-go" href="' + BASE + "surname/" +
+        /* on the front door v2 the page icon at the top right of the card says it, so the line is not repeated */
+        if (!TSV2) h.push('<a class="at-go" href="' + BASE + "surname/" +
                nameSlug(nrow.n) + '/">' + esc(T("Read more about") + " " + nrow.n) +
                " &rarr;</a>");
         /* The flag icon takes the country the band opens on — the earliest
@@ -7697,7 +7715,7 @@ window.addEventListener("load", async function () {
       cover.slice(0, 14).forEach(function (p) {
         h.push('<li><a href="' + esc(p.url) + '" target="_blank" rel="noopener">' +
                esc(p.name) + " &#8599;</a> <span class=\"ra-who\">" +
-               esc((ACC[p.access] || [0, p.access])[1]) + "</span>" +
+               accTxt(p.access) + "</span>" +
                (p.at ? ' <span class="ra-who">' + esc(p.at.place) + "</span>" : "") + "</li>");
       });
       h.push("</ul>");
@@ -8595,6 +8613,11 @@ window.addEventListener("load", async function () {
     });
   }
   function nfl(n) { return n.toLocaleString(); }
+  /* A SOURCE ROW CARRIES ITS OWN MARK. The list of sources that cover a country (and the archives standing in an area) used to be links only, while the
+     books above them had a + to add them to your research. The same attributes the place page's source rows use make volume-marks.js put the same + at the head. */
+  function srcAttrs(id, name, where, href) {
+    return ' data-src="source:' + esc(id) + '" data-src-t="' + esc(name) + '" data-src-where="' + esc(where || "") + '" data-src-href="' + esc(href) + '"';
+  }
   /* WHAT THE AREA SCREEN READS. Normally the shapes you drew (AREA.rows). The shelf can also ask for the same screen for the open place or for the
      map in view (AREA.ov, no shapes), so «see everything for Senj» looks and works like «see everything for my area». The drawn area is not touched. */
   function AR() { return AREA.ov || AREA.rows; }
@@ -8625,8 +8648,8 @@ window.addEventListener("load", async function () {
       h.push('<details class="ra-area-g ra-area-cov"' + (all.length === 1 || c.list.length <= 8 ? " open" : "") + '><summary><i style="background:#5B7A8C"></i>Sources that cover all of ' + esc(CNAME[c.cc] || c.cc) + " <b>" + nfl(c.list.length) + "</b></summary><ul>");
       c.list.forEach(function (a) {
         var st = volStatus("source:" + a.id);
-        h.push('<li><a class="ra-area-p" target="_blank" rel="noopener" href="' + BASE + "archive/" + esc(a.id) + '/"><i style="background:' + RC_COL[st] + '"></i><span>' + esc(a.name) + "</span><small>" +
-               esc((ACC[a.access] || [0, a.access || ""])[1]) + "</small></a></li>");
+        h.push('<li' + srcAttrs(a.id, a.name, CNAME[c.cc] || c.cc, BASE + "archive/" + a.id + "/") + '><a class="ra-area-p" target="_blank" rel="noopener" href="' + BASE + "archive/" + esc(a.id) + '/"><i style="background:' + RC_COL[st] + '"></i><span>' + esc(a.name) + "</span><small>" +
+               accTxt(a.access) + "</small></a></li>");
       });
       h.push("</ul></details>");
     });
@@ -8707,7 +8730,7 @@ window.addEventListener("load", async function () {
       h.push('<details class="ra-area-g" open><summary><i style="background:#8A6D3B"></i>Archives in this area <b>' + nfl(R.arch.length) + "</b></summary><ul>");
       R.arch.slice().sort(function (a, b) { return a.name.localeCompare(b.name); }).forEach(function (a) {
         var st = volStatus("source:" + a.id);
-        h.push('<li><a class="ra-area-p" target="_blank" rel="noopener" title="Opens in a new tab, so your areas stay on the map" href="' + BASE + "archive/" + esc(a.id) + '/"><i style="background:' + RC_COL[st] + '"></i><span>' + esc(a.name) + "</span><small>" +
+        h.push('<li' + srcAttrs(a.id, a.name, (a.at && a.at.place) || "", BASE + "archive/" + a.id + "/") + '><a class="ra-area-p" target="_blank" rel="noopener" title="Opens in a new tab, so your areas stay on the map" href="' + BASE + "archive/" + esc(a.id) + '/"><i style="background:' + RC_COL[st] + '"></i><span>' + esc(a.name) + "</span><small>" +
                esc((a.at && a.at.place) || "") + "</small></a></li>");
       });
       h.push("</ul></details>");
@@ -8717,8 +8740,8 @@ window.addEventListener("load", async function () {
              '<p class="at-sub">They reach this area from outside it: national or country-wide, not kept in a place you drew round.</p><ul>');
       c.list.forEach(function (a) {
         var st = volStatus("source:" + a.id);
-        h.push('<li><a class="ra-area-p" target="_blank" rel="noopener" title="Opens in a new tab, so your areas stay on the map" href="' + BASE + "archive/" + esc(a.id) + '/"><i style="background:' + RC_COL[st] + '"></i><span>' + esc(a.name) + "</span><small>" +
-               esc((ACC[a.access] || [0, a.access || ""])[1]) + "</small></a></li>");
+        h.push('<li' + srcAttrs(a.id, a.name, CNAME[c.cc] || c.cc, BASE + "archive/" + a.id + "/") + '><a class="ra-area-p" target="_blank" rel="noopener" title="Opens in a new tab, so your areas stay on the map" href="' + BASE + "archive/" + esc(a.id) + '/"><i style="background:' + RC_COL[st] + '"></i><span>' + esc(a.name) + "</span><small>" +
+               accTxt(a.access) + "</small></a></li>");
       });
       h.push("</ul></details>");
     });
@@ -11656,6 +11679,11 @@ window.addEventListener("load", async function () {
   :global(.ra-vy) { flex: none; width: 74px; text-align: right; font: 400 11.5px/1 var(--mono); color: var(--ink-3); font-variant-numeric: tabular-nums; }
   :global(.ra-vl .volmark) { flex: none; }
   :global(.ra-vl .volmark:has(.vm-edit)) { flex: 1 0 100%; padding: 6px 0 2px 18px; }
+  /* a source row in an area or a surname card: [+] [dot] name ..... note, the same bargain as a book above it */
+  :global(.ra-area-g > ul > li[data-src]) { display: flex; align-items: center; flex-wrap: wrap; gap: 0 8px; }
+  :global(.ra-area-g > ul > li[data-src] > .ra-area-p) { flex: 1 1 0; width: auto; min-width: 0; }
+  :global(.ra-area-g > ul > li[data-src] > .srcmark) { flex: none; margin: 0; }
+  :global(.ra-area-g > ul > li[data-src] > .srcmark:has(.src-edit)) { flex: 1 0 100%; padding: 4px 0 4px 4px; }
 
   /* ---- the research switch on the search line ---- */
   :global(.ra-rc-tog) { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px; border-radius: 10px; cursor: pointer; white-space: nowrap;

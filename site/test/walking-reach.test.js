@@ -276,3 +276,15 @@ test("the Year pill is spaced like its neighbours: no extra margin beside the fl
   const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
   assert.match(css, /order: 9; align-self: flex-start; max-width: none; margin: 0;/);
 });
+
+test("source rows carry a + like the books do, access is a picture with its words as the tooltip, and the surname card does not repeat its own page link", () => {
+  const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
+  assert.match(map, /function srcAttrs\(id, name, where, href\)/);
+  assert.equal((map.match(/'<li' \+ srcAttrs\(/g) || []).length, 3, "the place card, the archives and the country-wide lists");
+  assert.match(map, /'<li' \+ \(pv\.id \? srcAttrs\(pv\.id/, "the Where to read rows");
+  assert.match(map, /function accTxt\(a\)[\s\S]*?if \(!TSV2 \|\| !ACC_SVG\[a\]\) return esc\(label\);/, "words stay off v2");
+  assert.match(map, /role="img" title="' \+ esc\(label\) \+ '" aria-label="'/, "the words are the tooltip and the name");
+  assert.match(map, /if \(!TSV2\) h\.push\('<a class="at-go"/, "no Read more line beside the page icon");
+  assert.match(css, /^\.fd2-stage \.ra-acc \{/m);
+});
+

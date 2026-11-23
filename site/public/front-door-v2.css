@@ -472,3 +472,11 @@ body.fd2-immersive .fd2-stage::after { border-radius: 0; }
 .fd2-stage .ra-in-card .ra-area-p > span:nth-child(2) { flex: 1 1 auto; min-width: 0; }
 .fd2-stage .ra-in-card .ra-area-p small { display: none; }   /* the colour of the number says it; the words are its tooltip */
 .fd2-stage .ra-in-card .ra-ck-i { flex: none; display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; font: 700 10px/1 var(--mono, ui-monospace, monospace); }
+
+/* HOW YOU CAN READ A SOURCE, AS A PICTURE: a building for «on paper, in the building», a picture for images, a lock for a paywall, a book for a catalogue entry.
+   The words are the tooltip and the accessible name; the dot that used to precede them is not repeated. */
+.fd2-stage .ra-acc { flex: none; display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; color: var(--ink-2, #4c5d66); cursor: help; vertical-align: middle; }
+.fd2-stage .ra-acc:hover { color: var(--accent, #1f5c6b); background: var(--accent-wash, rgba(31, 92, 107, .1)); }
+.fd2-stage .ra-acc svg { display: block; }
+.fd2-stage .ra-who:has(> .ra-acc) > .at-dot, .fd2-stage .sr-m:has(.ra-acc) > .at-dot { display: none; }
+.fd2-stage .ra-area-p > small:has(.ra-acc) { display: inline-flex; align-items: center; margin-left: auto; }

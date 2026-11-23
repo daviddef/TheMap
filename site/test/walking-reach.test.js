@@ -211,3 +211,13 @@ test("on v2 the Year strip moves into the search bar, right of the filter button
   assert.match(css, /\.fd2-stage \.ra-bar-find \.ra-time \{ position: static !important;[^}]*order: 9;/);
   assert.match(css, /\.fd2-stage:has\(\.ra-th\) \.ra-bar-find \.ra-time \{ display: none; \}/);
 });
+
+test("the footer's GoatCounter link sits tight inside its brackets, and the removed v2 extras stay removed", () => {
+  const base = readFileSync(join(root, "src/layouts/Base.astro"), "utf8");
+  assert.match(base, /no cookies \(<a href="https:\/\/www\.goatcounter\.com\/" rel="noopener" style="margin: 0">GoatCounter<\/a>\)/);
+  const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
+  assert.match(css, /\.fd2-stage \.ra-base \{ display: none !important; \}/);
+  assert.match(css, /body\.fd2 #ra-mywork \{ display: none !important; \}/);
+  assert.doesNotMatch(map, /Zoom in, or draw a box round the ground you mean/);
+  assert.match(map, /if \(b\.getNorth\(\) - b\.getSouth\(\) > 9\) \{ el\.innerHTML = head\(""\); sized\(\); return; \}/);
+});

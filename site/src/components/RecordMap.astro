@@ -8931,7 +8931,7 @@ window.addEventListener("load", async function () {
         places = walkPlaces();
       } else if (P.act === "area") places = AREA.rows.places.filter(function (p) { return nvol(p) > 0; });
       else {
-        if (b.getNorth() - b.getSouth() > 9) { el.innerHTML = head("") + '<p class="ra-sh-empty">Zoom in, or draw a box round the ground you mean, and the shelf fills with its volumes.</p>'; sized(); return; }
+        if (b.getNorth() - b.getSouth() > 9) { el.innerHTML = head(""); sized(); return; }   /* zoomed right out: the header alone, no instruction (David: «we don't need to write things like "Zoom in..."») */
         var ck = b.toBBoxString(); if (ck !== SH.cells) { SH.cells = ck; areaEnsureCells(b).then(function () { if (on) queue(); }); }
         places = idx.places.filter(function (p) { return p.y != null && b.contains([p.y, p.x]) && nvol(p) > 0; });
       }

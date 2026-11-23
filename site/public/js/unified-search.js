@@ -172,7 +172,7 @@
       else if (/^to /i.test(tx)) trip.push(ch);
       else if (/^in /i.test(tx)) also.push(ch);
       else if (/^work:/i.test(tx)) { ch.textContent = tx.replace(/^work:\s*/i, ""); work.push(ch); }
-      else if (/^heard /i.test(tx)) heard.push(ch);
+      else if (/^(?:heard |had |nearly died)/i.test(tx)) heard.push(ch);
       else if (/\bwarn\b/.test(c.className)) check.push(ch);
       else who.push(ch);
     });

@@ -397,6 +397,8 @@ jobs:
       - name: Built-output gates
         run: python3 ../scripts/check-built.py
         working-directory: site
+        env:
+          RA_SHARD: none   # the gate reads this to know no generated page was built, and so not to ask for their styles
       - name: Install the uploader
         run: python3 -m pip install --quiet boto3
       - name: Upload the static part

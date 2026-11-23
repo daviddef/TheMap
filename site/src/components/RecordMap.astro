@@ -3828,6 +3828,65 @@ window.addEventListener("load", async function () {
   try { hoodOn = localStorage.getItem("ra-hood") !== "0"; } catch (e) { /* storage blocked */ }
   var HOOD_MIN = 4, HOOD_MAX = 25, HOOD_NEIGHBOURS = 8;
 
+  /* WALKING REACH (new front door only). The ring above is a circle, and a circle ignores the sea, the mountains and the passes: «a day's
+     walk» from Senj does not reach Krk, and it reaches further along the coast than over the Velebit. So on v2 the circle is a first
+     answer and, a moment later, the shape of the ground you could walk in N hours: Tobler's hiking function over an elevation grid
+     (js/walking-reach.js), sea impassable, steep ground impassable. It is a reach, not a parish or a jurisdiction: roads, rivers and
+     bridges are not in it. If the terrain will not load the circle stays, and the note says so. */
+  var REACH = { h: 3, id: null, d: null, res: null, state: "", tok: 0 }, REACH_HOURS = [[1, "1 h"], [2, "2 h"], [3, "3 h"], [8, "A day"]];
+  try { var rh0 = +localStorage.getItem("ra-reach-h"); if (REACH_HOURS.some(function (o) { return o[0] === rh0; })) REACH.h = rh0; } catch (e) { /* storage blocked */ }
+  var reachJs = null;
+  function reachOn(d) { return !!(TSV2 && REACH.res && REACH.id === d.id); }
+  function reachLoad() {
+    if (window.raReach) return Promise.resolve();
+    return reachJs || (reachJs = new Promise(function (ok, no) {
+      var sc = document.createElement("script");
+      sc.src = BASE + "js/walking-reach.js"; sc.onload = function () { window.raReach ? ok() : no(new Error("no module")); };
+      sc.onerror = function () { reachJs = null; no(new Error("module did not load")); };
+      document.head.appendChild(sc);
+    }));
+  }
+  function reachFor(d) {
+    if (!TSV2 || d.lat == null || d.lon == null) return;
+    var tok = ++REACH.tok;
+    REACH.id = d.id; REACH.d = d; REACH.state = "loading";
+    reachLoad().then(function () { return window.raReach.compute({ lat: d.lat, lon: d.lon, hours: REACH.h }); }).then(function (res) {
+      if (tok !== REACH.tok) return;
+      REACH.res = res; REACH.state = res.clamped ? "clamped" : "ok";
+      reachShow(d);
+    }).catch(function () {
+      if (tok !== REACH.tok) return;
+      REACH.res = null; REACH.state = "failed";
+      reachShow(d);
+    });
+  }
+  /* the polygon takes the circle's place on the map, in the same two strokes, and the checklist is rebuilt from it */
+  function reachShow(d) {
+    hoodLayer.clearLayers();
+    if (REACH.res && REACH.res.ring.length > 2) {
+      L.polygon(REACH.res.ring, { interactive: false, color: "#FFFFFF", weight: 5, opacity: .55, dashArray: "2 6", lineCap: "round", fill: false }).addTo(hoodLayer);
+      L.polygon(REACH.res.ring, { interactive: false, color: "#1B2A5B", weight: 2.2, opacity: 1, dashArray: "2 6", lineCap: "round", fillColor: "#1B2A5B", fillOpacity: .05 }).addTo(hoodLayer);
+    } else drawHoodCircle(d, hoodKm(d));
+    if (hoodOn && !map.hasLayer(hoodLayer)) hoodLayer.addTo(map);
+    buildCheck(d, hoodKm(d));
+  }
+  function reachSetHours(h) {
+    REACH.h = h;
+    try { localStorage.setItem("ra-reach-h", String(h)); } catch (e) { /* storage blocked */ }
+    if (REACH.d) { reachFor(REACH.d); buildCheck(REACH.d, hoodKm(REACH.d)); }
+  }
+  function reachUse() {
+    if (!REACH.res || !REACH.res.ring.length || typeof areaFinish !== "function") return;
+    areaFinish(REACH.res.ring.map(function (c) { return L.latLng(c[0], c[1]); }));
+  }
+  /* the checklist's buttons are rebuilt with every note, so one listener on the document serves them all */
+  document.addEventListener("click", function (e) {
+    var b = e.target && e.target.closest && e.target.closest("[data-reach-h],[data-reach-use]");
+    if (!b || !TSV2) return;
+    e.preventDefault();
+    if (b.hasAttribute("data-reach-use")) reachUse(); else reachSetHours(+b.getAttribute("data-reach-h"));
+  });
+
   function hoodKm(d) {
     var far = 0;
     (d.parishes || []).forEach(function (p) { if (+p.km > far) far = +p.km; });
@@ -3864,10 +3923,10 @@ window.addEventListener("load", async function () {
      first. */
   function hoodNoteHtml(d, r) {
     if (!r) return "";
-    var places = 0;
+    var R = reachOn(d) ? REACH.res : null, places = 0;
     idx.places.forEach(function (p) {
       if (p.y == null || p.i === d.id) return;
-      if (haversine(d.lat, d.lon, p.y, p.x) <= r) places++;
+      if (R ? R.timeAt(p.y, p.x) != null : haversine(d.lat, d.lon, p.y, p.x) <= r) places++;
     });
     var bits = [];
     if (places) bits.push(places + " " + T(places === 1 ? "place" : "places"));
@@ -3877,17 +3936,40 @@ window.addEventListener("load", async function () {
     if ((d.graves || []).length)
       bits.push(d.graves.length + " " +
                 T(d.graves.length === 1 ? "burial ground" : "burial grounds"));
-    if (!bits.length) return "";
-    return '<p class="ra-hood"><span class="ra-hood-k"></span><span>' +
-      esc(T("Within") + " " + r + " km") + " \u2014 " + esc(bits.join(" \u00b7 ")) +
-      ". " + esc(T("The ring on the map is the ground worth walking in a day.")) +
-      "</span></p>";
+    if (!bits.length && !TSV2) return "";
+    var lead = R ? T("Within a") + " " + hoursLabel(R.hours) + " " + T("walk") : T("Within") + " " + r + " km";
+    var tail = R ? T("The shape on the map follows the ground: the sea and the steep slopes stop it.") : T("The ring on the map is the ground worth walking in a day.");
+    var ctl = "";
+    if (TSV2) {
+      var st = REACH.id === d.id ? REACH.state : "";
+      ctl = '<span class="ra-reach" role="group" aria-label="' + esc(T("How long a walk")) + '">' +
+        REACH_HOURS.map(function (o) {
+          return '<button type="button" data-reach-h="' + o[0] + '" aria-pressed="' + (o[0] === REACH.h) + '">' + esc(T(o[1])) + "</button>";
+        }).join("") +
+        (R ? '<button type="button" class="ra-reach-use" data-reach-use title="' + esc(T("Search the registers inside this shape")) + '">' + esc(T("Use as my area")) + "</button>" : "") +
+        "</span>" +
+        (st === "loading" ? '<span class="ra-reach-s">' + esc(T("Working out the walk…")) + "</span>" : "") +
+        (st === "failed" ? '<span class="ra-reach-s">' + esc(T("The terrain did not load, so this is a plain circle.")) + "</span>" : "") +
+        (st === "clamped" ? '<span class="ra-reach-s">' + esc(T("Cut short at the edge of the terrain loaded.")) + "</span>" : "");
+    }
+    if (!bits.length) return '<div class="ra-hood ra-hood-r">' + ctl + "</div>";
+    return '<div class="ra-hood"><span class="ra-hood-k"></span><span>' +
+      esc(lead) + " — " + esc(bits.join(" · ")) +
+      ". " + esc(tail) + ctl + "</span></div>";
   }
+  function hoursLabel(h) { return h >= 8 ? T("day's") : h + " " + T("hour"); }
 
   function drawHood(d) {
     hoodLayer.clearLayers();
     if (d.lat == null || d.lon == null) return null;
     var r = hoodKm(d);
+    /* a new place: the old reach belongs to the last one */
+    if (REACH.id !== d.id) REACH.res = null;
+    drawHoodCircle(d, r);
+    if (TSV2) reachFor(d);
+    return r;
+  }
+  function drawHoodCircle(d, r) {
     /* Deep navy, dotted, and almost no fill — a boundary to read the map
        through, not a shape laid over it. Round caps make the dashes read as
        dots rather than ticks.
@@ -3909,10 +3991,9 @@ window.addEventListener("load", async function () {
       fillColor: "#1B2A5B", fillOpacity: .05
     }).addTo(hoodLayer);
     if (hoodOn && !map.hasLayer(hoodLayer)) hoodLayer.addTo(map);
-    return r;
   }
 
-  function clearHood() { hoodLayer.clearLayers(); }
+  function clearHood() { hoodLayer.clearLayers(); REACH.tok++; REACH.res = null; REACH.id = null; REACH.d = null; }
 
   /* A NEW SEARCH RETIRES THE LAST PLACE'S FURNITURE. David searched «senj»,
      got five matching places on the map, and the right-hand pane still listed
@@ -4154,20 +4235,23 @@ window.addEventListener("load", async function () {
 
     /* 4. The villages inside the ring, nearest first — their own registers
           may name the same family, and they are a walk apart. */
-    var vs = [];
+    var vs = [], RR = reachOn(d) ? REACH.res : null;
     idx.places.forEach(function (p) {
       if (p.y == null || p.i === d.id) return;
       var km = haversine(d.lat, d.lon, p.y, p.x);
-      if (km <= r) vs.push({ p: p, km: km });
+      if (RR) { var wt = RR.timeAt(p.y, p.x); if (wt != null) vs.push({ p: p, km: km, wt: wt }); }
+      else if (km <= r) vs.push({ p: p, km: km });
     });
-    vs.sort(function (a, b) { return a.km - b.km; });
+    /* on foot, the nearest is the quickest to walk to, not the nearest as the crow flies */
+    vs.sort(function (a, b) { return RR ? a.wt - b.wt : a.km - b.km; });
     if (vs.length) {
-      h.push('<h4>' + esc(T("Villages within") + " " + r + " km") + "</h4><ul>");
+      h.push('<h4>' + esc(RR ? T("Villages within a") + " " + hoursLabel(RR.hours) + " " + T("walk") : T("Villages within") + " " + r + " km") + "</h4><ul>");
       vs.slice(0, 20).forEach(function (x) {
         count++;
+        var vol = x.p.c ? x.p.c + " " + T(x.p.c === 1 ? "volume" : "volumes") : null;
+        var walk = x.wt != null ? window.raReach.hoursText(x.wt) + " " + T("on foot") : null;
         h.push(checkRow(BASE + "place/" + x.p.i + "/", x.p.n, x.km,
-                        x.p.c ? x.p.c + " " + T(x.p.c === 1 ? "volume" : "volumes")
-                              : null, null, count, x.p.y, x.p.x,
+                        vol && walk ? vol + " \u00b7 " + walk : vol || walk, null, count, x.p.y, x.p.x,
                         { id: "place:" + x.p.i, t: x.p.n,
                           where: CNAME[x.p.cc] || x.p.cc || "",
                           href: BASE + "place/" + x.p.i + "/" }));
@@ -8791,9 +8875,9 @@ window.addEventListener("load", async function () {
     R.rings.forEach(function (ring, i) {
       var c = L.polygon(ring).getBounds().getCenter();
       var m = L.marker(c, { icon: L.divIcon({ className: "ra-shape-wrap", iconSize: [28, 28], iconAnchor: [14, 14],
-        html: '<span class="ra-shape-badge" title="' + (ns > 1 ? "Area " + (i + 1) + ": reshape or remove" : "Reshape this area") + '">' + (ns > 1 ? String(i + 1) : "&#9998;") + "</span>" }),
+        html: '<span class="ra-shape-badge" title="' + (ns > 1 ? "Area " + (i + 1) + ": open" : "Open this area") + '">' + (ns > 1 ? String(i + 1) : "&#9998;") + "</span>" }),
         keyboard: true, zIndexOffset: 500, title: ns > 1 ? "Area " + (i + 1) : "Area" });
-      m.on("click", function (e) { L.DomEvent.stopPropagation(e); areaShapePop(i, c); });
+      m.on("click", function (e) { L.DomEvent.stopPropagation(e); areaShow(); });
       m.addTo(AREA_BADGES);
     });
   }
@@ -8821,7 +8905,22 @@ window.addEventListener("load", async function () {
     AREA.hint.classList.add("ra-lo"); AREA.hint.hidden = false; clearTimeout(AREA.noteT); AREA.noteT = setTimeout(function () { if (!AREA_ED && AREA.hint) AREA.hint.hidden = true; }, 9000);
   }
   function areaMakeDraft(ring) {
-    return L.polygon(ring, { color: "#1F5C6B", weight: 2.5, dashArray: "7 5", fillColor: "#1F5C6B", fillOpacity: .09, interactive: false }).addTo(map);
+    /* CLICK AN AREA, SEE THE SCREEN YOU SAW WHEN YOU ADDED IT. David: «if i click an area, i want to see the same screen i see if i just added
+       that area». It sits behind the places (bringToBack), so a dot inside the shape is still the thing you click; while a tool is drawing or a
+       shape is being reshaped the click is left to the map. */
+    var pl = L.polygon(ring, { color: "#1F5C6B", weight: 2.5, dashArray: "7 5", fillColor: "#1F5C6B", fillOpacity: .09, interactive: true, bubblingMouseEvents: false }).addTo(map);
+    pl.bringToBack();
+    pl.on("click", function (e) { if (AREA.mode || AREA_ED) { if (AREA.mode) map.fire("click", e); return; } L.DomEvent.stopPropagation(e); areaShow(); });
+    return pl;
+  }
+  /* the area screen again: the same one the add ended on */
+  function areaShow() {
+    if (!AREA.rows) return;
+    empty.hidden = true; panel.hidden = false; setQ("at", "");
+    areaRender(); areaAddUi();
+    /* on the new front door the card may have been folded away; the area screen is what was asked for */
+    var card = panel.closest ? panel.closest(".at-panel") : null;
+    if (card && card.classList.contains("fd2-folded")) { var fb = card.querySelector(".fd2-fold"); if (fb) fb.click(); }
   }
   /* re-read what lies inside after a shape changed, without moving the map */
   function areaRefresh() {
@@ -8974,8 +9073,9 @@ window.addEventListener("load", async function () {
       var a = MYA.areas[id];
       (a.rings || [a.ring]).forEach(function (r, i) {
         if (AREA_ED && AREA_ED.kind === "saved" && AREA_ED.id === id && AREA_ED.i === i) return;      /* being reshaped: drawn by the editor instead */
-        var poly = L.polygon(r, { color: "#6B4E9B", weight: 2, fillColor: "#6B4E9B", fillOpacity: .06, interactive: false });
-        poly.addTo(savedAreaLayer);
+        var poly = L.polygon(r, { color: "#6B4E9B", weight: 2, fillColor: "#6B4E9B", fillOpacity: .06, interactive: true, bubblingMouseEvents: false });
+        poly.addTo(savedAreaLayer); poly.bringToBack();
+        poly.on("click", function (e) { if (AREA.mode || AREA_ED) { if (AREA.mode) map.fire("click", e); return; } L.DomEvent.stopPropagation(e); areaOpenSaved(id, true); });
         if (i) return;                                /* one label per group, on its first shape */
         poly.bindTooltip(a.name, { permanent: true, direction: "center", className: "ra-area-lab", interactive: true });
         poly.getTooltip().on("add", function () {

@@ -23,12 +23,12 @@
 
   var css = document.createElement("style");
   css.textContent =
-    ".ra-q-add{position:absolute;right:34px;top:50%;transform:translateY(-50%);width:28px;height:28px;border:0;border-radius:50%;background:none;color:var(--ink-3,#777);font-size:20px;line-height:1;cursor:pointer;display:grid;place-items:center}" +
+    ".ra-q-add{position:absolute;right:34px;top:calc(var(--ra-ctl,38px) / 2);transform:translateY(-50%);width:28px;height:28px;border:0;border-radius:50%;background:none;color:var(--ink-3,#777);font-size:20px;line-height:1;cursor:pointer;display:grid;place-items:center}" +
     ".ra-q-add:hover,.ra-q-add:focus-visible{color:var(--accent,#1f5c6b);background:var(--accent-wash,rgba(31,92,107,.12));outline:none}" +
     ".ra-find #ra-q,.ra-bar #ra-q,.ra-bar-find #ra-q{padding-right:64px!important;text-overflow:ellipsis}" +
     /* the box: a Story badge and an accent edge say which of the three things the box is doing */
     ".ra-find.ra-story-on #ra-q{border-color:var(--accent,#1f5c6b)!important;box-shadow:0 0 0 3px var(--accent-wash,rgba(31,92,107,.14));padding-right:128px!important}" +
-    ".ra-q-badge{position:absolute;right:64px;top:50%;transform:translateY(-50%);font:600 10.5px/1 var(--sans,system-ui,sans-serif);letter-spacing:.07em;text-transform:uppercase;color:var(--accent,#1f5c6b);background:var(--accent-wash,rgba(31,92,107,.12));border-radius:99px;padding:5px 9px;pointer-events:none}" +
+    ".ra-q-badge{position:absolute;right:64px;top:calc(var(--ra-ctl,38px) / 2);transform:translateY(-50%);font:600 10.5px/1 var(--sans,system-ui,sans-serif);letter-spacing:.07em;text-transform:uppercase;color:var(--accent,#1f5c6b);background:var(--accent-wash,rgba(31,92,107,.12));border-radius:99px;padding:5px 9px;pointer-events:none}" +
     ".ra-q-badge[hidden]{display:none}" +
     /* the empty-box panel: three doors */
     "#ra-doors{position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:41;background:var(--panel,#fff);border:1px solid var(--rule-strong,#bbb);border-radius:10px;box-shadow:0 10px 28px rgba(10,20,26,.22);padding:10px}" +
@@ -42,7 +42,7 @@
     "#ra-doors .rd-d em{font:italic 400 12.5px/1.3 var(--serif,Georgia,serif);color:var(--ink-2,#444)}" +
     "@media (max-width:640px){#ra-doors .rd-g{grid-template-columns:1fr}}" +
     /* the story card, instead of a pile of pills */
-    "#ra-pills{display:block;margin:-2px 0 12px;border:1px solid var(--accent,#1f5c6b);border-radius:12px;background:var(--panel,#fff);overflow:hidden}" +
+    "#ra-pills{display:block;margin:-2px 0 12px;border:1px solid var(--accent,#1f5c6b);border-radius:16px;background:var(--panel,#fff);overflow:hidden}" +
     "#ra-pills[hidden]{display:none}" +
     "#ra-pills .rs-top{display:flex;align-items:center;gap:10px;padding:9px 10px 9px 14px;cursor:pointer}" +
     "#ra-pills .rs-dot{flex:none;width:9px;height:9px;border-radius:50%;background:var(--accent,#1f5c6b);box-shadow:0 0 0 4px var(--accent-wash,rgba(31,92,107,.14))}" +
@@ -50,11 +50,11 @@
     "#ra-pills .rs-sum b{font:600 14.5px/1.25 var(--serif,Georgia,serif);color:var(--ink,#111)}" +
     "#ra-pills .rs-sum small{display:block;font:400 12px/1.3 var(--sans,system-ui,sans-serif);color:var(--ink-3,#666);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}" +
     "#ra-pills .rs-ib{flex:none;font:inherit;font-size:12.5px;border:0;background:none;color:var(--ink-3,#666);padding:6px 9px;border-radius:99px;cursor:pointer}" +
+    "#ra-pills .rs-go{flex:none;font:inherit;font-size:12.5px;font-weight:600;border:0;background:var(--accent,#1f5c6b);color:#fff;padding:6px 11px;border-radius:99px;cursor:pointer;white-space:nowrap}" +
+    "#ra-pills .rs-go:hover,#ra-pills .rs-go:focus-visible{filter:brightness(1.12);outline:2px solid var(--accent-wash,rgba(31,92,107,.25));outline-offset:1px}" +
     "#ra-pills .rs-ib:hover,#ra-pills .rs-ib:focus-visible{background:var(--accent-wash,rgba(31,92,107,.12));color:var(--accent,#1f5c6b);outline:none}" +
     "#ra-pills .rs-body{border-top:1px solid var(--rule,#ddd)}" +
     "#ra-pills .rs-body[hidden]{display:none}" +
-    "#ra-pills .rs-words{margin:0;padding:10px 14px;font:italic 400 14.5px/1.5 var(--serif,Georgia,serif);color:var(--ink-2,#444);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;cursor:text}" +
-    "#ra-pills .rs-words.open{-webkit-line-clamp:unset;display:block}" +
     "#ra-pills .rs-sec{display:grid;grid-template-columns:84px minmax(0,1fr);gap:8px;padding:9px 14px;border-top:1px solid var(--rule,#ddd)}" +
     "#ra-pills .rs-sec h4{margin:3px 0 0;font:600 10.5px/1 var(--sans,system-ui,sans-serif);letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3,#777)}" +
     "#ra-pills .rs-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px}" +
@@ -91,22 +91,52 @@
   q.addEventListener("paste", function (e) { var fs = e.clipboardData && e.clipboardData.files; if (fs && fs.length) { e.preventDefault(); addFiles(fs); } });
 
   /* typing: a story is taken out of the place search and read live; a place or a name goes on exactly as before */
-  var fromBox = false, tmr = null, thinking = false, lastRead = 0, storyMode = false;
+  /* The box grows with what is written, to about six lines, and goes back to one when it is emptied. A newline is only for a story: in a place search Enter searches (and Shift+Enter does nothing), and a pasted line break becomes a space. */
+  function grow() { q.style.height = "auto"; q.style.height = (q.scrollHeight + (q.offsetHeight - q.clientHeight)) + "px"; q.style.overflowY = q.scrollHeight > 156 ? "auto" : "hidden"; }
+  q.addEventListener("input", function () {
+    if (/\n/.test(q.value) && !looksLikeStory(q.value)) { var p = q.selectionStart; q.value = q.value.replace(/\s*\n\s*/g, " "); try { q.setSelectionRange(p, p); } catch (e) { /* no selection */ } }
+    grow();
+  }, true);
+  q.addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.isComposing && (!e.shiftKey || !looksLikeStory(q.value))) e.preventDefault(); }, true);
+  window.addEventListener("resize", grow);
+  var fromBox = false, tmr = null, thinking = false, storyMode = false, lastText = "", thinkTmr = null;
   /* The place search runs on its own timers for whatever was typed before this turned into a story ("my n", "my na"). Empty the box for one
      beat so the map's own search clears itself, stop its pending timers, and put the story back. */
+  var resetting = false;
   function resetSearch() {
-    var v = q.value; q.value = "";
-    q.dispatchEvent(new Event("input", { bubbles: true }));
-    q.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    /* The empty value goes to the map's search only: our own listener below must not see it as the typing stopping being a story (it did, so every key
+       press took the story off and put it back), and the caret and selection must come back where they were (they went to the end, so a click in the
+       middle of the sentence and a new letter put the letter at the end). */
+    var v = q.value, a = q.selectionStart, b = q.selectionEnd, d = q.selectionDirection;
+    resetting = true;
+    try {
+      q.value = "";
+      q.dispatchEvent(new Event("input", { bubbles: true }));
+      q.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    } finally { resetting = false; }
     clearTimeout(q._t); clearTimeout(q._tf); clearTimeout(q._r);
-    q.value = v;
+    /* The map's search leaves its answer in the side panel when the box is emptied (a card headed "my — 156 places" stayed above the story). If the panel
+       is still showing the answer to the words the story began with, close it; a place the reader opened for themselves is not headed by their typing. */
+    try {
+      var hd = document.querySelector("#ra-body .at-h h3"), pn = document.getElementById("ra-sheet-x");
+      var fold = function (x) { return String(x || "").toLowerCase().replace(/\s+/g, " ").trim(); };
+      if (hd && pn && fold(hd.textContent) && fold(v).indexOf(fold(hd.textContent)) === 0) pn.click();
+    } catch (e) { /* the panel is not on this page */ }
+    q.value = v; grow();
+    try { if (a != null) q.setSelectionRange(a, b, d || "none"); } catch (e) { /* a type that has no selection */ }
   }
-  function read() {
-    clearTimeout(tmr); lastRead = Date.now(); var t = q.value.trim(); if (!t || !window.raStoryBox || !looksLikeStory(t)) return;
-    fromBox = true;
-    window.raStoryBox.start(t).then(function () { thinking = false; show(); }).catch(function () { thinking = false; show(); });
+  /* "Reading what you wrote…" is for a read that is really taking time: it is shown only if the read is still going after 0.4 s, never on a key press.
+     It used to appear on every key while no card was showing and vanish when the read found nothing, so the box below it jumped up and down. */
+  function readDone() { clearTimeout(thinkTmr); thinking = false; show(); }
+  function read(force) {
+    clearTimeout(tmr); var t = q.value.trim(); if (!t || !window.raStoryBox || !looksLikeStory(t)) return;
+    if (t === lastText && !force) return;   /* the same words as the last read: nothing new to understand, so nothing to redraw */
+    lastText = t; fromBox = true;
+    if (pills.hidden || !pills.children.length) { clearTimeout(thinkTmr); thinkTmr = setTimeout(function () { thinking = true; mirror(); }, 400); }
+    window.raStoryBox.start(t).then(readDone).catch(readDone);
   }
   q.addEventListener("input", function (e) {
+    if (resetting) return;   /* our own empty value for the map's search, not typing */
     if (looksLikeStory(q.value)) {
       e.stopImmediatePropagation();
       if (!storyMode) { storyMode = true; resetSearch(); }
@@ -115,18 +145,17 @@
       clearTimeout(q._t); clearTimeout(q._tf); clearTimeout(q._r);
       var sug = document.getElementById("ra-sug"); if (sug) { sug.hidden = true; sug.innerHTML = ""; }
       var rc = document.getElementById("ra-recent"); if (rc) rc.hidden = true;
-      if (pills.hidden || !pills.children.length) { thinking = true; mirror(); }   /* "Reading…" at once, before the reader has answered */
       /* THE STORY IS READ WHEN THE TYPING PAUSES, NOT WHILE IT GOES. It was read every 0.8 s mid-sentence plus after every third-of-a-second gap, and
          each read redraws the card, the tree and the map, so the box lagged behind the fingers. Now a pause of 0.9 s reads it; Enter reads it at once. */
       clearTimeout(tmr);
-      tmr = setTimeout(read, 900);
+      tmr = setTimeout(read, /[\s,.;!?]$/.test(q.value) ? 600 : 900);   /* a word, a comma or a sentence has just been finished: a little sooner */
     } else if (storyMode) {                                                       /* the typing stopped reading as a story: take the story off */
-      storyMode = false; fromBox = false; clearTimeout(tmr); thinking = false; lastRead = 0;
+      storyMode = false; fromBox = false; clearTimeout(tmr); thinking = false; lastText = ""; clearTimeout(thinkTmr);
       if (window.raStoryBox) window.raStoryBox.clear().then(function () { mirror(); });
     }
   }, true);
   q.addEventListener("keydown", function (e) {
-    if (e.key === "Enter" && looksLikeStory(q.value)) { e.preventDefault(); e.stopImmediatePropagation(); compact = false; read(); q.blur(); }
+    if (e.key === "Enter" && looksLikeStory(q.value)) { e.preventDefault(); e.stopImmediatePropagation(); compact = false; read(true); q.blur(); }
     else if (e.key === "Escape" && storyMode) { e.stopImmediatePropagation(); compact = true; userToggled = true; mirror(); q.blur(); }   /* Esc steps back: the card folds, the typing and the story stay */
   }, true);
 
@@ -137,7 +166,7 @@
   var src = null, mo = null, seenPills = Object.create(null);
   /* The card shows what the reader understood in sections (who, journey, also, work, heard) instead of one wrapped row of pills. Every chip is
      still the panel's own chip: pressing it presses that one, so it still opens the same place picker or the same "heard" list. */
-  var compact = false, userToggled = false, wordsOpen = false, blurT = 0;
+  var compact = false, userToggled = false, blurT = 0;
   function mk(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function chipOf(c, i) {
     var isBtn = c.tagName === "BUTTON", p = mk(isBtn ? "button" : "span", "ra-pill" + (/\bfrom\b/.test(c.className) ? " from" : "") + (/\bwarn\b/.test(c.className) ? " warn" : ""), c.textContent);
@@ -180,7 +209,7 @@
     var summary = [trip.length ? trip.map(function (x) { return x.textContent.replace(/^(?:from|to)\s+/i, "").replace(/,.*$/, ""); }).join(" → ") : "", also.length ? "also " + also.map(function (x) { return x.textContent.replace(/^in\s+/i, "").replace(/,.*$/, ""); }).join(", ") : ""].filter(Boolean).join(" · ") || (places ? "" : "no places read yet");
     var top = mk("div", "rs-top"); top.setAttribute("role", "button"); top.tabIndex = 0; top.setAttribute("aria-expanded", String(!compact));
     var sum = mk("div", "rs-sum"); sum.append(mk("b", null, name ? name + "’s story" : "Story on the map"), mk("small", null, summary || "Reading…"));
-    var ed = mk("button", "rs-ib", "Edit"); ed.type = "button"; ed.title = "Edit your story";
+    var ed = mk("button", "rs-go", "Open your story \u2192"); ed.type = "button"; ed.title = "Read it on its own page: the places, the family, what was going on and a research plan";
     var x = mk("button", "rs-ib", "×"); x.type = "button"; x.setAttribute("aria-label", "Take the story off the map"); x.title = "Take the story off the map"; x.style.fontSize = "18px";
     var tg = mk("button", "rs-ib", compact ? "Details" : "Hide"); tg.type = "button"; tg.title = compact ? "Show what was understood" : "Fold this away";
     top.append(mk("span", "rs-dot"), sum, tg, ed, x); pills.append(top);
@@ -188,11 +217,11 @@
     tg.addEventListener("click", flip);
     top.addEventListener("click", function (e) { if (e.target === ed || e.target === x || e.target === tg) return; flip(); });
     top.addEventListener("keydown", function (e) { if ((e.key === "Enter" || e.key === " ") && e.target === top) { e.preventDefault(); flip(); } });
-    ed.addEventListener("click", function () { if (window.raStoryBox) window.raStoryBox.open(); });
-    x.addEventListener("click", function () { fromBox = false; storyMode = false; thinking = false; compact = false; userToggled = false; q.value = ""; resetSearch(); if (window.raStoryBox) window.raStoryBox.clear().then(function () { mirror(); }); });
+    ed.addEventListener("click", function () { if (window.raStoryBox) window.raStoryBox.handoff(); });
+    x.addEventListener("click", function () { fromBox = false; storyMode = false; thinking = false; lastText = ""; clearTimeout(thinkTmr); compact = false; userToggled = false; q.value = ""; grow(); resetSearch(); if (window.raStoryBox) window.raStoryBox.clear().then(function () { mirror(); }); });
     if (!compact) {
       var body = mk("div", "rs-body");
-      if (q.value.trim()) { var w = mk("p", "rs-words" + (wordsOpen ? " open" : ""), q.value.trim()); w.title = "Your words. Click to show all of them."; w.addEventListener("click", function () { wordsOpen = !wordsOpen; w.classList.toggle("open", wordsOpen); }); body.append(w); }
+      /* The words are not repeated here: the box above grows to show all of them. */
       [["Who", who], ["Journey", trip.reduce(function (a, n, i) { if (i) a.push(mk("span", "rs-arrow", "→")); a.push(n); return a; }, [])], ["Also", also], ["Work", work], ["Told", heard], ["Check", check]].forEach(function (g) { var sec = section(g[0], g[1]); if (sec) body.append(sec); });
       if (any) body.lastChild && body.append(mk("p", "rs-note", "Tap a place to choose a different one. Nothing here is checked: it is kept as you told it."));
       var act = mk("div", "rs-act"), pa = mk("button", "rs-b", "+ Photo or document"); pa.type = "button"; pa.addEventListener("click", function () { file.click(); });
@@ -244,6 +273,6 @@
 
   /* the one-box idea in a sentence, for the placeholder */
   var narrow = window.matchMedia && window.matchMedia("(max-width: 560px)");
-  function holder() { q.setAttribute("placeholder", narrow && narrow.matches ? "A place, a surname, or your story" : "Find a place or a surname, or tell a story — Gallignana · Žubrinić · my father is Ivan from Senj…"); }
+  function holder() { q.setAttribute("placeholder", narrow && narrow.matches ? "A place, surname or story" : "Find a place or a surname, or tell a story — Gallignana · Žubrinić · my father is Ivan from Senj…"); }
   holder(); if (narrow && narrow.addEventListener) narrow.addEventListener("change", holder);
 })();

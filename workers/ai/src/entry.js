@@ -12,5 +12,10 @@ export class Allowance extends DurableObject {
   addTokens(now, n) { return this.l.addTokens(now, n); }
   peek(now) { return this.l.peek(now); }
   wipe() { return this.l.wipe(); }
+  getConfig() { return this.l.getConfig(); }
+  patchConfig(now, patch) { return this.l.patchConfig(now, patch); }
+  recordCall(now, e) { return this.l.recordCall(now, e); }
+  recordRefusal(now, reason) { return this.l.recordRefusal(now, reason); }
+  report(now, n) { return this.l.report(now, n); }
 }
 export default worker;

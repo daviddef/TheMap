@@ -9,16 +9,18 @@ import Base from "../layouts/Base.astro";
 import { recordTerms } from "../lib/record-terms.js";
 import { u } from "../lib/url.js";
 import ProgressKit from "../components/ProgressKit.astro";
-const { sources, terms } = recordTerms();
+const { sources, terms, seen } = recordTerms();
+const langNames = { la: "Latin", it: "Italian", es: "Spanish", pt: "Portuguese", nl: "Dutch", de: "German", fr: "French", cs: "Czech", sk: "Slovak", pl: "Polish", da: "Danish", hu: "Hungarian", hr: "Croatian" };
+const langCount = Object.fromEntries(Object.keys(langNames).map((l) => [l, terms.filter((t) => t.lang === l).length]));
 const chips = ["uxoris", "7bris", "susceptores", "obiit", "infans", "natum"];
 const dateChips = ["die 30 7bris 1671", "undecima februarii anno millesimo septingentesimo quadragesimo sexto", "xvi martii 1801"];
 const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" };
 ---
 <Base
   title="Reading the record"
-  eyebrow={`${terms.length} terms · every one sourced · the finder and date decoder keep everything in your browser`}
+  eyebrow={`${terms.length} terms in ${Object.values(langCount).filter(Boolean).length} languages · every one sourced · the finder and date decoder keep everything in your browser`}
   dek="Type a word as you see it in the register, or a whole date, and see what it is, what it does not tell you, and where it comes from."
-  description="A searchable guide to the Latin of old church registers: look up a word, an abbreviation or an ending, and decode a date such as 'die 30 7bris 1671'.">
+  description="A searchable guide to the words of old registers, in Latin and in the languages of their catalogue titles, with how often each turns up in the Atlas's own records, and a decoder for dates such as 'die 30 7bris 1671'.">
 
   <div class="rd-pick" role="tablist" aria-label="What would you like to do?">
     <button type="button" role="tab" id="tab-story" class="rd-tab is-on" aria-selected="true" aria-controls="tool-story" data-tool="story">
@@ -32,73 +34,107 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   </div>
 
   <section id="tool-story" class="rd-panel" role="tabpanel" aria-labelledby="tab-story">
-    <div class="sg" id="sg" aria-label="Start with your story">
-      <div class="sg-dots" id="sg-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-      <div class="sg-stage" id="sg-stage">
+    <div class="sp" id="sp" aria-label="Your story">
+      <nav class="sp-rail" id="sp-rail" aria-label="On this page" hidden>
+        <span class="sp-grp">Your story</span>
+        <a href="#sp-told" data-go="sp-told">What you told us</a>
+        <a href="#sp-family" data-go="sp-family" hidden>The family</a>
+        <a href="#sp-places" data-go="sp-places" hidden>Place by place</a>
+        <a href="#sp-life" data-go="sp-life" hidden>The person, as told</a>
+        <a href="#sp-names" data-go="sp-names" hidden>Names and spellings</a>
+        <a href="#sp-setting" data-go="sp-setting" hidden>What was going on</a>
+        <span class="sp-grp">Research</span>
+        <a href="#sp-plan" data-go="sp-plan" hidden>Your research plan</a>
+        <a href="#sp-keep" data-go="sp-keep" hidden>Keep it</a>
+      </nav>
 
-        <section class="sg-step" data-step="0" aria-labelledby="sg-h0">
-          <h2 class="sg-h" id="sg-h0">What do you have?</h2>
-          <p class="sg-sub">Pick everything you have: a photo, a document, a letter and the story can all go together.</p>
-          <div class="sg-tiles">
-            <button type="button" class="sg-tile" data-holds="photo"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><rect x="3.5" y="5" width="17" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="9" cy="10" r="1.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 17l5-4 3 3 3-2 5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><b>A photo</b><span>of a person, a family or a place</span></button>
-            <button type="button" class="sg-tile" data-holds="document"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M7 3.5h7l4 4V20H7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3.5V8h4M9.5 12h6M9.5 15.5h6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><b>A document</b><span>a certificate, passport, record or page</span></button>
-            <button type="button" class="sg-tile" data-holds="letter"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 8l8 6 8-6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><b>A letter</b><span>or a postcard, or a diary</span></button>
-            <button type="button" class="sg-tile" data-holds="story"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M5 5.5h14v10H11l-4 3.5v-3.5H5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><b>Just the story</b><span>what the family says happened</span></button>
-          </div>
-          <p class="sg-nav"><button type="button" class="sg-next" id="sg-next0" data-go="1">Skip, I will just tell the story</button></p>
+      <div class="sp-main">
+        <header id="sp-told" class="sp-head">
+          <h2 class="sp-title" id="sp-title">Tell us what you know</h2>
+          <p class="sp-lede" id="sp-lede">Type it, paste it, or say it your own way. Names, places and years are all we need. The page fills in as you write.</p>
+        </header>
+
+        <div class="sp-drop" id="sp-drop">
+          <textarea id="sp-text" rows="4" maxlength="8000" spellcheck="false" aria-label="What you know" placeholder="My great-grandfather Ivan Kosina came from Gallignana to Hamilton around 1905. All I have is this photo."></textarea>
+          <ul class="sp-shots" id="sp-shots" hidden aria-label="Pictures you added"></ul>
+          <p class="sp-row">
+            <label class="sp-add"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 16V5m0 0l-4 4m4-4l4 4M5 19h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Photo or document<input type="file" id="sp-file" accept="image/jpeg,image/png,image/webp" multiple hidden /></label>
+            <button type="button" class="sp-ghost" id="sp-eg">Try an example</button>
+            <button type="button" class="sp-ghost" id="sp-read" hidden>Read the writing on it with Claude</button>
+            <button type="button" class="sp-ghost" id="sp-clear" hidden>Start over</button>
+          </p>
+          <p class="sp-fine">Drag a picture onto this box, or paste one. It stays in this tab until you choose to have it read.</p>
+        </div>
+        <div class="sp-did" id="sp-did" hidden></div>
+        <div class="sp-chips" id="sp-chips" aria-live="polite"></div>
+        <p class="sp-status" id="sp-status" role="status" aria-live="polite"></p>
+
+        <section class="sp-sec" id="sp-family" aria-labelledby="sp-family-h" hidden>
+          <h2 id="sp-family-h">The family, as you told it</h2>
+          <div id="sp-tree"></div>
         </section>
 
-        <section class="sg-step" data-step="1" aria-labelledby="sg-h1" hidden>
-          <h2 class="sg-h" id="sg-h1">Tell us what you know</h2>
-          <p class="sg-sub" id="sg-sub1">Type it, paste it, or say it your own way. Names, places and years are all we need.</p>
-          <div class="sg-drop" id="sg-drop">
-            <textarea id="sg-text" rows="4" maxlength="2000" spellcheck="false" aria-label="What you know" placeholder="My great-grandfather Ivan Kosina came from Gallignana to Hamilton around 1905. All I have is this photo."></textarea>
-            <ul class="sg-shots" id="sg-shots" hidden aria-label="Pictures you added"></ul>
-            <p class="sg-row">
-              <label class="sg-add"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 16V5m0 0l-4 4m4-4l4 4M5 19h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Add a photo or document<input type="file" id="sg-file" accept="image/jpeg,image/png,image/webp" multiple hidden /></label>
-              <button type="button" class="sg-ghost" id="sg-eg">Try an example</button>
-              <button type="button" class="sg-ghost" id="sg-read" hidden>Read the writing on it with Claude</button>
-            </p>
-            <p class="sg-fine">Drag a picture onto this box, or paste one. It stays in this tab until you choose to have it read.</p>
+        <section class="sp-sec" id="sp-places" aria-labelledby="sp-places-h" hidden>
+          <h2 id="sp-places-h">Place by place</h2>
+          <div class="sp-map" id="sp-map" role="img" aria-label="Map of the places in the story, in order"></div>
+          <div class="sp-time" id="sp-time" hidden>
+            <button type="button" class="sp-play" id="sp-play">▶ Play</button>
+            <input type="range" id="sp-year" min="1800" max="1900" step="1" value="1800" aria-label="Year" />
+            <output id="sp-yearout" class="sp-yearout" for="sp-year"></output>
           </div>
-          <div class="sg-chips" id="sg-chips" aria-live="polite"></div>
-          <p class="sg-status" id="sg-status" role="status" aria-live="polite"></p>
-          <p class="sg-nav"><button type="button" class="sg-back" data-go="0">Back</button> <button type="button" class="sg-next" id="sg-next1">Show me their journey</button></p>
+          <div class="sp-cap lf-capbox" id="sp-cap"></div>
+          <div id="sp-stops"></div>
         </section>
 
-        <section class="sg-step" data-step="2" aria-labelledby="sg-h2" hidden>
-          <h2 class="sg-h" id="sg-h2">Their journey</h2>
-          <div class="sg-map" id="sg-map" role="img" aria-label="Map of the journey from the place they started to the place they arrived"></div>
-          <div class="sg-time" id="sg-time" hidden>
-            <button type="button" class="sg-play" id="sg-play">▶ Play</button>
-            <input type="range" id="sg-year" min="1800" max="1900" step="1" value="1800" aria-label="Year" />
-            <output id="sg-yearout" class="sg-yearout" for="sg-year"></output>
-          </div>
-          <div class="sg-cap lf-capbox" id="sg-cap"></div>
-          <details class="sg-more" open><summary>What was going on, and who led</summary><div class="lf-moments" id="sg-moments"></div></details>
-          <details class="sg-more" id="sg-tree-box" open><summary>Their family, as you told it</summary><div id="sg-tree"></div></details>
-          <details class="sg-more" id="sg-names-box"><summary>How their names were written</summary><div id="sg-names"></div></details>
-          <p class="sg-fine">The dashed line joins the places in date order. It is not the route they took: the Atlas does not know that, and neither does anyone without a ship's list.</p>
-          <p class="sg-nav"><button type="button" class="sg-back" data-go="1">Back</button> <button type="button" class="sg-next" data-go="3">What should I do first?</button></p>
+        <section class="sp-sec" id="sp-life" aria-labelledby="sp-life-h" hidden>
+          <h2 id="sp-life-h">The person, as told</h2>
+          <p class="sp-sublede">Kept as you told it. Nothing here is checked against a record.</p>
+          <div id="sp-lifebox"></div>
         </section>
 
-        <section class="sg-step" data-step="3" aria-labelledby="sg-h3" hidden>
-          <h2 class="sg-h" id="sg-h3">Your first steps</h2>
-          <p class="sg-sub">Each step names registers and sources the Atlas holds. A step that says the Atlas lists none is a gap in the Atlas, not in the record.</p>
-          <div class="sg-plan" id="sg-plan"></div>
-          <div class="sg-family" id="sg-family">
-            <p class="sg-fam-h">Ready to begin?</p>
-            <p class="sg-sub">A research family adds everything above as planned, so you can mark it off as you look. It stays in this browser.</p>
-            <p><button type="button" class="sg-next" id="sg-fam-btn">Start the research family</button></p>
-            <p class="sg-fam-out" id="sg-fam-out" role="status"></p>
-            <p class="sg-fine">Already have a tree? <a href={u("/tree-canvas/")}>Open it in Roots &amp; Routes</a> to see everyone on the map.</p>
-          </div>
-          <p class="sg-nav"><button type="button" class="sg-back" data-go="2">Back</button> <button type="button" class="sg-ghost" id="sg-again">Start again</button></p>
+        <section class="sp-sec" id="sp-names" aria-labelledby="sp-names-h" hidden>
+          <h2 id="sp-names-h">Names and spellings</h2>
+          <div id="sp-namesbox"></div>
         </section>
+
+        <section class="sp-sec" id="sp-setting" aria-labelledby="sp-setting-h" hidden>
+          <h2 id="sp-setting-h">What was going on</h2>
+          <div class="lf-moments" id="sp-moments"></div>
+          <div id="sp-ask"></div>
+        </section>
+
+        <section class="sp-sec sp-planbox" id="sp-plan" aria-labelledby="sp-plan-h" hidden>
+          <div class="sp-plan-h">
+            <div>
+              <h2 id="sp-plan-h">Your research plan</h2>
+              <p class="sp-sublede">Who to contact, what to read, where to look. Built from your story and the Atlas&rsquo;s own records of archives and registers.</p>
+            </div>
+            <button type="button" class="sp-btn" id="sp-ai-btn">Build my research plan</button>
+          </div>
+          <p class="sp-ai-note" id="sp-ai-note">Nothing is sent until you press the button. Then only what the story says (places, relationships, years and the Atlas records matched to them) goes to Claude Haiku. Not the picture, not the full text, and no name.</p>
+          <p class="sp-status" id="sp-ai-status" role="status" aria-live="polite"></p>
+          <div id="sp-ai-out" hidden></div>
+          <h3 class="sp-steps-h">What to do first</h3>
+          <div class="sp-plan" id="sp-steps"></div>
+        </section>
+
+        <section class="sp-sec" id="sp-keep" aria-labelledby="sp-keep-h" hidden>
+          <h2 id="sp-keep-h">Keep it</h2>
+          <div class="sp-fa">
+            <label class="sp-fa-l"><span class="sp-sr">Which family research</span><select id="sp-fa-line"></select></label>
+            <input type="text" id="sp-fa-name" maxlength="60" aria-label="Name for the new family research" placeholder="A surname" />
+            <button type="button" class="sp-btn" id="sp-fa-btn">Add this family to your research</button>
+            <button type="button" class="sp-btn sp-btn-ghost" id="sp-save-btn">Save the story only</button>
+          </div>
+          <p class="sp-fine">Adding a family starts a research list with the registers above marked as planned, and makes it your active family. Saving keeps just the words (and the names of any photos) in <a href={u("/my-research/#story")}>My story</a>, in My research. Either stays in this browser.</p>
+          <p class="sp-fine sp-out" id="sp-fa-out" role="status"></p>
+          <p class="sp-fine sp-out" id="sp-save-out" role="status"></p>
+          <p class="sp-fine">Already have a tree? <a href={u("/tree-canvas/")}>Open it in the Tree Canvas</a> to see everyone on the map.</p>
+        </section>
+
+        <p class="sp-fine sp-priv">Nothing leaves your browser until you press &ldquo;Build my research plan&rdquo; or &ldquo;Read the writing on it with Claude&rdquo;. Please do not enter details of anyone who may be alive.</p>
       </div>
-      <p class="sg-fine sg-priv">Nothing you type or drop is sent anywhere. Please do not enter details of anyone who may be alive.</p>
     </div>
-
   </section>
 
   <section id="tool-ask" class="rd-panel" role="tabpanel" aria-labelledby="tab-ask" hidden>
@@ -168,6 +204,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
       <p><input type="search" id="rr-q" autocomplete="off" spellcheck="false" aria-label="A word from the register" placeholder="uxoris" /></p>
       <p class="rr-filters" role="group" aria-label="Kind of record">
         {Object.entries(eventNames).map(([k, v]) => <label><input type="checkbox" class="rr-ev" value={k} /> {v}</label>)}
+        <label>Language <select id="rr-lang"><option value="">All</option>{Object.entries(langNames).filter(([l]) => langCount[l]).map(([l, n]) => <option value={l}>{n} ({langCount[l]})</option>)}</select></label>
       </p>
       <p class="cap rr-chips">Try: {chips.map((c) => <button type="button" class="chip rr-chip" data-q={c}>{c}</button>)}</p>
       <div id="rr-out" role="status" aria-live="polite"></div>
@@ -175,27 +212,15 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
       <summary><b>Browse all {terms.length} terms, A to Z</b> <span class="rr-m">the whole list the word finder searches, not only what matched</span></summary>
       <ul class="rr-all">
         {terms.map((t) => (
-          <li><b>{t.forms[0]}</b> <span class="rr-m">{t.means}</span></li>
+          <li><b>{t.forms[0]}</b> <span class="rr-m">{langNames[t.lang] || t.lang} · {t.means}</span></li>
         ))}
       </ul>
     </details>
     </div>
   </section>
 
-  <section>
-    <h2 class="yn-h">Where this comes from</h2>
-    <p class="cap">Each meaning is written in our own words from the pages below, and each card says which. Word meanings are facts; the guides
-    themselves are not copied. Where the card gives a warning, it is a point the source makes, not a rule that always holds: registers vary by
-    parish and century, so look at the page in front of you.</p>
-    <ul class="cap">
-      {Object.entries(sources).sort((a, b) => a[1].title.localeCompare(b[1].title, "en")).map(([k, s]) => <li><a href={s.url} rel="noopener">{s.title}</a></li>)}
-    </ul>
-    <p class="cap">Next on the plan: an annotated register page you can point at, a tool that reads a whole line, and a list of the misreadings that cost
-    researchers time. <a href={u("/worklist/")}>The worklist</a> has it.</p>
-  </section>
-
   <ProgressKit />
-  <script type="application/json" id="rr-data" set:html={JSON.stringify({ terms, sources: Object.fromEntries(Object.entries(sources).map(([k, s]) => [k, s.title])) })}></script>
+  <script type="application/json" id="rr-data" set:html={JSON.stringify({ terms, seen, langs: langNames, sources: Object.fromEntries(Object.entries(sources).map(([k, s]) => [k, s.title])) })}></script>
   <script is:inline>
     (function () {
       var tabs = [].slice.call(document.querySelectorAll(".rd-tab"));
@@ -226,7 +251,8 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   <script is:inline src={u("/js/atlas-summary.js")} defer></script>
   <script is:inline src={u("/js/shard-key.js")} defer></script>
   <script is:inline src={u("/js/story-engine.js")} defer></script>
-  <script is:inline src={u("/js/story-guide.js")} defer></script>
+  <script is:inline src={u("/js/story-plan.js")} defer></script>
+  <script is:inline src={u("/js/story-page.js")} defer></script>
   <script is:inline src={u("/js/case-atlas.js")} defer></script>
   <script is:inline src={u("/js/handover.js")} defer></script>
   <script is:inline>
@@ -238,13 +264,41 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
       var EV = { baptism: "baptism", marriage: "marriage", burial: "burial", all: "any record" };
       function el(tag, text, cls) { var e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; }
       function events() { return [].slice.call(document.querySelectorAll(".rr-ev:checked")).map(function (c) { return c.value; }); }
+      var LN = D.langs || {}, SEEN = D.seen || { terms: {}, concepts: {} };
+      var KIND = { baptism: "baptisms and births", marriage: "marriages", banns: "marriage banns", death: "deaths and burials", confirmation: "confirmations", index: "indexes", "soul-count": "parish censuses" };
+      function num(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+      function where(x) {
+        var top = x.countries.slice(0, 3).map(function (c) { return c[0] + " " + num(c[1]); }).join(", "), more = x.nCountries - Math.min(3, x.countries.length);
+        return top + (more > 0 ? " and " + more + " more countr" + (more === 1 ? "y" : "ies") : "");
+      }
+      function when(x) { return x.mostly ? "most from " + x.mostly[0] + " to " + x.mostly[1] + (x.earliest && x.earliest < x.mostly[0] - 30 ? ", the earliest " + x.earliest : "") : (x.earliest ? "earliest " + x.earliest : ""); }
       function card(t) {
         var c = el("div", null, "rr-card");
         c.append(el("h3", t.forms[0]), el("p", t.means, "rr-means"));
-        var meta = [EV[t.events] || t.events, t.role];
+        var meta = [LN[t.lang] || t.lang, EV[t.events] || t.events, t.role];
         c.append(el("p", meta.join(" · "), "cap"));
         c.append(el("p", "Also written: " + t.forms.slice(1).concat(t.abbr || []).join(", "), "cap"));
         if (t.note) c.append(el("p", t.note, "rr-note"));
+        var st = SEEN.terms[t.id], sc = t.concept && SEEN.concepts[t.concept];
+        if (st || sc) {
+          var box = el("div", null, "rr-seen");
+          box.append(el("b", "In the Atlas"));
+          if (st) box.append(el("p", "The word is in the title of " + num(st.n) + " register entries the Atlas lists: " + where(st) + (when(st) ? "; " + when(st) : "") + ".", "cap"));
+          if (sc && !st) box.append(el("p", "Registers of this kind (" + (KIND[t.concept] || t.concept) + ") are titled in " + sc.languages.length + " languages across " + sc.nCountries + " countries, " + num(sc.n) + " entries in all; " + where(sc) + (when(sc) ? "; " + when(sc) : "") + ". The titles do not say what language the entries inside are written in.", "cap"));
+          if (t.concept) {
+            var peers = D.terms.filter(function (o) { return o.concept === t.concept && o.id !== t.id && o.lang !== t.lang; });
+            if (peers.length) {
+              var p = el("p", "The same kind of book, in other languages: ", "cap");
+              peers.slice(0, 14).forEach(function (o, i) {
+                var b = el("button", o.forms[0], "rr-peer"); b.type = "button"; b.title = (LN[o.lang] || o.lang) + ": " + o.means;
+                b.addEventListener("click", function () { q.value = o.forms[0]; run(); q.focus(); });
+                if (i) p.append(" "); p.append(b); p.append(el("span", " " + (LN[o.lang] || o.lang), "rr-m"));
+              });
+              box.append(p);
+            }
+          }
+          c.append(box);
+        }
         var s = el("p", "Source: ", "cap");
         t.src.forEach(function (k, i) { s.append((i ? "; " : "") + (D.sources[k] || k)); });
         c.append(s);
@@ -253,7 +307,8 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
       function run() {
         out.textContent = "";
         var v = q.value.trim(); if (!v) return;
-        var r = R.find(idx, v, { events: events() });
+        var r = R.find(idx, v, { events: events() }), lg = document.getElementById("rr-lang").value;
+        if (lg) { var partial = r.partial; r = r.filter(function (x) { return x.term.lang === lg; }); r.partial = partial; }
         if (!r.length) { out.append(el("p", "No term here matches that. That is not a finding about the word: the list is short so far. Try fewer letters, or the English.", "cap")); return; }
         if (r.partial) out.append(el("p", "No single card holds that whole phrase, so these are the cards for its words, one word at a time.", "cap"));
         r.slice(0, 12).forEach(function (x) { out.append(card(x.term)); });
@@ -271,6 +326,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
       q.addEventListener("input", run);
       d.addEventListener("input", runDate);
       document.querySelectorAll(".rr-ev").forEach(function (b) { b.addEventListener("change", run); });
+      document.getElementById("rr-lang").addEventListener("change", run);
       document.querySelectorAll(".rr-chip").forEach(function (b) { b.addEventListener("click", function () { q.value = b.dataset.q; run(); }); });
       document.querySelectorAll(".rr-dchip").forEach(function (b) { b.addEventListener("click", function () { d.value = b.dataset.q; runDate(); }); });
       var m = location.search.match(/[?&]q=([^&]*)/); if (m) { q.value = decodeURIComponent(m[1].replace(/\+/g, " ")); run(); }
@@ -281,102 +337,184 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
 <style is:global>
   .rd-pick { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
   .rd-lead { max-width: var(--measure); color: var(--ink-2); margin: 10px 0 14px; }
-  .sg { background: var(--panel); border: 1px solid var(--rule); border-radius: 18px; padding: 18px clamp(14px, 3vw, 28px) 12px; overflow: hidden; }
-  .sg-dots { display: flex; gap: 6px; margin: 0 0 14px; }
-  .sg-dots i { flex: 1; height: 4px; border-radius: 2px; background: var(--rule-strong); transition: background .4s; }
-  .sg-dots i.on { background: var(--accent); }
-  .sg-stage { transition: opacity .28s ease, transform .28s ease; }
-  .sg-stage.out { opacity: 0; transform: translateX(-16px); }
-  .sg-step[hidden] { display: none; }
-  .sg-step { animation: sg-in .4s ease both; }
-  @keyframes sg-in { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
-  .sg-h { font: 500 clamp(24px, 3vw, 32px)/1.2 var(--serif); margin: 4px 0 6px; }
-  .sg-sub { color: var(--ink-2); font-size: 16px; line-height: 1.5; margin: 0 0 16px; max-width: var(--measure); }
-  .sg-fine { font-size: 13px; line-height: 1.5; color: var(--ink-2); margin: 6px 0; max-width: var(--measure); } .sg-fine a { color: var(--accent); }
-  .sg-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
-  .sg-tile { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; padding: 22px 14px; border: 1px solid var(--rule); border-radius: 16px; background: var(--ground);
-    color: var(--ink-2); font: 400 14px/1.35 var(--sans); cursor: pointer; transition: transform .2s, border-color .2s, background .2s, box-shadow .2s; }
-  .sg-tile svg { color: var(--accent); transition: transform .3s; }
-  .sg-tile b { font: 500 18px/1.2 var(--serif); color: var(--ink); }
-  .sg-tile { position: relative; } .sg-tile.on { border-color: var(--accent); background: var(--accent-wash); box-shadow: inset 0 0 0 1px var(--accent); }
-  .sg-tile.on::after { content: "✓"; position: absolute; top: 10px; right: 12px; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; font: 700 13px/22px var(--sans); text-align: center; }
-  .sg-tile:hover, .sg-tile:focus-visible { transform: translateY(-3px); border-color: var(--accent); background: var(--accent-wash); box-shadow: 0 8px 22px rgba(0,0,0,.12); }
-  .sg-tile:hover svg { transform: scale(1.12) rotate(-4deg); }
-  .sg-drop { border: 2px dashed var(--rule-strong); border-radius: 16px; padding: 14px 16px 8px; background: var(--ground); transition: border-color .2s, background .2s; max-width: 46rem; }
-  .sg-drop.hot { border-color: var(--accent); background: var(--accent-wash); }
-  .sg-drop textarea { width: 100%; box-sizing: border-box; border: 0; background: transparent; font: 400 18px/1.55 var(--sans); color: var(--ink); resize: vertical; min-height: 96px; outline: none; }
-  .sg-drop textarea::placeholder { color: var(--ink-3); }
-  .sg-shots { display: flex; gap: 10px; flex-wrap: wrap; margin: 6px 0; padding: 0; list-style: none; }
-  .sg-shot { position: relative; display: inline-block; }
-  .sg-shot img { width: 76px; height: 76px; object-fit: cover; border-radius: 10px; border: 1px solid var(--rule-strong); display: block; animation: sg-pop .4s cubic-bezier(.3,1.5,.5,1); }
-  .sg-shot button { position: absolute; top: -7px; right: -7px; width: 22px; height: 22px; border-radius: 50%; border: 0; background: var(--ink); color: var(--ground); font-size: 14px; line-height: 1; cursor: pointer; }
-  .sg-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 6px 0; }
-  .sg-add, .sg-ghost { font: 500 14px/1 var(--sans); padding: 10px 14px; border-radius: 999px; border: 1px solid var(--rule-strong); background: var(--panel); color: var(--ink); cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
-  .sg-add:hover, .sg-ghost:hover { background: var(--accent-wash); border-color: var(--accent); }
-  .sg-ghost[hidden] { display: none; }
-  .sg-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 4px; min-height: 4px; }
-  .sg-chip { font: 500 15px/1 var(--sans); padding: 9px 14px; border-radius: 999px; background: var(--accent-wash); color: var(--accent); border: 1px solid transparent; }
-  .sg-chip.from { background: color-mix(in srgb, var(--terra) 14%, var(--panel)); color: var(--terra); }
-  .sg-chip.warn { background: color-mix(in srgb, var(--ochre) 16%, var(--panel)); color: var(--ochre); }
-  button.sg-chip { cursor: pointer; } button.sg-chip:hover { border-color: currentColor; }
-  .sg-nudge { border-color: var(--accent); background: var(--accent-wash); animation: sg-pop .5s cubic-bezier(.3,1.5,.5,1); }
-  .sg-chip.pop { animation: sg-pop .4s cubic-bezier(.3,1.5,.5,1); }
-  @keyframes sg-pop { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
-  .sg-status { min-height: 1.2em; font-size: 14px; color: var(--ink-2); margin: 4px 0; } .sg-status.bad { color: var(--brick); }
-  .sg-nav { display: flex; gap: 10px; align-items: center; margin: 16px 0 4px; flex-wrap: wrap; }
-  .sg-next { font: 600 16px/1 var(--sans); padding: 14px 22px; border: 0; border-radius: 12px; background: var(--accent); color: #fff; cursor: pointer; transition: background .2s, transform .15s; }
-  .sg-next:hover { background: var(--accent-2); } .sg-next:active { transform: scale(.98); }
-  .sg-back { font: 500 15px/1 var(--sans); padding: 12px 8px; border: 0; background: none; color: var(--ink-2); cursor: pointer; } .sg-back:hover { color: var(--ink); }
-  .sg-map { height: clamp(280px, 44vh, 440px); border: 1px solid var(--rule); border-radius: 14px; background: var(--panel-2); margin: 4px 0 10px; }
-  .sg-time { display: flex; gap: 14px; align-items: center; margin: 8px 0; max-width: 46rem; }
-  .sg-time[hidden], .sg-play[hidden] { display: none; }
-  .sg-play { flex: none; font: 600 15px/1 var(--sans); min-width: 6.5em; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--accent); background: var(--panel); color: var(--accent); cursor: pointer; }
-  .sg-time input { flex: 1; min-width: 0; accent-color: var(--accent); }
-  .sg-yearout { font: 600 22px/1 var(--serif); min-width: 2.6em; text-align: right; }
-  .sg .lf-capbox { display: grid; gap: 8px; max-width: var(--measure); margin: 6px 0 10px; }
-  .sg .lf-capline { font: 400 16px/1.45 var(--sans); padding: 10px 14px; border-left: 4px solid var(--accent); background: var(--ground); border-radius: 0 8px 8px 0; }
-  .sg .lf-filed { color: var(--ink-2); font-size: 14px; margin-top: 3px; } .sg .lf-regime { color: var(--ink-2); }
-  .sg-more { margin: 6px 0; } .sg-more summary { cursor: pointer; color: var(--accent); font-size: 15px; }
-  .sg .lf-moments ul { padding-left: 18px; max-width: var(--measure); } .sg .lf-moments .cap { color: var(--ink-2); font-size: 13px; }
-  .sg .lf-capline { position: relative; }
-  .sg .lf-flag { float: right; width: 36px; height: 24px; margin: 0 0 4px 10px; object-fit: cover; border: 1px solid var(--rule); border-radius: 3px; background: var(--panel); }
-  .sg .lf-leader { font-style: italic; }
-  .sg .lf-now { margin-top: 5px; padding: 4px 8px; border-radius: 6px; background: var(--accent-wash); font-size: 14px; line-height: 1.35; }
-  .sg .lf-now-epidemic, .sg .lf-ev-epidemic .lf-tag { --tagc: #8a3b6e; } .sg .lf-now-famine, .sg .lf-ev-famine .lf-tag { --tagc: #a8741a; }
-  .sg .lf-now-war, .sg .lf-ev-war .lf-tag { --tagc: #b3452e; } .sg .lf-now-genocide, .sg .lf-ev-genocide .lf-tag, .sg .lf-ev-massacre .lf-tag, .sg .lf-ev-atrocity .lf-tag { --tagc: #7a1f1f; } .sg .lf-ev-displacement .lf-tag { --tagc: #1f5c6b; }
-  .sg .lf-now { border-left: 3px solid var(--tagc, var(--accent)); }
-  .sg .lf-tag { display: inline-block; padding: 1px 7px; border-radius: 999px; background: var(--tagc, var(--accent)); color: #fff; font: 600 11px/1.5 var(--sans); letter-spacing: .02em; }
-  .sg .lf-events { list-style: none; padding-left: 0 !important; display: grid; gap: 8px; }
-  .sg .lf-ev { padding: 6px 10px; border-left: 3px solid var(--tagc, var(--accent)); background: var(--ground); border-radius: 0 8px 8px 0; font-size: 14px; line-height: 1.4; }
-  .sg .lf-moments h4, .sg .lf-names h4 { display: block; font: 600 11.5px/1 var(--sans); letter-spacing: .09em; text-transform: uppercase; color: var(--accent); margin: 14px 0 6px; }
-  .sg .lf-forms { margin: 0 0 6px; padding-left: 18px; font-size: 14px; line-height: 1.5; } .sg .lf-forms li { margin: 0 0 4px; }
-  .sg .lf-names .cap { color: var(--ink-2); font-size: 12.5px; }
+  /* THE STORY PAGE: a rail on the left, one column that reads top to bottom on the right. */
+  .sp { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; align-items: start; }
+  .sp:has(.sp-rail:not([hidden])) { grid-template-columns: 210px minmax(0, 1fr); }
+  .sp-rail { position: sticky; top: 14px; display: flex; flex-direction: column; gap: 2px; font: 400 14.5px/1.3 var(--sans); }
+  .sp-rail[hidden], .sp-rail a[hidden] { display: none; }
+  .sp-rail a { padding: 7px 10px; border-radius: 8px; text-decoration: none; color: var(--ink-2); }
+  .sp-rail a:hover { background: var(--panel-2); color: var(--ink); }
+  .sp-rail a.sub { padding: 4px 10px 4px 24px; font-size: 13.5px; }
+  .sp .lf-stop { scroll-margin-top: 64px; }
+  .sp .lf-stops { display: grid; gap: 16px; }
+  .sp .lf-stop { background: var(--panel); border: 1px solid var(--rule); border-radius: 16px; padding: 18px 20px 14px; }
+  .sp .lf-stop-h { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 12px; }
+  .sp .lf-stop-n { flex: none; display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--accent); color: #fff; font: 600 15px/1 var(--sans); }
+  .sp .lf-stop-k { font: 600 11.5px/1 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+  .sp .lf-stop h3 { font: 500 26px/1.15 var(--serif); margin: 0; }
+  .sp .lf-stop-s { font-size: 14px; color: var(--ink-2); margin-top: 3px; }
+  .sp .lf-stop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 12px 28px; }
+  .sp .lf-stop-grid > * { min-width: 0; }
+  .sp .lf-full { margin-top: 14px; }
+  .sp .lf-full-btn { display: flex; flex-direction: column; gap: 2px; width: 100%; text-align: left; padding: 12px 14px; border: 1px solid var(--accent); border-radius: 10px; background: var(--panel); color: var(--ink); font: inherit; cursor: pointer; }
+  .sp .lf-full-btn b { color: var(--accent); font-weight: 600; font-size: 15px; } .sp .lf-full-btn span { font-size: 13px; color: var(--ink-2); line-height: 1.4; }
+  .sp .lf-full-btn:hover { background: var(--accent-wash); } .sp .lf-full-btn[aria-expanded="true"] b::after { content: " \2191 close"; font-weight: 400; color: var(--ink-3); }
+  .sp .lf-full-slot { margin-top: 10px; } .sp .lf-full-slot[hidden] { display: none; }
+  .sp .lf-stop h4 { font: 600 11.5px/1 var(--sans); letter-spacing: .09em; text-transform: uppercase; color: var(--accent); margin: 4px 0 8px; }
+  .sp .lf-stop h5 { font: 600 13.5px/1.3 var(--sans); margin: 12px 0 4px; }
+  .sp .lf-look { margin: 0 0 8px; padding-left: 18px; font-size: 14.5px; line-height: 1.5; } .sp .lf-look li { margin: 0 0 6px; }
+  .sp .lf-vols { margin: 0 0 8px; padding-left: 18px; font-size: 14px; line-height: 1.5; } .sp .lf-vols a, .sp .lf-stop-where p a { color: var(--accent); }
+  .sp .lf-stop-then .lf-capline { font-size: 14.5px; }
+  .sp .lf-ground h5 { margin: 14px 0 6px; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3, #777); }
+  .sp .lf-eras { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+  .sp .lf-eras li { display: flex; gap: 8px; align-items: center; padding: 4px 8px; border-radius: 6px; font-size: .9rem; line-height: 1.3; }
+  .sp .lf-eras li.on { background: var(--accent-wash, rgba(31, 92, 107, .14)); outline: 1px solid var(--accent, #1f5c6b); }
+  .sp .lf-eras .lf-flag { width: 26px; height: 17px; object-fit: cover; border-radius: 2px; flex: none; margin: 0; }
+  .sp .lf-eras.lf-mort li { display: block; }
+  .sp .lf-stops { margin-top: 6px; }
+  .sp .lf-stop-h > div { min-width: 0; }
+  .sp .lf-stop { margin: 0; }
+  .sp-rail a.on { background: var(--accent-wash); color: var(--accent); font-weight: 600; }
+  .sp-grp { font: 600 11px/1 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); padding: 14px 10px 5px; }
+  .sp-grp:first-child { padding-top: 2px; }
+  .sp-main { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+  .sp-head .sp-title { font: 600 clamp(26px, 3.2vw, 34px)/1.15 var(--serif); margin: 0; text-wrap: balance; }
+  .sp-lede { color: var(--ink-2); margin: 6px 0 0; max-width: 62ch; }
+  .sp-sublede { color: var(--ink-2); font-size: 15px; margin: 0; max-width: 64ch; }
+  .sp-fine { font-size: 13px; line-height: 1.5; color: var(--ink-3); margin: 4px 0; max-width: 70ch; } .sp-fine a { color: var(--accent); }
+  .sp-sec { border-top: 1px solid var(--rule); padding-top: 20px; margin-top: 10px; display: flex; flex-direction: column; gap: 12px; scroll-margin-top: 12px; }
+  .sp-sec[hidden] { display: none; }
+  .sp-sec > h2 { font: 600 22px/1.2 var(--serif); margin: 0; }
+  .sp-did { font-size: 14.5px; color: var(--ink-2); }
+  .sp-did button { font: inherit; margin: 0 4px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--accent); background: var(--panel); color: var(--accent); cursor: pointer; }
+  .sp-btn { font: 600 15px/1 var(--sans); padding: 13px 20px; border: 0; border-radius: 12px; background: var(--accent); color: #fff; cursor: pointer; white-space: nowrap; transition: background .2s; }
+  .sp-btn:hover { background: var(--accent-2); } .sp-btn:disabled { opacity: .55; cursor: default; }
+  .sp-btn-ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent); } .sp-btn-ghost:hover { background: var(--accent-wash); }
+  .sp-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .sp-fa { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .sp-fa select, .sp-fa input { font: 400 15px/1 var(--sans); padding: 12px 12px; border-radius: 10px; border: 1px solid var(--rule-strong); background: var(--panel); color: var(--ink); min-width: 0; max-width: 100%; }
+  .sp-fa input[hidden] { display: none; }
+  .sp-out { color: var(--ink-2); } .sp-out:empty { display: none; }
+  .sp-planbox { background: var(--panel); border: 1px solid var(--rule-strong); border-radius: 16px; padding: 18px clamp(14px, 2.4vw, 22px); }
+  .sp-plan-h { display: flex; flex-wrap: wrap; gap: 14px 20px; align-items: center; justify-content: space-between; }
+  .sp-ai-note { font-size: 13.5px; color: var(--ink-3); margin: 0; max-width: 70ch; border: 1px dashed var(--rule-strong); border-radius: 8px; padding: 8px 12px; }
+  .sp-steps-h { font: 600 17px/1.2 var(--serif); margin: 10px 0 0; }
+  .sp-ai-lead { font: 400 17px/1.5 var(--serif); max-width: 66ch; margin: 4px 0 0; }
+  .sp-ai-legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--ink-3); align-items: center; margin: 4px 0; }
+  .sp-ai-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 6px; align-items: start; }
+  .sp-ai-card { background: var(--ground); border: 1px solid var(--rule); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .sp-ai-card h3 { font: 600 16px/1.2 var(--serif); margin: 0; }
+  .sp-ai-item { font-size: 14.5px; line-height: 1.45; color: var(--ink-2); display: flex; flex-direction: column; gap: 3px; padding-top: 9px; border-top: 1px solid var(--rule); }
+  .sp-ai-item:first-of-type { border-top: 0; padding-top: 0; }
+  .sp-ai-item b { color: var(--ink); font-weight: 600; } .sp-ai-item a { color: var(--accent); }
+  .sp-src { font: 600 10.5px/1 var(--sans); letter-spacing: .06em; text-transform: uppercase; display: inline-block; border-radius: 5px; padding: 3px 7px; margin-right: 6px; vertical-align: 1px; }
+  .sp-src.atlas { background: var(--accent-wash); color: var(--accent); }
+  .sp-src.suggested { border: 1px dashed var(--ochre); color: var(--ochre); }
+  .sp-ai-foot { font-size: 13px; color: var(--ink-3); margin: 8px 0 0; max-width: 70ch; }
+  .sp-ai-foot button { font: inherit; color: var(--accent); background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; }
+  @media (max-width: 860px) {
+    .sp, .sp:has(.sp-rail:not([hidden])) { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+    .sp-rail { position: static; flex-direction: row; flex-wrap: wrap; gap: 6px; }
+    .sp-rail .sp-grp { display: none; }
+    .sp-rail a.sub { display: none; }
+    .sp-rail a { border: 1px solid var(--rule-strong); border-radius: 999px; padding: 7px 12px; }
+    .sp-ai-cols { grid-template-columns: minmax(0, 1fr); }
+    .sp-btn { white-space: normal; }
+  }
+  .sp-drop { border: 2px dashed var(--rule-strong); border-radius: 16px; padding: 14px 16px 8px; background: var(--ground); transition: border-color .2s, background .2s; }
+  .sp-drop.hot { border-color: var(--accent); background: var(--accent-wash); }
+  .sp-drop textarea { width: 100%; box-sizing: border-box; border: 0; background: transparent; font: 400 18px/1.55 var(--sans); color: var(--ink); resize: vertical; min-height: 96px; outline: none; }
+  .sp-drop textarea::placeholder { color: var(--ink-3); }
+  .sp-shots { display: flex; gap: 10px; flex-wrap: wrap; margin: 6px 0; padding: 0; list-style: none; }
+  .sp-shot { position: relative; display: inline-block; }
+  .sp-shot img { width: 76px; height: 76px; object-fit: cover; border-radius: 10px; border: 1px solid var(--rule-strong); display: block; animation: sp-pop .4s cubic-bezier(.3,1.5,.5,1); }
+  .sp-shot button { position: absolute; top: -7px; right: -7px; width: 22px; height: 22px; border-radius: 50%; border: 0; background: var(--ink); color: var(--ground); font-size: 14px; line-height: 1; cursor: pointer; }
+  .sp-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 6px 0; }
+  .sp-add, .sp-ghost { font: 500 14px/1 var(--sans); padding: 10px 14px; border-radius: 999px; border: 1px solid var(--rule-strong); background: var(--panel); color: var(--ink); cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+  .sp-add:hover, .sp-ghost:hover { background: var(--accent-wash); border-color: var(--accent); }
+  .sp-ghost[hidden] { display: none; }
+  .sp-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 4px; min-height: 4px; }
+  .sp-chip { font: 500 15px/1 var(--sans); padding: 9px 14px; border-radius: 999px; background: var(--accent-wash); color: var(--accent); border: 1px solid transparent; }
+  .sp-chip.from { background: color-mix(in srgb, var(--terra) 14%, var(--panel)); color: var(--terra); }
+  .sp-chip.warn { background: color-mix(in srgb, var(--ochre) 16%, var(--panel)); color: var(--ochre); }
+  button.sp-chip { cursor: pointer; } button.sp-chip:hover { border-color: currentColor; }
+  .sp-nudge { border-color: var(--accent); background: var(--accent-wash); animation: sp-pop .5s cubic-bezier(.3,1.5,.5,1); }
+  .sp-chip.pop { animation: sp-pop .4s cubic-bezier(.3,1.5,.5,1); }
+  @keyframes sp-pop { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
+  .sp-status { min-height: 1.2em; font-size: 14px; color: var(--ink-2); margin: 4px 0; } .sp-status.bad { color: var(--brick); }
+  .sp-map { height: clamp(280px, 44vh, 440px); border: 1px solid var(--rule); border-radius: 14px; background: var(--panel-2); margin: 4px 0 10px; }
+  .sp-time { display: flex; gap: 14px; align-items: center; margin: 8px 0; }
+  .sp-time[hidden], .sp-play[hidden] { display: none; }
+  .sp-play { flex: none; font: 600 15px/1 var(--sans); min-width: 6.5em; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--accent); background: var(--panel); color: var(--accent); cursor: pointer; }
+  .sp-time input { flex: 1; min-width: 0; accent-color: var(--accent); }
+  .sp-yearout { font: 600 22px/1 var(--serif); min-width: 2.6em; text-align: right; }
+  .sp .lf-capbox { display: grid; gap: 8px; max-width: var(--measure); margin: 6px 0 10px; }
+  .sp .lf-capline { font: 400 16px/1.45 var(--sans); padding: 10px 14px; border-left: 4px solid var(--accent); background: var(--ground); border-radius: 0 8px 8px 0; }
+  .sp .lf-filed { color: var(--ink-2); font-size: 14px; margin-top: 3px; } .sp .lf-regime { color: var(--ink-2); }
+  .sp .lf-moments ul { padding-left: 18px; max-width: var(--measure); } .sp .lf-moments .cap { color: var(--ink-2); font-size: 13px; }
+  .sp .lf-capline { position: relative; }
+  .sp li:has(> .lf-flag) { display: flow-root; }
+  .lf-flag-link { float: right; margin: 0 0 4px 10px; line-height: 0; border-radius: 3px; }
+  .lf-flag-link .lf-flag { float: none; margin: 0; }
+  .lf-flag-link:hover .lf-flag, .lf-flag-link:focus-visible .lf-flag { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .lf-eras li > b > a { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--ink-3, currentColor); }
+  .lf-eras li > b > a:hover { color: var(--accent); border-bottom-style: solid; }
+  .lf-eras a.lf-era-link { color: inherit; text-decoration: none; }
+  .lf-eras a.lf-era-link:hover { color: var(--accent); text-decoration: underline; }
+  .sp li:has(> .lf-flag-link) { display: flow-root; }
+  .sp .lf-flag { float: right; width: 36px; height: 24px; margin: 0 0 4px 10px; object-fit: cover; border: 1px solid var(--rule); border-radius: 3px; background: var(--panel); }
+  .sp .lf-leader { font-style: italic; }
+  .sp .lf-now { margin-top: 5px; padding: 4px 8px; border-radius: 6px; background: var(--accent-wash); font-size: 14px; line-height: 1.35; }
+  .sp .lf-now-epidemic, .sp .lf-ev-epidemic .lf-tag { --tagc: #8a3b6e; } .sp .lf-now-famine, .sp .lf-ev-famine .lf-tag { --tagc: #a8741a; }
+  .sp .lf-now-war, .sp .lf-ev-war .lf-tag { --tagc: #b3452e; } .sp .lf-now-genocide, .sp .lf-ev-genocide .lf-tag, .sp .lf-ev-massacre .lf-tag, .sp .lf-ev-atrocity .lf-tag { --tagc: #7a1f1f; } .sp .lf-ev-displacement .lf-tag { --tagc: #1f5c6b; }
+  .sp .lf-now { border-left: 3px solid var(--tagc, var(--accent)); }
+  .sp .lf-tag { display: inline-block; padding: 1px 7px; border-radius: 999px; background: var(--tagc, var(--accent)); color: #fff; font: 600 11px/1.5 var(--sans); letter-spacing: .02em; }
+  .sp .lf-events { list-style: none; padding-left: 0 !important; display: grid; gap: 8px; }
+  .sp .lf-ev { padding: 6px 10px; border-left: 3px solid var(--tagc, var(--accent)); background: var(--ground); border-radius: 0 8px 8px 0; font-size: 14px; line-height: 1.4; }
+  .sp .lf-moments h4, .sp .lf-names h4 { display: block; font: 600 11.5px/1 var(--sans); letter-spacing: .09em; text-transform: uppercase; color: var(--accent); margin: 14px 0 6px; }
+  .sp .lf-forms { margin: 0 0 6px; padding-left: 18px; font-size: 14px; line-height: 1.5; } .sp .lf-forms li { margin: 0 0 4px; }
+  .sp .lf-names .cap { color: var(--ink-2); font-size: 12.5px; }
   /* the "Try:" examples are buttons: without a ground of their own the browser paints them light grey, and pale text on that is unreadable in dark mode */
+  .rr-seen { margin: 8px 0; padding: 8px 12px; border-left: 3px solid var(--accent); background: var(--accent-wash); border-radius: 0 8px 8px 0; }
+  .rr-seen b { font: 600 12px/1 var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+  .rr-seen p { margin: 4px 0 0; }
+  .rr-peer { font: inherit; font-weight: 600; background: none; border: 0; border-bottom: 1px dotted var(--accent); color: var(--accent); cursor: pointer; padding: 0; }
+  .rr-filters select { font: inherit; margin-left: 4px; }
   .rr-chips .chip { background: var(--panel); color: var(--ink-2); font-size: 13px; padding: 5px 12px; border-radius: 999px; cursor: pointer; letter-spacing: 0; }
   .rr-chips .chip:hover, .rr-chips .chip:focus-visible { border-color: var(--accent); color: var(--accent); background: var(--accent-wash); }
-  .sg .lf-askyear[hidden] { display: none; }
-  .sg .lf-askyear { margin: 8px 0; padding: 10px 14px; border: 1px dashed var(--accent); border-radius: 10px; font-size: 14.5px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-  .sg .lf-askyear input { width: 6.5em; font: inherit; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--rule-strong); background: var(--panel); color: var(--ink); }
-  .sg .lf-askyear button { font: 600 14px/1 var(--sans); padding: 8px 12px; border-radius: 8px; border: 0; background: var(--accent); color: #fff; cursor: pointer; }
-  .sg .lf-person { margin: 0 0 6px; border: 1px solid var(--rule); border-radius: 10px; padding: 6px 12px; background: var(--ground); } .sg .lf-person summary { cursor: pointer; }
-  .sg .lf-tree { display: grid; gap: 0; justify-items: center; margin: 8px 0 4px; max-width: 54rem; }
-  .sg .lf-gen { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
-  .sg .lf-tie { width: 2px; height: 22px; background: var(--rule-strong); }
-  .sg .lf-card { min-width: 11rem; max-width: 19rem; padding: 10px 14px; border: 1px solid var(--rule-strong); border-radius: 12px; background: var(--panel); text-align: center; animation: sg-rise .5s ease both; }
-  .sg .lf-card-self { border-color: var(--accent); background: var(--accent-wash); } .sg .lf-card-you { border-style: dashed; }
-  .sg .lf-card-role { font: 600 11px/1 var(--sans); letter-spacing: .09em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
-  .sg .lf-card-name { font: 500 18px/1.25 var(--serif); } .sg .lf-card-place, .sg .lf-card-forms { font-size: 13px; color: var(--ink-2); margin-top: 3px; }
-  .sg-plan { display: grid; gap: 10px; max-width: 54rem; }
-  .sg-pstep { background: var(--ground); border: 1px solid var(--rule); border-radius: 14px; padding: 14px 18px 10px; animation: sg-rise .5s ease both; }
-  .sg-pstep h3 { font: 500 19px/1.3 var(--serif); margin: 0 0 4px; display: flex; gap: 12px; align-items: baseline; }
-  .sg-num { flex: none; display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; font: 600 14px/1 var(--sans); transform: translateY(-2px); }
-  .sg-pstep p, .sg-pstep ul { font-size: 15px; line-height: 1.5; margin: 0 0 8px; max-width: var(--measure); } .sg-pstep ul { padding-left: 20px; } .sg-why { color: var(--ink-2); }
-  .sg-ask b { color: var(--accent); } .sg-not b { color: var(--brick); }
-  @keyframes sg-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
-  .sg-family { margin: 16px 0 6px; padding: 18px 20px; border-radius: 14px; background: var(--accent-wash); max-width: 54rem; animation: sg-rise .5s .3s ease both; }
-  .sg-fam-h { font: 500 22px/1.2 var(--serif); margin: 0 0 4px; } .sg-fam-out { font-size: 14px; margin: 6px 0; } .sg-fam-out a { color: var(--accent); }
-  .sg-priv { margin-top: 10px; }
-  .sg-readbox { margin: 16px 0 0; } .sg-readbox > summary { cursor: pointer; font: 500 16px/1.4 var(--sans); color: var(--accent); padding: 10px 2px; }
-  .sg button:focus-visible, .sg-tile:focus-visible, .sg summary:focus-visible, .sg textarea:focus-visible { outline: 3px solid var(--accent-2); outline-offset: 2px; }
-  @media (prefers-reduced-motion: reduce) { .sg-step, .sg-stage, .sg-chip.pop, .sg-pstep, .sg-family, .sg-shot img { animation: none; transition: none; } }
+  .sp .lf-askyear[hidden] { display: none; }
+  .sp .lf-askyear { margin: 8px 0; padding: 10px 14px; border: 1px dashed var(--accent); border-radius: 10px; font-size: 14.5px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .sp .lf-askyear input { width: 6.5em; font: inherit; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--rule-strong); background: var(--panel); color: var(--ink); }
+  .sp .lf-askyear button { font: 600 14px/1 var(--sans); padding: 8px 12px; border-radius: 8px; border: 0; background: var(--accent); color: #fff; cursor: pointer; }
+  .sp .lf-person { margin: 0 0 6px; border: 1px solid var(--rule); border-radius: 10px; padding: 6px 12px; background: var(--ground); } .sp .lf-person summary { cursor: pointer; }
+  .sp .lf-tree { display: grid; gap: 0; justify-items: center; margin: 8px 0 4px; max-width: 54rem; }
+  .sp .lf-gen { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
+  .sp .lf-tie { width: 2px; height: 22px; background: var(--rule-strong); }
+  .sp .lf-card { min-width: 11rem; max-width: 19rem; padding: 10px 14px; border: 1px solid var(--rule-strong); border-radius: 12px; background: var(--panel); text-align: center; animation: sp-rise .5s ease both; }
+  .sp .lf-card-self { border-color: var(--accent); background: var(--accent-wash); } .sp .lf-card-you { border-style: dashed; }
+  .sp .lf-card-role { font: 600 11px/1 var(--sans); letter-spacing: .09em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+  .sp .lf-card-name { font: 500 18px/1.25 var(--serif); } .sp .lf-card-place, .sp .lf-card-forms { font-size: 13px; color: var(--ink-2); margin-top: 3px; }
+    .sp .lf-others { margin-top: 18px; max-width: 54rem; } .sp .lf-others-h { font: 600 11px/1 var(--sans); letter-spacing: .09em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; text-align: center; }
+  .sp .lf-others-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; } .sp .lf-other { padding: 8px 12px; border: 1px solid var(--rule); border-radius: 10px; background: var(--panel); text-align: center; min-width: 8rem; }
+  .sp .lf-other-name { font: 500 15px/1.25 var(--serif); } .sp .lf-other-rel { font-size: 12px; color: var(--ink-2); margin-top: 2px; }
+  .sp .lf-card-empty { border-style: dashed; background: transparent; } .sp .lf-card-empty .lf-card-name { color: var(--ink-3); font-size: 15px; font-style: italic; }
+  .sp .lf-card.editing { max-width: 23rem; text-align: left; } .sp .lf-card.editing .lf-card-role, .sp .lf-card.editing .lf-card-name { text-align: center; }
+  .sp .lf-edit { margin-top: 8px; font: 600 12.5px/1 var(--sans); color: var(--accent); background: transparent; border: 1px solid var(--rule-strong); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+  .sp .lf-edit:hover { background: var(--accent-wash); }
+  .sp .lf-form { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; margin-top: 10px; text-align: left; }
+  .sp .lf-form label { display: grid; gap: 3px; grid-column: 1 / -1; font: 600 11px/1.2 var(--sans); color: var(--ink-2); } .sp .lf-form label.sm { grid-column: auto; }
+  .sp .lf-form input { font: 400 14px/1.3 var(--sans); padding: 6px 8px; border: 1px solid var(--rule-strong); border-radius: 8px; background: var(--panel); color: var(--ink); min-width: 0; width: 100%; box-sizing: border-box; }
+  .sp .lf-form-row { grid-column: 1 / -1; display: flex; gap: 8px; } .sp .lf-form-row button { font: 600 13px/1 var(--sans); padding: 8px 14px; border-radius: 999px; border: 1px solid var(--rule-strong); background: var(--panel); color: var(--ink); cursor: pointer; }
+  .sp .lf-form-row button[type="submit"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .sp .lf-form-note { grid-column: 1 / -1; margin: 0; font-size: 11.5px; color: var(--ink-3); }
+  .sp-plan { display: grid; gap: 10px; max-width: 54rem; }
+  .sp-pstep { background: var(--ground); border: 1px solid var(--rule); border-radius: 14px; padding: 14px 18px 10px; animation: sp-rise .5s ease both; }
+  .sp-pstep h3 { font: 500 19px/1.3 var(--serif); margin: 0 0 4px; display: flex; gap: 12px; align-items: baseline; }
+  .sp-num { flex: none; display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; font: 600 14px/1 var(--sans); transform: translateY(-2px); }
+  .sp-pstep p, .sp-pstep ul { font-size: 15px; line-height: 1.5; margin: 0 0 8px; max-width: var(--measure); } .sp-pstep ul { padding-left: 20px; } .sp-why { color: var(--ink-2); }
+  .sp-ask b { color: var(--accent); } .sp-not b { color: var(--brick); }
+  @keyframes sp-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  .sp button:focus-visible, .sp summary:focus-visible, .sp textarea:focus-visible { outline: 3px solid var(--accent-2); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { .sp-step, .sp-stage, .sp-chip.pop, .sp-pstep, .sp-family, .sp-shot img { animation: none; transition: none; } }
+
 </style>

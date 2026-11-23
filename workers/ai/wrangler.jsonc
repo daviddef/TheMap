@@ -1,6 +1,6 @@
 {
   // The Record Atlas "Ask Claude" Worker: sends a pasted line (or a photo) of a register to Claude, with the Atlas's own
-  // cards as its first source. Holds David's Anthropic key as a SECRET (never in this file) and counts use per reader.
+  // cards as its first source, and writes research plans. Holds David's Anthropic key as a SECRET (never in this file).
   // Deployed by David from his own terminal; read README.md first, the ORDER matters (deploy, then the secrets).
   "name": "record-atlas-ai",
   "main": "src/entry.js",
@@ -10,19 +10,30 @@
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Allowance"] }],
   "vars": {
     "ALLOW_ORIGINS": "https://recordatlas.org",
-    "AI_ENABLED": "1",                 // set to "0" and redeploy to pause everything at once
+    "AI_ENABLED": "1",                 // set to "0" and redeploy (or switch it off on the /admin page) to pause everything at once
     "MODEL": "claude-haiku-5-5",
-    "ANON_DAILY": "5",                 // free tries a day for someone with no six words, per address
-    "ID_NEW_DAILY": "6",               // a brand-new six-word identity starts here ...
-    "ID_DAILY": "12",                  // ... and grows by 2 a day of age up to this
-    "ID_MONTHLY": "120",
-    "IP_DAILY": "20",                  // per address, however many identities it makes
-    "SITE_DAILY_REQUESTS": "150",      // everyone together, per UTC day
-    "SITE_MONTHLY_REQUESTS": "2500",   // everyone together, per calendar month: the number that bounds the bill
-    "SITE_DAILY_TOKENS": "600000",
-    "MAX_OUT_TOKENS": "1200"
+    "PLAN_MODEL": "claude-haiku-5-5",  // research plans: Haiku only for now
+    "PLAN_MAX_TOKENS": "3500",         // the most one research plan may write
+    "MAX_OUT_TOKENS": "1200",          // the most one short answer may write (bounds one answer, not use)
+
+    // LIMITS. "0" (or empty, or missing) means UNLIMITED. All are off for now so that real use can be seen; the numbers
+    // they were before 23 Nov 2026 are written beside each. The same settings can be changed without a redeploy on the
+    // /admin page (a value saved there wins over the one here). The counters keep counting whether or not anything is limited.
+    "ANON_DAILY": "0",                 // was 5: tries a day for someone with no six words, per address
+    "ID_NEW_DAILY": "0",               // was 6: a brand-new six-word identity starts here ...
+    "ID_DAILY": "0",                   // was 12: ... and grows by 2 a day of age up to this
+    "ID_MONTHLY": "0",                 // was 120
+    "IP_DAILY": "0",                   // was 20: per address, however many identities it makes
+    "SITE_DAILY_REQUESTS": "0",        // was 150: everyone together, per UTC day
+    "SITE_MONTHLY_REQUESTS": "0",      // was 2500: everyone together, per calendar month
+    "SITE_DAILY_TOKENS": "0"           // was 600000
+
+    // Optional, only to ESTIMATE cost on the /admin page (US dollars per million tokens; leave out to show tokens only):
+    // "PRICE_IN_PER_MTOK": "", "PRICE_OUT_PER_MTOK": ""
   },
-  // Secrets, set after the first deploy with `npx wrangler@4 secret put NAME`: ANTHROPIC_API_KEY, TURNSTILE_SECRET.
+  // Secrets, set after the first deploy with `npx wrangler@4 secret put NAME`: ANTHROPIC_API_KEY, TURNSTILE_SECRET, and ADMIN_TOKEN
+  // (optional: until it is set the /admin page and routes answer 404). The HARD ceiling on spend is the monthly limit on the key at
+  // console.anthropic.com, which no setting here or on the admin page can change.
   // Off on purpose: request logs would hold what readers paste. Turn it on only while debugging, then off again.
   "observability": { "enabled": false }
 }

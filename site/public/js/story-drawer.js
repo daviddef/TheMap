@@ -41,9 +41,18 @@
     addFiles: function (fl) { return ensure().then(function (a) { a.addFiles(fl); }); },
     clear: function () { return started ? started.then(function (a) { a.clear(); }) : Promise.resolve(); },
     open: function () { open(); },
+    handoff: function () { handoff(); },
     ready: function () { return ensure(); },
     state: function () { return api && api.state ? api.state() : { has: false, name: "" }; }
   };
+
+  /* Take the words (and a count of the pictures) to the story page, which reads them again and draws everything there. */
+  function handoff() {
+    var qb = document.getElementById("ra-q"), t = $(".sd-text"), txt = ((qb && qb.value) || (t && t.value) || "").trim();
+    var n = api && api.state ? (api.state().files || 0) : 0;
+    try { if (txt) localStorage.setItem("ra-story-handoff", JSON.stringify({ text: txt.slice(0, 8000), t: Date.now(), pics: n })); } catch (e) {}
+    location.href = BASE + "read/#story";
+  }
 
   function open() {
     root.hidden = false; if (launch) launch.hidden = true;
@@ -93,7 +102,7 @@
       b.addEventListener("click", function () { var t = report.querySelector("#" + b.getAttribute("data-go")); if (t) t.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" }); });
     });
     var reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
-    dock.querySelector(".sdk-more").addEventListener("click", function () { report.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" }); });
+    dock.querySelector(".sdk-more").addEventListener("click", function () { handoff(); });
     dock.querySelector(".sdk-x").addEventListener("click", function () { showDock(false); });
     window.addEventListener("resize", dockSize);
     refit = function () { if (last && !dock.hidden) paint(last); };
@@ -201,10 +210,11 @@
       var P0 = window.raProgress, selL = $(".sd-fa-line"), nameIn = $(".sd-fa-name"), btn = $(".sd-fa-btn"), want = selL.value;
       /* the families that already exist, then a new one named from the story; the choice is kept while the story is edited */
       selL.textContent = "";
-      var o0 = el("option", "A new family: " + (E.familyName(g.facts) || "name it")); o0.value = ""; selL.append(o0);
+      var surn = String(g.facts.name || "").trim().split(/\s+/).filter(Boolean).length > 1;   /* a surname is known only when the story gave a full name; the place is no family's name */
+      var o0 = el("option", "A new family" + (surn ? ": " + E.familyName(g.facts) : " (name it)")); o0.value = ""; selL.append(o0);
       (P0 ? P0.lines() : []).slice().sort(function (x, y) { return x.name.localeCompare(y.name); }).forEach(function (l) { var o = el("option", "Add to " + l.name + (l.where ? " of " + l.where : "")); o.value = l.slug; selL.append(o); });
       if (want && [].some.call(selL.options, function (o) { return o.value === want; })) selL.value = want;
-      if (document.activeElement !== nameIn && (!nameIn.value || nameIn.getAttribute("data-auto") === "1")) { nameIn.value = E.familyName(g.facts); nameIn.setAttribute("data-auto", "1"); }
+      if (document.activeElement !== nameIn && (!nameIn.value || nameIn.getAttribute("data-auto") === "1")) { nameIn.value = surn ? E.familyName(g.facts) : ""; nameIn.placeholder = surn ? "Name it" : "A surname" + (g.facts.from ? ", or leave blank for " + g.facts.from.name : ""); nameIn.setAttribute("data-auto", "1"); }
       function sync() { var ex = !!selL.value; nameIn.hidden = ex; btn.textContent = ex ? "Add this story to " + (selL.options[selL.selectedIndex].text.replace(/^Add to /, "")) : "Add this family to your research"; }
       if (!selL.__wired) { selL.__wired = true; selL.addEventListener("change", sync); nameIn.addEventListener("input", function () { nameIn.setAttribute("data-auto", "0"); }); }
       sync();
@@ -235,7 +245,7 @@
         parsedNow = p;
         drawChips(p);
         var sig = [(p.route || []).map(function (x) { return x.row.i + ":" + x.age; }).join(","), p.left, p.born, p.name, (p.people || []).map(function (x) { return x.name; }).join(","), p.holds].join("|");
-        if (sig === lastSig || !tellable(p)) { if (status.textContent === "Reading your story\u2026") status.textContent = ""; if (!tellable(p) && sig !== lastSig) { J.clear(); showDock(false); dropKeyPlaces(); report.hidden = true; planBox.hidden = true; fam.hidden = true; addBar.hidden = true; } return; }
+        if (sig === lastSig || !tellable(p)) { if (status.textContent === "Reading your story\u2026") status.textContent = ""; if (!tellable(p) && sig !== lastSig) { lastSig = ""; J.clear(); showDock(false); dropKeyPlaces(); report.hidden = true; planBox.hidden = true; fam.hidden = true; addBar.hidden = true; } return; }
         lastSig = sig;
         var my = ++token; status.textContent = "Reading the Atlas…";
         LD.gather(p).then(function (g) {
@@ -292,13 +302,10 @@
     }
     function drawReport(g) {
       var f = g.facts;
-      report.hidden = false;
-      report.querySelector(".rep-title").textContent = f.name ? f.name + "'s story" : "Their story";
+      /* The long report lives on its own page now (read/#story). Here only the map and the dock are drawn; the report stays hidden. */
+      report.hidden = true;
       dock.querySelector(".sdk-title").textContent = f.name ? f.name : "Their journey";
-      report.querySelector(".rep-lede").textContent = lede(f);
       var sb = J.stops(f, g.mort); stopItems = sb.items;
-      var stops = report.querySelector(".rep-stops"); stops.textContent = ""; stops.append(sb);
-      drawFamily(g); drawLife(g); drawNames(g); drawPlan(g);
       return keyPlaces(f);
     }
     /* the right-hand pane may have just opened and narrowed the map: draw the journey once the map has its final size */
@@ -415,7 +422,7 @@
     if (text.value) run();
     return {
       run: run,
-      setText: function (t) { text.value = String(t || "").slice(0, 2000); lastSig = ""; if (!announced) { announced = true; try { document.dispatchEvent(new CustomEvent("ra-story-start")); } catch (e) { /* no document */ } } run(); },
+      setText: function (t) { text.value = String(t || "").slice(0, 2000); if (!announced) { announced = true; try { document.dispatchEvent(new CustomEvent("ra-story-start")); } catch (e) { /* no document */ } } run(); },
       addFiles: function (fl) { try { document.dispatchEvent(new CustomEvent("ra-story-start")); } catch (e) { /* no document */ } addFiles(fl); },
       clear: function () { $(".sd-clear").click(); },
       state: function () { return { has: !!(parsedNow && ((parsedNow.route && parsedNow.route.length) || parsedNow.from || parsedNow.name || parsedNow.teller || tellable(parsedNow))), name: parsedNow && parsedNow.name || "", files: files.length }; }

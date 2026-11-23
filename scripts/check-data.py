@@ -1167,6 +1167,22 @@ def record_terms_gate():
                 err(f"{w}: {k} is too long: keep it short and in our own words")
             if person.search(t.get(k) or ""):
                 err(f"{w}: {k} reads like it is about a person")
+        for tw in t.get("titleWords") or []:
+            if tw != tw.lower() or " " in tw:
+                err(f"{w}: titleWords are single lower-case words")
+        if t.get("concept") not in (None, "baptism", "marriage", "banns", "death", "confirmation", "index", "soul-count"):
+            err(f"{w}: unknown concept {t.get('concept')}")
+    try:
+        seen_f = json.load(open("data/record-terms-seen.json", encoding="utf-8"))
+        ids = {t["id"] for t in d.get("terms") or []}
+        for i in seen_f.get("terms", {}):
+            if i not in ids:
+                err(f"record-terms-seen.json counts {i}, which is not a term: run scripts/record_terms_seen.py")
+        for t in d.get("terms") or []:
+            if t.get("titleWords") and t["id"] not in seen_f.get("terms", {}):
+                err(f"record-terms {t['id']}: has titleWords but no count: run scripts/record_terms_seen.py")
+    except FileNotFoundError:
+        err("data/record-terms-seen.json is missing: run scripts/record_terms_seen.py")
 
 
 def name_meanings_gate():

@@ -6,21 +6,26 @@
 
    WHO MAY ASK, in the order it is checked
      1. the switch (AI_ENABLED)   2. the origin   3. a Turnstile bot check   4. the six-word identity, if one is sent
-     5. its own daily and monthly allowance (small when new, grows with age)   6. the address's daily cap
-     7. the whole site's daily request and token caps.
-   The per-person caps are SOFT on purpose: anyone can make new six words. What actually bounds the bill is 6 and 7, plus the
-   monthly spend limit David sets with Anthropic on the key itself. */
-import { TRANSLATE_SYSTEM, TRANSCRIBE_SYSTEM, DOCUMENT_SYSTEM, CASEFILE_SYSTEM, translateMessage, documentMessage, casefileMessage, IMAGE_TYPES, parseJson } from "./prompt.js";
+     5. its own daily and monthly allowance   6. the address's daily cap   7. the whole site's daily, monthly and token caps.
+   EVERY LIMIT IS OFF BY DEFAULT: a value of 0, empty or missing means unlimited, and each can be set in wrangler.jsonc or, without a
+   redeploy, from the admin page (config.js). The counters keep counting either way. What bounds the bill when nothing is limited is the
+   monthly spend limit David sets with Anthropic on the key itself, and the bot check. Settings saved from the admin page are merged over
+   the deployed vars once per request (one Durable Object call).
+
+   Beside the answers there are: POST /v1/plan (a research plan, Haiku, grounded against the Atlas records the browser sent) and the
+   admin routes (admin.js: a page, a report of counts by day, the config), which exist only once the secret ADMIN_TOKEN is set. */
+import { TRANSLATE_SYSTEM, TRANSCRIBE_SYSTEM, DOCUMENT_SYSTEM, CASEFILE_SYSTEM, PLAN_SYSTEM, translateMessage, documentMessage, casefileMessage, planMessage, cleanPlanRequest, groundPlan, IMAGE_TYPES, parseJson } from "./prompt.js";
+import { json, sha256Hex, stub } from "./util.js";
+import { limit, pos, effectiveEnv, DEFAULTS } from "./config.js";
+import { handleAdmin } from "./admin.js";
 
 const ID_RE = /^[0-9a-f]{32}$/;
 const TOKEN_RE = /^[A-Za-z0-9_-]{43}$/;
 const MAX_JSON = 80 * 1024;
 const MAX_IMAGE_B64 = 2_200_000;                     // about 1.6 MB of picture; the browser shrinks it first
 const IMAGE_COST = 3;
-const enc = new TextEncoder();
-const hex = b => [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join("");
-const sha256Hex = async s => hex(await crypto.subtle.digest("SHA-256", enc.encode(s)));
-const num = (v, d) => { const n = Number(v); return Number.isFinite(n) && n >= 0 ? n : d; };
+const KINDS = ["translate", "transcribe", "document", "casefile", "plan"];
+const num = (v, d) => { const n = Number(v); return Number.isFinite(n) && n >= 0 ? n : d; };      // for the per-kind costs, which are not limits
 
 const allowed = env => String(env.ALLOW_ORIGINS || "").split(",").map(s => s.trim()).filter(Boolean);
 function corsFor(request, env) {
@@ -30,9 +35,7 @@ function corsFor(request, env) {
   return { ok: true, headers: { "Access-Control-Allow-Origin": o, "Vary": "Origin", "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Authorization, X-AI-Id, X-Turnstile, Content-Type", "Access-Control-Max-Age": "600" } };
 }
-const json = (obj, status, extra) => new Response(JSON.stringify(obj), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...extra } });
 const bearer = r => { const m = /^Bearer ([A-Za-z0-9_-]+)$/.exec(r.headers.get("Authorization") || ""); return m && TOKEN_RE.test(m[1]) ? m[1] : null; };
-const stub = (env, name) => env.ALLOW.get(env.ALLOW.idFromName(name));
 
 /* null when the bot check passed; otherwise a short reason, so a refusal can be diagnosed from the page. The reasons are Cloudflare's own public
    error codes (like "timeout-or-duplicate" or "invalid-input-secret") or one of ours: never the secret, the token or anything about the reader. */
@@ -49,11 +52,14 @@ async function turnstileWhy(env, token, ip, fetchFn) {
   } catch { return "siteverify-unreachable"; }
 }
 
+/* The reader's own day and month limits; null means no limit. A six-word identity starts at ID_NEW_DAILY and grows by 2 a day of age up to ID_DAILY. */
 function limitsFor(env, identity, now) {
-  if (!identity) return { day: num(env.ANON_DAILY, 3), month: null };
-  const ageDays = Math.floor((now - (identity.created || now)) / 86400000);
-  return { day: Math.min(num(env.ID_DAILY, 20), num(env.ID_NEW_DAILY, 5) + 2 * ageDays), month: num(env.ID_MONTHLY, 250) };
+  if (!identity) return { day: limit(env.ANON_DAILY), month: null };
+  const first = limit(env.ID_NEW_DAILY), most = limit(env.ID_DAILY), ageDays = Math.floor((now - (identity.created || now)) / 86400000);
+  const day = first == null ? null : most == null ? first + 2 * ageDays : Math.min(most, first + 2 * ageDays);
+  return { day, month: limit(env.ID_MONTHLY) };
 }
+const under = (used, cap) => cap == null || used < cap;
 const busy = (which, h) => json({ error: which === "site" || which === "tokens" ? "The free reads for today are used up for everyone. They come back tomorrow (midnight UTC). Everything else on the site still works." :
   which === "sitemonth" ? "The free reads for this month are used up for everyone. They come back on the 1st. Everything else on the site still works." :
   which === "month" ? "You have used this month's allowance." : "You have used today's allowance.", limit: which }, 429, h);
@@ -61,26 +67,37 @@ const busy = (which, h) => json({ error: which === "site" || which === "tokens" 
 async function callClaude(env, fetchFn, { system, content, maxTokens, model }) {
   const r = await fetchFn("https://api.anthropic.com/v1/messages", { method: "POST",
     headers: { "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-    body: JSON.stringify({ model: model || env.MODEL || "claude-haiku-5-5", max_tokens: maxTokens, system, messages: [{ role: "user", content }] }) });
+    body: JSON.stringify({ model, max_tokens: maxTokens, system, messages: [{ role: "user", content }] }) });
   if (!r.ok) {   // say which kind of refusal (Anthropic's public error type), never the key or anything sent
     let type = ""; try { type = String(((await r.json()).error || {}).type || "").replace(/[^a-z_]/g, "").slice(0, 40); } catch { /* no body */ }
     return { ok: false, status: r.status, type };
   }
-  const j = await r.json();
-  return { ok: true, text: (j.content || []).map(b => b.text || "").join(""), usage: (j.usage && (j.usage.input_tokens || 0) + (j.usage.output_tokens || 0)) || 0 };
+  const j = await r.json(), u = j.usage || {};
+  return { ok: true, text: (j.content || []).map(b => b.text || "").join(""), in: Math.max(0, Math.floor(u.input_tokens) || 0), out: Math.max(0, Math.floor(u.output_tokens) || 0) };
 }
+const errClass = status => !status ? "network" : status === 429 ? "429" : status >= 500 ? "5xx" : "4xx";
 
-export async function handle(request, env, o = {}) {
+export async function handle(request, env0, o = {}) {
   const fetchFn = o.fetch || fetch, now = o.now || Date.now();
-  const cors = corsFor(request, env);
+  const url = new URL(request.url), parts = url.pathname.split("/").filter(Boolean);
+  /* the admin page and routes: same origin, so they are answered BEFORE the origin check, and send no CORS headers */
+  if ((parts[0] === "admin" && parts.length === 1) || (parts[0] === "v1" && parts[1] === "admin")) return handleAdmin(request, env0, { now, parts, url });
+
+  const cors = corsFor(request, env0);
   if (!cors.ok) return json({ error: "origin not allowed" }, 403);
   const h = cors.headers;
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: h });
-  const url = new URL(request.url), parts = url.pathname.split("/").filter(Boolean);
   if (parts[0] !== "v1") return json({ error: "not found" }, 404, h);
+
+  /* the settings saved from the admin page, over the deployed vars: one Durable Object call per request. If it cannot be read, the deployed vars stand. */
+  let saved = {}; try { saved = (await stub(env0, "admin").getConfig()).v || {}; } catch { /* use the deployed vars */ }
+  const env = effectiveEnv(env0, saved);
+  /* counts of what was turned away and of every call made to Claude: counts only, and never allowed to break an answer */
+  const refuse = async (reason, res) => { try { await stub(env0, "stats").recordRefusal(now, reason); } catch { /* the count is lost, the answer is not */ } return res; };
+
   const enabled = env.AI_ENABLED !== "0";
   if (parts[1] === "health") return json({ ok: true, v: 1, enabled }, 200, h);
-  if (!enabled) return json({ error: "Ask Claude is paused for now." }, 503, h);
+  if (!enabled) return request.method === "POST" ? refuse("paused", json({ error: "Ask Claude is paused for now." }, 503, h)) : json({ error: "Ask Claude is paused for now." }, 503, h);
 
   /* the six-word identity, if sent: registered on first use, then every later call must carry the same token */
   const aiId = request.headers.get("X-AI-Id"), tok = bearer(request);
@@ -97,29 +114,37 @@ export async function handle(request, env, o = {}) {
   }
   if (request.method === "GET" && parts[1] === "allowance") {
     /* THE METER the page shows before anything is pressed: how many tries this reader has left today, and whether the whole site's free
-       reads are used up. A six-word identity is counted by its id; anyone else by address (hashed, dated, as the counting below does). */
+       reads are used up. A six-word identity is counted by its id; anyone else by address (hashed, dated, as the counting below does).
+       With no limit set, `left` and `of` are null (the page shows no meter) and the site is open. */
     const lim = limitsFor(env, identity, now), used = identity ? await stub(env, `id:${aiId}`).peek(now) : null;
     const ipk = await sha256Hex(`${request.headers.get("CF-Connecting-IP") || ""}:${new Date(now).toISOString().slice(0, 10)}`);
     const ipUsed = identity ? null : await stub(env, `ip:${ipk}`).peek(now);
     const sitePeek = await stub(env, "site").peek(now);
-    const siteOpen = sitePeek.day < num(env.SITE_DAILY_REQUESTS, 400) && sitePeek.tokens < num(env.SITE_DAILY_TOKENS, 1500000) && sitePeek.month < num(env.SITE_MONTHLY_REQUESTS, 6000);
+    const siteOpen = under(sitePeek.day, limit(env.SITE_DAILY_REQUESTS)) && under(sitePeek.tokens, limit(env.SITE_DAILY_TOKENS)) && under(sitePeek.month, limit(env.SITE_MONTHLY_REQUESTS));
     const dayUsed = used ? used.day : ipUsed ? ipUsed.day : null, dayLimit = lim.day;
     return json({ identity: !!identity, dayLimit, monthLimit: lim.month, dayUsed: used ? used.day : null, monthUsed: used ? used.month : null,
-      left: dayUsed == null ? null : Math.max(0, dayLimit - dayUsed), of: dayLimit, siteOpen }, 200, h);
+      left: dayUsed == null || dayLimit == null ? null : Math.max(0, dayLimit - dayUsed), of: dayLimit, siteOpen }, 200, h);
   }
-  if (request.method !== "POST" || !["translate", "transcribe", "document", "casefile"].includes(parts[1]) || parts.length !== 2) return json({ error: "not found" }, 404, h);
-  const kind = parts[1], isPic = kind === "transcribe" || kind === "document", cost = kind === "document" ? num(env.DOC_COST, 2) : isPic ? IMAGE_COST : kind === "casefile" ? num(env.CASE_COST, 2) : 1;   // a whole document costs 2 tries, the case file that joins them 2, a register line 1
+  if (request.method !== "POST" || !KINDS.includes(parts[1]) || parts.length !== 2) return json({ error: "not found" }, 404, h);
+  const kind = parts[1], isPic = kind === "transcribe" || kind === "document", cost = kind === "document" ? num(env.DOC_COST, 2) : isPic ? IMAGE_COST : kind === "casefile" ? num(env.CASE_COST, 2) : 1;   // a whole document costs 2 tries, the case file that joins them 2, a register line 1 (and a plan 1)
 
-  const len = Number(request.headers.get("Content-Length") || 0);
-  if (len > (isPic ? MAX_IMAGE_B64 + MAX_JSON : MAX_JSON)) return json({ error: "too large" }, 413, h);
-  let body; try { body = await request.json(); } catch { return json({ error: "not json" }, 400, h); }
+  const maxBody = isPic ? MAX_IMAGE_B64 + MAX_JSON : MAX_JSON;
+  if (Number(request.headers.get("Content-Length") || 0) > maxBody) return refuse("too_large", json({ error: "too large" }, 413, h));
+  let raw; try { raw = await request.text(); } catch { return json({ error: "not json" }, 400, h); }
+  if (raw.length > maxBody) return refuse("too_large", json({ error: "too large" }, 413, h));
+  let body; try { body = JSON.parse(raw); } catch { return json({ error: "not json" }, 400, h); }
   if (!body || typeof body !== "object") return json({ error: "not json" }, 400, h);
 
-  let content, system, model = env.MODEL, maxTokens = Math.min(num(env.MAX_OUT_TOKENS, 1200), 2000);
+  let content, system, model = env.MODEL, maxTokens = Math.min(pos(env.MAX_OUT_TOKENS, DEFAULTS.MAX_OUT_TOKENS), 2000), planCands = null;
   if (kind === "translate") {
     if (typeof body.text !== "string" || !body.text.trim()) return json({ error: "paste a line to read" }, 400, h);
-    if (body.text.length > 4000) return json({ error: "that is too long: paste one entry at a time (up to 4,000 characters)" }, 413, h);
+    if (body.text.length > 4000) return refuse("too_large", json({ error: "that is too long: paste one entry at a time (up to 4,000 characters)" }, 413, h));
     system = TRANSLATE_SYSTEM; content = translateMessage(body);
+  } else if (kind === "plan") {
+    const p = cleanPlanRequest(body);
+    if (p.error) return json({ error: p.error }, 400, h);
+    planCands = p.candidates; system = PLAN_SYSTEM; content = planMessage(p);
+    model = env.PLAN_MODEL || DEFAULTS.PLAN_MODEL; maxTokens = Math.min(pos(env.PLAN_MAX_TOKENS, DEFAULTS.PLAN_MAX_TOKENS), 16000);
   } else if (kind === "casefile") {
     const docs = Array.isArray(body.docs) ? body.docs : [];
     if (docs.length < 2 || docs.length > 6) return json({ error: "send two to six documents that were read" }, 400, h);
@@ -128,7 +153,7 @@ export async function handle(request, env, o = {}) {
   } else {
     const im = body.image;
     if (!im || !IMAGE_TYPES[im.media_type] || typeof im.data !== "string" || !/^[A-Za-z0-9+/=]+$/.test(im.data)) return json({ error: "send a jpeg, png or webp picture" }, 400, h);
-    if (im.data.length > MAX_IMAGE_B64) return json({ error: "that picture is too large: it should be shrunk first" }, 413, h);
+    if (im.data.length > MAX_IMAGE_B64) return refuse("too_large", json({ error: "that picture is too large: it should be shrunk first" }, 413, h));
     const pic = { type: "image", source: { type: "base64", media_type: im.media_type, data: im.data } };
     if (kind === "document") {      // a whole form or sheet, read field by field: a stronger model, and room to answer
       system = DOCUMENT_SYSTEM; model = env.DOC_MODEL || "claude-sonnet-5-5"; maxTokens = num(env.DOC_MAX_TOKENS, 3000);
@@ -138,33 +163,40 @@ export async function handle(request, env, o = {}) {
       content = [pic, { type: "text", text: "Transcribe this. " + (body.context && body.context.language ? "Language: " + String(body.context.language).slice(0, 40) + "." : "") }];
     }
   }
+  model = model || DEFAULTS.MODEL;
 
   const ip = request.headers.get("CF-Connecting-IP") || "";
   const why = await turnstileWhy(env, request.headers.get("X-Turnstile"), ip, fetchFn);
-  if (why) return json({ error: "The bot check did not pass. Reload the page and try again.", reason: why }, 403, h);
+  if (why) return refuse("bot", json({ error: "The bot check did not pass. Reload the page and try again.", reason: why }, 403, h));
 
-  const lim = limitsFor(env, identity, now);
-  if (identity) { const r = await stub(env, `id:${aiId}`).take(now, { cost, day: lim.day, month: lim.month }); if (!r.ok) return busy(r.which, h); }
+  /* the counters ALWAYS count; a limit that is not set (null) simply never refuses */
+  const lim = limitsFor(env, identity, now), anon = limit(env.ANON_DAILY);
+  if (identity) { const r = await stub(env, `id:${aiId}`).take(now, { cost, day: lim.day, month: lim.month }); if (!r.ok) return refuse("limit", busy(r.which, h)); }
   const ipKey = await sha256Hex(`${ip}:${new Date(now).toISOString().slice(0, 10)}`);       // dated, so it cannot follow an address across days
-  const rip = await stub(env, `ip:${ipKey}`).take(now, { cost, day: identity ? num(env.IP_DAILY, 40) : num(env.ANON_DAILY, 3) });
-  if (!rip.ok) return busy("day", h);
-  const site = await stub(env, "site").take(now, { cost: 1, day: num(env.SITE_DAILY_REQUESTS, 400), month: num(env.SITE_MONTHLY_REQUESTS, 6000), tokensBelow: num(env.SITE_DAILY_TOKENS, 1500000) });
+  const rip = await stub(env, `ip:${ipKey}`).take(now, { cost, day: identity ? limit(env.IP_DAILY) : anon });
+  if (!rip.ok) return refuse("limit", busy("day", h));
+  const site = await stub(env, "site").take(now, { cost: 1, day: limit(env.SITE_DAILY_REQUESTS), month: limit(env.SITE_MONTHLY_REQUESTS), tokensBelow: limit(env.SITE_DAILY_TOKENS) });
   if (!site.ok) {   // the site said no after the reader's own counters said yes: give those tries back, the reader used none
     await Promise.allSettled([identity ? stub(env, `id:${aiId}`).give(now, cost) : null, stub(env, `ip:${ipKey}`).give(now, cost)].filter(Boolean));
-    return busy(site.which === "tokens" ? "tokens" : site.which === "month" ? "sitemonth" : "site", h);
+    return refuse("limit", busy(site.which === "tokens" ? "tokens" : site.which === "month" ? "sitemonth" : "site", h));
   }
 
   let out;
   try { out = await callClaude(env, fetchFn, { system, content, maxTokens, model }); } catch { out = { ok: false, status: 0 }; }
+  /* every attempted call is counted once it has resolved, answered or not: kind, model, status class and the tokens in and out, never any text */
+  try { await stub(env0, "stats").recordCall(now, { kind, model, ok: out.ok, errClass: out.ok ? null : errClass(out.status), in: out.in || 0, out: out.out || 0 }); } catch { /* the count is lost, the answer is not */ }
   if (!out.ok) {   // a call that gave no answer costs the reader nothing: hand back every try it took
     await Promise.allSettled([identity ? stub(env, `id:${aiId}`).give(now, cost) : null, stub(env, `ip:${ipKey}`).give(now, cost), stub(env, "site").give(now, 1)].filter(Boolean));
   }
   if (!out.ok) return json({ error: out.status === 429 || out.status === 529 ? "Claude is busy. Try again in a minute." : "Claude could not answer just now.", reason: out.status ? "anthropic-" + out.status + (out.type ? "-" + out.type : "") : "anthropic-unreachable" }, 503, h);
-  await stub(env, "site").addTokens(now, out.usage);
+  await stub(env, "site").addTokens(now, out.in + out.out);
 
   const parsed = parseJson(out.text);
   const used = identity ? await stub(env, `id:${aiId}`).peek(now) : null;
-  return json({ kind, result: parsed || { unparsed: true, draft: String(out.text).slice(0, 4000) }, left: used ? Math.max(0, lim.day - used.day) : Math.max(0, num(env.ANON_DAILY, 3) - rip.day), of: identity ? lim.day : num(env.ANON_DAILY, 3) }, 200, h);
+  const left = used ? (lim.day == null ? null : Math.max(0, lim.day - used.day)) : (anon == null ? null : Math.max(0, anon - rip.day)), of = identity ? lim.day : anon;
+  const unparsed = { unparsed: true, draft: String(out.text).slice(0, 4000) };
+  if (kind === "plan") return json({ kind, result: (parsed && groundPlan(parsed, planCands)) || unparsed, model, left, of }, 200, h);
+  return json({ kind, result: parsed || unparsed, left, of }, 200, h);
 }
 
 export default {

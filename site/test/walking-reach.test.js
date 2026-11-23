@@ -429,3 +429,11 @@ test("the era note, its flag and the go-deeper row use the card's type scale, fl
   assert.match(css, /\.fd2-stage \.ra-ts-deeplab \{ font: 700 11px\/1\.4 var\(--mono/);
   assert.match(css, /\.fd2-stage \.ra-era-n \{ margin: 0; font: 400 13px/);
 });
+
+test("tapping the chosen era again lets it go, and with none chosen every governing state's archives are listed", () => {
+  const src = readFileSync(join(root, "src/components/RecordMap.astro"), "utf8");
+  assert.match(src, /tl\.classList\.contains\("open"\) && seg\.getAttribute\("aria-selected"\) === "true"/);
+  assert.match(src, /function areaGovStates\(d\)/);
+  assert.match(src, /class="ra-gov-src"/);
+  assert.match(src, /querySelectorAll\("\.ra-gov-src"\)/);
+});

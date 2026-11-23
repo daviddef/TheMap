@@ -1839,6 +1839,8 @@ window.addEventListener("load", async function () {
   function paintEraSources(entry) {
     var box = document.getElementById("ra-era-src");
     var home = document.getElementById("ra-home-src");
+    /* the standing list of governing states gives way to the chosen era's own list, and comes back when the era is let go */
+    [].forEach.call(document.querySelectorAll(".ra-gov-src"), function (g) { g.hidden = !!(entry && entry.ccs && entry.ccs.length); });
     if (!box) return;
     /* An era with nothing abroad puts the standing card back and clears this. */
     if (!entry || !entry.ccs || !entry.ccs.length) {
@@ -2046,6 +2048,15 @@ window.addEventListener("load", async function () {
     var seg = ev.target.closest && ev.target.closest(".ra-tl-seg");
     if (!seg) return;
     var tl = seg.closest(".ra-tl");
+    /* TAP IT AGAIN TO LET GO. David: «how do i remove the tap i made on the flag? tap again and remove?». On the new front door the era you tapped stays chosen
+       until you tap it again: its note, its flag and its archives go, and the card is back to the standing view (every state that governed here, below). */
+    if (tl && TSV2 && tl.classList.contains("open") && seg.getAttribute("aria-selected") === "true") {
+      tl.classList.remove("open");
+      [].forEach.call(tl.querySelectorAll(".ra-tl-seg"), function (b, j) { b.setAttribute("aria-selected", "false"); b.tabIndex = j === 0 ? 0 : -1; });
+      var dt = tl.querySelector(".ra-tl-detail") || (tl.closest(".ra-tl-group") || tl).querySelector(".ra-tl-detail"); if (dt) dt.innerHTML = "";
+      paintEraSources(null);
+      return;
+    }
     if (tl) { bandShow(tl, +seg.dataset.i); if (TSV2) tl.classList.add("open"); }
   });
 
@@ -8742,9 +8753,36 @@ window.addEventListener("load", async function () {
       });
       h.push("</ul></details>");
     });
+    /* EVERY STATE THAT GOVERNED THIS GROUND, WITH NOTHING CHOSEN. David: «why doesnt it show all the records for all governing states/countries? when nothings
+       selected?». The era strip shows one era's archives when you tap it; with none tapped the card only had today's country. The states of every era (not
+       today's) each get their archives here, as a shut fold named for the years they governed, and the list steps aside while an era is chosen. */
+    if (TSV2) {
+      var gv = areaGovStates(d);
+      if (gv.length) {
+        var hid = !!panel.querySelector(".ra-tl-v2.open");
+        h.push('<div class="ra-gov-src"' + (hid ? " hidden" : "") + ">");
+        gv.forEach(function (g) {
+          h.push(countrySources(g.cc, "Governed from " + (CNAME[g.cc] || g.cc) + " in " + g.yrs + ", so its archives are worth trying for those years.", (CNAME[g.cc] || g.cc) + " \u00b7 " + g.yrs, d.lat, d.lon, null, true));
+        });
+        h.push("</div>");
+      }
+    }
     h.push("</div>");
     (R.mount && R.mount.isConnected ? R.mount : panel).innerHTML = h.join("");
     areaFillVolumes();
+  }
+  /* the countries that governed this place in some era other than today's, with the years of each (from the era strip the card already built) */
+  function areaGovStates(d) {
+    var tl = panel.querySelector(".ra-tl"), rows = tl && BAND_ABROAD[tl.id], by = {}, order = [], home = String(d.country || "").toUpperCase();
+    (rows || []).forEach(function (e) {
+      if (!e || !e.ccs) return;
+      e.ccs.forEach(function (cc) {
+        if (cc === home) return;
+        if (!by[cc]) { by[cc] = []; order.push(cc); }
+        by[cc].push(e.from + "\u2013" + e.to);
+      });
+    });
+    return order.sort(function (a, b) { return (CNAME[a] || a).localeCompare(CNAME[b] || b); }).map(function (cc) { return { cc: cc, yrs: by[cc].join(", ") }; });
   }
   /* a place's books, with its catalogue entries beside them once each (a book is the same book by waypoint, link or title) */
   function areaPlaceVols(d, merge) {

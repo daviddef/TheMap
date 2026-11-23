@@ -215,7 +215,7 @@ test("the footer's GoatCounter link sits tight inside its brackets, and the remo
   const base = readFileSync(join(root, "src/layouts/Base.astro"), "utf8");
   assert.match(base, /no cookies \(<a href="https:\/\/www\.goatcounter\.com\/" rel="noopener" style="margin: 0">GoatCounter<\/a>\)/);
   const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
-  assert.match(css, /\.fd2-stage \.ra-base \{ display: none !important; \}/);
+  assert.match(css, /\.fd2-stage:not\(\.fd2-looks-on\) \.ra-base \{ display: none !important; \}/);
   assert.match(css, /body\.fd2 #ra-mywork \{ display: none !important; \}/);
   assert.doesNotMatch(map, /Zoom in, or draw a box round the ground you mean/);
   assert.match(map, /if \(b\.getNorth\(\) - b\.getSouth\(\) > 9\) \{ el\.innerHTML = head\(""\); sized\(\); return; \}/);

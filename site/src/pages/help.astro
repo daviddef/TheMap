@@ -18,6 +18,7 @@
  * Every number here is counted at build time.
  */
 import Base from "../layouts/Base.astro";
+import HomeAbout from "../components/HomeAbout.astro";
 import { u } from "../lib/url.js";
 import { atlas as idx } from "../lib/atlas.js";
 import regions from "../../public/regions.json";
@@ -79,6 +80,9 @@ const access = idx.access || {};
   </div>
   <p class="k-lede">The shelf is deep in one corner: Croatia, Istria and Carnia are far ahead. The jurisdiction layer covers
     {regions.regions.length} pieces of ground, not the planet, and a place outside them says so rather than guessing. A confident wrong answer about which archive to write to costs somebody a month.</p>
+
+  {/* WHAT THE ATLAS IS, IN WORDS: it sat under the map on the home page until 23 Nov 2026, when David asked for the map to have the room. */}
+  <HomeAbout />
 
   <div class="k-foot">
     <p>Still stuck?</p>

@@ -67,16 +67,16 @@ test("built: the working pages are noindex in the shipped HTML and in no sitemap
   }
 });
 
-test("built: the front page's HTML holds the written section, with real words and no ad", { skip: !built }, () => {
-  const html = readFileSync(new URL("index.html", DIST), "utf8");
+test("built: the Help page's HTML holds the written section (moved off the front page), with real words and no ad", { skip: !built }, () => {
+  const html = readFileSync(new URL("help/index.html", DIST), "utf8");
   const m = html.match(/<section class="[^"]*ra-about[^"]*" id="about-the-atlas"[\s\S]*?<\/section>/);
-  assert.ok(m, "the section is not in the static HTML of the front page");
+  assert.ok(m, "the section is not in the static HTML of the Help page");
   const text = m[0].replace(/<style[\s\S]*?<\/style>/g, " ").replace(/<[^>]+>/g, " ");
   const words = text.split(/\s+/).filter(Boolean).length;
   assert.ok(words >= 300 && words <= 520, `section has ${words} words`);
   assert.equal((m[0].match(/<h2/g) || []).length, 1, "exactly one h2");
   assert.ok(!/adsbygoogle|adslot/.test(m[0]), "no ad in the section");
-  /* it comes after the map in the document, so nothing above the fold moves */
+  /* it comes after the page's own opening, inside the main landmark */
   assert.ok(html.indexOf('id="about-the-atlas"') > html.indexOf("<main"), "after the main landmark opens");
   for (const href of ["/start/", "/places/", "/countries/", "/surnames/", "/tree-canvas/", "/data/", "/privacy/"]) {
     assert.ok(m[0].includes(`href="${href}"`), `no link to ${href}`);

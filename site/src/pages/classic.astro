@@ -1,0 +1,107 @@
+---
+import Base from "../layouts/Base.astro";
+import RecordMap from "../components/RecordMap.astro";
+import ProgressKit from "../components/ProgressKit.astro";
+import VolumeMarks from "../components/VolumeMarks.astro";
+import StoryDrawer from "../components/StoryDrawer.astro";
+import InventoryPill from "../components/InventoryPill.astro";
+import { u } from "../lib/url.js";
+import { atlas as idx } from "../lib/atlas.js";
+import regions from "../../public/regions.json";
+import { places, NEWS_KIND, latestNews, newsDay, volumes, placeCountries, countries, withPlaces, archives, archiveCountries, inventoryRows } from "../lib/inventory.js";
+
+---
+<Base
+  bare
+  noindex
+  title="Record Atlas, classic view"
+  dek="The same map and tools, in the layout the front door had before the map-first one."
+  wide>
+
+  {/* TIGHTER THAN THE PROSE PAGES, BECAUSE THIS ONE IS A TOOL. The shared
+      .pagehead gives every page 56px of air above the title and holds the
+      standfirst to a 76ch measure — right for something you read, wrong for
+      something you use, where it pushed the map below the fold and left a
+      third of a wide screen blank. .ra-lede takes the air back and lets the
+      line run the full width. The wording is two sentences now; the old five
+      spent three of them clearing their throat before the point. */}
+  {/* THREE STACKED BLOCKS BECAME ONE LINE. A 44px headline, a stats line and
+      a standfirst came to about 150 pixels above the search box — on a laptop
+      that is a fifth of the window spent saying the name of a page the reader
+      is already looking at, and the same complaint David made about the panel
+      below: «there isnt much point wasting real estate». The h1 stays, because
+      a page needs one and a screen reader announces it; it is just no longer
+      the size of a poster. Stats and the help link ride on the same baseline. */}
+  {/* THE WHOLE LEDE ROW WENT. David: «can we remove this entire row? and move the volume count pill between the record atlas icon and
+      "new"? how it works is just taking me to help which is already in the burger menu». The pill (and its inventory popover) now
+      sits in the header through Base's "inv" slot; the "How this works" line was a second door to Help, which the About menu has. The
+      h1 stays for screen readers and search engines, and is only hidden. (Earlier notes on this row: the page is a tool, not an
+      article, so nothing between the header and the search box.) */}
+  <h1 class="ra-sr">Where the records are</h1>
+  <InventoryPill slot="inv" />
+  {/* RIGHT OF «LOCAL». David: «move the volume numbers to the right of "local" … short form, e.g. 3.43M». On a wide screen the pill moves into
+      the Researching group, before the save button (David: the icon goes to the right of the count); below the burger breakpoint that group is in the drawer and the dot sits beside the brand, so
+      the pill goes back to sit after it. One element, moved by matchMedia (without script it stays beside the brand). */}
+  {/* The pill's placement, pulse and (on other pages) lazy fill are in /js/inventory-pill.js, loaded by Base. */}
+
+  {/* ABOVE THE MAP, BECAUSE IT DECIDES WHERE EVERY MARK GOES. David: «can we
+      move the researching dropdown thats hiding all the way at the bottom to
+      the header at the top, otherwise im marking things without selecting a
+      family?» It was below the map and below the fold, which on this page is
+      a very long way down — so the honest description of it was not «quiet»
+      but «hidden», and a reader could work a whole session into whichever
+      line happened to be active. A control that assigns ownership has to be
+      visible before the thing it assigns.
+      `quiet` stays: it holds the bar to one line until a second family
+      exists, which keeps a first-time reader's map uncluttered without
+      hiding the selector from somebody who has several. */}
+  <ProgressKit />
+
+  {/* THE CLASSIC VIEW, KEPT AT /classic/ WHEN THE MAP-FIRST FRONT DOOR BECAME THE HOME PAGE (23 Nov 2026). It is the same map and tools; it is not indexed, and this link is the way back. */}
+  <p class="ra-v2-try"><a href={u("/")}><span class="ra-v2-new">Classic</span> You are in the classic view. Back to the front door <span aria-hidden="true">&rarr;</span></a></p>
+
+  <RecordMap
+    indexUrl={u("/index.json")}
+    detailBase={u("/p/")}
+    regionsUrl={u("/regions.json")}
+    providersUrl={u("/providers.json")}
+    gazBase={u("/g/")}
+    surnameBase={u("/s/")}
+    belgiumBase={u("/bs/")}
+    wikidataUrl={u("/archives-wikidata.json")}
+    osmUrl={u("/archives-osm.json")}
+    featureBase={u("/")}
+    settlementBase={u("/rs/")}
+    districtBase={u("/a/")}
+    countryBase={u("/c/")}
+    townlandBase={u("/t/")}
+    comuneBase={u("/it/")}
+    estoniaBase={u("/ee/")}
+    scotlandBase={u("/sc/")}
+    worldArchivesUrl={u("/world-archives.json")}
+    countryPointsUrl={u("/country-points.json")}
+    base={u("/")} />
+
+  {/* THE TWO PROSE PANELS THAT WERE HERE NOW LIVE AT /help/.
+      They were already folded behind a summary because they took half the
+      page; folding was the right instinct and the wrong fix. A reader who
+      wants four hundred words on why this is a map is asking for help and
+      will go looking for it. A reader who arrived with a surname should meet
+      the map and nothing else. */}
+
+  <p id="ra-mywork" data-href={u("/my-research/")} hidden></p>
+  <VolumeMarks />
+  <StoryDrawer />
+</Base>
+
+<style>
+  .ra-v2-try { margin: 6px 0 -2px; text-align: right; font: 500 13px/1.3 var(--sans); }
+  .ra-v2-try a { display: inline-flex; align-items: center; gap: 7px; padding: 6px 13px; border-radius: 99px; text-decoration: none;
+    color: var(--accent); background: var(--accent-wash, rgba(31, 92, 107, .1)); border: 1px solid transparent; transition: border-color .15s, transform .15s; }
+  .ra-v2-try a:hover, .ra-v2-try a:focus-visible { border-color: var(--accent); transform: translateY(-1px); outline: none; }
+  .ra-v2-try b { font-weight: 700; }
+  .ra-v2-new { font: 700 10px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--on-accent, #fff); background: var(--accent); padding: 3px 6px; border-radius: 99px; }
+  /* The folded explanation. A summary that looks like a control, not like
+     a heading somebody forgot to style — a reader has to be able to tell
+     it opens. */
+</style>

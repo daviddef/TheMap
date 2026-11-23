@@ -10,8 +10,8 @@ import { dirname, join } from "node:path";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (p) => readFileSync(join(root, p), "utf8");
-const home = read("src/pages/index.astro");
-const v2 = read("src/pages/v2.astro");
+const home = read("src/pages/classic.astro");   /* the old layout, kept at /classic/ */
+const v2 = read("src/pages/index.astro");       /* the front door, the home page since 23 Nov 2026 */
 
 /* the props passed to <RecordMap ... />, as a sorted list of name=expression */
 function mapProps(src) {
@@ -33,10 +33,34 @@ test("v2 carries every component the home page carries, apart from the prose it 
   }
 });
 
-test("the two front doors link to each other, and v2 is not indexed while it is a trial", () => {
-  assert.match(home, /href=\{u\("\/v2\/"\)\}/, "the home page offers v2");
-  assert.match(v2, /href=\{u\("\/"\)\}[^>]*>\s*Classic view/, "v2 offers the classic view");
-  assert.match(v2, /<Base\b[^>]*\bnoindex\b/);
+test("the front door is the indexed home page and the classic view is its not-indexed twin; /v2/ sends on", () => {
+  assert.match(home, /href=\{u\("\/"\)\}/, "the classic view links back to the front door");
+  assert.match(home, /<Base\b[^>]*\bnoindex\b/, "the classic view is not indexed");
+  assert.match(v2, /href=\{u\("\/classic\/"\)\}[^>]*>Classic view/, "the front door offers the classic view");
+  assert.doesNotMatch(v2, /<Base\b[^>]*\bnoindex\b/, "the home page is indexed");
+  assert.match(v2, /title="Record Atlas"/);
+  assert.doesNotMatch(v2, /Front door v2|fd2-top/, "no trial labels on the home page");
+  assert.match(v2, /"@type": "SearchAction"/, "the structured data moved with the home page");
+  assert.doesNotMatch(v2, /<HomeAbout/, "the page's words moved to Help so the map has the room");
+  assert.match(read("src/pages/help.astro"), /<HomeAbout \/>/, "...and are on the Help page");
+  assert.doesNotMatch(home, /SearchAction|<HomeAbout/, "the classic view carries neither");
+  const old = read("src/pages/v2.astro");
+  assert.match(old, /location\.replace\(home \+ location\.search \+ location\.hash\)/, "an old /v2/ link keeps its query");
+  assert.match(old, /noindex/);
+});
+
+test("the map look is one button in the icon column, and the strip it opens is hidden until asked for", () => {
+  const css = read("public/front-door-v2.css"), rm = read("src/components/RecordMap.astro");
+  assert.match(rm, /ra-histctl ra-lookctl/);
+  assert.match(rm, /classList\.toggle\("fd2-looks-on", on\)/);
+  assert.match(rm, /\}, true\);   \/\* capture: the switcher stops the click/, "a pick closes the strip even though the switcher stops the click");
+  assert.match(css, /\.fd2-stage:not\(\.fd2-looks-on\) \.ra-base \{ display: none !important; \}/);
+});
+
+test("on a phone the Year sits in the row of the bookmark and filter buttons while it is off", () => {
+  const css = read("public/front-door-v2.css");
+  assert.match(css, /\.fd2-stage \.ra-bar-find \.ra-time:not\(\.on\) \{ flex: 1 1 0; min-width: 0; margin: 0;/);
+  assert.match(css, /\.fd2-stage \.ra-bar-find #ra-count \{ order: 10; \}/, "the full-width count line must not wedge between the buttons and the Year");
 });
 
 test("every door on the card goes somewhere that exists", () => {

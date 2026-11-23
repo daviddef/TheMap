@@ -350,3 +350,31 @@ test("'then to rhodesia' is a stop, at Zimbabwe, named as the family named it; '
   const q = F.parseStory("He lived in Salisbury, Rhodesia until 1975.", ctx);
   assert.ok(!places({ stops: q.stops }).includes("Rhodesia"), "the country name only chooses the place");
 });
+
+test("'my mother Cheryl who's grandfather was from Argentina' does not make the mother Argentine", () => {
+  const p = F.parseStory("My dad was born in 1951 and moved from Senj, Croatia to Brisbane and then to Johannesburg. He married my mother Cheryl who's grandfather was from Argentina.", ctx);
+  const mother = (p.people || []).filter((x) => x.role === "mother")[0];
+  assert.ok(!mother || !mother.place, "the mother has no place from her grandfather's");
+  assert.deepEqual((p.kin || []).filter((x) => /mother/.test(x.label || "")).map((x) => x.stops.length), []);
+  /* and the plain form still reads: she is from there */
+  const q = F.parseStory("My dad was born in Senj and moved to Brisbane. He married my mother Cheryl who was from Argentina.", ctx);
+  const m2 = (q.people || []).filter((x) => x.role === "mother")[0];
+  assert.ok(m2 && m2.place && m2.place.row.n === "Argentina" || (q.kin || []).some((x) => /mother/.test(x.label || "") && x.stops.some((s) => s.row.n === "Argentina")));
+});
+
+test("a mother's given name is read in lower case, and before a 'who's grandfather' clause", () => {
+  for (const t of ["he married my mother cheryl who's grandfather was from Argentina.", "He married my mother Cheryl whose grandfather was from Argentina.", "he married my mother cheryl who was from Argentina.", "he married my mother cheryl."]) {
+    const p = F.parseStory("My dad was born in 1951 and moved from Senj, Croatia to Brisbane. " + t, ctx);
+    const mother = (p.people || []).filter((x) => x.role === "mother")[0];
+    assert.equal(mother && mother.name, "Cheryl", t);
+  }
+  /* a lower-case word that is not a given name is not taken for one */
+  const q = F.parseStory("My dad was born in Senj and moved to Brisbane. He married my mother worked in Perth.", ctx);
+  assert.ok(!(q.people || []).some((x) => x.name === "Worked"));
+});
+
+test("'my father was named Ivan Kovač' gives the father his name and surname (not the word 'named')", () => {
+  const p = F.parseStory("My dad was born in 1951 in Senj. He married my mother Cheryl. My father was named Ivan Kovač. He worked as a stonemason.", ctx);
+  const fa = (p.people || []).filter((x) => x.role === "father")[0];
+  assert.ok(fa && fa.name === "Ivan Kovač", fa && fa.name);
+});

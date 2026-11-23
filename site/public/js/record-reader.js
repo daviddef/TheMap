@@ -12,6 +12,7 @@
 
   function norm(s) {
     return String(s == null ? "" : s).toLowerCase()
+      .replace(/ø/g, "o").replace(/ł/g, "l").replace(/đ/g, "d").replace(/ß/g, "ss")   // letters that do not decompose: døde = dode, małżeństw = malzenstw
       .normalize("NFD").replace(/[̀-ͯ]/g, "")
       .replace(/æ|ae/g, "e").replace(/œ|oe/g, "e")
       .replace(/j/g, "i").replace(/v/g, "u")

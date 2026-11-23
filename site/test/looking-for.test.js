@@ -259,16 +259,17 @@ test("the home page carries the drawer, the map is handed to it, and the first-v
   const d = src("story-drawer.js");
   assert.match(d, /navigator\.webdriver/);
   assert.equal(/indexedDB|sessionStorage|XMLHttpRequest|method:\s*["']POST|sendBeacon/.test(d), false);
-  assert.equal(/innerHTML|insertAdjacentHTML|document\.write/.test(d + src("story-guide.js")), false);
+  assert.equal(/innerHTML|insertAdjacentHTML|document\.write/.test(d + src("story-page.js") + src("story-plan.js")), false);
 });
 
 test("the guided Ask on /read/ keeps the old Ask card and every id its script needs", () => {
   const r = fs.readFileSync(path.join(here, "../src/pages/read.astro"), "utf8");
   ["ask", "ask-drop", "ask-text", "ask-go", "ask-photo", "ask-tray", "ask-where", "ask-read-docs", "ask-read-lines", "ask-clear", "ask-ts", "ask-status", "ask-out", "ask-hand", "ask-sum", "ask-atlas"]
     .forEach((id) => assert.ok(r.includes(`id="${id}"`), `id ${id} is still on the page`));
-  ["sg", "sg-stage", "sg-text", "sg-next1", "sg-plan", "sg-fam-btn"].forEach((id) => assert.ok(r.includes(`id="${id}"`), `guide id ${id}`));
+  ["sp-rail", "sp-text", "sp-read", "sp-places", "sp-life", "sp-names", "sp-family", "sp-setting", "sp-plan", "sp-ai-btn", "sp-keep", "sp-fa-btn", "sp-save-btn"].forEach((id) => assert.ok(r.includes(`id="${id}"`), `story page id ${id}`));
   assert.match(r, /story-engine\.js/);
-  assert.match(r, /story-guide\.js/);
+  assert.match(r, /story-page\.js/);
+  assert.match(r, /story-plan\.js/);
 });
 
 test("the flag in use in a year comes from the country's flag eras, and nothing when there are none", () => {
@@ -316,8 +317,8 @@ test("the three front doors show flags, events and name forms, and every file th
   ["flag-map.json", "leaders.json", "mortality.json", "surname-families.json", "given-names.json"].forEach((f) => assert.ok(e.includes(f), f));
   assert.match(e, /lf-flag/);
   assert.match(e, /namesBlock/);
-  assert.match(src("story-drawer.js"), /namesBlock/);
-  assert.match(src("story-guide.js"), /namesBlock/);
+  
+  assert.match(src("story-page.js"), /namesBlock/);
   assert.match(src("looking-for.js"), /namesBlock/);
   assert.match(read("src/pages/read.astro"), /shard-key\.js/);
   assert.match(read("src/pages/looking-for.astro"), /shard-key\.js/);
@@ -358,7 +359,7 @@ test("the tree draws only the people the story named, and the names panel groups
   const src2 = src("story-engine.js");
   assert.match(src2, /treeBlock/);
   assert.match(src2, /lf-askyear/);
-  ["story-guide.js", "story-drawer.js"].forEach((f) => { assert.match(src(f), /treeBlock/); assert.match(src(f), /onBorn/); });
+  assert.match(src("story-page.js"), /treeBlock/); assert.match(src("story-page.js"), /onBorn/); assert.match(src("story-drawer.js"), /onBorn/);
 });
 
 test("a role label never prints an object: the gathered given name is {typed, canon, groups}", () => {

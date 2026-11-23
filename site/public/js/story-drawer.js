@@ -41,9 +41,18 @@
     addFiles: function (fl) { return ensure().then(function (a) { a.addFiles(fl); }); },
     clear: function () { return started ? started.then(function (a) { a.clear(); }) : Promise.resolve(); },
     open: function () { open(); },
+    handoff: function () { handoff(); },
     ready: function () { return ensure(); },
     state: function () { return api && api.state ? api.state() : { has: false, name: "" }; }
   };
+
+  /* Take the words (and a count of the pictures) to the story page, which reads them again and draws everything there. */
+  function handoff() {
+    var qb = document.getElementById("ra-q"), t = $(".sd-text"), txt = ((qb && qb.value) || (t && t.value) || "").trim();
+    var n = api && api.state ? (api.state().files || 0) : 0;
+    try { if (txt) localStorage.setItem("ra-story-handoff", JSON.stringify({ text: txt.slice(0, 8000), t: Date.now(), pics: n })); } catch (e) {}
+    location.href = BASE + "read/#story";
+  }
 
   function open() {
     root.hidden = false; if (launch) launch.hidden = true;
@@ -93,7 +102,7 @@
       b.addEventListener("click", function () { var t = report.querySelector("#" + b.getAttribute("data-go")); if (t) t.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" }); });
     });
     var reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
-    dock.querySelector(".sdk-more").addEventListener("click", function () { report.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" }); });
+    dock.querySelector(".sdk-more").addEventListener("click", function () { handoff(); });
     dock.querySelector(".sdk-x").addEventListener("click", function () { showDock(false); });
     window.addEventListener("resize", dockSize);
     refit = function () { if (last && !dock.hidden) paint(last); };
@@ -291,13 +300,10 @@
     }
     function drawReport(g) {
       var f = g.facts;
-      report.hidden = false;
-      report.querySelector(".rep-title").textContent = f.name ? f.name + "'s story" : "Their story";
+      /* The long report lives on its own page now (read/#story). Here only the map and the dock are drawn; the report stays hidden. */
+      report.hidden = true;
       dock.querySelector(".sdk-title").textContent = f.name ? f.name : "Their journey";
-      report.querySelector(".rep-lede").textContent = lede(f);
       var sb = J.stops(f, g.mort); stopItems = sb.items;
-      var stops = report.querySelector(".rep-stops"); stops.textContent = ""; stops.append(sb);
-      drawFamily(g); drawLife(g); drawNames(g); drawPlan(g);
       return keyPlaces(f);
     }
     /* the right-hand pane may have just opened and narrowed the map: draw the journey once the map has its final size */

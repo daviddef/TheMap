@@ -50,6 +50,8 @@
     "#ra-pills .rs-sum b{font:600 14.5px/1.25 var(--serif,Georgia,serif);color:var(--ink,#111)}" +
     "#ra-pills .rs-sum small{display:block;font:400 12px/1.3 var(--sans,system-ui,sans-serif);color:var(--ink-3,#666);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}" +
     "#ra-pills .rs-ib{flex:none;font:inherit;font-size:12.5px;border:0;background:none;color:var(--ink-3,#666);padding:6px 9px;border-radius:99px;cursor:pointer}" +
+    "#ra-pills .rs-go{flex:none;font:inherit;font-size:12.5px;font-weight:600;border:0;background:var(--accent,#1f5c6b);color:#fff;padding:6px 11px;border-radius:99px;cursor:pointer;white-space:nowrap}" +
+    "#ra-pills .rs-go:hover,#ra-pills .rs-go:focus-visible{filter:brightness(1.12);outline:2px solid var(--accent-wash,rgba(31,92,107,.25));outline-offset:1px}" +
     "#ra-pills .rs-ib:hover,#ra-pills .rs-ib:focus-visible{background:var(--accent-wash,rgba(31,92,107,.12));color:var(--accent,#1f5c6b);outline:none}" +
     "#ra-pills .rs-body{border-top:1px solid var(--rule,#ddd)}" +
     "#ra-pills .rs-body[hidden]{display:none}" +
@@ -207,7 +209,7 @@
     var summary = [trip.length ? trip.map(function (x) { return x.textContent.replace(/^(?:from|to)\s+/i, "").replace(/,.*$/, ""); }).join(" → ") : "", also.length ? "also " + also.map(function (x) { return x.textContent.replace(/^in\s+/i, "").replace(/,.*$/, ""); }).join(", ") : ""].filter(Boolean).join(" · ") || (places ? "" : "no places read yet");
     var top = mk("div", "rs-top"); top.setAttribute("role", "button"); top.tabIndex = 0; top.setAttribute("aria-expanded", String(!compact));
     var sum = mk("div", "rs-sum"); sum.append(mk("b", null, name ? name + "’s story" : "Story on the map"), mk("small", null, summary || "Reading…"));
-    var ed = mk("button", "rs-ib", "Edit"); ed.type = "button"; ed.title = "Edit your story";
+    var ed = mk("button", "rs-go", "Open your story \u2192"); ed.type = "button"; ed.title = "Read it on its own page: the places, the family, what was going on and a research plan";
     var x = mk("button", "rs-ib", "×"); x.type = "button"; x.setAttribute("aria-label", "Take the story off the map"); x.title = "Take the story off the map"; x.style.fontSize = "18px";
     var tg = mk("button", "rs-ib", compact ? "Details" : "Hide"); tg.type = "button"; tg.title = compact ? "Show what was understood" : "Fold this away";
     top.append(mk("span", "rs-dot"), sum, tg, ed, x); pills.append(top);
@@ -215,7 +217,7 @@
     tg.addEventListener("click", flip);
     top.addEventListener("click", function (e) { if (e.target === ed || e.target === x || e.target === tg) return; flip(); });
     top.addEventListener("keydown", function (e) { if ((e.key === "Enter" || e.key === " ") && e.target === top) { e.preventDefault(); flip(); } });
-    ed.addEventListener("click", function () { if (window.raStoryBox) window.raStoryBox.open(); });
+    ed.addEventListener("click", function () { if (window.raStoryBox) window.raStoryBox.handoff(); });
     x.addEventListener("click", function () { fromBox = false; storyMode = false; thinking = false; lastText = ""; clearTimeout(thinkTmr); compact = false; userToggled = false; q.value = ""; grow(); resetSearch(); if (window.raStoryBox) window.raStoryBox.clear().then(function () { mirror(); }); });
     if (!compact) {
       var body = mk("div", "rs-body");

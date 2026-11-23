@@ -689,6 +689,9 @@ window.addEventListener("load", async function () {
      this browser); only with neither does the theme decide (dark opens on Night dots, light on the light map), and then it follows the
      theme if that is toggled. An unknown ?base= (or "constructor") is no choice at all. All of this is settled before the first tile. */
   var pick = BM.choose({ keys: BM.ATLAS_KEYS, url: Q.get("base"), stored: BM.stored(BM.ATLAS_KEYS), theme: BM.themeNow() });
+  /* THE NEW FRONT DOOR OPENS ON LIGHT DOTS in the light theme, when the reader has chosen nothing: the land as soft dots, so the colours of the data are the
+     first thing seen. Their own choice (the address bar or the switcher) still wins, and it is not remembered as a choice. */
+  if (!pick.explicit && pick.key === "map" && document.getElementById("fd2-stage") && BASES.lightdots) pick = { key: "lightdots", explicit: false, from: "theme" };
   var baseNow = pick.key, baseExplicit = pick.explicit;
   BASES[baseNow].addTo(map);
 

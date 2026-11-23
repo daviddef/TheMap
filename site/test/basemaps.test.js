@@ -12,8 +12,8 @@ const atlas = read("src/components/RecordMap.astro");
 const compass = read("public/tree-canvas/compass-view.js");
 const history = read("public/js/history-theatre.js");
 
-test("the lists: ten looks on the Atlas map, nine on Compass and History (no Terrain: its tile host is not on Compass's CSP)", () => {
-  assert.deepEqual(BM.ATLAS_KEYS, ["map", "smooth", "liberty", "ink", "terrain", "satellite", "night", "smoothdark", "inkdark", "imagenight"]);
+test("the lists: eleven looks on the Atlas map, ten on Compass and History (no Terrain: its tile host is not on Compass's CSP)", () => {
+  assert.deepEqual(BM.ATLAS_KEYS, ["map", "smooth", "liberty", "ink", "lightdots", "terrain", "satellite", "night", "smoothdark", "inkdark", "imagenight"]);
   assert.deepEqual(BM.EMBED_KEYS, BM.ATLAS_KEYS.filter((k) => k !== "terrain"));
   assert.deepEqual(Object.keys(BM.LOOKS), BM.ATLAS_KEYS, "every key has a look, in the same order");
   assert.deepEqual(BM.VECTOR_KEYS, ["smooth", "liberty", "ink", "smoothdark", "inkdark"]);
@@ -27,26 +27,26 @@ test("the lists: ten looks on the Atlas map, nine on Compass and History (no Ter
 
 test("the looks are grouped by the theme they were made for", () => {
   const by = (s) => BM.ATLAS_KEYS.filter((k) => BM.LOOKS[k].suits === s);
-  assert.deepEqual(by("light"), ["map", "smooth", "liberty", "ink"]);
+  assert.deepEqual(by("light"), ["map", "smooth", "liberty", "ink", "lightdots"]);
   assert.deepEqual(by("dark"), ["night", "smoothdark", "inkdark", "imagenight"]);
   assert.deepEqual(by("any"), ["terrain", "satellite"]);
   for (const k of ["night", "smoothdark", "inkdark", "imagenight"]) assert.equal(BM.isDark(k), true, k + " is a dark ground");
-  for (const k of ["map", "smooth", "liberty", "ink", "terrain", "satellite"]) assert.equal(BM.isDark(k), false, k);
+  for (const k of ["map", "smooth", "liberty", "ink", "lightdots", "terrain", "satellite"]) assert.equal(BM.isDark(k), false, k);
   assert.equal(BM.isDark("constructor"), false);
 });
 
 test("the switcher layout: this theme's looks first, then Terrain and Satellite, the other theme's behind More looks", () => {
   const light = BM.layout("light", BM.ATLAS_KEYS, "map", false);
-  assert.deepEqual(light.bar, ["map", "smooth", "liberty", "ink", "terrain", "satellite"]);
+  assert.deepEqual(light.bar, ["map", "smooth", "liberty", "ink", "lightdots", "terrain", "satellite"]);
   assert.deepEqual(light.more, ["night", "smoothdark", "inkdark", "imagenight"]);
   assert.equal(light.open, false); assert.equal(light.moreTheme, "dark");
   const dark = BM.layout("dark", BM.ATLAS_KEYS, "night", false);
   assert.deepEqual(dark.bar, ["night", "smoothdark", "inkdark", "imagenight", "terrain", "satellite"]);
-  assert.deepEqual(dark.more, ["map", "smooth", "liberty", "ink"]);
+  assert.deepEqual(dark.more, ["map", "smooth", "liberty", "ink", "lightdots"]);
   /* nothing is ever listed twice or left out */
   for (const l of [light, dark]) assert.deepEqual([...l.bar, ...l.more].sort(), [...BM.ATLAS_KEYS].sort());
   /* Compass and History have no Terrain to list */
-  assert.deepEqual(BM.layout("light", BM.EMBED_KEYS, "map", false).bar, ["map", "smooth", "liberty", "ink", "satellite"]);
+  assert.deepEqual(BM.layout("light", BM.EMBED_KEYS, "map", false).bar, ["map", "smooth", "liberty", "ink", "lightdots", "satellite"]);
 });
 
 test("the fold is open when the reader opened it, and always when the look in use is in it (the pressed button is never hidden)", () => {

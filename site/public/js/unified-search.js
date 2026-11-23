@@ -107,6 +107,13 @@
       q.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     } finally { resetting = false; }
     clearTimeout(q._t); clearTimeout(q._tf); clearTimeout(q._r);
+    /* The map's search leaves its answer in the side panel when the box is emptied (a card headed "my — 156 places" stayed above the story). If the panel
+       is still showing the answer to the words the story began with, close it; a place the reader opened for themselves is not headed by their typing. */
+    try {
+      var hd = document.querySelector("#ra-body .at-h h3"), pn = document.getElementById("ra-sheet-x");
+      var fold = function (x) { return String(x || "").toLowerCase().replace(/\s+/g, " ").trim(); };
+      if (hd && pn && fold(hd.textContent) && fold(v).indexOf(fold(hd.textContent)) === 0) pn.click();
+    } catch (e) { /* the panel is not on this page */ }
     q.value = v;
     try { if (a != null) q.setSelectionRange(a, b, d || "none"); } catch (e) { /* a type that has no selection */ }
   }

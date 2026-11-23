@@ -199,10 +199,11 @@
       var P0 = window.raProgress, selL = $(".sd-fa-line"), nameIn = $(".sd-fa-name"), btn = $(".sd-fa-btn"), want = selL.value;
       /* the families that already exist, then a new one named from the story; the choice is kept while the story is edited */
       selL.textContent = "";
-      var o0 = el("option", "A new family: " + (E.familyName(g.facts) || "name it")); o0.value = ""; selL.append(o0);
+      var surn = String(g.facts.name || "").trim().split(/\s+/).filter(Boolean).length > 1;   /* a surname is known only when the story gave a full name; the place is no family's name */
+      var o0 = el("option", "A new family" + (surn ? ": " + E.familyName(g.facts) : " (name it)")); o0.value = ""; selL.append(o0);
       (P0 ? P0.lines() : []).slice().sort(function (x, y) { return x.name.localeCompare(y.name); }).forEach(function (l) { var o = el("option", "Add to " + l.name + (l.where ? " of " + l.where : "")); o.value = l.slug; selL.append(o); });
       if (want && [].some.call(selL.options, function (o) { return o.value === want; })) selL.value = want;
-      if (document.activeElement !== nameIn && (!nameIn.value || nameIn.getAttribute("data-auto") === "1")) { nameIn.value = E.familyName(g.facts); nameIn.setAttribute("data-auto", "1"); }
+      if (document.activeElement !== nameIn && (!nameIn.value || nameIn.getAttribute("data-auto") === "1")) { nameIn.value = surn ? E.familyName(g.facts) : ""; nameIn.placeholder = surn ? "Name it" : "A surname" + (g.facts.from ? ", or leave blank for " + g.facts.from.name : ""); nameIn.setAttribute("data-auto", "1"); }
       function sync() { var ex = !!selL.value; nameIn.hidden = ex; btn.textContent = ex ? "Add this story to " + (selL.options[selL.selectedIndex].text.replace(/^Add to /, "")) : "Add this family to your research"; }
       if (!selL.__wired) { selL.__wired = true; selL.addEventListener("change", sync); nameIn.addEventListener("input", function () { nameIn.setAttribute("data-auto", "0"); }); }
       sync();

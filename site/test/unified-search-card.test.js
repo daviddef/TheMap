@@ -45,3 +45,12 @@ test("resetSearch is not mistaken for typing and gives the caret back", () => {
   assert.match(fn, /setSelectionRange\(a, b/, "the caret and selection go back where they were");
   assert.match(src, /q\.addEventListener\("input", function \(e\) \{\s+if \(resetting\) return;/, "our own listener ignores the marked event, so the story is not cleared on every key");
 });
+
+test("starting a story closes the place card the first words opened, and the save panel is plain", () => {
+  const fn = src.slice(src.indexOf("function resetSearch()"), src.indexOf("function read()"));
+  assert.match(fn, /#ra-body \.at-h h3/, "the place card heading is compared with what was typed");
+  assert.match(fn, /ra-sheet-x/, "the map's own close button closes it");
+  const sd = readFileSync(new URL("../src/components/StoryDrawer.astro", import.meta.url), "utf8");
+  assert.match(sd, /<a href=\{u\("\/my-research\/#story"\)\}>My story<\/a>/, "My story is a link");
+  assert.doesNotMatch(sd, /Roots &amp; Routes/, "the tree page is called the Tree Canvas");
+});

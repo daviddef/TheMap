@@ -572,7 +572,7 @@ assert.match(css, /\.topnav \.menulink\[href\$="\/tree-canvas\/"\]\[target="_bla
   assert.match(canvas, /href=\{u\("\/roots\/"\)\}[^>]*>Tree views \(older page\)<\/a>/, "the canvas start page links to the twelve tree views");
   assert.match(canvas, /id="yfRoots"[^>]*href=\{u\("\/roots\/"\)\}/, "and so does Your file");
   const sd = fs.readFileSync(path.join(here, "../src/components/StoryDrawer.astro"), "utf8"), rd = fs.readFileSync(path.join(here, "../src/pages/read.astro"), "utf8");
-  for (const s of [sd, rd]) assert.match(s, /Already have a tree\? <a href=\{u\("\/tree-canvas\/"\)\}>Open it in Roots &amp; Routes<\/a>/);
+  for (const s of [sd, rd]) assert.match(s, /Already have a tree\? <a href=\{u\("\/tree-canvas\/"\)\}>Open it in the Tree Canvas<\/a>/);
 });
 
 /* ---- the two "not connected" checks: truly apart, and joined only through an unknown person ---- */

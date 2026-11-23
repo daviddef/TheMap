@@ -36,6 +36,18 @@
     e.preventDefault(); goTo(a.getAttribute("data-go"));
     try { history.replaceState(null, "", "#story"); } catch (x) { /* the hash stays */ }
   });
+  /* each place of the story gets its own line under "Place by place", so the rail reads like the route */
+  function placesRail() {
+    [].forEach.call(rail.querySelectorAll("a.sub"), function (x) { x.remove(); });
+    var anchor = rail.querySelector('[data-go="sp-places"]'), prev = anchor, secs = $("sp-stops").querySelectorAll(".lf-stop");
+    if (!anchor) return;
+    [].forEach.call(secs, function (sec, i) {
+      sec.id = "sp-stop-" + (i + 1);
+      var h = sec.querySelector("h3"), a = document.createElement("a");
+      a.className = "sub"; a.href = "#" + sec.id; a.setAttribute("data-go", sec.id); a.textContent = h ? h.textContent : "Place " + (i + 1);
+      prev.after(a); prev = a;
+    });
+  }
   /* the rail marks where you are */
   var spy = null;
   function watch() {
@@ -140,7 +152,7 @@
     $("sp-lede").textContent = lede(f) || $("sp-lede").textContent;
     rail.hidden = false;
     secShow("sp-places", true);
-    var sb = J.stops(f, g.mort); stopItems = sb.items; var st = $("sp-stops"); st.textContent = ""; st.append(sb);
+    var sb = J.stops(f, g.mort); stopItems = sb.items; var st = $("sp-stops"); st.textContent = ""; st.append(sb); placesRail();
     var lb = E.lifeBlock(g.life, g.mort), lbox = $("sp-lifebox"); lbox.textContent = ""; secShow("sp-life", !!lb); if (lb) lbox.append(lb);
     var nb = E.namesBlock(g.names, BASE), nbox = $("sp-namesbox"); nbox.textContent = ""; secShow("sp-names", !!nb);
     if (nb) { nbox.append(nb); [].forEach.call(nb.querySelectorAll("details"), function (d) { d.open = true; }); }
@@ -152,7 +164,7 @@
     watch();
   }
   function clearReport() {
-    J.clear(); last = null; lastPlan = null; rail.hidden = true;
+    J.clear(); last = null; lastPlan = null; rail.hidden = true; [].forEach.call(rail.querySelectorAll("a.sub"), function (x) { x.remove(); });
     ["sp-places", "sp-life", "sp-names", "sp-family", "sp-setting", "sp-plan", "sp-keep"].forEach(function (id) { secShow(id, false); });
     $("sp-ai-out").hidden = true; $("sp-ai-out").textContent = ""; $("sp-title").textContent = "Tell us what you know";
   }

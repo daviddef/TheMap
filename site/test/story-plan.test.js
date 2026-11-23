@@ -70,3 +70,11 @@ test("the home page hands the words to the story page and keeps no long report o
   assert.match(u, /Open your story/); assert.match(u, /raStoryBox\.handoff/);
   assert.match(src("story-page.js"), /ra-story-handoff/);
 });
+
+test("each place of the story is a line in the page's rail, jumping to that stop", () => {
+  const p = src("story-page.js"), r = fs.readFileSync(path.join(here, "../src/pages/read.astro"), "utf8");
+  assert.match(p, /function placesRail/);
+  assert.match(p, /\.lf-stop/);
+  assert.match(p, /data-go", sec\.id|setAttribute\("data-go", sec\.id\)/);
+  assert.match(r, /\.sp-rail a\.sub/);
+});

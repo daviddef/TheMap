@@ -94,12 +94,21 @@
   var fromBox = false, tmr = null, thinking = false, storyMode = false, lastText = "", thinkTmr = null;
   /* The place search runs on its own timers for whatever was typed before this turned into a story ("my n", "my na"). Empty the box for one
      beat so the map's own search clears itself, stop its pending timers, and put the story back. */
+  var resetting = false;
   function resetSearch() {
-    var v = q.value; q.value = "";
-    q.dispatchEvent(new Event("input", { bubbles: true }));
-    q.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    /* The empty value goes to the map's search only: our own listener below must not see it as the typing stopping being a story (it did, so every key
+       press took the story off and put it back), and the caret and selection must come back where they were (they went to the end, so a click in the
+       middle of the sentence and a new letter put the letter at the end). */
+    var v = q.value, a = q.selectionStart, b = q.selectionEnd, d = q.selectionDirection;
+    resetting = true;
+    try {
+      q.value = "";
+      q.dispatchEvent(new Event("input", { bubbles: true }));
+      q.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    } finally { resetting = false; }
     clearTimeout(q._t); clearTimeout(q._tf); clearTimeout(q._r);
     q.value = v;
+    try { if (a != null) q.setSelectionRange(a, b, d || "none"); } catch (e) { /* a type that has no selection */ }
   }
   /* "Reading what you wrote…" is for a read that is really taking time: it is shown only if the read is still going after 0.4 s, never on a key press.
      It used to appear on every key while no card was showing and vanish when the read found nothing, so the box below it jumped up and down. */
@@ -112,6 +121,7 @@
     window.raStoryBox.start(t).then(readDone).catch(readDone);
   }
   q.addEventListener("input", function (e) {
+    if (resetting) return;   /* our own empty value for the map's search, not typing */
     if (looksLikeStory(q.value)) {
       e.stopImmediatePropagation();
       if (!storyMode) { storyMode = true; resetSearch(); }

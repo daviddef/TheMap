@@ -38,3 +38,10 @@ test("typing does not flash the Reading card or redraw the map for words already
   const drawer = readFileSync(new URL("../public/js/story-drawer.js", import.meta.url), "utf8");
   assert.doesNotMatch(drawer, /setText: function \(t\) \{[^\n]*lastSig = ""/, "setText keeps the signature, so an unchanged story is not drawn again");
 });
+
+test("resetSearch is not mistaken for typing and gives the caret back", () => {
+  const fn = src.slice(src.indexOf("function resetSearch()"), src.indexOf("function readDone()") > -1 ? src.indexOf("/* \"Reading what you wrote") : undefined);
+  assert.match(fn, /resetting = true/, "the empty value sent to the map's search is marked");
+  assert.match(fn, /setSelectionRange\(a, b/, "the caret and selection go back where they were");
+  assert.match(src, /q\.addEventListener\("input", function \(e\) \{\s+if \(resetting\) return;/, "our own listener ignores the marked event, so the story is not cleared on every key");
+});

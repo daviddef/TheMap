@@ -91,9 +91,9 @@
         function bt(txt, fn) { var x = mk("button", "ra-cb-allbtn", txt); x.type = "button"; x.addEventListener("mousedown", function (e) { e.preventDefault(); e.stopPropagation(); fn(); syncTicks(); }); return x; }
         var go = mk("a", "ra-cb-allgo", "Read together \u2192"); go.href = allHref;
         go.addEventListener("mousedown", function (e) { e.stopPropagation(); });
-        tg.append(mk("span", "ra-cb-alllab", "Read several together"), bt("Select all families", function () { writeScope({ all: true, slugs: [] }); }),
-                  bt("Clear", function () { writeScope({ all: false, slugs: [] }); }), cnt, go);
-        tg.title = "Tick families to read them as one on My research. Clicking a family's name still chooses the one you mark under.";
+        /* ONE TOOLBAR LINE: the two edits on the left, how many are ticked and the way through on the right. The caption that used to sit above them is the tooltip. */
+        tg.append(bt("Select all", function () { writeScope({ all: true, slugs: [] }); }), bt("Clear", function () { writeScope({ all: false, slugs: [] }); }), cnt, go);
+        tg.title = "Read several together: tick families to read them as one on My research. Clicking a family's name still chooses the one you mark under.";
         list.append(tg);
         syncTicks();
       }

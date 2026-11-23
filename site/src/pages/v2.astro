@@ -1,0 +1,67 @@
+---
+/* FRONT DOOR V2: the same live map, with a new way in.
+
+   It is not a second map. This page renders the very components the home page renders (RecordMap, ProgressKit, VolumeMarks, StoryDrawer,
+   the volume pill), so every capability the home page has is here because it is the same code: search by any name, the one box that
+   takes a place, a surname, a story or a photo, filters and layers, saved views and areas, the year scrubber and Play, draw an area,
+   the visiting checklist, My research colouring, the flags section, the basemaps. What changes is the shell, which
+   /front-door-v2.css and /js/front-door-v2.js lay over it: one stage, a bigger search box, and ONE card on the left that asks "Why are you
+   here?" when the box is empty and holds the answer when it is not.
+
+   It sits beside the home page, not in place of it: the home page carries a "Try the new front door" link here, and this page carries a
+   "Classic view" link back. Not indexed while it is a trial. */
+import Base from "../layouts/Base.astro";
+import RecordMap from "../components/RecordMap.astro";
+import ProgressKit from "../components/ProgressKit.astro";
+import VolumeMarks from "../components/VolumeMarks.astro";
+import StoryDrawer from "../components/StoryDrawer.astro";
+import InventoryPill from "../components/InventoryPill.astro";
+import { u } from "../lib/url.js";
+import { places, volumes, countries, archives } from "../lib/inventory.js";
+const base = u("/");
+---
+<Base bare noindex wide
+  title="Record Atlas, front door v2"
+  dek="The map-first way in: say what you know and the map and the card follow.">
+
+  <h1 class="ra-sr">Where the records are</h1>
+  <InventoryPill slot="inv" />
+  <ProgressKit />
+
+  <div class="fd2-top">
+    <p class="fd2-tag"><b>Front door v2</b> <span>a trial: the same map and the same tools, with a new way in.</span></p>
+    <a class="fd2-classic" href={u("/")}>Classic view</a>
+  </div>
+
+  <div class="fd2-stage" id="fd2-stage" data-places={places} data-volumes={volumes} data-countries={countries} data-archives={archives.length} data-base={base}>
+    <RecordMap
+      indexUrl={u("/index.json")}
+      detailBase={u("/p/")}
+      regionsUrl={u("/regions.json")}
+      providersUrl={u("/providers.json")}
+      gazBase={u("/g/")}
+      surnameBase={u("/s/")}
+      belgiumBase={u("/bs/")}
+      wikidataUrl={u("/archives-wikidata.json")}
+      osmUrl={u("/archives-osm.json")}
+      featureBase={u("/")}
+      settlementBase={u("/rs/")}
+      districtBase={u("/a/")}
+      countryBase={u("/c/")}
+      townlandBase={u("/t/")}
+      comuneBase={u("/it/")}
+      estoniaBase={u("/ee/")}
+      scotlandBase={u("/sc/")}
+      worldArchivesUrl={u("/world-archives.json")}
+      countryPointsUrl={u("/country-points.json")}
+      base={u("/")} />
+  </div>
+
+  <p id="ra-mywork" data-href={u("/my-research/")} hidden></p>
+  <VolumeMarks />
+  <StoryDrawer />
+
+  <link rel="stylesheet" href={base + "front-door-v2.css"} />
+  <script is:inline>document.body.classList.add("fd2");</script>
+  <script is:inline defer src={base.replace(/\/$/, "") + "/js/front-door-v2.js"}></script>
+</Base>

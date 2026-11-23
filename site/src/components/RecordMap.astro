@@ -4343,7 +4343,7 @@ window.addEventListener("load", async function () {
      group (name, count), each archive a one-line row (a numbered dot that matches its pin on the map, the name, the access in small type at the
      right), the same classes the area card uses. */
   function nameCheckCard(byCC, order) {
-    var h = [], count = 0;
+    var h = [], count = 0, pinN = 0;
     order.forEach(function (cc) {
       var ps = byCC[cc];
       h.push('<details class="ra-area-g ra-area-rd" open><summary><i style="background:#5B7A8C"></i>' +
@@ -4352,9 +4352,11 @@ window.addEventListener("load", async function () {
       ps.slice(0, 3).forEach(function (pv) {
         count++;
         var dot = ACCESS_DOT(pv.access), note = (ACC[pv.access] || [0, pv.access])[1];
-        if (pv.at) checkPins.push({ n: count, y: pv.at.lat, x: pv.at.lon, name: pv.name, dot: dot });
+        /* a number belongs to a pin: a source with no place on the map (online only) gets a globe, and the numbers run on without a gap */
+        if (pv.at) { pinN++; checkPins.push({ n: pinN, y: pv.at.lat, x: pv.at.lon, name: pv.name, dot: dot }); }
         h.push('<li' + (pv.id ? srcAttrs(pv.id, pv.name, CNAME[cc] || cc, BASE + "archive/" + pv.id + "/") : "") + '><a class="ra-area-p" target="_blank" rel="noopener" href="' + esc(pv.url) + '" title="' + esc(note) + '">' +
-               '<span class="ra-ck-i"' + (pv.at ? ' title="' + esc(T("Show on the map")) + '"' : "") + (dot ? ' style="background:' + dot + ";color:" + inkOn(dot) + '"' : "") + ">" + count + "</span>" +
+               '<span class="ra-ck-i' + (pv.at ? "" : " ra-ck-web") + '" title="' + esc(pv.at ? T("Show on the map") : T("Online only: not a place on the map")) + '"' + (dot ? ' style="background:' + dot + ";color:" + inkOn(dot) + '"' : "") + ">" +
+               (pv.at ? pinN : '<svg viewBox="0 0 20 20" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M3 10h14M10 3c2.4 2.2 2.4 11.8 0 14M10 3c-2.4 2.2-2.4 11.8 0 14"/></svg>') + "</span>" +
                "<span>" + esc(pv.name) + "</span><small>" + esc(note) + "</small></a></li>");
       });
       if (ps.length > 3) h.push('<li class="at-sub">' + esc(T("and") + " " + (ps.length - 3) + " " + T("more in") + " " + (CNAME[cc] || cc)) + "</li>");

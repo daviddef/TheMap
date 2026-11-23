@@ -294,3 +294,8 @@ test("a number in Where to read flies the map to its pin and pulses it, instead 
   assert.match(map, /\}, true\);\n/, "in the capture phase, ahead of the link round it");
   assert.match(map, /@keyframes ra-pin-hit/);
 });
+
+test("a source with no place on the map shows a globe in Where to read, and the numbers on pins run without a gap", () => {
+  assert.match(map, /if \(pv\.at\) \{ pinN\+\+; checkPins\.push\(\{ n: pinN,/);
+  assert.match(map, /" ra-ck-web"[\s\S]*?\(pv\.at \? pinN : '<svg viewBox="0 0 20 20"/);
+});

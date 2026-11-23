@@ -882,6 +882,46 @@ def flag_art_audit():
     print(f"flag art: {n} of {total} drawings compared with a reference ({parts})")
 
 
+def provider_emails_gate():
+    """data/provider-emails.json: where to write to an archive. Every address is well formed and appears once, names a state the file
+    defines, links only to providers that exist (or names the institution it belongs to), and is a role mailbox: an address that names
+    a member of staff (given.surname@ at an institution, or any free-mail address) is a person, and no person goes in the catalogue."""
+    import re
+    p = "data/provider-emails.json"
+    if not os.path.exists(p):
+        return
+    d = json.load(open(p, encoding="utf-8"))
+    known = {x["id"] for x in json.load(open("data/providers.json", encoding="utf-8"))["providers"]}
+    states, seen = d.get("states", {}), set()
+    free = {"gmail.com", "googlemail.com", "me.com", "icloud.com", "hotmail.com", "outlook.com", "yahoo.com", "live.com"}
+    for e in d.get("emails", []):
+        w = f"provider-emails {e.get('email')}"
+        em = (e.get("email") or "").strip()
+        if not re.fullmatch(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+", em):
+            err(f"{w}: not an address")
+            continue
+        if em.lower() in seen:
+            err(f"{w}: listed twice")
+        seen.add(em.lower())
+        local, host = em.lower().split("@")
+        if host in free:
+            err(f"{w}: a free-mail address is a person, not an institution")
+        roles = {"archives", "archive", "archivo", "archiv", "special", "collections", "library", "enquiries", "enquiry", "info", "clientservices",
+                 "client", "services", "reading", "room", "records", "research", "reference", "heritage", "contact", "office", "registry", "service"}
+        if re.fullmatch(r"[a-z]{2,}\.[a-z]{3,}", local) and not (set(local.split(".")) & roles):
+            err(f"{w}: reads as given.surname, which names a person; keep role mailboxes only")
+        if e.get("state") not in states:
+            err(f"{w}: state {e.get('state')!r} is not one of {sorted(states)}")
+        if not e.get("via") or not e.get("note"):
+            err(f"{w}: says neither where it was met nor what was done with it")
+        for pid in e.get("providers", []):
+            if pid not in known:
+                err(f"{w}: provider {pid!r} does not exist")
+        if not e.get("providers") and not e.get("institution"):
+            err(f"{w}: belongs to no provider and names no institution")
+    print(f"provider e-mails: {len(seen)} addresses")
+
+
 def mortality_gate():
     """data/mass-death-events.json: every event is a real, sourced, bounded claim, and site/public/mortality.json is what
     scripts/build-mortality.py writes from it. A toll is a range or says there is none; a label that is contested says so;
@@ -1360,6 +1400,7 @@ def support_link_gate():
 def main():
     support_link_gate()
     mortality_gate()
+    provider_emails_gate()
     history_audit()
     flag_era_drift()
     flag_art_drift()

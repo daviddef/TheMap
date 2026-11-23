@@ -385,7 +385,7 @@
     ["dragleave", "drop"].forEach(function (t) { drop.addEventListener(t, function () { drop.classList.remove("hot"); }); });
     drop.addEventListener("drop", function (e) { e.preventDefault(); addFiles(e.dataTransfer && e.dataTransfer.files); });
     text.addEventListener("paste", function (e) { var fs = e.clipboardData && e.clipboardData.files; if (fs && fs.length) { e.preventDefault(); addFiles(fs); } });
-    /* keep the story: the words (and the names of any photos) go to My research, My story, where more can be added */
+    /* keep the story: the words (and the names of any photos) go to My research, where more can be added */
     $(".sd-save-btn").addEventListener("click", function () {
       var out = $(".sd-save-out"), t = text.value.trim();
       if (!t && !files.length) { out.textContent = "Tell the story first, then save it."; return; }
@@ -407,7 +407,7 @@
         try { localStorage.setItem("ra-story-current", id); } catch (e) { /* the page still opens it by address */ }
         Promise.all(keeps).then(function () {
           out.textContent = "Saved" + (kept ? " with " + kept + " picture" + (kept === 1 ? "" : "s") + ", kept in this browser only (the words travel with the story, the pictures do not)" : "") + (lost ? ". " + lost + " picture" + (lost === 1 ? " was" : "s were") + " not kept: this browser would not store them" : "") + ". ";
-          var a = el("a", "Open it in My research to add more"); a.href = BASE + "my-research/#story/" + id; out.append(a, document.createTextNode("."));
+          var a = el("a", "See it in My research, and add more there"); a.href = BASE + "my-research/#story"; out.append(a, document.createTextNode("."));
         });
         $(".sd-save-btn").disabled = true; setTimeout(function () { $(".sd-save-btn").disabled = false; }, 4000);
       }).catch(function () { out.textContent = "Could not save here. Open My research and start the story there."; });

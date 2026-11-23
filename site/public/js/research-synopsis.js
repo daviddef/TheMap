@@ -195,7 +195,43 @@
     return L.join("\n") + "\n";
   }
 
-  var api = { build: build, story: story, mergeRanges: mergeRanges, pagesIn: pagesIn };
+  /* WHICH FAMILIES THE PAGE READS. The ones ticked in the header picker; «All» means every family; nothing ticked (or none that still exists)
+     means the family the reader marks under. The one place this is decided, so the figures, the map, the plan and the place-by-place list can
+     never read different sets. `stored` is the saved choice ({all, slugs}) or null. */
+  function scopeOf(lines, active, stored) {
+    var all = (lines || []).map(function (l) { return l.slug; });
+    var out = [];
+    if (stored && stored.all) out = all.slice();
+    else if (stored && Array.isArray(stored.slugs)) out = all.filter(function (s) { return stored.slugs.indexOf(s) > -1; });
+    if (!out.length && active && all.indexOf(active) > -1) out = [active];
+    return out;
+  }
+
+  /* WHAT THE CHOSEN FAMILIES DID AT ONE MARK, AS ONE ROW. With one family this is exactly that family's entry; with several, the pages are
+     unioned, the further-along state wins, the notes are joined with the family named, and the later date stands. `fams` lists who did
+     something here, so the row can say so. Walked pages are shared and are added in by coverage(), not counted as anyone's own. */
+  var RANK = { planned: 1, written: 2, blocked: 3, searched: 4, found: 5, exhausted: 6 };
+  function rowBy(m, slugs, nameOf) {
+    var by = (m && m.by) || {}, mine = (slugs || []).filter(function (s) { return own(by[s]); });
+    if (slugs && slugs.length === 1) return { b: by[slugs[0]] || {}, fams: mine };
+    var b = {}, notes = [];
+    mine.forEach(function (s) {
+      var x = by[s];
+      if (x.done && x.done.length) b.done = mergeRanges((b.done || []).concat(x.done));
+      if (x.state && (!b.state || (RANK[x.state] || 0) > (RANK[b.state] || 0))) b.state = x.state;
+      if (x.note) notes.push((mine.length > 1 && nameOf && nameOf[s] ? nameOf[s] + ": " : "") + x.note);
+      if (x.since && (!b.since || x.since > b.since)) b.since = x.since;
+    });
+    if (notes.length) b.note = notes.join(" \u00b7 ");
+    return { b: b, fams: mine };
+  }
+  function rowCov(m, slugs) {
+    var list = (m && m.walked || []).slice();
+    (slugs || []).forEach(function (s) { var x = m && m.by && m.by[s]; if (x && x.done) list = list.concat(x.done); });
+    return mergeRanges(list);
+  }
+
+  var api = { build: build, story: story, mergeRanges: mergeRanges, pagesIn: pagesIn, scopeOf: scopeOf, rowBy: rowBy, rowCov: rowCov, own: own };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   root.raSynopsis = api;
 })(typeof window !== "undefined" ? window : globalThis);

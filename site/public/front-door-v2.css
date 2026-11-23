@@ -205,6 +205,15 @@ body.fd2-immersive .fd2-stage::after { border-radius: 0; }
   .fd2-stage .ra-base-row > button { flex: none; }
 }
 
+/* TYPING ON A PHONE MUST NOT BE COVERED BY ITS OWN ANSWER. The map's phone sheet is fixed to the bottom of the screen and sized for a screen with no
+   keyboard; while the box has focus the keyboard takes half the screen, the search finds a place after the first letters, the sheet opens, and it sits
+   over the box being typed in. While the box is focused the answer flows in under it instead (above the map, above the keyboard), and goes back to
+   being the sheet when the typing stops. */
+@media (max-width: 700px) {
+  .fd2-stage:has(#ra-q:focus) .at-panel { position: static; order: -1; max-height: none; overflow: visible; animation: none; box-shadow: none; border: 1px solid var(--rule); border-radius: 16px; padding: 0 14px 12px; }
+  .fd2-stage:has(#ra-q:focus) .ra-sheet-x { display: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .fd2-stage, .fd2-stage .at-panel, .fd2-stage .ra-find #ra-q, .fd2-tile, .fd2-stats, .fd2-more, .fd2-guide { animation: none !important; }
   .fd2-tile, .fd2-ic, .fd2-go, .fd2-chip, .fd2-primary { transition: none !important; }

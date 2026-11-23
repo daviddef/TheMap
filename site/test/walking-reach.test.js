@@ -450,3 +450,12 @@ test("the walk is an area: tapping its shape opens it, it joins the areas list, 
   assert.match(src, /\[data-back-areas\]/);
   assert.match(src, /\/\^familysearch\/i\.test\(v\.src \|\| ""\)/);
 });
+
+test("a whole name typed in the map (given name and surname) is recognised, summarised from the two catalogues, and opens the Names page on the same text", () => {
+  const src = readFileSync(join(root, "src/components/RecordMap.astro"), "utf8");
+  assert.match(src, /async function nameCardFor\(term\)/);
+  assert.match(src, /get\("given-names\.json"\), get\("surname-families\.json"\)/);
+  assert.match(src, /BASE \+ "your-name\/\?q=" \+ encodeURIComponent\(t\)\.replace\(\/%20\/g, "\+"\)/);
+  assert.match(src, /\(!hits\.length && !\(names && names\.length\)\) \? await nameCardFor\(term\)/);
+  assert.match(src, /class="ra-nc"/);
+});

@@ -59,3 +59,10 @@ test("the country card is the place card's folds, not the old three lists", () =
   assert.match(c, /familyTreeGroup\(c\.cc\)/);
   assert.doesNotMatch(c, /class="at-films"|class="lab">Where to start/, "the old underlined-link lists are gone");
 });
+
+test("a given name typed with a surname answers with the surname's placement, under the name card", () => {
+  assert.match(map, /var tailName = false;/);
+  assert.match(map, /!names\.length && !hits\.length && !exact/);
+  assert.match(map, /if \(tailName\) \{ var tcard = await nameCardFor\(term\)/);
+  assert.match(map, /var nrow = names\.length && !tailName \? names\[0\] : null;/);
+});

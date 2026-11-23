@@ -7341,6 +7341,21 @@ window.addEventListener("load", async function () {
       return wordHit(fold(p.name), f);
     });
     var names = await surnames(term);
+    /* «IVAN DEFRANCESKI» IS A GIVEN NAME AND A SURNAME, AND THE SURNAME HAS A PLACEMENT. David: «ivan as a name shows me a country placement, but
+       ivan defranceski doesnt?» — «ivan» alone and «Defranceski» alone both drew «Where the name was, and when»; typed together, nothing matched the
+       whole string as a surname, so only the catalogue card came back. When the whole string is no surname and no place, take the surname off the end
+       the way the name card does and answer with ITS placement (the countries, the bars, the map), under the card that says what the given name is. */
+    var tailName = false;
+    if (!names.length && !hits.length && !exact) {
+      try {
+        var tcat = await nameCatalogues(), tpar = tcat && yearsIn(term).text ? ncParse(tcat, yearsIn(term).text) : null;
+        if (tpar && tpar.given && tpar.given.length && tpar.sur) {
+          var tn = await surnames(tpar.sur);
+          if (stale()) return;
+          if (tn.length) { names = tn; tailName = true; }
+        }
+      } catch (e) { /* the card alone is still an answer */ }
+    }
     /* PICKING «Lerena» SHOULD NOT ANSWER WITH LERENARD. David, on the new
        dropdown: «why if i now have "smart" search and i select the exact named
        record do you then still show me all the variation in names?» — because
@@ -7387,7 +7402,7 @@ window.addEventListener("load", async function () {
        and then repeated the spellings and the page link further down the card
        as two more labelled rows. Same furniture, same line, same order —
        a count, the other spellings, the page, the icons. */
-    var nrow = names.length ? names[0] : null;
+    var nrow = names.length && !tailName ? names[0] : null;   /* the heading's count and spellings are the surname's, not the typed pair's */
     var h = ['<div class="at-h"><h3>' + esc(canon || term) + "</h3>"];
     if (nrow) {
       var nccs = (nrow.countries || []).length;
@@ -7426,7 +7441,8 @@ window.addEventListener("load", async function () {
     }
     h.push("</div>");
     if (names.length) {
-      h.push(renderSurnames(names, term));
+      if (tailName) { var tcard = await nameCardFor(term); if (stale()) return; if (tcard) h.push(tcard); }
+      h.push(renderSurnames(names, tailName ? names[0].n : term));
       /* The strongest evidence for a country wins its outline. A name in both
          a register and an archive is drawn as a register — the stronger claim
          is the true one, and the panel lists both anyway. */

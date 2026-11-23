@@ -371,8 +371,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp-rail a:hover { background: var(--panel-2); color: var(--ink); }
   .sp-rail a.sub { padding: 4px 10px 4px 24px; font-size: 13.5px; }
   .sp-rail a.psub { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; } .sp-rail a.psub .psub-r { font-size: 11.5px; color: var(--ink-3); text-transform: capitalize; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-  .sp .lf-card-flags { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 10px; margin-top: 5px; } .sp .lf-cflag { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--ink-2); }
-  .sp .lf-cflag-img { width: 24px; height: 16px; object-fit: cover; border: 1px solid var(--rule); border-radius: 2px; background: var(--panel); flex: none; cursor: help; } .sp .lf-cflag-now .lf-cflag-img { opacity: .5; border-style: dashed; }
+  .sp .lf-cflag { width: 18px; height: 12px; object-fit: cover; border: 1px solid var(--rule); border-radius: 2px; vertical-align: -1px; margin-left: 5px; cursor: help; } .sp .lf-cflag-now { opacity: .5; border-style: dashed; }
   .sp .lf-card-hit { box-shadow: 0 0 0 3px var(--accent); transition: box-shadow .3s; }
   .sp .lf-stop { scroll-margin-top: 64px; }
   .sp .lf-stops { display: grid; gap: 16px; }
@@ -382,7 +381,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp .lf-stop-k { font: 600 11.5px/1 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
   .sp .lf-stop h3 { font: 500 26px/1.15 var(--serif); margin: 0; }
   .sp .lf-stop-s { font-size: 14px; color: var(--ink-2); margin-top: 3px; }
-  .sp .lf-stop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 12px 28px; }
+  .sp .lf-stop-grid { display: grid; grid-template-columns: minmax(250px, 310px) minmax(0, 1fr); gap: 4px 32px; align-items: start; } @media (max-width: 760px) { .sp .lf-stop-grid { grid-template-columns: minmax(0, 1fr); } }
   .sp .lf-stop-grid > * { min-width: 0; }
   .sp .lf-full { margin-top: 14px; }
   .sp .lf-full-btn { display: flex; flex-direction: column; gap: 2px; width: 100%; text-align: left; padding: 12px 14px; border: 1px solid var(--accent); border-radius: 10px; background: var(--panel); color: var(--ink); font: inherit; cursor: pointer; }
@@ -390,7 +389,12 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp .lf-full-btn:hover { background: var(--accent-wash); } .sp .lf-full-btn[aria-expanded="true"] b::after { content: " \2191 close"; font-weight: 400; color: var(--ink-3); }
   .sp .lf-full-slot { margin-top: 10px; } .sp .lf-full-slot[hidden] { display: none; }
   .sp .lf-stop h4 { font: 600 11.5px/1 var(--sans); letter-spacing: .09em; text-transform: uppercase; color: var(--accent); margin: 4px 0 8px; }
-  .sp .lf-stop h5 { font: 600 13.5px/1.3 var(--sans); margin: 12px 0 4px; }
+  .sp .lf-stop h5 { font: 600 12.5px/1.3 var(--sans); color: var(--ink-2); margin: 12px 0 4px; }
+  /* the right-hand lists flow into columns so a long list does not leave the left one standing alone; every row is one size, one colour */
+  .sp .lf-stop-where { columns: 2 250px; column-gap: 28px; } .sp .lf-stop-where > * { break-inside: avoid; } .sp .lf-stop-where > h4 { column-span: all; margin-top: 4px; }
+  .sp .lf-srcs { list-style: none; padding-left: 0; margin: 0 0 6px; } .sp .lf-src { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 8px; padding: 3px 0; font-size: 14px; line-height: 1.35; }
+  .sp .lf-src > a:first-child { color: var(--accent); min-width: 0; } .sp .lf-src .lf-filed { margin: 0; font-size: 12.5px; color: var(--ink-3); }
+  .sp .lf-mail { margin-left: auto; align-self: center; line-height: 0; color: var(--ink-3); border-radius: 3px; } .sp .lf-mail:hover, .sp .lf-mail:focus-visible { color: var(--accent); } .sp .lf-mail-answered { color: #1E8449; }
   .sp .lf-look { margin: 0 0 8px; padding-left: 18px; font-size: 14.5px; line-height: 1.5; } .sp .lf-look li { margin: 0 0 6px; }
   .sp .lf-vols { margin: 0 0 8px; padding-left: 18px; font-size: 14px; line-height: 1.5; } .sp .lf-vols a, .sp .lf-stop-where p a { color: var(--accent); }
   .sp .lf-stop-then .lf-capline { font-size: 14.5px; }

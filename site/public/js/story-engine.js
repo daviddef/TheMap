@@ -2333,15 +2333,36 @@
       box.items = items;
       function yearOf(x) { return x.year != null ? x.year : (f.born != null && x.age != null ? f.born + x.age : null); }
       function when(x, y) { return (x.age != null ? (x.approx ? "about age " : "age ") + x.age : "") + (x.age != null && y != null ? ", " : "") + (y != null ? (x.approx && !x.yearTold ? "about " : "") + y : ""); }
+      /* one plain line per source: the name, then «kind · access» in small grey, then (if we know one) an envelope to write to it. David: «reduce space waste, align
+         font sizes/colours, add the email add here if we know them». */
+      function mailSvg() {
+        var NS = "http://www.w3.org/2000/svg", v = document.createElementNS(NS, "svg"), r = document.createElementNS(NS, "rect"), pa = document.createElementNS(NS, "path");
+        [["viewBox", "0 0 20 20"], ["width", "15"], ["height", "15"], ["fill", "none"], ["stroke", "currentColor"], ["stroke-width", "1.5"], ["stroke-linecap", "round"], ["stroke-linejoin", "round"], ["aria-hidden", "true"]].forEach(function (x) { v.setAttribute(x[0], x[1]); });
+        [["x", "2.5"], ["y", "4.5"], ["width", "15"], ["height", "11"], ["rx", "1.8"]].forEach(function (x) { r.setAttribute(x[0], x[1]); }); pa.setAttribute("d", "M3.2 6.2L10 11l6.8-4.8");
+        v.append(r, pa); return v;
+      }
+      var MAIL_WHY = { answered: "It has answered a letter from our research.", delivered: "A letter was delivered here; no reply is recorded.", listed: "Listed by the institution itself.", unverified: "Found in a third-party listing: confirm it on the institution's own page first.", wikidata: "From the institution's Wikidata entry." };
+      function mailLink(p) {
+        var em = p && p.em; if (!em || !em.length) return null;
+        var a = el("a", null, "lf-mail lf-mail-" + em[0][1]), tip = "Write to " + p.name + ": " + em.map(function (x) { return x[0] + (x[2] ? " (" + x[2] + ")" : ""); }).join(" \u00b7 ") + ". " + (MAIL_WHY[em[0][1]] || "");
+        a.href = "mailto:" + em[0][0]; a.title = tip; a.setAttribute("aria-label", tip); a.append(mailSvg()); return a;
+      }
+      function srcLine(p, extra) {
+        var li = el("li", null, "lf-src"), a = el("a", p.name); a.href = p.url; a.rel = "noopener"; li.append(a);
+        var meta = [String(p.kind || "").replace(/-/g, " "), p.access && p.access !== "unsurveyed" ? p.access : ""].filter(Boolean).join(" \u00b7 ");
+        if (extra || meta) li.append(el("span", extra || meta, "lf-filed"));
+        var m = mailLink(p); if (m) li.append(m);
+        return li;
+      }
       function volumeList(info, kinds, win, cap) {
         var any = false, wrap = el("div");
         KINDS.forEach(function (k) {
           if (kinds.indexOf(k[0]) < 0) return;
           var vs = volumesFor(info.cols, k[0], win); if (!vs.length) return;
           any = true; wrap.append(el("h5", k[1]));
-          var ul = el("ul", null, "lf-vols");
+          var ul = el("ul", null, "lf-vols lf-srcs");
           vs.slice(0, cap || 4).forEach(function (c) {
-            var li = el("li"), a = el("a", volLabel(c)); a.href = info.href; li.append(a, document.createTextNode(c.held ? ", held by " + c.held : "")); if (c.access) li.append(el("span", " access: " + c.access, "lf-filed")); ul.append(li);
+            var li = el("li", null, "lf-src"), a = el("a", volLabel(c)); a.href = info.href; li.append(a); if (c.held || c.access) li.append(el("span", [c.held ? "held by " + c.held : "", c.access || ""].filter(Boolean).join(" \u00b7 "), "lf-filed")); ul.append(li);
             items.push({ vol: c, href: info.href });
           });
           if (vs.length > (cap || 4)) { var more = el("li"), am = el("a", "and " + (vs.length - (cap || 4)) + " more on the place page"); am.href = info.href; more.append(am); ul.append(more); }
@@ -2357,11 +2378,11 @@
         var cols = (p.fs || []).filter(function (c) { return c.url && (!win || (c.from <= win[1] && c.to >= win[0])); }).sort(function (a, b) { return (b.rank || 0) - (a.rank || 0); }).slice(0, 3);
         if (vols.length) {
           any = true; wrap.append(el("h5", "Register images on FamilySearch"));
-          var ul = el("ul", null, "lf-vols"); vols.forEach(function (v) { var li = el("li"), a = el("a", v.t); a.href = v.url; a.rel = "noopener"; li.append(a); ul.append(li); items.push({ vol: v, href: v.url }); }); wrap.append(ul);
+          var ul = el("ul", null, "lf-vols lf-srcs"); vols.forEach(function (v) { var li = el("li", null, "lf-src"), a = el("a", v.t); a.href = v.url; a.rel = "noopener"; li.append(a); ul.append(li); items.push({ vol: v, href: v.url }); }); wrap.append(ul);
         }
         if (cols.length) {
           any = true; wrap.append(el("h5", "FamilySearch collections that cover " + info.name));
-          var u2 = el("ul", null, "lf-vols"); cols.forEach(function (c) { var li = el("li"), a = el("a", c.t); a.href = c.url; a.rel = "noopener"; li.append(a, el("span", " " + c.from + "–" + c.to + (c.n ? ", " + c.n.toLocaleString("en") + " records" : ""), "lf-filed")); u2.append(li); }); wrap.append(u2);
+          var u2 = el("ul", null, "lf-vols lf-srcs"); cols.forEach(function (c) { var li = el("li"), a = el("a", c.t); a.href = c.url; a.rel = "noopener"; li.className = "lf-src"; li.append(a, el("span", c.from + "–" + c.to + (c.n ? " \u00b7 " + c.n.toLocaleString("en") + " records" : ""), "lf-filed")); u2.append(li); }); wrap.append(u2);
         }
         return any ? wrap : null;
       }
@@ -2388,7 +2409,7 @@
         var ws = (info.world || []).filter(function (x) { return /^(familysearch|ancestry|myheritage|findagrave|geneanet|geni|wikitree|billiongraves)$/.test(x.id); });
         if (!ws.length || worldDone) return null; worldDone = true;
         var wrap = el("div"); wrap.append(el("h5", "Worldwide sites, for any place in the story"));
-        var ul = el("ul", null, "lf-vols"); ws.forEach(function (x) { var li = el("li"), a = el("a", x.name); a.href = x.url; a.rel = "noopener"; li.append(a, el("span", " " + x.kind + "; access: " + x.access, "lf-filed")); ul.append(li); items.push({ src: x, href: x.url }); }); wrap.append(ul);
+        var ul = el("ul", null, "lf-vols lf-srcs"); ws.forEach(function (x) { ul.append(srcLine(x)); items.push({ src: x, href: x.url }); }); wrap.append(ul);
         return wrap;
       }
       var srcSeen = Object.create(null);
@@ -2398,8 +2419,8 @@
         if (ps.length) srcSeen[info.cc] = info.name;
         if (!ps.length) { wrap.append(el("p", "The source catalogue lists nothing yet for " + (info.countryName || info.name) + ". Look for its national archive and the state or county records directly: that is a gap in the Atlas, not proof nothing exists.", "lf-filed")); return wrap; }
         wrap.append(el("h5", "Archives and sources for " + (info.countryName || info.name)));
-        var ul = el("ul", null, "lf-vols");
-        ps.slice(0, 6).forEach(function (p) { var li = el("li"), a = el("a", p.name); a.href = p.url; a.rel = "noopener"; li.append(a, el("span", " " + p.kind + "; access: " + p.access, "lf-filed")); ul.append(li); items.push({ src: p, href: p.url }); });
+        var ul = el("ul", null, "lf-vols lf-srcs");
+        ps.slice(0, 6).forEach(function (p) { ul.append(srcLine(p)); items.push({ src: p, href: p.url }); });
         if (ps.length > 6) { var li2 = el("li"), a2 = el("a", "and " + (ps.length - 6) + " more in the source catalogue"); a2.href = base + "providers/"; li2.append(a2); ul.append(li2); }
         wrap.append(ul); return wrap;
       }
@@ -2531,7 +2552,6 @@
         then.append(ground(info, years, span));
         where.append(el("h4", "Where to search"));
         var ul = el("ul", null, "lf-look"); look.forEach(function (x) { ul.append(el("li", x)); }); where.append(ul);
-        if ((info.older || []).length) where.append(el("p", info.name + " is also found as " + info.older.slice(0, 8).join(", ") + ". Search all of them.", "lf-filed"));
         var fl = fsList(info, kinds, win); if (fl) where.append(fl);
         var vl = volumeList(info, kinds, win); if (vl) where.append(vl); else if (kinds.length) { where.append(el("p", "The Atlas lists no " + (kinds.length > 1 ? "birth, baptism or marriage" : kinds[0] === "b" ? "birth or baptism" : kinds[0] === "m" ? "marriage" : "burial") + " volume for " + info.name + (win ? " in those years" : "") + ". That is a gap in the Atlas, not proof the records do not exist.", "lf-filed")); var nl = nearList(info, kinds); if (nl) where.append(nl); }
         if (withSources) where.append(sources(info));
@@ -2676,26 +2696,30 @@
         var d = rs.filter(function (x) { return (x.ev || []).some(function (v) { return v.type === "died"; }); })[0];
         if (d) marks.push({ word: "Died", st: d, year: (d.ev.filter(function (v) { return v.type === "died"; })[0] || {}).year });
       })();
-      var fr = el("div", null, "lf-card-flags");
-      marks.forEach(function (m) {
-        var yr = m.year != null ? m.year : null, fl = flagFor(m.st.info, yr);
-        if (!fl) return;
-        var cap = yr != null ? captionAt(m.st.info, yr) : null, one = el("span", null, "lf-cflag" + (yr == null ? " lf-cflag-now" : "")), im = el("img", null, "lf-cflag-img");
-        im.src = FB + "fl/" + encodeURIComponent(fl) + ".svg"; im.alt = "";
+      /* the flag sits NEXT TO the birth or the death it belongs to, inside the line that already says it: «From Senj [flag] → Botswana 1954 → …», «Died 1999, Brisbane [flag]» */
+      function flagImg(m) {
+        var yr = m.year != null ? m.year : null, fl = flagFor(m.st.info, yr); if (!fl) return null;
+        var cap = yr != null ? captionAt(m.st.info, yr) : null, im = el("img", null, "lf-cflag" + (yr == null ? " lf-cflag-now" : ""));
         var at = (m.word === "From" ? "From " : m.word + " in ") + m.st.info.name;
+        im.src = FB + "fl/" + encodeURIComponent(fl) + ".svg"; im.alt = "";
         im.title = yr != null ? at + ", " + yr + ": the flag of the time" + (cap && cap.polity ? ", under " + cap.polity : "") + " (from the Atlas's flag history of today's " + m.st.info.countryName + ")"
                               : at + ", year not told: this is today's flag of " + m.st.info.countryName + ". Add a year to see the flag of the time.";
-        one.append(im, el("span", m.word + (yr != null ? " " + yr : ""), "lf-cflag-t")); fr.append(one);
-      });
-      if (fr.childNodes.length) c.append(fr);
+        return im;
+      }
+      var flagOf = { start: null, died: null };
+      marks.forEach(function (m) { var im = flagImg(m); if (im) flagOf[m.word === "Died" ? "died" : "start"] = im; });
       if (rs.length) {
         var first = rs[0].role, rt = (first === "born" ? "Born in " : first === "origin" ? "From " : "Places: ") + rs.map(function (x) { return x.info.name + (x.year != null ? " " + x.year : ""); }).join(" \u2192 ");
-        c.append(el("div", rt, "lf-card-place lf-card-route"));
+        var rd = el("div", null, "lf-card-place lf-card-route"), rb = rt.indexOf(" \u2192 "), r1 = rb < 0 ? rt : rt.slice(0, rb);
+        rd.append(document.createTextNode(r1)); if (flagOf.start) rd.append(flagOf.start); if (rb >= 0) rd.append(document.createTextNode(rt.slice(rb)));
+        c.append(rd);
       }
       else if (pe.place && !hasBorn) c.append(el("div", (pe.role === "self" && !pe.events ? "Born in " : "From ") + (typeof pe.place === "string" ? pe.place : pe.place.word), "lf-card-place"));
       (pe.events || []).forEach(function (e) {
         var t = e.type === "told" ? e.text : (e.type === "born" ? "Born" : e.type === "married" ? "Married" : e.type === "lived" ? "Lived" : "Died") + (e.year != null ? " " + e.year : "") + (e.place ? (e.year != null ? ", " : " in ") + e.place : "") + (e.cause ? " (" + e.cause + ")" : "");
-        c.append(el("div", t, "lf-card-place lf-card-ev"));
+        if (e.type === "born" && rs.length && rs[0].role === "born") return;   /* the route line already begins with where they were born */
+        var ev = el("div", t, "lf-card-place lf-card-ev"); if (e.type === "died" && flagOf.died) { ev.append(flagOf.died); flagOf.died = null; } else if (e.type === "born" && flagOf.start && !rs.length) { ev.append(flagOf.start); flagOf.start = null; }
+        c.append(ev);
       });
       if (pe.occupation) c.append(el("div", "Work: " + pe.occupation, "lf-card-forms"));
       if (pe.counts) { var cb = []; ["children", "grandchildren", "sons", "daughters"].forEach(function (k2) { if (pe.counts[k2] != null) cb.push(pe.counts[k2] + " " + k2); }); if (cb.length) c.append(el("div", "Told: " + cb.join(", ") + " (not named)", "lf-card-forms")); }

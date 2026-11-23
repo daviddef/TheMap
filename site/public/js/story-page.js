@@ -21,7 +21,7 @@
   var LEDE0 = ($("sp-lede") && $("sp-lede").textContent) || "";
   var DRAFT = "ra-story-page-draft", HAND = "ra-story-handoff";
 
-  function loadScript(src) { return new Promise(function (ok, fail) { var s = document.createElement("script"); s.src = BASE + "js/" + src; s.onload = ok; s.onerror = function () { fail(new Error(src)); }; document.head.appendChild(s); }); }
+  function loadScript(src) { return new Promise(function (ok, fail) { var s = document.createElement("script"); s.src = BASE + "js/" + src; s.onload = ok; s.onerror = function () { fail(new Error("Could not load " + src + ". Check your connection, then try again.")); }; document.head.appendChild(s); }); }
   function tellable(p) { return !!(p && (p.from || (p.kin && p.kin.length) || (p.people || []).some(function (x) { return x.sought; }))); }
   function say(m, bad) { status.textContent = m || ""; status.className = "sp-status" + (bad ? " bad" : ""); }
 

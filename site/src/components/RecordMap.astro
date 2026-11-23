@@ -8714,10 +8714,10 @@ window.addEventListener("load", async function () {
   function areaRenderSolo(R) {
     var d = R.place, pp = R.places[0], h = ['<div class="ra-area ra-area-solo">'];
     h.push('<div class="ra-area-add" id="ra-area-add"></div>');
-    h.push('<details class="ra-area-pl ra-area-solo-l" data-vols="' + esc(pp.i) + '" open><summary><span>' + esc(T("The books and catalogues for") + " " + d.name) + '</span> <small><span class="ra-area-n"></span></small></summary><ul class="ra-vl"></ul></details>');
+    h.push('<details class="ra-area-pl ra-area-solo-l" data-vols="' + esc(pp.i) + '"><summary><span>' + esc(T("The books and catalogues for") + " " + d.name) + '</span> <small><span class="ra-area-n"></span></small></summary><ul class="ra-vl"></ul></details>');
     if (!(d.volumes || []).length && !(d.collections || []).length) h.push('<p class="at-sub">' + esc(T("No volumes recorded here yet.")) + "</p>");
     areaCountrySources(R).forEach(function (c, ix, all) {
-      h.push('<details class="ra-area-g ra-area-cov"' + (all.length === 1 || c.list.length <= 8 ? " open" : "") + '><summary><i style="background:#5B7A8C"></i>Sources that cover all of ' + esc(CNAME[c.cc] || c.cc) + " <b>" + nfl(c.list.length) + "</b></summary><ul>");
+      h.push('<details class="ra-area-g ra-area-cov"><summary><i style="background:#5B7A8C"></i>Sources that cover all of ' + esc(CNAME[c.cc] || c.cc) + " <b>" + nfl(c.list.length) + "</b></summary><ul>");
       c.list.forEach(function (a) {
         var st = volStatus("source:" + a.id);
         h.push('<li' + srcAttrs(a.id, a.name, CNAME[c.cc] || c.cc, BASE + "archive/" + a.id + "/") + '><a class="ra-area-p" target="_blank" rel="noopener" href="' + BASE + "archive/" + esc(a.id) + '/"><i style="background:' + RC_COL[st] + '"></i><span>' + esc(a.name) + "</span><small>" +
@@ -8835,6 +8835,53 @@ window.addEventListener("load", async function () {
   /* The volumes of every place in the area that has any: one file per place, six at a time, up to AREA_CAP places. */
   /* A VILLAGE'S BOOKS, ON REQUEST. The Visiting list's villages fold out to «the books and catalogues for» that village, the rows the primary place shows,
      fetched when first opened and kept while the walk changes. */
+  /* A + ON EVERY TOP-LEVEL SECTION. David: «could we not just add the + to the level 1?». The books, the country-wide sources, the archives and the villages
+     each carry the + the rows carry: one click puts everything in that section on the active family's list as «planned» (what is already started is left
+     alone), and the + becomes a tick when it is all there. It is added to the head by this code, so no template has to repeat it. */
+  var GRP_SEL = "details.ra-area-solo-l, details.ra-area-cov, details.ra-visit";
+  function grpItems(det) {
+    var out = [];
+    [].forEach.call(det.querySelectorAll("li[data-vol], li[data-src]"), function (li) {
+      var vol = li.hasAttribute("data-vol"), id = li.getAttribute(vol ? "data-vol" : "data-src"); if (!id) return;
+      out.push({ id: id, t: li.getAttribute(vol ? "data-vol-t" : "data-src-t"), where: li.getAttribute(vol ? "data-vol-where" : "data-src-where"), href: li.getAttribute(vol ? "data-vol-href" : "data-src-href") });
+    });
+    /* a village's folded-out books are its own, added from its own row */
+    return out.filter(function (x, i, a) { return a.findIndex(function (y) { return y.id === x.id; }) === i; });
+  }
+  function grpTodo(det) { var P = window.raProgress; return grpItems(det).filter(function (x) { return !(P.get(x.id) || {}).state; }); }
+  var grpBusy = false;
+  function grpPaint() {
+    var P = window.raProgress; if (!P || grpBusy || !panel) return;
+    grpBusy = true;
+    [].forEach.call(panel.querySelectorAll(GRP_SEL), function (det) {
+      var sum = det.querySelector(":scope > summary"); if (!sum) return;
+      var b = sum.querySelector(".ra-grp-add"), n = grpItems(det).length;
+      if (!b) { b = document.createElement("button"); b.type = "button"; b.className = "ra-grp-add vm-pill"; sum.insertBefore(b, sum.firstChild); }
+      var todo = n ? grpTodo(det).length : 0, on = n > 0 && !todo, txt = on ? "\u2713" : "+";
+      b.hidden = !n;
+      if (b.textContent !== txt) b.textContent = txt;
+      b.classList.toggle("vm-pill-on", on);
+      var t = !n ? "" : on ? "Everything in this section is on your list" : "Add " + todo + (todo === 1 ? " item" : " items") + " in this section to your research";
+      if (b.title !== t) { b.title = t; b.setAttribute("aria-label", t); }
+    });
+    grpBusy = false;
+  }
+  var grpTick = 0;
+  function grpSoon() { cancelAnimationFrame(grpTick); grpTick = requestAnimationFrame(grpPaint); }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest(".ra-grp-add"); if (!b) return;
+    e.preventDefault(); e.stopPropagation();
+    var det = b.closest("details"), P = window.raProgress, todo = det ? grpTodo(det) : [];
+    if (!todo.length) return;
+    if (!P.lines().some(function (l) { return l.active; })) { P.setState(todo[0].id, "planned"); return; }   /* no family chosen yet: the chooser opens, then click again */
+    todo.slice(0, ADD_CAP).forEach(function (x) { P.setWhat(x.id, { t: x.t, where: x.where, href: x.href }); P.setState(x.id, "planned"); });
+    document.dispatchEvent(new CustomEvent("ra-progress-changed"));
+    rcIdx = null; paintProgressRings(); rcRepaint(); grpPaint();
+  }, true);
+  if (TSV2) {
+    new MutationObserver(function () { if (!grpBusy) grpSoon(); }).observe(panel, { childList: true, subtree: true });
+    document.addEventListener("ra-progress-changed", grpSoon);
+  }
   var VEXP = {};
   function vbkFill(id) {
     var box = panel.querySelector('.ra-vbk[data-vbk="' + id + '"]'); if (!box || box.getAttribute("data-done")) return;
@@ -8903,7 +8950,7 @@ window.addEventListener("load", async function () {
       var li = areaVolRows(e.p, vs);
       box.querySelector(".ra-vl").innerHTML = li;
       box.querySelector(".ra-area-n").textContent = vs.length + " book" + (vs.length === 1 ? "" : "s");
-      if (openAll || rcState(e.p) !== "none") box.open = true;
+      if (!(AR() && AR().place) && (openAll || rcState(e.p) !== "none")) box.open = true;   /* a place card keeps its books shut until asked */
     });
   }
   /* A mark made in the list recolours the dots at once; the groups themselves stay put until Show, so a row does not jump away under the pointer. */

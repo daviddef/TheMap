@@ -390,3 +390,13 @@ test("a village in the Visiting list folds out to its books and catalogues, shut
   assert.match(map, /areaPlaceVols\(d, true\)/);
   assert.match(css, /^\.fd2-stage \.ra-vl > li\.ra-vrow > \.ra-vbk \{/m);
 });
+
+test("every top-level section of a v2 place card starts shut and carries a + that adds everything in it", () => {
+  const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
+  assert.doesNotMatch(map, /ra-area-solo-l" data-vols="' \+ esc\(pp\.i\) \+ '" open>/, "the books are shut by default");
+  assert.match(map, /h\.push\('<details class="ra-area-g ra-area-cov"><summary><i style="background:#5B7A8C"><\/i>Sources that cover all of/, "so are the country-wide sources");
+  assert.match(map, /var GRP_SEL = "details\.ra-area-solo-l, details\.ra-area-cov, details\.ra-visit";/);
+  assert.match(map, /className = "ra-grp-add vm-pill"/);
+  assert.match(map, /P\.setState\(x\.id, "planned"\)/);
+  assert.match(css, /^\.fd2-stage \.ra-grp-add \{/m);
+});

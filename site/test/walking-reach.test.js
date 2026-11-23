@@ -221,3 +221,10 @@ test("the footer's GoatCounter link sits tight inside its brackets, and the remo
   assert.doesNotMatch(map, /Zoom in, or draw a box round the ground you mean/);
   assert.match(map, /if \(b\.getNorth\(\) - b\.getSouth\(\) > 9\) \{ el\.innerHTML = head\(""\); sized\(\); return; \}/);
 });
+
+test("the surname card is dressed like the place and area cards on v2: flat hairline sections, mono section labels, quiet chips", () => {
+  const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
+  assert.match(css, /\.fd2-stage \.ra-surn \{[^}]*background: none; border: 0; border-top: 1px solid/);
+  assert.match(css, /\.fd2-stage \.ra-surn \.lab \{ font: 700 11px\/1\.4 var\(--mono/);
+  assert.match(css, /\.fd2-stage \.ra-surn \.ra-chip \{[^}]*background: transparent;/);
+});

@@ -198,8 +198,8 @@
   requestAnimationFrame(function () { setTimeout(countUp, 350); });
 
   /* ---------- a search box that shows what it takes ---------- */
-  var phrases = ["my father Ivan was born in Croatia", "Blažević", "Senj, or Segna, or Zengg", "my grandmother came from Trieste in 1905", "Gallignana", "a photo of a baptism record"];
-  var short = ["my father was born in Croatia", "Blažević", "Senj, or Segna", "Gallignana", "a baptism photo"];
+  var phrases = ["my grandfather left Dalmatia for Chile", "Dubrovnik, or Ragusa", "Modrić", "my great-grandmother sailed from Fiume to New York", "Smiljan, where Tesla was born", "Horvat", "Split, or Spalato", "Kovačević", "Rijeka, or Fiume", "a photo of a baptism record"];
+  var short = ["from Dalmatia to Chile", "Dubrovnik, or Ragusa", "Modrić", "Rijeka, or Fiume", "Horvat", "Smiljan, Tesla's village", "a baptism photo"];
   var narrowMq = window.matchMedia ? window.matchMedia("(max-width: 560px)") : { matches: false };
   var idle = narrowMq.matches ? "A place, surname or story" : "Find a place or a surname, or tell a story";
   if (q) {

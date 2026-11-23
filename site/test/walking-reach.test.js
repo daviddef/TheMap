@@ -165,3 +165,27 @@ test("the place card's four icons share one row and one design; history moves in
   assert.match(css, /\.fd2-stage #ra-play \{ display: none; \}/, "the play button is gone from the pill");
   assert.match(css, /\.fd2-stage \.ra-histctl \{ display: block !important; \}/, "and the icon shows at every width");
 });
+
+/* FREEHAND DRAWING: the stroke is painted on its own canvas, never through the map's shared dot canvas */
+test("the freehand pen paints on its own overlay canvas, one paint per frame, and cleans up on lift", () => {
+  assert.match(map, /function freeCanvas\(\)/);
+  assert.match(map, /function freePaint\(\)/);
+  assert.match(map, /pointer-events:none;z-index:640/, "the overlay never takes the pointer");
+  assert.match(map, /e\.getCoalescedEvents \? e\.getCoalescedEvents\(\) : null/, "every pen sample is used, not one per frame");
+  assert.match(map, /requestAnimationFrame\(freePaint\)/);
+  assert.match(map, /cancelAnimationFrame\(FREE\.raf\)/);
+  assert.match(map, /var tol = 1\.4, s = L\.LineUtil\.simplify\(pts, tol\);/);
+});
+
+test("the shelf and history icons wear the same glass as the rest of the icon column; history is a play mark on a timeline, not a clock", () => {
+  const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
+  assert.match(css, /\.fd2-stage \.ra-areactl, \.fd2-stage \.ra-shelfctl, \.fd2-stage \.ra-histctl \{ border-radius: 14px/);
+  assert.match(map, /<path d="M7 3\.6v7\.6l6\.2-3\.8z"\/>/, "a play triangle over a timeline");
+  assert.doesNotMatch(map, /M3\.4 10a6\.6 6\.6 0 1 1 1\.9 4\.6/, "the clock-with-arrow glyph is gone");
+});
+test("the search box examples are Croatian places, surnames and stories, with the old names beside the new", () => {
+  const js = readFileSync(join(root, "public/js/front-door-v2.js"), "utf8");
+  for (const s of ["Dubrovnik, or Ragusa", "Rijeka, or Fiume", "Split, or Spalato", "Modrić", "Horvat", "Kovačević", "Smiljan, where Tesla was born", "Dalmatia for Chile"])
+    assert.ok(js.includes(s), s);
+  assert.ok(!js.includes("my grandmother came from Trieste in 1905"), "the Italian example is gone");
+});

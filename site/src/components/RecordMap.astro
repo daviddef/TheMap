@@ -8313,6 +8313,40 @@ window.addEventListener("load", async function () {
     if (FREE.mode === "box") return areaRect(map.containerPointToLatLng(a), map.containerPointToLatLng(b));
     return FREE.pts.map(function (p) { return map.containerPointToLatLng(p); });
   }
+  /* THE STROKE IS DRAWN ON ITS OWN CANVAS. David: «drawing still isnt fluid pen like». The map renders to ONE shared canvas (preferCanvas) with every
+     dot on it, so moving a Leaflet polygon on each pointer event repainted the whole map per event and the line trailed the pen. Now the live
+     stroke is a small canvas of its own laid over the map: every point the pointer reports (coalesced, so a fast pen loses none) is added, the
+     curve is smoothed through them, and one frame is painted per animation frame. The map itself is touched once, when the pen is lifted. */
+  function freeCanvas() {
+    if (FREE.cv) return FREE.cv;
+    var host = map.getContainer(), cv = document.createElement("canvas"), dpr = window.devicePixelRatio || 1;
+    cv.className = "ra-freecv"; cv.setAttribute("aria-hidden", "true");
+    cv.width = Math.round(host.clientWidth * dpr); cv.height = Math.round(host.clientHeight * dpr);
+    cv.style.cssText = "position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:640";
+    host.appendChild(cv); FREE.cv = cv; FREE.dpr = dpr;
+    return cv;
+  }
+  function freePaint() {
+    FREE.raf = 0;
+    var cv = FREE.cv; if (!cv) return;
+    var ctx = cv.getContext("2d"), pts = FREE.pts, dpr = FREE.dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+    function path() {
+      ctx.beginPath();
+      if (FREE.mode === "box") { var a = pts[0], b = pts[pts.length - 1]; ctx.rect(Math.min(a.x, b.x), Math.min(a.y, b.y), Math.abs(b.x - a.x), Math.abs(b.y - a.y)); return; }
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (var i = 1; i < pts.length - 1; i++) { var mx = (pts[i].x + pts[i + 1].x) / 2, my = (pts[i].y + pts[i + 1].y) / 2; ctx.quadraticCurveTo(pts[i].x, pts[i].y, mx, my); }
+      if (pts.length > 1) ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
+    }
+    if (FREE.mode !== "box") {                                          /* the part not yet drawn: the way the loop will close, faint */
+      ctx.beginPath(); ctx.moveTo(pts[pts.length - 1].x, pts[pts.length - 1].y); ctx.lineTo(pts[0].x, pts[0].y);
+      ctx.setLineDash([4, 5]); ctx.strokeStyle = "rgba(31,92,107,.55)"; ctx.lineWidth = 1.5; ctx.stroke(); ctx.setLineDash([]);
+      path(); ctx.closePath(); ctx.fillStyle = "rgba(31,92,107,.09)"; ctx.fill();
+    } else { path(); ctx.fillStyle = "rgba(31,92,107,.09)"; ctx.fill(); }
+    path(); ctx.strokeStyle = "rgba(255,255,255,.7)"; ctx.lineWidth = 6; ctx.stroke();
+    path(); ctx.strokeStyle = "#1F5C6B"; ctx.lineWidth = 2.6; ctx.stroke();
+  }
   function areaDragMove(e) {
     if (!FREE || e.pointerId !== FREE.id) return;
     var cp = map.mouseEventToContainerPoint(e), last = FREE.pts[FREE.pts.length - 1];
@@ -8321,16 +8355,22 @@ window.addEventListener("load", async function () {
       FREE.moved = true; AREA.pts = [];                                 /* a drag starts the shape afresh; corners tapped before it are dropped */
       if (AREA.rubber) { map.removeLayer(AREA.rubber); AREA.rubber = null; }
       areaBox(T(FREE.mode === "box" ? "Let go at the opposite corner" : "Keep drawing, then let go to close the shape"), false);
+      freeCanvas();
     }
     if (FREE.mode === "box") { if (FREE.pts.length < 2) FREE.pts.push(cp); else FREE.pts[1] = cp; }
-    else if (cp.distanceTo(last) >= 3) FREE.pts.push(cp);
-    var ring = areaFreeRing();
-    if (!AREA.rubber) AREA.rubber = L.polygon(ring, { color: "#1F5C6B", weight: 2.5, dashArray: "6 4", fillOpacity: .08, interactive: false, lineCap: "round", lineJoin: "round" }).addTo(map);
-    else AREA.rubber.setLatLngs(ring);
+    else {
+      var evs = e.getCoalescedEvents ? e.getCoalescedEvents() : null;
+      (evs && evs.length ? evs : [e]).forEach(function (ev) {
+        var q = map.mouseEventToContainerPoint(ev), l = FREE.pts[FREE.pts.length - 1];
+        if (q.distanceTo(l) >= 1.2) FREE.pts.push(q);
+      });
+    }
+    if (!FREE.raf) FREE.raf = requestAnimationFrame(freePaint);
     if (e.cancelable) e.preventDefault();
   }
   function areaDragStop() {
     window.removeEventListener("pointermove", areaDragMove); window.removeEventListener("pointerup", areaDragUp); window.removeEventListener("pointercancel", areaDragUp);
+    if (FREE) { if (FREE.raf) cancelAnimationFrame(FREE.raf); if (FREE.cv && FREE.cv.parentNode) FREE.cv.parentNode.removeChild(FREE.cv); }
     FREE = null;
   }
   function areaDragUp(e) {
@@ -8346,8 +8386,8 @@ window.addEventListener("load", async function () {
       if (pts.length < 2 || Math.abs(pts[1].x - pts[0].x) < 12 || Math.abs(pts[1].y - pts[0].y) < 12) { areaTooSmall(); return; }
       ring = areaRect(map.containerPointToLatLng(pts[0]), map.containerPointToLatLng(pts[1]));
     } else {
-      var tol = 2.5, s = L.LineUtil.simplify(pts, tol);
-      while (s.length > 120 && tol < 20) { tol += 1.5; s = L.LineUtil.simplify(pts, tol); }       /* a hand-drawn loop, kept light enough to save and test against */
+      var tol = 1.4, s = L.LineUtil.simplify(pts, tol);
+      while (s.length > 160 && tol < 20) { tol += 1; s = L.LineUtil.simplify(pts, tol); }       /* a hand-drawn loop, kept light enough to save and test against */
       var xs = s.map(function (p) { return p.x; }), ys = s.map(function (p) { return p.y; });
       if (s.length < 3 || Math.max.apply(null, xs) - Math.min.apply(null, xs) < 12 || Math.max.apply(null, ys) - Math.min.apply(null, ys) < 12) { areaTooSmall(); return; }
       ring = s.map(function (p) { return map.containerPointToLatLng(p); });
@@ -8992,7 +9032,7 @@ window.addEventListener("load", async function () {
       onAdd: function () {
         var d = L.DomUtil.create("div", "leaflet-bar ra-histctl");
         d.innerHTML = '<a href="#" role="button" aria-label="Watch history play on the history map" title="Watch history play: who held the ground, year by year, on the history map">' +
-          '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 10a6.6 6.6 0 1 1 1.9 4.6"/><path d="M3.2 5.8v4.2h4.2"/><path d="M10 6.6V10l2.6 1.7"/></svg></a>';
+          '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.6v7.6l6.2-3.8z"/><path d="M3.2 15.6h13.6"/><circle cx="8.4" cy="15.6" r="1.5" fill="currentColor" stroke="none"/></svg></a>';
         L.DomEvent.disableClickPropagation(d);
         d.querySelector("a").addEventListener("click", function (e) { e.preventDefault(); var pb = document.getElementById("ra-play"); if (pb) pb.click(); });
         return d;

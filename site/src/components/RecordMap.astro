@@ -3608,6 +3608,10 @@ window.addEventListener("load", async function () {
   }
 
   var hoodLayer = L.layerGroup();
+  /* SHOW OR HIDE THE NEIGHBOURS. The ring round a place and the numbered pins for what stands in it are the answer to «what is near here», and a
+     reader working on the map itself wants them gone. One switch holds both, remembered in this browser; the pane's list is untouched. */
+  var hoodOn = true;
+  try { hoodOn = localStorage.getItem("ra-hood") !== "0"; } catch (e) { /* storage blocked */ }
   var HOOD_MIN = 4, HOOD_MAX = 25, HOOD_NEIGHBOURS = 8;
 
   function hoodKm(d) {
@@ -3690,7 +3694,7 @@ window.addEventListener("load", async function () {
       dashArray: "2 6", lineCap: "round",
       fillColor: "#1B2A5B", fillOpacity: .05
     }).addTo(hoodLayer);
-    if (!map.hasLayer(hoodLayer)) hoodLayer.addTo(map);
+    if (hoodOn && !map.hasLayer(hoodLayer)) hoodLayer.addTo(map);
     return r;
   }
 
@@ -3828,7 +3832,7 @@ window.addEventListener("load", async function () {
       /* The same colour as the number in the pane, so a pin and its row are matched by colour and by number. */
       if (p.dot && pm._icon) { pm._icon.style.background = p.dot; pm._icon.style.color = inkOn(p.dot); }
     });
-    if (checkPins.length && !map.hasLayer(checkLayer)) checkLayer.addTo(map);
+    if (hoodOn && checkPins.length && !map.hasLayer(checkLayer)) checkLayer.addTo(map);
   }
   function clearCheckPins() { checkPins = []; checkLayer.clearLayers(); }
 
@@ -8288,8 +8292,23 @@ window.addEventListener("load", async function () {
           '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><rect x="3" y="4" width="14" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-dasharray="2.5 2" stroke-linecap="round"/></svg></a>' +
           '<a href="#" role="button" data-m="shape" title="Draw round it: drag a loop with your finger or the mouse, or tap its corners" aria-label="Draw a free shape on the map">' +
           '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M4 9c0-3 3-5 6-5s6 2 6 5-3 6-6 6c-2 0-3-1-3-1l-2 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-dasharray="2.5 2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>';
+        d.insertAdjacentHTML("beforeend",
+          '<a href="#" role="button" data-hood="1" class="ra-hood-tog" aria-pressed="' + hoodOn + '" title="' + (hoodOn ? "Hide the neighbours: the ring and the numbered places round the one you opened" : "Show the neighbours: the ring and the numbered places round the one you opened") + '" aria-label="' + (hoodOn ? "Hide the neighbours on the map" : "Show the neighbours on the map") + '">' +
+          '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><circle cx="10" cy="10" r="3" fill="currentColor"/><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="1.8 2.6" stroke-linecap="round"/><circle cx="16" cy="6" r="1.3" fill="currentColor"/><circle cx="5" cy="14.5" r="1.3" fill="currentColor"/></svg></a>');
+        if (!hoodOn) d.querySelector("a[data-hood]").classList.add("off");
         L.DomEvent.disableClickPropagation(d);
         d.addEventListener("click", function (e) {
+          var tg = e.target.closest("a[data-hood]");
+          if (tg) {
+            e.preventDefault(); hoodOn = !hoodOn;
+            try { localStorage.setItem("ra-hood", hoodOn ? "1" : "0"); } catch (x) { /* storage blocked */ }
+            if (hoodOn) { if (hoodLayer.getLayers().length) hoodLayer.addTo(map); if (checkPins.length) checkLayer.addTo(map); }
+            else { map.removeLayer(hoodLayer); map.removeLayer(checkLayer); }
+            tg.classList.toggle("off", !hoodOn); tg.setAttribute("aria-pressed", String(hoodOn));
+            tg.title = hoodOn ? "Hide the neighbours: the ring and the numbered places round the one you opened" : "Show the neighbours: the ring and the numbered places round the one you opened";
+            tg.setAttribute("aria-label", hoodOn ? "Hide the neighbours on the map" : "Show the neighbours on the map");
+            return;
+          }
           var a = e.target.closest("a[data-m]"); if (!a) return;
           e.preventDefault(); areaStart(a.getAttribute("data-m"));
         });
@@ -10689,6 +10708,8 @@ window.addEventListener("load", async function () {
   /* ---- the area tool ---- */
   :global(.ra-areactl a) { display: grid; place-items: center; width: 30px; height: 30px; color: var(--ink-2); }
   :global(.ra-areactl a.on) { background: var(--accent); color: #fff; }
+  /* the neighbours switch belongs to the new front door: the classic map has its own way of showing them */
+  :global(.ra-areactl a.ra-hood-tog) { display: none; }
   @media (pointer: coarse) { :global(.ra-areactl a) { width: 34px; height: 34px; } }
   /* SLIMMER MAP CONTROLS ON A PHONE. Zoom, full screen, markers, the two draw tools and the base-map switch were stacked down both edges of a
      map 390px wide and covered a good part of it. Smaller buttons, the base switch as one thin row, less margin round the edge. */

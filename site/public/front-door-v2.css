@@ -228,6 +228,11 @@ body.fd2-immersive .fd2-stage::after { border-radius: 0; }
   .fd2-tile, .fd2-ic, .fd2-go, .fd2-chip, .fd2-primary { transition: none !important; }
 }
 
+/* the show/hide neighbours switch, under the two drawing buttons; struck through when the neighbours are hidden */
+.fd2-stage .ra-areactl a.ra-hood-tog { display: grid !important; position: relative; }
+.fd2-stage .ra-areactl a.ra-hood-tog.off::after { content: ""; position: absolute; left: 9px; right: 9px; top: 50%; height: 2px; border-radius: 2px; background: currentColor; transform: rotate(-40deg); box-shadow: 0 0 0 1.5px var(--fd2-glass, #fff); }
+.fd2-stage .ra-areactl a.ra-hood-tog.off svg { opacity: .55; }
+
 /* the story button is not needed here: the "+" in the box adds a photo, a document or an example, and the card's first door opens the panel */
 .fd2-stage .sd-launch, .fd2-stage #ra-story-open { display: none !important; }
 /* the typewriter in the box is a hint, never text: slanted and paler */

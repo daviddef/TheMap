@@ -4182,6 +4182,8 @@ window.addEventListener("load", async function () {
     var pane = document.getElementById("ra-check");
     var body = document.getElementById("ra-check-b");
     if (!pane || !body) return;
+    var visitOld = TSV2 ? panel.querySelector(".ra-visit") : null, visitOpen = visitOld ? visitOld.open : false;
+    if (visitOld && (d.lat == null || !r)) visitOld.remove();
     if (d.lat == null || !r) { pane.hidden = true; clearCheckPins(); return; }
     clearCheckPins();
     /* What a mark made in this pane says it belongs to. Same string the place
@@ -4309,7 +4311,19 @@ window.addEventListener("load", async function () {
       h.push("</ul>");
     }
 
-    if (!count) { pane.hidden = true; return; }
+    if (!count) { pane.hidden = true; if (visitOld) visitOld.remove(); return; }
+    /* ON THE NEW FRONT DOOR THE PLACE'S «VISITING» LIST IS PART OF ITS CARD. David: «cant these merge somehow? Where the paper is, Villages within a 6 hour walk».
+       The same rows and the same numbered pins, but a folded section of the place card (after its books and sources) instead of a second overlay at the
+       right. It keeps its open or shut state while the walk is changed, and starts shut: the walk's shape and pins are already on the map. */
+    if (TSV2) {
+      pane.hidden = true;
+      var mount = panel.querySelector("#ra-place-body");
+      if (visitOld) visitOld.remove();
+      if (mount) mount.insertAdjacentHTML("afterend", '<details class="ra-check-b ra-in-card ra-visit"' + (visitOpen ? " open" : "") + '><summary class="lab">' +
+        esc(T("Visiting")) + " \u00b7 " + count + "</summary>" + h.join("") + "</details>");
+      drawCheckPins();
+      return;
+    }
     body.innerHTML = h.join("");
     document.getElementById("ra-check-n").textContent = count;
     (document.querySelector(".ra-check-w") || {}).textContent = T("Visiting");
@@ -11136,6 +11150,12 @@ window.addEventListener("load", async function () {
   :global(:is(#ra-check-b, .ra-in-card) li.ra-ck-nonum.src-has .srcmark) { grid-column: 1; }
   :global(:is(#ra-check-b, .ra-in-card) li.ra-ck-r.src-has .ra-ck-i) { grid-row: 1 / span 3; }
   :global(:is(#ra-check-b, .ra-in-card) .ra-ck-more) { margin: 2px 0 0 34px; }
+  /* the place card's Visiting rows: the + at the head of the row, like every other source and book (the id lifts these above the pane's own placement) */
+  :global(#fd2-stage .ra-visit li.ra-ck-r) { grid-template-columns: auto 24px minmax(0, 1fr); }
+  :global(#fd2-stage .ra-visit li.ra-ck-r .srcmark) { grid-column: 1; grid-row: 1 / span 2; align-self: center; margin: 0; }
+  :global(#fd2-stage .ra-visit li.ra-ck-r .ra-ck-i) { grid-column: 2; }
+  :global(#fd2-stage .ra-visit li.ra-ck-r .ra-ck-main), :global(#fd2-stage .ra-visit li.ra-ck-r .ra-ck-meta) { grid-column: 3; }
+  :global(#fd2-stage .ra-visit li.ra-ck-r.src-has .srcmark) { grid-column: 3; grid-row: 3; }
  :global(.ra-pin) { display: flex !important; align-items: center;
     justify-content: center; border-radius: 50%; background: #1B2A5B;
     color: #fff; font-family: var(--mono); font-size: 10px; font-weight: 500;

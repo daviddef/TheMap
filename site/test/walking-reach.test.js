@@ -299,3 +299,9 @@ test("a source with no place on the map shows a globe in Where to read, and the 
   assert.match(map, /if \(pv\.at\) \{ pinN\+\+; checkPins\.push\(\{ n: pinN,/);
   assert.match(map, /" ra-ck-web"[\s\S]*?\(pv\.at \? pinN : '<svg viewBox="0 0 20 20"/);
 });
+
+test("on v2 the place card's Visiting list is a folded section of the card, not a second overlay, and its rows put the + first", () => {
+  assert.match(map, /if \(TSV2\) \{\s*pane\.hidden = true;\s*var mount = panel\.querySelector\("#ra-place-body"\);[\s\S]*?class="ra-check-b ra-in-card ra-visit"/);
+  assert.match(map, /visitOld \? visitOld\.open : false/, "it keeps its open or shut state while the walk changes");
+  assert.match(map, /#fd2-stage \.ra-visit li\.ra-ck-r \.srcmark\) \{ grid-column: 1;/);
+});

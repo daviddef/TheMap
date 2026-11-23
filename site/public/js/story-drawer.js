@@ -233,7 +233,7 @@
         parsedNow = p;
         drawChips(p);
         var sig = [(p.route || []).map(function (x) { return x.row.i + ":" + x.age; }).join(","), p.left, p.born, p.name, (p.people || []).map(function (x) { return x.name; }).join(","), p.holds].join("|");
-        if (sig === lastSig || !tellable(p)) { if (status.textContent === "Reading your story\u2026") status.textContent = ""; if (!tellable(p) && sig !== lastSig) { J.clear(); showDock(false); dropKeyPlaces(); report.hidden = true; planBox.hidden = true; fam.hidden = true; addBar.hidden = true; } return; }
+        if (sig === lastSig || !tellable(p)) { if (status.textContent === "Reading your story\u2026") status.textContent = ""; if (!tellable(p) && sig !== lastSig) { lastSig = ""; J.clear(); showDock(false); dropKeyPlaces(); report.hidden = true; planBox.hidden = true; fam.hidden = true; addBar.hidden = true; } return; }
         lastSig = sig;
         var my = ++token; status.textContent = "Reading the Atlas…";
         LD.gather(p).then(function (g) {
@@ -413,7 +413,7 @@
     if (text.value) run();
     return {
       run: run,
-      setText: function (t) { text.value = String(t || "").slice(0, 2000); lastSig = ""; if (!announced) { announced = true; try { document.dispatchEvent(new CustomEvent("ra-story-start")); } catch (e) { /* no document */ } } run(); },
+      setText: function (t) { text.value = String(t || "").slice(0, 2000); if (!announced) { announced = true; try { document.dispatchEvent(new CustomEvent("ra-story-start")); } catch (e) { /* no document */ } } run(); },
       addFiles: function (fl) { try { document.dispatchEvent(new CustomEvent("ra-story-start")); } catch (e) { /* no document */ } addFiles(fl); },
       clear: function () { $(".sd-clear").click(); },
       state: function () { return { has: !!(parsedNow && ((parsedNow.route && parsedNow.route.length) || parsedNow.from || parsedNow.name || parsedNow.teller || tellable(parsedNow))), name: parsedNow && parsedNow.name || "", files: files.length }; }

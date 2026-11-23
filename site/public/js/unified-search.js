@@ -91,7 +91,7 @@
   q.addEventListener("paste", function (e) { var fs = e.clipboardData && e.clipboardData.files; if (fs && fs.length) { e.preventDefault(); addFiles(fs); } });
 
   /* typing: a story is taken out of the place search and read live; a place or a name goes on exactly as before */
-  var fromBox = false, tmr = null, thinking = false, lastRead = 0, storyMode = false;
+  var fromBox = false, tmr = null, thinking = false, storyMode = false, lastText = "", thinkTmr = null;
   /* The place search runs on its own timers for whatever was typed before this turned into a story ("my n", "my na"). Empty the box for one
      beat so the map's own search clears itself, stop its pending timers, and put the story back. */
   function resetSearch() {
@@ -101,10 +101,15 @@
     clearTimeout(q._t); clearTimeout(q._tf); clearTimeout(q._r);
     q.value = v;
   }
-  function read() {
-    clearTimeout(tmr); lastRead = Date.now(); var t = q.value.trim(); if (!t || !window.raStoryBox || !looksLikeStory(t)) return;
-    fromBox = true;
-    window.raStoryBox.start(t).then(function () { thinking = false; show(); }).catch(function () { thinking = false; show(); });
+  /* "Reading what you wrote…" is for a read that is really taking time: it is shown only if the read is still going after 0.4 s, never on a key press.
+     It used to appear on every key while no card was showing and vanish when the read found nothing, so the box below it jumped up and down. */
+  function readDone() { clearTimeout(thinkTmr); thinking = false; show(); }
+  function read(force) {
+    clearTimeout(tmr); var t = q.value.trim(); if (!t || !window.raStoryBox || !looksLikeStory(t)) return;
+    if (t === lastText && !force) return;   /* the same words as the last read: nothing new to understand, so nothing to redraw */
+    lastText = t; fromBox = true;
+    if (pills.hidden || !pills.children.length) { clearTimeout(thinkTmr); thinkTmr = setTimeout(function () { thinking = true; mirror(); }, 400); }
+    window.raStoryBox.start(t).then(readDone).catch(readDone);
   }
   q.addEventListener("input", function (e) {
     if (looksLikeStory(q.value)) {
@@ -115,18 +120,17 @@
       clearTimeout(q._t); clearTimeout(q._tf); clearTimeout(q._r);
       var sug = document.getElementById("ra-sug"); if (sug) { sug.hidden = true; sug.innerHTML = ""; }
       var rc = document.getElementById("ra-recent"); if (rc) rc.hidden = true;
-      if (pills.hidden || !pills.children.length) { thinking = true; mirror(); }   /* "Reading…" at once, before the reader has answered */
       /* THE STORY IS READ WHEN THE TYPING PAUSES, NOT WHILE IT GOES. It was read every 0.8 s mid-sentence plus after every third-of-a-second gap, and
          each read redraws the card, the tree and the map, so the box lagged behind the fingers. Now a pause of 0.9 s reads it; Enter reads it at once. */
       clearTimeout(tmr);
-      tmr = setTimeout(read, 900);
+      tmr = setTimeout(read, /[\s,.;!?]$/.test(q.value) ? 600 : 900);   /* a word, a comma or a sentence has just been finished: a little sooner */
     } else if (storyMode) {                                                       /* the typing stopped reading as a story: take the story off */
-      storyMode = false; fromBox = false; clearTimeout(tmr); thinking = false; lastRead = 0;
+      storyMode = false; fromBox = false; clearTimeout(tmr); thinking = false; lastText = ""; clearTimeout(thinkTmr);
       if (window.raStoryBox) window.raStoryBox.clear().then(function () { mirror(); });
     }
   }, true);
   q.addEventListener("keydown", function (e) {
-    if (e.key === "Enter" && looksLikeStory(q.value)) { e.preventDefault(); e.stopImmediatePropagation(); compact = false; read(); q.blur(); }
+    if (e.key === "Enter" && looksLikeStory(q.value)) { e.preventDefault(); e.stopImmediatePropagation(); compact = false; read(true); q.blur(); }
     else if (e.key === "Escape" && storyMode) { e.stopImmediatePropagation(); compact = true; userToggled = true; mirror(); q.blur(); }   /* Esc steps back: the card folds, the typing and the story stay */
   }, true);
 
@@ -189,7 +193,7 @@
     top.addEventListener("click", function (e) { if (e.target === ed || e.target === x || e.target === tg) return; flip(); });
     top.addEventListener("keydown", function (e) { if ((e.key === "Enter" || e.key === " ") && e.target === top) { e.preventDefault(); flip(); } });
     ed.addEventListener("click", function () { if (window.raStoryBox) window.raStoryBox.open(); });
-    x.addEventListener("click", function () { fromBox = false; storyMode = false; thinking = false; compact = false; userToggled = false; q.value = ""; resetSearch(); if (window.raStoryBox) window.raStoryBox.clear().then(function () { mirror(); }); });
+    x.addEventListener("click", function () { fromBox = false; storyMode = false; thinking = false; lastText = ""; clearTimeout(thinkTmr); compact = false; userToggled = false; q.value = ""; resetSearch(); if (window.raStoryBox) window.raStoryBox.clear().then(function () { mirror(); }); });
     if (!compact) {
       var body = mk("div", "rs-body");
       if (q.value.trim()) { var w = mk("p", "rs-words" + (wordsOpen ? " open" : ""), q.value.trim()); w.title = "Your words. Click to show all of them."; w.addEventListener("click", function () { wordsOpen = !wordsOpen; w.classList.toggle("open", wordsOpen); }); body.append(w); }

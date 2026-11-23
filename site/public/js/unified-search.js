@@ -53,8 +53,6 @@
     "#ra-pills .rs-ib:hover,#ra-pills .rs-ib:focus-visible{background:var(--accent-wash,rgba(31,92,107,.12));color:var(--accent,#1f5c6b);outline:none}" +
     "#ra-pills .rs-body{border-top:1px solid var(--rule,#ddd)}" +
     "#ra-pills .rs-body[hidden]{display:none}" +
-    "#ra-pills .rs-words{margin:0;padding:10px 14px;font:italic 400 14.5px/1.5 var(--serif,Georgia,serif);color:var(--ink-2,#444);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;cursor:text}" +
-    "#ra-pills .rs-words.open{-webkit-line-clamp:unset;display:block}" +
     "#ra-pills .rs-sec{display:grid;grid-template-columns:84px minmax(0,1fr);gap:8px;padding:9px 14px;border-top:1px solid var(--rule,#ddd)}" +
     "#ra-pills .rs-sec h4{margin:3px 0 0;font:600 10.5px/1 var(--sans,system-ui,sans-serif);letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3,#777)}" +
     "#ra-pills .rs-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px}" +
@@ -158,7 +156,7 @@
   var src = null, mo = null, seenPills = Object.create(null);
   /* The card shows what the reader understood in sections (who, journey, also, work, heard) instead of one wrapped row of pills. Every chip is
      still the panel's own chip: pressing it presses that one, so it still opens the same place picker or the same "heard" list. */
-  var compact = false, userToggled = false, wordsOpen = false, blurT = 0;
+  var compact = false, userToggled = false, blurT = 0;
   function mk(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function chipOf(c, i) {
     var isBtn = c.tagName === "BUTTON", p = mk(isBtn ? "button" : "span", "ra-pill" + (/\bfrom\b/.test(c.className) ? " from" : "") + (/\bwarn\b/.test(c.className) ? " warn" : ""), c.textContent);
@@ -213,7 +211,7 @@
     x.addEventListener("click", function () { fromBox = false; storyMode = false; thinking = false; lastText = ""; clearTimeout(thinkTmr); compact = false; userToggled = false; q.value = ""; resetSearch(); if (window.raStoryBox) window.raStoryBox.clear().then(function () { mirror(); }); });
     if (!compact) {
       var body = mk("div", "rs-body");
-      if (q.value.trim()) { var w = mk("p", "rs-words" + (wordsOpen ? " open" : ""), q.value.trim()); w.title = "Your words. Click to show all of them."; w.addEventListener("click", function () { wordsOpen = !wordsOpen; w.classList.toggle("open", wordsOpen); }); body.append(w); }
+      /* The words are not repeated here: the box above grows to show all of them. */
       [["Who", who], ["Journey", trip.reduce(function (a, n, i) { if (i) a.push(mk("span", "rs-arrow", "→")); a.push(n); return a; }, [])], ["Also", also], ["Work", work], ["Told", heard], ["Check", check]].forEach(function (g) { var sec = section(g[0], g[1]); if (sec) body.append(sec); });
       if (any) body.lastChild && body.append(mk("p", "rs-note", "Tap a place to choose a different one. Nothing here is checked: it is kept as you told it."));
       var act = mk("div", "rs-act"), pa = mk("button", "rs-b", "+ Photo or document"); pa.type = "button"; pa.addEventListener("click", function () { file.click(); });

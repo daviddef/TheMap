@@ -533,11 +533,11 @@
   }
 
   var FORMER = {
-    "rhodesia": { cc: ["ZW", "ZM"], drop: 1 }, "southern rhodesia": { cc: ["ZW"] }, "northern rhodesia": { cc: ["ZM"] }, "yugoslavia": { cc: ["HR", "RS", "SI", "BA", "MK", "ME", "XK"], drop: 1 },
+    "rhodesia": { cc: ["ZW", "ZM"], stop: "ZW", drop: 1 }, "southern rhodesia": { cc: ["ZW"], stop: "ZW" }, "northern rhodesia": { cc: ["ZM"], stop: "ZM" }, "yugoslavia": { cc: ["HR", "RS", "SI", "BA", "MK", "ME", "XK"], drop: 1 },
     "czechoslovakia": { cc: ["CZ", "SK"], drop: 1 }, "ussr": { cc: ["RU", "UA", "BY", "LT", "LV", "EE", "MD", "GE", "AM", "AZ", "KZ"], drop: 1 }, "soviet union": { cc: ["RU", "UA", "BY", "LT", "LV", "EE", "MD", "GE", "AM", "AZ", "KZ"] },
-    "east germany": { cc: ["DE"] }, "west germany": { cc: ["DE"] }, "zaire": { cc: ["CD"], drop: 1 }, "belgian congo": { cc: ["CD"] }, "ceylon": { cc: ["LK"], drop: 1 },
-    "south west africa": { cc: ["NA"] }, "british honduras": { cc: ["BZ"] }, "gold coast": { cc: ["GH"] }, "dutch east indies": { cc: ["ID"] }, "east pakistan": { cc: ["BD"] },
-    "burma": { cc: ["MM"] }, "persia": { cc: ["IR"] }, "siam": { cc: ["TH"] }, "prussia": { cc: ["DE", "PL", "RU"] }
+    "east germany": { cc: ["DE"] }, "west germany": { cc: ["DE"] }, "zaire": { cc: ["CD"], stop: "CD", drop: 1 }, "belgian congo": { cc: ["CD"], stop: "CD" }, "ceylon": { cc: ["LK"], stop: "LK", drop: 1 },
+    "south west africa": { cc: ["NA"], stop: "NA" }, "british honduras": { cc: ["BZ"], stop: "BZ" }, "gold coast": { cc: ["GH"], stop: "GH" }, "dutch east indies": { cc: ["ID"], stop: "ID" }, "east pakistan": { cc: ["BD"] },
+    "burma": { cc: ["MM"], stop: "MM" }, "persia": { cc: ["IR"] }, "siam": { cc: ["TH"], stop: "TH" }, "prussia": { cc: ["DE", "PL", "RU"] }
   };
   /* "a woman named Cheryl", "married a man called Ivan Kosina", "his daughter named Anna": the person named is not the one the story is about */
   var KIN_NAMED = /\b(married(?:\s+an?\s+\p{L}+)?|woman|lady|wife|husband|spouse|partner|bride|groom|man|girl|daughter|son|boy|child)\s+(?:named|called)\s+([\p{L}'\u2019-]+)(?:\s+([\p{Lu}][\p{L}'\u2019-]+))?/giu;
@@ -562,9 +562,26 @@
       for (j = i; j < i + len; j++) used[j] = 1;
       hits.push({ at: i, len: len, cc: cc, word: w });
     }
+    /* A COUNTRY THAT NO LONGER EXISTS, NAMED AS A PLACE TO GO: "moved to Rhodesia" is a stop, at Zimbabwe, called what the family called it. Only straight
+       after a place word (so "Salisbury, Rhodesia" stays Salisbury), only where one country took over the name, and never where a place already covers it. */
+    Object.keys(FORMER).forEach(function (nm) {
+      var f = FORMER[nm]; if (!f.stop) return;
+      var w = nm.split(" "), cc = f.stop;
+      for (var i = 1; i + w.length <= tokens.length; i++) {
+        if (tokens.slice(i, i + w.length).join(" ") !== nm || !PLACE_MARK.test(tokens[i - 1] || "") || !cen[cc]) continue;
+        if (hits.some(function (h) { return h.at < i + w.length && i < h.at + h.len; })) continue;
+        if (cands.some(function (c) { var cl = c.word.split(" ").length; return c.at < i + w.length && i < c.at + cl; })) continue;
+        hits.push({ at: i, len: w.length, cc: cc, word: nm, former: nm });
+      }
+    });
     if (!hits.length) return cands;
     var keep = cands.filter(function (c) { var cl = c.word.split(" ").length; return !hits.some(function (h) { return c.at < h.at + h.len && h.at < c.at + cl; }); });
     hits.forEach(function (h) {
+      if (h.former) {   /* a stop named as the family named it, standing at the country that has the name now */
+        var fn = h.former.replace(/\b\p{L}/gu, function (m) { return m.toUpperCase(); });
+        keep.push({ word: h.word, at: h.at, rows: [{ i: "f-" + h.former.replace(/ /g, "-"), n: fn, cc: h.cc, x: cen[h.cc].x, y: cen[h.cc].y, a: 1, c: 0, w: 1, country: true, gaz: true, former: ctx.countries[h.cc] }], country: h.cc });
+        return;
+      }
       var nm = ctx.countries[h.cc], f = S.fold(nm);
       var exact = (ctx.map[f] || []).filter(function (r) { return r.cc === h.cc && S.fold(String(r.n).replace(/\s*\([^)]*\)/g, "")) === f; })[0];
       var row = exact || { i: "c-" + h.cc.toLowerCase(), n: nm, cc: h.cc, x: cen[h.cc].x, y: cen[h.cc].y, a: 1, c: 0, w: 1, country: true, gaz: true };

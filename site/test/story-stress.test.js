@@ -342,3 +342,11 @@ test("'i then has 2 children, alessio and mateo' puts the teller's two children 
   assert.deepEqual((p.people || []).filter((x) => x.role === "child").map((x) => x.name), ["Alessio", "Mateo"]);
   assert.ok((p.people || []).some((x) => x.role === "spouse" && x.name === "Cheryl"), "Cheryl is still his wife");
 });
+
+test("'then to rhodesia' is a stop, at Zimbabwe, named as the family named it; 'Salisbury, Rhodesia' stays Salisbury", () => {
+  const bw = { ...ctx, countries: { ...countries, BW: "Botswana" }, map: A.buildMap(rows.concat([P("Gaborone", "BW", 25.9, -24.65)])) };
+  const p = F.parseStory("my dad moved from croatia to botswana and then to rhodesia and then later to johannesburg and then to brisbane.", bw);
+  assert.deepEqual(places({ stops: p.stops }), ["Croatia", "Botswana", "Rhodesia", "Johannesburg", "Brisbane"]);
+  const q = F.parseStory("He lived in Salisbury, Rhodesia until 1975.", ctx);
+  assert.ok(!places({ stops: q.stops }).includes("Rhodesia"), "the country name only chooses the place");
+});

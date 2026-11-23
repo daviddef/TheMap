@@ -129,7 +129,7 @@ export const C = [
  { id:"imp-name-place", t:"my aunt Lourdes lived in Sydney and her husband Victor was from Valencia", e:{stops:["Sydney","Valencia"]} },
  { id:"imp-country-only", t:"my grandfather was from croatia and his wife was from south africa", e:{stops:["Croatia","South Africa"]} },
  { id:"imp-city-country", t:"my dad was born in Cork Ireland and moved to Perth Australia", e:{stops:["Cork","Perth","Australia"]} },
- { id:"imp-ambig-us", t:"my grandfather lived in Springfield Illinois before Peoria", e:{stops:["Springfield","Peoria"]}, gap:"Peoria is found only as Peoria County in the index; the browser asks the gazetteer, the harness does not" },
+ { id:"imp-ambig-us", t:"my grandfather lived in Springfield Illinois before Peoria", e:{stops:["Springfield","Peoria"]} },
  { id:"imp-hometown", t:"he went back to his hometown of Udine", e:{stops:["Udine"]} },
  { id:"imp-born-in-the", t:"my great aunt was born in the village of Gracisce in Istria", e:{stops:["Gračišće"]} },
  { id:"imp-old-name", t:"my grandfather came from Fiume to Trieste", e:{stops:["Rijeka","Trieste"]} },
@@ -156,4 +156,12 @@ export const C = [
  { id:"third-person-his-father", t:"Thomas was born in Galway. his father Sean was born in Clifden", e:{stops:["Galway","Clifden"], name:"Thomas"} },
  { id:"my-father-is-subject", t:"My father Marco was born in Florence. His father Luigi was born in Pisa.", e:{stops:["Florence","Pisa"], rel:"father", name:"Marco"} },
  { id:"namesake-village-not-gazetteer", t:"He was born in Clifden in 1900.", e:{stops:["Clifden"], years:[1900]} },
+ // ---- the remaining weaknesses (23 Nov 2026, second pass)
+ { id:"given-is-place-first", t:"My father Sydney lived in Sydney.", e:{stops:["Sydney"], name:"Sydney", rel:"father"} },
+ { id:"two-people-wife", t:"my grandfather was born in Cork. My wife was born in Sydney.", e:{stops:["Cork"], rel:"grandfather", people:["spouse"]} },
+ { id:"two-people-husband", t:"my father was born in Cork. My husband Tom was born in Galway and his mother in Limerick.", e:{stops:["Cork","Limerick"], rel:"father", people:["spouse"]} },
+ { id:"two-people-named-wife", t:"my grandfather was born in Cork and moved to Boston. My wife Anna was born in Zagreb.", e:{stops:["Cork","Boston"], rel:"grandfather", people:["spouse"]} },
+ { id:"wifes-grandmother-stays", t:"My wife's grandmother was from Gdansk. Her parents moved to Chicago.", e:{stops:["Gdansk","Chicago"]} },
+ { id:"wife-and-i", t:"my grandfather was born in Cork. My wife and I moved to Perth.", e:{stops:["Cork","Perth"]} },
+ { id:"state-no-comma", t:"my grandfather lived in Springfield Illinois before moving to Peoria", e:{stops:["Springfield","Peoria"]} },
 ];

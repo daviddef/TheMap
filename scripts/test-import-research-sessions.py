@@ -189,6 +189,11 @@ for text, ok in book_cases:
     if got != ok:
         failures.append(f"safe_book({text[:40]!r}) -> {got}, wanted {ok}")
 
+# A KIND OF REGISTER IS NOT A FAMILY, even when the archive's surname list happens to hold the word (Falco's held DEATH).
+for w in ("Death", "Births", "marriage", "Baptism", "Burial", "Census"):
+    if irs.squash(w) not in irs.RECORD_WORDS:
+        failures.append(f"{w!r} is a kind of register and must never name a family line")
+
 if failures:
     print(f"{len(failures)} FAILED")
     for f in failures:

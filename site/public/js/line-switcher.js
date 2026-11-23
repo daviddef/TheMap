@@ -162,22 +162,116 @@
     /* MY RESEARCH'S BAR. On that page the bar also says whose research this is, which family research session it came from, and carries
        the things you do to a family: rename it, remove it, print or save it as a PDF. Rename and Remove open a small panel in the bar
        (the pop-up question box is not used). Remove takes this family's marks only, never the books themselves, and is refused for the
-       last family. Merging two families and a whole-session view do not exist yet. */
+       last family. Merge folds this family into another (its pages, states and notes move across, nothing is lost), and Look for duplicates
+       lists the families that are probably one, using the surname catalogue's «same» spellings as well as plain spelling. A whole-session
+       view does not exist yet. */
     var isAdmin = bar.classList.contains("ra-lines-admin"), fam = null, origTitle = document.title;
     if (isAdmin) {
       fam = { who: mk("span", "ra-fam-who"), sess: mk("span", "ra-fam-sess"), tools: mk("span", "ra-fam-tools"), panel: mk("div", "ra-fam-panel") };
       fam.panel.hidden = true;
       /* round icon buttons, the same make as the header's Save, Read and Contrast; the words are the tooltip and the screen-reader name */
-      var ICO = { pen: '<path d="M4 20h4L19 9l-4-4L4 16z M13.5 6.5l4 4" />', bin: '<path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13M10 11v6M14 11v6" />', print: '<path d="M7 9V3h10v6M7 17H4v-7h16v7h-3M7 14h10v7H7z" />' };
+      var ICO = { pen: '<path d="M4 20h4L19 9l-4-4L4 16z M13.5 6.5l4 4" />', bin: '<path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13M10 11v6M14 11v6" />', print: '<path d="M7 9V3h10v6M7 17H4v-7h16v7h-3M7 14h10v7H7z" />',
+               merge: '<path d="M5 4c0 6 7 6 7 11v5M19 4c0 6-7 6-7 11" />', dup: '<path d="M9 9h10v11H9zM15 9V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h4" />' };
       function tool(label, cls, fn, ico) {
         var b = mk("button", "ra-fam-b ra-fam-i" + (cls ? " " + cls : "")); b.type = "button"; b.title = label; b.setAttribute("aria-label", label);
         b.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + ICO[ico] + "</svg>";
         b.addEventListener("click", fn); fam.tools.append(b); return b;
       }
       function current() { return P.lines().filter(function (l) { return l.active; })[0]; }
+      /* WHICH FAMILIES ARE PROBABLY ONE. Two families are suggested when their names are the same once capitals, accents, spaces and punctuation
+         are ignored (D'Arcy and Darcy), or when the surname catalogue lists both spellings as the same family (status «same», never a
+         spelling that was only seen). Two with different places are left alone: the place was given to tell them apart. A pair marked «not the
+         same» is not offered again. */
+      function squash(t) { return String(t || "").toLowerCase().replace(/\u0111/g, "d").replace(/\u0142/g, "l").replace(/\u00f8/g, "o").replace(/\u00df/g, "ss").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, ""); }
+      var GROUPS = null, groupsAsked = false;
+      function loadGroups(then) {
+        if (GROUPS) return then();
+        if (groupsAsked) { return setTimeout(function () { then(); }, 400); }
+        groupsAsked = true;
+        var base = (document.documentElement.getAttribute("data-base") || "/").replace(/\/?$/, "/");
+        fetch(base + "surname-groups.json").then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (j) { GROUPS = (j && j.groups) || []; }).catch(function () { GROUPS = []; }).then(function () { then(); });
+      }
+      function notSame() { try { return JSON.parse(localStorage.getItem("ra-notsame") || "[]") || []; } catch (e) { return []; } }
+      function pairKey(a, b) { return [a, b].sort().join("|"); }
+      function suggestions() {
+        var lines = P.lines(), ns = notSame(), out = [], seen = {};
+        var groupOf = {}; (GROUPS || []).forEach(function (g, i) { g.forEach(function (k) { groupOf[k] = i; }); });
+        for (var i = 0; i < lines.length; i++) for (var j = i + 1; j < lines.length; j++) {
+          var a = lines[i], b = lines[j], ka = squash(a.name), kb = squash(b.name);
+          if (!ka || !kb || ns.indexOf(pairKey(a.slug, b.slug)) > -1) continue;
+          if (a.where && b.where && squash(a.where) !== squash(b.where)) continue;
+          var why = ka === kb ? "Same name, apart from capitals, accents or punctuation" : (groupOf[ka] !== undefined && groupOf[ka] === groupOf[kb]) ? "The surname catalogue lists these as the same family" : "";
+          if (!why || seen[pairKey(a.slug, b.slug)]) continue;
+          seen[pairKey(a.slug, b.slug)] = 1;
+          /* the one with more work is the one kept; on a tie, the one the sessions publish, then the first by name */
+          var keep = a.marks !== b.marks ? (a.marks > b.marks ? a : b) : (a.session !== b.session ? (a.session ? a : b) : a), drop = keep === a ? b : a;
+          out.push({ keep: keep, drop: drop, why: why });
+        }
+        return out;
+      }
+      function badge() {
+        var t = fam.tools.querySelector(".ra-fam-dupbtn"); if (!t) return;
+        var n = suggestions().length, bd = t.querySelector(".ra-fam-badge");
+        if (!n) { if (bd) bd.remove(); return; }
+        if (!bd) { bd = mk("span", "ra-fam-badge"); t.append(bd); }
+        bd.textContent = String(n); t.title = n + (n === 1 ? " pair of families looks like one" : " pairs of families look like one") + ": look for duplicates";
+      }
+      function afterChange(p) { if (p) p.hidden = true; draw(); document.dispatchEvent(new CustomEvent("ra-progress-changed")); }
+      /* a family that was ticked for reading together follows the merge, so the tick does not point at nothing */
+      function mergeScope(from, into) {
+        var x = readScope(); if (!x || !x.slugs) return;
+        var i = x.slugs.indexOf(from); if (i < 0) return;
+        x.slugs.splice(i, 1); if (x.slugs.indexOf(into) < 0) x.slugs.push(into); writeScope(x);
+      }
+      function doMerge(from, into, useName) {
+        var f = P.lines().filter(function (l) { return l.slug === from; })[0], r = P.mergeLines(from, into);
+        if (r && useName && f) P.renameLine(into, f.name, f.where);
+        if (r) mergeScope(from, into);
+        return r;
+      }
       function openPanel(kind) {
         var me = current(); if (!me) return;
         var p = fam.panel; p.innerHTML = ""; p.hidden = false;
+        if (kind === "merge") {
+          var others = P.lines().filter(function (l) { return l.slug !== me.slug; });
+          if (!others.length) { var ok0 = mk("button", "ra-fam-b", "OK"); ok0.type = "button"; ok0.addEventListener("click", function () { p.hidden = true; }); p.append(mk("span", "", "There is no other family to merge this one into."), ok0); return; }
+          var sug = {}; suggestions().forEach(function (x) { if (x.drop.slug === me.slug) sug[x.keep.slug] = 1; else if (x.keep.slug === me.slug) sug[x.drop.slug] = 1; });
+          others.sort(function (a, b) { return (sug[b.slug] ? 1 : 0) - (sug[a.slug] ? 1 : 0) || a.name.localeCompare(b.name); });
+          var pick = mk("select"), keepName = mk("input"), kl = mk("label", "ra-fam-chk"), go3 = mk("button", "ra-fam-b pri", "Merge"), no3 = mk("button", "ra-fam-b", "Cancel"), say2 = mk("span", "ra-fam-say");
+          pick.setAttribute("aria-label", "The family to merge into");
+          others.forEach(function (l) { var o = mk("option", "", (sug[l.slug] ? "\u2713 looks the same \u00b7 " : "") + labelOf(l) + " (" + l.marks + (l.marks === 1 ? " mark)" : " marks)")); o.value = l.slug; pick.append(o); });
+          keepName.type = "checkbox"; kl.append(keepName, " Keep the name \u201C" + labelOf(me) + "\u201D for the merged family");
+          go3.type = "button"; no3.type = "button";
+          function explain() {
+            var t = others.filter(function (l) { return l.slug === pick.value; })[0]; if (!t) return;
+            say2.textContent = "All " + me.marks + (me.marks === 1 ? " mark" : " marks") + " made under " + labelOf(me) + " move into " + labelOf(t) + "; pages are added together, nothing is lost, and " + labelOf(me) + " is removed. The books themselves are not touched. This cannot be undone, so back up first if you want to be safe.";
+          }
+          pick.addEventListener("change", explain); explain();
+          go3.addEventListener("click", function () { var r = doMerge(me.slug, pick.value, keepName.checked); afterChange(p); });
+          no3.addEventListener("click", function () { p.hidden = true; });
+          p.append(mk("span", "", "Merge " + labelOf(me) + " into"), pick, kl, say2, go3, no3);
+          pick.focus(); return;
+        }
+        if (kind === "dups") {
+          var wait = mk("span", "", "Looking\u2026"); p.append(wait);
+          loadGroups(function () {
+            p.innerHTML = ""; var list = suggestions();
+            var close = mk("button", "ra-fam-b", list.length ? "Close" : "OK"); close.type = "button"; close.addEventListener("click", function () { p.hidden = true; });
+            if (!list.length) { p.append(mk("span", "", "No duplicates found: no two of your families share a name or a catalogued spelling."), close); return; }
+            var ul = mk("ul", "ra-fam-dups");
+            list.forEach(function (x) {
+              var li = mk("li"), txt = mk("span", "ra-fam-dtxt"), m = mk("button", "ra-fam-b pri", "Merge into " + labelOf(x.keep)), n = mk("button", "ra-fam-b", "Not the same");
+              m.type = "button"; n.type = "button";
+              txt.append(mk("b", "", labelOf(x.keep)), " (" + x.keep.marks + ") and ", mk("b", "", labelOf(x.drop)), " (" + x.drop.marks + ") \u2014 " + x.why.toLowerCase() + ".");
+              m.addEventListener("click", function () { doMerge(x.drop.slug, x.keep.slug, false); draw(); document.dispatchEvent(new CustomEvent("ra-progress-changed")); openPanel("dups"); });
+              n.addEventListener("click", function () { var ns = notSame(); ns.push(pairKey(x.keep.slug, x.drop.slug)); try { localStorage.setItem("ra-notsame", JSON.stringify(ns)); } catch (e) { /* storage blocked: asked again next time */ } badge(); openPanel("dups"); });
+              li.append(txt, m, n); ul.append(li);
+            });
+            p.append(mk("span", "", "These look like the same family:"), ul, close);
+          });
+          return;
+        }
         if (kind === "rename") {
           var n = mk("input"), w = mk("input"), ok = mk("button", "ra-fam-b pri", "Save name"), no = mk("button", "ra-fam-b", "Cancel");
           n.value = me.name; n.setAttribute("aria-label", "Family name"); w.value = me.where || ""; w.placeholder = "Where (optional)"; w.setAttribute("aria-label", "Where, optional");
@@ -201,6 +295,8 @@
         }
       }
       tool("Rename this family", "", function () { openPanel("rename"); }, "pen");
+      tool("Merge this family into another", "", function () { openPanel("merge"); }, "merge");
+      tool("Look for duplicate families", "ra-fam-dupbtn", function () { openPanel("dups"); }, "dup");
       tool("Remove this family", "danger", function () { openPanel("remove"); }, "bin");
       tool("Print or save as PDF", "", function () { window.print(); }, "print");
       var after = bar.querySelector(".ra-lines-n");
@@ -220,6 +316,7 @@
         } else fam.sess.append(me.session ? "From a family research session" : "Started by you");
       }
       fam.tools.hidden = !me;
+      if (GROUPS) badge(); else loadGroups(badge);
       /* the page's own title says whose research it is */
       var h = document.querySelector(".pagehead h1"), ttl = me ? "My research: " + labelOf(me) : "My research";
       if (h) h.textContent = ttl;

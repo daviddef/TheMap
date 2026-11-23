@@ -138,9 +138,9 @@ body.fd2 .fd2-classic:hover, body.fd2 .fd2-classic:focus-visible { color: var(--
 @keyframes fd2-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
 .fd2-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 14px 0 2px; padding-top: 12px; border-top: 1px solid var(--rule, #d3d0c7); animation: fd2-rise .6s .75s both; }
-.fd2-stats div { display: grid; gap: 1px; min-width: 0; }
-.fd2-stats b { font: 600 19px/1.1 var(--serif, Georgia, serif); font-variant-numeric: tabular-nums; color: var(--ink, #16222a); }
-.fd2-stats span { font: 600 10px/1.25 var(--sans, system-ui, sans-serif); letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3, #606c72); }
+.fd2-stats div { display: grid; gap: 1px; min-width: 0; overflow: hidden; }
+.fd2-stats b { font: 600 18px/1.15 var(--serif, Georgia, serif); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink, #16222a); }
+.fd2-stats span { font: 600 10px/1.25 var(--sans, system-ui, sans-serif); letter-spacing: .05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; color: var(--ink-3, #606c72); }
 .fd2-more { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 10px 0 0; font: 500 13px/1.4 var(--sans, system-ui, sans-serif); animation: fd2-rise .6s .85s both; }
 .fd2-more a { color: var(--accent, #1f5c6b); text-decoration: none; }
 .fd2-more a:hover { text-decoration: underline; }

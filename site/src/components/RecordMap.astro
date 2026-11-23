@@ -4201,8 +4201,8 @@ window.addEventListener("load", async function () {
     var pane = document.getElementById("ra-check");
     var body = document.getElementById("ra-check-b");
     if (!pane || !body) return;
-    var visitOld = TSV2 ? panel.querySelector(".ra-visit") : null, visitOpen = visitOld ? visitOld.open : false;
-    if (visitOld && (d.lat == null || !r)) visitOld.remove();
+    var visitOld = TSV2 ? [].slice.call(panel.querySelectorAll(".ra-visit")) : [], visitOpen = visitOld.map(function (x) { return x.open; });
+    if (visitOld.length && (d.lat == null || !r)) visitOld.forEach(function (x) { x.remove(); });
     if (d.lat == null || !r) { pane.hidden = true; clearCheckPins(); return; }
     clearCheckPins();
     /* What a mark made in this pane says it belongs to. Same string the place
@@ -4330,24 +4330,27 @@ window.addEventListener("load", async function () {
       h.push("</ul>");
     }
 
-    if (!count) { pane.hidden = true; if (visitOld) visitOld.remove(); return; }
+    if (!count) { pane.hidden = true; visitOld.forEach(function (x) { x.remove(); }); return; }
     /* ON THE NEW FRONT DOOR THE PLACE'S «VISITING» LIST IS PART OF ITS CARD. David: «cant these merge somehow? Where the paper is, Villages within a 6 hour walk».
        The same rows and the same numbered pins, but a folded section of the place card (after its books and sources) instead of a second overlay at the
        right. It keeps its open or shut state while the walk is changed, and starts shut: the walk's shape and pins are already on the map. */
     if (TSV2) {
       pane.hidden = true;
       var mount = panel.querySelector("#ra-place-body");
-      if (visitOld) visitOld.remove();
-      /* THE WALK'S NOTE JOINS THE HEAD. David: «can those 2 lines merge?». «Within a 6 hour walk — 8 places» sits in the section's own head line, after its
-         name; only a failure message (the terrain did not load) keeps a line of its own, and while the walk is being worked out the note pulses. */
+      visitOld.forEach(function (x) { x.remove(); });
+      /* «WHERE THE PAPER IS» AND «VILLAGES WITHIN A WALK» ARE SECTIONS OF THE CARD, NOT PARTS OF ONE. David: «move them up a level, as top level collapsible groups».
+         Each of the list's headings becomes its own fold, like the books and the sources: the heading and the count at the right. The walk's note is the
+         heading itself (it names the hours); only a failure message (the terrain did not load) keeps a line, and while the walk is worked out the villages' heading pulses. */
       var nt = document.createElement("div"); nt.innerHTML = h[0] || "";
       var ld = !!nt.querySelector(".ra-reach-ld"), bad = [].map.call(nt.querySelectorAll(".ra-reach-s:not(.ra-reach-ld)"), function (x) { return x.textContent; }).join(" ");
-      [].forEach.call(nt.querySelectorAll(".ra-reach-s"), function (x) { x.remove(); });
-      var noteTxt = nt.textContent.trim().replace(/\.$/, "");
-      if (h[0]) h[0] = bad ? '<p class="at-sub">' + esc(bad) + "</p>" : "";
-      if (mount) mount.insertAdjacentHTML("afterend", '<details class="ra-check-b ra-in-card ra-visit"' + (visitOpen ? " open" : "") + '><summary class="lab">' +
-        "<span>" + esc(T("Visiting")) + "</span>" + (noteTxt ? '<span class="ra-sum-note' + (ld ? " ra-sum-ld" : "") + '">' + esc(noteTxt) + "</span>" : "") + "<b>" + count + "</b></summary>" +
-        h.join("").replace(/<ul>/g, '<ul class="ra-vl">') + "</details>");
+      var groups = h.slice(1).join("").split(/(?=<h4>)/).filter(function (g) { return g.indexOf("<h4>") === 0; }), out = [];
+      groups.forEach(function (g, gi) {
+        var m = g.match(/^<h4>([\s\S]*?)<\/h4>([\s\S]*)$/); if (!m) return;
+        var n = (m[2].match(/<li class="ra-vrow"/g) || []).length, vill = /Villages/.test(m[1]) || /walk/.test(m[1]);
+        out.push('<details class="ra-check-b ra-in-card ra-visit"' + (visitOpen[gi] ? " open" : "") + '><summary class="lab"><span' + (ld && vill ? ' class="ra-sum-ld"' : "") + ">" + m[1] + "</span><b>" + n + "</b></summary>" +
+                 m[2].replace(/<ul>/g, '<ul class="ra-vl">') + "</details>");
+      });
+      if (mount) mount.insertAdjacentHTML("afterend", (bad ? '<p class="at-sub ra-visit-bad">' + esc(bad) + "</p>" : "") + out.join(""));
       drawCheckPins();
       return;
     }

@@ -301,7 +301,7 @@ test("a source with no place on the map shows a globe in Where to read, and the 
 
 test("on v2 the place card's Visiting list is a folded section of the card, not a second overlay, and its rows put the + first", () => {
   assert.match(map, /if \(TSV2\) \{\s*pane\.hidden = true;\s*var mount = panel\.querySelector\("#ra-place-body"\);[\s\S]*?class="ra-check-b ra-in-card ra-visit"/);
-  assert.match(map, /visitOld \? visitOld\.open : false/, "it keeps its open or shut state while the walk changes");
+  assert.match(map, /visitOpen = visitOld\.map\(function \(x\) \{ return x\.open; \}\)/, "each fold keeps its open or shut state while the walk changes");
   assert.match(map, /return '<li class="ra-vrow"' \+ at[\s\S]*?'<span class="ra-vy">'/, "a Visiting row is a book row: the figure at the right");
   assert.match(map, /replace\(\/<ul>\/g, '<ul class="ra-vl">'\)/);
 });
@@ -345,14 +345,12 @@ test("every foldable section of a v2 card carries the same chevron and no colour
 test("the count in a foldable card section's head sits at the right, in one style", () => {
   const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
   assert.match(css, /details\.ra-area-cov > summary > b, \.fd2-stage details\.ra-area-rd > summary > b, \.fd2-stage details\.ra-in-card > summary\.lab > b \{ margin-left: auto;/);
-  assert.match(map, /"<span>" \+ esc\(T\("Visiting"\)\) \+ "<\/span>"[\s\S]*?"<b>" \+ count \+ "<\/b><\/summary>"/);
+  assert.match(map, /"<\/span><b>" \+ n \+ "<\/b><\/summary>"/);
 });
 
-test("the walk's note sits in the Visiting head, not on a line of its own", () => {
-  const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
-  assert.match(map, /class="ra-sum-note' \+ \(ld \? " ra-sum-ld" : ""\)/);
-  assert.match(map, /if \(h\[0\]\) h\[0\] = bad \?/);
-  assert.match(css, /^\.fd2-stage \.ra-sum-note \{/m);
+test("while the walk is worked out the villages' heading pulses, and only a failure keeps a line of its own", () => {
+  assert.match(map, /ld && vill \? ' class="ra-sum-ld"'/);
+  assert.match(map, /class="at-sub ra-visit-bad"/);
 });
 
 test("the v2 place card names only the region above its who-held band, not the words «Who held this ground»", () => {
@@ -375,4 +373,10 @@ test("source rows use the books' dot size and gaps, and the access icon has no s
 test("the dot sits in a slot as wide as a number, so book, source and visiting names start on one line", () => {
   const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
   assert.match(css, /\.fd2-stage \.ra-vl > li > i, \.fd2-stage \.ra-area-g > ul > li\[data-src\] > \.ra-area-p > i \{ margin: 0 5px; \}/);
+});
+
+test("on v2 the Visiting list's headings are top-level folds of the card, each with its own count", () => {
+  assert.match(map, /split\(\/\(\?=<h4>\)\/\)/);
+  assert.match(map, /class="ra-check-b ra-in-card ra-visit"' \+ \(visitOpen\[gi\] \? " open" : ""\)/);
+  assert.doesNotMatch(map, /esc\(T\("Visiting"\)\) \+ "<\/span>"/, "no single Visiting wrapper");
 });

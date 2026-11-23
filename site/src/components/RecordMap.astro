@@ -7919,6 +7919,9 @@ window.addEventListener("load", async function () {
     if (typeof areaEditStop === "function") areaEditStop(true);      /* a reshape in progress is given up when anything else starts */
     map.off("click", areaClick); map.off("mousemove", areaMove); map.off("dblclick", areaDbl);
     document.removeEventListener("keydown", areaKey);
+    map.getContainer().removeEventListener("pointerdown", areaDragDown);
+    areaDragStop();
+    if (AREA.dragOff) { map.dragging.enable(); AREA.dragOff = false; }
     map.getContainer().classList.remove("ra-drawing");
     map.doubleClickZoom.enable();
     if (AREA.rubber) { map.removeLayer(AREA.rubber); AREA.rubber = null; }
@@ -7942,8 +7945,72 @@ window.addEventListener("load", async function () {
     map.doubleClickZoom.disable();
     map.on("click", areaClick); map.on("mousemove", areaMove); map.on("dblclick", areaDbl);
     document.addEventListener("keydown", areaKey);
+    /* DRAW IT, DON'T TAP IT. A finger or a mouse dragged across the map draws the shape as it goes (a box from one corner to the other, a loop as a loop);
+       a plain tap still adds a corner, so the old way works as it did. The map stops panning while a tool is on, or the drag would move the map. */
+    map.getContainer().addEventListener("pointerdown", areaDragDown);
+    if (map.dragging.enabled()) { map.dragging.disable(); AREA.dragOff = true; }
     var btn = document.querySelector('.ra-areactl a[data-m="' + mode + '"]'); if (btn) btn.classList.add("on");
-    areaBox((AREA.rings.length ? T("Adding area " + (AREA.rings.length + 1) + ".") + " " : "") + T(mode === "box" ? "Tap one corner, then the opposite corner" : "Tap the corners of your area. Finish on the first corner, or press Finish"), mode === "shape");
+    areaBox((AREA.rings.length ? T("Adding area " + (AREA.rings.length + 1) + ".") + " " : "") + T(mode === "box" ? "Drag a box over the map, or tap two opposite corners" : "Draw round your area with a finger or the mouse, or tap its corners and finish on the first one"), mode === "shape");
+  }
+  /* The drag: points are kept in screen pixels, so what is drawn is what is under the finger however the map is zoomed. */
+  var FREE = null;
+  function areaDragDown(e) {
+    if (!AREA.mode || !e.isPrimary || (e.pointerType === "mouse" && e.button !== 0)) return;
+    if (e.target.closest && e.target.closest(".leaflet-control, .ra-area-hint, .ra-area-bar, .leaflet-popup, button, a")) return;
+    FREE = { id: e.pointerId, mode: AREA.mode, pts: [map.mouseEventToContainerPoint(e)], moved: false };
+    window.addEventListener("pointermove", areaDragMove); window.addEventListener("pointerup", areaDragUp); window.addEventListener("pointercancel", areaDragUp);
+  }
+  function areaFreeRing() {
+    if (!FREE) return [];
+    var a = FREE.pts[0], b = FREE.pts[FREE.pts.length - 1];
+    if (FREE.mode === "box") return areaRect(map.containerPointToLatLng(a), map.containerPointToLatLng(b));
+    return FREE.pts.map(function (p) { return map.containerPointToLatLng(p); });
+  }
+  function areaDragMove(e) {
+    if (!FREE || e.pointerId !== FREE.id) return;
+    var cp = map.mouseEventToContainerPoint(e), last = FREE.pts[FREE.pts.length - 1];
+    if (!FREE.moved) {
+      if (cp.distanceTo(FREE.pts[0]) < 9) return;                     /* still a tap */
+      FREE.moved = true; AREA.pts = [];                                 /* a drag starts the shape afresh; corners tapped before it are dropped */
+      if (AREA.rubber) { map.removeLayer(AREA.rubber); AREA.rubber = null; }
+      areaBox(T(FREE.mode === "box" ? "Let go at the opposite corner" : "Keep drawing, then let go to close the shape"), false);
+    }
+    if (FREE.mode === "box") { if (FREE.pts.length < 2) FREE.pts.push(cp); else FREE.pts[1] = cp; }
+    else if (cp.distanceTo(last) >= 3) FREE.pts.push(cp);
+    var ring = areaFreeRing();
+    if (!AREA.rubber) AREA.rubber = L.polygon(ring, { color: "#1F5C6B", weight: 2.5, dashArray: "6 4", fillOpacity: .08, interactive: false, lineCap: "round", lineJoin: "round" }).addTo(map);
+    else AREA.rubber.setLatLngs(ring);
+    if (e.cancelable) e.preventDefault();
+  }
+  function areaDragStop() {
+    window.removeEventListener("pointermove", areaDragMove); window.removeEventListener("pointerup", areaDragUp); window.removeEventListener("pointercancel", areaDragUp);
+    FREE = null;
+  }
+  function areaDragUp(e) {
+    if (!FREE || e.pointerId !== FREE.id) return;
+    var F = FREE, moved = F.moved; areaDragStop();
+    if (!moved) return;                                                 /* a tap: the map's own click adds a corner */
+    /* the click that follows a drag must not add a corner, or open something under the finger */
+    var stop = function (ev) { ev.stopPropagation(); };
+    map.getContainer().addEventListener("click", stop, { capture: true, once: true });
+    setTimeout(function () { map.getContainer().removeEventListener("click", stop, true); }, 400);
+    var pts = F.pts, ring;
+    if (F.mode === "box") {
+      if (pts.length < 2 || Math.abs(pts[1].x - pts[0].x) < 12 || Math.abs(pts[1].y - pts[0].y) < 12) { areaTooSmall(); return; }
+      ring = areaRect(map.containerPointToLatLng(pts[0]), map.containerPointToLatLng(pts[1]));
+    } else {
+      var tol = 2.5, s = L.LineUtil.simplify(pts, tol);
+      while (s.length > 120 && tol < 20) { tol += 1.5; s = L.LineUtil.simplify(pts, tol); }       /* a hand-drawn loop, kept light enough to save and test against */
+      var xs = s.map(function (p) { return p.x; }), ys = s.map(function (p) { return p.y; });
+      if (s.length < 3 || Math.max.apply(null, xs) - Math.min.apply(null, xs) < 12 || Math.max.apply(null, ys) - Math.min.apply(null, ys) < 12) { areaTooSmall(); return; }
+      ring = s.map(function (p) { return map.containerPointToLatLng(p); });
+    }
+    areaFinish(ring);
+  }
+  function areaTooSmall() {
+    if (AREA.rubber) { map.removeLayer(AREA.rubber); AREA.rubber = null; }
+    AREA.pts = [];
+    areaBox(T("That was too small. Draw it a little bigger"), AREA.mode === "shape");
   }
   function areaKey(e) { if (e.key === "Escape") areaCancelDraw(); }
   function areaMove(e) {
@@ -8198,10 +8265,10 @@ window.addEventListener("load", async function () {
         var d = L.DomUtil.create("div", "leaflet-bar ra-areactl");
         d.id = "ra-areactl";
         d.innerHTML =
-          '<a href="#" role="button" data-m="box" title="Draw a box: tap two opposite corners" aria-label="Draw a box on the map">' +
-          '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><rect x="2.5" y="3.5" width="11" height="9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 2"/></svg></a>' +
-          '<a href="#" role="button" data-m="shape" title="Draw a shape: tap its corners" aria-label="Draw a free shape on the map">' +
-          '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3 5l6-2.5 4 4-1.5 6L4.5 12z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 2" stroke-linejoin="round"/></svg></a>';
+          '<a href="#" role="button" data-m="box" title="Draw a box: drag it out, or tap two opposite corners" aria-label="Draw a box on the map">' +
+          '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><rect x="3" y="4" width="14" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-dasharray="2.5 2" stroke-linecap="round"/></svg></a>' +
+          '<a href="#" role="button" data-m="shape" title="Draw round it: drag a loop with your finger or the mouse, or tap its corners" aria-label="Draw a free shape on the map">' +
+          '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M4 9c0-3 3-5 6-5s6 2 6 5-3 6-6 6c-2 0-3-1-3-1l-2 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-dasharray="2.5 2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>';
         L.DomEvent.disableClickPropagation(d);
         d.addEventListener("click", function (e) {
           var a = e.target.closest("a[data-m]"); if (!a) return;
@@ -10603,7 +10670,7 @@ window.addEventListener("load", async function () {
     :global(.leaflet-left .leaflet-control) { margin-left: 6px; }
     :global(.leaflet-right .leaflet-control) { margin-right: 6px; }
   }
-  :global(.leaflet-container.ra-drawing) { cursor: crosshair; }
+  :global(.leaflet-container.ra-drawing) { cursor: crosshair; touch-action: none !important; }   /* a finger drag draws, it must not scroll the page */
   :global(.leaflet-container.ra-drawing .leaflet-interactive) { pointer-events: none; }
   :global(.ra-area-hint), :global(.ra-area-bar) { position: absolute; z-index: 900; left: 50%; transform: translateX(-50%); top: 10px; display: flex; align-items: center; gap: 10px;
     padding: 7px 12px; border-radius: 999px; background: var(--panel); border: 1px solid var(--rule-strong); box-shadow: 0 4px 16px rgba(10, 20, 26, .2);

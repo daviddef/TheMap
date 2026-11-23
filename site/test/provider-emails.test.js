@@ -36,9 +36,9 @@ test("the best state leads, a branch mailbox does not, and Wikidata is only a fa
 });
 
 test("the Where the paper is row carries the icon as a mailto link whose tooltip names the address and how far to trust it", () => {
-  assert.match(map, /function mailIcon\(em, name\)/);
+  assert.match(map, /function mailIcon\(em, name, pid\)/);
   assert.match(map, /href="mailto:' \+ esc\(a\[0\]\)/);
   assert.match(map, /MAIL_WHY = \{ answered:/);
-  assert.match(map, /mailIcon\(em, name\) \+ '<span class="ra-vy">'/, "on the new front door, before the distance");
-  assert.match(map, /\}, null, x\.p\.em\)\);/, "the archive rows pass the provider's addresses");
+  assert.match(map, /mailIcon\(em, name, pid\) \+ '<span class="ra-vy">'/, "on the new front door, before the distance");
+  assert.match(map, /\}, null, x\.p\.em, x\.p\.id\)\);/, "the archive rows pass the provider's addresses");
 });

@@ -450,3 +450,26 @@ test("the walk is an area: tapping its shape opens it, it joins the areas list, 
   assert.match(src, /\[data-back-areas\]/);
   assert.match(src, /\/\^familysearch\/i\.test\(v\.src \|\| ""\)/);
 });
+
+test("a whole name typed in the map (given name and surname) is recognised, summarised from the two catalogues, and opens the Names page on the same text", () => {
+  const src = readFileSync(join(root, "src/components/RecordMap.astro"), "utf8");
+  assert.match(src, /async function nameCardFor\(term\)/);
+  assert.match(src, /get\("given-names\.json"\), get\("surname-families\.json"\)/);
+  assert.match(src, /BASE \+ "your-name\/\?q=" \+ encodeURIComponent\(t\)\.replace\(\/%20\/g, "\+"\)/);
+  assert.match(src, /\(!hits\.length && !\(names && names\.length\)\) \? await nameCardFor\(term\)/);
+  assert.match(src, /class="ra-nc"/);
+});
+
+test("the flag icon on a place, country or name card opens the Atlas's own flag hub, not the old Flag-History site", () => {
+  const src = readFileSync(join(root, "src/components/RecordMap.astro"), "utf8");
+  assert.match(src, /href="' \+ BASE \+ "flags\/" \+ FLAG_SLUG\[String\(cc\)\.toUpperCase\(\)\] \+\s*'-flags\/" title="'/);
+  assert.doesNotMatch(src, /FLAG_BASE \+ FLAG_SLUG/);
+});
+
+test("search list: a bracket that repeats the name is dropped, gazetteer rows have no side rule", () => {
+  const src = readFileSync(join(root, "src/components/RecordMap.astro"), "utf8");
+  assert.match(src, /function sugName\(n\)/);
+  assert.match(src, /esc\(sugName\(p\.n\)\)/);
+  assert.doesNotMatch(src, /\.ra-sug-g\) \{ border-left/);
+  assert.match(src, /no registers held/);
+});

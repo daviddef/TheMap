@@ -1179,10 +1179,10 @@ window.addEventListener("load", async function () {
          '<path d="M5.6 8.4h4.8M5.6 11h3.2"/>' +
          "</svg></a>";
     if (cc && FLAG_SLUG[String(cc).toUpperCase()]) {
-      var lab = T("Which flags flew over") + " " + name + " \u2014 Flag History";
+      var lab = T("Which flags flew over") + " " + name + " \u2014 the flag history of " + (CNAME[String(cc).toUpperCase()] || cc);
       h += '<a class="at-ico-flag" data-cc="' + esc(String(cc).toUpperCase()) +
-           '" href="' + FLAG_BASE + FLAG_SLUG[String(cc).toUpperCase()] +
-           '-flags.html" target="_blank" rel="noopener" title="' + esc(lab) +
+           '" href="' + BASE + "flags/" + FLAG_SLUG[String(cc).toUpperCase()] +
+           '-flags/" title="' + esc(lab) +
            '" aria-label="' + esc(lab) + '">&#9873;</a>';
     }
     return h + "</span>";
@@ -7083,6 +7083,91 @@ window.addEventListener("load", async function () {
 
   /* `exact` — the reader CHOSE this name from the dropdown, so answer with it
      and not with everything that resembles it. */
+  /* A WHOLE NAME TYPED IN THE MAP. David typed «ivan defranceski» and was told «No places of that name here yet», while the Names page knows both words:
+     Ivan is a form of Giovanni and Defranceski is spelt in the Defranceschi family. When the box holds two or more words, no place and no surname of the map
+     answers, and the two name catalogues recognise a word of it, the panel says what they hold, in a few lines, and opens the Names page on the same name
+     (/your-name/?q=ivan+defranceski, the address that page already reads). The catalogues (given-names.json is the big one) are fetched only on this path. */
+  var nameCats = null;
+  function ncFold(s) { return String(s || "").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/æ/g, "ae").trim(); }
+  function ncKey(s) { return String(s || "").normalize("NFC").toLowerCase().replace(/[\s'’-]+/g, ""); }
+  function ncLoose(s) { return String(s || "").replace(/[đł]/gi, function (c) { return c.toLowerCase() === "đ" ? "d" : "l"; }).replace(/ø/gi, "o").replace(/ß/g, "ss").normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]/g, ""); }
+  function nameCatalogues() {
+    if (nameCats) return nameCats;
+    var get = function (u) { return fetch(BASE + u).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }); };
+    return (nameCats = Promise.all([get("given-names.json"), get("surname-families.json")]).then(function (a) {
+      var g = a[0], f = a[1], gi = {}, ex = {}, lo = {};
+      if (g) {
+        g.rows.forEach(function (r, i) { var k = ncFold(r.canon); if (!(k in gi)) gi[k] = i; });
+        g.rows.forEach(function (r, i) { Object.keys(r.langs || {}).forEach(function (L) { r.langs[L].forEach(function (x) { var k = ncFold(x.form); if (!(k in gi)) gi[k] = i; }); }); });
+      }
+      if (f) f.rows.forEach(function (r, i) {
+        r.forms.forEach(function (fm) {
+          var k = ncKey(fm[0]); (ex[k] = ex[k] || []).indexOf(i) < 0 && ex[k].push(i);
+          var l = ncLoose(fm[0]); (lo[l] = lo[l] || []).indexOf(i) < 0 && lo[l].push(i);
+        });
+      });
+      return (g || f) ? { g: g, f: f, gi: gi, ex: ex, lo: lo } : null;
+    }));
+  }
+  function ncSur(c, w) { var k = ncKey(w), l = ncLoose(w); return c.ex[k] ? { ids: c.ex[k], loosely: false } : (l && c.lo[l] ? { ids: c.lo[l], loosely: true } : null); }
+  function ncGiven(c, w) { var k = ncFold(w); return k && k in c.gi ? c.g.rows[c.gi[k]] : null; }
+  /* which words are the given names and which the surname: a comma puts the surname first; a trailing run (up to three words) the surname catalogue holds is the
+     surname; otherwise the last word is. The Names page lets the reader overrule the guess, and this card opens that page on the same text. */
+  function ncParse(c, t) {
+    var cl = function (x) { return x.replace(/[.;:]+$/g, "").trim(); };
+    if (t.indexOf(",") > -1) { var pr = t.split(","); return { sur: cl(pr[0]), given: pr.slice(1).join(" ").split(/\s+/).map(cl).filter(Boolean) }; }
+    var tk = t.split(/\s+/).map(cl).filter(Boolean), n = tk.length; if (n < 2) return null;
+    for (var k = Math.min(3, n - 1); k >= 1; k--) { var tail = tk.slice(n - k).join(" "); if (c.f && ncSur(c, tail)) return { sur: tail, given: tk.slice(0, n - k) }; }
+    return { sur: tk[n - 1], given: tk.slice(0, n - 1) };
+  }
+  var NC_ST = { same: "the same family", attested: "met on this family's records", rule: "by a spelling rule", lead: "a lead: plausible, never seen on a record", "case-by-case": "sometimes this family, sometimes another" };
+  async function nameCardFor(term) {
+    var t = yearsIn(term).text; if (!t || t.split(/[\s,]+/).filter(Boolean).length < 2) return "";
+    var c = await nameCatalogues(); if (!c) return "";
+    var P = ncParse(c, t); if (!P) return "";
+    var gp = [], found = 0, h = [];
+    P.given.forEach(function (w) {
+      var r = c.g ? ncGiven(c, w) : null;
+      if (!r) { gp.push('<div class="ra-nc-u"><h4>' + esc(w) + '<span>' + T("Given name") + '</span></h4><p class="ra-nc-n">' + T("Not in the given-name catalogue. That is not a finding about the name.") + "</p></div>"); return; }
+      found++;
+      var seen = {}, nf = 0, nl = 0, sample = [], typedIn = "";
+      Object.keys(r.langs || {}).forEach(function (L) {
+        var fs = r.langs[L] || [], any = false;
+        fs.forEach(function (x) { var k = ncFold(x.form); if (!seen[k]) { seen[k] = 1; nf++; } any = true; if (ncFold(x.form) === ncFold(w) && !typedIn) typedIn = L; });
+        if (any) nl++;
+      });
+      ["latin", "italian", "venetian", "croatian", "german", "hungarian", "english"].forEach(function (L) {
+        var fs = (r.langs || {})[L]; if (!fs || !fs.length) return;
+        var own = fs.filter(function (x) { return !x.shared; }), f1 = own.filter(function (x) { return x.seen > 0; })[0] || own[0] || fs[0];
+        var lab = ((c.g.languages || []).filter(function (l) { return l.key === L; })[0] || { label: L }).label;
+        sample.push("<span><b>" + esc(lab) + "</b> " + esc(f1.form) + "</span>");
+      });
+      var same = ncFold(r.canon) === ncFold(w);
+      gp.push('<div class="ra-nc-u"><h4>' + esc(w) + '<span>' + T("Given name") + '</span></h4><p class="ra-nc-n">' + esc(cap1(w)) + (same ? " is the name " : " is a form of the name ") + "<b>" + esc(r.canon) + "</b>. " +
+        T("One name, catalogued in") + " " + nl + " " + T("languages") + ", " + nf + " " + T("forms") + ", " + r.attested + " " + T("met on a record in these archives") + ".</p>" +
+        (sample.length ? '<p class="ra-nc-f">' + sample.join("") + "</p>" : "") +
+        '<p class="ra-nc-n"><a href="' + esc(BASE + "name/" + r.id + "/") + '">' + T("The page for") + " " + esc(r.canon) + "</a></p></div>");
+    });
+    var sp = "", sh = c.f ? ncSur(c, P.sur) : null;
+    if (sh) {
+      found++;
+      var fam = c.f.rows[sh.ids[0]], st = "", same = [], att = 0, typed = ncKey(P.sur);
+      fam.forms.forEach(function (fm) {
+        if (ncKey(fm[0]) === typed || (sh.loosely && ncLoose(fm[0]) === ncLoose(P.sur))) st = st || fm[1];
+        if (fm[1] === "same") same.push(fm[0]); else if (fm[1] === "attested") att++;
+      });
+      sp = '<div class="ra-nc-u"><h4>' + esc(P.sur) + '<span>' + T("Surname") + '</span></h4><p class="ra-nc-n">' + esc(cap1(P.sur)) +
+        (sh.loosely ? " " + T("is spelt like") : " " + T("is written in")) + " " + T("the") + " <b>" + esc(fam.name) + "</b> " + T("family") + (st && NC_ST[st] ? " (" + esc(T(NC_ST[st])) + ")" : "") + ".</p>" +
+        (same.length ? '<p class="ra-nc-f">' + same.slice(0, 8).map(function (x) { return "<span>" + esc(x) + "</span>"; }).join("") + "</p>" : "") +
+        '<p class="ra-nc-n">' + (att ? att + " " + T("more spellings met on this line's records") + ". " : "") + '<a href="' + esc(BASE + "surname-families/#" + fam.id) + '">' + T("Every spelling, with its evidence") + "</a></p></div>";
+    }
+    if (!found) return "";
+    var href = BASE + "your-name/?q=" + encodeURIComponent(t).replace(/%20/g, "+");
+    h.push('<div class="ra-nc"><p class="ra-nc-k">' + T("This looks like a name") + "</p>" + gp.join("") + sp +
+           '<p class="ra-nc-o"><a href="' + esc(href) + '">' + T("Open the full page for") + " " + esc(t) + " →</a></p></div>");
+    return h.join("");
+  }
+  function cap1(x) { return x ? x.charAt(0).toUpperCase() + x.slice(1) : x; }
   async function elsewhere(term, exact) {
     bothFor = null;
     var mine = ++searchTok;
@@ -7817,7 +7902,10 @@ window.addEventListener("load", async function () {
        listing two of them, which reads as the page contradicting itself. The
        shelf and the gazetteer answer different questions — does this map hold
        volumes here, and does this place exist — and only the first is «no». */
-    h.push(hits.length
+    var ncard = (!hits.length && !(names && names.length)) ? await nameCardFor(term) : "";
+    if (stale()) return;
+    if (ncard) { h.push(ncard); h.push('<p class="at-sub">' + esc(T("No place on the map is called that.")) + "</p>"); }
+    else h.push(hits.length
       ? '<p class="at-what"><b>The place is here. The volumes are not.</b> ' +
         "This map knows where it is and has nothing anybody has walked for it " +
         "— the shelf stands in 95 countries and only 46 of them have a place " +
@@ -7840,7 +7928,7 @@ window.addEventListener("load", async function () {
       h.push("</div>");
       h.push('<p class="at-sub">Switch on <b>The archives</b> above to see the ones that have ' +
              "a building.</p>");
-    } else {
+    } else if (!ncard) {
       h.push('<p class="at-sub">Nothing in this map reaches it either — which is exactly the ' +
              "kind of gap worth telling us about.</p>");
     }
@@ -7897,6 +7985,12 @@ window.addEventListener("load", async function () {
 
      The gazetteer is a fetch, so it arrives the same way surnames already do:
      the list paints on drawn places first and grows when the shard lands. */
+  /* «Senj (Senj)» is the shelf's own «settlement (district)» label; when the
+     bracket only repeats the name it says nothing, so it is not shown. */
+  function sugName(n) {
+    var m = /^(.*?)\s*\(([^)]*)\)\s*$/.exec(String(n));
+    return m && m[1] && fold(m[1]) === fold(m[2]) ? m[1] : String(n);
+  }
   function sugRender(places, names, gaz) {
     sugRows = [];
     var h = [];
@@ -7906,7 +8000,7 @@ window.addEventListener("load", async function () {
         var i = sugRows.length; sugRows.push({ kind: "place", p: p });
         h.push('<button type="button" role="option" aria-selected="false" ' +
                'class="ra-sug-r" data-i="' + i + '">' +
-               '<span class="ra-sug-n">' + esc(p.n) + "</span>" +
+               '<span class="ra-sug-n">' + esc(sugName(p.n)) + "</span>" +
                (p.cc ? '<span class="ra-sug-m">' + esc(CNAME[p.cc] || p.cc) + "</span>" : "") +
                (p.c ? '<span class="ra-sug-c">' + p.c + " " +
                       esc(T(p.c === 1 ? "volume" : "volumes")) + "</span>" : "") +
@@ -7925,7 +8019,7 @@ window.addEventListener("load", async function () {
              (g[3] ? '<span class="ra-sug-m">' + esc(CNAME[g[3]] || g[3]) +
                      "</span>" : "") +
              '<span class="ra-sug-c">' + (g[6] === "isl" ? "island · " : "") +
-             "no volumes here</span></button>");
+             "no registers held</span></button>");
     });
     if (names && names.length) {
       h.push('<p class="ra-sug-h">' + esc(T("Names")) + "</p>");
@@ -11187,6 +11281,22 @@ window.addEventListener("load", async function () {
   .at-hint { color: var(--ink-3) !important; font-size: 12px !important; }
   :global(.at-h) { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
   :global(.at-also) { font: 400 11.5px/1.5 var(--mono); color: var(--ink-3); margin: 8px 0 0; }
+  /* the card for a whole name typed in the box: what the two name catalogues hold, and the way to the Names page */
+  :global(.ra-nc) { margin: 10px 0 8px; }
+  :global(.ra-nc-k) { margin: 0 0 6px; font: 700 11px/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
+  :global(.ra-nc-u) { padding: 9px 0; border-top: 1px solid var(--rule); }
+  :global(.ra-nc-u h4) { margin: 0 0 3px; display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline; font: 500 18px/1.25 var(--serif); }
+  :global(.ra-nc-u h4 span) { font: 700 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+  :global(.ra-nc-n) { margin: 3px 0 0; font: 400 13px/1.45 var(--sans); color: var(--ink-2); }
+  :global(.ra-nc-n b) { color: var(--ink); font-weight: 600; }
+  :global(.ra-nc-n a) { color: var(--accent); text-decoration: none; }
+  :global(.ra-nc-n a:hover) { text-decoration: underline; }
+  :global(.ra-nc-f) { margin: 5px 0 0; display: flex; flex-wrap: wrap; gap: 4px 6px; font: 400 12.5px/1.4 var(--sans); }
+  :global(.ra-nc-f span) { padding: 1px 9px; border: 1px solid var(--rule); border-radius: 999px; background: var(--panel); color: var(--ink-2); }
+  :global(.ra-nc-f span b) { font: 700 10px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); margin-right: 5px; }
+  :global(.ra-nc-o) { margin: 8px 0 0; padding-top: 10px; border-top: 1px solid var(--rule); font: 600 13px/1.4 var(--sans); }
+  :global(.ra-nc-o a) { display: inline-block; padding: 8px 14px; border-radius: 99px; background: var(--accent); color: var(--panel); }
+  :global(.ra-nc-o a:hover) { text-decoration: none; filter: brightness(1.12); }
   :global(.ra-juris) { margin-top: 16px; padding: 12px 14px; border-radius: 3px;
                        background: var(--accent-wash); border-left: 2px solid var(--accent); }
   :global(.at-go) { margin: 14px 0 0; font-size: 13px; }
@@ -11299,10 +11409,10 @@ window.addEventListener("load", async function () {
     font-size: 10.5px; color: var(--ink-3); white-space: nowrap; }
   /* A GAZETTEER ROW IS A REAL ANSWER AND A LESSER ONE. It is the name you
      typed and a place that exists; it is not somewhere this atlas has walked
-     a register. Marked by a rule rather than by dimming — opacity would take
-     the contrast down with it, which this project has already paid for once
-     — so it reads as a second rank without becoming hard to read. */
-  :global(.ra-sug-g) { border-left: 2px solid var(--rule-strong); }
+     a register. Marked by a lighter weight and its own label, with no side
+     rule (it read as a stray bracket) and no opacity (that takes the
+     contrast down with it). */
+  :global(.ra-sug-g .ra-sug-n) { font-weight: 400; color: var(--ink-2); }
 
   .ra-recent { position: absolute; top: calc(100% + 6px); left: 0; right: 0;
                z-index: 40; display: flex; align-items: center; gap: 6px;

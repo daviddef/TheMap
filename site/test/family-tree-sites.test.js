@@ -66,3 +66,11 @@ test("a given name typed with a surname answers with the surname's placement, un
   assert.match(map, /if \(tailName\) \{ var tcard = await nameCardFor\(term\)/);
   assert.match(map, /var nrow = names\.length && !tailName \? names\[0\] : null;/);
 });
+
+test("the search box offers sources, by name first and then by what they say they are, and a pick opens the source", () => {
+  assert.match(map, /function sugSources\(f\)/);
+  assert.match(map, /wordHit\(fold\(p\.what \|\| ""\), f\)/);
+  assert.match(map, /sugRows\.push\(\{ kind: "source", p: p \}\)/);
+  assert.match(map, /if \(row\.kind === "source"\)/);
+  assert.match(map, /function openSource\(p\)/);
+});

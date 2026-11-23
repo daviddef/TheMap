@@ -8042,8 +8042,51 @@ window.addEventListener("load", async function () {
      containing it. Within a tier, the place with more volumes first — that is
      the one most likely to be meant, and it is the only signal here that is
      not about spelling. */
-  var SUG_PLACES = 7, SUG_NAMES = 3, SUG_GAZ = 4;
+  var SUG_PLACES = 7, SUG_NAMES = 3, SUG_GAZ = 4, SUG_SRC = 4;
   var sugBox, sugRows = [], sugIdx = -1, sugTerm = "";
+
+  /* SOURCES ARE SEARCHABLE FROM THE ONE BOX. David: «if i search e.g. geni, looking for a source, it doesnt find it. could sources also be included in the unified
+     search? including their "what it is" metadata used in the find?» The box offered places and names only; a source (Geni, MyHeritage, an archive) was reachable
+     by the sources page or by guessing a country. Matched on the source's own name first (the whole name, then a word of it), then on a word of what it says it is;
+     the family-tree sites come first within a tier, because they are the ones people look for by name. */
+  function sugSources(f) {
+    if (!provs || !provs.providers) return [];
+    var out = [];
+    provs.providers.forEach(function (p) {
+      var n = fold(p.name || ""), tier = null;
+      if (n === f) tier = 0;
+      else if (n.indexOf(f) === 0) tier = 1;
+      else if (wordHit(n, f)) tier = 2;
+      else if (f.length >= 4 && wordHit(fold(p.what || ""), f)) tier = 3;
+      if (tier !== null) out.push([tier, p.family_tree || 99, n, p]);
+    });
+    out.sort(function (a, b) { return a[0] - b[0] || a[1] - b[1] || (a[2] < b[2] ? -1 : a[2] > b[2] ? 1 : 0); });
+    return out.slice(0, SUG_SRC).map(function (x) { return x[3]; });
+  }
+  function srcReach(p) {
+    var c = p.countries || [];
+    if (!c.length || c.indexOf("*") > -1) return T("worldwide");
+    return c.length > 3 ? c.length + " " + T("countries") : c.map(function (k) { return CNAME[k] || k; }).join(", ");
+  }
+  /* A source picked from the box: what it is, who it reaches, what it costs to look, and the way in. The map shows the countries it reaches when they are few. */
+  function openSource(p) {
+    bothFor = null; var mine = ++searchTok;
+    retireVisit();
+    if (Q.get("at")) { setQ("at", ""); if (window.raShelfForget) window.raShelfForget(); }
+    if (gmark) { map.removeLayer(gmark); gmark = null; }
+    ctryLayer.clearLayers(); communeLayer.clearLayers(); litCC = null;
+    empty.hidden = true; panel.hidden = false;
+    var h = ['<div class="at-h"><h3>' + esc(p.name) + '</h3><span class="at-n">' + esc(String(p.kind || "source").replace(/-/g, " ")) + "</span></div>"];
+    if (p.what) h.push('<p class="at-what">' + esc(p.what) + "</p>");
+    h.push('<div class="at-sec at-sec-wide"><div class="lab">' + esc(T("Where it reaches")) + '</div><p class="at-sub">' + esc(srcReach(p)) + "</p></div>");
+    h.push('<ul class="at-films"><li><a href="' + esc(p.url) + '" target="_blank" rel="noopener">' + esc(T("Open the site")) + " &#8599;</a> " +
+           '<span class="ra-who">' + accTxt(p.access) + "</span> " + mailIcon(p.em, p.name) + "</li></ul>");
+    h.push('<p class="at-sub"><a href="' + esc(BASE + "providers/?q=" + encodeURIComponent(p.name)) + '">' + esc(T("See it on the sources page")) + " &rarr;</a></p>");
+    panel.innerHTML = h.join("");
+    var cc = (p.countries || []).filter(function (k) { return k !== "*"; });
+    if (cc.length && cc.length <= 8 && p.countries.indexOf("*") < 0)
+      showCountries(cc.map(function (k) { return { cc: k, how: "register" }; }), function () { return mine !== searchTok; });
+  }
   var sugNames = null, sugGaz = null;
 
   function sugPlaces(f) {
@@ -8081,7 +8124,7 @@ window.addEventListener("load", async function () {
     var m = /^(.*?)\s*\(([^)]*)\)\s*$/.exec(String(n));
     return m && m[1] && fold(m[1]) === fold(m[2]) ? m[1] : String(n);
   }
-  function sugRender(places, names, gaz) {
+  function sugRender(places, names, gaz, srcs) {
     sugRows = [];
     var h = [];
     if (places.length || (gaz && gaz.length)) {
@@ -8111,6 +8154,16 @@ window.addEventListener("load", async function () {
              '<span class="ra-sug-c">' + (g[6] === "isl" ? "island · " : "") +
              "no registers held</span></button>");
     });
+    if (srcs && srcs.length) {
+      h.push('<p class="ra-sug-h">' + esc(T("Sources")) + "</p>");
+      srcs.forEach(function (p) {
+        var i = sugRows.length; sugRows.push({ kind: "source", p: p });
+        h.push('<button type="button" role="option" aria-selected="false" class="ra-sug-r" data-i="' + i + '">' +
+               '<span class="ra-sug-n">' + esc(p.name) + "</span>" +
+               '<span class="ra-sug-m">' + esc(String(p.kind || "source").replace(/-/g, " ")) + "</span>" +
+               '<span class="ra-sug-c">' + esc(srcReach(p)) + "</span></button>");
+      });
+    }
     if (names && names.length) {
       h.push('<p class="ra-sug-h">' + esc(T("Names")) + "</p>");
       names.forEach(function (r) {
@@ -8171,6 +8224,13 @@ window.addEventListener("load", async function () {
       apply();
       return;
     }
+    if (row.kind === "source") {
+      qbox.value = row.p.name;
+      setQ("q", row.p.name);
+      clearTimeout(qbox._t);
+      openSource(row.p);
+      return;
+    }
     if (row.kind === "place") {
       var p = row.p;
       /* The box keeps the name that was chosen, not the fragment typed — but
@@ -8193,7 +8253,8 @@ window.addEventListener("load", async function () {
     if (f.length < 2 || !idx.places) { sugHide(); return; }
     sugNames = null; sugGaz = null;
     var places = sugPlaces(f);
-    sugRender(places, null, null);
+    var srcs = sugSources(f);
+    sugRender(places, null, null, srcs);
     /* DEDUPED AGAINST WHAT IS ALREADY ON THE LIST, by name and country. Many
        gazetteer rows ARE drawn places; offering «Senj» twice, once with its
        volumes and once saying it has none, would be the panel arguing with
@@ -8214,7 +8275,7 @@ window.addEventListener("load", async function () {
         gazSeen[k] = 1;
         return true;
       }).slice(0, SUG_GAZ);
-      if (gkeep.length) { sugGaz = gkeep; sugRender(places, sugNames, gkeep); }
+      if (gkeep.length) { sugGaz = gkeep; sugRender(places, sugNames, gkeep, srcs); }
     }).catch(function () {});
     /* The surname shard is a fetch, so the list appears on places first and
        grows a «Names» section when it lands — rather than the whole dropdown
@@ -8235,7 +8296,7 @@ window.addEventListener("load", async function () {
          names wiping out the gazetteer or the other way about, depending on
          which file was quicker. */
       sugNames = keep;
-      if (keep.length) sugRender(places, keep, sugGaz);
+      if (keep.length) sugRender(places, keep, sugGaz, srcs);
     }).catch(function () {});
   }
 

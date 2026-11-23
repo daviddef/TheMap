@@ -2011,9 +2011,19 @@
           var ul = el("ul", null, "lf-eras"), now = new Date().getFullYear();
           eras.forEach(function (e) {
             var li = el("li", null, years.some(function (y) { return y >= e.from && y < e.to; }) ? "on" : ""), fl = flagFor(info, e.from);
-            if (fl) { var im = el("img", null, "lf-flag"); im.src = base + "fl/" + encodeURIComponent(fl) + ".svg"; im.alt = ""; im.title = "From the flag history of today's " + info.countryName + " in " + e.from; li.append(im); }
+            /* the flag and the name of the era go to that era on the country's flag page (its entries are anchored by the year their flag begins); the years open the History theatre at that year */
+            var fr = info.flagRows ? info.flagRows.filter(function (r) { return e.from >= r[0] && (r[1] == null || e.from < r[1]); }).sort(function (a, b) { return b[0] - a[0]; })[0] : null;
+            var fhref = info.flagSlug ? base + "flags/" + info.flagSlug + "/" + (fr ? "#era-" + fr[0] : "") : "";
+            if (fl) {
+              var im = el("img", null, "lf-flag"); im.src = base + "fl/" + encodeURIComponent(fl) + ".svg"; im.alt = ""; im.title = "From the flag history of today's " + info.countryName + " in " + e.from;
+              if (fhref) { var fa = el("a", null, "lf-flag-link"); fa.href = fhref; fa.title = "This flag, and who held the ground under it, on the flags page of " + info.countryName; fa.setAttribute("aria-label", "The flag of " + e.polity + " on the flags page"); fa.append(im); li.append(fa); }
+              else li.append(im);
+            }
             var rg = info.regimes && info.regimes[e.regime];
-            li.append(el("b", e.from + "\u2013" + (e.to >= now ? "now" : e.to) + " "), document.createTextNode(e.polity + (rg && rg.label && rg.label !== e.polity ? " (" + rg.label + ")" : "")));
+            var yb = el("b", null), ya = el("a", e.from + "\u2013" + (e.to >= now ? "now" : e.to)); ya.href = base + "history/?y=" + e.from; ya.title = "See what was happening in " + e.from + ", in the History theatre"; yb.append(ya, " ");
+            var pn = e.polity + (rg && rg.label && rg.label !== e.polity ? " (" + rg.label + ")" : "");
+            li.append(yb);
+            if (fhref) { var pa = el("a", pn, "lf-era-link"); pa.href = fhref; pa.title = "More about this era and its flag, on the flags page of " + info.countryName; li.append(pa); } else li.append(document.createTextNode(pn));
             ul.append(li);
           });
           wrap.append(ul);

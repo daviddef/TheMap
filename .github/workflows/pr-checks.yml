@@ -1,0 +1,26 @@
+name: Pull request checks
+
+# What a pull request can be checked for without the built data or a build. The data checks in scripts/check-data.py run only after a push to
+# main (they need the harvest), so a hand-written file such as the What's new list could be merged broken and stop the deploy. Each test here
+# reads only its own file and takes seconds.
+on:
+  pull_request:
+    paths:
+      - "site/src/data/whats-new.json"
+      - "site/test/whats-new.test.js"
+      - "site/src/pages/**"
+      - ".github/workflows/pr-checks.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  whats-new:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: What's new list (headline length, dates, links, duplicate keys)
+        run: node --test --test-reporter=spec test/whats-new.test.js
+        working-directory: site

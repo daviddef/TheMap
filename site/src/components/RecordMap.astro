@@ -4135,8 +4135,12 @@ window.addEventListener("load", async function () {
       var disc2 = num != null ? '<span class="ra-ck-i" title="' + esc(dot && note ? note : T("Show on the map")) + '"' + (dot ? ' style="background:' + dot + ";color:" + inkOn(dot) + '"' : "") + ">" + num + "</span>" : "";
       return '<li class="ra-vrow"' + at + ">" + disc2 +
         '<span class="ra-vt" title="' + esc(name) + '">' + (href ? '<a href="' + esc(href) + '" target="_blank" rel="noopener">' + esc(name) + "</a>" : esc(name)) +
-        (note && !dot ? ' <small class="ra-vn">' + esc(note) + "</small>" : "") + "</span>" +
-        '<span class="ra-vy">' + (km != null ? (Math.round(km * 10) / 10) + " km" : "") + "</span></li>";
+        (note && !dot ? (mark && /^place:/.test(mark.id)
+          /* a village folds out to its books and catalogues, shut until asked */
+          ? ' <button type="button" class="ra-vn ra-vexp" data-vplace="' + esc(mark.id.slice(6)) + '" aria-expanded="' + (!!VEXP[mark.id.slice(6)]) + '" title="' + esc(T("Show the books and catalogues for") + " " + name) + '">' + esc(note) + '<svg viewBox="0 0 10 10" width="8" height="8" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
+          : ' <small class="ra-vn">' + esc(note) + "</small>") : "") + "</span>" +
+        '<span class="ra-vy">' + (km != null ? (Math.round(km * 10) / 10) + " km" : "") + "</span>" +
+        (mark && /^place:/.test(mark.id) && note && !dot ? '<div class="ra-vbk" data-vbk="' + esc(mark.id.slice(6)) + '"' + (VEXP[mark.id.slice(6)] ? "" : " hidden") + "></div>" : "") + "</li>";
     }
     /* A ROW IS A NUMBER, A NAME AND A LINE OF PLAIN WORDS. David: «can we neaten the right pane? ... item 3
        and 5 wrap completely wrong, and feel could be a bit more "exciting"». The row was a wrapping flex
@@ -4350,7 +4354,9 @@ window.addEventListener("load", async function () {
         out.push('<details class="ra-check-b ra-in-card ra-visit"' + (visitOpen[gi] ? " open" : "") + '><summary class="lab"><span' + (ld && vill ? ' class="ra-sum-ld"' : "") + ">" + m[1] + "</span><b>" + n + "</b></summary>" +
                  m[2].replace(/<ul>/g, '<ul class="ra-vl">') + "</details>");
       });
+      var afterIns = function () { Object.keys(VEXP).forEach(function (id) { if (VEXP[id]) vbkFill(id); }); };
       if (mount) mount.insertAdjacentHTML("afterend", (bad ? '<p class="at-sub ra-visit-bad">' + esc(bad) + "</p>" : "") + out.join(""));
+      afterIns();
       drawCheckPins();
       return;
     }
@@ -8724,9 +8730,9 @@ window.addEventListener("load", async function () {
     areaFillVolumes();
   }
   /* a place's books, with its catalogue entries beside them once each (a book is the same book by waypoint, link or title) */
-  function areaPlaceVols(d) {
+  function areaPlaceVols(d, merge) {
     var vs = (d.volumes || []).slice();
-    if (!(AREA.ov && AREA.ov.place)) return vs;
+    if (!merge && !(AREA.ov && AREA.ov.place)) return vs;
     /* the same book is found by its waypoint (its own, or read out of the link's wc=), else by title and years */
     var keys = function (v) {
       var wc = ((v.url || "").match(/[?&]wc=([^:&%]+)/) || [])[1], k = [];
@@ -8827,6 +8833,26 @@ window.addEventListener("load", async function () {
     }).filter(function (c) { return c.list.length; });
   }
   /* The volumes of every place in the area that has any: one file per place, six at a time, up to AREA_CAP places. */
+  /* A VILLAGE'S BOOKS, ON REQUEST. The Visiting list's villages fold out to «the books and catalogues for» that village, the rows the primary place shows,
+     fetched when first opened and kept while the walk changes. */
+  var VEXP = {};
+  function vbkFill(id) {
+    var box = panel.querySelector('.ra-vbk[data-vbk="' + id + '"]'); if (!box || box.getAttribute("data-done")) return;
+    box.setAttribute("data-done", "1");
+    box.innerHTML = '<p class="at-sub">' + esc(T("Reading the books…")) + "</p>";
+    (cache[id] ? Promise.resolve(cache[id]) : fetch(DETAIL + id + ".json").then(function (r) { return r.json(); })).then(function (d) {
+      cache[id] = d;
+      var vs = areaPlaceVols(d, true);
+      box.innerHTML = vs.length ? '<ul class="ra-vl">' + areaVolRows({ i: id, n: d.name, cc: d.country }, vs) + "</ul>" : '<p class="at-sub">' + esc(T("No volumes recorded here yet.")) + "</p>";
+    }).catch(function () { box.removeAttribute("data-done"); box.innerHTML = '<p class="at-sub">' + esc(T("Could not load this place.")) + "</p>"; });
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest(".ra-vexp"); if (!b) return;
+    e.preventDefault();
+    var id = b.getAttribute("data-vplace"), box = panel.querySelector('.ra-vbk[data-vbk="' + id + '"]'); if (!box) return;
+    var open = box.hidden; box.hidden = !open; VEXP[id] = open; b.setAttribute("aria-expanded", String(open));
+    if (open) vbkFill(id);
+  });
   function areaLoadVolumes() {
     var R = AR(); if (!R || R.loading) return;
     R.loading = true; R.vols = {};
@@ -8854,22 +8880,27 @@ window.addEventListener("load", async function () {
   function areaVolId(v) { return "volume:" + (v.waypoint || v.url || v.t); }
   var AREA_KIND = [/birth|baptis|christen|nati|rođen|rodjen/i, /marri|wedding|vjen|matrim/i, /death|burial|buried|umrl|mort|sepolt/i];
   function areaKindRank(t) { for (var i = 0; i < AREA_KIND.length; i++) if (AREA_KIND[i].test(t)) return i; return 3; }
+  /* ONE BOOK ROW, for the area lists and for the villages that fold out under a place card */
+  function areaVolRows(p, vs) {
+    vs = vs.slice();
+    vs.sort(function (a, b) { return areaKindRank(a.t) - areaKindRank(b.t) || (a.from || 9999) - (b.from || 9999) || a.t.localeCompare(b.t); });
+    var where = p.n + (p.cc ? ", " + (CNAME[p.cc] || p.cc) : "");
+    return vs.map(function (v) {
+      var vid = areaVolId(v), st = volStatus(vid);
+      return '<li data-vol="' + esc(vid) + '" data-vol-t="' + esc(v.t) + '" data-vol-where="' + esc(where) + '" data-vol-href="' + esc(BASE + "place/" + p.i + '/') + '">' +
+             '<i' + (st === "busy" ? ' class="pz"' : "") + ' style="background:' + RC_COL[st] + '"></i>' +
+             '<span class="ra-vt" title="' + esc(v.t + (v.src ? " \u2014 " + v.src : "")) + '">' + (v.url ? '<a href="' + esc(v.url) + '" target="_blank" rel="noopener">' + esc(v.t) + "</a>" : esc(v.t)) + "</span>" +
+             '<span class="ra-vy">' + (v.from ? v.from + "\u2013" + v.to : "") + "</span>" +
+             '<span class="volmark"></span></li>';
+    }).join("");
+  }
   function areaFillVolumes() {
     var R = AR(); if (!R || !R.vols) return;
     var ids = Object.keys(R.vols), openAll = ids.length <= 8;
     ids.forEach(function (id) {
       var box = panel.querySelector('[data-vols="' + id + '"]'); if (!box) return;
       var e = R.vols[id], vs = e.vols.slice(); if (!vs.length) { box.classList.add("ra-area-nolist"); return; }
-      vs.sort(function (a, b) { return areaKindRank(a.t) - areaKindRank(b.t) || (a.from || 9999) - (b.from || 9999) || a.t.localeCompare(b.t); });
-      var where = e.p.n + (e.p.cc ? ", " + (CNAME[e.p.cc] || e.p.cc) : "");
-      var li = vs.map(function (v) {
-        var vid = areaVolId(v), st = volStatus(vid);
-        return '<li data-vol="' + esc(vid) + '" data-vol-t="' + esc(v.t) + '" data-vol-where="' + esc(where) + '" data-vol-href="' + esc(BASE + "place/" + e.p.i + '/') + '">' +
-               '<i' + (st === "busy" ? ' class="pz"' : "") + ' style="background:' + RC_COL[st] + '"></i>' +
-               '<span class="ra-vt" title="' + esc(v.t + (v.src ? " \u2014 " + v.src : "")) + '">' + (v.url ? '<a href="' + esc(v.url) + '" target="_blank" rel="noopener">' + esc(v.t) + "</a>" : esc(v.t)) + "</span>" +
-               '<span class="ra-vy">' + (v.from ? v.from + "\u2013" + v.to : "") + "</span>" +
-               '<span class="volmark"></span></li>';
-      }).join("");
+      var li = areaVolRows(e.p, vs);
       box.querySelector(".ra-vl").innerHTML = li;
       box.querySelector(".ra-area-n").textContent = vs.length + " book" + (vs.length === 1 ? "" : "s");
       if (openAll || rcState(e.p) !== "none") box.open = true;

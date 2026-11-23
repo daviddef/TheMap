@@ -546,3 +546,13 @@ body.fd2-immersive .fd2-stage::after { border-radius: 0; }
 .fd2-stage .ra-vl > li > i, .fd2-stage .ra-area-g > ul > li[data-src] > .ra-area-p > i { margin: 0 5px; }   /* the dot sits in an 18px slot, the width of a number, so every name starts on one line */
 .fd2-stage .ra-area-g > ul > li[data-src] > .srcmark { margin-right: 10px; }
 .fd2-stage .ra-vl > li.ra-vrow > .ra-ck-i { margin-right: 0; }
+
+/* a village's «N volumes» is the button that folds out its books and catalogues, shut until asked; they nest under the village, a step in from its + */
+.fd2-stage .ra-vt .ra-vexp { display: inline-flex; align-items: center; gap: 5px; margin-left: 6px; padding: 2px 4px; border: 0; border-radius: 6px; background: none; font: 400 11px/1 var(--sans, system-ui, sans-serif); color: var(--ink-3, #606c72); cursor: pointer; }
+.fd2-stage .ra-vt .ra-vexp:hover, .fd2-stage .ra-vt .ra-vexp:focus-visible { color: var(--accent, #1f5c6b); background: var(--accent-wash, rgba(31, 92, 107, .1)); }
+.fd2-stage .ra-vexp svg { transition: transform .15s; }
+.fd2-stage .ra-vexp[aria-expanded="true"] svg { transform: rotate(180deg); }
+.fd2-stage .ra-vl > li.ra-vrow > .ra-vbk { flex: 1 0 100%; margin: 6px 0 -1px 34px; }
+.fd2-stage .ra-vbk[hidden] { display: none; }
+.fd2-stage .ra-vbk > .ra-vl { margin: 0; border-top: 1px solid var(--rule, #d3d0c7); }
+.fd2-stage .ra-vbk > .at-sub { margin: 4px 0 8px; }

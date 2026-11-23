@@ -67,12 +67,19 @@
   function setStory(v) { text.value = v; text.dispatchEvent(new Event("input", { bubbles: true })); try { text.focus(); } catch (e) { /* fine */ } }
   function loadScript(src) { return new Promise(function (res, rej) { var s = document.createElement("script"); s.src = BASE + "js/" + src; s.onload = res; s.onerror = function () { rej(new Error(src)); }; document.head.appendChild(s); }); }
   function ready() { return window.raStoryRead && window.raStoryRead.call ? Promise.resolve() : loadScript("story-read.js"); }
-  function sync() { go.disabled = busy || !ok.checked || (mode === "post" ? postIn.value.trim().length < 20 : text.value.trim().length < 10); }
+  var why = $("sp-aip-why"), send = $("sp-aip-send"), preview = $("sp-aip-preview");
+  function short(mode2) { return mode2 === "post" ? postIn.value.trim().length < 20 : text.value.trim().length < 10; }
+  function sync() {
+    go.disabled = busy || !ok.checked || short(mode);
+    /* say why the button is off, instead of leaving a grey button */
+    if (why) why.textContent = busy ? "Claude is reading it…" : short(mode) ? (mode === "post" ? "Paste the post first (a few lines at least)." : "Write a little of the story first, then come back.") : !ok.checked ? "Tick the box above to switch this on." : "";
+    if (preview && mode === "tidy") preview.textContent = text.value.trim();
+  }
 
   function open(m) {
     mode = m; panel.hidden = false; out.textContent = ""; say(""); ok.checked = false; lastPost = null;
     panel.setAttribute("data-mode", m);
-    postIn.parentNode.hidden = m !== "post";
+    postIn.parentNode.hidden = m !== "post"; if (send) send.hidden = m !== "tidy";
     if (m === "tidy") {
       title.textContent = "Get the story AI ready";
       note.textContent = "Claude rewrites what is in the story box as short, plain sentences, one fact each, saying who each is about, and adds nothing. You see the old and the new side by side before anything changes.";
@@ -83,7 +90,7 @@
       go.textContent = "Read this post";
       try { postIn.focus(); } catch (e) { /* fine */ }
     }
-    $("sp-aip-consent").textContent = "I am happy for this text to be sent to Claude. It goes through ai.recordatlas.org, which keeps no text and no names, only counts; Claude (Haiku) reads it once to answer. Nothing is sent until I press the button.";
+    $("sp-aip-consent").textContent = "Send this text to Claude (Haiku) once, to be read. It goes through ai.recordatlas.org, which keeps no text and no names, only counts. Nothing is sent until I press the button.";
     sync(); panel.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }
   function close() { panel.hidden = true; mode = null; }

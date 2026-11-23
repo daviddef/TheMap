@@ -386,7 +386,7 @@ test("'my mother Cheryl who's grandfather was from Argentina' does not make the 
   const p = F.parseStory("My dad was born in 1951 and moved from Senj, Croatia to Brisbane and then to Johannesburg. He married my mother Cheryl who's grandfather was from Argentina.", ctx);
   const mother = (p.people || []).filter((x) => x.role === "mother")[0];
   assert.ok(!mother || !mother.place, "the mother has no place from her grandfather's");
-  assert.deepEqual((p.kin || []).filter((x) => /mother/.test(x.label || "")).map((x) => x.stops.length), []);
+  assert.deepEqual((p.kin || []).filter((x) => /^(?:your |his )?mother$/.test(x.label || "")).map((x) => x.stops.length), [], "her own line has no stops; her grandfather's is a line of its own");
   /* and the plain form still reads: she is from there */
   const q = F.parseStory("My dad was born in Senj and moved to Brisbane. He married my mother Cheryl who was from Argentina.", ctx);
   const m2 = (q.people || []).filter((x) => x.role === "mother")[0];
@@ -497,3 +497,24 @@ test("gazWants: a town known only as its county (Peoria County) is asked for in 
   assert.deepEqual(map.peoria.map((r) => r.n + (r.partial ? "*" : "")), ["Peoria", "Peoria", "Peoria County*"]);
 });
 
+
+/* David's own story, typed in lower case: the journey stopped at Botswana and nobody above his parents was drawn. */
+test("a lower-case journey with 'and then' keeps every place, and the parents' parents are drawn by name", () => {
+  const w = { ...ctx, countries: { ...countries, BW: "Botswana" }, map: A.buildMap(rows.concat([P("Gaborone", "BW", 25.9, -24.65)])) };
+  const g = ctx.given; ["Nuno", "Catherine", "Hedviga"].forEach((n) => { w.given = w.given === g ? A.buildGiven(given.concat(["Nuno", "Catherine", "Hedviga"].map((x) => ({ canon: x, id: x.toLowerCase(), langs: { english: [{ form: x, status: "same" }] } })))) : w.given; });
+  const t = "my father ivan was from senj and moved to botswana, then salisbury, rhodesia, and then johannesburg and then brisbane. my mother was cheryl who had an argentinian grandfather. her father was nuno and mother catherine. my fathers father was ivan and his mother was hedviga.";
+  const p = F.parseStory(t, w);
+  const father = (p.kin || []).filter((x) => x.label === "your father")[0];
+  const route = father.stops.map((x) => x.row.n);
+  assert.deepEqual([route[0], route[1], route[route.length - 2], route[route.length - 1]], ["Senj", "Botswana", "Johannesburg", "Brisbane"], "the journey runs to the end");
+  const by = {}; (p.people || []).forEach((x) => { by[x.key] = x.name; });
+  assert.deepEqual([by.FF, by.FM, by.MF, by.MM], ["Ivan", "Hedviga", "Nuno", "Catherine"], "her father is her father, not his");
+  const aj = (p.kin || []).filter((x) => /mother's grandfather/.test(x.label))[0];
+  assert.deepEqual(aj && aj.stops.map((x) => x.row.n), ["Argentina"], "the Argentinian grandfather is a line of his own");
+});
+
+test("a lower-case story still offers a near miss ('brisban'), and a given name is never offered as a place", () => {
+  const p = F.parseStory("my father ivan was from senj and moved to johannesburg and then brisban.", ctx);
+  assert.ok((p.suggest || []).some((x) => x.typed === "brisban" && x.options[0].n === "Brisbane"), "the near miss is offered, not used");
+  assert.ok(!places(p).includes("Brisbane"), "and not used until the reader says so");
+});

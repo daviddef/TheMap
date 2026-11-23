@@ -60,3 +60,16 @@ test("the import walk finds the templates' dependencies and is not in doubt", ()
   assert.ok(Number(out[0]) > 30, "the templates reach their layout, components and libraries");
   assert.equal(out[1], "0", "no import it could not resolve: a doubt would make every source change a full build");
 });
+
+/* The built-output gates must not ask the static-only part (RA_SHARD=none) for the styles of pages it does not build. */
+test("check-built skips styles only the generated pages carry, in the static-only part and nowhere else", () => {
+  const run = (shard) => execFileSync("python3", ["-c", `
+import os, sys, importlib.util
+os.environ["RA_SHARD"] = ${JSON.stringify(shard)}
+spec = importlib.util.spec_from_file_location("cb", "scripts/check-built.py"); cb = importlib.util.module_from_spec(spec); spec.loader.exec_module(cb)
+print("\\n".join(sorted(cb.only_generated_files())))`], { cwd: path.join(here, "..", ".."), encoding: "utf8" }).trim().split("\n").filter(Boolean);
+  const none = run("none");
+  assert.ok(none.includes("site/src/pages/name/[id].astro"), "the name page's own styles are skipped");
+  assert.ok(!none.some((f) => f.endsWith("index.astro")), "a page with no [param] is built in every part, so it stays checked");
+  assert.deepEqual(run("3/16"), [], "a sliced build builds those pages, so nothing is skipped");
+});

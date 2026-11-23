@@ -216,18 +216,6 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
     </div>
   </section>
 
-  <section>
-    <h2 class="yn-h">Where this comes from</h2>
-    <p class="cap">Each meaning is written in our own words from the pages below, and each card says which. Word meanings are facts; the guides
-    themselves are not copied. Where the card gives a warning, it is a point the source makes, not a rule that always holds: registers vary by
-    parish and century, so look at the page in front of you.</p>
-    <ul class="cap">
-      {Object.entries(sources).sort((a, b) => a[1].title.localeCompare(b[1].title, "en")).map(([k, s]) => <li><a href={s.url} rel="noopener">{s.title}</a></li>)}
-    </ul>
-    <p class="cap">Next on the plan: an annotated register page you can point at, a tool that reads a whole line, and a list of the misreadings that cost
-    researchers time. <a href={u("/worklist/")}>The worklist</a> has it.</p>
-  </section>
-
   <ProgressKit />
   <script type="application/json" id="rr-data" set:html={JSON.stringify({ terms, sources: Object.fromEntries(Object.entries(sources).map(([k, s]) => [k, s.title])) })}></script>
   <script is:inline>

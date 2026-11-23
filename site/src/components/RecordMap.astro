@@ -4206,12 +4206,19 @@ window.addEventListener("load", async function () {
      wrote to or read off the institution's own page) and, where there is none, Wikidata's. The icon is a mailto link; the state says how far to trust it. */
   var MAIL_SVG = '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="15" height="11" rx="1.8"/><path d="M3.2 6.2L10 11l6.8-4.8"/></svg>';
   var MAIL_WHY = { answered: "It has answered a letter from our research.", delivered: "A letter was delivered here; no reply is recorded.", listed: "Listed by the institution itself.", unverified: "Found in a third-party listing: confirm it on the institution's own page first.", wikidata: "From the institution's Wikidata entry." };
-  function mailIcon(em, name) {
+  /* The pencil beside the envelope: start a letter to this institution (drafted from a plain template on My research, never sent from here). */
+  var PEN_SVG = '<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.5 3.8l2.7 2.7L7 15.7l-3.6.9.9-3.6z"/><path d="M12 5.3l2.7 2.7"/></svg>';
+  function penIcon(pid, name) {
+    if (!pid) return "";
+    var tip = T("Draft a letter to") + " " + name + ". " + T("It is kept in My research; nothing is sent from the Atlas.");
+    return '<a class="ra-mail ra-pen" href="' + esc(BASE + "my-research/?errand=" + encodeURIComponent(pid) + "#mr-errands") + '" title="' + esc(tip) + '" aria-label="' + esc(tip) + '">' + PEN_SVG + "</a>";
+  }
+  function mailIcon(em, name, pid) {
     if (!em || !em.length) return "";
     var a = em[0], tip = T("Write to") + " " + name + ": " + em.map(function (x) { return x[0] + (x[2] ? " (" + x[2] + ")" : ""); }).join(" \u00b7 ") + ". " + T(MAIL_WHY[a[1]] || "");
-    return '<a class="ra-mail ra-mail-' + esc(a[1]) + '" href="mailto:' + esc(a[0]) + '" title="' + esc(tip) + '" aria-label="' + esc(tip) + '">' + MAIL_SVG + "</a>";
+    return '<a class="ra-mail ra-mail-' + esc(a[1]) + '" href="mailto:' + esc(a[0]) + '" title="' + esc(tip) + '" aria-label="' + esc(tip) + '">' + MAIL_SVG + "</a>" + penIcon(pid, name);
   }
-  function checkRow(href, name, km, note, dot, num, y, x, mark, rcp, em) {
+  function checkRow(href, name, km, note, dot, num, y, x, mark, rcp, em, pid) {
     /* `rcp` is a place whose pin and number take the colour of the research there (Colour places by my research). It colours only; it never
        stands in for `dot`, which also changes how the row's note is written. */
     var rcDot = rcp && RC.on && ((rcp.v || 0) || (rcp.c || 0)) ? RC_COL[rcState(rcp)] : null;
@@ -4235,7 +4242,7 @@ window.addEventListener("load", async function () {
           /* a village folds out to its books and catalogues, shut until asked */
           ? ' <button type="button" class="ra-vn ra-vexp" data-vplace="' + esc(mark.id.slice(6)) + '" aria-expanded="' + (!!VEXP[mark.id.slice(6)]) + '" title="' + esc(T("Show the books and catalogues for") + " " + name) + '">' + esc(note) + '<svg viewBox="0 0 10 10" width="8" height="8" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
           : ' <small class="ra-vn">' + esc(note) + "</small>") : "") + "</span>" +
-        mailIcon(em, name) + '<span class="ra-vy">' + (km != null ? (Math.round(km * 10) / 10) + " km" : "") + "</span>" +
+        mailIcon(em, name, pid) + '<span class="ra-vy">' + (km != null ? (Math.round(km * 10) / 10) + " km" : "") + "</span>" +
         (mark && /^place:/.test(mark.id) && note && !dot ? '<div class="ra-vbk" data-vbk="' + esc(mark.id.slice(6)) + '"' + (VEXP[mark.id.slice(6)] ? "" : " hidden") + "></div>" : "") + "</li>";
     }
     /* A ROW IS A NUMBER, A NAME AND A LINE OF PLAIN WORDS. David: «can we neaten the right pane? ... item 3
@@ -4263,7 +4270,7 @@ window.addEventListener("load", async function () {
                    esc(name) + "</a>" : esc(name)) +
            (km != null ? ' <span class="ra-ck-km">' + (Math.round(km * 10) / 10) +
                          " km</span>" : "") + "</span>" +
-           mailIcon(em, name) + (meta ? '<span class="ra-ck-meta">' + meta + "</span>" : "") + "</li>";
+           mailIcon(em, name, pid) + (meta ? '<span class="ra-ck-meta">' + meta + "</span>" : "") + "</li>";
   }
 
   var checkLayer = L.layerGroup();
@@ -4409,7 +4416,7 @@ window.addEventListener("load", async function () {
                         ACCESS_DOT(x.p.access), count, x.p.at.lat, x.p.at.lon,
                         { id: "source:" + x.p.id, t: x.p.name,
                           where: CNAME[d.country] || d.country || "",
-                          href: BASE + "archive/" + x.p.id + "/" }, null, x.p.em));
+                          href: BASE + "archive/" + x.p.id + "/" }, null, x.p.em, x.p.id));
       });
       archHtml.push("</ul>");
       h = h.concat(archHtml);
@@ -4562,7 +4569,7 @@ window.addEventListener("load", async function () {
         h.push(checkRow(pv.url, pv.name, null,
                         (ACC[pv.access] || [0, pv.access])[1],
                         ACCESS_DOT(pv.access), count,
-                        pv.at ? pv.at.lat : null, pv.at ? pv.at.lon : null, null, null, pv.em));
+                        pv.at ? pv.at.lat : null, pv.at ? pv.at.lon : null, null, null, pv.em, pv.id));
       });
       if (ps.length > 3)
         h.push('<li class="ra-ck-more">' + esc(T("and") + " " +
@@ -12341,7 +12348,7 @@ window.addEventListener("load", async function () {
   :global(.ra-vst[data-st="done"] .bar i) { background: #1E8449; }
   :global(.ra-vst[data-st="busy"] b) { color: #94560A; }
   :global(.ra-vst[data-st="list"] b) { color: #2A5F9E; }
-  :global(.ra-mail) { flex: none; display: inline-flex; align-items: center; margin: 0 8px; color: var(--ink-3); line-height: 0; border-radius: 3px; } :global(.ra-mail:hover), :global(.ra-mail:focus-visible) { color: var(--accent); } :global(.ra-mail-answered) { color: #1E8449; }
+  :global(.ra-mail) { flex: none; display: inline-flex; align-items: center; margin: 0 8px; color: var(--ink-3); line-height: 0; border-radius: 3px; } :global(.ra-mail:hover), :global(.ra-mail:focus-visible) { color: var(--accent); } :global(.ra-pen) { margin-left: -4px; } :global(.ra-mail-answered) { color: #1E8449; }
   :global(.ra-vy) { flex: none; width: 74px; text-align: right; font: 400 11.5px/1 var(--mono); color: var(--ink-3); font-variant-numeric: tabular-nums; }
   :global(.ra-vl .volmark) { flex: none; }
   :global(.ra-vl .volmark:has(.vm-edit)) { flex: 1 0 100%; padding: 6px 0 2px 18px; }

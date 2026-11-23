@@ -2347,11 +2347,20 @@
         var a = el("a", null, "lf-mail lf-mail-" + em[0][1]), tip = "Write to " + p.name + ": " + em.map(function (x) { return x[0] + (x[2] ? " (" + x[2] + ")" : ""); }).join(" \u00b7 ") + ". " + (MAIL_WHY[em[0][1]] || "");
         a.href = "mailto:" + em[0][0]; a.title = tip; a.setAttribute("aria-label", tip); a.append(mailSvg()); return a;
       }
+      /* the pencil beside the envelope: a letter to this institution, drafted on My research from a plain template, kept there, never sent from here */
+      function penLink(p) {
+        if (!p || !p.id || !p.em || !p.em.length) return null;
+        var NS = "http://www.w3.org/2000/svg", v = document.createElementNS(NS, "svg"), a = el("a", null, "lf-mail lf-pen"), tip = "Draft a letter to " + p.name + ". It is kept in My research; nothing is sent from the Atlas.";
+        [["viewBox", "0 0 20 20"], ["width", "15"], ["height", "15"], ["fill", "none"], ["stroke", "currentColor"], ["stroke-width", "1.5"], ["stroke-linecap", "round"], ["stroke-linejoin", "round"], ["aria-hidden", "true"]].forEach(function (x) { v.setAttribute(x[0], x[1]); });
+        ["M13.5 3.8l2.7 2.7L7 15.7l-3.6.9.9-3.6z", "M12 5.3l2.7 2.7"].forEach(function (d) { var pa = document.createElementNS(NS, "path"); pa.setAttribute("d", d); v.append(pa); });
+        a.href = (document.documentElement.getAttribute("data-base") || "/").replace(/\/?$/, "/") + "my-research/?errand=" + encodeURIComponent(p.id) + "#mr-errands";
+        a.title = tip; a.setAttribute("aria-label", tip); a.append(v); return a;
+      }
       function srcLine(p, extra) {
         var li = el("li", null, "lf-src"), a = el("a", p.name); a.href = p.url; a.rel = "noopener"; li.append(a);
         var meta = [String(p.kind || "").replace(/-/g, " "), p.access && p.access !== "unsurveyed" ? p.access : ""].filter(Boolean).join(" \u00b7 ");
         if (extra || meta) li.append(el("span", extra || meta, "lf-filed"));
-        var m = mailLink(p); if (m) li.append(m);
+        var m = mailLink(p); if (m) li.append(m); var pn = penLink(p); if (pn) li.append(pn);
         return li;
       }
       function volumeList(info, kinds, win, cap) {

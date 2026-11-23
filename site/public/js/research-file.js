@@ -16,7 +16,7 @@
    Pure functions at the top (tested in node: test/research-file.test.js); the browser glue is at the bottom. */
 (function (root) {
   "use strict";
-  var KEY_DEC = "ra-fix-decisions-v1", KEY_BACKUP = "ra-backup-v1", KEY_MYA = "ra-areas-v1", KEY_GED = "ra-gedcom-names-v1", KEY_STORIES = "ra-stories-v1", KEY_CANVAS = "ra-canvas-v1", KEY_SETTINGS = "ra-settings-v1";
+  var KEY_DEC = "ra-fix-decisions-v1", KEY_BACKUP = "ra-backup-v1", KEY_MYA = "ra-areas-v1", KEY_GED = "ra-gedcom-names-v1", KEY_STORIES = "ra-stories-v1", KEY_ERRANDS = "ra-errands-v1", KEY_CANVAS = "ra-canvas-v1", KEY_SETTINGS = "ra-settings-v1";
   var DAY = 86400000;
 
   function today(now) { return new Date(now || Date.now()).toISOString().slice(0, 10); }
@@ -37,9 +37,10 @@
     if (v && typeof v === "object") return "{" + Object.keys(v).sort().map(function (k) { return JSON.stringify(k) + ":" + stable(v[k]); }).join(",") + "}";
     return JSON.stringify(v);
   }
-  function sigOf(progress, decisions, stories) {
+  function sigOf(progress, decisions, stories, errands) {
     var o = { l: progress.lines || {}, m: progress.marks || {}, d: decisions || {} };
     if (stories && Object.keys(stories.stories || {}).length) o.s = stories.stories;      // absent when there are none, so a signature made before stories existed still matches
+    if (errands && Object.keys(errands.errands || {}).length) o.e = errands.errands;       // likewise: a signature made before errands existed still matches
     return hash(stable(o));
   }
 
@@ -94,6 +95,9 @@
     /* THE STORIES a reader has told (text only: stories.js says what a story holds), with the removals that stop a merge bringing one back */
     var sty = extras.stories;
     if (sty && (Object.keys(sty.stories || {}).length || Object.keys(sty.gone || {}).length)) out.stories = clone(sty);
+    /* THE ERRANDS (errands.js): letters to where the record is, as text, with the removals that stop a merge bringing one back */
+    var ern = extras.errands;
+    if (ern && (Object.keys(ern.errands || {}).length || Object.keys(ern.gone || {}).length)) out.errands = clone(ern);
     if (extras.gedcoms && extras.gedcoms.length) out.gedcoms = clone(extras.gedcoms.slice(0, GED_MAX));
     /* THE TREE CANVAS'S SAVED WORK (public/tree-canvas/work.js), cleaned and capped. Each record is where a tree came from (a link, a file's name, an archive's
        key) and an arrangement: which people are on the canvas as short hashes of the file's own ids, where each sits, the view and the path. Never the tree. */
@@ -310,7 +314,7 @@
     });
     return { lines: Object.keys(file.lines || {}).length, volumes: marks.length, notes: notes, pages: pages,
              decisions: Object.keys(file.decisions || {}).length, areas: Object.keys(file.areas || {}).length,
-             views: Object.keys(file.views || {}).length, gedcoms: (file.gedcoms || []).length, stories: file.stories ? Object.keys(file.stories.stories || {}).length : 0, sites: file.sites ? Object.keys(file.sites).length : 0, canvases: file.canvas && file.canvas.items ? Object.keys(file.canvas.items).length : 0 };
+             views: Object.keys(file.views || {}).length, gedcoms: (file.gedcoms || []).length, stories: file.stories ? Object.keys(file.stories.stories || {}).length : 0, errands: file.errands ? Object.keys(file.errands.errands || {}).length : 0, sites: file.sites ? Object.keys(file.sites).length : 0, canvases: file.canvas && file.canvas.items ? Object.keys(file.canvas.items).length : 0 };
   }
 
   /* A file from anywhere: an export, a pack, the published sessions file, or what save-browser-storage.js downloaded. */
@@ -324,7 +328,7 @@
     } else if (d && d.decisions) decisions = d.decisions;
     if (!d || !d.marks || typeof d.marks !== "object") throw new Error("not a Record Atlas research file");
     var mya = d.areas || d.views || d.gone ? { v: 1, areas: d.areas || {}, views: d.views || {}, gone: d.gone || {} } : null;
-    return { progress: d, decisions: decisions, mya: mya, gedcoms: Array.isArray(d.gedcoms) ? d.gedcoms : null, stories: d.stories && typeof d.stories === "object" ? d.stories : null, sites: cleanSites(d.sites), settings: cleanSettings(d.settings), canvas: cleanCanvas(d.canvas), kind: d.kind || (d.lines ? "export" : "old export") };
+    return { progress: d, decisions: decisions, mya: mya, gedcoms: Array.isArray(d.gedcoms) ? d.gedcoms : null, stories: d.stories && typeof d.stories === "object" ? d.stories : null, errands: d.errands && typeof d.errands === "object" ? d.errands : null, sites: cleanSites(d.sites), settings: cleanSettings(d.settings), canvas: cleanCanvas(d.canvas), kind: d.kind || (d.lines ? "export" : "old export") };
   }
 
   /* Union of two decision tables: a row decided on either device stays decided; the later date wins a tie. */
@@ -400,7 +404,7 @@
 
   var api = { hash: hash, sigOf: sigOf, buildBackup: buildBackup, buildPack: buildPack, summary: summary, parseAny: parseAny,
               mergeDecisions: mergeDecisions, MAX_DECISIONS: MAX_DECISIONS, capDecisions: capDecisions, capInfo: capInfo, mergeMya: mergeMya, mergeGedcoms: mergeGedcoms, status: status, encodeLink: encodeLink, decodeLink: decodeLink, LINK_MAX: LINK_MAX,
-              KEY_DEC: KEY_DEC, KEY_BACKUP: KEY_BACKUP, KEY_MYA: KEY_MYA, KEY_GED: KEY_GED, KEY_STORIES: KEY_STORIES, KEY_CANVAS: KEY_CANVAS, cleanSites: cleanSites,
+              KEY_DEC: KEY_DEC, KEY_BACKUP: KEY_BACKUP, KEY_MYA: KEY_MYA, KEY_GED: KEY_GED, KEY_STORIES: KEY_STORIES, KEY_ERRANDS: KEY_ERRANDS, KEY_CANVAS: KEY_CANVAS, cleanSites: cleanSites,
               cleanCanvas: cleanCanvas, mergeCanvas: mergeCanvas, capCanvas: capCanvas, CANVAS_TOTAL_CHARS: CANVAS_TOTAL_CHARS,
               KEY_SETTINGS: KEY_SETTINGS, cleanSettings: cleanSettings, settingsToFill: settingsToFill };
 
@@ -423,7 +427,8 @@
     var hasWork_ = function () { return Object.keys(P.all()).length > 0; };
     /* the stories, through the store's own cleaner (stories.js) when this page loads it, else as stored */
     var stories = function () { var d = readJSON(KEY_STORIES); return root.raStories ? root.raStories.clean(d) : d; };
-    api.current = function () { var p = progress(); return { progress: p, decisions: decisions(), sig: sigOf(p, decisions(), stories()) }; };
+    var errands = function () { var d = readJSON(KEY_ERRANDS); return root.raErrands ? root.raErrands.clean(d) : d; };
+    api.current = function () { var p = progress(); return { progress: p, decisions: decisions(), sig: sigOf(p, decisions(), stories(), errands()) }; };
     var own = function () { try { return { first: localStorage.getItem("ra-own-first"), last: localStorage.getItem("ra-own-last") }; } catch (e) { return null; } };
     api.backupStatus = function () { return status(readJSON(KEY_BACKUP), own(), hasWork_()); };
     api.persisted = function () { return navigator.storage && navigator.storage.persisted ? navigator.storage.persisted().catch(function () { return false; }) : Promise.resolve(false); };
@@ -432,7 +437,7 @@
     };
     /* opts.canvas false leaves the Tree Canvas's saved work out (the six-word save retries that way if the server says the copy is too large) */
     api.exportAll = function (opts) {
-      var c = api.current(), file = buildBackup(c.progress, c.decisions, undefined, { mya: readJSON(KEY_MYA), gedcoms: readJSON(KEY_GED), stories: stories(), canvas: opts && opts.canvas === false ? null : readJSON(KEY_CANVAS), sites: { mh: rawGet(KEY_MH), anc: rawGet(KEY_ANC), mhTrees: readJSON(KEY_TREES) }, settings: (function () { var c = chosenSettings(); c.v = 1; return c; })() }), name = "record-atlas-research-" + today() + ".json";
+      var c = api.current(), file = buildBackup(c.progress, c.decisions, undefined, { mya: readJSON(KEY_MYA), gedcoms: readJSON(KEY_GED), stories: stories(), errands: errands(), canvas: opts && opts.canvas === false ? null : readJSON(KEY_CANVAS), sites: { mh: rawGet(KEY_MH), anc: rawGet(KEY_ANC), mhTrees: readJSON(KEY_TREES) }, settings: (function () { var c = chosenSettings(); c.v = 1; return c; })() }), name = "record-atlas-research-" + today() + ".json";
       return { file: file, name: name, text: JSON.stringify(file, null, 1) };
     };
     api.importText = function (text) {
@@ -442,7 +447,7 @@
         cur.rows = mergeDecisions(cur.rows, got.decisions); nd = Object.keys(got.decisions).length;
         try { localStorage.setItem(KEY_DEC, JSON.stringify(cur)); } catch (e) { nd = 0; }
       }
-      var na = 0, ng = 0, ns = 0, nc = 0;
+      var na = 0, ng = 0, ns = 0, nc = 0, ne = 0;
       if (got.canvas && Object.keys(got.canvas.items).length + Object.keys(got.canvas.gone).length) {
         /* the Tree Canvas's saved work: by tree, the later change wins, so another device's newer arrangement arrives and an older one does not replace this one */
         var before = JSON.stringify(readJSON(KEY_CANVAS) || {}), cmg = mergeCanvas(readJSON(KEY_CANVAS), got.canvas);
@@ -455,6 +460,10 @@
         /* merged like the map's saves: add what is new, never drop what is here; cleaned first so a hand-edited file cannot put markup in */
         var Sx = root.raStories;
         if (Sx) { var mrg = Sx.merge(readJSON(KEY_STORIES), got.stories); try { localStorage.setItem(KEY_STORIES, JSON.stringify(mrg)); ns = Object.keys(Sx.clean(got.stories).stories).length; } catch (e) { ns = 0; } }
+      }
+      if (got.errands) {
+        var Ex = root.raErrands;
+        if (Ex) { var emg = Ex.merge(readJSON(KEY_ERRANDS), got.errands); try { localStorage.setItem(KEY_ERRANDS, JSON.stringify(emg)); ne = Object.keys(Ex.clean(got.errands).errands).length; } catch (e) { ne = 0; } }
       }
       if (got.mya) {
         var cm = mergeMya(readJSON(KEY_MYA), got.mya);
@@ -490,7 +499,7 @@
           }
         } catch (e) { nset = 0; /* storage blocked */ }
       }
-      return { marks: n, decisions: nd, areas: na, gedcoms: ng, stories: ns, canvases: nc, settings: nset, kind: got.kind };
+      return { marks: n, decisions: nd, areas: na, gedcoms: ng, stories: ns, errands: ne, canvases: nc, settings: nset, kind: got.kind };
     };
     api.pack = function (opts) { return buildPack(progress(), opts); };
     /* THE NAMES OF THE GEDCOM FILES LAST USED, read from the Roots & Routes page's own browser store (database roots-recent) and kept as a

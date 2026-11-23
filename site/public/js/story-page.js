@@ -174,7 +174,7 @@
     var lb = E.lifeBlock(g.life, g.mort), lbox = $("sp-lifebox"); lbox.textContent = ""; secShow("sp-life", !!lb); if (lb) lbox.append(lb);
     var nb = E.namesBlock(g.names, BASE), nbox = $("sp-namesbox"); nbox.textContent = ""; secShow("sp-names", !!nb);
     if (nb) { nbox.append(nb); [].forEach.call(nb.querySelectorAll("details"), function (d) { d.open = true; }); }
-    var tr = E.treeBlock(g.people, f.rel, { onEdit: editBox, kin: f.kin }), tbox = $("sp-tree"); tbox.textContent = ""; secShow("sp-family", !!tr); if (tr) tbox.append(tr);
+    var tr = E.treeBlock(g.people, f.rel, { onEdit: editBox, kin: f.kin }), ob = E.othersBlock(g.others), tbox = $("sp-tree"); tbox.textContent = ""; secShow("sp-family", !!(tr || ob)); if (tr) tbox.append(tr); if (ob) tbox.append(ob);
     secShow("sp-setting", true);
     secShow("sp-plan", true); drawSteps(g);
     secShow("sp-keep", true); drawKeep(g);

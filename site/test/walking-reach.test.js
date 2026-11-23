@@ -109,8 +109,11 @@ test("villages are listed by walking time, with the time on foot, when a reach i
   assert.match(map, /vs\.sort\(function \(a, b\) \{ return RR \? a\.wt - b\.wt : a\.km - b\.km; \}\)/);
   assert.match(map, /window\.raReach\.hoursText\(x\.wt\)/);
 });
-test("\"Use as my area\" hands the shape to the same area flow a drawn one takes", () => {
-  assert.match(map, /areaFinish\(REACH\.res\.ring\.map\(function \(c\) \{ return L\.latLng\(c\[0\], c\[1\]\); \}\)\)/);
+test("the hours are 1, 2, 4 and 5, with no button to turn the shape into an area: the shelf's On foot scope is the area", () => {
+  assert.match(map, /REACH_HOURS = \[\[1, "1 h"\], \[2, "2 h"\], \[4, "4 h"\], \[5, "5 h"\]\]/);
+  assert.doesNotMatch(map, /Use as my area/);
+  assert.match(map, /segs\.push\(\["walk", "On foot"\]\)/);
+  assert.match(map, /if \(P\.act === "walk"\) \{\s*areaEnsureCells\(L\.polygon\(REACH\.res\.ring\)\.getBounds\(\)\)\.then[\s\S]*?areaOverlay\("Within a "/, "See the list opens it");
 });
 test("clicking a drawn or saved area opens its area screen, and the card unfolds for it", () => {
   assert.match(map, /function areaShow\(\) \{[\s\S]*?areaRender\(\); areaAddUi\(\);[\s\S]*?fd2-folded/);

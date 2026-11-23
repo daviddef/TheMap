@@ -3834,7 +3834,7 @@ window.addEventListener("load", async function () {
      answer and, a moment later, the shape of the ground you could walk in N hours: Tobler's hiking function over an elevation grid
      (js/walking-reach.js), sea impassable, steep ground impassable. It is a reach, not a parish or a jurisdiction: roads, rivers and
      bridges are not in it. If the terrain will not load the circle stays, and the note says so. */
-  var REACH = { h: 3, id: null, d: null, res: null, state: "", tok: 0 }, REACH_HOURS = [[1, "1 h"], [2, "2 h"], [3, "3 h"], [8, "A day"]];
+  var REACH = { h: 2, id: null, d: null, res: null, state: "", tok: 0 }, REACH_HOURS = [[1, "1 h"], [2, "2 h"], [4, "4 h"], [5, "5 h"]];
   try { var rh0 = +localStorage.getItem("ra-reach-h"); if (REACH_HOURS.some(function (o) { return o[0] === rh0; })) REACH.h = rh0; } catch (e) { /* storage blocked */ }
   var reachJs = null;
   function reachOn(d) { return !!(TSV2 && REACH.res && REACH.id === d.id); }
@@ -3870,22 +3870,19 @@ window.addEventListener("load", async function () {
     } else drawHoodCircle(d, hoodKm(d));
     if (hoodOn && !map.hasLayer(hoodLayer)) hoodLayer.addTo(map);
     buildCheck(d, hoodKm(d));
+    if (window.raShelfPing) window.raShelfPing();
   }
   function reachSetHours(h) {
     REACH.h = h;
     try { localStorage.setItem("ra-reach-h", String(h)); } catch (e) { /* storage blocked */ }
     if (REACH.d) { reachFor(REACH.d); buildCheck(REACH.d, hoodKm(REACH.d)); }
   }
-  function reachUse() {
-    if (!REACH.res || !REACH.res.ring.length || typeof areaFinish !== "function") return;
-    areaFinish(REACH.res.ring.map(function (c) { return L.latLng(c[0], c[1]); }));
-  }
   /* the checklist's buttons are rebuilt with every note, so one listener on the document serves them all */
   document.addEventListener("click", function (e) {
-    var b = e.target && e.target.closest && e.target.closest("[data-reach-h],[data-reach-use]");
+    var b = e.target && e.target.closest && e.target.closest("[data-reach-h]");
     if (!b || !TSV2) return;
     e.preventDefault();
-    if (b.hasAttribute("data-reach-use")) reachUse(); else reachSetHours(+b.getAttribute("data-reach-h"));
+    reachSetHours(+b.getAttribute("data-reach-h"));
   });
 
   function hoodKm(d) {
@@ -3939,7 +3936,7 @@ window.addEventListener("load", async function () {
                 T(d.graves.length === 1 ? "burial ground" : "burial grounds"));
     if (!bits.length && !TSV2) return "";
     var lead = R ? T("Within a") + " " + hoursLabel(R.hours) + " " + T("walk") : T("Within") + " " + r + " km";
-    var tail = R ? T("The shape on the map follows the ground: the sea and the steep slopes stop it.") : T("The ring on the map is the ground worth walking in a day.");
+    var tail = R ? T("The shape on the map follows the ground: the sea and the steep slopes stop it. It is also the On foot scope of the shelf.") : T("The ring on the map is the ground worth walking in a day.");
     var ctl = "";
     if (TSV2) {
       var st = REACH.id === d.id ? REACH.state : "";
@@ -3947,18 +3944,17 @@ window.addEventListener("load", async function () {
         REACH_HOURS.map(function (o) {
           return '<button type="button" data-reach-h="' + o[0] + '" aria-pressed="' + (o[0] === REACH.h) + '">' + esc(T(o[1])) + "</button>";
         }).join("") +
-        (R ? '<button type="button" class="ra-reach-use" data-reach-use title="' + esc(T("Search the registers inside this shape")) + '">' + esc(T("Use as my area")) + "</button>" : "") +
         "</span>" +
         (st === "loading" ? '<span class="ra-reach-s">' + esc(T("Working out the walk…")) + "</span>" : "") +
         (st === "failed" ? '<span class="ra-reach-s">' + esc(T("The terrain did not load, so this is a plain circle.")) + "</span>" : "") +
         (st === "clamped" ? '<span class="ra-reach-s">' + esc(T("Cut short at the edge of the terrain loaded.")) + "</span>" : "");
     }
     if (!bits.length) return '<div class="ra-hood ra-hood-r">' + ctl + "</div>";
-    return '<div class="ra-hood"><span class="ra-hood-k"></span><span>' +
+    return '<div class="ra-hood" title="' + esc(tail) + '"><span class="ra-hood-k"></span><span>' +
       esc(lead) + " — " + esc(bits.join(" · ")) +
-      ". " + esc(tail) + ctl + "</span></div>";
+      "." + ctl + "</span></div>";
   }
-  function hoursLabel(h) { return h >= 8 ? T("day's") : h + " " + T("hour"); }
+  function hoursLabel(h) { return h + " " + T("hour"); }
 
   function drawHood(d) {
     hoodLayer.clearLayers();
@@ -8746,10 +8742,12 @@ window.addEventListener("load", async function () {
       SH.lastPl = pl; return pl;
     }
     function areaOn() { return !!(AREA.rows && AREA.rows.places && AREA.rows.places.length); }
+    function walkPlaces() { return idx.places.filter(function (p) { return p.y != null && nvol(p) > 0 && REACH.res.timeAt(p.y, p.x) != null; }); }
     function plan() {
       var pl = placeNow(), has = areaOn(), def = pl && !SH.areaNew ? "place" : has ? "area" : pl ? "place" : "view";
-      var act = SH.user && (SH.user !== "place" || pl) && (SH.user !== "area" || has) ? SH.user : def;
-      return { act: act, pl: pl, has: has };
+      var walk = !!(pl && REACH.res && REACH.id === pl.i);
+      var act = SH.user && (SH.user !== "place" || pl) && (SH.user !== "area" || has) && (SH.user !== "walk" || walk) ? SH.user : def;
+      return { act: act, pl: pl, has: has, walk: walk };
     }
     function load(p) {
       if (cache[p.i]) return Promise.resolve(cache[p.i]);
@@ -8776,9 +8774,10 @@ window.addEventListener("load", async function () {
       SH.t = null;
       if (!on) { el.hidden = true; stage.classList.remove("fd2-shelfon"); stage.style.removeProperty("--shh"); return; }
       var P = plan(), Y = years(), yrs = Y.yrs, tok = ++SH.tok, b = map.getBounds(), places = [], head;
-      var title = P.act === "place" && P.pl ? "On the shelf for " + esc(short(P.pl.n)) : P.act === "area" ? "On the shelf for your area" : "On the shelf here";
+      var title = P.act === "walk" ? "On the shelf within a " + REACH.res.hours + " hour walk of " + esc(short(P.pl.n)) : P.act === "place" && P.pl ? "On the shelf for " + esc(short(P.pl.n)) : P.act === "area" ? "On the shelf for your area" : "On the shelf here";
       var segs = [];
       if (P.pl) segs.push(["place", short(P.pl.n).length > 14 ? "This place" : short(P.pl.n)]);
+      if (P.walk) segs.push(["walk", "On foot"]);
       segs.push(["view", "This view"]); segs.push(["area", "My area"]);
       head = function (n) {
         return '<div class="ra-sh-head"><b>' + title + "</b>" + (n || "") +
@@ -8790,7 +8789,11 @@ window.addEventListener("load", async function () {
       };
       el.hidden = false; stage.classList.add("fd2-shelfon");
       if (P.act === "place" && P.pl) places = [P.pl];
-      else if (P.act === "area") places = AREA.rows.places.filter(function (p) { return nvol(p) > 0; });
+      else if (P.act === "walk") {
+        var wb = L.polygon(REACH.res.ring).getBounds(), wk = "w" + wb.toBBoxString();
+        if (wk !== SH.cells) { SH.cells = wk; areaEnsureCells(wb).then(function () { if (on) queue(); }); }
+        places = walkPlaces();
+      } else if (P.act === "area") places = AREA.rows.places.filter(function (p) { return nvol(p) > 0; });
       else {
         if (b.getNorth() - b.getSouth() > 9) { el.innerHTML = head("") + '<p class="ra-sh-empty">Zoom in, or draw a box round the ground you mean, and the shelf fills with its volumes.</p>'; sized(); return; }
         var ck = b.toBBoxString(); if (ck !== SH.cells) { SH.cells = ck; areaEnsureCells(b).then(function () { if (on) queue(); }); }
@@ -8816,6 +8819,7 @@ window.addEventListener("load", async function () {
         });
         rows.sort(function (a, c) { return a.o - c.o || kindRank(a.k.name) - kindRank(c.k.name) || (a.v.from || 0) - (c.v.from || 0); });
         var arch = P.act === "place" ? [] : archives.filter(function (a) {
+          if (P.act === "walk") return a.at && a.at.lat != null && REACH.res.timeAt(a.at.lat, a.at.lon) != null;
           return a.at && a.at.lat != null && (P.act === "area" ? AREA.rows.rings.some(function (r) { return areaInside(a.at.lat, a.at.lon, r); }) : b.contains([a.at.lat, a.at.lon]));
         }).slice(0, 8);
         var np = {}; rows.forEach(function (r) { np[r.p.i] = 1; });
@@ -8853,6 +8857,13 @@ window.addEventListener("load", async function () {
     function shelfList() {
       var P = plan();
       if (P.act === "area") { areaShow(); return; }
+      if (P.act === "walk") {
+        areaEnsureCells(L.polygon(REACH.res.ring).getBounds()).then(function () {
+          areaOverlay("Within a " + REACH.res.hours + " hour walk of " + short(P.pl.n), "The places and archives you could walk to from " + short(P.pl.n) + " in " + REACH.res.hours + " hours, following the ground. Change the hours in the Visiting pane.",
+            walkPlaces(), archives.filter(function (a) { return a.at && a.at.lat != null && REACH.res.timeAt(a.at.lat, a.at.lon) != null; }));
+        });
+        return;
+      }
       if (P.act === "place" && P.pl) {
         var pl = idx.places.filter(function (p) { return p.i === P.pl.i; })[0] || P.pl;
         areaOverlay(short(P.pl.n), "Everything the Atlas holds for " + short(P.pl.n) + ".", [pl], []);

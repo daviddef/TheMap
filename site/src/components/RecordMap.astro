@@ -87,12 +87,14 @@ try {
         you type — these are the searches you made, not suggestions for the
         one you are making. */}
     <div class="ra-find">
-      <input id="ra-q" type="search" autocomplete="off"
+      {/* A TEXT BOX THAT GROWS, NOT A ONE-LINE INPUT. A story is a paragraph, and in a one-line input it ran off the end where it could not be read or
+          mended. One line for a place or a surname; it grows with what is written, up to about six lines (unified-search.js). Enter still searches. */}
+      <textarea id="ra-q" rows="1" autocomplete="off" spellcheck="false" enterkeyhint="search"
              aria-label="Find a place or a surname, by any name it has ever had"
              role="combobox" aria-expanded="false" aria-controls="ra-sug"
              aria-autocomplete="list"
              aria-describedby="ra-recent"
-             placeholder="Find a place or a surname — Gallignana · Žubrinić · Lerena" />
+             placeholder="Find a place or a surname — Gallignana · Žubrinić · Lerena"></textarea>
       {/* role="group", because a div has no role and aria-label is prohibited
           on a roleless element — so the name this box was given was being
           discarded, and the one thing it had to say to a screen reader was
@@ -2093,10 +2095,12 @@ window.addEventListener("load", async function () {
     return at && cache[at] && !panel.hidden ? cache[at] : null;
   }
 
-  var storyCcs = null;
-  /* window.raFlagsFor(["HR","ZA"]) from the story reader narrows the cards to those countries; (null) gives them back. */
+  var storyCcs = null, storyQuiet = false;
+  /* window.raFlagsFor(["HR","ZA"]) from the story reader narrows the cards to those countries; (null) gives them back. The map goes quiet with it:
+     «when im in story mode why do we keep showing all the markers for places not in the story? its really overwhelming the map.» */
   window.raFlagsFor = function (ccs) {
     storyCcs = ccs && ccs.length ? ccs : null;
+    if (storyQuiet !== !!storyCcs) { storyQuiet = !!storyCcs; try { syncLayers(); } catch (e) { /* the map is still starting */ } }
     if (FLAGIDX) drawFlagRes(qbox ? qbox.value : ""); else if (storyCcs) loadFlagIndex();
   };
   /* THE FLAGS FOLLOW THE MAP. David: the cards under the map did not change when the map was moved or zoomed, only when something was typed.
@@ -4288,6 +4292,13 @@ window.addEventListener("load", async function () {
   }
   drawLayers();
   function syncLayers() {
+    /* A STORY IS ON THE MAP: its own places stand alone. The shelf, the archives, the countries and the rest step off the map (the ticks in the
+       Layers menu are kept, so they come back as they were when the story goes). */
+    if (storyQuiet) {
+      LAYERS.concat([[0, 0, 0, clusterLayer], [0, 0, 0, moveLayer], [0, 0, 0, flagLayer]]).forEach(function (l) { if (map.hasLayer(l[3])) map.removeLayer(l[3]); });
+      setQ("layers", LAYERS.filter(function (l) { return on[l[0]]; }).map(function (l) { return l[0]; }).join(","));
+      return;
+    }
     LAYERS.forEach(function (l) {
       /* The shelf is the one layer this does not touch: below zoom 6 it is
          represented by the cluster bubbles instead, and drawClusters owns
@@ -5136,6 +5147,7 @@ window.addEventListener("load", async function () {
   var clusterLayer = L.layerGroup(), CLUSTER_TO = 6, CLUSTER_PX = 70,
       lastVisible = [];
   function show(layer, want) {
+    if (storyQuiet) want = false;
     var has = map.hasLayer(layer);
     if (want && !has) layer.addTo(map);
     else if (!want && has) map.removeLayer(layer);
@@ -10719,4 +10731,22 @@ window.addEventListener("load", async function () {
   :global(.leaflet-container.ra-drawing .ra-area-lab) { pointer-events: none; }
   :global(.ra-area-nm) { margin: 0; }
   :global(.ra-area-bar form) { display: flex; }
+
+  /* THE ONE BOX, ROUNDER AND TALLER (David, 23 Nov: «i prefer the mockup look and feel»). The shapes, sizes and type of the search-bar mock-up on the Atlas's own warm
+     palette: 50px controls with a 16px radius and a 1.5px line, the typed text in Fraunces at 17px, the small text in Source Sans 3. --ra-ctl is the one height
+     the box, Saved, Filters and the icons share; the box grows past it when a story is written, and the buttons stay level with its first line. */
+  .ra-bar-find { --ra-ctl: 50px; align-items: flex-start; }
+  .ra-bar-find #ra-q { display: block; resize: none; overflow-y: auto; height: auto; min-height: var(--ra-ctl); max-height: 156px;
+    font: 400 17px/1.45 var(--serif); padding: 11px 14px; border: 1.5px solid var(--rule); border-radius: 16px;
+    background: var(--panel); color: var(--ink); transition: border-color .15s, box-shadow .15s; }
+  .ra-bar-find #ra-q::placeholder { color: var(--ink-3); opacity: .9; }
+  .ra-bar-find #ra-q:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-wash); }
+  .ra-bar-find .ra-ico, .ra-bar-find .ra-cats-wrap summary { border-width: 1.5px; border-radius: 16px; font: 500 14px/1.2 var(--sans); }
+  .ra-bar-find .ra-cats-wrap summary { padding: 0 14px; }
+  .ra-bar-find .ra-ico, .ra-bar-find .ra-cats-wrap summary { height: var(--ra-ctl); min-height: var(--ra-ctl); }
+  .ra-bar-find .ra-ico { width: var(--ra-ctl); }
+  @media (max-width: 620px) {
+    .ra-bar-find { --ra-ctl: 46px; }
+    .ra-bar-find #ra-q { font-size: 16px; }
+  }
 </style>

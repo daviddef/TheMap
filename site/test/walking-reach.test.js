@@ -421,3 +421,11 @@ test("the era block (a year on the time strip) draws its sources as the card's s
   const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
   assert.match(css, /\.fd2-stage \.ra-era-lead-l \{ display: block;/);
 });
+
+test("the era note, its flag and the go-deeper row use the card's type scale, flat, with no boxed aside", () => {
+  const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
+  assert.match(css, /\.fd2-stage \.ra-tl-detail \{ margin: 12px 0 0; padding: 0; background: none; border: 0;/);
+  assert.match(css, /\.fd2-stage \.ra-ef-h \{ margin: 0 0 8px; font: 700 11px\/1\.4 var\(--mono/);
+  assert.match(css, /\.fd2-stage \.ra-ts-deeplab \{ font: 700 11px\/1\.4 var\(--mono/);
+  assert.match(css, /\.fd2-stage \.ra-era-n \{ margin: 0; font: 400 13px/);
+});

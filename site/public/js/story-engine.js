@@ -838,7 +838,7 @@
     (t.match(/[\p{L}]+/gu) || []).forEach(function (w) { var f = S.fold(w); if (OCC[f] && f.length > 3 && out.occupations.indexOf(f) < 0 && out.occupations.length < 4 && !(ctx.given && ctx.given[f] && /^[A-ZÀ-ÖØ-Þ]/.test(w))) out.occupations.push(f); });
     out.occupation = out.occupations[0] || "";
     var ys = yearsIn(t), born = null, left = null, rest = [];
-    ys.forEach(function (y) { if (/(born|birth|b|b\.)\s*$/.test(y.before) && born == null) born = y.y; else rest.push(y); });
+    ys.forEach(function (y) { if (/(born|birth|b|b\.)(?:\s+in)?\s*$/.test(y.before) && born == null) born = y.y; else rest.push(y); });
     if (rest.length) {
       var lab = rest.filter(function (y) { return /(came|arriv|left|emigrat|sail|around|about|circa|c\.|abt|in|by|moved)\s*$/.test(y.before); })[0] || rest[rest.length - 1];
       left = lab.y;
@@ -905,7 +905,7 @@
       var anc = null, am, are = new RegExp(ANC.source, "g");
       while ((am = are.exec(win))) anc = am[1];
       var role = anc ? (/mother|mum|mom|grandmother/.test(anc) ? "mother" : "father") + "-from"
-        : /\bborn\b/.test(win) ? "born"
+        : /\bborn\b/.test(win) && !MOVE.test(win.slice(win.lastIndexOf("born"))) ? "born"   /* "born in 1951 and moved to Botswana": Botswana is where he moved, not where he was born */
         : /(^| )(from|of)$/.test(win) ? "origin"
         : MOVE.test(win) ? "move" : "lived";
       stops.push({ row: c.rows[0], alts: c.rows.slice(1, 6), pool: c.rows, word: c.word, at: c.at, len: len, role: role, age: null, year: null, approx: false, isCountry: !!c.country, before: /(?:^| )(?:before that|previously|earlier|prior to that|originally|beforehand)(?: |$)/.test(win),
@@ -940,7 +940,7 @@
     }
     var route = stops.filter(function (x) { return x.role !== "father-from" && x.role !== "mother-from"; });
     /* ages: "when he was 3 years old he moved to Harare" gives Harare age 3; a stop with no age sits between its neighbours */
-    var AGE = /(?:when (?:he|she|they|i|we) (?:was|were)|aged?|at the age of|at age|by the age of|at) (\d{1,2})(?: years?(?: old)?)?(?= |$)/g, am2, ages = [];
+    var AGE = /(?:(?:when|by the time) (?:he|she|they|i|we) (?:was|were|turned)|aged?|at the age of|at age|by the age of|at) (\d{1,2})(?: years?(?: old)?)?(?= |$)/g, am2, ages = [];
     while ((am2 = AGE.exec(ft))) ages.push({ age: Number(am2[1]), tok: ft.slice(0, am2.index).split(" ").length - 1 });
     var au = 0, lastAt = -1;
     route.forEach(function (st) {
@@ -1098,7 +1098,7 @@
       pv.rows = hit.concat(pv.rows.filter(function (r) { return r.cc !== cc; }));
       delete atMap[at];
     });
-    var mode = "origin", pending = null;
+    var mode = "origin", pending = null, preYear = null, pendAge = null;
     function place(c) { return { row: c.rows[0], alts: c.rows.slice(1, 6), word: c.word }; }
     for (var i = 0; i < ft.length; i++) {
       var tk = ft[i], c = atMap[i];
@@ -1106,20 +1106,23 @@
       if (EV_BORN.test(tk)) { mode = "born"; out.born = out.born || { year: null, place: null }; continue; }
       if (EV_DIED.test(tk)) { mode = "died"; out.died = out.died || { year: null, place: null, cause: "" }; continue; }
       if (EV_WED.test(tk)) { mode = "married"; out.married = out.married || { year: null, place: null, spouse: "" }; continue; }
-      if (EV_MOVE.test(tk) && !c) { if (mode !== "move") { mode = "move"; pending = null; } continue; }
+      if (EV_MOVE.test(tk) && !c) { if (mode !== "move") { mode = "move"; pending = preYear; preYear = null; } continue; }   /* "by 1955 they were living in Salisbury": the year came before the verb */
       if (mode === "died" && EV_CAUSE.test(tk) && (out.died.place || out.died.year != null)) { out.died.cause = ft.slice(i + 1).join(" "); break; }
       if (/^(1[4-9][0-9]{2}|20[0-2][0-9])$/.test(tk)) {
         var y = Number(tk);
         if (mode === "born") out.born.year = y; else if (mode === "died") out.died.year = y; else if (mode === "married") out.married.year = y;
         else if (mode === "move") { if (out.moves.length && out.moves[out.moves.length - 1].year == null) out.moves[out.moves.length - 1].year = y; else pending = y; }
+        else preYear = y;
         continue;
       }
+      /* "by the time he was 18 he moved to Johannesburg", "at 14 she left": an age before a move belongs to that move */
+      if (/^\d{1,2}$/.test(tk) && /^(?:was|were|aged?|at|turned)$/.test(ft[i - 1] || "") && mode !== "born" && mode !== "died") { pendAge = Number(tk); continue; }
       if (!c) continue;
       var pl = place(c); i += c.word.split(" ").length - 1;
       if (mode === "born") { if (!out.born.place) out.born.place = pl; }
       else if (mode === "died") { if (!out.died.place) out.died.place = pl; }
       else if (mode === "married") { if (!out.married.place) out.married.place = pl; }
-      else if (mode === "move") { out.moves.push({ place: pl, year: pending }); pending = null; }
+      else if (mode === "move") { out.moves.push({ place: pl, year: pending, age: pendAge }); pending = null; pendAge = null; }
       else if (!out.origin) out.origin = pl;
     }
     if (out.married) {
@@ -1192,6 +1195,19 @@
           ms.push({ at: bs, end: be, poss: bm[1].toLowerCase(), steps: stepsOf(bm[2]), name: "", bare: true });
         }
         ms.sort(function (x, y) { return x.at - y.at; }); }
+      /* "HIS FATHER IVAN AND MOTHER HEDVIGA": the second parent shares the "his" of the first, so it has no word of its own to be found by. It is
+         read as "his mother Hedviga" (and "her father X and mother Y" the same), or Hedviga was lost and her places went to the father. */
+      { var sre = /^\s*,?\s*(?:and|&)\s+(mother|mum|mom|father|dad)\s+(?:named\s+|called\s+)?([\p{L}'’-]+)/iu, extra = [];
+        ms.slice().forEach(function (o) {
+          if (!o.poss || o.poss === "has" || o.bare || !o.steps || o.steps.length !== 1) return;
+          var sm = sre.exec(sent.slice(o.end)); if (!sm) return;
+          var nf = S.fold(sm[2]);
+          if (/^(?:a|an|the|my|his|her|their|not|also|now|and|who|was|is|were|are)$/i.test(sm[2]) || STOP[nf] || COMMON[nf] || OCC[nf] || MONTHS[nf]) return;
+          var k0 = o.end + sm[0].toLowerCase().indexOf(sm[1].toLowerCase()), k1 = o.end + sm[0].length;
+          if (ms.concat(extra).some(function (q) { return k0 < q.end && k1 > q.at; })) return;
+          extra.push({ at: k0, end: k1, poss: o.poss, steps: KIN_STEP[sm[1].toLowerCase()], name: sm[2], grp: true });
+        });
+        if (extra.length) { ms = ms.concat(extra); ms.sort(function (x, y) { return x.at - y.at; }); } }
       /* "HAS A MOTHER HEDVIGA AND A FATHER IVAN": the parents of the person just named, told as a list instead of "his mother was ... his father was ...".
          The person they belong to is the one named just before "has" (the entry before them), so each is a parent of THAT person. */
       { var hre = /\b(?:has|had|have)\s+(?:a|an)\s+(mother|mum|mom|father|dad)\s+(?:named\s+|called\s+)?([\p{L}'’-]+)/giu, hm, hasAt = -1;
@@ -1231,7 +1247,14 @@
         if (LINE_OF.test(sent)) { mention(to); return; }
         people[to].chunks.push(sent); spouseOf(to, sent); mention(to); return;
       }
-      if (cur && ms[0].at > 0) { var pre = sent.slice(0, ms[0].at), cp = THEY.test(pre) ? couple() : null; if (cp) cp.forEach(function (k) { people[k].chunks.push(pre); }); else people[cur].chunks.push(pre); }
+      /* "BY 1955 HIM AND HIS FATHER IVAN AND MOTHER HEDVIGA WERE LIVING IN SALISBURY, AND BY THE TIME HE WAS 18 HE MOVED TO JOHANNESBURG": the person told
+         of so far and the people named after "and" are one party. What they did together is told of each of them, and the clause that starts again with
+         "he" is the first of them (the one the page is about) alone, not whoever was named last. */
+      var coll = null, gk = [];
+      if (cur && ms.length) { var pre0 = sent.slice(0, ms[0].at);
+        if (/\b(?:him|me|he|she|her|us|i|them)\s+and\s*$/i.test(pre0)) coll = { head: cur, lead: pre0.replace(/\b(?:him|me|he|she|her|us|i|them)\s+and\s*$/i, "") }; }
+      if (coll) gk.push(coll.head);
+      if (!coll && cur && ms[0].at > 0) { var pre = sent.slice(0, ms[0].at), cp = THEY.test(pre) ? couple() : null; if (cp) cp.forEach(function (k) { people[k].chunks.push(pre); }); else people[cur].chunks.push(pre); }
       var prevKey = null;
       ms.forEach(function (x, i) {
         var unnamed = !!subject && !x.bare && x.steps && /^(?:a|an|the)$/i.test(x.name);   /* "his mother was a singer": a person with no name, and the words after "a" are about her */
@@ -1254,6 +1277,18 @@
         var objOf = x.bare && cur && cur !== pk && /\b(?:married|marry|wed|met|meet|to|with)\s*$/i.test(sent.slice(0, x.at)) && !/^\s*(?:there\s*)?,?\s*(?:who|that)\b/i.test(rest);
         if (objOf) { rest = cutRelative(rest).own; people[cur].chunks.push(rest); spouseOf(cur, rest); mention(pk); return; }
         rest = cutRelative(rest).own;   /* "my mother Cheryl who's grandfather was from X": X is her grandfather's, not hers */
+        if (coll) {
+          if (gk.indexOf(pk) < 0) gk.push(pk);
+          if (i === ms.length - 1) {
+            var fam = rest, own = "", sp3 = /,?\s+and\s+(?:by|when|then|later|after|once)\b[^,]*?\b(?:he|she)\b/i.exec(rest);
+            if (sp3) { fam = rest.slice(0, sp3.index); own = rest.slice(sp3.index).replace(/^,?\s+and\s+/i, ""); }
+            var party = (coll.lead + " " + fam).trim();
+            gk.forEach(function (gkey) { if (people[gkey]) people[gkey].chunks.push(party); });
+            if (own) people[coll.head].chunks.push(own);
+            gk.forEach(function (gkey) { if (gkey !== coll.head) mention(gkey); }); mention(coll.head); cur = coll.head;
+          } else mention(pk);
+          return;
+        }
         if (!LINE_OF.test(rest)) p.chunks.push(rest);   /* "came from a long line of Defranceschi who were from X": the line's places, not his */
         cur = pk; mention(pk); spouseOf(pk, rest);
       });
@@ -1506,7 +1541,7 @@
     function add(pl, role, yr) { if (pl) rs.push({ row: pl.row, alts: pl.alts, word: pl.word, role: role, age: null, year: yr == null ? null : yr, approx: false, told: yr != null }); }
     if (ev.born && ev.born.place) add(ev.born.place, "born", ev.born.year);
     if (ev.origin && !(rs[0] && rs[0].row.i === ev.origin.row.i)) add(ev.origin, rs.length ? "move" : "origin");
-    ev.moves.forEach(function (mv) { if (rs.length && rs[rs.length - 1].row.i === mv.place.row.i) return; add(mv.place, "move", mv.year); });
+    ev.moves.forEach(function (mv) { if (rs.length && rs[rs.length - 1].row.i === mv.place.row.i) return; add(mv.place, "move", mv.year); rs[rs.length - 1].mvAge = mv.age == null ? null : mv.age; });
     var endYear = ev.died && ev.died.year != null ? ev.died.year : null;
     function stopFor(pl) { for (var i = 0; i < rs.length; i++) if (pl && rs[i].row.i === pl.row.i) return rs[i]; return null; }
     var stopEv = [];
@@ -1519,6 +1554,8 @@
       var my = year(P[sk + "M"]), fy = year(P[sk + "F"]);
       born = my != null ? my + 26 : fy != null ? fy + 30 : ev.married && ev.married.year != null ? ev.married.year - 26 : null; bornApprox = born != null;
     }
+    /* "by the time he was 18 he moved to Johannesburg": the year is the birth year and the age, said to be about when the birth is itself worked out */
+    if (born != null) rs.forEach(function (x) { if (x.year == null && x.mvAge != null) { x.year = born + x.mvAge; x.told = !bornApprox; x.approx = bornApprox; } });
     if (born != null && rs.length) {
       if (rs[0].year == null) { rs[0].year = born; rs[0].approx = bornApprox; }
       var known = [];

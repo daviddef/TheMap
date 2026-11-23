@@ -347,6 +347,22 @@ test("a long story is read whole: every place in order with its age, the father'
   assert.equal(F.parseStory("ivan was born in crikvenica", { map: A.buildMap(rs), given, skip: Object.create(null) }).route.length, 1);
 });
 
+test("a father's move with his parents, then on his own at 18: each of them on the right place, in the right year", () => {
+  const rs = [
+    { i: "croatia", n: "Croatia", cc: "HR", c: 1 }, { i: "botswana", n: "Botswana (area)", cc: "BW", c: 1 }, { i: "harare", n: "Harare", cc: "ZW", c: 3, q: "salisbury" },
+    { i: "johannesburg", n: "Johannesburg", cc: "ZA", c: 2 },
+  ];
+  const given = A.buildGiven([{ canon: "Giovanni", langs: { croatian: [{ form: "Ivan", status: "same" }, { form: "Hedviga", status: "same" }] } }]);
+  const text = "my father ivan was from croatia. he was born in 1951 and moved to botswana in 1954. by 1955 him and his father ivan and mother hedviga were living in salisbury, rhodesia, and by the time he was 18 he moved to johannesburg.";
+  const p = F.parseStory(text, { map: A.buildMap(rs), given, skip: Object.create(null) });
+  assert.deepEqual(p.route.map((s) => [s.row.i, s.year]), [["croatia", 1951], ["botswana", 1954], ["harare", 1955], ["johannesburg", 1969]]);
+  assert.deepEqual(p.people.map((x) => x.role + ":" + x.name), ["self:Ivan", "father:Ivan", "mother:Hedviga"]);
+  assert.equal(p.people[0].events.some((e) => e.type === "born" && e.year === 1951), true);
+  // the parents are at Salisbury; Johannesburg is his alone
+  const solo = F.parseStory("he was born in 1951 and moved to botswana in 1954. by 1955 he was living in salisbury, rhodesia, and by the time he was 18 he moved to johannesburg.", { map: A.buildMap(rs), given, skip: Object.create(null) });
+  assert.equal(solo.route.some((s) => s.row.i === "botswana" && s.role === "born"), false, "Botswana is where he moved, not where he was born");
+});
+
 test("a name typed in lower case still gets its surname, and ordinary words never become one", () => {
   const given = A.buildGiven([{ canon: "Giovanni", langs: { croatian: [{ form: "Ivan", status: "same" }] } }]);
   const c = { map: A.buildMap([]), given, skip: Object.create(null) };

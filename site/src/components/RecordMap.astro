@@ -4162,6 +4162,21 @@ window.addEventListener("load", async function () {
     if (hoodOn && checkPins.length && !map.hasLayer(checkLayer)) checkLayer.addTo(map);
   }
   function clearCheckPins() { checkPins = []; checkLayer.clearLayers(); }
+  /* THE NUMBER IS A WAY TO THE PLACE. David: «if i click the numbers, they should take me to the location on the map». The disc in a Where to read row (a link
+     round it) flies the map to that archive's pin and lets the pin pulse, instead of opening the archive's site. The row's name still opens the site. */
+  document.addEventListener("click", function (e) {
+    var d = e.target.closest && e.target.closest(".ra-in-card .ra-ck-i"); if (!d) return;
+    var n = parseInt(d.textContent, 10), pin = checkPins.filter(function (p) { return p.n === n; })[0];
+    if (!pin || !map) return;
+    e.preventDefault(); e.stopPropagation();
+    if (!map.hasLayer(checkLayer)) checkLayer.addTo(map);
+    map.flyTo([pin.y, pin.x], Math.max(map.getZoom(), 8), { duration: .8 });
+    checkLayer.eachLayer(function (l) {
+      var el = l._icon; if (!el || el.textContent !== String(n)) return;
+      el.classList.remove("ra-pin-hit"); void el.offsetWidth; el.classList.add("ra-pin-hit");
+      setTimeout(function () { el.classList.remove("ra-pin-hit"); }, 2600);
+    });
+  }, true);
 
   function buildCheck(d, r) {
     var pane = document.getElementById("ra-check");
@@ -4339,7 +4354,7 @@ window.addEventListener("load", async function () {
         var dot = ACCESS_DOT(pv.access), note = (ACC[pv.access] || [0, pv.access])[1];
         if (pv.at) checkPins.push({ n: count, y: pv.at.lat, x: pv.at.lon, name: pv.name, dot: dot });
         h.push('<li' + (pv.id ? srcAttrs(pv.id, pv.name, CNAME[cc] || cc, BASE + "archive/" + pv.id + "/") : "") + '><a class="ra-area-p" target="_blank" rel="noopener" href="' + esc(pv.url) + '" title="' + esc(note) + '">' +
-               '<span class="ra-ck-i"' + (dot ? ' style="background:' + dot + ";color:" + inkOn(dot) + '"' : "") + ">" + count + "</span>" +
+               '<span class="ra-ck-i"' + (pv.at ? ' title="' + esc(T("Show on the map")) + '"' : "") + (dot ? ' style="background:' + dot + ";color:" + inkOn(dot) + '"' : "") + ">" + count + "</span>" +
                "<span>" + esc(pv.name) + "</span><small>" + esc(note) + "</small></a></li>");
       });
       if (ps.length > 3) h.push('<li class="at-sub">' + esc(T("and") + " " + (ps.length - 3) + " " + T("more in") + " " + (CNAME[cc] || cc)) + "</li>");
@@ -11123,6 +11138,10 @@ window.addEventListener("load", async function () {
     justify-content: center; border-radius: 50%; background: #1B2A5B;
     color: #fff; font-family: var(--mono); font-size: 10px; font-weight: 500;
     border: 1.5px solid #fff; box-shadow: 0 1px 4px rgba(10, 20, 26, .45); }
+ :global(.ra-pin-hit) { animation: ra-pin-hit 1.1s ease-out 2; z-index: 900 !important; }
+  @keyframes ra-pin-hit { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, .95), 0 1px 4px rgba(10, 20, 26, .45); } 100% { box-shadow: 0 0 0 16px rgba(255, 255, 255, 0), 0 1px 4px rgba(10, 20, 26, .45); } }
+  @media (prefers-reduced-motion: reduce) { :global(.ra-pin-hit) { animation: none; outline: 2px solid #fff; } }
+  :global(.ra-in-card .ra-ck-i) { cursor: pointer; }
  :global(.ra-ck-km) { font-family: var(--mono); font-size: 10.5px;
     color: var(--ink-3); margin-left: 5px; white-space: nowrap; }
   :global(.ra-ck-n) { display: block; font-size: 11px; color: var(--ink-3); }

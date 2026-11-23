@@ -288,3 +288,9 @@ test("source rows carry a + like the books do, access is a picture with its word
   assert.match(css, /^\.fd2-stage \.ra-acc \{/m);
 });
 
+
+test("a number in Where to read flies the map to its pin and pulses it, instead of opening the archive", () => {
+  assert.match(map, /closest\("\.ra-in-card \.ra-ck-i"\)[\s\S]*?e\.preventDefault\(\); e\.stopPropagation\(\);[\s\S]*?map\.flyTo\(\[pin\.y, pin\.x\]/);
+  assert.match(map, /\}, true\);\n/, "in the capture phase, ahead of the link round it");
+  assert.match(map, /@keyframes ra-pin-hit/);
+});

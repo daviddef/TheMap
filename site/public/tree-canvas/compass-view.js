@@ -99,7 +99,8 @@ export function createCompass(deps) {
     if (built) return; built = true; stats.builds++;
     root.textContent = '';
     const head = h('header', 'cp-head');
-    el.back = btn('stbtn cp-backbtn', '← Back to the canvas', () => deps.close(), { id: 'cp-back' });
+    el.back = btn('stbtn cp-backbtn', '← Back', () => deps.close(), { id: 'cp-back' });
+    el.back.append(h('span', 'cp-long', ' to the canvas'));
     /* the wordmark is the Tree Canvas's own (Lilita One, two-tone, a sticker ledge under it, tilted; "by Record Atlas" tilted with a dotted underline), with a small compass rose.
        The words are the accessible name; the rose is decoration. */
     const brand = h('div', 'cp-brand');
@@ -109,9 +110,18 @@ export function createCompass(deps) {
     el.title.append(document.createTextNode('Com'), h('b', '', 'pass'));
     const by = h('p', 'cp-by'); by.append(document.createTextNode('by '), h('a', '', 'Record Atlas', { href: '/', target: '_blank', rel: 'noopener', title: 'Record Atlas, in a new tab' }));
     stack.append(el.title, by); brand.append(stack);
-    el.sum = h('p', 'cp-sum', '', { id: 'cp-sum' });
-    head.append(el.back, brand, el.sum);
-    el.filters = h('section', 'cp-filters', null, { 'aria-label': 'Who is on the map' });
+    /* THE SAME ORDER AS THE CANVAS: the wordmark on the left (the switcher sits beside it, fixed, as over the canvas), the buttons on the right, and the filters behind one Filters button
+       instead of four rows of chips along the top. The count of people and who is being followed are one quiet line under the bar. */
+    el.follow = h('b', 'cp-following'); el.sumText = h('span');
+    el.sum = h('p', 'cp-sum', '', { id: 'cp-sum' }); el.sum.append(el.follow, el.sumText);
+    el.fbtn = btn('stbtn cp-fbtn', '', () => setFilters(el.filters.hidden), { id: 'cp-fbtn', 'aria-expanded': 'false', 'aria-controls': 'cp-filters', title: 'Who is on the map: trees, people, what to show and the colour' });
+    el.fbtn.append(ico('M4 5h16l-6 7v6l-4 2v-8z', 'cp-ico'), h('span', '', 'Filters'));
+    el.fcount = h('b', 'cp-fcount', '', { hidden: true }); el.fbtn.append(el.fcount);
+    const tools = h('div', 'cp-tools'); tools.append(el.fbtn, el.back);
+    el.filters = h('section', 'cp-filters', null, { id: 'cp-filters', hidden: true, 'aria-label': 'Who is on the map' });
+    head.append(brand, tools, el.sum, el.filters);
+    root.addEventListener('pointerdown', e => { if (!el.filters.hidden && !el.filters.contains(e.target) && !el.fbtn.contains(e.target)) setFilters(false); });
+    root.addEventListener('keydown', e => { if (e.key === 'Escape' && !el.filters.hidden) { e.preventDefault(); e.stopPropagation(); setFilters(false, true); } });
     el.main = h('div', 'cp-main');
     el.stage = h('div', 'cp-stage');
     el.mapBox = h('div', 'cp-map', '', { id: 'cp-map', role: 'application', 'aria-label': 'Map of where the people in your file were, by year. Arrow keys move the map, plus and minus zoom.', tabindex: '0' });
@@ -146,7 +156,7 @@ export function createCompass(deps) {
     el.winSel.addEventListener('change', () => { st.win = +el.winSel.value; draw(); });
     const row = h('div', 'cp-row'); row.append(el.play, el.scrub, el.yrOut, el.speed, el.winSel);
     el.bar.append(el.chapters, row);
-    root.append(head, el.filters, el.main, el.bar);
+    root.append(head, el.main, el.bar);
     el.range.id = 'cp-range';
   }
 
@@ -196,8 +206,10 @@ export function createCompass(deps) {
 
   /* ---------------- filters and the top bar ---------------- */
   function drawFilters() {
-    const F = el.filters; F.textContent = '';
-    const grp = (label, ...kids) => { const g = h('div', 'cp-grp'); g.append(h('span', 'cp-glab', label), ...kids); return g; };
+    const F = el.filters;
+    const ctrls = () => [...F.querySelectorAll('button, select')], kept = F.contains(document.activeElement) ? ctrls().indexOf(document.activeElement) : -1;   // a click redraws the list: the focus goes back to the same control
+    F.textContent = '';
+    const grp = (label, ...kids) => { const g = h('div', 'cp-grp'), b = h('div', 'cp-gbody'); b.append(...kids); g.append(h('span', 'cp-glab', label), b); return g; };
     const chip = (label, on, fn, attrs) => { const c = btn('cp-chip', label, fn, { 'aria-pressed': on ? 'true' : 'false', ...(attrs || {}) }); return c; };
     const f = st.filter, fn = focusName();
     const hasFocus = !!st.focus;
@@ -226,9 +238,18 @@ export function createCompass(deps) {
     const colour = h('div', 'cp-chips', null, { role: 'group', 'aria-label': 'Colour the arrows by' });
     colour.append(chip("Side", st.colour === 'side', () => { st.colour = 'side'; draw(); drawFilters(); }, { title: 'Blue for the father’s side, orange for the mother’s, as in the Fan', disabled: !hasFocus || null }));
     colour.append(chip('Family line', st.colour === 'line', () => { st.colour = 'line'; draw(); drawFilters(); }, { title: 'One colour for each family line, as on the canvas' }));
-    const follow = h('p', 'cp-follow', fn ? 'Following ' + fn + '.' : hasFocus ? 'Following a person who may be living (their name and places are never shown).' : 'No one is selected on the canvas, so the side and generation filters are off.');
-    F.append(grp('Trees', arch), grp('People', who, gen), grp('Show', ev), grp('Colour', colour), follow);
+    el.follow.textContent = fn ? 'Following ' + fn + '.' : hasFocus ? 'Following a person who may be living (their name and places are never shown).' : '';
+    F.append(grp('Trees', arch), grp('People', who, gen), grp('Show', ev), grp('Colour', colour));
+    if (!hasFocus) F.append(h('p', 'cp-follow', 'No one is selected on the canvas, so the side and generation filters are off.'));
     if (!hasFocus && st.colour === 'side') st.colour = 'line';
+    const changed = st.on.size + Object.keys(M.DEFAULT_FILTER).filter(k => st.filter[k] !== M.DEFAULT_FILTER[k]).length;
+    el.fcount.textContent = String(changed); el.fcount.hidden = !changed;
+    el.fbtn.setAttribute('aria-label', changed ? 'Filters, ' + changed + ' changed' : 'Filters');
+    if (kept >= 0) { const c = ctrls()[kept]; if (c && !c.disabled) c.focus(); }
+  }
+  function setFilters(open, back) {
+    el.filters.hidden = !open; el.fbtn.setAttribute('aria-expanded', String(open)); el.fbtn.classList.toggle('on', open);
+    if (open) { const c = el.filters.querySelector('button:not(:disabled), select:not(:disabled)'); if (c) c.focus(); } else if (back) el.fbtn.focus();
   }
   async function toggleArchive(k) {
     if (st.on.has(k)) { st.on.delete(k); reindex(true); st.ctx = makeCtx(); drawFilters(); draw(); drawSummary(); return; }
@@ -243,7 +264,7 @@ export function createCompass(deps) {
   function showLoad(text) { el.load.textContent = text; el.load.hidden = !text; }
   function drawSummary() {
     const s = M.summaryText(st.idx.stats), undated = st.idx.stats.reduce((a, x) => a + x.undated, 0);
-    el.sum.textContent = s.line + (undated ? ' ' + n0(undated) + ' have no birth year, so they are not on the map.' : '');
+    el.sumText.textContent = s.line + (undated ? ' ' + n0(undated) + ' have no birth year, so they are not on the map.' : '');
   }
 
   /* ---------------- the map ---------------- */
@@ -717,7 +738,7 @@ export function createCompass(deps) {
     }
     if (!st.shapes) getJson('/history-ground.json').then(g => { st.shapes = g.shapes || []; if (st.open) { groundKey = ''; drawGround(); } }).catch(() => { /* plain tiles */ });
   }
-  function close() { stop(); if (root.contains(document.activeElement) && document.activeElement !== root) st.lastFocus = document.activeElement; st.open = false; root.hidden = true; clearTimeout(underT); clearTimeout(needle.idle); cancelAnimationFrame(needle.raf); document.removeEventListener('pointermove', onPointer); }
+  function close() { stop(); if (el.filters && !el.filters.hidden) setFilters(false); if (root.contains(document.activeElement) && document.activeElement !== root) st.lastFocus = document.activeElement; st.open = false; root.hidden = true; clearTimeout(underT); clearTimeout(needle.idle); cancelAnimationFrame(needle.raf); document.removeEventListener('pointermove', onPointer); }
   function onKey(e) {
     if (!st.open) return false;
     if (e.key === ' ' && e.target === el.mapBox) { e.preventDefault(); togglePlay(); return true; }

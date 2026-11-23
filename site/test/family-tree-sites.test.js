@@ -79,3 +79,18 @@ test("the typed surname is named in a given-name-plus-surname answer, even when 
   assert.match(map, /tailSur = tpar\.sur/);
   assert.match(map, /tcard\.indexOf\(T\("Surname"\) \+ "<\/span>"\) < 0/);
 });
+
+test("a place card's books are two lists, FamilySearch and the rest, with no tally line, and the 60-book cap is said", () => {
+  assert.match(map, /\["fs", "Books and catalogues on FamilySearch"\], \["ot", "Books and catalogues in other collections"\]/);
+  assert.match(map, /function areaIsFS\(v\)/);
+  assert.match(map, /\(TSV2 && R\.place \? "" : '<p class="at-sub ra-area-what"/);
+  assert.match(map, /total: d\.volumesTotal \|\| 0/);
+  assert.match(map, /T\("The oldest"\)/);
+});
+
+test("the country's flag band scrolls sideways instead of cutting off, and the card's flag words are short", () => {
+  assert.match(map, /overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; \}\n  :global\(\.ra-tl-seg\)/);
+  assert.match(map, /T\("flags and regimes"\)/);
+  assert.doesNotMatch(map, /T\("The flags these regimes flew"\)/);
+  assert.doesNotMatch(map, /Above is " \+\n/);
+});

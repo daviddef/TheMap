@@ -1370,13 +1370,14 @@ window.addEventListener("load", async function () {
          Almería: the places with a record region show who held the ground,
          the regimes and the flags; the others showed a bare strip. So the
          label says whose it is, and the hint says what it can and cannot tell. */
-      h.push('<p class="at-lab">' + esc(CNAME[String(d.country).toUpperCase()] || d.country) +
-             " \u00b7 " + esc(T("the country's regimes and flags")) + "</p>");
-      h.push('<p class="at-hint" style="margin:0 0 6px">' +
-             esc(T("This place has no era table of its own yet, so these are the " +
+      /* SHORT, AND THE LONG WORDS ON HOVER. David, on France: «way too wordy. move some of that flag history, regimes to icons at the top, and make this way less
+         wordy.» The label said whose history this is and a paragraph said what it cannot tell; the paragraph is now the label's tooltip, and the Flag History
+         link is the flag icon at the top of the card. */
+      h.push('<p class="at-lab" title="' + esc(T("This place has no era table of its own yet, so these are the " +
                    "country's eras, not this ground's: borders moved, and it may have " +
                    "been held by another power for part of this. It does not say which " +
-                   "archive holds the paper.")) + "</p>");
+                   "archive holds the paper.")) + '">' + esc(CNAME[String(d.country).toUpperCase()] || d.country) +
+             " \u00b7 " + esc(T("flags and regimes")) + "</p>");
     }
     h.push('<div class="ra-tl-band" role="tablist" aria-label="' +
            esc(T("Flags over time")) + '">');
@@ -1452,17 +1453,13 @@ window.addEventListener("load", async function () {
              eraFacts(sp.e) +
              '<p class="at-hint" style="margin:0"><a href="' + BASE +
              esc(flagHref(sp.e.page) || ("flags/" + slug + "-flags/")) + "#" +
-             esc(sp.e.id) + '">' + esc(T("This flag on Flag History")) +
+             esc(sp.e.id) + '">' + esc(T("Flag History")) +
              " \u2192</a></p>";
     });
 
     /* In supplement mode the flag beside the place's name already links to
        the same page, so a second link would be the third thing on screen
        pointing at Flag History. */
-    if (!supplement)
-      h.push('<p class="at-hint"><a href="' + BASE + "flags/" + slug +
-             '-flags/">' + esc(T("The flags these regimes flew")) +
-             " \u2192</a></p>");
     return h.join("") + "</div>";
   }
 
@@ -3481,13 +3478,9 @@ window.addEventListener("load", async function () {
            carries the explanation instead. */
       }
     } else {
-      h.push('<div class="ra-juris ra-unmapped"><div class="lab">Whose ground this was</div>' +
-             "<p>Not yet mapped. " + REGIONS_N + " record regions carry a place-level " +
-             "era table so far — Istria, the Kvarner, Carnia, Dalmatia, Galicia, " +
-             "Bukovina, Bohemia, Moravia, Hungary, Transylvania, East Prussia, " +
-             "Pomerania and the rest — and this place is outside all of them. Above is " +
-             "the country's own history instead. That is a gap in this map, not a gap " +
-             "in the record, and it is on the list to close.</p></div>");
+      h.push('<div class="ra-juris ra-unmapped" title="' + esc(REGIONS_N + " record regions carry a place-level era table so far, and this place is outside all of them. " +
+             "That is a gap in this map, not a gap in the record, and it is on the list to close.") + '"><p>' +
+             esc(T("Whose ground this was") + ": " + T("not yet mapped")) + ". " + esc(T("The country's history is above.")) + "</p></div>");
     }
 
     /* The link to this place's own page moved up onto the heading line.
@@ -9040,7 +9033,12 @@ window.addEventListener("load", async function () {
   function areaRenderSolo(R) {
     var d = R.place, pp = R.places[0], h = ['<div class="ra-area ra-area-solo">'];
     h.push('<div class="ra-area-add" id="ra-area-add"></div>');
-    h.push('<details class="ra-area-pl ra-area-solo-l" data-vols="' + esc(pp.i) + '"><summary><span>' + esc(T("The books and catalogues for") + " " + d.name) + '</span> <small><span class="ra-area-n"></span></small></summary><ul class="ra-vl"></ul></details>');
+    /* TWO LISTS, NOT ONE WITH A TALLY. David, on France: «instead of showing the row "60 books, 60 on family search" can we just have 2 sections, one for
+       family search, and one for others? no need to merge them or add that line». The books on FamilySearch and the books in every other holder each get their own
+       fold, named for what they are; an empty one is not drawn (areaFillVolumes). */
+    [["fs", "Books and catalogues on FamilySearch"], ["ot", "Books and catalogues in other collections"]].forEach(function (g) {
+      h.push('<details class="ra-area-pl ra-area-solo-l" data-vols="' + esc(pp.i) + '" data-grp="' + g[0] + '" hidden><summary><span>' + esc(T(g[1])) + '</span> <small><span class="ra-area-n"></span></small></summary><ul class="ra-vl"></ul></details>');
+    });
     if (!(d.volumes || []).length && !(d.collections || []).length) h.push('<p class="at-sub">' + esc(T("No volumes recorded here yet.")) + "</p>");
     areaCountrySources(R).forEach(function (c, ix, all) {
       h.push('<details class="ra-area-g ra-area-cov"><summary><i style="background:#5B7A8C"></i>Sources that cover all of ' + esc(CNAME[c.cc] || c.cc) + " <b>" + nfl(c.list.length) + "</b></summary><ul>");
@@ -9271,7 +9269,7 @@ window.addEventListener("load", async function () {
       if (i >= want.length) return;
       var p = want[i++];
       (cache[p.i] ? Promise.resolve(cache[p.i]) : fetch(DETAIL + p.i + ".json").then(function (r) { return r.json(); }))
-        .then(function (d) { cache[p.i] = d; R.vols[p.i] = { p: p, vols: areaPlaceVols(d) }; })
+        .then(function (d) { cache[p.i] = d; R.vols[p.i] = { p: p, vols: areaPlaceVols(d), total: d.volumesTotal || 0 }; })
         .catch(function () { R.vols[p.i] = { p: p, vols: [] }; })
         .then(function () {
           done++;
@@ -9318,12 +9316,15 @@ window.addEventListener("load", async function () {
   var areaYrT = 0;
   function areaYearRefresh() { if (TSV2 && AR() && AR().place && AR().vols) areaFillVolumes(); }
   if (TSV2) qbox.addEventListener("input", function () { clearTimeout(areaYrT); areaYrT = setTimeout(areaYearRefresh, 250); });
+  function areaIsFS(v) { return /familysearch\.org/i.test(v.url || "") || /^familysearch/i.test(v.src || ""); }
+  function areaHasOther(vs) { return vs.some(function (v) { return !areaIsFS(v); }); }
   function areaFillVolumes() {
     var R = AR(); if (!R || !R.vols) return;
     var ids = Object.keys(R.vols), openAll = ids.length <= 8;
     ids.forEach(function (id) {
-      var box = panel.querySelector('[data-vols="' + id + '"]'); if (!box) return;
-      var e = R.vols[id], vs = e.vols.slice(); if (!vs.length) { box.classList.add("ra-area-nolist"); return; }
+      var boxes = [].slice.call(panel.querySelectorAll('[data-vols="' + id + '"]')); if (!boxes.length) return;
+      var e = R.vols[id], vs = e.vols.slice();
+      if (!vs.length) { boxes.forEach(function (b) { b.classList.add("ra-area-nolist"); }); return; }
       /* A YEAR IN THE SEARCH NARROWS THE BOOKS TO THE ONES THAT COVER IT. David: «if i search "senj 1810" then why do i still see the older books?».
          On the place card (v2) a typed year or range keeps the books whose years overlap it, says so, and opens the list. */
       var ys = TSV2 && AR().place ? tsYears() : null, all = vs.length, note = "";
@@ -9332,11 +9333,20 @@ window.addEventListener("load", async function () {
         var yl = ys[0] === ys[1] ? ys[0] : ys[0] + "\u2013" + ys[1];
         note = vs.length === all ? "" : '<li class="ra-vnote">' + (vs.length ? "Only the books that cover " + yl + ". " : "No book here covers " + yl + ". ") + 'Clear the year to see all ' + all + ".</li>";
       }
-      var li = areaVolRows(e.p, vs) + note;
-      box.querySelector(".ra-vl").innerHTML = li;
-      box.querySelector(".ra-area-n").textContent = ys && vs.length !== all ? vs.length + " of " + all + " books" : vs.length + " book" + (vs.length === 1 ? "" : "s");
-      if (ys && AR().place && vs.length) box.open = true;
-      else if (!(AR() && AR().place) && (openAll || rcState(e.p) !== "none")) box.open = true;   /* a place card keeps its books shut until asked */
+      /* THE DETAIL FILE KEEPS ONLY THE OLDEST 60 BOOKS OF A PLACE (build.py, to keep the files small) AND CARRIES THE TRUE TOTAL, which the card now says. David, on
+         France: «it only shows the first 60 books?» It did, and nothing said so. */
+      var more = e.total && e.total > e.vols.length && !ys ? '<li class="ra-vnote">' + esc(T("The oldest") + " " + e.vols.length + " " + T("of") + " " + nfl(e.total) + " " + T("books are listed here. The rest are on the catalogue itself, and the place page counts them all.")) + "</li>" : "";
+      var fsV = vs.filter(areaIsFS), otV = vs.filter(function (v) { return !areaIsFS(v); }), lastG = otV.length ? "ot" : "fs";
+      boxes.forEach(function (box) {
+        var g = box.getAttribute("data-grp");
+        var mine = g ? (g === "fs" ? fsV : otV) : vs;
+        if (!mine.length && g !== lastG) { box.hidden = true; return; }   /* an empty list is not drawn; the last one stays to carry a note */
+        box.hidden = false;
+        box.querySelector(".ra-vl").innerHTML = areaVolRows(e.p, mine) + (!g || g === lastG ? note + more : "");
+        box.querySelector(".ra-area-n").textContent = mine.length + " book" + (mine.length === 1 ? "" : "s");
+        if (ys && AR().place && mine.length) box.open = true;
+        else if (!(AR() && AR().place) && (openAll || rcState(e.p) !== "none")) box.open = true;   /* a place card keeps its books shut until asked */
+      });
     });
   }
   /* A mark made in the list recolours the dots at once; the groups themselves stay put until Show, so a row does not jump away under the pointer. */
@@ -9387,7 +9397,7 @@ window.addEventListener("load", async function () {
         '<button type="button" data-a="yes">Yes, add them</button><button type="button" data-a="no">Cancel</button></p>';
       return;
     }
-    box.innerHTML = '<p class="at-sub ra-area-what"' + (R.place ? "" : ' title="The places above are only where these sit"') + '>Not started: <b>' + what + "</b></p>" +
+    box.innerHTML = (TSV2 && R.place ? "" : '<p class="at-sub ra-area-what"' + (R.place ? "" : ' title="The places above are only where these sit"') + '>Not started: <b>' + what + "</b></p>") +
       (TSV2 && R.place ? "" : '<button type="button" class="ra-area-addb" data-a="add">Add ' + nfl(n) + (n === c.length ? "" : " of them") + " to " + esc(line) + "'s list</button>") +
       ((c.length > ADD_CAP || cap) ? '<p class="at-sub" title="' + (c.length > ADD_CAP ? "One click adds at most " + nfl(ADD_CAP) + ". " : "") + (cap ? cap.trim() : "") + '">Big area. Draw a smaller one to see and add the rest.</p>' : "");
   }
@@ -11837,7 +11847,7 @@ window.addEventListener("load", async function () {
  :global(.ra-tl) { margin: 6px 0 12px; }
   :global(.ra-tl-band) { display: flex; align-items: stretch; gap: 2px;
     border: 1px solid var(--rule); border-radius: 3px;
-    background: var(--ground); padding: 2px; overflow: hidden; }
+    background: var(--ground); padding: 2px; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
   :global(.ra-tl-seg) { --seg: var(--accent);
     flex: 1 1 38px; min-width: 38px; position: relative;
     display: flex; flex-direction: column; justify-content: flex-start;
@@ -12317,6 +12327,7 @@ window.addEventListener("load", async function () {
   :global(.ra-area-cov > .at-sub) { margin: 4px 0 2px; font-size: 12px; }
   :global(.ra-area-cov .ra-area-p small) { white-space: normal; text-align: right; }
   @media (prefers-reduced-motion: reduce) { :global(.ra-chev) { transition: none; } }
+  :global(.ra-vl > li.ra-vnote) { font-size: 12px; color: var(--ink-3); display: block; }
   :global(.ra-vl) { list-style: none; margin: 6px 0 0; padding: 0; border-top: 1px solid var(--rule); }
   :global(.ra-vl > li) { display: flex; align-items: center; flex-wrap: wrap; gap: 0 10px; padding: 7px 0; border-bottom: 1px solid var(--rule); font: 400 12.5px/1.35 var(--sans); }
   :global(.ra-vl > li > i) { width: 8px; height: 8px; border-radius: 50%; flex: none; }

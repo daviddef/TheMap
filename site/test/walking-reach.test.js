@@ -303,5 +303,26 @@ test("a source with no place on the map shows a globe in Where to read, and the 
 test("on v2 the place card's Visiting list is a folded section of the card, not a second overlay, and its rows put the + first", () => {
   assert.match(map, /if \(TSV2\) \{\s*pane\.hidden = true;\s*var mount = panel\.querySelector\("#ra-place-body"\);[\s\S]*?class="ra-check-b ra-in-card ra-visit"/);
   assert.match(map, /visitOld \? visitOld\.open : false/, "it keeps its open or shut state while the walk changes");
-  assert.match(map, /#fd2-stage \.ra-visit li\.ra-ck-r \.srcmark\) \{ grid-column: 1;/);
+  assert.match(map, /return '<li class="ra-vrow"' \+ at[\s\S]*?'<span class="ra-vy">'/, "a Visiting row is a book row: the figure at the right");
+  assert.match(map, /replace\(\/<ul>\/g, '<ul class="ra-vl">'\)/);
+});
+
+test("every list in a v2 card shares one type scale, and each access icon explains itself", () => {
+  const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
+  assert.match(css, /\.fd2-stage \.ra-area-g > summary, \.fd2-stage \.ra-visit h4 \{ font: 700 11px/);
+  assert.match(css, /\.fd2-stage \.ra-vl > li, \.fd2-stage \.ra-vt \{ font-size: 13px; \}/);
+  assert.match(map, /unsurveyed: \["Not checked yet", "Nobody has looked at what this source holds/);
+});
+
+test("the link to the full table of who held a place is a button on v2", () => {
+  const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
+  assert.match(css, /\.fd2-stage \.ra-held-more a \{ display: inline-flex;[\s\S]*?border: 1px solid var\(--rule-strong/);
+});
+
+test("the Visiting header is one line: the note and the walk's hours share a row, and 'working out the walk' is a pulse, not a line", () => {
+  const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
+  assert.match(map, /class="ra-reach-s ra-reach-ld" role="status"/);
+  assert.match(css, /\.fd2-stage \.ra-visit \.ra-hood \{ display: flex;/);
+  assert.match(css, /\.ra-reach-ld \{ position: absolute; width: 1px;/);
+  assert.match(css, /@keyframes fd2-walk/);
 });

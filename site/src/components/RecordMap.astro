@@ -612,9 +612,22 @@ window.addEventListener("load", async function () {
     onsite: '<path d="M3 8l7-4 7 4M4.5 8v7M8 8v7M12 8v7M15.5 8v7M3 16.5h14"/>',
     unsurveyed: '<circle cx="10" cy="10" r="6.5" stroke-dasharray="2.2 2.2"/><path d="M8.3 8.2a1.8 1.8 0 1 1 2.6 1.6c-.6.3-.9.7-.9 1.4M10 13.6v.1"/>'
   };
+  /* WHAT EACH ICON MEANS, IN PLAIN WORDS. David: «what does "nobody has walked this one yet" mean? can you add a little more explanability?» The legend's word
+     «walked» means somebody has surveyed the source; the tooltip says what that leaves unknown. */
+  var ACC_WHY = {
+    free: ["Free images", "Scanned pages you can look at free, without an account."],
+    account: ["Free with an account", "Scanned pages that are free, but you have to make an account first."],
+    index: ["An index only", "A searchable index. It points to the records but has no images of the pages."],
+    mixed: ["Partly free, partly paid", "Some of it is free to look at and some is behind a paywall."],
+    paid: ["Behind a paywall", "The scanned pages cost money to see."],
+    catalogue: ["A catalogue entry", "It tells you the book exists, but the pages are not photographed online."],
+    onsite: ["On paper, in the building", "The records are on paper: you have to visit the archive, or write to it."],
+    unsurveyed: ["Not checked yet", "Nobody has looked at what this source holds or whether it is free to use. Open it to find out, then add it to your research."]
+  };
   function accTxt(a) {
     var m = ACC[a], label = (m || [0, a || ""])[1];
     if (!TSV2 || !ACC_SVG[a]) return esc(label);
+    var why = ACC_WHY[a]; label = why ? T(why[0]) + ". " + T(why[1]) : label;
     return '<span class="ra-acc" role="img" title="' + esc(label) + '" aria-label="' + esc(label) + '"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ACC_SVG[a] + "</svg></span>";
   }
 
@@ -3980,7 +3993,7 @@ window.addEventListener("load", async function () {
           return '<button type="button" data-reach-h="' + o[0] + '" aria-pressed="' + (o[0] === REACH.h) + '">' + esc(T(o[1])) + "</button>";
         }).join("") +
         "</span>" +
-        (st === "loading" ? '<span class="ra-reach-s">' + esc(T("Working out the walk…")) + "</span>" : "") +
+        (st === "loading" ? '<span class="ra-reach-s ra-reach-ld" role="status">' + esc(T("Working out the walk…")) + "</span>" : "") +
         (st === "failed" ? '<span class="ra-reach-s">' + esc(T("The terrain did not load, so this is a plain circle.")) + "</span>" : "") +
         (st === "clamped" ? '<span class="ra-reach-s">' + esc(T("Cut short at the edge of the terrain loaded.")) + "</span>" : "");
     }
@@ -4118,6 +4131,16 @@ window.addEventListener("load", async function () {
            ' data-src-t="' + esc(mark.t || name) + '"' +
            ' data-src-where="' + esc(mark.where || "") + '"' +
            ' data-src-href="' + esc(mark.href || href || "") + '"';
+    }
+    /* ON THE FRONT DOOR V2 A VISITING ROW IS A BOOK ROW. David: «the km's should be on the right, this must follow the same look and feel as the other volume /
+       book tables»: [+] [number] name ........ figure, the classes the books list uses. An archive's access is the number's colour (its words the tooltip); a
+       village's volumes and walk time sit on a line under its name. */
+    if (TSV2) {
+      var disc2 = num != null ? '<span class="ra-ck-i" title="' + esc(dot && note ? note : T("Show on the map")) + '"' + (dot ? ' style="background:' + dot + ";color:" + inkOn(dot) + '"' : "") + ">" + num + "</span>" : "";
+      return '<li class="ra-vrow"' + at + ">" + disc2 +
+        '<span class="ra-vt" title="' + esc(name) + '">' + (href ? '<a href="' + esc(href) + '" target="_blank" rel="noopener">' + esc(name) + "</a>" : esc(name)) + "</span>" +
+        '<span class="ra-vy">' + (km != null ? (Math.round(km * 10) / 10) + " km" : "") + "</span>" +
+        (note && !dot ? '<span class="ra-vn">' + esc(note) + "</span>" : "") + "</li>";
     }
     /* A ROW IS A NUMBER, A NAME AND A LINE OF PLAIN WORDS. David: «can we neaten the right pane? ... item 3
        and 5 wrap completely wrong, and feel could be a bit more "exciting"». The row was a wrapping flex
@@ -4320,7 +4343,7 @@ window.addEventListener("load", async function () {
       var mount = panel.querySelector("#ra-place-body");
       if (visitOld) visitOld.remove();
       if (mount) mount.insertAdjacentHTML("afterend", '<details class="ra-check-b ra-in-card ra-visit"' + (visitOpen ? " open" : "") + '><summary class="lab">' +
-        esc(T("Visiting")) + " \u00b7 " + count + "</summary>" + h.join("") + "</details>");
+        esc(T("Visiting")) + " \u00b7 " + count + "</summary>" + h.join("").replace(/<ul>/g, '<ul class="ra-vl">') + "</details>");
       drawCheckPins();
       return;
     }
@@ -11150,12 +11173,11 @@ window.addEventListener("load", async function () {
   :global(:is(#ra-check-b, .ra-in-card) li.ra-ck-nonum.src-has .srcmark) { grid-column: 1; }
   :global(:is(#ra-check-b, .ra-in-card) li.ra-ck-r.src-has .ra-ck-i) { grid-row: 1 / span 3; }
   :global(:is(#ra-check-b, .ra-in-card) .ra-ck-more) { margin: 2px 0 0 34px; }
-  /* the place card's Visiting rows: the + at the head of the row, like every other source and book (the id lifts these above the pane's own placement) */
-  :global(#fd2-stage .ra-visit li.ra-ck-r) { grid-template-columns: auto 24px minmax(0, 1fr); }
-  :global(#fd2-stage .ra-visit li.ra-ck-r .srcmark) { grid-column: 1; grid-row: 1 / span 2; align-self: center; margin: 0; }
-  :global(#fd2-stage .ra-visit li.ra-ck-r .ra-ck-i) { grid-column: 2; }
-  :global(#fd2-stage .ra-visit li.ra-ck-r .ra-ck-main), :global(#fd2-stage .ra-visit li.ra-ck-r .ra-ck-meta) { grid-column: 3; }
-  :global(#fd2-stage .ra-visit li.ra-ck-r.src-has .srcmark) { grid-column: 3; grid-row: 3; }
+  /* a Visiting row is a book row: the + first, then the number, the name, the figure at the right; a village's note is its own line */
+  :global(.ra-vl .srcmark) { flex: none; margin: 0; }
+  :global(.ra-vl .srcmark:has(.src-edit)) { flex: 1 0 100%; padding: 4px 0 4px 4px; }
+  :global(.ra-vl > li.ra-vrow .ra-ck-i) { flex: none; }
+  :global(.ra-vl > li.ra-vrow > .ra-vn) { flex: 1 0 100%; padding-left: 74px; margin-top: -3px; font: 400 11.5px/1.3 var(--sans); color: var(--ink-3); }
  :global(.ra-pin) { display: flex !important; align-items: center;
     justify-content: center; border-radius: 50%; background: #1B2A5B;
     color: #fff; font-family: var(--mono); font-size: 10px; font-weight: 500;

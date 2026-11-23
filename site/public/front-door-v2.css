@@ -378,8 +378,9 @@ body.fd2-immersive .fd2-stage::after { border-radius: 0; }
 .fd2-stage .ra-tl-v2:not(.open) .ra-tl-detail { display: none; }
 .fd2-stage .at-era-src:empty { display: none; }
 .fd2-stage .ra-held-more { margin: 4px 0 14px; font: 500 12.5px/1.4 var(--sans, system-ui, sans-serif); }
-.fd2-stage .ra-held-more a { color: var(--accent, #1f5c6b); text-decoration: none; }
-.fd2-stage .ra-held-more a:hover { text-decoration: underline; }
+.fd2-stage .ra-held-more a { display: inline-flex; align-items: center; gap: 6px; box-sizing: border-box; min-height: 36px; padding: 0 14px; border-radius: 10px;
+  border: 1px solid var(--rule-strong, #bdb9ad); background: var(--panel, #f7f6f2); color: var(--ink, #16222a); font: 600 13px/1.2 var(--sans, system-ui, sans-serif); text-decoration: none; }
+.fd2-stage .ra-held-more a:hover, .fd2-stage .ra-held-more a:focus-visible { border-color: var(--accent, #1f5c6b); color: var(--accent, #1f5c6b); }
 .fd2-stage .ra-mortnote > ul, .fd2-stage .ra-mortnote li.ra-mn-more ul { grid-template-columns: 1fr; grid-auto-rows: auto; gap: 6px; }
 .fd2-stage .ra-mortnote li.ra-mn-c { padding: 8px 12px; border-width: 1px; border-left: 4px solid var(--mn, #6b7780); border-radius: 8px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 2px 10px; }
 .fd2-stage .ra-mortnote .ra-mn-t { display: contents; }
@@ -480,3 +481,24 @@ body.fd2-immersive .fd2-stage::after { border-radius: 0; }
 .fd2-stage .ra-acc svg { display: block; }
 .fd2-stage .ra-who:has(> .ra-acc) > .at-dot, .fd2-stage .sr-m:has(.ra-acc) > .at-dot { display: none; }
 .fd2-stage .ra-area-p > small:has(.ra-acc) { display: inline-flex; align-items: center; margin-left: auto; }
+
+/* ONE TYPE SCALE FOR THE LISTS IN A CARD. David: «text not the same in the different sections?». Section heads are the mono caps the books use, every row's name is 13px
+   sans in the ink colour, and the figures beside it (km, years) are 11px mono in the quiet ink. */
+.fd2-stage .ra-area-g > summary, .fd2-stage .ra-visit h4 { font: 700 11px/1.4 var(--mono, ui-monospace, monospace); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2, #4c5d66); }
+.fd2-stage .ra-visit h4 { margin: 12px 0 4px; }
+.fd2-stage .ra-vl > li, .fd2-stage .ra-vt { font-size: 13px; }
+.fd2-stage .ra-visit .ra-ck-km, .fd2-stage .ra-vy { font-size: 11px; }
+
+/* THE VISITING HEADER IS ONE LINE. David: «real estate? e.g. "working out the walk", wasteful real estate, remove it, and optimise this real estate». The note and
+   the walk's hours share a row (the words left, the four small buttons right); while the walk is being worked out the chosen button pulses instead of a line of
+   text saying so (the line stays for a screen reader, and the words for a failure stay visible). */
+.fd2-stage .ra-visit .ra-hood { display: flex; align-items: center; gap: 8px; margin: 4px 0 6px; }
+.fd2-stage .ra-visit .ra-hood > span:last-child { flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 10px; }
+.fd2-stage .ra-visit .ra-hood .ra-reach { margin: 0; flex-wrap: nowrap; gap: 4px; }
+.fd2-stage .ra-visit .ra-reach button { font-size: 11px; padding: 4px 9px; min-height: 24px; }
+.fd2-stage .ra-visit .ra-hood-r { display: flex; justify-content: flex-end; }
+.fd2-stage .ra-visit .ra-reach-s { margin: 0; flex: 1 0 100%; }
+.fd2-stage .ra-visit .ra-reach-ld { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; flex: none; }
+.fd2-stage .ra-visit .ra-reach:has(~ .ra-reach-ld) button[aria-pressed="true"] { animation: fd2-walk 1s ease-in-out infinite alternate; }
+@keyframes fd2-walk { from { opacity: 1; } to { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .fd2-stage .ra-visit .ra-reach:has(~ .ra-reach-ld) button[aria-pressed="true"] { animation: none; opacity: .6; } }

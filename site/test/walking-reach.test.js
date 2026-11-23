@@ -437,3 +437,16 @@ test("tapping the chosen era again lets it go, and with none chosen every govern
   assert.match(src, /class="ra-gov-src"/);
   assert.match(src, /querySelectorAll\("\.ra-gov-src"\)/);
 });
+
+test("the walk is an area: tapping its shape opens it, it joins the areas list, the map fits it, and a place has a way back to the areas", () => {
+  const src = readFileSync(join(root, "src/components/RecordMap.astro"), "utf8");
+  assert.match(src, /wp\.on\("click", function \(e\) \{ L\.DomEvent\.stopPropagation\(e\); walkOpen\(\); \}\)/);
+  assert.match(src, /function walkJoin\(tick\)/);
+  assert.match(src, /function walkOpen\(\)/);
+  assert.match(src, /if \(TSV2 && WALK && !WALK\.off && areaWalkI\(\) < 0\) walkJoin\(false\)/);
+  assert.match(src, /function reachFit\(\)/);
+  assert.match(src, /\(r\.walk \? "" : '<button type="button" data-sa="reshape"/);
+  assert.match(src, /class="ra-back-areas" data-back-areas/);
+  assert.match(src, /\[data-back-areas\]/);
+  assert.match(src, /\/\^familysearch\/i\.test\(v\.src \|\| ""\)/);
+});

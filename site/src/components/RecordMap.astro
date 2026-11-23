@@ -3308,6 +3308,9 @@ window.addEventListener("load", async function () {
        then a lone link on a row of its own — three stacked blocks and most of
        two hundred pixels before the first source. The heading already lays
        out as a wrapping flex row, so both join it. */
+    /* BACK TO THE AREAS. David: «the area view, how do i get back to it?». Opening a place from the areas replaces them; this puts them back. */
+    if (TSV2 && AREA.rows && AREA.rings.length)
+      h.push('<button type="button" class="ra-back-areas" data-back-areas>\u2039 ' + esc(T("Back to your")) + " " + (AREA.rings.length === 1 ? esc(T("area")) : AREA.rings.length + " " + esc(T("areas"))) + "</button>");
     h.push('<div class="at-h"><h3>' + esc(d.name) + "</h3>");
     if (d.collections.length)
       h.push('<span class="at-n">' + d.collections.length + " volume" +
@@ -3912,7 +3915,14 @@ window.addEventListener("load", async function () {
      bridges are not in it. If the terrain will not load the circle stays, and the note says so. */
   var REACH = { h: 2, id: null, d: null, res: null, state: "", tok: 0 }, REACH_HOURS = [[1, "1 h"], [2, "2 h"], [4, "4 h"], [6, "6 h"]];
   try { var rh0 = +localStorage.getItem("ra-reach-h"); if (REACH_HOURS.some(function (o) { return o[0] === rh0; })) REACH.h = rh0; } catch (e) { /* storage blocked */ }
-  var reachJs = null;
+  var reachJs = null, WALK = null;
+  /* the map fitted to the walk, with the card's footprint kept clear */
+  function reachFit() {
+    if (!TSV2 || !REACH.res || !(REACH.res.ring || []).length) return;
+    var b = L.latLngBounds(REACH.res.ring), card = document.querySelector(".at-panel"), mc = map.getContainer().getBoundingClientRect();
+    var w = card ? Math.max(0, card.getBoundingClientRect().right - mc.left) : 0;
+    map.fitBounds(b, { paddingTopLeft: [Math.min(w + 24, mc.width * 0.6), 90], paddingBottomRight: [70, 150], maxZoom: 14 });
+  }
   function reachOn(d) { return !!(TSV2 && REACH.res && REACH.id === d.id); }
   function reachLoad() {
     if (window.raReach) return Promise.resolve();
@@ -3942,14 +3952,21 @@ window.addEventListener("load", async function () {
     hoodLayer.clearLayers();
     if (REACH.res && REACH.res.ring.length > 2) {
       L.polygon(REACH.res.ring, { interactive: false, color: "#FFFFFF", weight: 5, opacity: .55, dashArray: "2 6", lineCap: "round", fill: false }).addTo(hoodLayer);
-      L.polygon(REACH.res.ring, { interactive: false, color: "#1B2A5B", weight: 2.2, opacity: 1, dashArray: "2 6", lineCap: "round", fillColor: "#1B2A5B", fillOpacity: .05 }).addTo(hoodLayer);
+      var wp = L.polygon(REACH.res.ring, { interactive: true, bubblingMouseEvents: false, color: "#1B2A5B", weight: 2.2, opacity: 1, dashArray: "2 6", lineCap: "round", fillColor: "#1B2A5B", fillOpacity: .05 }).addTo(hoodLayer);
+      /* THE WALK IS AN AREA. David: «if i tap on the neighbours area, why doesnt it focus on the area like the regular area view?». Tapping the shape opens it
+         as an area: the same screen a drawn area gives, with the map fitted to it. */
+      wp.bindTooltip(T("The walk from") + " " + d.name + ", " + REACH.res.hours + " h" + ". " + T("Tap for the area view."), { sticky: true });
+      wp.on("click", function (e) { L.DomEvent.stopPropagation(e); walkOpen(); });
+      WALK = { id: d.id, name: d.name, h: REACH.res.hours, ring: REACH.res.ring, off: false };
+      if (areaWalkI() >= 0) { walkJoin(false); if (AREA.rows && !AREA.ov) areaRefresh(); }
     } else drawHoodCircle(d, hoodKm(d));
+    if (REACH.fit && REACH.res) { REACH.fit = false; reachFit(); }
     if (hoodOn && !map.hasLayer(hoodLayer)) hoodLayer.addTo(map);
     buildCheck(d, hoodKm(d));
     if (window.raShelfPing) window.raShelfPing();
   }
   function reachSetHours(h) {
-    REACH.h = h;
+    REACH.h = h; REACH.fit = true;
     try { localStorage.setItem("ra-reach-h", String(h)); } catch (e) { /* storage blocked */ }
     if (REACH.d) { reachFor(REACH.d); buildCheck(REACH.d, hoodKm(REACH.d)); }
   }
@@ -8613,21 +8630,51 @@ window.addEventListener("load", async function () {
     AREA.added = null; AREA.confirm = false;
     AREA.rings.push(ring);
     AREA.polys.push(areaMakeDraft(ring));
-    if (!AREA.bar) {
-      AREA.bar = document.createElement("div"); AREA.bar.className = "ra-area-bar";
-      map.getContainer().appendChild(AREA.bar); L.DomEvent.disableClickPropagation(AREA.bar);
-      /* typing a name must not pan or zoom the map (Leaflet takes + - and the arrows from anywhere in its container) */
-      L.DomEvent.on(AREA.bar, "keydown keyup keypress", L.DomEvent.stopPropagation);
-      AREA.bar.addEventListener("submit", function (e) {
-        var f = e.target.closest && e.target.closest("form.ra-area-nm"); if (!f) return;
-        e.preventDefault(); areaSaveNamed(f.querySelector("input").value);
-      });
-    }
+    areaEnsureBar();
     AREA.meta = null;
     if (window.raShelfScope) window.raShelfScope("area");
     AREA.bar.innerHTML = '<span id="ra-area-n">Reading the area…</span><button type="button" data-a="show">Show</button><button type="button" data-a="more" title="Draw another area and keep this one">Add area</button><button type="button" data-a="save">Save</button><button type="button" data-a="clear">Clear</button>';
     AREA.bar.hidden = false;
+    /* the walk round the place last opened is always one of the areas in the list, unticked until it is asked for */
+    if (TSV2 && WALK && !WALK.off && areaWalkI() < 0) walkJoin(false);
     areaAnalyse(AREA.rings.slice());
+  }
+  function areaEnsureBar() {
+    if (AREA.bar) return;
+    AREA.bar = document.createElement("div"); AREA.bar.className = "ra-area-bar";
+    map.getContainer().appendChild(AREA.bar); L.DomEvent.disableClickPropagation(AREA.bar);
+    /* typing a name must not pan or zoom the map (Leaflet takes + - and the arrows from anywhere in its container) */
+    L.DomEvent.on(AREA.bar, "keydown keyup keypress", L.DomEvent.stopPropagation);
+    AREA.bar.addEventListener("submit", function (e) {
+      var f = e.target.closest && e.target.closest("form.ra-area-nm"); if (!f) return;
+      e.preventDefault(); areaSaveNamed(f.querySelector("input").value);
+    });
+  }
+  /* THE WALK AS AN AREA. The shape the neighbours button draws (the ground you could walk in N hours) joins the list of areas as its own entry: it can be ticked,
+     shown on its own and counted like a drawn one, but not reshaped (it is computed, not drawn). */
+  function areaWalkI() { for (var i = 0; i < AREA.rings.length; i++) if (AREA.rings[i].walk) return i; return -1; }
+  function walkLabel(r) { return T("Walk from") + " " + r.walk.name + ", " + r.walk.h + " h"; }
+  function walkJoin(tick) {
+    if (!TSV2 || !WALK) return false;
+    var ring = WALK.ring.map(function (c) { return L.latLng(c); }); ring.walk = { id: WALK.id, name: WALK.name, h: WALK.h };
+    var i = areaWalkI(), draft = areaMakeDraft(ring);
+    draft.setStyle({ color: "#1B2A5B", weight: 2.2, dashArray: "2 6", fillColor: "#1B2A5B", fillOpacity: .05 });
+    if (i >= 0) { map.removeLayer(AREA.polys[i]); AREA.rings[i] = ring; AREA.polys[i] = draft; return true; }
+    var n = AREA.rings.length; if (!AREA.on || AREA.on.length !== n) AREA.on = areaOnAll(n);
+    AREA.rings.unshift(ring); AREA.polys.unshift(draft); AREA.on.unshift(!!tick || n === 0);
+    return true;
+  }
+  /* tapping the walk's shape on the map: open it as the area, alone, with the map fitted to it */
+  function walkOpen() {
+    if (!WALK) return;
+    WALK.off = false; walkJoin(true);
+    areaEnsureBar(); AREA.meta = null; AREA.ov = null; AREA.added = null; AREA.confirm = false;
+    AREA.bar.innerHTML = '<span id="ra-area-n">Reading the area…</span><button type="button" data-a="show">Show</button><button type="button" data-a="more" title="Draw another area and keep this one">Add area</button><button type="button" data-a="save">Save</button><button type="button" data-a="clear">Clear</button>';
+    AREA.bar.hidden = false;
+    AREA.pick = areaWalkI();
+    if (window.raShelfScope) window.raShelfScope("area");
+    areaAnalyse(AREA.rings.slice());
+    reachFit();
   }
   /* The tail cells that overlap the area's box must be in before the places inside it can be counted. */
   function areaEnsureCells(bounds) {
@@ -8817,7 +8864,7 @@ window.addEventListener("load", async function () {
     if (n) n.textContent = T(ns > 1 ? ns + " areas" : "Area") + ": " + nfl(R.places.length) + " " + T(R.places.length === 1 ? "place" : "places") + " · " + nfl(vtot) + " " + T(vtot === 1 ? "volume" : "volumes");
     var h = ['<div class="ra-area">'];
     var M = AREA.ov ? null : AREA.meta, SV = M && !M.multi && MYA.areas[M.id], MULTI = M && M.multi;
-    h.push('<div class="at-h ra-area-hd"><h3 id="ra-area-title">' + esc(AREA.ov ? AREA.ov.title : SV ? SV.name : MULTI ? M.names.length + " saved areas together" : (ns > 1 ? areaTitleN(ns) : "Your area")) + "</h3>" + (SV
+    h.push('<div class="at-h ra-area-hd"><h3 id="ra-area-title">' + esc(AREA.ov ? AREA.ov.title : SV ? SV.name : MULTI ? M.names.length + " saved areas together" : (ns > 1 ? areaTitleN(ns) : (R.rings[0] && R.rings[0].walk ? walkLabel(R.rings[0]) : "Your area"))) + "</h3>" + (SV
       ? (AREA.delAsk ? '<span class="ra-area-ask">Delete this area? <button type="button" data-a="yesdel">Yes, delete</button><button type="button" data-a="nodel">Cancel</button></span>'
                      : '<span class="ra-area-ed"><button type="button" data-a="rename">Rename</button><button type="button" data-a="delete">Delete</button></span>')
       : "") + "</div>");
@@ -9037,7 +9084,7 @@ window.addEventListener("load", async function () {
       R.vols[id].vols.forEach(function (v) {
         var vid = areaVolId(v);
         if (volStatus(vid) === "none" && !(window.raProgress.get(vid) || {}).state)
-          out.push({ id: vid, t: v.t, kind: "book", fs: /familysearch\.org/i.test(v.url || ""), where: p.n + (p.cc ? ", " + (CNAME[p.cc] || p.cc) : ""), href: BASE + "place/" + p.i + "/" });
+          out.push({ id: vid, t: v.t, kind: "book", fs: /familysearch\.org/i.test(v.url || "") || /^familysearch/i.test(v.src || ""), where: p.n + (p.cc ? ", " + (CNAME[p.cc] || p.cc) : ""), href: BASE + "place/" + p.i + "/" });
       });
     });
     R.arch.forEach(function (a) {
@@ -9122,6 +9169,7 @@ window.addEventListener("load", async function () {
     reachPopBtn = tg;
     if (!reachPopEl.hidden) { reachPopClose(); return; }
     var br = tg.getBoundingClientRect(), cr = box.getBoundingClientRect();
+    if (REACH.res && !map.getBounds().contains(L.latLngBounds(REACH.res.ring))) reachFit();
     reachPopEl.hidden = false; reachSyncPos(br, cr);
     tg.setAttribute("aria-expanded", "true"); reachPopSync();
   }
@@ -9177,6 +9225,7 @@ window.addEventListener("load", async function () {
       else if (a === "cancelsave") { AREA.bar.innerHTML = '<span id="ra-area-n"></span><button type="button" data-a="show">Show</button><button type="button" data-a="more" title="Draw another area and keep this one">Add area</button><button type="button" data-a="save">Save</button><button type="button" data-a="clear">Clear</button>'; areaRender(); }
     });
     panel.addEventListener("click", function (e) {
+      if (e.target.closest && e.target.closest("[data-back-areas]")) { e.preventDefault(); areaShow(null); return; }
       var o = e.target.closest && e.target.closest("[data-open]");
       if (o) { e.preventDefault(); var pid = o.getAttribute("data-open"), pl = idx.places.filter(function (p) { return p.i === pid; })[0]; if (pl) open(pl); return; }
       var b = e.target.closest && e.target.closest(".ra-area [data-a]"); if (!b) return;
@@ -9464,12 +9513,12 @@ window.addEventListener("load", async function () {
       var pr = per[i], ck = !on || on[i];
       return '<li class="ra-shape-r' + (ck ? "" : " off") + '">' +
         (ns > 1 ? '<input type="checkbox" class="ra-shape-ck" data-sa="tick" data-i="' + i + '" aria-label="Show only what lies inside the ticked areas: area ' + (i + 1) + '"' + (ck ? " checked" : "") + (AREA_ED ? " disabled" : "") + ">" : "") +
-        '<span class="ra-shape-t"><span>' + (ns > 1 ? "Area " + (i + 1) : "The shape") + " <small>" + r.length + ' corners</small></span>' +
+        '<span class="ra-shape-t"><span>' + (r.walk ? esc(walkLabel(r)) : ns > 1 ? "Area " + (i + 1) : "The shape") + " <small>" + (r.walk ? T("follows the ground") : r.length + " corners") + '</small></span>' +
         (pr && ns > 1 ? '<small class="ra-shape-n">' + nfl(pr.places) + " " + (pr.places === 1 ? "place" : "places") + " · " + nfl(pr.vols) + " " + (pr.vols === 1 ? "volume" : "volumes") + " · " + nfl(pr.arch) + " " + (pr.arch === 1 ? "source" : "sources") + "</small>" : "") + '</span><span class="ra-area-ed">' +
-        '<button type="button" data-sa="reshape" data-i="' + i + '"' + (AREA_ED ? " disabled" : "") + '>Reshape</button>' +
+        (r.walk ? "" : '<button type="button" data-sa="reshape" data-i="' + i + '"' + (AREA_ED ? " disabled" : "") + '>Reshape</button>') +
         (ns > 1 ? '<button type="button" data-sa="remove" data-i="' + i + '"' + (AREA_ED ? " disabled" : "") + '>Remove</button>' : "") + "</span></li>";
     }).join("");
-    return '<details class="ra-area-shapes"' + (ns > 1 ? " open" : "") + '><summary>' + (ns > 1 ? "The " + ns + " areas, one by one" : "Change the shape") + "</summary><ul>" + rows + "</ul>" +
+    return '<details class="ra-area-shapes"' + (ns > 1 ? " open" : "") + '><summary>' + (ns > 1 ? "The " + ns + " areas, one by one" : R.rings[0] && R.rings[0].walk ? "The walk" : "Change the shape") + "</summary><ul>" + rows + "</ul>" +
       (partial ? '<p class="at-sub">Showing only the ticked areas. <button type="button" data-sa="all">Show all ' + ns + "</button></p>" : (ns > 1 ? '<p class="at-sub">Tick the areas you want to see; the list below follows.</p>' : "")) +
       (saved && ns > 1 ? '<p class="at-sub">Remove takes one shape out of the group ' + esc(saved.name) + ". Delete (above) removes the whole group.</p>" : "") + "</details>";
   }
@@ -9526,10 +9575,11 @@ window.addEventListener("load", async function () {
     } else {
       if (AREA.rings.length < 2 || !AREA.rings[i]) return;
       var g = AREA.rings.splice(i, 1)[0]; map.removeLayer(AREA.polys.splice(i, 1)[0]); if (AREA.on) AREA.on.splice(i, 1);
+      if (g.walk && WALK) WALK.off = true;
       AREA.undo = { kind: "draft", i: i, ring: g };
     }
     map.closePopup(); areaRefresh();
-    areaNote("Area " + (i + 1) + " removed.", true);
+    areaNote((AREA.undo && AREA.undo.ring && AREA.undo.ring.walk ? "The walk" : "Area " + (i + 1)) + " removed.", true);
   }
   function areaUndoRemove() {
     var u = AREA.undo; if (!u) return; AREA.undo = null;

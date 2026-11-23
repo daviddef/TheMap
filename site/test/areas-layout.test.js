@@ -24,3 +24,19 @@ test("a place is never split from its books, and big places and sub-headings spa
 test("the markup marks a place with ten or more books as big", () => {
   assert.match(src, /nv >= 10 \? ' class="ra-area-big"' : ""/);
 });
+
+test("a place with books folds, and the count of books is in its name line", () => {
+  assert.match(src, /<details class="ra-area-pl" data-vols=/);
+  assert.match(src, /<span class="ra-area-n">/);
+  assert.match(src, /box\.querySelector\("\.ra-area-n"\)\.textContent = vs\.length/);
+});
+
+test("the name opens the place and does not also fold the row", () => {
+  assert.match(src, /if \(o\) \{ e\.preventDefault\(\);/);
+});
+
+test("sources that cover a whole country are listed under the area, regional archives elsewhere are not", () => {
+  assert.match(src, /function areaCountrySources\(R\)/);
+  assert.match(src, /p\.kind !== "regional-archive" && p\.kind !== "diocesan"/);
+  assert.match(src, /Sources that cover all of /);
+});

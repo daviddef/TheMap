@@ -295,5 +295,17 @@ test("the header is the way home and the switcher sits beside it as icons: no fo
   assert.doesNotMatch(css, /\.sw-l \{ padding: 4px 9px/, "no word pill beside the round buttons");
   assert.match(css, /min-width: 761px\)[^}]*\{\s*#sw \{ top: 10px; left: 196px; transform: none; flex-direction: row/, "in a row beside the title on a wide screen");
   assert.match(css, /max-width: 760px/, "a column on a phone");
-  assert.match(cpcss, /min-width: 761px\) \{ #cp \{ padding-top: 58px/, "Compass starts below the row");
+  assert.doesNotMatch(cpcss, /#cp \{ padding-top: 58px/, "Compass no longer starts below the switcher row: its own header is that row");
+  assert.match(cpcss, /\.cp-head \{[^}]*grid-template-areas: "brand tools" "sum sum"[^}]*min-height: 62px/, "the wordmark on the left, the buttons on the right, one quiet line under them");
+  assert.match(cpcss, /\.cp-title \{[^}]*font: 400 29px/, "the wordmark is narrow enough to leave the switcher's place (196px in) free");
+});
+
+test("Compass keeps its filters behind one Filters button, with a count, Esc and a click outside to close", () => {
+  const view = fs.readFileSync(path.join(here, "../public/tree-canvas/compass-view.js"), "utf8"), cpcss = fs.readFileSync(path.join(here, "../public/tree-canvas/compass.css"), "utf8");
+  assert.match(view, /el\.fbtn = btn\('stbtn cp-fbtn'[^\n]*'aria-expanded': 'false', 'aria-controls': 'cp-filters'/);
+  assert.match(view, /head\.append\(brand, tools, el\.sum, el\.filters\)/, "title left, tools right, summary line, then the popover");
+  assert.match(view, /root\.append\(head, el\.main, el\.bar\)/, "the filters are no longer a row of their own");
+  assert.match(view, /e\.key === 'Escape' && !el\.filters\.hidden\) \{ e\.preventDefault\(\); e\.stopPropagation\(\); setFilters\(false, true\)/, "Esc closes the popover, not Compass");
+  assert.match(view, /el\.fcount\.textContent = String\(changed\)/, "the button says how many filters are changed");
+  assert.match(cpcss, /\.cp-filters \{ position: absolute;/); assert.match(cpcss, /\.cp-filters\[hidden\] \{ display: none; \}/);
 });

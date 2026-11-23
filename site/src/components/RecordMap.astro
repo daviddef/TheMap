@@ -8163,9 +8163,13 @@ window.addEventListener("load", async function () {
       h.push('<details class="ra-area-g" ' + (k !== "none" || g.length <= 200 ? "open" : "") + '><summary><i style="background:' + RC_COL[k] + '"></i>' + RC_LAB[k] + " <b>" + nfl(g.length) + "</b></summary><ul>");
       g.slice(0, 400).forEach(function (p) {
         var nv = (p.v || 0) || (p.c || 0);
-        h.push('<li' + (nv >= 10 ? ' class="ra-area-big"' : "") + '><button type="button" class="ra-area-p" data-open="' + esc(p.i) + '"><i' + (k === "busy" ? ' class="pz"' : "") + ' style="background:' + RC_COL[k] + '"></i><span>' + esc(p.n) + "</span>" +
-               '<small>' + (CNAME[p.cc] || p.cc || "") + (nv ? " · " + nfl(nv) + " vol" : " · no volumes") + "</small></button>" +
-               '<div class="ra-area-v" data-vols="' + esc(p.i) + '"></div></li>');
+        var dot = '<i' + (k === "busy" ? ' class="pz"' : "") + ' style="background:' + RC_COL[k] + '"></i>', cn = CNAME[p.cc] || p.cc || "";
+        if (!nv) { h.push('<li class="ra-area-no"><button type="button" class="ra-area-p" data-open="' + esc(p.i) + '">' + dot + "<span>" + esc(p.n) + "</span><small>" + cn + " · no volumes</small></button></li>"); return; }
+        /* The count sits in the name line and the place folds: the books are under it, not on a line of their own. */
+        h.push('<li' + (nv >= 10 ? ' class="ra-area-big"' : "") + '><details class="ra-area-pl" data-vols="' + esc(p.i) + '"><summary><span class="ra-chev" aria-hidden="true"></span>' + dot +
+               '<button type="button" class="ra-area-p" data-open="' + esc(p.i) + '"><span>' + esc(p.n) + "</span></button>" +
+               '<small>' + cn + ' · <span class="ra-area-n">' + nfl(nv) + " book" + (nv === 1 ? "" : "s") + "</span></small></summary>" +
+               '<ul class="ra-vl"></ul></details></li>');
       });
       if (g.length > 400) h.push('<li class="at-sub">…and ' + nfl(g.length - 400) + " more. Draw a smaller area to see them.</li>");
       h.push("</ul></details>");
@@ -8179,9 +8183,30 @@ window.addEventListener("load", async function () {
       });
       h.push("</ul></details>");
     }
-    h.push('<p class="at-sub">Only catalogued places are inside; a source that covers a whole country reaches the area from outside it. Colours read the family line selected in the header.</p></div>');
+    areaCountrySources(R).forEach(function (c, ix, all) {
+      h.push('<details class="ra-area-g ra-area-cov"' + (all.length === 1 || c.list.length <= 8 ? " open" : "") + '><summary><i style="background:#5B7A8C"></i>Sources that cover all of ' + esc(CNAME[c.cc] || c.cc) + " <b>" + nfl(c.list.length) + "</b></summary>" +
+             '<p class="at-sub">They reach this area from outside it: national or country-wide, not kept in a place you drew round.</p><ul>');
+      c.list.forEach(function (a) {
+        var st = volStatus("source:" + a.id);
+        h.push('<li><a class="ra-area-p" target="_blank" rel="noopener" title="Opens in a new tab, so your areas stay on the map" href="' + BASE + "archive/" + esc(a.id) + '/"><i style="background:' + RC_COL[st] + '"></i><span>' + esc(a.name) + "</span><small>" +
+               esc((ACC[a.access] || [0, a.access || ""])[1]) + "</small></a></li>");
+      });
+      h.push("</ul></details>");
+    });
+    h.push('<p class="at-sub">Only catalogued places are inside the area itself; the sources that cover a whole country are listed under it. Colours read the family line selected in the header.</p></div>');
     panel.innerHTML = h.join("");
     areaFillVolumes();
+  }
+  /* The sources that reach the area from outside it: for each country that has a place inside, the providers that name that country and are not
+     a regional or diocesan archive somewhere else (those only count when they stand inside the area, and are listed above). Nearest the area first. */
+  function areaCountrySources(R) {
+    var by = {}, have = {};
+    R.places.forEach(function (p) { if (!p.cc) return; var b = by[p.cc] || (by[p.cc] = { n: 0, la: 0, lo: 0 }); b.n++; b.la += p.y; b.lo += p.x; });
+    R.arch.forEach(function (a) { have[a.id] = 1; });
+    return Object.keys(by).sort(function (a, b) { return by[b].n - by[a].n || a.localeCompare(b); }).map(function (cc) {
+      var b = by[cc];
+      return { cc: cc, list: natProviders(cc, b.la / b.n, b.lo / b.n).filter(function (p) { return !have[p.id] && p.kind !== "regional-archive" && p.kind !== "diocesan"; }) };
+    }).filter(function (c) { return c.list.length; });
   }
   /* The volumes of every place in the area that has any: one file per place, six at a time, up to AREA_CAP places. */
   function areaLoadVolumes() {
@@ -8216,7 +8241,7 @@ window.addEventListener("load", async function () {
     var ids = Object.keys(R.vols), openAll = ids.length <= 8;
     ids.forEach(function (id) {
       var box = panel.querySelector('[data-vols="' + id + '"]'); if (!box) return;
-      var e = R.vols[id], vs = e.vols.slice(); if (!vs.length) return;
+      var e = R.vols[id], vs = e.vols.slice(); if (!vs.length) { box.classList.add("ra-area-nolist"); return; }
       vs.sort(function (a, b) { return areaKindRank(a.t) - areaKindRank(b.t) || (a.from || 9999) - (b.from || 9999) || a.t.localeCompare(b.t); });
       var where = e.p.n + (e.p.cc ? ", " + (CNAME[e.p.cc] || e.p.cc) : "");
       var li = vs.map(function (v) {
@@ -8227,7 +8252,9 @@ window.addEventListener("load", async function () {
                '<span class="ra-vy">' + (v.from ? v.from + "\u2013" + v.to : "") + "</span>" +
                '<span class="volmark"></span></li>';
       }).join("");
-      box.innerHTML = "<details" + (openAll || rcState(e.p) !== "none" ? " open" : "") + "><summary>" + vs.length + " book" + (vs.length === 1 ? "" : "s") + '</summary><ul class="ra-vl">' + li + "</ul></details>";
+      box.querySelector(".ra-vl").innerHTML = li;
+      box.querySelector(".ra-area-n").textContent = vs.length + " book" + (vs.length === 1 ? "" : "s");
+      if (openAll || rcState(e.p) !== "none") box.open = true;
     });
   }
   /* A mark made in the list recolours the dots at once; the groups themselves stay put until Show, so a row does not jump away under the pointer. */
@@ -8342,7 +8369,7 @@ window.addEventListener("load", async function () {
     });
     panel.addEventListener("click", function (e) {
       var o = e.target.closest && e.target.closest("[data-open]");
-      if (o) { var pid = o.getAttribute("data-open"), pl = idx.places.filter(function (p) { return p.i === pid; })[0]; if (pl) open(pl); return; }
+      if (o) { e.preventDefault(); var pid = o.getAttribute("data-open"), pl = idx.places.filter(function (p) { return p.i === pid; })[0]; if (pl) open(pl); return; }
       var b = e.target.closest && e.target.closest(".ra-area [data-a]"); if (!b) return;
       var a = b.getAttribute("data-a");
       if (a === "rename") areaRenameForm(); else if (a === "delete") { AREA.delAsk = true; areaRender(); areaAddUi(); }
@@ -10974,8 +11001,23 @@ window.addEventListener("load", async function () {
     font: 400 13.5px/1.3 var(--sans); color: var(--ink); text-decoration: none; }
   :global(.ra-area-p:hover) { background: var(--ground, #eee); }
   :global(.ra-area-p small) { margin-left: auto; font: 400 11px/1 var(--mono); color: var(--ink-3); white-space: nowrap; }
-  :global(.ra-area-v) { margin: 0 0 6px 22px; }
-  :global(.ra-area-v summary) { cursor: pointer; font: 500 12px/1.4 var(--sans); color: var(--accent); padding: 2px 0; }
+  /* A place folds: [chevron] [dot] name ........ Country · 5 books. The name opens the place; the rest of the line folds it. */
+  :global(.ra-area-pl > summary) { display: flex; align-items: center; gap: 8px; cursor: pointer; list-style: none; padding: 5px 4px; border-radius: 6px; }
+  :global(.ra-area-pl > summary::-webkit-details-marker) { display: none; }
+  :global(.ra-area-pl > summary:hover) { background: var(--ground, #eee); }
+  :global(.ra-area-pl > summary > i) { width: 10px; height: 10px; border-radius: 50%; flex: none; display: inline-block; }
+  :global(.ra-area-pl > summary .ra-area-p) { width: auto; flex: 1 1 auto; min-width: 0; padding: 0; background: none; }
+  :global(.ra-area-pl > summary .ra-area-p:hover) { background: none; text-decoration: underline; }
+  :global(.ra-area-pl > summary > small) { margin-left: auto; font: 400 11px/1 var(--mono); color: var(--ink-3); white-space: nowrap; }
+  :global(.ra-area-pl > summary > small .ra-area-n) { color: var(--accent); font-weight: 600; }
+  :global(.ra-chev) { flex: none; width: 0; height: 0; border-left: 5px solid var(--ink-3); border-top: 4px solid transparent; border-bottom: 4px solid transparent; transition: transform .12s; margin: 0 2px; }
+  :global(.ra-area-pl[open] > summary .ra-chev) { transform: rotate(90deg); }
+  :global(.ra-area-nolist > summary .ra-chev) { visibility: hidden; }
+  :global(.ra-area-pl > .ra-vl) { margin: 2px 0 8px 31px; }
+  :global(.ra-area-no) { padding-left: 21px; }
+  :global(.ra-area-cov > .at-sub) { margin: 4px 0 2px; font-size: 12px; }
+  :global(.ra-area-cov .ra-area-p small) { white-space: normal; text-align: right; }
+  @media (prefers-reduced-motion: reduce) { :global(.ra-chev) { transition: none; } }
   :global(.ra-vl) { list-style: none; margin: 6px 0 0; padding: 0; border-top: 1px solid var(--rule); }
   :global(.ra-vl > li) { display: flex; align-items: center; flex-wrap: wrap; gap: 0 10px; padding: 7px 0; border-bottom: 1px solid var(--rule); font: 400 12.5px/1.35 var(--sans); }
   :global(.ra-vl > li > i) { width: 8px; height: 8px; border-radius: 50%; flex: none; }
@@ -11007,7 +11049,7 @@ window.addEventListener("load", async function () {
   :global(.ra-area-g > ul) { columns: 2 25rem; column-gap: 36px; }
   :global(.ra-area-g > ul > li) { break-inside: avoid; }
   :global(.ra-area-g > ul > li.at-sub), :global(.ra-area-g > ul > li.ra-area-big) { column-span: all; }
-  :global(.ra-area-p), :global(.ra-area-v > details > summary) { break-after: avoid; }
+  :global(.ra-area-p), :global(.ra-area-pl > summary) { break-after: avoid; }
   :global(.ra-area-big .ra-vl) { columns: 2 24rem; column-gap: 36px; }
   :global(.ra-area-big .ra-vl > li) { break-inside: avoid; }
 

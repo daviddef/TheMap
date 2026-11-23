@@ -11,6 +11,12 @@
 /* ---------- the strip above the stage ---------- */
 body.fd2 .fd2-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 6px 0 10px; font: 400 13.5px/1.4 var(--sans, system-ui, sans-serif); color: var(--ink-3, #606c72); }
 body.fd2 .fd2-tag { margin: 0; min-width: 0; }
+/* the «N volumes marked in this browser · see and export them» line under the map: My research is in the header (David: «remove this all») */
+body.fd2 #ra-mywork { display: none !important; }
+/* the map credits, under the map frame */
+body.fd2 .fd2-credits { margin: 6px 4px 0; text-align: right; font: 400 11px/1.4 var(--sans, system-ui, sans-serif); color: var(--ink-3, #606c72); }
+body.fd2 .fd2-credits .leaflet-control-attribution { position: static; float: none; clear: none; display: inline; margin: 0; padding: 0; background: none !important; box-shadow: none; color: inherit; font: inherit; }
+body.fd2 .fd2-credits .leaflet-control-attribution a { color: var(--ink-2, #4c5d66); }
 body.fd2 .fd2-tag b { color: var(--accent, #1f5c6b); font-weight: 600; letter-spacing: .01em; }
 body.fd2 .fd2-tag span { margin-left: 4px; }
 body.fd2 .fd2-classic { flex: none; font: 600 13px/1 var(--sans, system-ui, sans-serif); color: var(--ink-2, #4c5d66); text-decoration: none; border: 1px solid var(--rule-strong, #b6b2a6); border-radius: 99px; padding: 8px 14px; background: var(--panel, #f7f6f2); }
@@ -73,9 +79,11 @@ body.fd2 .fd2-classic:hover, body.fd2 .fd2-classic:focus-visible { color: var(--
   .fd2-stage .leaflet-top.leaflet-left { left: auto; right: 12px; top: 120px; }
   .fd2-stage .leaflet-top.leaflet-left .leaflet-control { margin: 0 0 10px 0; clear: both; float: right; }
   .fd2-stage .leaflet-top.leaflet-right { top: auto; bottom: 30px; right: 10px; }
-  .fd2-stage .leaflet-control-zoom, .fd2-stage .ra-fullctl, .fd2-stage .ra-areactl { border-radius: 14px !important; overflow: hidden; border: 1px solid var(--rule-strong, #b6b2a6) !important; box-shadow: 0 8px 24px -10px rgba(10, 24, 32, .5) !important; background: var(--fd2-glass); backdrop-filter: blur(10px); }
-  .fd2-stage .leaflet-control-zoom a, .fd2-stage .ra-fullctl a, .fd2-stage .ra-fullctl button, .fd2-stage .ra-areactl a, .fd2-stage .ra-areactl button { width: 38px !important; height: 38px !important; line-height: 38px !important; background: transparent !important; color: var(--ink, #16222a) !important; border-bottom-color: var(--rule, #d3d0c7) !important; }
-  .fd2-stage .leaflet-control-zoom a:hover, .fd2-stage .ra-fullctl a:hover, .fd2-stage .ra-fullctl button:hover, .fd2-stage .ra-areactl a:hover, .fd2-stage .ra-areactl button:hover { background: var(--accent-wash, #dce8ea) !important; color: var(--accent, #1f5c6b) !important; }
+  .fd2-stage .leaflet-control-zoom, .fd2-stage .ra-fullctl, .fd2-stage .ra-areactl, .fd2-stage .ra-shelfctl, .fd2-stage .ra-histctl { border-radius: 14px !important; overflow: hidden; border: 1px solid var(--rule-strong, #b6b2a6) !important; box-shadow: 0 8px 24px -10px rgba(10, 24, 32, .5) !important; background: var(--fd2-glass); backdrop-filter: blur(10px); }
+  .fd2-stage .leaflet-control-zoom a, .fd2-stage .ra-fullctl a, .fd2-stage .ra-fullctl button, .fd2-stage .ra-areactl a, .fd2-stage .ra-areactl button, .fd2-stage .ra-shelfctl a, .fd2-stage .ra-histctl a { width: 38px !important; height: 38px !important; line-height: 38px !important; background: transparent !important; color: var(--ink, #16222a) !important; border-bottom-color: var(--rule, #d3d0c7) !important; }
+  .fd2-stage .leaflet-control-zoom a:hover, .fd2-stage .ra-fullctl a:hover, .fd2-stage .ra-fullctl button:hover, .fd2-stage .ra-areactl a:hover, .fd2-stage .ra-areactl button:hover, .fd2-stage .ra-shelfctl a:hover, .fd2-stage .ra-histctl a:hover { background: var(--accent-wash, #dce8ea) !important; color: var(--accent, #1f5c6b) !important; }
+  .fd2-stage .ra-shelfctl a.on { background: var(--accent, #1f5c6b) !important; color: #fff !important; }
+  .fd2-stage .ra-shelfctl a, .fd2-stage .ra-histctl a { display: grid; place-items: center; }
   .fd2-stage .ra-base { border-radius: 14px; border: 1px solid var(--rule-strong, #b6b2a6); background: var(--fd2-glass); backdrop-filter: blur(10px); box-shadow: 0 8px 24px -10px rgba(10, 24, 32, .5); overflow: hidden; }
   .fd2-stage .leaflet-control-attribution { border-radius: 8px 0 0 0; background: var(--fd2-glass) !important; }
 
@@ -271,7 +279,7 @@ body.fd2-immersive .fd2-stage::after { border-radius: 0; }
   .fd2-stage .ra-sh-seg { display: inline-flex; border-radius: 99px; padding: 2px; background: color-mix(in srgb, var(--rule, #d8d4c8) 55%, transparent); }
   .fd2-stage .ra-sh-seg button { all: unset; box-sizing: border-box; cursor: pointer; font: 600 12px/1 var(--sans, system-ui, sans-serif); padding: 6px 11px; border-radius: 99px; color: var(--ink-2, #4c5d66); }
   .fd2-stage .ra-sh-seg button[aria-pressed="true"] { background: var(--accent, #1f5c6b); color: #fff; }
-  .fd2-stage .ra-sh-seg button:focus-visible, .fd2-stage .ra-sh-x:focus-visible, .fd2-stage .ra-sh-yrchip:focus-visible, .fd2-stage .ra-sh-card:focus-visible { outline: 2px solid var(--accent, #1f5c6b); outline-offset: 2px; }
+  .fd2-stage .ra-sh-list:focus-visible, .fd2-stage .ra-sh-seg button:focus-visible, .fd2-stage .ra-sh-x:focus-visible, .fd2-stage .ra-sh-yrchip:focus-visible, .fd2-stage .ra-sh-card:focus-visible { outline: 2px solid var(--accent, #1f5c6b); outline-offset: 2px; }
   .fd2-stage .ra-sh-x { all: unset; cursor: pointer; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; font-size: 18px; color: var(--ink-3, #606c72); }
   .fd2-stage .ra-sh-x:hover { background: var(--accent-wash, #dce8ea); color: var(--accent, #1f5c6b); }
   .fd2-stage .ra-sh-yrchip { all: unset; cursor: pointer; font: 700 12.5px/1 var(--sans, system-ui, sans-serif); padding: 6px 10px; border-radius: 99px; background: var(--accent-wash, #dce8ea); color: var(--accent, #1f5c6b); font-variant-numeric: tabular-nums; }
@@ -352,3 +360,252 @@ body.fd2-immersive .fd2-stage::after { border-radius: 0; }
 @media (prefers-reduced-motion: reduce) { .fd2-stage .ra-mortnote li.ra-ts-flash { animation: none; } }
 .fd2-stage .ra-ts-ringtip { font: 600 12px/1.2 var(--sans, system-ui, sans-serif); color: var(--ink, #16222a); background: var(--panel, #f7f6f2); border: 1px solid var(--rule-strong, #b6b2a6); border-radius: 99px; padding: 3px 9px; box-shadow: 0 2px 8px rgba(0, 0, 0, .25); }
 .fd2-stage .ra-ts-ringtip::before { display: none; }
+
+/* WALKING REACH: the hours switch and "Use as my area" in the checklist's note */
+.fd2-stage .ra-hood-r { display: block; }
+.fd2-stage .ra-hood .ra-reach { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.fd2-stage .ra-reach button { font: 600 12px/1 var(--sans, system-ui, sans-serif); padding: 7px 11px; min-height: 30px; border-radius: 99px; border: 1px solid var(--rule-strong, #b6b2a6); background: var(--panel, #f7f6f2); color: var(--ink, #16222a); cursor: pointer; }
+.fd2-stage .ra-reach button:hover { border-color: var(--accent, #1f5c6b); color: var(--accent, #1f5c6b); }
+.fd2-stage .ra-reach button[aria-pressed="true"] { background: var(--ink, #16222a); border-color: var(--ink, #16222a); color: var(--panel, #f7f6f2); }
+.fd2-stage .ra-reach-s { display: block; margin-top: 6px; font-size: 11px; color: var(--ink-2, #4c5d66); }
+
+/* the shelf's "See the list": the same area screen for the place, the view or the area */
+.fd2-stage .ra-sh-list { all: unset; cursor: pointer; font: 700 12.5px/1 var(--sans, system-ui, sans-serif); padding: 7px 12px; border-radius: 99px; border: 1px solid var(--accent, #1f5c6b); color: var(--accent, #1f5c6b); white-space: nowrap; }
+.fd2-stage .ra-sh-list:hover { background: var(--accent, #1f5c6b); color: #fff; }
+
+/* THE PLACE CARD, ON THE AREA SCREEN'S TERMS: one strip for who held the ground (its text opens when a segment is tapped), the other regions on the
+   place page, the events as one-line rows, and the books and catalogues drawn as the area screen draws them */
+.fd2-stage .ra-tl-v2:not(.open) .ra-tl-detail { display: none; }
+.fd2-stage .at-era-src:empty { display: none; }
+.fd2-stage .ra-mortnote > ul, .fd2-stage .ra-mortnote li.ra-mn-more ul { grid-template-columns: 1fr; grid-auto-rows: auto; gap: 6px; }
+.fd2-stage .ra-mortnote li.ra-mn-c { padding: 8px 12px; border-width: 1px; border-left: 4px solid var(--mn, #6b7780); border-radius: 8px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 2px 10px; }
+.fd2-stage .ra-mortnote .ra-mn-t { display: contents; }
+.fd2-stage .ra-mortnote .ra-mn-t b { min-height: 0; font-size: 14px; }
+.fd2-stage .ra-mortnote .ra-mn-m, .fd2-stage .ra-mortnote .ra-mn-v, .fd2-stage .ra-mortnote .ra-mn-r { grid-column: 1 / -1; }
+.fd2-stage .ra-mortnote .ra-mn-v { padding: 2px 0; background: none; font-size: 11.5px; }
+.fd2-stage .ra-area-solo { margin-top: 6px; }
+.fd2-stage .ra-area-solo-l > summary { cursor: pointer; font: 700 11px/1.4 var(--mono, ui-monospace, monospace); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2, #4c5d66); padding: 6px 0; }
+.fd2-stage .ra-mortnote { max-height: 240px; overflow: auto; overscroll-behavior: contain; padding-right: 4px; }
+
+/* the history play moved into the icon column: the pill keeps only its Year switch */
+.fd2-stage #ra-play { display: none; }
+.fd2-stage .ra-histctl { display: block !important; }
+
+/* THE FOUR ICONS OF A PLACE CARD, ONE ROW AT THE TOP RIGHT, ONE DESIGN: the mark, the place page, the flag, then the card's own fold. Round, 32px, the
+   fold's own border and ground; the flag fills its circle. */
+.fd2-stage .at-h:has(.at-tools) { position: relative; padding-right: 156px; min-height: 36px; }
+.fd2-stage .at-tools { position: absolute; top: -12px; right: 26px; display: flex; align-items: center; gap: 6px; }
+.fd2-stage .at-tools .at-ico { display: contents; }
+.fd2-stage .at-tools .srcmark { display: contents; }
+.fd2-stage .at-tools .vm-pill, .fd2-stage .at-tools .at-ico a { box-sizing: border-box; display: inline-grid; place-items: center; width: 32px; height: 32px; min-width: 32px; padding: 0; margin: 0; overflow: hidden;
+  border-radius: 99px; border: 1px solid var(--rule, #d3d0c7); background: var(--panel, #f7f6f2); color: var(--ink-2, #4c5d66); font: 600 18px/1 var(--sans, system-ui, sans-serif); text-decoration: none; cursor: pointer; }
+.fd2-stage .at-tools .vm-pill:hover, .fd2-stage .at-tools .at-ico a:hover, .fd2-stage .at-tools .vm-pill:focus-visible, .fd2-stage .at-tools .at-ico a:focus-visible { color: var(--accent, #1f5c6b); border-color: var(--accent, #1f5c6b); outline: none; }
+.fd2-stage .at-tools .at-ico a svg { width: 15px; height: 15px; }
+.fd2-stage .at-tools .at-ico a.at-ico-flag { padding: 0; }
+.fd2-stage .at-tools .at-ico a.at-ico-flag svg { width: 100%; height: 100%; border: 0; display: block; }
+
+/* the year strip sits in the search bar, right of the filter button (moved there by RecordMap); the history theatre hides it while it is open */
+.fd2-stage .ra-bar-find .ra-time { position: static !important; transform: none !important; left: auto !important; right: auto !important; bottom: auto !important;
+  flex: 0 0 auto; order: 9; align-self: flex-start; max-width: none; margin: 0; box-sizing: border-box; height: var(--ra-ctl, 56px); padding: 0 14px; z-index: auto;
+  border-radius: 16px; background: var(--panel, #17212a); box-shadow: 0 1px 2px rgba(10, 20, 26, .06); color: var(--ink-2, #4c5d66); font-size: 14px; }
+.fd2-stage .ra-bar-find .ra-time:hover { border-color: var(--accent, #1f5c6b); }
+.fd2-stage .ra-bar-find .ra-time .ra-ylab-w, .fd2-stage .ra-bar-find .ra-time #ra-yout { font-size: 14px; }
+.fd2-stage .ra-bar-find .ra-time .ra-slider { flex: 0 0 150px; width: 150px; }
+.fd2-stage:has(.ra-th) .ra-bar-find .ra-time { display: none; }
+@media (max-width: 899px) {
+  .fd2-stage .ra-bar-find .ra-time { flex: 1 1 100%; margin: 8px 0 0; height: var(--ra-ctl, 56px); justify-content: space-between; }
+  .fd2-stage .ra-bar-find .ra-time .ra-slider { flex: 1 1 auto; width: auto; }
+}
+
+/* removed on the new front door (David: «remove this all»): the base-map "looks" strip (the line about volumes marked is removed too, near the top of this file) */
+.fd2-stage .ra-base { display: none !important; }
+
+/* THE SURNAME CARD wears the place card's and the area card's look (David: «the surname overlay, can it follow the look and feel of layers and
+   places?»): flat sections divided by a hairline instead of tinted boxes with a purple edge, the same small mono section label, quiet chips,
+   tighter prose, and one line per country. The facts are the same; only the dress changes. */
+.fd2-stage .ra-surn { margin-top: 10px; padding: 10px 0 0; border-radius: 0; background: none; border: 0; border-top: 1px solid var(--rule, #d3d0c7); }
+.fd2-stage .ra-surn:first-of-type { border-top: 0; margin-top: 4px; }
+.fd2-stage .ra-surn .lab { font: 700 11px/1.4 var(--mono, ui-monospace, monospace); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2, #4c5d66); margin: 0 0 6px; }
+.fd2-stage .ra-surn p { font-size: 12.5px; line-height: 1.5; margin: 4px 0 0; color: var(--ink-2, #4c5d66); }
+.fd2-stage .ra-surn b { font-size: 14px; }
+.fd2-stage .ra-surn .ra-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.fd2-stage .ra-surn .ra-chip { padding: 3px 9px; font-size: 12px; background: transparent; border: 1px solid var(--rule-strong, #b6b2a6); color: var(--ink, #16222a); }
+.fd2-stage .ra-surn .ra-chip.on, .fd2-stage .ra-surn .ra-chip b { font-weight: 600; font-size: 12px; border-color: var(--accent, #1f5c6b); color: var(--accent, #1f5c6b); }
+.fd2-stage .ra-surn .ra-orig-s { font-size: 11px; color: var(--ink-3, #606c72); margin-top: 6px; }
+.fd2-stage .ra-surn .ra-tw .at-lab { font: 700 11px/1.4 var(--mono, ui-monospace, monospace); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2, #4c5d66); margin: 10px 0 4px; }
+.fd2-stage .ra-surn .ra-first { margin: 0 0 6px !important; font-size: 12.5px; }
+.fd2-stage .ra-surn .ra-who { color: var(--ink-3, #606c72); }
+.fd2-stage .ra-surn .ra-how { margin-top: 8px; padding-top: 6px; border-top: 1px dashed var(--rule, #d3d0c7); }
+.fd2-stage .ra-surn .ra-how summary { font: 700 11px/1.4 var(--mono, ui-monospace, monospace); letter-spacing: .08em; color: var(--ink-3, #606c72); }
+
+/* «Where to read» is a section of the surname card on the new front door, not a second overlay */
+.fd2-stage .ra-in-card { flex: none; min-height: 0; overflow: visible; margin-top: 10px; padding: 10px 0 0; border-top: 1px solid var(--rule, #d3d0c7); }
+.fd2-stage .ra-in-card .lab { font: 700 11px/1.4 var(--mono, ui-monospace, monospace); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2, #4c5d66); margin: 0 0 6px; }
+.fd2-stage .ra-in-card h4 { margin: 8px 0 2px; }
+
+/* THE SURNAME CARD IS A GLANCE, NOT A DOSSIER. David: «the name view is just way too long. this name already has its own page, let's keep this ultra wow,
+   brilliant visuals, and not just wordy overlays». The card keeps the name, its languages, the origin line and the country timeline (the picture),
+   and «Where to read» folded. The other spellings, the commune note, the mapped-region notes, the how-to-read text and the per-country source
+   lists are on the name's own page (the link under its title) and stay out of the card. */
+.fd2-stage .at-body:has(> .ra-surn) > .ra-surn ~ .ra-surn,
+.fd2-stage .at-body:has(> .ra-surn) > .ra-note,
+.fd2-stage .at-body:has(> .ra-surn) > .ra-juris,
+.fd2-stage .at-body:has(> .ra-surn) > .at-sec { display: none; }
+.fd2-stage .ra-surn .ra-orig-s, .fd2-stage .ra-surn .ra-vars, .fd2-stage .ra-surn .ra-filed, .fd2-stage .ra-surn .ra-how, .fd2-stage .ra-surn .ra-first .ra-who, .fd2-stage .ra-surn .ra-tw-nd { display: none; }
+.fd2-stage .ra-surn .ra-chips > :nth-child(n+5) { display: none; }
+.fd2-stage .ra-surn .ra-tw-r { margin: 5px 0; }
+.fd2-stage details.ra-in-card > summary.lab { cursor: pointer; list-style: none; }
+
+
+/* the fold control: a chevron in the same round button as the place card's icons */
+.fd2-stage .fd2-fold .fd2-fold-x { display: inline-grid; place-items: center; }
+
+/* «Where to read» in the surname card: the area list's own look (a group per country, one line per archive) */
+.fd2-stage .ra-in-card .ra-area-g { margin: 0 0 6px; padding-top: 6px; border-top: 1px solid var(--rule, #d3d0c7); }
+.fd2-stage .ra-in-card .ra-area-g > summary a { color: inherit; text-decoration: none; }
+.fd2-stage .ra-in-card .ra-area-g > summary a:hover { color: var(--accent, #1f5c6b); text-decoration: underline; }
+.fd2-stage .ra-in-card .ra-area-p { text-decoration: none; color: var(--ink, #16222a); font: 500 13px/1.35 var(--sans, system-ui, sans-serif); }
+.fd2-stage .ra-in-card .ra-area-p > span:nth-child(2) { flex: 1 1 auto; min-width: 0; }
+.fd2-stage .ra-in-card .ra-area-p small { display: none; }   /* the colour of the number says it; the words are its tooltip */
+.fd2-stage .ra-in-card .ra-ck-i { flex: none; display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; font: 700 10px/1 var(--mono, ui-monospace, monospace); }
+
+/* HOW YOU CAN READ A SOURCE, AS A PICTURE: a building for «on paper, in the building», a picture for images, a lock for a paywall, a book for a catalogue entry.
+   The words are the tooltip and the accessible name; the dot that used to precede them is not repeated. */
+.fd2-stage .ra-acc { flex: none; display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; color: var(--ink-2, #4c5d66); cursor: help; vertical-align: middle; }
+.fd2-stage .ra-acc:hover { color: var(--accent, #1f5c6b); background: var(--accent-wash, rgba(31, 92, 107, .1)); }
+.fd2-stage .ra-acc svg { display: block; }
+.fd2-stage .ra-who:has(> .ra-acc) > .at-dot, .fd2-stage .sr-m:has(.ra-acc) > .at-dot { display: none; }
+.fd2-stage .ra-area-p > small:has(.ra-acc) { display: inline-flex; align-items: center; margin-left: auto; }
+
+/* ONE TYPE SCALE FOR THE LISTS IN A CARD. David: «text not the same in the different sections?». Section heads are the mono caps the books use, every row's name is 13px
+   sans in the ink colour, and the figures beside it (km, years) are 11px mono in the quiet ink. */
+.fd2-stage .ra-area-g > summary, .fd2-stage .ra-visit h4 { font: 700 11px/1.4 var(--mono, ui-monospace, monospace); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2, #4c5d66); }
+.fd2-stage .ra-visit h4 { margin: 12px 0 4px; }
+.fd2-stage .ra-vl > li, .fd2-stage .ra-vt { font-size: 13px; }
+.fd2-stage .ra-visit .ra-ck-km, .fd2-stage .ra-vy { font-size: 11px; }
+
+/* THE VISITING HEADER IS ONE LINE. David: «real estate? e.g. "working out the walk", wasteful real estate, remove it, and optimise this real estate». The note and
+   the walk's hours share a row (the words left, the four small buttons right); while the walk is being worked out the chosen button pulses instead of a line of
+   text saying so (the line stays for a screen reader, and the words for a failure stay visible). */
+.fd2-stage .ra-visit .ra-hood { display: flex; align-items: center; gap: 8px; margin: 4px 0 6px; }
+.fd2-stage .ra-visit .ra-hood > span:last-child { flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 10px; }
+.fd2-stage .ra-visit .ra-hood .ra-reach { margin: 0; flex-wrap: nowrap; gap: 4px; }
+.fd2-stage .ra-visit .ra-reach button { font-size: 11px; padding: 4px 9px; min-height: 24px; }
+.fd2-stage .ra-visit .ra-hood-r { display: flex; justify-content: flex-end; }
+.fd2-stage .ra-visit .ra-reach-s { margin: 0; flex: 1 0 100%; }
+.fd2-stage .ra-visit .ra-reach-ld { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; flex: none; }
+.fd2-stage .ra-visit .ra-hood:has(.ra-reach-ld) .ra-hood-k { animation: fd2-walk 1s ease-in-out infinite alternate; }
+@keyframes fd2-walk { from { opacity: 1; } to { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .fd2-stage .ra-visit .ra-hood:has(.ra-reach-ld) .ra-hood-k { animation: none; opacity: .6; } }
+
+/* the neighbours button's panel: the walk's hours beside the button, and a switch for the ring */
+.fd2-stage .fd2-reachpop { position: absolute; z-index: 1100; display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--rule-strong, #bdb9ad);
+  background: var(--panel, #f7f6f2); box-shadow: 0 6px 22px rgba(10, 20, 26, .22); color: var(--ink, #16222a); }
+.fd2-stage .fd2-reachpop[hidden] { display: none; }
+.fd2-stage .fd2-rp-l { font: 700 10.5px/1.3 var(--mono, ui-monospace, monospace); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2, #4c5d66); }
+.fd2-stage .fd2-reachpop .ra-reach { display: flex; gap: 6px; }
+.fd2-stage .fd2-rp-off { align-self: flex-start; font: 600 12px/1 var(--sans, system-ui, sans-serif); padding: 7px 11px; border-radius: 99px; border: 1px solid var(--rule-strong, #b6b2a6); background: transparent; color: var(--ink-2, #4c5d66); cursor: pointer; }
+.fd2-stage .fd2-rp-off:hover { border-color: var(--accent, #1f5c6b); color: var(--accent, #1f5c6b); }
+
+/* ONE FOLD MARK FOR EVERY SECTION OF A CARD. David: «why different bullets/collapse icons?». The books, the country-wide sources, Visiting and Where to read all
+   fold the same way, so they carry the same small chevron (right when shut, down when open) and none of them carries a coloured dot in front of its name. */
+.fd2-stage details.ra-in-card > summary.lab::before, .fd2-stage details.ra-area-solo-l > summary::before, .fd2-stage details.ra-area-cov > summary::before, .fd2-stage details.ra-area-rd > summary::before {
+  content: ""; flex: none; display: inline-block; width: 6px; height: 6px; margin: 0 9px 2px 3px; border-right: 1.6px solid currentColor; border-bottom: 1.6px solid currentColor; transform: rotate(-45deg); transition: transform .15s; }
+.fd2-stage details[open].ra-in-card > summary.lab::before, .fd2-stage details[open].ra-area-solo-l > summary::before, .fd2-stage details[open].ra-area-cov > summary::before, .fd2-stage details[open].ra-area-rd > summary::before { transform: rotate(45deg); margin-bottom: 4px; }
+.fd2-stage details.ra-area-cov > summary > i, .fd2-stage details.ra-area-rd > summary > i { display: none; }
+.fd2-stage details.ra-area-solo-l > summary, .fd2-stage details.ra-area-cov > summary, .fd2-stage details.ra-area-rd > summary, .fd2-stage details.ra-in-card > summary.lab { cursor: pointer; list-style: none; }
+.fd2-stage details > summary::-webkit-details-marker { display: none; }
+
+/* THE COUNT IS ALWAYS AT THE RIGHT. David: «why are the numbers not all on the right?». Every foldable section's head is one row: chevron, name, and the count pushed to
+   the right edge in the same small teal figures the books list uses. */
+.fd2-stage details.ra-area-solo-l > summary, .fd2-stage details.ra-area-cov > summary, .fd2-stage details.ra-area-rd > summary, .fd2-stage details.ra-in-card > summary.lab { display: flex; align-items: center; gap: 0; padding: 5px 0; }
+.fd2-stage details.ra-area-cov > summary > b, .fd2-stage details.ra-area-rd > summary > b, .fd2-stage details.ra-in-card > summary.lab > b { margin-left: auto; padding-left: 10px; font: 600 11px/1 var(--mono, ui-monospace, monospace); letter-spacing: .08em; color: var(--accent, #1f5c6b); }
+
+/* the walk's note in the Visiting head: quiet, lower case, between the name and the count */
+.fd2-stage .ra-sum-note { flex: 1 1 auto; min-width: 0; margin-left: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 11.5px/1.3 var(--sans, system-ui, sans-serif); letter-spacing: 0; text-transform: none; color: var(--ink-3, #606c72); }
+.fd2-stage .ra-sum-ld { animation: fd2-walk 1s ease-in-out infinite alternate; }
+@media (prefers-reduced-motion: reduce) { .fd2-stage .ra-sum-ld { animation: none; opacity: .6; } }
+
+/* ONE SPACING FOR EVERY LIST IN A CARD. David: «spacing and indentation not consistent». Rows start at the section head's own left edge (the + of every list is on one
+   line), each row is the book row's height with a hairline under it, a list opens under a hairline, and the figures at the right all end on the same edge. */
+.fd2-stage .ra-area-pl.ra-area-solo-l > .ra-vl, .fd2-stage .ra-visit > .ra-vl { margin: 4px 0 10px; }
+.fd2-stage .ra-area-g > ul { margin: 4px 0 10px; border-top: 1px solid var(--rule, #d3d0c7); }
+.fd2-stage .ra-area-g > ul > li[data-src] { padding: 7px 0; border-bottom: 1px solid var(--rule, #d3d0c7); }
+.fd2-stage .ra-area-g > ul > li[data-src] > .ra-area-p { padding: 0; font-size: 13px; line-height: 1.35; }
+.fd2-stage .ra-area-g > ul > li[data-src] > .ra-area-p:hover { background: none; }
+.fd2-stage .ra-area-p > small:has(.ra-acc) { display: flex; align-items: center; height: 22px; margin-right: -3px; }
+.fd2-stage .ra-vl > li { gap: 0 10px; }
+.fd2-stage .ra-vt .ra-vn { margin-left: 6px; font: 400 11px/1 var(--sans, system-ui, sans-serif); color: var(--ink-3, #606c72); white-space: nowrap; }
+
+/* the same dot, the same gaps and the same centre line in every list row: the books' 8px grey dot, 10px between the +, the dot and the name, and the access icon centred on the name */
+.fd2-stage .ra-acc { margin: 0; }
+.fd2-stage .ra-area-g > ul > li[data-src] { gap: 0 10px; }
+.fd2-stage .ra-area-g > ul > li[data-src] > .ra-area-p { gap: 10px; align-items: center; min-height: 22px; }
+.fd2-stage .ra-area-g > ul > li[data-src] > .ra-area-p > i { width: 8px; height: 8px; }
+.fd2-stage .ra-area-g > ul > li[data-src] > .ra-area-p > span:nth-child(2) { line-height: 1.35; }
+.fd2-stage .ra-vl > li > i, .fd2-stage .ra-area-g > ul > li[data-src] > .ra-area-p > i { margin: 0 5px; }   /* the dot sits in an 18px slot, the width of a number, so every name starts on one line */
+.fd2-stage .ra-area-g > ul > li[data-src] > .srcmark { margin-right: 10px; }
+.fd2-stage .ra-vl > li.ra-vrow > .ra-ck-i { margin-right: 0; }
+
+/* a village's «N volumes» is the button that folds out its books and catalogues, shut until asked; they nest under the village, a step in from its + */
+.fd2-stage .ra-vt .ra-vexp { display: inline-flex; align-items: center; gap: 5px; margin-left: 6px; padding: 2px 4px; border: 0; border-radius: 6px; background: none; font: 400 11px/1 var(--sans, system-ui, sans-serif); color: var(--ink-3, #606c72); cursor: pointer; }
+.fd2-stage .ra-vt .ra-vexp:hover, .fd2-stage .ra-vt .ra-vexp:focus-visible { color: var(--accent, #1f5c6b); background: var(--accent-wash, rgba(31, 92, 107, .1)); }
+.fd2-stage .ra-vexp svg { transition: transform .15s; }
+.fd2-stage .ra-vexp[aria-expanded="true"] svg { transform: rotate(180deg); }
+.fd2-stage .ra-vl > li.ra-vrow > .ra-vbk { flex: 1 0 calc(100% - 34px); min-width: 0; margin: 6px 0 -1px 34px; }
+.fd2-stage .ra-vbk[hidden] { display: none; }
+.fd2-stage .ra-vbk > .ra-vl { margin: 0; border-top: 1px solid var(--rule, #d3d0c7); }
+.fd2-stage .ra-vbk > .at-sub { margin: 4px 0 8px; }
+
+/* the + on a top-level section's head: the row's own pill, then the chevron; the head's name and count follow */
+.fd2-stage .ra-grp-add { flex: none; margin: 0 25px 0 0; }
+.fd2-stage .ra-grp-add[hidden] { display: none; }
+.fd2-stage details.ra-in-card > summary.lab, .fd2-stage details.ra-area-solo-l > summary, .fd2-stage details.ra-area-cov > summary { padding-left: 0; }
+
+/* THE HEAD LINES UP WITH THE ROWS UNDER IT. David: «spacing is really inconsistent now». The head's + sits in the same column as every row's +, its name starts
+   where the rows' dots do, and the count is at the same right edge as the rows' years. The fold chevron hangs in the card's left gutter so it takes no room
+   from that column. */
+.fd2-stage details.ra-in-card > summary.lab, .fd2-stage details.ra-area-solo-l > summary, .fd2-stage details.ra-area-cov > summary { position: relative; }
+.fd2-stage details.ra-in-card > summary.lab::before, .fd2-stage details.ra-area-solo-l > summary::before, .fd2-stage details.ra-area-cov > summary::before {
+  position: absolute; left: -15px; top: 50%; margin: -5px 0 0; transform: rotate(-45deg); }
+.fd2-stage details[open].ra-in-card > summary.lab::before, .fd2-stage details[open].ra-area-solo-l > summary::before, .fd2-stage details[open].ra-area-cov > summary::before { margin: -7px 0 0; transform: rotate(45deg); }
+.fd2-stage details.ra-area-solo-l > summary > small { margin-left: auto; padding-left: 10px; font: 600 11px/1 var(--mono, ui-monospace, monospace); letter-spacing: .08em; color: var(--accent, #1f5c6b); text-transform: uppercase; }
+.fd2-stage .ra-vl > li.ra-vnote { display: block; padding: 7px 0 7px 49px; font: 400 11.5px/1.4 var(--sans, system-ui, sans-serif); color: var(--ink-3, #606c72); border-top: 1px solid var(--rule, #d3d0c7); }
+
+/* THE ERA BLOCK (a year picked on the time strip) USES THE SAME PARTS AS THE REST OF THE CARD. David: «touching the flag timeline everything doesnt align with the
+   standards weve been working on». Its lead is a heading and a sentence in the card's own type; its country sections are the shut folds with a + on the head. */
+.fd2-stage .ra-era-lead { margin: 16px 0 6px; font: 400 13px/1.45 var(--sans, system-ui, sans-serif); color: var(--ink-2, #4c5d66); }
+.fd2-stage .ra-era-lead b { color: var(--ink, #16222a); font-weight: 600; }
+.fd2-stage .ra-era-lead-l { display: block; margin: 0 0 3px; font: 700 11px/1.4 var(--mono, ui-monospace, monospace); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2, #4c5d66); }
+.fd2-stage .ra-era-g > .at-sub { margin: 2px 0 6px 0; font: 400 12.5px/1.45 var(--sans, system-ui, sans-serif); color: var(--ink-3, #606c72); }
+
+/* THE ERA NOTE, ITS FLAG AND THE GO DEEPER ROW, IN THE CARD'S OWN TYPE. David: «do the era note box and go deeper row too». The era note was a boxed aside with a
+   left rule, a 10px brass heading and 11.5px grey body; it is now flat like every other section: a mono head (11px, bold, tracked, the same as a fold's head), 13px
+   body, one hairline above the flag, and the flag's name and dates in the sizes the rows use. */
+.fd2-stage .ra-tl-detail { margin: 12px 0 0; padding: 0; background: none; border: 0; border-radius: 0; font: 400 13px/1.45 var(--sans, system-ui, sans-serif); color: var(--ink-2, #4c5d66); }
+.fd2-stage .ra-tl-d-y { margin: 0 0 4px; font: 400 13px/1.45 var(--sans, system-ui, sans-serif); color: var(--ink-2, #4c5d66); }
+.fd2-stage .ra-tl-d-y .ra-era-y { margin-right: 4px; font: 700 11px/1.4 var(--mono, ui-monospace, monospace); letter-spacing: .08em; color: var(--ink-2, #4c5d66); }
+.fd2-stage .ra-era-n { margin: 0; font: 400 13px/1.45 var(--sans, system-ui, sans-serif); color: var(--ink-2, #4c5d66); }
+.fd2-stage .ra-tl-d-away { margin: 8px 0 0; font: 400 13px/1.45 var(--sans, system-ui, sans-serif); color: var(--ink-2, #4c5d66); }
+.fd2-stage .ra-tl-d-away a { color: var(--accent, #1f5c6b); text-decoration: none; }
+.fd2-stage .ra-tl-d-away a:hover { text-decoration: underline; }
+.fd2-stage .ra-ef { margin: 12px 0 0; padding: 10px 0 0; border-top: 1px solid var(--rule, #d3d0c7); }
+.fd2-stage .ra-ef-h { margin: 0 0 8px; font: 700 11px/1.4 var(--mono, ui-monospace, monospace); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2, #4c5d66); }
+.fd2-stage .ra-ef-lead { gap: 12px; margin: 0 0 6px; }
+.fd2-stage .ra-ef-lf { width: 60px; height: 40px; }
+.fd2-stage .ra-ef-lead .ra-ef-t { font: 500 13px/1.35 var(--sans, system-ui, sans-serif); }
+.fd2-stage .ra-ef-t b { font-weight: 600; }
+.fd2-stage .ra-ef-d { margin-top: 1px; font: 500 11px/1.3 var(--mono, ui-monospace, monospace); color: var(--ink-3, #606c72); }
+.fd2-stage .ra-ef-l { color: var(--accent, #1f5c6b); }
+.fd2-stage .ra-ef-c { margin: 0 0 8px; font: 400 12.5px/1.45 var(--sans, system-ui, sans-serif); color: var(--ink-3, #606c72); }
+.fd2-stage .ra-ef-more > summary { display: flex; align-items: center; gap: 0; list-style: none; padding: 5px 0; font: 400 13px/1.4 var(--sans, system-ui, sans-serif); color: var(--ink-2, #4c5d66); }
+.fd2-stage .ra-ef-more > summary::-webkit-details-marker { display: none; }
+.fd2-stage .ra-ef-more > summary::before { content: ""; flex: none; width: 6px; height: 6px; margin: 0 9px 2px 3px; border-right: 1.6px solid currentColor; border-bottom: 1.6px solid currentColor; transform: rotate(-45deg); transition: transform .15s; }
+.fd2-stage .ra-ef-more[open] > summary::before { transform: rotate(45deg); margin-bottom: 4px; }
+.fd2-stage .ra-ef-more > summary b { font-weight: 600; margin-left: auto; padding-left: 10px; font: 600 11px/1 var(--mono, ui-monospace, monospace); letter-spacing: .08em; color: var(--accent, #1f5c6b); }
+.fd2-stage .ra-ts-deep { align-items: center; gap: 4px 16px; margin-top: 8px; font: 500 13px/1.4 var(--sans, system-ui, sans-serif); }
+.fd2-stage .ra-ts-deeplab { font: 700 11px/1.4 var(--mono, ui-monospace, monospace); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2, #4c5d66); }
+
+/* the way back from a place to the areas it was opened from */
+.fd2-stage .ra-back-areas { display: block; margin: 0 0 8px; padding: 0; border: 0; background: none; cursor: pointer; font: 600 12px/1.4 var(--sans, system-ui, sans-serif); color: var(--accent, #1f5c6b); }
+.fd2-stage .ra-back-areas:hover { text-decoration: underline; }

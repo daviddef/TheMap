@@ -28,7 +28,7 @@ test("the markup marks a place with ten or more books as big", () => {
 test("a place with books folds, and the count of books is in its name line", () => {
   assert.match(src, /<details class="ra-area-pl" data-vols=/);
   assert.match(src, /<span class="ra-area-n">/);
-  assert.match(src, /box\.querySelector\("\.ra-area-n"\)\.textContent = vs\.length/);
+  assert.match(src, /box\.querySelector\("\.ra-area-n"\)\.textContent = ys && vs\.length !== all \? vs\.length \+ " of " \+ all \+ " books" : vs\.length/);
 });
 
 test("the name opens the place and does not also fold the row", () => {

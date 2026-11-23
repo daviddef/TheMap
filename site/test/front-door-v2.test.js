@@ -103,3 +103,9 @@ test("on a phone the suggestion list and the answer card are never open together
   const css = read("public/front-door-v2.css");
   assert.match(css, /\.fd2-stage:has\(#ra-q:focus\):has\(\.ra-sug:not\(\[hidden\]\)\) \.at-panel\s*\{\s*display:\s*none/, "the answer waits while the list is open");
 });
+
+test("the flag grid under the map is switched off for now, and only by one CSS rule", () => {
+  const rm = read("src/components/RecordMap.astro");
+  assert.match(rm, /\.ra-flagres \{ display: none !important; \}/);
+  assert.match(rm, /<section class="ra-flagres" id="ra-flagres"/, "the section itself is still there");
+});

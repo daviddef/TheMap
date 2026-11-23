@@ -45,3 +45,14 @@ test("resetSearch is not mistaken for typing and gives the caret back", () => {
   assert.match(fn, /setSelectionRange\(a, b/, "the caret and selection go back where they were");
   assert.match(src, /q\.addEventListener\("input", function \(e\) \{\s+if \(resetting\) return;/, "our own listener ignores the marked event, so the story is not cleared on every key");
 });
+
+test("the one box is a growing text box in the mock-up's shape: 50px, 16px radius, Fraunces 17px", () => {
+  const map = readFileSync(new URL("../src/components/RecordMap.astro", import.meta.url), "utf8");
+  assert.match(map, /<textarea id="ra-q" rows="1"/, "a text box that can grow, not a one-line input");
+  assert.doesNotMatch(map, /<input id="ra-q"/);
+  assert.match(map, /\.ra-bar-find \{ --ra-ctl: 50px; align-items: flex-start; \}/, "one height for the box and the buttons, level with the first line");
+  assert.match(map, /\.ra-bar-find #ra-q \{[^}]*font: 400 17px\/1\.45 var\(--serif\)[^}]*border-radius: 16px/);
+  assert.match(src, /function grow\(\) \{ q\.style\.height = "auto"/, "it grows with what is written");
+  assert.match(src, /e\.key === "Enter" && !e\.isComposing && \(!e\.shiftKey \|\| !looksLikeStory\(q\.value\)\)\) e\.preventDefault\(\)/, "Enter searches; it never adds a line to a place search");
+  assert.match(src, /top:calc\(var\(--ra-ctl,38px\) \/ 2\)/, "the + and the Story badge stay on the first line");
+});

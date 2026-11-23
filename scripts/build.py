@@ -1394,9 +1394,16 @@ def main():
             _added = json.load(fh)
     except FileNotFoundError:
         _added = {}
-    providers_out = dict(providers, providers=[
+    # WHO TO E-MAIL, ON EACH PROVIDER. «Where the paper is» shows an e-mail icon
+    # on a row whose archive can be written to. scripts/provider_emails.py joins
+    # data/provider-emails.json (addresses a family archive actually used or read
+    # off the institution's own page) and, where there is none, the address
+    # Wikidata states, onto each provider as `em`. A `dead` address never reaches
+    # the page.
+    import provider_emails
+    providers_out = provider_emails.attach(dict(providers, providers=[
         dict(p, added=_added[p["id"]]) if p["id"] in _added else p
-        for p in providers["providers"]])
+        for p in providers["providers"]]))
     json.dump(providers_out, open(os.path.join(OUT, "providers.json"), "w"),
               ensure_ascii=False, separators=(",", ":"))
     # WHERE TO WRITE, SERVED TO THE BROWSER. /my-research/ shows the letters a

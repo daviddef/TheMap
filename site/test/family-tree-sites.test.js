@@ -34,8 +34,8 @@ test("the place card draws the group after the country's own sources, from the d
   assert.match(map, /function familyTreeSites\(cc\)/);
   assert.match(map, /p\.family_tree && \(c\.indexOf\("\*"\) > -1 \|\| \(cc && c\.indexOf\(cc\) > -1\)\)/);
   const solo = map.slice(map.indexOf("function areaRenderSolo(R)"));
-  assert.ok(solo.indexOf("familyTreeSites(d.country)") > solo.indexOf("areaCountrySources(R)"), "after the country groups");
-  assert.ok(solo.indexOf("familyTreeSites(d.country)") < solo.indexOf("areaGovStates(d)"), "before the governing states");
+  assert.ok(solo.indexOf("familyTreeGroup(d.country)") > solo.indexOf("areaCountrySources(R)"), "after the country groups");
+  assert.ok(solo.indexOf("familyTreeGroup(d.country)") < solo.indexOf("areaGovStates(d)"), "before the governing states");
 });
 
 test("a name attested in several countries lists the worldwide sources once, after the last country that has sources", () => {
@@ -50,4 +50,12 @@ test("a search that does not name the open place lets go of it: the address, and
 
 test("the years typed after a name are not part of the name that is looked up", () => {
   assert.match(map, /elsewhere\(yearsIn\(qbox\.value\)\.text \|\| qbox\.value\.trim\(\)\);/);
+});
+
+test("the country card is the place card's folds, not the old three lists", () => {
+  const c = map.slice(map.indexOf("function openCountry(c)"), map.indexOf("var LAYERS = ["));
+  assert.match(c, /ra-area ra-area-solo/);
+  assert.match(c, /countrySources\(c\.cc, null, T\("The sources for"\) \+ " " \+ c\.n\)/);
+  assert.match(c, /familyTreeGroup\(c\.cc\)/);
+  assert.doesNotMatch(c, /class="at-films"|class="lab">Where to start/, "the old underlined-link lists are gone");
 });

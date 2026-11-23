@@ -895,6 +895,20 @@ window.addEventListener("load", async function () {
     }).sort(function (a, b) { return a.family_tree - b.family_tree; });
   }
 
+  /* The family-tree and genealogy sites as one closed fold, the same on a place card and a country card. "" when none reach the country. */
+  function familyTreeGroup(cc) {
+    var fts = familyTreeSites(cc), h = [];
+    if (!fts.length) return "";
+    h.push('<details class="ra-area-g ra-area-cov ra-area-ft"><summary><i style="background:#7A5C8E"></i>' + esc(T("Family-tree and genealogy sites")) + " <b>" + nfl(fts.length) + "</b></summary>" +
+           '<p class="at-sub">' + esc(T("Not about this place in particular: the big family-tree and records sites that reach here.")) + "</p><ul>");
+    fts.forEach(function (a) {
+      var st = volStatus("source:" + a.id);
+      h.push('<li' + srcAttrs(a.id, a.name, T("Everywhere"), BASE + "archive/" + a.id + "/") + '><a class="ra-area-p" target="_blank" rel="noopener" href="' + BASE + "archive/" + esc(a.id) + '/"><i title="' + RC_LAB[st] + ' (' + esc(T("your research on this source")) + ')" style="background:' + RC_COL[st] + '"></i><span>' + esc(a.name) + "</span><small>" +
+             accTxt(a.access) + "</small></a></li>");
+    });
+    h.push("</ul></details>");
+    return h.join("");
+  }
   function countrySources(cc, hint, heading, lat, lon, id, noWw) {
     if (!cc) return "";
     /* THE SAME FALLBACK THE PAGE MAKES, because the panel is the surface most
@@ -4645,39 +4659,30 @@ window.addEventListener("load", async function () {
            (c.c ? " · " + c.c + " collection" + (c.c === 1 ? "" : "s") + " cover it" : "") +
            "</p>");
 
-    if (c.fs) {
-      h.push('<div class="at-sec"><div class="lab">Where to start</div>');
-      h.push('<ul class="at-films"><li><a href="https://www.familysearch.org/en/wiki/' +
-             esc(c.fs) + '_Genealogy" target="_blank" rel="noopener">FamilySearch ' +
-             "Research Wiki — " + esc(c.n) + " &#8599;</a> " +
-             '<span class="ra-who">a research guide FamilySearch keeps for every ' +
-             "country: what records exist, from when, and who holds them</span></li></ul>");
-      h.push("</div>");
-    }
-    if (warch[c.cc]) {
-      h.push('<div class="at-sec"><div class="lab">National sources, unverified</div>');
-      h.push('<ul class="at-films">');
-      warch[c.cc].slice(0, 6).forEach(function (r) {
-        h.push('<li><a href="' + esc(r.url) + '" target="_blank" rel="noopener">' +
-               esc(r.name) + " &#8599;</a> " + '<span class="ra-who">' +
-               (r.kind === "national-archive" ? "national archive" : "national library") +
-               "</span></li>");
-      });
-      h.push("</ul></div>");
-    }
+    /* THE COUNTRY CARD IS THE PLACE CARD'S BODY. David: «if i click on the country marker why does the overlay not follow the styling/branding as the rest?».
+       It was the old three-list layout (underlined serif links under small headings); the place card's sections are shut folds with a + on each row and
+       the access icon at the right. A country gets the same folds, in the same order: where to start, its own sources, the family-tree sites. */
+    var fold1 = function (title, hint, rows, n, open) {
+      return '<details class="ra-area-g ra-area-cov ra-era-g"' + (open ? " open" : "") + '><summary><i style="background:#5B7A8C"></i>' + esc(title) + " <b>" + nfl(n) + "</b></summary>" +
+             (hint ? '<p class="at-sub">' + esc(hint) + "</p>" : "") + "<ul>" + rows + "</ul></details>";
+    };
     var nat = provs.providers.filter(function (p) {
       return (p.countries || []).indexOf(c.cc) > -1;
     });
-    if (nat.length) {
-      h.push('<div class="at-sec"><div class="lab">Checked sources for ' +
-             esc(c.n) + "</div><ul class=\"at-films\">");
-      nat.slice(0, 8).forEach(function (p) {
-        h.push('<li><a href="' + esc(p.url) + '" target="_blank" rel="noopener">' +
-               esc(p.name) + " &#8599;</a> " + '<span class="ra-who">' +
-               accTxt(p.access) + "</span></li>");
-      });
-      h.push("</ul></div>");
+    var body = [];
+    if (c.fs) {
+      body.push(fold1(T("Where to start"), "", '<li><a class="ra-area-p" target="_blank" rel="noopener" href="https://www.familysearch.org/en/wiki/' + esc(c.fs) + '_Genealogy"><span>FamilySearch Research Wiki \u2014 ' + esc(c.n) + "</span><small>" +
+        esc(T("a research guide: what records exist, from when, and who holds them")) + "</small></a></li>", 1, true));
     }
+    if (warch[c.cc]) {
+      var wr = warch[c.cc].slice(0, 6).map(function (r) {
+        return '<li><a class="ra-area-p" target="_blank" rel="noopener" href="' + esc(r.url) + '"><span>' + esc(r.name) + "</span><small>" + (r.kind === "national-archive" ? esc(T("national archive")) : esc(T("national library"))) + "</small></a></li>";
+      }).join("");
+      body.push(fold1(T("National sources, unverified"), "", wr, Math.min(6, warch[c.cc].length), false));
+    }
+    if (nat.length) body.push(countrySources(c.cc, null, T("The sources for") + " " + c.n));
+    body.push(familyTreeGroup(c.cc));
+    if (body.join("")) h.push('<div class="ra-area ra-area-solo">' + body.join("") + "</div>");
     if (!c.fs && !warch[c.cc] && !nat.length) {
       h.push('<p class="at-what"><b>This map holds nothing for ' + esc(c.n) +
              " at all.</b> Not a collection, not an archive, not a research guide. " +
@@ -8968,17 +8973,7 @@ window.addEventListener("load", async function () {
        (countries: ["*"]) but only the name-search and era panels drew the «cover everywhere» group, so a place card never showed them. A provider row
        carries `family_tree: <rank>` for the dozen that are worth offering anywhere (FamilySearch, Ancestry, MyHeritage, Geni, ...); a regional one
        (Findmypast, GenealogyBank) shows only where its countries reach. The specialist worldwide sources (Holocaust, maps, memorials) stay out of it. */
-    var fts = familyTreeSites(d.country);
-    if (fts.length) {
-      h.push('<details class="ra-area-g ra-area-cov ra-area-ft"><summary><i style="background:#7A5C8E"></i>' + esc(T("Family-tree and genealogy sites")) + " <b>" + nfl(fts.length) + "</b></summary>" +
-             '<p class="at-sub">' + esc(T("Not about this place in particular: the big family-tree and records sites that reach here.")) + "</p><ul>");
-      fts.forEach(function (a) {
-        var st = volStatus("source:" + a.id);
-        h.push('<li' + srcAttrs(a.id, a.name, T("Everywhere"), BASE + "archive/" + a.id + "/") + '><a class="ra-area-p" target="_blank" rel="noopener" href="' + BASE + "archive/" + esc(a.id) + '/"><i title="' + RC_LAB[st] + ' (' + esc(T("your research on this source")) + ')" style="background:' + RC_COL[st] + '"></i><span>' + esc(a.name) + "</span><small>" +
-               accTxt(a.access) + "</small></a></li>");
-      });
-      h.push("</ul></details>");
-    }
+    h.push(familyTreeGroup(d.country));
     /* EVERY STATE THAT GOVERNED THIS GROUND, WITH NOTHING CHOSEN. David: «why doesnt it show all the records for all governing states/countries? when nothings
        selected?». The era strip shows one era's archives when you tap it; with none tapped the card only had today's country. The states of every era (not
        today's) each get their archives here, as a shut fold named for the years they governed, and the list steps aside while an era is chosen. */
@@ -12213,6 +12208,8 @@ window.addEventListener("load", async function () {
   :global(.ra-area-ok) { margin: 0; padding: 10px 12px; border-radius: 8px; background: rgba(31, 157, 85, .13); font: 400 13px/1.4 var(--sans); }
   :global(.ra-area-ok button) { font: 600 12.5px/1 var(--sans); margin-left: 8px; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--rule-strong); background: var(--panel); cursor: pointer; }
   :global(.ra-area-g) { margin: 0 0 8px; border-top: 1px solid var(--rule); padding-top: 8px; }
+  /* a fold whose rows cannot be added to the research (an unverified list) has no + , so its title keeps the place the + would have taken and lines up with the others */
+  :global(.ra-area-solo .ra-area-g > summary:has(> .ra-grp-add[hidden])) { padding-left: 49px; }
   :global(.ra-area-g > summary) { cursor: pointer; font: 700 12px/1.4 var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); list-style: none; }
   :global(.ra-area-g > ul) { list-style: none; margin: 6px 0 0; padding: 0; }
   :global(.ra-area-g > ul > li) { margin: 0; padding: 2px 0; }

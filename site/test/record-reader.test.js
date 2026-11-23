@@ -101,3 +101,20 @@ test("a heading of two words that no single card holds falls back to the cards f
   assert.equal(m.exports.find(idx, "parentum", {}).partial, undefined, "a single word is never partial");
   assert.deepEqual(m.exports.find(idx, "zzzq qqqx", {}), []);
 });
+
+test("other languages: letters that do not decompose fold, and each language's words are found", () => {
+  assert.equal(R.norm("døde"), R.norm("dode"));
+  assert.equal(R.norm("małżeństw"), R.norm("malzenstw"));
+  assert.ok(ids("dode").includes("dode"), "Danish 'døde' is found without the slash");
+  assert.ok(ids("battesimi").includes("battesimi"));
+  assert.ok(ids("rođeni").includes("rodeni"), "Croatian reads with the hook");
+  assert.ok(new Set(data.terms.map(t => t.lang)).size >= 12, "the list spans the languages of the catalogue titles");
+});
+
+test("the counts file lines up with the terms: every counted term exists, every kind of book has a count", () => {
+  const seen = JSON.parse(fs.readFileSync(path.join(here, "../../data/record-terms-seen.json"), "utf8"));
+  const have = new Set(data.terms.map(t => t.id));
+  for (const id of Object.keys(seen.terms)) assert.ok(have.has(id), id + " is counted but is not a term");
+  for (const t of data.terms.filter(t => t.titleWords)) assert.ok(seen.terms[t.id] && seen.terms[t.id].n > 0, t.id + " has title words but no count");
+  for (const t of data.terms.filter(t => t.concept)) assert.ok(seen.concepts[t.concept], t.concept + " has no count");
+});

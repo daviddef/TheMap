@@ -9,16 +9,18 @@ import Base from "../layouts/Base.astro";
 import { recordTerms } from "../lib/record-terms.js";
 import { u } from "../lib/url.js";
 import ProgressKit from "../components/ProgressKit.astro";
-const { sources, terms } = recordTerms();
+const { sources, terms, seen } = recordTerms();
+const langNames = { la: "Latin", it: "Italian", es: "Spanish", pt: "Portuguese", nl: "Dutch", de: "German", fr: "French", cs: "Czech", sk: "Slovak", pl: "Polish", da: "Danish", hu: "Hungarian", hr: "Croatian" };
+const langCount = Object.fromEntries(Object.keys(langNames).map((l) => [l, terms.filter((t) => t.lang === l).length]));
 const chips = ["uxoris", "7bris", "susceptores", "obiit", "infans", "natum"];
 const dateChips = ["die 30 7bris 1671", "undecima februarii anno millesimo septingentesimo quadragesimo sexto", "xvi martii 1801"];
 const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" };
 ---
 <Base
   title="Reading the record"
-  eyebrow={`${terms.length} terms · every one sourced · the finder and date decoder keep everything in your browser`}
+  eyebrow={`${terms.length} terms in ${Object.values(langCount).filter(Boolean).length} languages · every one sourced · the finder and date decoder keep everything in your browser`}
   dek="Type a word as you see it in the register, or a whole date, and see what it is, what it does not tell you, and where it comes from."
-  description="A searchable guide to the Latin of old church registers: look up a word, an abbreviation or an ending, and decode a date such as 'die 30 7bris 1671'.">
+  description="A searchable guide to the words of old registers, in Latin and in the languages of their catalogue titles, with how often each turns up in the Atlas's own records, and a decoder for dates such as 'die 30 7bris 1671'.">
 
   <div class="rd-pick" role="tablist" aria-label="What would you like to do?">
     <button type="button" role="tab" id="tab-story" class="rd-tab is-on" aria-selected="true" aria-controls="tool-story" data-tool="story">
@@ -202,6 +204,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
       <p><input type="search" id="rr-q" autocomplete="off" spellcheck="false" aria-label="A word from the register" placeholder="uxoris" /></p>
       <p class="rr-filters" role="group" aria-label="Kind of record">
         {Object.entries(eventNames).map(([k, v]) => <label><input type="checkbox" class="rr-ev" value={k} /> {v}</label>)}
+        <label>Language <select id="rr-lang"><option value="">All</option>{Object.entries(langNames).filter(([l]) => langCount[l]).map(([l, n]) => <option value={l}>{n} ({langCount[l]})</option>)}</select></label>
       </p>
       <p class="cap rr-chips">Try: {chips.map((c) => <button type="button" class="chip rr-chip" data-q={c}>{c}</button>)}</p>
       <div id="rr-out" role="status" aria-live="polite"></div>
@@ -209,7 +212,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
       <summary><b>Browse all {terms.length} terms, A to Z</b> <span class="rr-m">the whole list the word finder searches, not only what matched</span></summary>
       <ul class="rr-all">
         {terms.map((t) => (
-          <li><b>{t.forms[0]}</b> <span class="rr-m">{t.means}</span></li>
+          <li><b>{t.forms[0]}</b> <span class="rr-m">{langNames[t.lang] || t.lang} · {t.means}</span></li>
         ))}
       </ul>
     </details>
@@ -217,7 +220,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   </section>
 
   <ProgressKit />
-  <script type="application/json" id="rr-data" set:html={JSON.stringify({ terms, sources: Object.fromEntries(Object.entries(sources).map(([k, s]) => [k, s.title])) })}></script>
+  <script type="application/json" id="rr-data" set:html={JSON.stringify({ terms, seen, langs: langNames, sources: Object.fromEntries(Object.entries(sources).map(([k, s]) => [k, s.title])) })}></script>
   <script is:inline>
     (function () {
       var tabs = [].slice.call(document.querySelectorAll(".rd-tab"));
@@ -261,13 +264,41 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
       var EV = { baptism: "baptism", marriage: "marriage", burial: "burial", all: "any record" };
       function el(tag, text, cls) { var e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; }
       function events() { return [].slice.call(document.querySelectorAll(".rr-ev:checked")).map(function (c) { return c.value; }); }
+      var LN = D.langs || {}, SEEN = D.seen || { terms: {}, concepts: {} };
+      var KIND = { baptism: "baptisms and births", marriage: "marriages", banns: "marriage banns", death: "deaths and burials", confirmation: "confirmations", index: "indexes", "soul-count": "parish censuses" };
+      function num(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+      function where(x) {
+        var top = x.countries.slice(0, 3).map(function (c) { return c[0] + " " + num(c[1]); }).join(", "), more = x.nCountries - Math.min(3, x.countries.length);
+        return top + (more > 0 ? " and " + more + " more countr" + (more === 1 ? "y" : "ies") : "");
+      }
+      function when(x) { return x.mostly ? "most from " + x.mostly[0] + " to " + x.mostly[1] + (x.earliest && x.earliest < x.mostly[0] - 30 ? ", the earliest " + x.earliest : "") : (x.earliest ? "earliest " + x.earliest : ""); }
       function card(t) {
         var c = el("div", null, "rr-card");
         c.append(el("h3", t.forms[0]), el("p", t.means, "rr-means"));
-        var meta = [EV[t.events] || t.events, t.role];
+        var meta = [LN[t.lang] || t.lang, EV[t.events] || t.events, t.role];
         c.append(el("p", meta.join(" · "), "cap"));
         c.append(el("p", "Also written: " + t.forms.slice(1).concat(t.abbr || []).join(", "), "cap"));
         if (t.note) c.append(el("p", t.note, "rr-note"));
+        var st = SEEN.terms[t.id], sc = t.concept && SEEN.concepts[t.concept];
+        if (st || sc) {
+          var box = el("div", null, "rr-seen");
+          box.append(el("b", "In the Atlas"));
+          if (st) box.append(el("p", "The word is in the title of " + num(st.n) + " register entries the Atlas lists: " + where(st) + (when(st) ? "; " + when(st) : "") + ".", "cap"));
+          if (sc && !st) box.append(el("p", "Registers of this kind (" + (KIND[t.concept] || t.concept) + ") are titled in " + sc.languages.length + " languages across " + sc.nCountries + " countries, " + num(sc.n) + " entries in all; " + where(sc) + (when(sc) ? "; " + when(sc) : "") + ". The titles do not say what language the entries inside are written in.", "cap"));
+          if (t.concept) {
+            var peers = D.terms.filter(function (o) { return o.concept === t.concept && o.id !== t.id && o.lang !== t.lang; });
+            if (peers.length) {
+              var p = el("p", "The same kind of book, in other languages: ", "cap");
+              peers.slice(0, 14).forEach(function (o, i) {
+                var b = el("button", o.forms[0], "rr-peer"); b.type = "button"; b.title = (LN[o.lang] || o.lang) + ": " + o.means;
+                b.addEventListener("click", function () { q.value = o.forms[0]; run(); q.focus(); });
+                if (i) p.append(" "); p.append(b); p.append(el("span", " " + (LN[o.lang] || o.lang), "rr-m"));
+              });
+              box.append(p);
+            }
+          }
+          c.append(box);
+        }
         var s = el("p", "Source: ", "cap");
         t.src.forEach(function (k, i) { s.append((i ? "; " : "") + (D.sources[k] || k)); });
         c.append(s);
@@ -276,7 +307,8 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
       function run() {
         out.textContent = "";
         var v = q.value.trim(); if (!v) return;
-        var r = R.find(idx, v, { events: events() });
+        var r = R.find(idx, v, { events: events() }), lg = document.getElementById("rr-lang").value;
+        if (lg) { var partial = r.partial; r = r.filter(function (x) { return x.term.lang === lg; }); r.partial = partial; }
         if (!r.length) { out.append(el("p", "No term here matches that. That is not a finding about the word: the list is short so far. Try fewer letters, or the English.", "cap")); return; }
         if (r.partial) out.append(el("p", "No single card holds that whole phrase, so these are the cards for its words, one word at a time.", "cap"));
         r.slice(0, 12).forEach(function (x) { out.append(card(x.term)); });
@@ -294,6 +326,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
       q.addEventListener("input", run);
       d.addEventListener("input", runDate);
       document.querySelectorAll(".rr-ev").forEach(function (b) { b.addEventListener("change", run); });
+      document.getElementById("rr-lang").addEventListener("change", run);
       document.querySelectorAll(".rr-chip").forEach(function (b) { b.addEventListener("click", function () { q.value = b.dataset.q; run(); }); });
       document.querySelectorAll(".rr-dchip").forEach(function (b) { b.addEventListener("click", function () { d.value = b.dataset.q; runDate(); }); });
       var m = location.search.match(/[?&]q=([^&]*)/); if (m) { q.value = decodeURIComponent(m[1].replace(/\+/g, " ")); run(); }
@@ -442,6 +475,11 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp .lf-forms { margin: 0 0 6px; padding-left: 18px; font-size: 14px; line-height: 1.5; } .sp .lf-forms li { margin: 0 0 4px; }
   .sp .lf-names .cap { color: var(--ink-2); font-size: 12.5px; }
   /* the "Try:" examples are buttons: without a ground of their own the browser paints them light grey, and pale text on that is unreadable in dark mode */
+  .rr-seen { margin: 8px 0; padding: 8px 12px; border-left: 3px solid var(--accent); background: var(--accent-wash); border-radius: 0 8px 8px 0; }
+  .rr-seen b { font: 600 12px/1 var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+  .rr-seen p { margin: 4px 0 0; }
+  .rr-peer { font: inherit; font-weight: 600; background: none; border: 0; border-bottom: 1px dotted var(--accent); color: var(--accent); cursor: pointer; padding: 0; }
+  .rr-filters select { font: inherit; margin-left: 4px; }
   .rr-chips .chip { background: var(--panel); color: var(--ink-2); font-size: 13px; padding: 5px 12px; border-radius: 999px; cursor: pointer; letter-spacing: 0; }
   .rr-chips .chip:hover, .rr-chips .chip:focus-visible { border-color: var(--accent); color: var(--accent); background: var(--accent-wash); }
   .sp .lf-askyear[hidden] { display: none; }

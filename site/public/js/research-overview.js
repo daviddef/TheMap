@@ -1,4 +1,9 @@
-/* THE «ALL FAMILIES» TAB ON /my-research/: choose which family lines to look at together, and read them as one synopsis.
+/* THE FIGURES, THE FAMILY CHOOSER, THE OVERLAPS AND THE PLAN OF THE RESEARCH VIEW ON /my-research/. This was the «All families» tab; it is now the top
+ * and the middle of the one Research tab, for one family or several (the map and the place-by-place list are the dossier's, in the same panel).
+ * What it draws: which families are read (and the chooser), the figures, Copy / Download / Print, where the families overlap (only when there are two
+ * or more) and what to do first. The old text follows.
+ *
+ * CHOOSE WHICH FAMILY LINES TO LOOK AT TOGETHER, AND READ THEM AS ONE SYNOPSIS.
  *
  * The arithmetic is research-synopsis.js (tested in Node); this file is only the page: the family chooser, the figures, the overlaps, the plan,
  * and Copy / Download / Print of the same thing as plain text. Everything is drawn from the marks already in this browser, with textContent, because
@@ -8,8 +13,8 @@
  */
 (function () {
   "use strict";
-  var P = window.raProgress, S = window.raSynopsis, host = document.getElementById("mr-all"), panel = document.getElementById("mr-p-all");
-  if (!P || !S || !host || !panel) return;
+  var P = window.raProgress, S = window.raSynopsis, host = document.getElementById("mr-all"), mid = document.getElementById("mr-mid"), panel = document.getElementById("mr-p-families");
+  if (!P || !S || !host || !mid || !panel) return;
   var BASE = host.getAttribute("data-base") || "/";
   var SKEY = "ra-synopsis-scope", PLACES = {}, asked = {};
 
@@ -24,21 +29,10 @@
     return names.length > 8 ? "Reading " + names.length + " families together, from " + names[0] + " to " + names[names.length - 1] + "." : "Reading " + (names.join(", ") || "no families") + ".";
   }
 
-  function chosenSlugs(lines) {
-    var all = lines.map(function (l) { return l.slug; });
-    return scope.all ? all : all.filter(function (s) { return scope.slugs.indexOf(s) > -1; });
-  }
+  /* ONE DECISION, SHARED WITH THE DOSSIER: research-synopsis.js scopeOf (ticked, or all, or the family you mark under when nothing is ticked). */
+  function chosenSlugs(lines) { return S.scopeOf(lines, P.active(), scope); }
 
   /* NAMES, NOT SLUGS. The place file holds the atlas's name for a place; fetch it once for each place in the chosen families, a few at a time. */
-  /* A source mark knows its provider by id; the provider's own address is the link when the mark itself carries none. Fetched once, only when a
-     «waiting or blocked» row needs it. */
-  var PROVS = null, provAsked = false;
-  function wantProvs() {
-    if (provAsked) return; provAsked = true;
-    fetch(BASE + "providers.json").then(function (r) { return r.json(); })
-      .then(function (d) { PROVS = {}; (d.providers || []).forEach(function (p) { PROVS[p.id] = p; }); draw(); })
-      .catch(function () { PROVS = {}; });
-  }
   function wantNames(syn) {
     var todo = syn.places.map(function (p) { return p.pid; }).filter(function (p) { return !(p in PLACES) && !asked[p]; });
     if (!todo.length) return;
@@ -63,7 +57,7 @@
   function draw() {
     scope = readScope();
     var lines = P.lines();
-    host.textContent = "";
+    host.textContent = ""; mid.textContent = "";
     if (!lines.length) {
       host.append(el("p", "cap", "No families yet. Add one from the Research menu in the header, then mark books on a place page, and they will be drawn together here."));
       return;
@@ -74,8 +68,8 @@
 
     // ---- the chooser
     var box = el("section", "mra-pick");
-    box.append(el("h2", "mr-h", "All families together"));
-    box.append(el("p", "cap", "Choose the families to read as one. This joins what you have marked for each of them into a single picture: where they overlap, what is still open, and a plan that covers the most families in the fewest trips. Nothing here is a new record; it is read from the marks you and the family research sessions have made."));
+    box.append(el("h2", "mr-h", "Families read here"));
+    box.append(el("p", "cap", "This view reads the families ticked in the Research menu in the header (with none ticked, the one you mark under). Choose one or several: the map, the plan and the places below all follow. Marks you make still go under the one you are marking as."));
     /* EIGHTY FAMILIES IS NOT A ROW OF BUTTONS. Once the research sessions have published their families the list is long, so the chooser folds
        away behind its own summary («86 of 86 chosen»), can be searched, and has the four cuts a reader actually wants. */
     var det = el("details", "mra-choose"); if (lines.length <= 12) det.open = true;
@@ -86,7 +80,7 @@
     var acts = el("div", "mra-acts");
     function setScope(fn) { var cur = fn(P.lines()); scope = { all: cur.length === P.lines().length, slugs: cur }; writeScope(scope); openState = true; draw(); }
     [["All families", function (ls) { return ls.map(function (l) { return l.slug; }); }],
-     ["None", function () { return []; }],
+     ["Just the one I mark under", function () { return []; }],
      ["Only those with work marked", function (ls) { return ls.filter(function (l) { return l.marks > 0; }).map(function (l) { return l.slug; }); }],
      ["Only the ones I made", function (ls) { return ls.filter(function (l) { return !l.session; }).map(function (l) { return l.slug; }); }]].forEach(function (a2) {
       var bt = el("button", "mra-link", a2[0]); bt.type = "button"; bt.addEventListener("click", function () { setScope(a2[1]); }); acts.append(bt);
@@ -121,7 +115,9 @@
 
     // ---- the figures
     var t = syn.totals, fig = el("ul", "mra-fig");
-    [[t.families, "families"], [t.places, "places"], [t.sharedPlaces, "places shared by two or more"], [t.books, "books marked"], [t.sharedBooks, "books touched by two or more"], [t.pages, "pages read for a named family"], [t.openPlaces, "places with open work"]].forEach(function (f) {
+    var tiles = [[t.families, "families"], [t.places, "places"], [t.sharedPlaces, "places shared by two or more"], [t.books, "books marked"], [t.sharedBooks, "books touched by two or more"], [t.pages, "pages read for a named family"], [t.openPlaces, "places with open work"]];
+    if (syn.scope.length < 2) tiles = [[t.places, "places"], [t.books, "books marked"], [t.pages, "pages read"], [t.openPlaces, "places with open work"]];
+    tiles.forEach(function (f) {
       var li = el("li"); li.append(el("b", "", String(f[0])), el("span", "", f[1])); fig.append(li);
     });
     host.append(fig);
@@ -145,97 +141,57 @@
     var pre = el("textarea", "mra-pre"); pre.hidden = true; pre.readOnly = true; pre.rows = 12; pre.setAttribute("aria-label", "The plan as text");
     host.append(tools, pre);
 
-    // ---- where they overlap
-    host.append(el("h3", "mra-h3", "Where the families overlap"));
-    if (!syn.sharedPlaces.length) host.append(el("p", "cap", "No place is worked by more than one of the chosen families yet."));
-    syn.sharedPlaces.forEach(function (p) {
-      var s = el("section", "mra-place"), h = el("h4"), a = el("a", "", p.name); a.href = BASE + "place/" + p.pid + "/"; h.append(a);
-      p.slugs.forEach(function (sl) { h.append(" ", badge(nameOf[sl])); });
-      s.append(h);
-      if (p.sharedBooks.length) {
-        var ul = el("ul", "mra-l");
-        p.sharedBooks.forEach(function (r) {
-          var li = el("li"); li.append(el("span", "", r.title + (r.total ? " (" + plural(r.total, "image") + ")" : "")));
-          Object.keys(r.lines).sort(function (x, y) { return nameOf[x].localeCompare(nameOf[y]); }).forEach(function (sl) {
-            var x = r.lines[sl]; li.append(" ", badge(nameOf[sl] + ": " + (x.state || "searched") + (x.ownPages ? ", " + plural(x.ownPages, "page") : ""), x.state ? "st-" + x.state : ""));
+    // ---- where they overlap: only when two or more families are read
+    var several = syn.scope.length > 1;
+    if (several) {
+      mid.append(el("h3", "mra-h3", "Where the families overlap"));
+      if (!syn.sharedPlaces.length) mid.append(el("p", "cap", "No place is worked by more than one of the chosen families yet."));
+      syn.sharedPlaces.forEach(function (p) {
+        var s = el("section", "mra-place"), h = el("h4"), a = el("a", "", p.name); a.href = BASE + "place/" + p.pid + "/"; h.append(a);
+        p.slugs.forEach(function (sl) { h.append(" ", badge(nameOf[sl])); });
+        s.append(h);
+        if (p.sharedBooks.length) {
+          var ul = el("ul", "mra-l");
+          p.sharedBooks.forEach(function (r) {
+            var li = el("li"); li.append(el("span", "", r.title + (r.total ? " (" + plural(r.total, "image") + ")" : "")));
+            Object.keys(r.lines).sort(function (x, y) { return nameOf[x].localeCompare(nameOf[y]); }).forEach(function (sl) {
+              var x = r.lines[sl]; li.append(" ", badge(nameOf[sl] + ": " + (x.state || "searched") + (x.ownPages ? ", " + plural(x.ownPages, "page") : ""), x.state ? "st-" + x.state : ""));
+            });
+            if (r.open.length > 1) li.append(" ", badge("one reading serves " + r.open.length, "mra-once"));
+            ul.append(li);
           });
-          if (r.open.length > 1) li.append(" ", badge("one reading serves " + r.open.length, "mra-once"));
-          ul.append(li);
-        });
-        s.append(ul);
-      } else s.append(el("p", "cap", p.books.length ? "No single book is shared; the families have marked different books here." : "Each family has the place on its list; no book is marked yet."));
-      host.append(s);
-    });
-
-    // ---- the plan
-    host.append(el("h3", "mra-h3", "What to do, covering the most families first"));
-    host.append(el("p", "cap", "A place comes first when more of the chosen families have open work there (a book or place on the to-do list, or a book part-read), then when a book is open for several of them at once, since one reading serves them all."));
-    if (!syn.order.length) host.append(el("p", "cap", "Nothing is marked as planned or part-read for these families."));
-    var ol = el("ol", "mra-plan");
-    syn.order.forEach(function (p) {
-      var li = el("li"), a = el("a", "", p.name); a.href = BASE + "place/" + p.pid + "/"; li.append(el("b", "", ""), a);
-      if (several) p.openFamilies.forEach(function (sl) { li.append(" ", badge(nameOf[sl])); });
-      var ul = el("ul", "mra-l");
-      p.sameBookOpen.forEach(function (r) { ul.append(el("li", "", "One reading serves " + r.open.map(function (sl) { return nameOf[sl]; }).sort().join(" and ") + ": " + r.title + (r.total ? " (" + plural(r.total, "image") + ")" : ""))); });
-      p.openFamilies.forEach(function (sl) {
-        p.openBy[sl].filter(function (r) { return !(r.open && r.open.length > 1); }).forEach(function (r) { ul.append(el("li", "", nameOf[sl] + ": " + r.title + (r.kind === "volume" ? "" : " (" + r.kind + ")"))); });
+          s.append(ul);
+        } else s.append(el("p", "cap", p.books.length ? "No single book is shared; the families have marked different books here." : "Each family has the place on its list; no book is marked yet."));
+        mid.append(s);
       });
-      li.append(ul); ol.append(li);
-    });
-    host.append(ol);
-
-    // ---- waiting / blocked: each one a link when the mark knows its address, with who is waiting and what was written
-    var oth = syn.other, several = syn.scope.length > 1;
-    function hrefOf(h) {
-      if (!h) return "";
-      if (/^https?:\/\//i.test(h)) return h;
-      return h.charAt(0) === "/" ? BASE + h.replace(/^\/(?:TheMap\/)?/, "") : "";
     }
-    function waitList(rows, title) {
-      if (!rows.length) return;
-      if (PROVS === null && rows.some(function (r) { return !hrefOf(r.href) && /^source:/.test(r.id); })) wantProvs();
-      host.append(el("h4", "mra-sub", title + " (" + rows.length + ")"));
-      var ul = el("ul", "mra-wl");
-      rows.slice().sort(function (a, b) { return a.title.localeCompare(b.title); }).forEach(function (r) {
-        var li = el("li"), h = hrefOf(r.href) || ((PROVS && PROVS[r.id.replace(/^source:/, "")]) || {}).url || "", head = el("div", "mra-wh"), name;
-        if (h) { name = el("a", "mra-wt", r.title); name.href = h; if (/^https?:/i.test(h)) { name.target = "_blank"; name.rel = "noopener"; name.append(" \u2197"); } }
-        else name = el("span", "mra-wt", r.title);
-        head.append(name);
-        var sls = Object.keys(r.lines).sort(function (x, y) { return nameOf[x].localeCompare(nameOf[y]); }), notes = {};
-        sls.forEach(function (sl) {
-          var x = r.lines[sl], tag = (several ? nameOf[sl] : "") + (x.since ? (several ? " \u00b7 " : "since ") + x.since : "");
-          if (tag) head.append(" ", badge(tag));
-          if (x.note) notes[x.note] = 1;
+
+    // ---- the plan: what is still open, in the order that covers the most families first. With one family it is that family's open work; it is
+    // left out when there is none, because the dossier below already says what has been done.
+    if (several || syn.order.length) {
+      mid.append(el("h3", "mra-h3", several ? "What to do, covering the most families first" : "What to do first"));
+      mid.append(el("p", "cap", several
+        ? "A place comes first when more of the chosen families have open work there (a book or place on the to-do list, or a book part-read), then when a book is open for several of them at once, since one reading serves them all."
+        : "The places where a book or the place itself is on your to-do list, or a book is part-read, most open work first."));
+      if (!syn.order.length) mid.append(el("p", "cap", "Nothing is marked as planned or part-read for these families."));
+      var ol = el("ol", "mra-plan");
+      syn.order.forEach(function (p) {
+        var li = el("li"), a = el("a", "", p.name); a.href = BASE + "place/" + p.pid + "/"; li.append(el("b", "", ""), a);
+        if (several) p.openFamilies.forEach(function (sl) { li.append(" ", badge(nameOf[sl])); });
+        var ul = el("ul", "mra-l");
+        p.sameBookOpen.forEach(function (r) { ul.append(el("li", "", "One reading serves " + r.open.map(function (sl) { return nameOf[sl]; }).sort().join(" and ") + ": " + r.title + (r.total ? " (" + plural(r.total, "image") + ")" : ""))); });
+        p.openFamilies.forEach(function (sl) {
+          p.openBy[sl].filter(function (r) { return !(r.open && r.open.length > 1); }).forEach(function (r) { ul.append(el("li", "", (several ? nameOf[sl] + ": " : "") + r.title + (r.kind === "volume" ? "" : " (" + r.kind + ")"))); });
         });
-        li.append(head);
-        Object.keys(notes).forEach(function (n) { li.append(el("p", "mra-wnote", n.length > 220 ? n.slice(0, 217) + "\u2026" : n)); });
-        ul.append(li);
+        li.append(ul); ol.append(li);
       });
-      host.append(ul);
+      mid.append(ol);
     }
-    if (oth.letters.length || oth.blocked.length) {
-      host.append(el("h3", "mra-h3", "Waiting or blocked"));
-      waitList(oth.letters, "Letters out, no reply yet");
-      waitList(oth.blocked, "Blocked");
-    }
-
-    // ---- place by place
-    host.append(el("h3", "mra-h3", "Place by place"));
-    var pl = el("ul", "mra-all");
-    syn.places.forEach(function (p) {
-      var li = el("li"), a = el("a", "mra-pn", p.name), who = el("span", "mra-pw"), n = el("small", "mra-pc", p.books.length ? plural(p.books.length, "book") + " marked" : "");
-      a.href = BASE + "place/" + p.pid + "/";
-      if (several) p.slugs.forEach(function (sl) { who.append(badge(nameOf[sl])); });
-      li.append(a, who, n);
-      pl.append(li);
-    });
-    host.append(pl);
+    /* The letters out and the blocked sources, and the place-by-place list, are in the dossier below, for the same families. */
   }
 
   function visible() { return !panel.hidden; }
   function maybe() { if (visible()) draw(); }
-  var t = document.getElementById("mr-t-all");
-  if (t) t.addEventListener("click", function () { setTimeout(draw, 0); });
   document.addEventListener("ra-progress-changed", maybe);
   document.addEventListener("ra-scope-changed", function () { scope = readScope(); maybe(); });
   window.addEventListener("storage", function () { scope = readScope(); maybe(); });

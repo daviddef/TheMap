@@ -219,9 +219,52 @@
     }).then(null, function (e) { aiStat.textContent = (e && e.message) || "The plan could not be built just now."; aiStat.className = "sp-status bad"; }).then(function () { aiBtn.disabled = false; });
   });
 
+  /* ---- A SAVED STORY, CONTINUED ----------------------------------------------------------------------------------------------
+     David: «the my story tab, isn't this the same as /read/#story? I don't think we need another.» There is one story tool, this one, and a story
+     saved from it is listed in My research with its dated log. /read/?story=<id>#story brings one back here to add to: the words of the story (the
+     pieces of kind «story») fill the box; documents, photos, notes and plans already saved stay in it, untouched. Saving then ADDS what was written
+     after the saved words as a new, dated piece; if the saved words were changed, they are replaced by the new version (also a dated piece). A story
+     too long for the box (8,000 characters) opens empty and whatever is written is added to the end. /read/?family=<slug> starts a new story for that
+     family. A first save also makes the story «current», so a second press changes it instead of saving a copy. */
+  var QS = new URLSearchParams(location.search), CUR = null, PEND_FAM = QS.get("family") || "", CHUNK = 5800;
+  function storyWords(st) { return (st && st.pieces || []).filter(function (p) { return p.kind === "story" && p.text; }).map(function (p) { return p.text; }).join("\n\n"); }
+  function chunked(t) {
+    t = String(t).trim(); if (t.length <= CHUNK) return t ? [t] : [];
+    var out = [], rest = t;
+    while (rest.length > CHUNK) {
+      var cut = rest.lastIndexOf("\n\n", CHUNK); if (cut < CHUNK * 0.5) cut = rest.lastIndexOf(". ", CHUNK); if (cut < CHUNK * 0.5) cut = CHUNK;
+      out.push(rest.slice(0, cut + 1).trim()); rest = rest.slice(cut + 1).trim();
+    }
+    if (rest) out.push(rest);
+    return out;
+  }
+  function saveLabel() {
+    var b = $("sp-save-btn"); if (b) b.textContent = CUR ? "Save to this story" : "Save the story only";
+    var n = $("sp-cont"); if (!n) { n = el("p", null, "sp-cont"); n.id = "sp-cont"; drop.parentNode.insertBefore(n, drop); }
+    n.textContent = "";
+    if (CUR) {
+      n.append("Continuing \u201C" + CUR.name + "\u201D" + (CUR.appendOnly ? " (it is long, so what you write here is added to the end)" : "") + ". Save adds what you write to it. ");
+      var nb = el("button", "Start a new story instead"); nb.type = "button"; nb.className = "sp-linkbtn";
+      nb.addEventListener("click", function () { CUR = null; saveLabel(); saveOut.textContent = ""; try { history.replaceState(null, "", location.pathname + "#story"); } catch (e) { /* none */ } });
+      n.append(nb);
+    }
+    n.hidden = !CUR;
+  }
+  function openSaved(id) {
+    return (window.raStories ? Promise.resolve() : loadScript("stories.js")).then(function () {
+      var st = window.raStories.get(id); if (!st) { say("That story is not in this browser. It may have been deleted, or saved on another device that has not synced yet."); return false; }
+      var words = storyWords(st), append = words.length > text.maxLength;
+      CUR = { id: id, name: st.name, base: append ? "" : words, appendOnly: append };
+      if (st.line) PEND_FAM = st.line;
+      text.value = append ? "" : words; grow(); saveLabel();
+      return true;
+    }).catch(function () { return false; });
+  }
+  var saveOut = $("sp-save-out");
+
   /* ---- keep it: a research family, or just the words ------------------------------------------------------------------------ */
   function drawKeep(g) {
-    var P0 = window.raProgress, selL = $("sp-fa-line"), nameIn = $("sp-fa-name"), btn = $("sp-fa-btn"), want = selL.value, out = $("sp-fa-out");
+    var P0 = window.raProgress, selL = $("sp-fa-line"), nameIn = $("sp-fa-name"), btn = $("sp-fa-btn"), want = selL.value || PEND_FAM, out = $("sp-fa-out");
     out.textContent = "";
     selL.textContent = "";
     /* a research family is named for a surname; with none in the story the place is no family's name, so the box is left to be filled */
@@ -242,16 +285,30 @@
       try { if (window.raPaintProgress) window.raPaintProgress(); } catch (e) { /* the map repaints on its own next time */ }
     };
   }
-  /* keep the words: the story (and the names of any photos) go to My research, My story, where more can be added; the plan too when it was built */
-  var saveOut = $("sp-save-out");
+  /* keep the words: the story (and the names of any photos) go to My research, where more can be added; the plan too when it was built */
   function save(withPlan) {
     var t = text.value.trim();
     if (!t && !files.length) { saveOut.textContent = "Tell the story first, then save it."; return; }
     (window.raStories ? Promise.resolve() : loadScript("stories.js")).then(function () { return files.length && !window.raStoryPics ? loadScript("story-pics.js") : null; }).then(function () {
-      var ST = window.raStories, f = last && last.facts;
-      var id = ST.create({ name: f && f.name ? f.name + "'s story" : "", text: t.slice(0, 5800) });
-      if (!id) { saveOut.textContent = "This browser would not keep it. Storage may be full or blocked."; return; }
-      if (t.length > 5800) ST.addPiece(id, { kind: "story", label: "The family story (continued)", text: t.slice(5800, 11600) });
+      var ST = window.raStories, f = last && last.facts, id, how = "Saved";
+      if (CUR && ST.get(CUR.id)) {
+        id = CUR.id;
+        var prior = CUR.appendOnly ? "" : CUR.base, now = new Date(), tag = now.getDate() + " " + ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][now.getMonth()] + " " + now.getFullYear();
+        if (!CUR.appendOnly && t === prior && !files.length && !lastPlan) { saveOut.textContent = "Nothing new to save: the words are as they were."; return; }
+        if (t && (CUR.appendOnly || (prior && t.indexOf(prior) === 0))) {
+          var added = CUR.appendOnly ? t : t.slice(prior.length).trim();
+          chunked(added).forEach(function (c, i) { ST.addPiece(id, { kind: "story", label: i ? "Added " + tag + " (continued)" : "Added " + tag, text: c }); });
+          how = added ? "Added to the story" : "Saved";
+        } else if (t) {
+          ST.get(id).pieces.filter(function (p) { return p.kind === "story"; }).forEach(function (p) { ST.removePiece(id, p.id); });
+          chunked(t).forEach(function (c, i) { ST.addPiece(id, { kind: "story", label: i ? "The family story (revised " + tag + ", continued)" : "The family story (revised " + tag + ")", text: c }); });
+          how = "Saved the new version of the story";
+        }
+      } else {
+        id = ST.create({ name: f && f.name ? f.name + "'s story" : "", text: t.slice(0, CHUNK) });
+        if (!id) { saveOut.textContent = "This browser would not keep it. Storage may be full or blocked."; return; }
+        if (t.length > CHUNK) ST.addPiece(id, { kind: "story", label: "The family story (continued)", text: t.slice(CHUNK, CHUNK * 2) });
+      }
       if (lastPlan && window.raStoryPlan) { var pt = window.raStoryPlan.asText(lastPlan); if (pt) ST.addPiece(id, { kind: "note", label: "Research plan (a draft by Claude Haiku)", text: pt }); }
       var kept = 0, lost = 0;
       var keeps = files.map(function (x) {
@@ -262,12 +319,17 @@
       if (parsed && parsed.born != null) ST.setBorn(id, parsed.born);
       var pick = $("sp-fa-line"); if (pick && pick.value && ST.setLine) ST.setLine(id, pick.value);
       try { localStorage.setItem("ra-story-current", id); } catch (e) { /* the page still opens it by address */ }
+      /* now saved: the next press changes THIS story, instead of saving a copy */
+      var st2 = ST.get(id); CUR = { id: id, name: st2 ? st2.name : "", base: CUR && CUR.appendOnly ? "" : t, appendOnly: !!(CUR && CUR.appendOnly) };
+      if (CUR.appendOnly) { text.value = ""; grow(); }
+      saveLabel();
+      try { history.replaceState(null, "", location.pathname + "?story=" + encodeURIComponent(id) + "#story"); } catch (e) { /* none */ }
       Promise.all(keeps).then(function () {
-        saveOut.textContent = "Saved" + (withPlan && lastPlan ? " with the plan" : "") + (kept ? " with " + kept + " picture" + (kept === 1 ? "" : "s") + ", kept in this browser only (the words travel with the story, the pictures do not)" : "") + (lost ? ". " + lost + " picture" + (lost === 1 ? " was" : "s were") + " not kept: this browser would not store them" : "") + ". ";
-        var a = el("a", "Open it in My story to add more"); a.href = BASE + "my-research/#story/" + id; saveOut.append(a, document.createTextNode("."));
+        saveOut.textContent = how + (withPlan && lastPlan ? " with the plan" : "") + (kept ? " with " + kept + " picture" + (kept === 1 ? "" : "s") + ", kept in this browser only (the words travel with the story, the pictures do not)" : "") + (lost ? ". " + lost + " picture" + (lost === 1 ? " was" : "s were") + " not kept: this browser would not store them" : "") + ". ";
+        var a = el("a", "See it in My research, with its log"); a.href = BASE + "my-research/#story"; saveOut.append(a, document.createTextNode("."));
       });
-      $("sp-save-btn").disabled = true; setTimeout(function () { $("sp-save-btn").disabled = false; }, 4000);
-    }).catch(function () { saveOut.textContent = "Could not save here. Open My research and start the story there."; });
+      $("sp-save-btn").disabled = true; setTimeout(function () { $("sp-save-btn").disabled = false; }, 2500);
+    }).catch(function () { saveOut.textContent = "Could not save here. Open My research and look for the story there."; });
   }
   $("sp-save-btn").addEventListener("click", function () { save(false); });
 
@@ -365,6 +427,11 @@
   (function boot() {
     var h = null; try { h = JSON.parse(localStorage.getItem(HAND) || "null"); localStorage.removeItem(HAND); } catch (e) { h = null; }
     var draft = ""; try { draft = sessionStorage.getItem(DRAFT) || ""; } catch (e) { draft = ""; }
+    var sid = QS.get("story");
+    if (sid) {
+      openSaved(sid).then(function (ok) { if (ok) { $("sp-clear").hidden = false; run(); } else if (draft) { text.value = draft; grow(); run(); } });
+      return;
+    }
     if (h && h.text && Date.now() - (h.t || 0) < 600000) {
       text.value = String(h.text).slice(0, 8000);
       if (h.pics) say("You had " + h.pics + " picture" + (h.pics === 1 ? "" : "s") + " on the map page. Add " + (h.pics === 1 ? "it" : "them") + " here to read " + (h.pics === 1 ? "it" : "them") + ".");

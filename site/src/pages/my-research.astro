@@ -104,144 +104,34 @@ const BASE_ = u("/");
   {/* TABS, AS ON THE READ PAGE. The page was one long scroll: the family, its places, then two notes about other people's work. Four tabs
       now, the same ones-and-panels shape as the Journey / Story / People tabs on /read/ (the rs-tab styles). The map and the dossier
       stay in the first panel, untouched: the script below still finds them by id. */}
-  <div class="mr-multi" id="mr-multi" role="status" hidden></div>
   <div class="rs-tabs mr-tabs" role="tablist" id="mr-tabs">
-    <button type="button" class="rs-tab" role="tab" id="mr-t-families" aria-controls="mr-p-families" aria-selected="true">Families &amp; places</button>
-    <button type="button" class="rs-tab" role="tab" id="mr-t-all" aria-controls="mr-p-all" aria-selected="false" tabindex="-1">All families<span id="mr-n-all"></span></button>
-    <button type="button" class="rs-tab" role="tab" id="mr-t-story" aria-controls="mr-p-story" aria-selected="false" tabindex="-1">My story</button>
+    <button type="button" class="rs-tab" role="tab" id="mr-t-families" aria-controls="mr-p-families" aria-selected="true">Research<span id="mr-n-all"></span></button>
     <button type="button" class="rs-tab" role="tab" id="mr-t-fixes" aria-controls="mr-p-fixes" aria-selected="false" tabindex="-1">GEDCOM to fix <span class="rs-n" id="mr-n-fixes" hidden></span></button>
     <button type="button" class="rs-tab" role="tab" id="mr-t-sessions" aria-controls="mr-p-sessions" aria-selected="false" tabindex="-1">Other names</button>
   </div>
 
+  {/* ONE RESEARCH VIEW, FOR ONE FAMILY OR SEVERAL. David: «selecting one family or selecting more than 1 can we merge this into a single useable,
+      impactful research view?» «Families & places» (one family) and «All families» (the ticked set) were two tabs that answered the same question
+      two ways. It is one panel now, read from the families chosen in the header picker (nothing ticked means the one you mark under): who is read
+      and the figures, the map of their places, what to do first, where they overlap (only when there are two or more), their stories, and then the
+      place-by-place list. */}
   <div class="rs-panel mr-panel" id="mr-p-families" role="tabpanel" aria-labelledby="mr-t-families">
+  <div id="mr-all" data-base={u("/")}></div>
   <div id="mr-map" hidden></div>
   <p class="cap" id="mr-map-cap" hidden></p>
   <p class="cap" id="mr-dots-hint" hidden></p>
+  <div id="mr-mid"></div>
+  <div id="mr-stories" class="mr-stories" data-base={u("/")}></div>
 
   <div id="mr-body"></div>
   </div>
 
-  <div class="rs-panel mr-panel" id="mr-p-all" role="tabpanel" aria-labelledby="mr-t-all" hidden>
-    <div id="mr-all" data-base={u("/")}></div>
-  </div>
-
-  <div class="rs-panel mr-panel" id="mr-p-story" role="tabpanel" aria-labelledby="mr-t-story" hidden>
-  <div class="ms" id="ms-root">
-    <p class="ms-intro">Tell the story of someone you are looking for, then keep adding to it as you find more: write the next part, paste an article or an obituary, add a photo with its caption. The Atlas reads everything together, so the journey, the registers to search and the names to try grow with it, and every addition is kept in a dated log. Kept in this browser; with the six words on, it travels to your other devices with the rest of your research.</p>
-    <p class="ms-status" id="ms-status" role="status"></p>
-
-    <div class="ms-bar" id="ms-bar" hidden>
-      <label class="ms-sr" for="ms-pick">Story</label>
-      <select id="ms-pick" class="ms-in ms-pick"></select>
-      <button type="button" class="ms-btn" id="ms-new">New story</button>
-      <button type="button" class="ms-link" id="ms-rename">Rename</button>
-      <button type="button" class="ms-link" id="ms-del">Delete story</button>
-    </div>
-    <div class="ms-row ms-rename" id="ms-rename-row" hidden>
-      <input type="text" id="ms-rename-in" class="ms-in" maxlength="80" aria-label="New name for this story" />
-      <button type="button" class="ms-btn ms-pri" id="ms-rename-ok">Rename</button>
-      <button type="button" class="ms-btn" id="ms-rename-no">Cancel</button>
-    </div>
-
-    <section class="ms-first" id="ms-first" hidden>
-      <h2 class="ms-h">Start a story</h2>
-      <p class="ms-dim ms-first-sub">Write what you know, even a few words. Add a photo or document if you have one. The Atlas draws the journey, lists the registers to search and the names to try as you go.</p>
-      <div class="ms-drop" id="ms-first-drop">
-        <label class="ms-lab" for="ms-first-text">Who are you looking for, and what do you know?</label>
-        <textarea id="ms-first-text" class="ms-in ms-ta" rows="5" maxlength="6000" placeholder="My great-grandfather Ivan Kosina came from Gallignana to Hamilton around 1905. All I have is one photo."></textarea>
-        <ul class="ms-shots" id="ms-first-shots" hidden></ul>
-        <div class="ms-row">
-          <label class="ms-btn ms-filebtn"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 15V4m0 0L8 8m4-4l4 4M5 14v4.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg> Add a photo or document<input type="file" id="ms-first-file" accept="image/jpeg,image/png,image/webp" multiple hidden /></label>
-          <button type="button" class="ms-btn" id="ms-first-eg">Try an example</button>
-          <button type="button" class="ms-link" id="ms-first-clear" hidden>Start again</button>
-        </div>
-        <p class="ms-dim">You can also drop or paste a picture here.</p>
-        <div class="ms-read" id="ms-first-read" hidden>
-          <p class="ms-read-why">A census sheet, a certificate or a petition can be read for you: the pictures are sent to Claude only when you press the button, and what it says about people with your surnames is added to your words, where you can edit it.</p>
-          <button type="button" class="ms-btn ms-pri" id="ms-first-readbtn">Read it with Claude</button>
-        </div>
-      </div>
-      <div class="ms-chips" id="ms-first-chips" aria-live="polite"></div>
-      <label class="ms-lab" for="ms-first-name">A name for this story (optional)</label>
-      <input type="text" id="ms-first-name" class="ms-in" maxlength="80" placeholder="Ivan Kosina's journey" />
-      <div class="ms-row"><button type="button" class="ms-btn ms-pri" id="ms-first-go">Start the story</button></div>
-      <p class="ms-dim">Nothing is sent anywhere unless you press Read it with Claude. Please leave out details of people who may be alive.</p>
-    </section>
-
-    <div id="ms-view" hidden>
-      <h2 class="ms-h" id="ms-name"></h2>
-
-      <section class="ms-comp" id="ms-comp" aria-labelledby="ms-add-h">
-        <h3 class="ms-h3" id="ms-add-h">Add the next piece to <span id="ms-add-to"></span></h3>
-        <div class="ms-kinds" role="group" aria-label="What are you adding?">
-          <button type="button" class="ms-kind" data-kind="story" aria-pressed="true">Write more</button>
-          <button type="button" class="ms-kind" data-kind="document" aria-pressed="false">Paste an article or document</button>
-          <button type="button" class="ms-kind" data-kind="photo" aria-pressed="false">Add a photo</button>
-          <button type="button" class="ms-kind" data-kind="note" aria-pressed="false">A note</button>
-        </div>
-        <div class="ms-photo" id="ms-photo-row" hidden>
-          <label class="ms-btn ms-filebtn">Choose a photo<input type="file" id="ms-file" accept="image/jpeg,image/png,image/webp,image/gif" hidden /></label>
-          <span class="ms-dim">or drop one here, or paste it into the box below. The photo is shown here only while this page is open: the Atlas reads words, so type who, where and when, and that is what is kept.</span>
-          <div class="ms-photo-prev" id="ms-photo-prev" hidden></div>
-          <button type="button" class="ms-btn ms-pri" id="ms-photo-read" hidden>Read it with Claude</button>
-        </div>
-        <label class="ms-sr" for="ms-text">What to add</label>
-        <textarea id="ms-text" class="ms-in ms-ta" rows="6" maxlength="60000"></textarea>
-        <div class="ms-row" id="ms-label-row">
-          <label class="ms-sr" for="ms-label">Where it came from</label>
-          <input type="text" id="ms-label" class="ms-in ms-lab-in" maxlength="80" />
-          <button type="button" class="ms-btn ms-pri" id="ms-add">Add to the story</button>
-        </div>
-      </section>
-
-      <section class="ms-out" id="ms-out" aria-labelledby="ms-so-h" hidden>
-        <h3 class="ms-h3" id="ms-so-h">The story so far</h3>
-        <p class="ms-lede" id="ms-lede"></p>
-        <p class="ms-also" id="ms-did" hidden></p>
-        <div id="ms-fam" class="ms-fam" aria-label="Add this family to your research"></div>
-        <div class="ms-nav" id="ms-nav" role="navigation" aria-label="In this story">
-          <button type="button" data-go="ms-journey">The journey</button>
-          <button type="button" data-go="ms-stops-h">Place by place</button>
-          <button type="button" data-go="ms-life-sec">The person, as told</button>
-          <button type="button" data-go="ms-names-sec">First names and surnames</button>
-          <button type="button" data-go="ms-tree-sec">The family</button>
-          <button type="button" data-go="ms-plan-h">What to do first</button>
-        </div>
-        <p class="ms-also" id="ms-also" hidden></p>
-        <div id="ms-journey" hidden>
-          <div id="ms-map" class="ms-map" role="img" aria-label="Map of the journey"></div>
-          <div class="lf-time" id="ms-time">
-            <button id="ms-play" class="lf-play" type="button">▶ Play</button>
-            <label class="lf-slide"><span class="ms-sr">Year</span><input id="ms-year" type="range" min="1800" max="1900" step="1" value="1800" /></label>
-            <output id="ms-yearout" class="lf-yearout" for="ms-year"></output>
-          </div>
-          <div id="ms-year-row"></div>
-          <div id="ms-cap" class="lf-capbox" aria-live="polite"></div>
-          <div id="ms-moments" class="lf-moments"></div>
-        </div>
-        <div id="ms-rest" hidden>
-          <h3 class="ms-h3" id="ms-stops-h">Place by place: who held the ground, and where to search</h3>
-          <div id="ms-stops"></div>
-          <section id="ms-life-sec" hidden><h3 class="ms-h3">The person, as told</h3><div id="ms-life"></div></section>
-          <section id="ms-names-sec" hidden><h3 class="ms-h3">First names and surnames</h3><div id="ms-names"></div></section>
-          <section id="ms-tree-sec" hidden><h3 class="ms-h3">The family</h3><div id="ms-tree"></div></section>
-          <h3 class="ms-h3" id="ms-plan-h">What to do first</h3>
-          <div id="ms-plan"></div>
-        </div>
-      </section>
-
-      <section class="ms-logbox" aria-labelledby="ms-log-h">
-        <h3 class="ms-h3" id="ms-log-h">Log of additions <span class="ms-count" id="ms-log-n"></span></h3>
-        <ol class="ms-log" id="ms-log"></ol>
-      </section>
-    </div>
-  </div>
-  <p class="ms-dim ms-fail" id="ms-fail" hidden>My story could not start. Reload the page. If it still does not appear, the site is probably being updated: try again in a few minutes. Nothing you have kept is lost.</p>
+  {/* THE STORY WAS A SECOND COPY. «My story» was an older copy of the Read page's story tool. There is one story tool now, /read/#story; the stories
+      you have saved are listed in the research view above (research-stories.js), with the dated log of what was added to each and a way back into the
+      tool to add more. The old addresses (#story, #story/<id>) land there. */}
   <script is:inline src={u("/js/research-synopsis.js")}></script>
   <script is:inline src={u("/js/research-overview.js")}></script>
-  <script is:inline src={u("/js/story-tab.js")}></script>
-  <script is:inline>if (!window.raStoryTab) { var f = document.getElementById("ms-fail"); if (f) f.hidden = false; }</script>
-  </div>
+  <script is:inline src={u("/js/research-stories.js")}></script>
 
   <div class="rs-panel mr-panel" id="mr-p-fixes" role="tabpanel" aria-labelledby="mr-t-fixes" hidden>
     <h2 class="mr-h">GEDCOM research still to fix</h2>
@@ -308,28 +198,19 @@ const BASE_ = u("/");
     /* TABS AND THE GEDCOM-TO-FIX PANEL. Reads ra-gedcom-fixes-v1 (written by Roots & Routes while "Remember my decisions" is on; see
        roots/js/decisions.js). Place text is user data, so every node here is built with textContent. */
     (function () {
-      var NAMES = ["families", "all", "story", "fixes", "sessions"], FKEY = "ra-gedcom-fixes-v1";
+      var NAMES = ["families", "fixes", "sessions"], FKEY = "ra-gedcom-fixes-v1";
       var curTab = "families", MKEY = "ra-synopsis-scope";
-      /* SEVERAL FAMILIES TICKED IN THE HEADER PICKER. «Families & places» and «My story» are about ONE family, the one you mark under; only
-         «All families» reads the ticked set together. Say so on the tabs that show one, and open the joint tab when a tick is made. */
+      /* ONE RESEARCH TAB. It reads the families ticked in the header picker (nothing ticked means the one you mark under), so there is no separate
+         «All families» tab and no banner telling you to go there; the tab only says how many families it is reading. */
       function ticked() {
         try {
           var P = window.raProgress, x = JSON.parse(localStorage.getItem(MKEY) || "null"); if (!P || !x) return [];
           var ls = P.lines(); return x.all ? ls : ls.filter(function (l) { return (x.slugs || []).indexOf(l.slug) > -1; });
         } catch (e) { return []; }
       }
-      function nm(l) { return l.name === "My research so far" ? "Research Names" : l.name; }
-      function multiBanner() {
-        var b = document.getElementById("mr-multi"); if (!b) return;
-        var sl = ticked();
-        var cnt = document.getElementById("mr-n-all"); if (cnt) cnt.textContent = sl.length ? " (" + sl.length + ")" : "";   // «All families (4)»: how many are ticked
-        if (sl.length < 2 || curTab === "all" || curTab === "fixes" || curTab === "sessions") { b.hidden = true; return; }
-        var P = window.raProgress, act = P && P.active && P.active(), al = P.lines().filter(function (l) { return l.slug === act; })[0];
-        var names = sl.map(nm).sort(), shown = names.length > 4 ? names.slice(0, 3).join(", ") + " and " + (names.length - 3) + " more" : names.join(", ");
-        b.textContent = "";
-        b.append(el("span", "You have ticked " + sl.length + " families (" + shown + "). This tab shows one family" + (al ? ": " + nm(al) + ", the one you mark under." : "."), ""));
-        var go = el("button", "Read the " + sl.length + " together", ""); go.type = "button"; go.addEventListener("click", function () { show("all", true); });
-        b.append(go); b.hidden = false;
+      function countTab() {
+        var cnt = document.getElementById("mr-n-all"), n = ticked().length;
+        if (cnt) cnt.textContent = n > 1 ? " (" + n + " families)" : "";
       }
       function show(n, push) {
         curTab = n;
@@ -338,9 +219,7 @@ const BASE_ = u("/");
           if (!t || !p) return; t.setAttribute("aria-selected", String(on)); t.tabIndex = on ? 0 : -1; p.hidden = !on;
         });
         if (push) { try { history.replaceState(null, "", n === "families" ? location.pathname + location.search : "#" + n); } catch (e) { /* no history */ } }
-        if (n === "story" && window.raStoryTab) window.raStoryTab.show();
         if (n === "families") setTimeout(function () { window.dispatchEvent(new Event("resize")); }, 30);   // the map was drawn while hidden
-        multiBanner();
         document.dispatchEvent(new CustomEvent("ra-tab-shown", { detail: n }));
       }
       NAMES.forEach(function (k, i) {
@@ -351,11 +230,20 @@ const BASE_ = u("/");
           var n = NAMES[(i + d + NAMES.length) % NAMES.length]; show(n, true); document.getElementById("mr-t-" + n).focus(); e.preventDefault();
         });
       });
-      var h = (location.hash || "").replace("#", ""); if (/^story(\/|$)/.test(h)) show("story", false); else if (NAMES.indexOf(h) > 0) show(h, false);
-      document.addEventListener("ra-scope-changed", function () { if (ticked().length > 1 && curTab !== "all") show("all", true); else multiBanner(); });
-      document.addEventListener("ra-progress-changed", multiBanner);
-      window.addEventListener("hashchange", function () { var g = (location.hash || "").replace("#", ""); if (g === "all" && curTab !== "all") show("all", false); });
-      setTimeout(multiBanner, 0);
+      /* THE OLD ADDRESSES. #all (the All families tab) and #story or #story/<id> (the My story tab) both land in the research view; a story address
+         scrolls to the stories in it. */
+      function landOld() {
+        var g = (location.hash || "").replace("#", "");
+        if (g === "all" || /^story(\/|$)/.test(g)) {
+          show("families", false);
+          if (g !== "all") setTimeout(function () { var st = document.getElementById("mr-stories"); if (st && st.scrollIntoView) st.scrollIntoView({ block: "start" }); }, 400);
+        } else if (NAMES.indexOf(g) > 0) show(g, false);
+      }
+      landOld();
+      document.addEventListener("ra-scope-changed", countTab);
+      document.addEventListener("ra-progress-changed", countTab);
+      window.addEventListener("hashchange", landOld);
+      setTimeout(countTab, 0);
 
       function el(tag, text, cls) { var e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; }
       function read() { try { var r = localStorage.getItem(FKEY), d = r && JSON.parse(r); return d && d.trees ? d : { v: 1, trees: {} }; } catch (e) { return { v: 1, trees: {} }; } }
@@ -431,6 +319,7 @@ const BASE_ = u("/");
          here would be a second answer to one question, which is the mistake
          this project has already made once with the era radius. */
       var ATLAS = null, PLACEC = {}, PROVS = null, CONTACTS = null;
+      var CUR = { several: false, nameOf: {} };   /* who is read, set by draw() for rowHtml */
       var PSTAT = {};   /* per place, what this family has done there: set by draw(), read by drawMap() */
       var IDX = null;   /* the atlas's place index (coordinates + how many FamilySearch books), fetched once for the suggestions */
 
@@ -469,8 +358,16 @@ const BASE_ = u("/");
         return P.lines().filter(function (l) { return l.active; })[0] || null;
       }
 
+      /* THE FAMILIES READ: the ones ticked in the header picker, or the one you mark under (research-synopsis.js decides, for every part of this
+         view). `slug` stays the family you MARK under, which is who «forget» acts for; `slugs` is who is READ. */
+      function readStored() { try { return JSON.parse(localStorage.getItem("ra-synopsis-scope") || "null"); } catch (e) { return null; } }
       function draw() {
-        var marks = P.all(), slug = P.active(), me = line();
+        var marks = P.all(), slug = P.active(), me = line(), SY = window.raSynopsis, allLines = P.lines();
+        var slugs = SY.scopeOf(allLines, slug, readStored()), nameOf = {};
+        allLines.forEach(function (l) { nameOf[l.slug] = l.name === "My research so far" ? "Research Names" : l.name; });
+        var several = slugs.length > 1;
+        CUR = { several: several, nameOf: nameOf };
+        var readNames = slugs.map(function (s) { return nameOf[s]; });
         PSTAT = {};
         /* WHAT THIS FAMILY DID, AND WHAT WAS READ FOR SOMEBODY ELSE.
            A volume WALKED in full is shared by every line, on purpose: the
@@ -486,8 +383,7 @@ const BASE_ = u("/");
            below, as what they are. */
         var mine = [], sharedOnly = [];
         Object.keys(marks).forEach(function (id) {
-          var b = (marks[id].by && marks[id].by[slug]) || {};
-          if ((b.done && b.done.length) || b.state || b.note) mine.push(id);
+          if (SY.rowBy(marks[id], slugs, nameOf).fams.length) mine.push(id);
           else if (marks[id].walked && marks[id].walked.length) sharedOnly.push(id);
         });
 
@@ -503,7 +399,7 @@ const BASE_ = u("/");
              names one of the five things and none of the buttons. */
           body.innerHTML =
             '<p class="cap" style="margin-top:22px">Nothing recorded yet' +
-            (me ? " for <b>" + esc(me.name) + "</b>" : "") + "." +
+            (readNames.length ? " for <b>" + esc(readNames.length > 4 ? readNames.slice(0, 3).join(", ") + " and " + (readNames.length - 3) + " more" : readNames.join(", ")) + "</b>" : "") + "." +
             (others.length ? " You do have work under " +
               others.map(function (l) { return "<b>" + esc(l.name) + "</b>"; }).join(", ") +
               " — switch above to see it." : "") + "</p>" +
@@ -543,9 +439,9 @@ const BASE_ = u("/");
         var byPlace = {}, films = [], registers = [], letters = [], blocked = [], loose = [];
         var pages = 0, vols = 0;
         mine.forEach(function (id) {
-          var m = marks[id], b = (m.by && m.by[slug]) || {};
-          var cov = P.coverage(id, slug);
-          var row = { id: id, m: m, b: b, cov: cov };
+          var m = marks[id], rb = SY.rowBy(m, slugs, nameOf), b = rb.b;
+          var cov = SY.rowCov(m, slugs);
+          var row = { id: id, m: m, b: b, cov: cov, fams: rb.fams, mineHere: rb.fams.indexOf(slug) > -1 };
           if (cov.length) { vols++; pages += P.covered(cov); }
           if (b.state === "blocked") { blocked.push(row); return; }
           /* A FILM THAT HAS BEEN RESOLVED KNOWS ITS GROUND. The importer reads the
@@ -616,7 +512,7 @@ const BASE_ = u("/");
         /* ---- 1. where this family has been ------------------------------ */
         var pids = Object.keys(byPlace).sort();
         if (pids.length) {
-          h.push('<div class="lab">Where this family has been worked</div>');
+          h.push('<div class="lab">' + (several ? "Where these families have been worked" : "Where this family has been worked") + "</div>");
           h.push('<p class="mrlead">Opening a place lets you mark its books \u2014 ' +
                  "and shows the villages within a day's walk, whose registers " +
                  "may hold this family under their own name.</p>");
@@ -668,9 +564,9 @@ const BASE_ = u("/");
               if (!v.waypoint) return;
               var vid = "volume:" + String(v.waypoint).split(":")[0], vm = marks[vid];
               if (!vm) return;
-              var vb = (vm.by && vm.by[slug]) || {};
+              var vb = SY.rowBy(vm, slugs, nameOf).b;
               if (vb.state === "exhausted" ||
-                  (vm.total && P.covered(P.coverage(vid, slug)) >= vm.total)) nDone++;
+                  (vm.total && P.covered(SY.rowCov(vm, slugs)) >= vm.total)) nDone++;
             });
             rows.forEach(function (r) {
               /* IN FLIGHT = something has actually been read or concluded here, not only put on the to-do list */
@@ -769,7 +665,7 @@ const BASE_ = u("/");
         }).sort();
         if (elsewhere.length) {
           h.push('<p class="mrshared mrshared-else">Books read page by page, which count for every family, in places ' +
-            esc(me ? me.name : "this family") + " has no marks of its own: " + elsewhere.map(function (pid) {
+            esc(several ? "these families" : (readNames[0] || "this family")) + (several ? " have no marks of their own: " : " has no marks of its own: ") + elsewhere.map(function (pid) {
               var pc = PLACEC[pid];
               /* data-shared-place so fill() fetches the place's own file and
                  the NAME arrives. Without it these links are not [data-place]
@@ -895,7 +791,8 @@ const BASE_ = u("/");
           '<div class="mrline mrline-t">' +
             (m.href ? '<a class="mrt" href="' + esc(m.href) + '">' + esc(m.t || raw) + "</a>"
                     : '<span class="mrt">' + esc(m.t || raw) + "</span>") +
-            '<button type="button" class="mrdel" data-id="' + esc(r.id) + '">forget</button>' +
+            (CUR.several && r.fams && r.fams.length ? '<span class="mrfams">' + r.fams.map(function (s) { return '<span class="mrfam">' + esc(CUR.nameOf[s] || s) + "</span>"; }).join("") + "</span>" : "") +
+            (r.mineHere ? '<button type="button" class="mrdel" data-id="' + esc(r.id) + '">forget</button>' : "") +
           "</div>" +
           (cov.length || chips
             ? '<div class="mrline mrline-r">' +
@@ -1203,6 +1100,7 @@ const BASE_ = u("/");
 
       draw();
       document.addEventListener("ra-progress-changed", draw);
+      document.addEventListener("ra-scope-changed", draw);   /* ticking or clearing families in the picker changes who is read */
       /* one line of the same story the header dot tells (window.raConn is defined in Base.astro) */
       function connLine() {
         var el = document.getElementById("mr-conn"), c = window.raConn && window.raConn.get();
@@ -1456,73 +1354,38 @@ const BASE_ = u("/");
     cursor: pointer; font: inherit; font-size: 11.5px; color: var(--ink-3);
     text-decoration: underline; text-underline-offset: 2px; }
   :global(.mrdel:hover) { color: var(--brick); }
+  :global(.mrs) { margin: 26px 0 8px; }
+  :global(.mrs-bar) { margin: 8px 0 14px; }
+  :global(.mrs-card) { padding: 14px 16px; margin: 0 0 12px; border: 1px solid var(--rule); border-left: 3px solid var(--accent, #245565); border-radius: 8px; background: var(--panel); }
+  :global(.mrs-head) { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+  :global(.mrs-name) { margin: 0; font: 600 17px/1.3 var(--serif); color: var(--ink); }
+  :global(.mrs-fam) { padding: 1px 8px; border: 1px solid var(--rule-strong); border-radius: 999px; background: var(--bg); color: var(--ink-2); font: 500 11.5px/1.5 var(--sans); }
+  :global(.mrs-meta) { margin: 2px 0 0; font: 400 12.5px var(--sans); color: var(--ink-3); }
+  :global(.mrs-first) { margin: 8px 0 0; font: 400 14px/1.5 var(--sans); color: var(--ink-2); max-width: 70ch; }
+  :global(.mrs-row) { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 12px 0 0; }
+  :global(.mrs-btn) { display: inline-flex; align-items: center; padding: 6px 14px; border: 1px solid var(--rule-strong); border-radius: 999px; background: var(--bg); color: var(--ink-2); font: 600 13px var(--sans); text-decoration: none; cursor: pointer; }
+  :global(.mrs-btn:hover) { border-color: var(--accent); color: var(--accent); }
+  :global(.mrs-pri) { background: var(--accent); border-color: var(--accent); color: #fff; }
+  :global(.mrs-pri:hover) { color: #fff; filter: brightness(1.08); }
+  :global(.mrs-danger) { background: var(--brick, #b3452e); border-color: var(--brick, #b3452e); color: #fff; }
+  :global(.mrs-link) { background: none; border: 0; padding: 0; font: 400 12.5px var(--sans); color: var(--ink-3); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+  :global(.mrs-link:hover) { color: var(--brick, #b3452e); }
+  :global(.mrs-ask) { font: 400 13px var(--sans); color: var(--ink-2); }
+  :global(.mrs-sub) { margin: 18px 0 8px; font: 600 12px var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+  :global(.mrs-log) { margin: 12px 0 0; }
+  :global(.mrs-log > summary) { cursor: pointer; font: 600 13px var(--sans); color: var(--ink-2); }
+  :global(.mrs-ol) { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
+  :global(.mrs-ol li) { padding: 8px 0 0; border-top: 1px solid var(--rule); }
+  :global(.mrs-lt) { display: flex; flex-wrap: wrap; gap: 2px 10px; font: 400 12.5px var(--sans); color: var(--ink-2); }
+  :global(.mrs-lt b) { color: var(--ink); font-weight: 600; }
+  :global(.mrs-when) { color: var(--ink-3); font-family: var(--mono); font-size: 11.5px; }
+  :global(.mrs-src) { color: var(--ink-3); }
+  :global(.mrs-txt) { margin: 3px 0 0; font: 400 13px/1.45 var(--sans); color: var(--ink-2); }
+  :global(.mrfams) { display: inline-flex; flex-wrap: wrap; gap: 4px; margin-left: 8px; }
+  :global(.mrfam) { padding: 1px 8px; border: 1px solid var(--rule-strong); border-radius: 999px; background: var(--bg); color: var(--ink-2); font: 500 11px/1.5 var(--sans); white-space: nowrap; }
 </style>
 
 <style is:global>
-  /* ---- My story ---- */
-  .ms { font-family: var(--sans); color: var(--ink); max-width: 62rem; }
-  .ms [hidden] { display: none !important; }
-  .ms-intro { max-width: 46rem; color: var(--ink-2); font-size: 15px; line-height: 1.55; margin: 4px 0 14px; }
-  .ms-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  .ms-h { font: 500 28px/1.15 var(--serif); margin: 6px 0 14px; }
-  .ms-h3 { font: 600 12px/1 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin: 26px 0 10px; }
-  .ms-count { color: var(--ink-3); font-weight: 500; letter-spacing: 0; }
-  .ms-in { font: 400 15px/1.4 var(--sans); color: var(--ink); background: var(--panel); border: 1px solid var(--rule-strong, var(--rule)); border-radius: 8px; padding: 9px 11px; min-width: 0; max-width: 100%; }
-  .ms-in:focus-visible, .ms-btn:focus-visible, .ms-kind:focus-visible, .ms-link:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-  .ms-ta { width: 100%; box-sizing: border-box; resize: vertical; line-height: 1.5; }
-  .ms-lab { display: block; font-size: 14px; font-weight: 600; margin: 12px 0 5px; }
-  .ms-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 10px 0; }
-  .ms-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 4px 0 8px; }
-  .ms-pick { flex: 1 1 18rem; max-width: 30rem; }
-  .ms-btn { font: 600 14px/1 var(--sans); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--rule-strong, var(--rule)); background: var(--panel); color: var(--ink); cursor: pointer; }
-  .ms-btn:disabled { opacity: .5; cursor: default; }
-  .ms-pri { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .ms-link { font: 600 13.5px/1 var(--sans); background: none; border: 0; padding: 6px 4px; color: var(--accent); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
-  .ms-danger { color: var(--brick); }
-  .ms-dim { color: var(--ink-3); font-size: 13px; line-height: 1.45; }
-  .ms-status { min-height: 1.3em; margin: 4px 0; font-size: 14px; color: var(--accent); } .ms-status.ms-bad { color: var(--brick); }
-  .ms-comp { border: 1px solid var(--rule); border-left: 4px solid var(--accent); border-radius: 10px; background: var(--panel); padding: 4px 18px 16px; transition: box-shadow .15s; }
-  .ms-comp.ms-hot { box-shadow: 0 0 0 3px var(--accent); }
-  .ms-kinds { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
-  .ms-kind { font: 600 13.5px/1 var(--sans); padding: 9px 13px; border-radius: 999px; border: 1px solid var(--rule-strong, var(--rule)); background: var(--ground); color: var(--ink); cursor: pointer; }
-  .ms-kind[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .ms-photo { margin: 0 0 10px; display: grid; gap: 8px; justify-items: start; }
-  .ms-filebtn { display: inline-block; }
-  .ms-photo-prev { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; } .ms-photo-prev img { max-height: 120px; max-width: 100%; border-radius: 8px; border: 1px solid var(--rule); }
-  .ms-lab-in { flex: 1 1 16rem; }
-  .ms-out { margin-top: 8px; }
-  .ms-lede { font: 400 17px/1.5 var(--serif); max-width: 46rem; margin: 0 0 14px; }
-  .ms-map { height: clamp(280px, 42vh, 420px); border: 1px solid var(--rule); border-radius: 10px; background: var(--panel-2); }
-  .ms .lf-time { display: flex; gap: 14px; align-items: center; margin: 12px 0 6px; max-width: 46rem; } .ms .lf-time[hidden] { display: none; }
-  .ms .lf-play { flex: none; font: 600 15px/1 var(--sans); min-width: 6.5em; background: var(--panel); border: 1px solid var(--accent); color: var(--accent); border-radius: 8px; padding: 11px 14px; cursor: pointer; }
-  .ms .lf-slide { flex: 1; min-width: 0; } .ms .lf-slide input { width: 100%; }
-  .ms .lf-yearout { flex: none; font: 600 22px/1 var(--serif); min-width: 2.6em; text-align: right; }
-  .ms .lf-capbox { margin: 6px 0 10px; max-width: 46rem; }
-  .ms #ms-rest, .ms #ms-stops { margin-top: 4px; }
-  .ms .ms-step { border: 1px solid var(--rule); border-radius: 10px; background: var(--panel); padding: 10px 14px; margin: 0 0 8px; }
-  .ms .ms-step summary { cursor: pointer; display: flex; gap: 10px; align-items: center; font-weight: 600; }
-  .ms .ms-num { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 13px; }
-  .ms .ms-why { color: var(--ink-2); font-size: 14px; } .ms .ms-step ul { padding-left: 18px; font-size: 14.5px; line-height: 1.5; }
-  .ms .ms-ask, .ms .ms-not { font-size: 13.5px; margin: 6px 0 0; } .ms .ms-not { color: var(--ink-2); }
-  .ms-also { max-width: 46rem; font-size: 14px; line-height: 1.5; margin: 0 0 14px; } .ms-also a { color: var(--accent); }
-  .ms-route { display: block; margin: 8px 0 0; font-size: 13px; color: var(--ink-2); }
-  .ms-logbox { margin-top: 12px; }
-  .ms-log { list-style: none; margin: 0; padding: 0 0 0 14px; border-left: 2px solid var(--rule); display: grid; gap: 12px; }
-  .ms-ent { position: relative; padding: 10px 14px; border: 1px solid var(--rule); border-radius: 10px; background: var(--panel); }
-  .ms-ent::before { content: ""; position: absolute; left: -22px; top: 16px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); border: 2px solid var(--ground); }
-  .ms-k-document::before { background: var(--brass); } .ms-k-photo::before { background: var(--brick); } .ms-k-note::before { background: var(--ink-3); }
-  .ms-ent-h { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; font-size: 14px; }
-  .ms-ent-n { font: 600 11px/1 var(--sans); background: var(--accent-wash); color: var(--accent); border-radius: 999px; padding: 3px 7px; }
-  .ms-ent-d { color: var(--ink-3); font-size: 12.5px; margin-left: auto; }
-  .ms-thumb { display: inline-flex; flex-direction: column; gap: 3px; margin: 6px 0; text-decoration: none; font-size: 12px; } .ms-thumb img { max-width: 200px; max-height: 150px; border: 1px solid var(--rule); border-radius: 6px; object-fit: contain; background: var(--panel); }
-  .ms-ent-l { margin: 4px 0 0; font-size: 13px; color: var(--ink-2); font-style: italic; }
-  .ms-ent-t { margin: 6px 0 0; font-size: 14.5px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
-  .ms-more summary { cursor: pointer; font-size: 14.5px; line-height: 1.5; margin-top: 6px; overflow-wrap: anywhere; } .ms-more .ms-ent-t { margin-top: 8px; }
-  .ms-ent-f { margin: 6px 0 0; font-size: 12.5px; color: var(--accent); } .ms-ent-f:empty { display: none; }
-  .ms-acts { margin: 4px 0 0; gap: 6px; }
-  .ms-ent-ta { width: 100%; box-sizing: border-box; margin-top: 8px; }
-  .ms-ent-start { background: transparent; border-style: dashed; color: var(--ink-3); font-size: 13px; }
-  @media (max-width: 640px) { .ms-comp { padding: 4px 12px 14px; } .ms-ent-d { margin-left: 0; } .ms-h { font-size: 24px; } }
 
   /* ---- ALL FAMILIES: the synopsis tab (public/js/research-overview.js) ------------------------------------------------------------ */
   .mra-pick .cap { max-width: 70ch; }
@@ -1566,9 +1429,6 @@ const BASE_ = u("/");
   .mra-wh { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 6px; font: 15px/1.4 var(--sans); }
   .mra-wt { font-weight: 600; overflow-wrap: anywhere; }
   .mra-wnote { margin: 3px 0 0; font: 13px/1.45 var(--sans); color: var(--ink-3); max-width: 80ch; }
-  .mr-multi { margin: 14px 0 0; padding: 10px 14px; border: 1px solid var(--rule-strong, var(--rule)); border-left: 3px solid var(--accent, #245565); border-radius: 8px; background: var(--panel); font: 14px/1.5 var(--sans); display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
-  .mr-multi[hidden] { display: none; }
-  .mr-multi button { font: 600 13.5px var(--sans); padding: 6px 12px; border: 1px solid var(--accent, #245565); border-radius: 8px; background: var(--bg); color: var(--accent, #245565); cursor: pointer; }
   @media print { .mra-chips, .mra-acts, .mra-tools, .mra-pre { display: none; } }
 
   .mr-tabs { margin-top: 18px; }

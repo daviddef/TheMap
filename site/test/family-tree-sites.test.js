@@ -61,7 +61,7 @@ test("the country card is the place card's folds, not the old three lists", () =
 });
 
 test("a given name typed with a surname answers with the surname's placement, under the name card", () => {
-  assert.match(map, /var tailName = false;/);
+  assert.match(map, /var tailName = false, tailSur = "";/);
   assert.match(map, /!names\.length && !hits\.length && !exact/);
   assert.match(map, /if \(tailName\) \{ var tcard = await nameCardFor\(term\)/);
   assert.match(map, /var nrow = names\.length && !tailName \? names\[0\] : null;/);

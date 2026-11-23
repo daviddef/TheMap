@@ -1589,7 +1589,7 @@
     function line(info, year, evs, prefix, ageText) {
       var d = el("div", null, "lf-capline");
       if (year == null) {
-        d.append(el("div", (prefix || "") + info.name + (ageText ? ", " + ageText : "") + ": add a birth year below to see who held the ground, the flag and what was going on.", "lf-caphead"));
+        d.append(el("div", (prefix || "") + info.name + (ageText ? ", " + ageText : "") + ": add a birth year to see who held the ground, the flag and what was going on.", "lf-caphead"));
         return d;
       }
       var c = captionAt(info, year), fl = flagFor(info, year);

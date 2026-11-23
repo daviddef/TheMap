@@ -171,16 +171,21 @@
   /* ---------- fold the card ---------- */
   var fold = el("button", "fd2-fold"); fold.type = "button";
   fold.setAttribute("aria-label", "Fold the card away"); fold.setAttribute("aria-expanded", "true");
-  fold.innerHTML = '<span class="fd2-fold-t">Show the card</span><span class="fd2-fold-x" aria-hidden="true">–</span>';
+  /* A CHEVRON, NOT A MINUS. David: «the - button looks like a "remove" rather than a close». Up to fold the card away, down to bring it back. */
+  var CHEV = '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="%P"/></svg>';
+  var CHEV_UP = CHEV.replace("%P", "M5 12.5l5-5 5 5"), CHEV_DOWN = CHEV.replace("%P", "M5 7.5l5 5 5-5");
+  fold.title = "Fold the card away";
+  fold.innerHTML = '<span class="fd2-fold-t">Show the card</span><span class="fd2-fold-x" aria-hidden="true">' + CHEV_UP + '</span>';
   fold.addEventListener("click", function () {
     var f = panel.classList.toggle("fd2-folded");
     fold.setAttribute("aria-expanded", String(!f)); fold.setAttribute("aria-label", f ? "Show the card" : "Fold the card away");
-    fold.querySelector(".fd2-fold-x").textContent = f ? "+" : "–";
+    fold.title = f ? "Show the card" : "Fold the card away";
+    fold.querySelector(".fd2-fold-x").innerHTML = f ? CHEV_DOWN : CHEV_UP;
   });
   panel.insertBefore(fold, panel.firstChild);
 
   function unfold() {
-    panel.classList.remove("fd2-folded"); fold.setAttribute("aria-expanded", "true"); fold.setAttribute("aria-label", "Fold the card away"); fold.querySelector(".fd2-fold-x").textContent = "–";
+    panel.classList.remove("fd2-folded"); fold.setAttribute("aria-expanded", "true"); fold.setAttribute("aria-label", "Fold the card away"); fold.title = "Fold the card away"; fold.querySelector(".fd2-fold-x").innerHTML = CHEV_UP;
   }
 
   /* ---------- counts, counted up once ---------- */
@@ -347,4 +352,17 @@
   }
   (function () { var tries = 0, w = setInterval(function () { if (paintMine() || ++tries > 40) clearInterval(w); }, 150); })();
   document.addEventListener("ra-progress-changed", function () { paintMine(); });
+})();
+
+/* THE MAP CREDITS LIVE UNDER THE MAP, NOT ON IT. David: «why is this floating over my map?» Leaflet's attribution strip sat across the foot of the map.
+   It is still shown, in full, as the credits line directly beneath the map frame; Leaflet keeps updating the same element. */
+(function () {
+  var stage = document.getElementById("fd2-stage"); if (!stage) return;
+  var tries = 0, t = setInterval(function () {
+    var at = stage.querySelector(".leaflet-control-attribution");
+    if (!at && ++tries < 120) return;
+    clearInterval(t); if (!at) return;
+    var wrap = document.createElement("p"); wrap.className = "fd2-credits"; wrap.setAttribute("aria-label", "Map credits");
+    wrap.appendChild(at); stage.insertAdjacentElement("afterend", wrap);
+  }, 250);
 })();

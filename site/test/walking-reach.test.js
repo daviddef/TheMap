@@ -262,3 +262,12 @@ test("the surname card on v2 is a glance: name, languages, origin and the countr
   assert.match(css, /\.ra-surn \.ra-tw-nd \{ display: none; \}/);
   assert.match(css, /\.ra-surn \.ra-chips > :nth-child\(n\+5\) \{ display: none; \}/);
 });
+
+test("the card's fold control is a chevron, a surname's two icons share the place card's top-right row, and the map credits sit under the map", () => {
+  const js = readFileSync(join(root, "public/js/front-door-v2.js"), "utf8");
+  assert.match(js, /M5 12\.5l5-5 5 5/, "a chevron up to fold");
+  assert.match(js, /M5 7\.5l5 5 5-5/, "a chevron down to bring it back");
+  assert.doesNotMatch(js, /textContent = f \? "\+" : "–"/, "no plus or minus");
+  assert.match(map, /if \(TSV2\) h\.push\('<span class="at-tools">'\);[\s\S]*?if \(TSV2\) h\.push\("<\/span>"\);/);
+  assert.match(js, /wrap\.className = "fd2-credits"; wrap\.setAttribute\("aria-label", "Map credits"\);\s*wrap\.appendChild\(at\); stage\.insertAdjacentElement\("afterend", wrap\);/);
+});

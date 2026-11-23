@@ -7100,9 +7100,11 @@ window.addEventListener("load", async function () {
           tks.sort(function (a, b) { return nrow.tl[a][0] - nrow.tl[b][0]; });
           nflagcc = tks[0];
         }
+        if (TSV2) h.push('<span class="at-tools">');   /* the page and flag icons sit top right, the same row and the same buttons as a place's */
         h.push(goIcons(BASE + "surname/" + nameSlug(nrow.n) + "/",
                        T("Everything about") + " " + nrow.n + " \u2014 its own page",
                        nflagcc, nrow.n));
+        if (TSV2) h.push("</span>");
       }
     }
     h.push("</div>");

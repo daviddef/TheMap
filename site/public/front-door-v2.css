@@ -13,6 +13,10 @@ body.fd2 .fd2-top { display: flex; align-items: center; justify-content: space-b
 body.fd2 .fd2-tag { margin: 0; min-width: 0; }
 /* the «N volumes marked in this browser · see and export them» line under the map: My research is in the header (David: «remove this all») */
 body.fd2 #ra-mywork { display: none !important; }
+/* the map credits, under the map frame */
+body.fd2 .fd2-credits { margin: 6px 4px 0; text-align: right; font: 400 11px/1.4 var(--sans, system-ui, sans-serif); color: var(--ink-3, #606c72); }
+body.fd2 .fd2-credits .leaflet-control-attribution { position: static; float: none; clear: none; display: inline; margin: 0; padding: 0; background: none !important; box-shadow: none; color: inherit; font: inherit; }
+body.fd2 .fd2-credits .leaflet-control-attribution a { color: var(--ink-2, #4c5d66); }
 body.fd2 .fd2-tag b { color: var(--accent, #1f5c6b); font-weight: 600; letter-spacing: .01em; }
 body.fd2 .fd2-tag span { margin-left: 4px; }
 body.fd2 .fd2-classic { flex: none; font: 600 13px/1 var(--sans, system-ui, sans-serif); color: var(--ink-2, #4c5d66); text-decoration: none; border: 1px solid var(--rule-strong, #b6b2a6); border-radius: 99px; padding: 8px 14px; background: var(--panel, #f7f6f2); }
@@ -456,3 +460,6 @@ body.fd2-immersive .fd2-stage::after { border-radius: 0; }
 .fd2-stage details.ra-in-card > summary.lab { cursor: pointer; list-style: none; }
 .fd2-stage details.ra-in-card > summary.lab::before { content: "\25B8"; display: inline-block; margin-right: 6px; transition: transform .15s; }
 .fd2-stage details.ra-in-card[open] > summary.lab::before { transform: rotate(90deg); }
+
+/* the fold control: a chevron in the same round button as the place card's icons */
+.fd2-stage .fd2-fold .fd2-fold-x { display: inline-grid; place-items: center; }

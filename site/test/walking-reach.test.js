@@ -365,3 +365,14 @@ test("v2 lists share one spacing, and the walking time is not repeated on the vi
   assert.match(css, /\.fd2-stage \.ra-area-g > ul > li\[data-src\] \{ padding: 7px 0; border-bottom: 1px solid/);
   assert.match(css, /\.fd2-stage \.ra-area-pl\.ra-area-solo-l > \.ra-vl, \.fd2-stage \.ra-visit > \.ra-vl \{ margin: 4px 0 10px; \}/);
 });
+
+test("source rows use the books' dot size and gaps, and the access icon has no stray margin", () => {
+  const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
+  assert.match(css, /^\.fd2-stage \.ra-acc \{ margin: 0; \}/m);
+  assert.match(css, /li\[data-src\] > \.ra-area-p > i \{ width: 8px; height: 8px; \}/);
+});
+
+test("the dot sits in a slot as wide as a number, so book, source and visiting names start on one line", () => {
+  const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
+  assert.match(css, /\.fd2-stage \.ra-vl > li > i, \.fd2-stage \.ra-area-g > ul > li\[data-src\] > \.ra-area-p > i \{ margin: 0 5px; \}/);
+});

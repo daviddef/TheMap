@@ -885,6 +885,16 @@ window.addEventListener("load", async function () {
     });
   }
 
+  /* The family-tree sites that reach a country: those flagged `family_tree` in the directory that cover everywhere or that country, in the rank the
+     directory gives (the free and the big first). */
+  function familyTreeSites(cc) {
+    cc = String(cc || "").toUpperCase();
+    return provs.providers.filter(function (p) {
+      var c = p.countries || [];
+      return p.family_tree && (c.indexOf("*") > -1 || (cc && c.indexOf(cc) > -1));
+    }).sort(function (a, b) { return a.family_tree - b.family_tree; });
+  }
+
   function countrySources(cc, hint, heading, lat, lon, id, noWw) {
     if (!cc) return "";
     /* THE SAME FALLBACK THE PAGE MAKES, because the panel is the surface most
@@ -8942,6 +8952,22 @@ window.addEventListener("load", async function () {
       });
       h.push("</ul></details>");
     });
+    /* THE FAMILY-TREE AND GENEALOGY SITES, ON EVERY PLACE. David: «these just dont look complete. e.g. myheritage, geni, ancestry, findmypast, etc.
+       do we need a separate category for those "always show" sources for global family tree / genealogical resources?». They were in the directory
+       (countries: ["*"]) but only the name-search and era panels drew the «cover everywhere» group, so a place card never showed them. A provider row
+       carries `family_tree: <rank>` for the dozen that are worth offering anywhere (FamilySearch, Ancestry, MyHeritage, Geni, ...); a regional one
+       (Findmypast, GenealogyBank) shows only where its countries reach. The specialist worldwide sources (Holocaust, maps, memorials) stay out of it. */
+    var fts = familyTreeSites(d.country);
+    if (fts.length) {
+      h.push('<details class="ra-area-g ra-area-cov ra-area-ft"><summary><i style="background:#7A5C8E"></i>' + esc(T("Family-tree and genealogy sites")) + " <b>" + nfl(fts.length) + "</b></summary>" +
+             '<p class="at-sub">' + esc(T("Not about this place in particular: the big family-tree and records sites that reach here.")) + "</p><ul>");
+      fts.forEach(function (a) {
+        var st = volStatus("source:" + a.id);
+        h.push('<li' + srcAttrs(a.id, a.name, T("Everywhere"), BASE + "archive/" + a.id + "/") + '><a class="ra-area-p" target="_blank" rel="noopener" href="' + BASE + "archive/" + esc(a.id) + '/"><i title="' + RC_LAB[st] + ' (' + esc(T("your research on this source")) + ')" style="background:' + RC_COL[st] + '"></i><span>' + esc(a.name) + "</span><small>" +
+               accTxt(a.access) + "</small></a></li>");
+      });
+      h.push("</ul></details>");
+    }
     /* EVERY STATE THAT GOVERNED THIS GROUND, WITH NOTHING CHOSEN. David: «why doesnt it show all the records for all governing states/countries? when nothings
        selected?». The era strip shows one era's archives when you tap it; with none tapped the card only had today's country. The states of every era (not
        today's) each get their archives here, as a shut fold named for the years they governed, and the list steps aside while an era is chosen. */

@@ -153,3 +153,15 @@ test("the era's own text opens when a segment is tapped, and the events are one-
   assert.match(map, /tl\.classList\.add\("open"\)/);
   assert.match(css, /\.fd2-stage \.ra-mortnote \{ max-height: 240px; overflow: auto;/);
 });
+
+/* THE ICONS: one row of four on the place card; history in the map's icon column instead of the play pill */
+test("the place card's four icons share one row and one design; history moves into the map's icon column", () => {
+  const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
+  assert.match(map, /if \(TSV2\) h\.push\('<span class="at-tools">'\);/, "the mark, the page and the flag are wrapped together on v2");
+  assert.match(map, /head\.querySelector\("\.at-tools"\) \|\| head\.querySelector\("\.at-placemark"\)/, "the mortality pill still finds its place");
+  assert.match(css, /\.fd2-stage \.at-tools \.vm-pill, \.fd2-stage \.at-tools \.at-ico a \{[^}]*width: 32px; height: 32px;[^}]*border-radius: 99px;/);
+  assert.match(map, /"leaflet-bar ra-histctl"/);
+  assert.match(map, /var pb = document\.getElementById\("ra-play"\); if \(pb\) pb\.click\(\);/, "the icon does what the play button did");
+  assert.match(css, /\.fd2-stage #ra-play \{ display: none; \}/, "the play button is gone from the pill");
+  assert.match(css, /\.fd2-stage \.ra-histctl \{ display: block !important; \}/, "and the icon shows at every width");
+});

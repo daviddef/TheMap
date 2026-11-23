@@ -381,3 +381,20 @@ body.fd2-immersive .fd2-stage::after { border-radius: 0; }
 .fd2-stage .ra-area-solo { margin-top: 6px; }
 .fd2-stage .ra-area-solo-l > summary { cursor: pointer; font: 700 11px/1.4 var(--mono, ui-monospace, monospace); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2, #4c5d66); padding: 6px 0; }
 .fd2-stage .ra-mortnote { max-height: 240px; overflow: auto; overscroll-behavior: contain; padding-right: 4px; }
+
+/* the history play moved into the icon column: the pill keeps only its Year switch */
+.fd2-stage #ra-play { display: none; }
+.fd2-stage .ra-histctl { display: block !important; }
+
+/* THE FOUR ICONS OF A PLACE CARD, ONE ROW AT THE TOP RIGHT, ONE DESIGN: the mark, the place page, the flag, then the card's own fold. Round, 32px, the
+   fold's own border and ground; the flag fills its circle. */
+.fd2-stage .at-h:has(.at-tools) { position: relative; padding-right: 156px; min-height: 36px; }
+.fd2-stage .at-tools { position: absolute; top: -12px; right: 26px; display: flex; align-items: center; gap: 6px; }
+.fd2-stage .at-tools .at-ico { display: contents; }
+.fd2-stage .at-tools .srcmark { display: contents; }
+.fd2-stage .at-tools .vm-pill, .fd2-stage .at-tools .at-ico a { box-sizing: border-box; display: inline-grid; place-items: center; width: 32px; height: 32px; min-width: 32px; padding: 0; margin: 0; overflow: hidden;
+  border-radius: 99px; border: 1px solid var(--rule, #d3d0c7); background: var(--panel, #f7f6f2); color: var(--ink-2, #4c5d66); font: 600 18px/1 var(--sans, system-ui, sans-serif); text-decoration: none; cursor: pointer; }
+.fd2-stage .at-tools .vm-pill:hover, .fd2-stage .at-tools .at-ico a:hover, .fd2-stage .at-tools .vm-pill:focus-visible, .fd2-stage .at-tools .at-ico a:focus-visible { color: var(--accent, #1f5c6b); border-color: var(--accent, #1f5c6b); outline: none; }
+.fd2-stage .at-tools .at-ico a svg { width: 15px; height: 15px; }
+.fd2-stage .at-tools .at-ico a.at-ico-flag { padding: 0; }
+.fd2-stage .at-tools .at-ico a.at-ico-flag svg { width: 100%; height: 100%; border: 0; display: block; }

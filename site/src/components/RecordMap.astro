@@ -2276,7 +2276,7 @@ window.addEventListener("load", async function () {
         var f = CC2FLAG[a.dataset.cc];
         if (!f || !f.flag) return;
         a.dataset.on = "1";
-        a.innerHTML = '<svg viewBox="0 0 300 200" aria-hidden="true">' +
+        a.innerHTML = '<svg viewBox="0 0 300 200"' + (TSV2 ? ' preserveAspectRatio="xMidYMid slice"' : "") + ' aria-hidden="true">' +
                       f.flag + "</svg>";
       });
   }
@@ -3195,7 +3195,7 @@ window.addEventListener("load", async function () {
       pill.addEventListener("click", function () {
         box.hidden = !box.hidden; pill.setAttribute("aria-expanded", box.hidden ? "false" : "true");
       });
-      var mark = head.querySelector(".at-placemark");
+      var mark = head.querySelector(".at-tools") || head.querySelector(".at-placemark");
       head.insertBefore(pill, mark || null);
       head.insertAdjacentElement("afterend", box);
       if (TSV2) tsEventLane(hits, pill, box);
@@ -3282,6 +3282,7 @@ window.addEventListener("load", async function () {
        decided to work Rovinj — and had not yet opened a single register — had
        nowhere to put that decision, and /my-research/ could not show it.
        «planning to» is the whole point of a to-do list. */
+    if (TSV2) h.push('<span class="at-tools">');
     h.push('<span class="at-placemark" data-src="place:' + esc(d.id) + '" ' +
            'data-src-t="' + esc(d.name) + '" ' +
            'data-src-where="' + esc(CNAME[d.country] || d.country || "") + '" ' +
@@ -3289,6 +3290,7 @@ window.addEventListener("load", async function () {
     h.push(goIcons(BASE + "place/" + esc(d.id) + "/",
                    T("Everything about") + " " + d.name + " \u2014 its own page",
                    d.country, d.name));
+    if (TSV2) h.push("</span>");
     /* WHAT THE VOLUMES BELOW COME TO — derived, never set. David: «youre
        marking a whole town, i want to mark specifc volumes that roll up into
        that town». A town with a state of its own would be a second tally of
@@ -8981,6 +8983,24 @@ window.addEventListener("load", async function () {
     if (on) queue();
   })();
 
+  /* HISTORY, IN THE MAP'S OWN ICON COLUMN (new front door). David: «the history play button, we can just remove it, and add a history icon to the map
+     icon set under shelf». The play pill is hidden on v2; this icon does what it did there (the v2 script sends a click on #ra-play to the history
+     map, at the year set), so nothing else about the history play changes. */
+  (function () {
+    if (!document.getElementById("fd2-stage")) return;
+    var Ctl = L.Control.extend({
+      onAdd: function () {
+        var d = L.DomUtil.create("div", "leaflet-bar ra-histctl");
+        d.innerHTML = '<a href="#" role="button" aria-label="Watch history play on the history map" title="Watch history play: who held the ground, year by year, on the history map">' +
+          '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 10a6.6 6.6 0 1 1 1.9 4.6"/><path d="M3.2 5.8v4.2h4.2"/><path d="M10 6.6V10l2.6 1.7"/></svg></a>';
+        L.DomEvent.disableClickPropagation(d);
+        d.querySelector("a").addEventListener("click", function (e) { e.preventDefault(); var pb = document.getElementById("ra-play"); if (pb) pb.click(); });
+        return d;
+      }
+    });
+    new Ctl({ position: "topleft" }).addTo(map);
+  })();
+
   /* ---- ONE SHAPE AT A TIME ---------------------------------------------------------------------------------------------
      David: «how can I remove 1 area? e.g. if I have 3? or edit that one area?»
      Every shape of the area on the map (the drafts being drawn, or the shapes of a saved group that is open) wears a small numbered badge, and the side
@@ -11365,7 +11385,7 @@ window.addEventListener("load", async function () {
   :global(.ra-rc-k b) { font: 600 11px/1 var(--mono); color: var(--ink-3); }
 
   /* ---- the shelf: only the new front door shows it ---- */
-  :global(.ra-shelfctl), :global(.ra-shelf) { display: none; }
+  :global(.ra-shelfctl), :global(.ra-shelf), :global(.ra-histctl) { display: none; }
   :global(.ra-shelfctl a.on) { background: var(--accent); color: #fff; }
   /* ---- the area tool ---- */
   :global(.ra-areactl a) { display: grid; place-items: center; width: 30px; height: 30px; color: var(--ink-2); }

@@ -116,8 +116,8 @@ test("the hours are 1, 2, 4 and 6, with no button to turn the shape into an area
   assert.match(map, /if \(P\.act === "walk"\) \{\s*areaEnsureCells\(L\.polygon\(REACH\.res\.ring\)\.getBounds\(\)\)\.then[\s\S]*?areaOverlay\("Within a "/, "See the list opens it");
 });
 test("clicking a drawn or saved area opens its area screen, and the card unfolds for it", () => {
-  assert.match(map, /function areaShow\(\) \{[\s\S]*?areaRender\(\); areaAddUi\(\);[\s\S]*?fd2-folded/);
-  assert.match(map, /pl\.on\("click", function \(e\) \{ if \(AREA\.mode \|\| AREA_ED\)[\s\S]*?areaShow\(\)/, "a draft shape");
+  assert.match(map, /function areaShow\(i\) \{[\s\S]*?areaRender\(\); areaAddUi\(\);[\s\S]*?fd2-folded/);
+  assert.match(map, /pl\.on\("click", function \(e\) \{ if \(AREA\.mode \|\| AREA_ED\)[\s\S]*?areaShow\(AREA\.polys\.indexOf\(pl\)\)/, "a draft shape");
   assert.match(map, /poly\.on\("click"[\s\S]*?areaOpenSaved\(id, true\)/, "a saved shape");
   assert.match(map, /pl\.bringToBack\(\)/, "behind the places, so a dot inside the shape is still the thing clicked");
 });
@@ -235,4 +235,22 @@ test("on v2 a surname's Where to read list is a section of its card; the side pa
   assert.match(map, /var inCardList = buildNameCheck\(canon \|\| term, byCC, order, rank\);\s*if \(TSV2 && inCardList\) h\.push\(inCardList\);/);
   assert.match(map, /if \(!TSV2\) h\.push\('<p class="at-sub at-sub-wide">'/, "the sentence that pointed at the pane is not needed");
   assert.match(map, /:global\(:is\(#ra-check-b, \.ra-in-card\) li\.ra-ck-r\)/, "the rows keep their look inside the card");
+});
+
+/* SEVERAL AREAS: per-area counts, a tick to show only some, and a click on a shape for its detail */
+test("each area lists its own places, volumes and sources, and a tick filters the card, the shelf and the add button to the ticked areas", () => {
+  assert.match(map, /var per = rings\.map\(function \(r\) \{/);
+  assert.match(map, /allPlaces: inside, allArch: arch, per: per/);
+  assert.match(map, /function areaApplyTicks\(\) \{/);
+  assert.match(map, /data-sa="tick" data-i="/);
+  assert.match(map, /else if \(a === "tick"\) areaTick\(i\);/);
+  assert.match(map, /else if \(a === "all"\) areaTickAll\(\);/);
+  assert.match(map, /a book-reading pass still running for the old selection sees AR\(\) !== R and stops/);
+  assert.match(map, /" sources"|"source" : "sources"/);
+});
+test("clicking one area on the map (its shape or its number) ticks that one alone and shows its detail", () => {
+  assert.match(map, /areaShow\(AREA\.polys\.indexOf\(pl\)\)/);
+  assert.match(map, /m\.on\("click", function \(e\) \{ L\.DomEvent\.stopPropagation\(e\); areaShow\(i\); \}\);/);
+  assert.match(map, /AREA\.pick = \(a\.rings \|\| \[a\.ring\]\)\.length > 1 \? i : null; areaOpenSaved\(id, true\);/, "a saved group's shape too");
+  assert.match(map, /return \(t\.length === 1 \? "Area " : "Areas "\) \+ t\.join\(", "\) \+ " of " \+ ns;/);
 });

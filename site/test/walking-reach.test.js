@@ -231,7 +231,7 @@ test("the surname card is dressed like the place and area cards on v2: flat hair
 
 test("on v2 a surname's Where to read list is a section of its card; the side pane stays shut", () => {
   assert.match(map, /var h = \[TSV2 \? "" : '<p class="ra-hood ra-hood-n">'/);
-  assert.match(map, /inCard = '<div class="ra-check-b ra-in-card">/);
+  assert.match(map, /inCard = '<details class="ra-check-b ra-in-card"><summary class="lab">/, "folded until asked for");
   assert.match(map, /var inCardList = buildNameCheck\(canon \|\| term, byCC, order, rank\);\s*if \(TSV2 && inCardList\) h\.push\(inCardList\);/);
   assert.match(map, /if \(!TSV2\) h\.push\('<p class="at-sub at-sub-wide">'/, "the sentence that pointed at the pane is not needed");
   assert.match(map, /:global\(:is\(#ra-check-b, \.ra-in-card\) li\.ra-ck-r\)/, "the rows keep their look inside the card");
@@ -253,4 +253,12 @@ test("clicking one area on the map (its shape or its number) ticks that one alon
   assert.match(map, /m\.on\("click", function \(e\) \{ L\.DomEvent\.stopPropagation\(e\); areaShow\(i\); \}\);/);
   assert.match(map, /AREA\.pick = \(a\.rings \|\| \[a\.ring\]\)\.length > 1 \? i : null; areaOpenSaved\(id, true\);/, "a saved group's shape too");
   assert.match(map, /return \(t\.length === 1 \? "Area " : "Areas "\) \+ t\.join\(", "\) \+ " of " \+ ns;/);
+});
+
+test("the surname card on v2 is a glance: name, languages, origin and the country timeline, with the long notes left to the name's own page", () => {
+  const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
+  assert.match(map, /class="ra-tw-r ra-tw-nd"/, "a country with no dates is marked so v2 can leave it out");
+  assert.match(css, /> \.ra-surn ~ \.ra-surn,[\s\S]*?> \.ra-note,[\s\S]*?> \.ra-juris,[\s\S]*?> \.at-sec \{ display: none; \}/);
+  assert.match(css, /\.ra-surn \.ra-tw-nd \{ display: none; \}/);
+  assert.match(css, /\.ra-surn \.ra-chips > :nth-child\(n\+5\) \{ display: none; \}/);
 });

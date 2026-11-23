@@ -4348,7 +4348,7 @@ window.addEventListener("load", async function () {
     if (!count) { pane.hidden = true; return ""; }
     var inCard = "";
     if (TSV2) {
-      inCard = '<div class="ra-check-b ra-in-card"><div class="lab">' + esc(T("Where to read")) + " \u00b7 " + count + "</div>" + h.join("") + "</div>";
+      inCard = '<details class="ra-check-b ra-in-card"><summary class="lab">' + esc(T("Where to read")) + " \u00b7 " + count + "</summary>" + h.join("") + "</details>";
       pane.hidden = true;
     } else {
       body.innerHTML = h.join("");
@@ -6248,7 +6248,7 @@ window.addEventListener("load", async function () {
              not missing» — with the sentence beside it, so the strip cannot
              be mistaken for a span. */
           if (!row.ds) {
-            wh.push('<div class="ra-tw-r">' +
+            wh.push('<div class="ra-tw-r ra-tw-nd">' +
                     '<span class="ra-tw-f">' +
                     (f0 && f0.flag ? '<svg viewBox="0 0 300 200" aria-hidden="true">' +
                                      f0.flag + "</svg>" : "") + "</span>" +

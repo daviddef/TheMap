@@ -441,3 +441,18 @@ body.fd2-immersive .fd2-stage::after { border-radius: 0; }
 .fd2-stage .ra-in-card { flex: none; min-height: 0; overflow: visible; margin-top: 10px; padding: 10px 0 0; border-top: 1px solid var(--rule, #d3d0c7); }
 .fd2-stage .ra-in-card .lab { font: 700 11px/1.4 var(--mono, ui-monospace, monospace); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2, #4c5d66); margin: 0 0 6px; }
 .fd2-stage .ra-in-card h4 { margin: 8px 0 2px; }
+
+/* THE SURNAME CARD IS A GLANCE, NOT A DOSSIER. David: «the name view is just way too long. this name already has its own page, let's keep this ultra wow,
+   brilliant visuals, and not just wordy overlays». The card keeps the name, its languages, the origin line and the country timeline (the picture),
+   and «Where to read» folded. The other spellings, the commune note, the mapped-region notes, the how-to-read text and the per-country source
+   lists are on the name's own page (the link under its title) and stay out of the card. */
+.fd2-stage .at-body:has(> .ra-surn) > .ra-surn ~ .ra-surn,
+.fd2-stage .at-body:has(> .ra-surn) > .ra-note,
+.fd2-stage .at-body:has(> .ra-surn) > .ra-juris,
+.fd2-stage .at-body:has(> .ra-surn) > .at-sec { display: none; }
+.fd2-stage .ra-surn .ra-orig-s, .fd2-stage .ra-surn .ra-vars, .fd2-stage .ra-surn .ra-filed, .fd2-stage .ra-surn .ra-how, .fd2-stage .ra-surn .ra-first .ra-who, .fd2-stage .ra-surn .ra-tw-nd { display: none; }
+.fd2-stage .ra-surn .ra-chips > :nth-child(n+5) { display: none; }
+.fd2-stage .ra-surn .ra-tw-r { margin: 5px 0; }
+.fd2-stage details.ra-in-card > summary.lab { cursor: pointer; list-style: none; }
+.fd2-stage details.ra-in-card > summary.lab::before { content: "\25B8"; display: inline-block; margin-right: 6px; transition: transform .15s; }
+.fd2-stage details.ra-in-card[open] > summary.lab::before { transform: rotate(90deg); }

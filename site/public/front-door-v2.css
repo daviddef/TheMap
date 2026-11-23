@@ -199,6 +199,10 @@ body.fd2-immersive .fd2-stage::after { border-radius: 0; }
   .fd2-tt b { font-size: 15px; }
   .fd2-go { display: none; }
   .fd2-stats { margin-top: 14px; }
+  /* the basemap strip is one row that scrolls sideways, not two rows with the second nearly empty ("More looks" wrapped under the others) */
+  .fd2-stage .ra-base-row { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; scrollbar-width: none; }
+  .fd2-stage .ra-base-row::-webkit-scrollbar { display: none; }
+  .fd2-stage .ra-base-row > button { flex: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

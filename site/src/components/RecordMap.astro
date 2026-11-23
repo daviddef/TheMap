@@ -2990,6 +2990,7 @@ window.addEventListener("load", async function () {
     setQ("at", p.i);
     panelAt = p.i; panelQ = qbox.value;
     panel.innerHTML = render(d);
+    if (window.raShelfPing) window.raShelfPing();
     bandsInit(panel);
     paintIcoFlags(panel);
     buildCheck(d, drawHood(d));
@@ -4562,6 +4563,7 @@ window.addEventListener("load", async function () {
   }
   function yearUI() {
     yin.disabled = yin2.disabled = !year;
+    if (window.raShelfPing) window.raShelfPing();
     /* The movements layer is a function of the year, so it follows the
        scrubber and the play button without either of them knowing it. */
     if (on.conquest || on.migration) drawMoves();
@@ -5093,7 +5095,7 @@ window.addEventListener("load", async function () {
   function keep(p) {
     if (hubCCs && !hubCCs[p.cc]) return false;
     if (off[RANK[p.a]]) return false;
-    var t = qPlace || fold(qbox.value.trim());
+    var t = qPlace || fold(yearsIn(qbox.value).text);
     /* `q` now holds only the forms that are NOT the place's own name, so the
        name itself is folded here rather than shipped 2,128 times. */
     /* THE BLOB IS MATCHED ON WHOLE WORDS. `q` holds a place's other names
@@ -5195,8 +5197,17 @@ window.addEventListener("load", async function () {
   }
 
   var typedFor = "";   /* the words the panel was last asked about, so emptying the box can take their answer away */
+  /* «senj 1951» and «senj 1951-1982»: a place, then the year or years to look at it for. The years leave the search (they are not a name) and
+     are read by the shelf, which narrows to them. Only a trailing year after something else counts; a lone year is left alone. */
+  function yearsIn(str) {
+    var s = String(str || "").trim(), m = s.match(/(?:^|\s)((?:1[5-9]|20)\d\d)(?:\s*[-\u2013\u2014]\s*((?:1[5-9]|20)\d\d))?\s*$/);
+    if (!m || !s.slice(0, m.index).trim()) return { text: s, yrs: null };
+    var a = +m[1], b = m[2] ? +m[2] : a; if (b < a) { var x = a; a = b; b = x; }
+    if (b > 2026) return { text: s, yrs: null };
+    return { text: s.slice(0, m.index).trim(), yrs: [a, b] };
+  }
   function apply(noFrame) {
-    var t = fold(qbox.value.trim());
+    var t = fold(yearsIn(qbox.value).text);
     if (qbox.value.trim()) typedFor = qbox.value.trim();
     searchHit = false;
     /* The lighting belongs to the query that produced it, and nothing else. */
@@ -6363,7 +6374,7 @@ window.addEventListener("load", async function () {
 
   async function showCountries(list, stale, origin) {
     if (list && list.length) { searchHit = true; noteSearch(); retireVisit(); }
-    litFor = fold(qbox.value.trim());
+    litFor = fold(yearsIn(qbox.value).text);
     /* THE FLAG CARDS FOLLOW THE SURNAME, NOT THE TEXT. David: «when I search
        Defranceski I don't see flags below, even though we know which countries
        a name is found in and we show it on the map.» Quite right — the cards
@@ -7955,6 +7966,7 @@ window.addEventListener("load", async function () {
     areaDropDrafts();
     if (AREA.bar) AREA.bar.hidden = true;
     AREA.rows = null; AREA.done = false;
+    if (window.raShelfPing) window.raShelfPing();
   }
   function areaStart(mode) {
     var was = AREA.mode; areaCancelDraw();
@@ -8114,6 +8126,7 @@ window.addEventListener("load", async function () {
   function nfl(n) { return n.toLocaleString(); }
   function areaRender() {
     var R = AREA.rows; if (!R) return;
+    if (window.raShelfPing) window.raShelfPing();
     var P = window.raProgress, line = P ? (P.lines().filter(function (l) { return l.active; })[0] || {}).name : "";
     var groups = { none: [], list: [], busy: [], done: [] }, vtot = 0;
     R.places.forEach(function (p) { groups[rcState(p)].push(p); vtot += (p.v || 0) || (p.c || 0); });
@@ -8318,6 +8331,187 @@ window.addEventListener("load", async function () {
       else if (a === "yesdel") { var mid = AREA.meta && AREA.meta.id; AREA.delAsk = false; if (mid) { delete MYA.areas[mid]; MYA.gone[mid] = new Date().toISOString(); areaClear(); AREA.meta = null; panel.hidden = true; empty.hidden = false; myaSave(); } }
       else if (a === "add") { AREA.confirm = true; areaAddUi(); } else if (a === "no") { AREA.confirm = false; areaAddUi(); } else if (a === "yes") { AREA.confirm = false; areaDoAdd(); } else if (a === "undo") areaUndo();
     });
+  })();
+
+  /* ---- THE SHELF: what the Atlas holds for the ground you are looking at -------------------------------------------------------
+     David: «i think the overlay should only show volumes in that area, e.g. the area i flag, or the area im zooming into … way neater/fun», then
+     «i want to be able to type e.g. senj 1951 or senj 1951-1982, and the shelf adjusts to that year for the place, rather than showing everything.»
+     A row of cards along the foot of the new front door: one card per volume (its kind, the place, the years it covers on a 1500–2026 line, whose
+     it is), then the archives to write to. The scope is the open place, else the area you drew, else the map in view; the years are the Year
+     control's, or the years typed after a place in the box. Only the new front door shows it (the button and the row are hidden elsewhere), the
+     detail files are the ones the place panel already reads, so nothing new is fetched that the panel would not fetch. */
+  (function () {
+    var host = map.getContainer(), stage = document.getElementById("fd2-stage");
+    if (!stage) return;
+    var on = false; try { on = localStorage.getItem("ra-shelf") === "1"; } catch (e) {}
+    var SH = { user: null, tok: 0, t: null, cells: "" };
+    var el = document.createElement("div");
+    el.className = "ra-shelf"; el.id = "ra-shelf"; el.hidden = true; el.setAttribute("aria-label", "What the Atlas holds here");
+    host.appendChild(el);
+    L.DomEvent.disableClickPropagation(el); L.DomEvent.disableScrollPropagation(el);
+    var btn;
+    var Ctl = L.Control.extend({
+      onAdd: function () {
+        var d = L.DomUtil.create("div", "leaflet-bar ra-shelfctl");
+        d.innerHTML = '<a href="#" role="button" aria-pressed="false" aria-label="Show what the Atlas holds here" title="On the shelf here: the volumes and archives for the place, the area you drew, or the map in view">' +
+          '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="3.4" height="12" rx=".8"/><rect x="8.3" y="4" width="3.4" height="12" rx=".8"/><path d="M14 5l3 .8-2.6 10.4-3-.8z"/></svg></a>';
+        L.DomEvent.disableClickPropagation(d);
+        btn = d.querySelector("a");
+        btn.addEventListener("click", function (e) { e.preventDefault(); setOn(!on); });
+        return d;
+      }
+    });
+    new Ctl({ position: "topleft" }).addTo(map);
+    function fold(s) { return String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim(); }
+    function typed() { return yearsIn(qbox.value); }
+    function years() {
+      if (yon && yon.checked && year) return { yrs: [Math.min(year, year2 || year), Math.max(year, year2 || year)], from: "slider" };
+      var t = typed(); return t.yrs ? { yrs: t.yrs, from: "box" } : { yrs: null };
+    }
+    function nvol(p) { return (p.v || 0) || (p.c || 0); }
+    function short(n) { return String(n).replace(/\s*\(.*\)\s*$/, "") || String(n); }
+    function placeNow() {
+      var t = typed();
+      if (t.text && t.yrs) {
+        var f = fold(t.text), hit = idx.places.filter(function (p) { return (fold(p.n) === f || fold(String(p.n).replace(/\s*\(.*\)\s*$/, "")) === f) && nvol(p) > 0; }).sort(function (a, b) { return nvol(b) - nvol(a); })[0];
+        if (hit) return hit;
+      }
+      var id = Q.get("at"); if (!id) return null;
+      return idx.places.filter(function (p) { return p.i === id; })[0] || { i: id, n: (cache[id] && cache[id].name) || id };
+    }
+    function areaOn() { return !!(AREA.rows && AREA.rows.places && AREA.rows.places.length); }
+    function plan() {
+      var pl = placeNow(), has = areaOn(), def = pl ? "place" : has ? "area" : "view";
+      var act = SH.user && (SH.user !== "place" || pl) && (SH.user !== "area" || has) ? SH.user : def;
+      return { act: act, pl: pl, has: has };
+    }
+    function load(p) {
+      if (cache[p.i]) return Promise.resolve(cache[p.i]);
+      return fetch(DETAIL + p.i + ".json").then(function (r) { return r.json(); }).then(function (d) { cache[p.i] = d; return d; }).catch(function () { return null; });
+    }
+    var KCOL = { B: "#3E7A55", M: "#9A7424", D: "#B3452E" }, CODE = { b: "Births", m: "Marriages", d: "Deaths", i: "Index" };
+    function kindOf(v) {
+      var k = (v.kinds && v.kinds.length) ? (CODE[v.kinds[0]] || v.kinds[0]) : (v.rk && v.rk.length) ? (KLAB[v.rk[0]] || v.rk[0]) : "Other";
+      k = String(k).charAt(0).toUpperCase() + String(k).slice(1);
+      return { name: k, L: k === "Other" ? "•" : String(k).charAt(0).toUpperCase() };
+    }
+    function kindRank(n) { var i = ["Births", "Marriages", "Deaths", "Church Census", "Confirmations", "Index"].indexOf(n); return i < 0 ? 99 : i; }
+    function span(v) { return v.from ? (v.from === v.to ? String(v.from) : v.from + "–" + v.to) : ""; }
+    function bar(v, ys) {
+      if (!v.from) return "";
+      var a = Math.max(1500, v.from), b = Math.min(2026, v.to || v.from), W = 526;
+      var s = '<span class="ra-sh-yr"><i style="left:' + ((a - 1500) / W * 100).toFixed(1) + "%;width:" + Math.max(2.5, (b - a) / W * 100).toFixed(1) + '%"></i>';
+      if (ys) s += '<b style="left:' + ((Math.max(1500, ys[0]) - 1500) / W * 100).toFixed(1) + "%;width:" + Math.max(1, (ys[1] - ys[0]) / W * 100).toFixed(1) + '%"></b>';
+      return s + "</span>";
+    }
+    function yt(y) { return y[0] === y[1] ? String(y[0]) : y[0] + "–" + y[1]; }
+    function status(h, msg) { el.innerHTML = h + '<p class="ra-sh-empty">' + msg + "</p>"; }
+    function render() {
+      SH.t = null;
+      if (!on) { el.hidden = true; stage.classList.remove("fd2-shelfon"); stage.style.removeProperty("--shh"); return; }
+      var P = plan(), Y = years(), yrs = Y.yrs, tok = ++SH.tok, b = map.getBounds(), places = [], head;
+      var title = P.act === "place" && P.pl ? "On the shelf for " + esc(short(P.pl.n)) : P.act === "area" ? "On the shelf for your area" : "On the shelf here";
+      var segs = [];
+      if (P.pl) segs.push(["place", short(P.pl.n).length > 14 ? "This place" : short(P.pl.n)]);
+      segs.push(["view", "This view"]); segs.push(["area", "My area"]);
+      head = function (n) {
+        return '<div class="ra-sh-head"><b>' + title + "</b>" + (n || "") +
+          (yrs ? '<button type="button" class="ra-sh-yrchip" data-sh="noyears" title="Show every year again">' + yt(yrs) + " ×</button>" : "") +
+          '<span class="ra-sh-seg" role="group" aria-label="Scope">' + segs.map(function (s) {
+            return '<button type="button" data-sh="' + s[0] + '" aria-pressed="' + (s[0] === P.act) + '"' + (s[0] === "area" && !P.has ? ' title="Draw a box or a loop first"' : "") + ">" + esc(s[1]) + "</button>";
+          }).join("") + '</span><button type="button" class="ra-sh-x" data-sh="hide" aria-label="Hide the shelf">×</button></div>';
+      };
+      el.hidden = false; stage.classList.add("fd2-shelfon");
+      if (P.act === "place" && P.pl) places = [P.pl];
+      else if (P.act === "area") places = AREA.rows.places.filter(function (p) { return nvol(p) > 0; });
+      else {
+        if (b.getNorth() - b.getSouth() > 9) { el.innerHTML = head("") + '<p class="ra-sh-empty">Zoom in, or draw a box round the ground you mean, and the shelf fills with its volumes.</p>'; sized(); return; }
+        var ck = b.toBBoxString(); if (ck !== SH.cells) { SH.cells = ck; areaEnsureCells(b).then(function () { if (on) queue(); }); }
+        places = idx.places.filter(function (p) { return p.y != null && b.contains([p.y, p.x]) && nvol(p) > 0; });
+      }
+      places.sort(function (a, c) { return nvol(c) - nvol(a); });
+      var total = places.length; places = places.slice(0, 12);
+      if (!places.length && P.act !== "place") {
+        el.innerHTML = head("") + '<p class="ra-sh-empty">No catalogued volumes inside ' + (P.act === "area" ? "your area" : "this view") + ".</p>"; sized(); return;
+      }
+      el.innerHTML = head('<span class="ra-sh-n">Reading the books…</span>'); sized();
+      Promise.all(places.map(load)).then(function (ds) {
+        if (tok !== SH.tok || !on) return;
+        var rows = [], run = [1e9, -1e9];
+        ds.forEach(function (d, i) {
+          if (!d) return;
+          /* the books FamilySearch lists, then the registers the archives' own catalogues list (a place such as Umag has only the second kind) */
+          (d.volumes || []).concat((d.collections || []).map(function (c) { return { t: c.title, from: c.from, to: c.to, url: c.url, kinds: c.kinds, src: c.held || c.provider || "Archive catalogue", col: 1 }; })).forEach(function (v) {
+            if (v.from) { run[0] = Math.min(run[0], v.from); run[1] = Math.max(run[1], v.to || v.from); }
+            if (yrs && !(v.from && v.from <= yrs[1] && (v.to || v.from) >= yrs[0])) return;
+            rows.push({ v: v, d: d, p: places[i], k: kindOf(v), o: i });
+          });
+        });
+        rows.sort(function (a, c) { return a.o - c.o || kindRank(a.k.name) - kindRank(c.k.name) || (a.v.from || 0) - (c.v.from || 0); });
+        var arch = P.act === "place" ? [] : archives.filter(function (a) {
+          return a.at && a.at.lat != null && (P.act === "area" ? AREA.rows.rings.some(function (r) { return areaInside(a.at.lat, a.at.lon, r); }) : b.contains([a.at.lat, a.at.lon]));
+        }).slice(0, 8);
+        var np = {}; rows.forEach(function (r) { np[r.p.i] = 1; });
+        var n = '<span class="ra-sh-n"><b>' + rows.length.toLocaleString() + "</b> volume" + (rows.length === 1 ? "" : "s") + " · <b>" + Object.keys(np).length + "</b> place" + (Object.keys(np).length === 1 ? "" : "s") + (arch.length ? " · <b>" + arch.length + "</b> archive" + (arch.length === 1 ? "" : "s") : "") +
+          (total > places.length ? " · biggest " + places.length + " of " + total.toLocaleString() + " places" : "") + "</span>";
+        if (!rows.length && !arch.length) {
+          var msg = yrs && isFinite(run[0]) ? "No volume here covers " + yt(yrs) + ". The ones listed run " + run[0] + "–" + run[1] + "." : "No volumes are listed here yet.";
+          el.innerHTML = head(n) + '<p class="ra-sh-empty">' + msg + "</p>"; sized(); return;
+        }
+        /* ONE CARD PER KIND OF BOOK PER PLACE, with the years its books run and how many there are: Pag alone has sixty, and sixty cards of one place would be the shelf. */
+        var groups = [], gix = {};
+        rows.forEach(function (r) {
+          var key = r.p.i + "|" + r.k.name + "|" + (r.v.col ? "c" : "f"), g = gix[key];
+          if (!g) { g = gix[key] = { r: r, n: 0, from: 1e9, to: -1e9, one: r.v }; groups.push(g); }
+          g.n++; if (r.v.from) { g.from = Math.min(g.from, r.v.from); g.to = Math.max(g.to, r.v.to || r.v.from); }
+        });
+        var cards = groups.slice(0, 60).map(function (g) {
+          var r = g.r, c = KCOL[r.k.L] || "#1F5C6B", d = r.d, v = r.v, fs = !v.col && /familysearch/i.test(v.url || ""), one = g.n === 1;
+          var gv = { from: isFinite(g.from) && g.from < 1e9 ? g.from : 0, to: g.to > -1e9 ? g.to : 0 };
+          return '<button type="button" class="ra-sh-card" style="--c:' + c + '" data-sh-p="' + esc(r.p.i) + '"' + (one && v.url ? ' data-sh-u="' + esc(v.url) + '"' : "") + ' title="' + esc(one ? v.t : g.n + " books: " + r.k.name + ", " + d.name) + '">' +
+            '<span class="t"><i>' + esc(r.k.L) + "</i>" + esc(r.k.name) + (one ? "" : ' <em>\u00d7' + g.n + "</em>") + "</span>" +
+            '<span class="pl">' + esc(d.name + (d.country ? ", " + (CNAME[d.country] || d.country) : "")) + "</span>" + bar(gv, yrs) +
+            '<span class="yl">' + esc(span(gv) || "years not stated") + "</span>" +
+            '<span class="src"><i style="background:' + (fs ? "#5B6BA8" : "#8A6D3B") + '"></i>' + (fs ? "FamilySearch" : esc(v.src || "Catalogue")) + (one && v.film ? " \u00b7 film " + esc(v.film) : "") + "</span></button>";
+        }).concat(arch.map(function (a) {
+          return '<a class="ra-sh-card ra-sh-arch" style="--c:#B3452E" target="_blank" rel="noopener" href="' + BASE + "archive/" + esc(a.id) + '/" title="Opens in a new tab">' +
+            '<span class="t"><i>A</i>Archive</span><span class="pl">' + esc(a.name) + '</span><span class="yl">' + esc((a.at && a.at.place) || "") + '</span><span class="src"><i style="background:#B3452E"></i>Write to them</span></a>';
+        }));
+        el.innerHTML = head(n) + '<div class="ra-sh-row">' + cards.join("") + "</div>" + (groups.length > 60 ? '<p class="ra-sh-more">Showing the first 60 shelves. Narrow the years or draw a smaller area to see the rest.</p>' : "");
+        sized();
+      });
+    }
+    function sized() { requestAnimationFrame(function () { stage.style.setProperty("--shh", el.offsetHeight + "px"); }); }
+    function queue() { if (SH.t) clearTimeout(SH.t); SH.t = setTimeout(render, 280); }
+    function setOn(v) {
+      on = v; try { localStorage.setItem("ra-shelf", v ? "1" : "0"); } catch (e) {}
+      if (btn) { btn.setAttribute("aria-pressed", String(v)); btn.classList.toggle("on", v); }
+      render();
+    }
+    el.addEventListener("click", function (e) {
+      var s = e.target.closest("[data-sh]");
+      if (s) {
+        var a = s.getAttribute("data-sh");
+        if (a === "hide") setOn(false);
+        else if (a === "noyears") {
+          if (yon && yon.checked && year) { yon.checked = false; readRange(); yearUI(); }
+          else { var t = typed(); if (t.yrs) { qbox.value = t.text; qbox.dispatchEvent(new Event("input", { bubbles: true })); } }
+          queue();
+        } else if (a === "area" && !areaOn()) { return; }
+        else { SH.user = a === "place" ? null : a; render(); }
+        return;
+      }
+      var c = e.target.closest("[data-sh-p]"); if (!c) return;
+      var pid = c.getAttribute("data-sh-p"), P = plan();
+      if (P.act === "place" && c.getAttribute("data-sh-u")) { window.open(c.getAttribute("data-sh-u"), "_blank", "noopener"); return; }
+      var pl = idx.places.filter(function (p) { return p.i === pid; })[0];
+      if (pl) { open(pl); if (pl.y != null) map.panTo([pl.y, pl.x]); }
+    });
+    map.on("moveend", function () { if (on) queue(); });
+    qbox.addEventListener("input", function () { if (on) queue(); });
+    window.raShelfPing = function () { if (on) queue(); };
+    if (btn) { btn.setAttribute("aria-pressed", String(on)); btn.classList.toggle("on", on); }
+    if (on) queue();
   })();
 
   /* ---- ONE SHAPE AT A TIME ---------------------------------------------------------------------------------------------
@@ -10686,6 +10880,9 @@ window.addEventListener("load", async function () {
   :global(.ra-rc-k i) { width: 11px; height: 11px; border-radius: 50%; box-shadow: 0 0 0 1.5px #fff, 0 0 0 2.5px var(--rule-strong); }
   :global(.ra-rc-k b) { font: 600 11px/1 var(--mono); color: var(--ink-3); }
 
+  /* ---- the shelf: only the new front door shows it ---- */
+  :global(.ra-shelfctl), :global(.ra-shelf) { display: none; }
+  :global(.ra-shelfctl a.on) { background: var(--accent); color: #fff; }
   /* ---- the area tool ---- */
   :global(.ra-areactl a) { display: grid; place-items: center; width: 30px; height: 30px; color: var(--ink-2); }
   :global(.ra-areactl a.on) { background: var(--accent); color: #fff; }

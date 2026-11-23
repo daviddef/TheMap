@@ -64,3 +64,16 @@ Anna`, a name that is also a place last in a list. 125 pass, 3 are known gaps:
 
 Also left: a person's given name that is also a place stays the person's name even when it is the last word of a place list (`Places: Senj, Rijeka,
 Sydney` reads Sydney as the place and also as a name). "Perth Australia" keeps Australia as a stop because the index has Perth only as Perth, Western Australia.
+
+## Fixed on 23 November 2026 (stress harness: 141 pass, 1 known gap)
+
+| What went wrong | Example | Now |
+|---|---|---|
+| A famous city shadowed by a US village | "born in Alexandria ... died in Warsaw" gave Alexandria and Warsaw in the US; Athens and Cairo the same; Oxford gave Oxford County | `WORLD` (12 cities) adds the city as a reading with a small lead; a country or state in the story still wins ("Athens, Georgia"), and the US reading stays one tap away |
+| A state taken for a given name | "Athens, Georgia" made the person called Georgia; "Alexandria, Virginia" the same | a US state written after a town and a comma is the state (`stateTail`), not the name; "Tbilisi, Georgia" is untouched |
+| A given name that is also a place | "his mother in Zara", "lived in Sydney" gave a person called Zara or Sydney and dropped the place | a given name written only after in/at/from/near/to is the place; "my uncle Jordan moved to Jordan" is both |
+| An old name resolved to a village | "Zara" gave Zverinac (Zadar) | the old name goes to the place itself (Zadar), not a village whose name carries it |
+| A namesake via another name | "Clifden" gave Rathgarvan, a hamlet whose list of names includes Clifden | a place with the name as its own name comes before, and instead of, one that only lists it |
+| "His father" taken for the teller's | "my husband Tom was born in Galway. His father Sean ..." made Sean the person the story is about | the teller's relation is the spouse; `rel` is empty, the husband's parents stay parents; a name after "his father" is not the subject's unless the story is about that father |
+
+Still left: "My father Sydney lived in Sydney" reads the name but loses the stop; two people told in one story ("my husband Tom ... and my father ...") still share one list of stops; the husband himself is named only when he is in the given-name catalogue (Tom is not a catalogued form of Thomas).

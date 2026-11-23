@@ -284,6 +284,14 @@
     var p1 = byEnd[c.at], p2 = p1 && byEnd[p1.at];
     return !!(p1 && p2);
   }
+  /* A US state that is also a given name (Georgia, Virginia, Carolina), written straight after a place and a comma ("Athens, Georgia", "born in
+     Alexandria, Virginia"), is the state, which says which of the same-named places was meant. A name the index holds as a state of this size and
+     nothing else follows a place and a comma only as that. */
+  function stateTail(c, cands, text) {
+    if (c.word.indexOf(" ") > -1 || !new RegExp("\\p{L}\\s*,\\s*" + c.word + "\\b", "iu").test(String(text))) return false;
+    if (!c.rows.some(function (r) { return r.cc === "US" && S.fold(r.n) === c.word && (r.v || 0) >= 500; })) return false;
+    return cands.some(function (x) { return x !== c && x.at + x.word.split(" ").length === c.at && x.rows.some(function (r) { return r.cc === "US"; }); });
+  }
   var MOVE = /\b(moved|move|went|go|came|come|travelled|traveled|emigrated|migrated|sailed|settled|relocated|then|to|into|arrived|returned|left)\b/;
   var ANC = /\b(?:his|her|their|a|the)\s+(grandfather|grandmother|father|mother|dad|mum|mom)\b/g;
   var PLACE_BEFORE = { from: "from", of: "from", to: "to", into: "to", at: "to" };
@@ -357,6 +365,9 @@
   function gazMerge(map, w, shardRows) {
     var fold = S.fold, hit = (shardRows || []).filter(function (r) { return fold(r[0]) === w.ph || (r[4] || []).some(function (a) { return fold(a) === w.ph; }); });
     if (w.ccs) hit = hit.filter(function (r) { return w.ccs.indexOf(r[3]) > -1; });
+    /* a place that has the name as its OWN name comes before, and instead of, a place that only lists it among its other names
+       (Clifden in Galway, not Rathgarvan in Kilkenny, whose list of names happens to include "Clifden") */
+    var own = hit.filter(function (r) { return fold(r[0]) === w.ph; }); if (own.length) hit = own;
     var have = map[w.ph] || []; hit = hit.filter(function (r) { return !have.some(function (h) { return h.cc === r[3] && h.y != null && Math.abs(h.y - r[1]) < 0.25 && Math.abs(h.x - r[2]) < 0.25; }); });
     hit = hit.slice(0, w.ccs ? 20 : 8); if (!hit.length) return 0;
     var rows = hit.map(function (r) { return { i: "g-" + w.ph.replace(/ /g, "-") + "-" + String(r[3]).toLowerCase() + "-" + Math.round(r[1] * 100), n: r[0], y: r[1], x: r[2], cc: r[3], c: 0, gaz: 1 }; });
@@ -571,6 +582,29 @@
     ["zara", "Zadar", "HR", 15.23, 44.12], ["aintab", "Gaziantep", "TR", 37.38, 37.07]
   ];
   var EXO_BY = (function () { var m = Object.create(null); EXO.forEach(function (e) { m[e[0]] = e; }); return m; })();
+  /* THE CITY THE WORLD MEANS. "Athens", "Cairo", "Warsaw" and "Alexandria" are, in the gazetteer, mostly villages in the US (Athens, Georgia; Cairo,
+     Illinois), and the city itself is often not in the index under that name. A story that names only one of them, with nothing pointing to the US,
+     means the city. Each is [name as told, modern name, country, longitude, latitude]; the city is added as a reading (taken from the Atlas's own
+     row when it has one, else a point) with a small lead, so a country the story names, or a state ("Athens, Georgia"), still wins. Never a stop on
+     its own; only the order of the readings changes and the other is still one tap away. */
+  var WORLD = [
+    ["alexandria", "Alexandria", "EG", 29.92, 31.2], ["warsaw", "Warsaw", "PL", 21.01, 52.23], ["athens", "Athens", "GR", 23.73, 37.98], ["cairo", "Cairo", "EG", 31.24, 30.04],
+    ["rome", "Rome", "IT", 12.5, 41.9], ["oxford", "Oxford", "GB", -1.26, 51.75], ["cambridge", "Cambridge", "GB", 0.12, 52.2], ["damascus", "Damascus", "SY", 36.3, 33.51],
+    ["bethlehem", "Bethlehem", "PS", 35.2, 31.7], ["berlin", "Berlin", "DE", 13.4, 52.52], ["sparta", "Sparta", "GR", 22.43, 37.07], ["jerusalem", "Jerusalem", "IL", 35.22, 31.77]
+  ];
+  var WORLD_BY = (function () { var m = Object.create(null); WORLD.forEach(function (e) { m[e[0]] = e; }); return m; })();
+  function withWorldCities(text, ctx) {
+    if (!ctx || !ctx.map) return;
+    var f = " " + S.fold(text).replace(/\s+/g, " ") + " ";
+    WORLD.forEach(function (e) {
+      if (f.indexOf(" " + e[0] + " ") < 0) return;
+      var rows = ctx.map[e[0]] || (ctx.map[e[0]] = []);
+      if (rows.some(function (r) { return r.fam; })) return;
+      var mine = rows.filter(function (r) { return r.cc === e[2] && S.fold(r.n) === e[0]; })[0];
+      if (mine) { mine.fam = 1; return; }
+      rows.push({ i: "w-" + e[0], n: e[1], cc: e[2], x: e[3], y: e[4], a: 1, c: 0, w: 1, gaz: true, fam: 1 });
+    });
+  }
   /* put the rows for any old name the story uses at the FRONT of its word, so "Bombay" is the city before it is a village */
   function withExonyms(text, ctx) {
     if (!ctx || !ctx.map) return;
@@ -579,7 +613,8 @@
       if (f.indexOf(" " + e[0] + " ") < 0) return;
       var rows = ctx.map[e[0]] || (ctx.map[e[0]] = []);
       if (rows.some(function (r) { return r.exo === e[0]; })) return;
-      var modern = (ctx.map[S.fold(e[1])] || []).filter(function (r) { return r.cc === e[2] && r.c > 0; })[0] || (ctx.map[S.fold(e[1])] || []).filter(function (r) { return r.cc === e[2]; })[0];
+      var own = function (r) { return r.cc === e[2] && S.fold(String(r.n).replace(/\s*\([^)]*\)/g, "")) === S.fold(e[1]); };   /* the place itself, not a village whose name carries it (Zverinac (Zadar)) */
+      var modern = (ctx.map[S.fold(e[1])] || []).filter(function (r) { return own(r) && r.c > 0; })[0] || (ctx.map[S.fold(e[1])] || []).filter(own)[0] || (ctx.map[S.fold(e[1])] || []).filter(function (r) { return r.cc === e[2] && r.c > 0; })[0];
       var row = modern ? Object.assign({}, modern, { exo: e[0] }) : { i: "x-" + e[0].replace(/ /g, "-"), n: e[1], cc: e[2], x: e[3], y: e[4], a: 1, c: 0, w: 1, gaz: true, exo: e[0] };
       rows.unshift(row);
     });
@@ -611,7 +646,7 @@
     }
     cands.forEach(function (c) {
       if (c.country || ccs(c).length < 2) return;
-      c.rows = c.rows.map(function (r, i) { return { r: r, i: i, s: (votes[r.cc] || 0) + (r.c > 0 ? 2 : 0) + (r.v > 0 ? 0.5 : 0) + (r.exo ? 100 : 0) + 2 * prox(c, r) - i * 0.01 }; })
+      c.rows = c.rows.map(function (r, i) { return { r: r, i: i, s: (votes[r.cc] || 0) + (r.c > 0 ? 2 : 0) + (r.v > 0 ? 0.5 : 0) + (r.exo ? 100 : 0) + (r.fam ? 2.5 : 0) + 2 * prox(c, r) - i * 0.01 }; })
         .sort(function (a, b) { return b.s - a.s; }).map(function (x) { return x.r; });
     });
     return cands;
@@ -769,6 +804,7 @@
 
   function parseStory(text, ctx, attached) {
     withExonyms(text, ctx);
+    withWorldCities(text, ctx);
     var typed = String(text || ""), t = repairCase(typed.replace(/^\u2014 Picture \d+ \([^\n]*\) \u2014[ \t]*$/gm, " "), ctx), teller = "";   /* the line that names a picture read into the story is not story */
     /* "my name is David" says who is telling, not who the story is about */
     t = t.replace(/\bmy name is\s+([\p{L}'’-]+)(?:\s+([\p{Lu}][\p{L}'’-]+))?/iu, function (m, g, sn) { teller = cased(g) + (sn && /^\p{Lu}/u.test(sn) && !CONNECT.test(sn) && !STOP[S.fold(sn)] && !(ctx.map && ctx.map[S.fold(sn)]) ? " " + cased(sn) : ""); return " "; });
@@ -785,7 +821,12 @@
        is the person's own father, not a relation of the reader; and the opening "Born in 1898 in X, Name verb" is the same as "Name was born in 1898 in X." */
     var firstPerson = /\b(?:my|our|me|mine|we)\b/i.test(t) || /\bI\b/.test(t);
     if (!firstPerson) t = t.replace(/^\s*Born in (\d{4})(?:,| in)?\s*([^]*?),\s*(\p{Lu}[\p{L}'\u2019-]+(?:\s+\p{Lu}[\p{L}'\u2019-]+)?)\s+(?=\p{Ll})/u, function (m, y, pl, nm) { return nm + " was born in " + y + (pl ? " in " + pl.replace(/^in\s+/i, "") : "") + ". " + nm + " "; });
-    var rm = firstPerson ? REL.exec(t) : null; if (rm) { out.rel = rm[1].toLowerCase().replace(/ /g, "-"); out.rel = REL_ALIAS[out.rel] || out.rel; }
+    var rm = firstPerson ? REL.exec(t) : null;
+    /* "my husband Tom was born in Galway. His father Sean was ...": the father is the HUSBAND's. The teller's own relation is the spouse (or child), who is
+       not on the list of relations, so "his father" / "her mother" after it is not the teller's father */
+    var viaSp = firstPerson && rm && /\b(?:my|our)\s+(?:(?:late|ex|first|second|third)[- ])?(husband|wife|partner|fianc[e\u00e9]e?|son|daughter|boyfriend|girlfriend)\b/i.exec(t);
+    if (viaSp && viaSp.index < rm.index && /\b(?:his|her|their)\s+$/i.test(t.slice(0, rm.index).slice(-8))) { rm = null; out.via = viaSp[1].toLowerCase(); }
+    if (rm) { out.rel = rm[1].toLowerCase().replace(/ /g, "-"); out.rel = REL_ALIAS[out.rel] || out.rel; }
     var ft = S.fold(t), tokens = ft.split(" ").filter(Boolean);
     ctx = Object.assign({}, ctx, { hintTokens: tokens });
     /* "he married a woman named Cheryl": Cheryl is his wife, not him. Names so introduced are taken out before the story's own name is looked for. */
@@ -810,8 +851,32 @@
       return " ";
     });
     var sibs = readSiblings(tg, ctx); tg = sibs.rest; out.siblings = sibs.list.map(function (x) { return { rel: x.rel, name: x.name, label: (x.mine ? "your " : /^(?:mother|grandmother|aunt|sister|wife|mum|mom|nonna)/.test(out.rel || "") ? "her " : /^(?:father|grandfather|uncle|brother|husband|dad|nonno)/.test(out.rel || "") ? "his " : "their ") + x.rel }; });
+    /* "Athens, Georgia" and "Alexandria, Virginia": the state after a place and a comma is not the person's given name */
+    var stateW = [];
+    tg = tg.replace(/(\p{Lu}[\p{L}'\u2019-]+)(\s*,\s*)(\p{Lu}[\p{L}'\u2019-]+)/gu, function (m, a, sep, w) {
+      var rw = ctx.map && ctx.map[S.fold(w)];
+      if (!(ctx.map && ctx.map[S.fold(a)] && ctx.map[S.fold(a)].some(function (r) { return r.cc === "US"; }) && rw && rw.some(function (r) { return r.cc === "US" && S.fold(r.n) === S.fold(w) && (r.v || 0) >= 500; }))) return m;
+      stateW.push(S.fold(w)); return a + " ";
+    });
     var gv = ctx.given ? S.givenIn(tg, ctx.given, ctx.skip) : [];
-    var gset = Object.create(null); gv.forEach(function (g) { gset[g.word] = 1; });
+    /* "his father Sean", "my mother Nora": a name straight after a word for a relation is that relation's, not the person the story is about, unless the
+       story is told about that very relation ("my father Marco was born in ..."): the first such name is no longer taken for the subject's own */
+    var kinOf = Object.create(null);
+    (t.match(/\b(?:[Mm]other|[Mm]um|[Mm]om|[Ff]ather|[Dd]ad|[Uu]ncle|[Aa]unt(?:ie|y)?|[Bb]rother|[Ss]ister|[Cc]ousin|[Nn]ephew|[Nn]iece|[Ss]on|[Dd]aughter|[Ww]ife|[Hh]usband|[Gg]rand(?:father|mother|pa|ma|ad))\s+(?:(?:was|is|named|called)\s+)?\p{Lu}[\p{L}'\u2019-]+/gu) || []).forEach(function (m) {
+      var ws = m.split(/\s+/), nm = S.fold(ws.pop()), kw = ws.join(" ").toLowerCase().replace(/\s+(?:was|is|named|called)$/, "");
+      (kinOf[nm] || (kinOf[nm] = [])).push(kw);
+    });
+    var gvAll = gv; gv = gv.filter(function (g) { var ks = kinOf[g.word]; if (!ks) return true; return ks.some(function (kw) { kw = kw.replace(/\s+/g, "-"); var k2 = REL_ALIAS[kw] || kw; return out.rel && (out.rel === k2 || out.rel.slice(-k2.length - 1) === "-" + k2); }) || tokens.some(function (tk, i) { return tk === g.word && !ks.length; }); });
+    /* a given name written only straight after in / at / from / near / to, and that is also a place ("lived in Sydney", "his mother in Zara"), is the place,
+       not a person: every time the story writes it, a place marker stands before it */
+    function markedOnly(w) {
+      if (!(ctx.map && ctx.map[w] && ctx.map[w].length)) return false;
+      var seenAt = 0, bare = false;
+      tokens.forEach(function (tk, i) { if (tk !== w) return; seenAt++; if (!/^(?:in|at|from|near|to|into|en|nach|aus|von|iz|nel|nella)$/.test(tokens[i - 1] || "")) bare = true; });
+      return seenAt > 0 && !bare;
+    }
+    gv = gv.filter(function (g) { return !markedOnly(g.word); });
+    var gset = Object.create(null); gvAll.forEach(function (g) { gset[g.word] = 1; }); stateW.forEach(function (w) { if (ctx.given && ctx.given[w]) gset[w] = 1; });
     if (gv.length) {
       out.given = gv[0].row.canon;
       var raw = tg.split(/\s+/), gi = -1;
@@ -875,7 +940,7 @@
     var rolesFor = cands.map(function (c) {
       var p1 = tokens[c.at - 1] || "", p2 = tokens[c.at - 2] || "", isGiven = !!gset[c.word] || !!nameW[c.word];
       var role = PLACE_BEFORE[p1] || ((p1 === "in" && p2 === "born") ? "from" : (p1 === "in" && /^(settled|arrived|lived|living|came|went|emigrated|moved)$/.test(p2)) ? "to" : "");
-      var drop = (isGiven && !role && !listTail(c, cands, t)) || (c.word.indexOf(" ") < 0 && (STOP[c.word] || COMMON[c.word] || REL.test(c.word))) || notPlace(c, tokens, ci, ctx);
+      var drop = (isGiven && !role && !listTail(c, cands, t) && !stateTail(c, cands, t) && !(c.word.indexOf(" ") < 0 && /^(?:in|at|near|from|to|into|nach|aus|von|iz|nel|nella)$/.test(p1) && ctx.map && ctx.map[c.word] && ctx.map[c.word].length)) || (c.word.indexOf(" ") < 0 && (STOP[c.word] || COMMON[c.word] || REL.test(c.word))) || notPlace(c, tokens, ci, ctx);
       return { c: c, role: role, drop: drop };
     }).filter(function (x) { return !x.drop; });
     function pick(x) { return x ? { row: x.c.rows[0], alts: x.c.rows.slice(1, 6), word: x.c.word } : null; }

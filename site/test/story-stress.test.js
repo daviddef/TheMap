@@ -29,8 +29,10 @@ const rows = [
   P("Fall River County", "US", -103.5, 43.2, { c: 0 }), P("Three Rivers", "US", -85.6, 41.9, { c: 0 }), P("South March", "CA", -75.9, 45.3, { c: 0 }), P("Small Isles", "GB", -6.3, 56.9, { c: 0 }),
   P("Lincoln", "US", -96.7, 40.8, { c: 0 }), P("Washington", "US", -77, 38.9, { c: 0 }), P("South Jordan", "US", -111.9, 40.5, { c: 0 }), P("Roden", "NL", 6.4, 53.1, { c: 0 }), P("Richmond County", "US", -77, 38, { c: 0 }),
   P("Ellis County", "US", -96.8, 32.4, { c: 0 }), P("Augusta", "US", -69.8, 44.3, { c: 0 }),
+  /* the US villages that shadow a world city, and a state that is also a given name */
+  P("Alexandria", "US", -77.05, 38.8, { c: 0, v: 139 }), P("Warsaw", "US", -85.85, 41.24, { c: 0, v: 3 }), P("Athens", "US", -83.4, 33.95, { c: 0, v: 112 }), P("Virginia", "US", -78.5, 37.5, { c: 0, v: 1800 }), P("Georgia", "US", -83.5, 32.7, { c: 0, v: 7000 }),
 ];
-const given = [["Marco"], ["Lucia"], ["Ivan"], ["Anton"], ["Giovanni"], ["Maria"], ["Florence"], ["Victoria"], ["Sydney"], ["Charlotte"], ["Johan"], ["Abraham"], ["George"], ["Anna"], ["Cheryl"]]
+const given = [["Marco"], ["Lucia"], ["Ivan"], ["Anton"], ["Giovanni"], ["Maria"], ["Florence"], ["Victoria"], ["Sydney"], ["Charlotte"], ["Johan"], ["Abraham"], ["George"], ["Anna"], ["Cheryl"], ["Virginia"], ["Georgia"], ["Sean"], ["Nora"], ["Thomas"]]
   .map(([n]) => ({ canon: n, id: n.toLowerCase(), langs: { english: [{ form: n, status: "same" }] } }));
 const countries = { IE: "Ireland", GB: "United Kingdom", US: "United States of America", IT: "Italy", HR: "Croatia", AU: "Australia", ZA: "South Africa", DE: "Germany", LV: "Latvia", AR: "Argentina", ZW: "Zimbabwe" };
 const ctx = { map: A.buildMap(rows), given: A.buildGiven(given), skip: {}, countries };
@@ -420,4 +422,46 @@ test("the teller's two parents, one named, are a family told from the middle, an
   assert.deepEqual(f.stops.map((x) => [x.row.n.replace(/ \(.*/, ""), x.year]), [["Senj", 1920], ["Brisbane", 1999]], "his death place is on his line, at the year told");
   const c = F.parseStory("My father Ivan was born in Senj in 1920. My mother Ana was born in Split in 1925.", named, null);
   assert.equal(c.name, "Ivan", "both parents named: the first is the one the page follows");
+});
+
+const parse = (t) => F.parseStory(t, ctx);
+
+/* 23 Nov 2026: the reader's weaknesses that the stress harness (node site/test/stress/run.mjs) found against the real gazetteer */
+test("Alexandria, Warsaw and Athens, with nothing pointing to the US, are the cities; a state after a town keeps the US reading", () => {
+  const p = parse("my great grandmother was born in Alexandria in 1890 and died in Warsaw");
+  assert.deepEqual(p.stops.map((s) => s.row.n + "/" + s.row.cc), ["Alexandria/EG", "Warsaw/PL"]);
+  assert.ok(p.stops[0].alts.some((r) => r.cc === "US"), "the US village stays one tap away");
+  assert.equal(parse("my grandfather was born in Athens").stops[0].row.cc, "GR");
+  const ga = parse("my grandfather lived in Athens, Georgia");
+  assert.deepEqual([ga.stops.map((s) => s.row.n + "/" + s.row.cc), ga.name], [["Athens/US"], ""]);
+  const va = parse("she was born in Alexandria, Virginia");
+  assert.deepEqual([va.stops.map((s) => s.row.n + "/" + s.row.cc), va.name], [["Alexandria/US"], ""]);
+});
+
+test("a given name that is also a place, written only after in / at / from, is the place and not the person", () => {
+  const p = parse("My father lived in Sydney.");
+  assert.deepEqual([p.stops.map((s) => s.row.n), p.name, p.rel], [["Sydney"], "", "father"]);
+  assert.equal(parse("My great aunt Victoria lived in Sydney.").name, "Victoria");
+});
+
+test("'my husband Tom ... his father Sean' is the husband's father: the teller's own relation is not 'father', and Sean is not the subject", () => {
+  const p = parse("my husband Thomas was born in Galway. his father Sean was born in Cork and his mother Nora came from Dublin");
+  assert.equal(p.rel, "");
+  assert.notEqual(p.name, "Sean");
+  assert.deepEqual(p.stops.map((s) => s.row.n), ["Galway", "Cork", "Dublin"]);
+  const q = parse("My father Marco was born in Florence. His father Ivan was born in Siena.");
+  assert.deepEqual([q.rel, q.name], ["father", "Marco"]);
+});
+
+test("a name straight after 'his father' is not the story's own person unless the story is about that father", () => {
+  assert.equal(parse("Thomas was born in Galway. his father Sean was born in Cork").name, "Thomas");
+  assert.equal(parse("My great grandfather Ivan was born in Senj in 1880.").name, "Ivan");
+});
+
+test("gazMerge: a place that has the name as its own name comes before, and instead of, one that only lists it among its other names", () => {
+  const map = Object.create(null), rows = [["Clifden", 53.49, -10.02, "IE", ["An Clochan"]], ["Rathgarvan", 52.64, -7.15, "IE", ["Clifden"]], ["Clifden", -29.5, 152.9, "AU", []]];
+  assert.equal(F.gazMerge(map, { ph: "clifden", ccs: null }, rows), 2);
+  assert.deepEqual(map.clifden.map((r) => r.n + "/" + r.cc), ["Clifden/IE", "Clifden/AU"]);
+  const only = Object.create(null);
+  assert.equal(F.gazMerge(only, { ph: "clifden", ccs: null }, [["Rathgarvan", 52.64, -7.15, "IE", ["Clifden"]]]), 1);
 });

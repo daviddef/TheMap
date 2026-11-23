@@ -358,3 +358,10 @@ test("the walk's note sits in the Visiting head, not on a line of its own", () =
 test("the v2 place card names only the region above its who-held band, not the words «Who held this ground»", () => {
   assert.match(map, /if \(TSV2\) \{\s*var main = [\s\S]*?h\.push\('<p class="at-lab">' \+ esc\(String\(main\.label\)/);
 });
+
+test("v2 lists share one spacing, and the walking time is not repeated on the villages", () => {
+  const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
+  assert.match(map, /var walk = x\.wt != null && !TSV2 \?/);
+  assert.match(css, /\.fd2-stage \.ra-area-g > ul > li\[data-src\] \{ padding: 7px 0; border-bottom: 1px solid/);
+  assert.match(css, /\.fd2-stage \.ra-area-pl\.ra-area-solo-l > \.ra-vl, \.fd2-stage \.ra-visit > \.ra-vl \{ margin: 4px 0 10px; \}/);
+});

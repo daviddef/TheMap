@@ -518,10 +518,21 @@ body.fd2-immersive .fd2-stage::after { border-radius: 0; }
 
 /* THE COUNT IS ALWAYS AT THE RIGHT. David: «why are the numbers not all on the right?». Every foldable section's head is one row: chevron, name, and the count pushed to
    the right edge in the same small teal figures the books list uses. */
-.fd2-stage details.ra-area-solo-l > summary, .fd2-stage details.ra-area-cov > summary, .fd2-stage details.ra-area-rd > summary, .fd2-stage details.ra-in-card > summary.lab { display: flex; align-items: center; gap: 0; padding: 5px 4px; }
+.fd2-stage details.ra-area-solo-l > summary, .fd2-stage details.ra-area-cov > summary, .fd2-stage details.ra-area-rd > summary, .fd2-stage details.ra-in-card > summary.lab { display: flex; align-items: center; gap: 0; padding: 5px 0; }
 .fd2-stage details.ra-area-cov > summary > b, .fd2-stage details.ra-area-rd > summary > b, .fd2-stage details.ra-in-card > summary.lab > b { margin-left: auto; padding-left: 10px; font: 600 11px/1 var(--mono, ui-monospace, monospace); letter-spacing: .08em; color: var(--accent, #1f5c6b); }
 
 /* the walk's note in the Visiting head: quiet, lower case, between the name and the count */
 .fd2-stage .ra-sum-note { flex: 1 1 auto; min-width: 0; margin-left: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 11.5px/1.3 var(--sans, system-ui, sans-serif); letter-spacing: 0; text-transform: none; color: var(--ink-3, #606c72); }
 .fd2-stage .ra-sum-ld { animation: fd2-walk 1s ease-in-out infinite alternate; }
 @media (prefers-reduced-motion: reduce) { .fd2-stage .ra-sum-ld { animation: none; opacity: .6; } }
+
+/* ONE SPACING FOR EVERY LIST IN A CARD. David: «spacing and indentation not consistent». Rows start at the section head's own left edge (the + of every list is on one
+   line), each row is the book row's height with a hairline under it, a list opens under a hairline, and the figures at the right all end on the same edge. */
+.fd2-stage .ra-area-pl.ra-area-solo-l > .ra-vl, .fd2-stage .ra-visit > .ra-vl { margin: 4px 0 10px; }
+.fd2-stage .ra-area-g > ul { margin: 4px 0 10px; border-top: 1px solid var(--rule, #d3d0c7); }
+.fd2-stage .ra-area-g > ul > li[data-src] { padding: 7px 0; border-bottom: 1px solid var(--rule, #d3d0c7); }
+.fd2-stage .ra-area-g > ul > li[data-src] > .ra-area-p { padding: 0; font-size: 13px; line-height: 1.35; }
+.fd2-stage .ra-area-g > ul > li[data-src] > .ra-area-p:hover { background: none; }
+.fd2-stage .ra-area-p > small:has(.ra-acc) { display: flex; align-items: center; height: 22px; margin-right: -3px; }
+.fd2-stage .ra-vl > li { gap: 0 10px; }
+.fd2-stage .ra-vt .ra-vn { margin-left: 6px; font: 400 11px/1 var(--sans, system-ui, sans-serif); color: var(--ink-3, #606c72); white-space: nowrap; }

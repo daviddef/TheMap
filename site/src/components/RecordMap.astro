@@ -4134,9 +4134,9 @@ window.addEventListener("load", async function () {
     if (TSV2) {
       var disc2 = num != null ? '<span class="ra-ck-i" title="' + esc(dot && note ? note : T("Show on the map")) + '"' + (dot ? ' style="background:' + dot + ";color:" + inkOn(dot) + '"' : "") + ">" + num + "</span>" : "";
       return '<li class="ra-vrow"' + at + ">" + disc2 +
-        '<span class="ra-vt" title="' + esc(name) + '">' + (href ? '<a href="' + esc(href) + '" target="_blank" rel="noopener">' + esc(name) + "</a>" : esc(name)) + "</span>" +
-        '<span class="ra-vy">' + (km != null ? (Math.round(km * 10) / 10) + " km" : "") + "</span>" +
-        (note && !dot ? '<span class="ra-vn">' + esc(note) + "</span>" : "") + "</li>";
+        '<span class="ra-vt" title="' + esc(name) + '">' + (href ? '<a href="' + esc(href) + '" target="_blank" rel="noopener">' + esc(name) + "</a>" : esc(name)) +
+        (note && !dot ? ' <small class="ra-vn">' + esc(note) + "</small>" : "") + "</span>" +
+        '<span class="ra-vy">' + (km != null ? (Math.round(km * 10) / 10) + " km" : "") + "</span></li>";
     }
     /* A ROW IS A NUMBER, A NAME AND A LINE OF PLAIN WORDS. David: «can we neaten the right pane? ... item 3
        and 5 wrap completely wrong, and feel could be a bit more "exciting"». The row was a wrapping flex
@@ -4317,7 +4317,7 @@ window.addEventListener("load", async function () {
       vs.slice(0, 20).forEach(function (x) {
         count++;
         var vol = x.p.c ? x.p.c + " " + T(x.p.c === 1 ? "volume" : "volumes") : null;
-        var walk = x.wt != null ? window.raReach.hoursText(x.wt) + " " + T("on foot") : null;
+        var walk = x.wt != null && !TSV2 ? window.raReach.hoursText(x.wt) + " " + T("on foot") : null;   /* the walking time is not repeated on v2: the ring and the hours already say it */
         h.push(checkRow(BASE + "place/" + x.p.i + "/", x.p.n, x.km,
                         vol && walk ? vol + " \u00b7 " + walk : vol || walk, null, count, x.p.y, x.p.x,
                         { id: "place:" + x.p.i, t: x.p.n,
@@ -11232,7 +11232,6 @@ window.addEventListener("load", async function () {
   :global(.ra-vl .srcmark) { flex: none; margin: 0; }
   :global(.ra-vl .srcmark:has(.src-edit)) { flex: 1 0 100%; padding: 4px 0 4px 4px; }
   :global(.ra-vl > li.ra-vrow .ra-ck-i) { flex: none; }
-  :global(.ra-vl > li.ra-vrow > .ra-vn) { flex: 1 0 100%; padding-left: 74px; margin-top: -3px; font: 400 11.5px/1.3 var(--sans); color: var(--ink-3); }
  :global(.ra-pin) { display: flex !important; align-items: center;
     justify-content: center; border-radius: 50%; background: #1B2A5B;
     color: #fff; font-family: var(--mono); font-size: 10px; font-weight: 500;

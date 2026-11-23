@@ -72,7 +72,8 @@ const adsHere = AD_PAGES.some((p) => here.startsWith(p))
 /* The three page kinds that carry ProgressKit, which is what the RESEARCHING
    control acts on. Everywhere else it is furniture. */
 const marksHere = here === u("/") || here === "/"
-  || here.startsWith(u("/place/")) || here.startsWith(u("/my-research/"));
+  || here.startsWith(u("/place/")) || here.startsWith(u("/my-research/"))
+  || here.startsWith(u("/v2/"));   /* Front Door v2 is the home map with a new way in: the family choice colours its dots too */
 /* Strip the query string: /?q=Breslau and / are the same page. */
 const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
 import LineSwitcher from "../components/LineSwitcher.astro";

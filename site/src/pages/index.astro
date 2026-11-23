@@ -5,6 +5,7 @@ import ProgressKit from "../components/ProgressKit.astro";
 import VolumeMarks from "../components/VolumeMarks.astro";
 import StoryDrawer from "../components/StoryDrawer.astro";
 import HomeAbout from "../components/HomeAbout.astro";
+import InventoryPill from "../components/InventoryPill.astro";
 import { u } from "../lib/url.js";
 import { atlas as idx } from "../lib/atlas.js";
 import regions from "../../public/regions.json";
@@ -78,30 +79,7 @@ import { places, NEWS_KIND, latestNews, newsDay, volumes, placeCountries, countr
       h1 stays for screen readers and search engines, and is only hidden. (Earlier notes on this row: the page is a tool, not an
       article, so nothing between the header and the search box.) */}
   <h1 class="ra-sr">Where the records are</h1>
-  <details class="ra-inv" slot="inv" id="ra-inv" data-volumes={volumes}>
-    <summary class="ra-inv-ico" aria-label={volumes.toLocaleString() + " volumes: what the atlas holds"} title={(volumes / 1e6).toFixed(2) + "M volumes: what the Atlas holds"}><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path d="M4 4h4v16H4zM10 4h4v16h-4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M16.3 5.7l3.7-.9 3 14.4-3.7.9z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span class="ra-inv-t">{(volumes / 1e6).toFixed(2)}M volumes</span></summary>
-    <div class="ra-inv-grid">
-      <div class="ra-inv-top">
-        <p class="ra-inv-count"><span class="ra-inv-big">{volumes.toLocaleString()} volumes</span> <span class="ra-inv-in">in the Atlas</span><span class="ra-inv-new" hidden></span></p>
-        <a class="ra-inv-all" href={u("/whats-new/")}>What's new: all updates →</a>
-        <ul class="ra-inv-news" aria-label="The latest updates">
-          {latestNews.map((e) => (
-            <li><a href={u(e.href || "/whats-new/")} title={e.headline}><span class={"ra-inv-kind " + (e.kind || "better")}>{NEWS_KIND[e.kind] || "Better"}</span><span class="ra-inv-line">{e.headline}</span><time datetime={e.date}>{newsDay(e.date)}</time></a></li>
-          ))}
-        </ul>
-      </div>
-      {inventoryRows.map(([head, items]) => (
-        <>
-          <p class="ra-inv-h">{head}</p>
-          <ul class="ra-inv-row">
-            {items.map(([n, label, href, note, eg]) => (
-              <li><a href={u(href)}><b>{n.toLocaleString()}</b> <span>{label}</span><small>{note}</small><em class="eg">e.g. {eg}</em></a></li>
-            ))}
-          </ul>
-        </>
-      ))}
-    </div>
-  </details>
+  <InventoryPill slot="inv" />
   {/* RIGHT OF «LOCAL». David: «move the volume numbers to the right of "local" … short form, e.g. 3.43M». On a wide screen the pill moves into
       the Researching group, before the save button (David: the icon goes to the right of the count); below the burger breakpoint that group is in the drawer and the dot sits beside the brand, so
       the pill goes back to sit after it. One element, moved by matchMedia (without script it stays beside the brand). */}
@@ -119,6 +97,10 @@ import { places, NEWS_KIND, latestNews, newsDay, volumes, placeCountries, countr
       exists, which keeps a first-time reader's map uncluttered without
       hiding the selector from somebody who has several. */}
   <ProgressKit />
+
+  {/* THE NEW FRONT DOOR, OFFERED BESIDE THIS ONE. /v2/ is the same map and the same tools with a new way in (see pages/v2.astro); this link
+      is the only change to the home page, and it is meant to be removed or promoted once the trial has decided. */}
+  <p class="ra-v2-try"><a href={u("/v2/")}><span class="ra-v2-new">New</span> Try the map-first front door <b>v2</b> <span aria-hidden="true">&rarr;</span></a></p>
 
   <RecordMap
     indexUrl={u("/index.json")}
@@ -157,6 +139,12 @@ import { places, NEWS_KIND, latestNews, newsDay, volumes, placeCountries, countr
 </Base>
 
 <style>
+  .ra-v2-try { margin: 6px 0 -2px; text-align: right; font: 500 13px/1.3 var(--sans); }
+  .ra-v2-try a { display: inline-flex; align-items: center; gap: 7px; padding: 6px 13px; border-radius: 99px; text-decoration: none;
+    color: var(--accent); background: var(--accent-wash, rgba(31, 92, 107, .1)); border: 1px solid transparent; transition: border-color .15s, transform .15s; }
+  .ra-v2-try a:hover, .ra-v2-try a:focus-visible { border-color: var(--accent); transform: translateY(-1px); outline: none; }
+  .ra-v2-try b { font-weight: 700; }
+  .ra-v2-new { font: 700 10px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--on-accent, #fff); background: var(--accent); padding: 3px 6px; border-radius: 99px; }
   /* The folded explanation. A summary that looks like a control, not like
      a heading somebody forgot to style — a reader has to be able to tell
      it opens. */

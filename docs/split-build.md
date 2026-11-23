@@ -38,5 +38,38 @@ redirects match the live site; the Worker refuses `//host/x` paths and stops an 
 9. (Done 22 Nov) `deploy.yml` no longer runs on push: it is a manual run only, so GitHub Pages is refreshed by hand when wanted. `scripts/check-built.py` (the built-output gates) now runs in slice 0 of the sliced workflow before any upload. *Build and publish to R2 (sliced)* has a `dry_run` input (builds and gates, uploads nothing, own queue) for testing workflow changes.
 8. (Done 10 Nov) *Build and publish to R2 (sliced)* now runs on every push to main; that is the production deploy. Retire `deploy.yml`'s upload step only after a week of the new path being quiet.
 
+## Which parts build: lanes (23 Nov 2026)
+
+Every push used to build everything. Now the first job, `classify`, reads the files changed **since the last successful run on main**
+(`scripts/build_lane.py`) and picks the smallest build that is still correct:
+
+| Lane | When | What runs |
+|---|---|---|
+| `none` | docs, notes, other workflows, the research import record | nothing |
+| `check` | tests, Workers | `prep` only: the tests and data checks; nothing is published |
+| `static` | a static page, a script/stylesheet/image served as written (`site/public/**`), the research marks (`research-receipts/`, `research-sessions.json`), a component or file no generated page imports | `prep`, then **one** build with `RA_SHARD=none` (no place, surname or name page) and the `static` part uploaded. The 16 slices do not run |
+| `full` | data, scripts, the layout, a shared component or library, a generated page template, `site/package.json`, the deploy workflow itself, any path it does not know | everything, as before |
+
+**The rule that keeps it honest: when in doubt, full.** "Static" is granted only to a file the place, surname and name templates cannot
+reach, found by following every import from them (`reachable()` in `build_lane.py`). An import it cannot resolve, a computed `import()`,
+or an unknown path makes the answer `full`. A wrong `full` costs minutes; a wrong `static` would publish place pages that disagree with
+their template. `site/test/build-lane.test.js` pins the cases, including that the walk is not in doubt.
+
+**Why the baseline is the last success, not the previous push.** The deploy queue keeps only the newest waiting run, and a run can fail. If
+the baseline were "before this push", a dropped or failed run would leave its changes unbuilt forever. With "the last run that succeeded",
+the next run's diff includes everything not yet published. Dry runs and runs forced to a lane below `full` say so in their title
+(`run-name`) and are not taken as the baseline.
+
+**By hand.** Actions, *Build and publish to R2 (sliced)*, Run workflow: `lane` is `auto` (default) or forces `none`, `check`, `static` or
+`full`; `dry_run` builds and checks and uploads nothing (it has its own queue). Use `full` after changing anything this document says is
+read by the build, and `dry_run` to try a change to the workflow.
+
+**What a research publish costs now.** The What's new page builds its "In the Atlas" news from `research-sessions.json`, so the marks cannot
+go straight to the bucket: they take the `static` lane (about the `prep` time plus one static build, instead of the full build).
+
+**Known limits, in the order they could be tightened.** `scripts/**` is `full` even for a script the data step never runs (the data cache is
+keyed on all of `scripts/`); `site/src/data/whats-new.json` is `full` because the layout reads its newest date into every page (it would be
+`static` while that date is unchanged, if that ever matters); the 3,500 static pages are still rebuilt by every slice in the `full` lane.
+
 **Not yet done.** Moving the roughly 3,500 static pages out of the slice builds (each slice rebuilds them, about 90 s), and a smoke test
 that fails the workflow when a sampled page is missing from the bucket after the upload.

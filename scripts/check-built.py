@@ -136,10 +136,33 @@ def attribution_gate():
                         f"reach the page is not a credit.")
                     break
 
+def only_generated_files():
+    """Files that only the place, surname and name page templates reach: in the static-only part (RA_SHARD=none, which builds none of those
+    pages) their style blocks are correctly absent from the built CSS, so the selector gate must not ask for them. Anything this cannot
+    resolve is NOT skipped (when in doubt, the gate stays strict). Empty outside the static-only part, where every page is built."""
+    if os.environ.get("RA_SHARD") != "none":
+        return set()
+    sys.path.insert(0, os.path.join("scripts"))
+    import build_lane
+    G, doubt = build_lane.reachable(build_lane.generated_roots())
+    if doubt:
+        return set()
+    # a file is "only generated" when no static page reaches it; the static pages' own reach is every other page under site/src/pages
+    others = [os.path.relpath(f).replace(os.sep, "/") for f in glob.glob("site/src/pages/**/*.astro", recursive=True)
+              if not os.path.relpath(f).replace(os.sep, "/").startswith(build_lane.GENERATED_DIRS)]
+    S, doubt2 = build_lane.reachable(others)
+    if doubt2:
+        return set()
+    # a page with no [param] (name/index, surname/index) is built in every part, so its styles must still be there
+    return {f for f in G if f.endswith(".astro") and not (f.startswith("site/src/pages/") and "[" not in f)} - S
+
 def selectors_declared():
     """Class selectors written in a layout or component's own style block."""
     want = {}
+    skip = only_generated_files()
     for f in glob.glob("site/src/**/*.astro", recursive=True):
+        if os.path.relpath(f).replace(os.sep, "/") in skip:
+            continue
         src = open(f, encoding="utf-8").read()
         for m in re.finditer(r"<style\b[^>]*>(.*?)</style>", src, re.S):
             body = re.sub(r"/\*.*?\*/", " ", m.group(1), flags=re.S)

@@ -2020,7 +2020,7 @@
               else li.append(im);
             }
             var rg = info.regimes && info.regimes[e.regime];
-            var yb = el("b", null), ya = el("a", e.from + "\u2013" + (e.to >= now ? "now" : e.to)); ya.href = base + "history/?y=" + e.from; ya.title = "See what was happening in " + e.from + ", in the History theatre"; yb.append(ya, " ");
+            var yb = el("b", null), ya = el(e.from >= 600 ? "a" : "span", e.from + "\u2013" + (e.to >= now ? "now" : e.to)); if (e.from >= 600) { ya.href = base + "history/?y=" + e.from; ya.title = "See what was happening in " + e.from + ", in the History theatre"; } yb.append(ya, " ");   /* the History theatre starts in 600 */
             var pn = e.polity + (rg && rg.label && rg.label !== e.polity ? " (" + rg.label + ")" : "");
             li.append(yb);
             if (fhref) { var pa = el("a", pn, "lf-era-link"); pa.href = fhref; pa.title = "More about this era and its flag, on the flags page of " + info.countryName; li.append(pa); } else li.append(document.createTextNode(pn));
@@ -2034,7 +2034,10 @@
         if (evs.length) {
           wrap.append(el("h5", "Mass mortality whose area covers " + info.name + (span ? ", " + span[0] + "\u2013" + span[1] : "")));
           var ue = el("ul", null, "lf-eras lf-mort");
-          evs.slice(0, 8).forEach(function (e) { var li = el("li", null, "lf-now-" + e.ty); li.append(el("b", e.f + (e.t !== e.f ? "\u2013" + e.t : "") + " "), document.createTextNode(typeLabel(e.ty) + ": " + e.n)); ue.append(li); });
+          evs.slice(0, 8).forEach(function (e) { var li = el("li", null, "lf-now-" + e.ty), yb = el("b", null), hist = e.f >= 600, ya = el(hist ? "a" : "span", e.f + (e.t !== e.f ? "\u2013" + e.t : "")); yb.append(ya, " "); li.append(yb);
+            if (hist) { ya.href = base + "history/?y=" + e.f; ya.title = "See it on the map, from " + e.f + ", in the History theatre"; var ea = el("a", typeLabel(e.ty) + ": " + e.n, "lf-era-link"); ea.href = base + "history/?y=" + e.f; ea.title = "See where and when it happened, in the History theatre"; li.append(ea); }
+            else li.append(document.createTextNode(typeLabel(e.ty) + ": " + e.n));
+            ue.append(li); });
           if (evs.length > 8) ue.append(el("li", "and " + (evs.length - 8) + " more on the place page", "lf-filed"));
           wrap.append(ue);
         }

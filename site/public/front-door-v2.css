@@ -403,10 +403,13 @@ body.fd2-immersive .fd2-stage::after { border-radius: 0; }
 
 /* the year strip sits in the search bar, right of the filter button (moved there by RecordMap); the history theatre hides it while it is open */
 .fd2-stage .ra-bar-find .ra-time { position: static !important; transform: none !important; left: auto !important; right: auto !important; bottom: auto !important;
-  flex: 0 0 auto; order: 9; align-self: center; max-width: none; margin: 0 0 0 10px; box-sizing: border-box; height: 46px; padding: 0 16px; box-shadow: none; z-index: auto; }
+  flex: 0 0 auto; order: 9; align-self: flex-start; max-width: none; margin: 0 0 0 10px; box-sizing: border-box; height: var(--ra-ctl, 56px); padding: 0 14px; z-index: auto;
+  border-radius: 16px; background: var(--panel, #17212a); box-shadow: 0 1px 2px rgba(10, 20, 26, .06); color: var(--ink-2, #4c5d66); font-size: 14px; }
+.fd2-stage .ra-bar-find .ra-time:hover { border-color: var(--accent, #1f5c6b); }
+.fd2-stage .ra-bar-find .ra-time .ra-ylab-w, .fd2-stage .ra-bar-find .ra-time #ra-yout { font-size: 14px; }
 .fd2-stage .ra-bar-find .ra-time .ra-slider { flex: 0 0 150px; width: 150px; }
 .fd2-stage:has(.ra-th) .ra-bar-find .ra-time { display: none; }
 @media (max-width: 899px) {
-  .fd2-stage .ra-bar-find .ra-time { flex: 1 1 100%; margin: 8px 0 0; height: 40px; justify-content: space-between; }
+  .fd2-stage .ra-bar-find .ra-time { flex: 1 1 100%; margin: 8px 0 0; height: var(--ra-ctl, 56px); justify-content: space-between; }
   .fd2-stage .ra-bar-find .ra-time .ra-slider { flex: 1 1 auto; width: auto; }
 }

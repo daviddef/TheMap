@@ -90,7 +90,7 @@ test("no new third-party request: the tour fetches only this site's own files", 
 test("the What's new entry for the tour points at a page that exists", () => {
   const items = JSON.parse(read("src/data/whats-new.json"));
   const list = Array.isArray(items) ? items : items.items || items.entries;
-  const e = list.find((x) => /story/i.test(x.headline || ""));
+  const e = list.find((x) => /^The story:/i.test(x.headline || ""));
   assert.ok(e, "no What's new entry mentions the story tour");
   assert.ok(["new", "better", "fixed", "research"].includes(e.kind));
   assert.ok(e.headline.length <= 120);

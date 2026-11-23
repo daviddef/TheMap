@@ -189,3 +189,10 @@ test("the search box examples are Croatian places, surnames and stories, with th
     assert.ok(js.includes(s), s);
   assert.ok(!js.includes("my grandmother came from Trieste in 1905"), "the Italian example is gone");
 });
+
+test("the area card keeps its small print in hover tips, not in paragraphs", () => {
+  assert.doesNotMatch(map, /The places above are only where they sit\./);
+  assert.doesNotMatch(map, /Add area draws another and keeps this one\.<\/p>/);
+  assert.match(map, /Big area\. Draw a smaller one to see and add the rest\./);
+  assert.match(map, /Not started: <b>/);
+});

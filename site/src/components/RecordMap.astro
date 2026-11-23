@@ -8561,10 +8561,10 @@ window.addEventListener("load", async function () {
     if (SV && SV.line) h.push('<p class="ra-area-grp">Research group for <b>' + esc(SV.line) + "</b>" + (ns > 1 ? " · " + ns + " areas" : "") + "</p>");
     if (AREA.ov) h.push('<p class="at-sub">' + esc(AREA.ov.note) + '</p>');
     else if (MULTI) h.push('<p class="ra-area-grp">' + M.names.map(esc).join(" · ") + "</p>");
-    else if (!SV) h.push('<p class="at-sub">Not saved yet: use Save on the map to name ' + (ns > 1 ? "them as one group" : "it") + ' and keep ' + (ns > 1 ? "them" : "it") + '. Add area draws another and keeps this one.</p>');
+    else if (!SV) h.push('<p class="at-sub" title="Add area draws another shape and keeps this one">Not saved yet. Use Save on the map to keep ' + (ns > 1 ? "them" : "it") + '.</p>');
     if (!MULTI && !AREA.ov) h.push(areaShapeRows(R));
-    h.push('<p class="ra-area-sum"><b>' + nfl(R.places.length) + "</b> " + T(R.places.length === 1 ? "catalogued place" : "catalogued places") + " · <b>" + nfl(vtot) + "</b> " + T(vtot === 1 ? "volume" : "volumes") +
-           " · <b>" + nfl(R.arch.length) + "</b> " + T(R.arch.length === 1 ? "archive" : "archives") + ". " + T("Colours show") + " <b>" + esc(line || T("your research")) + "</b>.</p>");
+    h.push('<p class="ra-area-sum" title="' + esc(T("Colours show") + " " + (line || T("your research"))) + '"><b>' + nfl(R.places.length) + "</b> " + T(R.places.length === 1 ? "catalogued place" : "catalogued places") + " · <b>" + nfl(vtot) + "</b> " + T(vtot === 1 ? "volume" : "volumes") +
+           " · <b>" + nfl(R.arch.length) + "</b> " + T(R.arch.length === 1 ? "archive" : "archives") + '</p>');
     h.push('<div class="ra-area-tally"><span class="ra-area-tl">Places:</span>' + ["done", "busy", "list", "none"].map(function (k) {
       return '<span><i style="background:' + RC_COL[k] + '"></i>' + RC_LAB[k] + " <b>" + nfl(groups[k].length) + "</b></span>";
     }).join("") + "</div>");
@@ -8702,7 +8702,7 @@ window.addEventListener("load", async function () {
     var box = document.getElementById("ra-area-add"); if (!box || !AR()) return;
     var P = window.raProgress, line = (P.lines().filter(function (l) { return l.active; })[0] || {}).name || "my research";
     var c = areaCandidates(), R = AR();
-    var cap = R.capped ? " Only the " + AREA_CAP + " places with the most books were read; draw a smaller area for the rest." : "";
+    var cap = R.capped ? " Big area: only the " + AREA_CAP + " places with the most books were read." : "";
     if (AREA.added) {
       box.innerHTML = '<p class="ra-area-ok">Added ' + nfl(AREA.added.length) + " to the list for <b>" + esc(line) + '</b>. <button type="button" data-a="undo">Undo</button></p>';
       return;
@@ -8718,10 +8718,9 @@ window.addEventListener("load", async function () {
         '<button type="button" data-a="yes">Yes, add them</button><button type="button" data-a="no">Cancel</button></p>';
       return;
     }
-    box.innerHTML = '<p class="at-sub ra-area-what">' + (R.place ? "Not started here: <b>" + what + "</b>." : "Not started in this area: <b>" + what + "</b>. The places above are only where they sit.") + "</p>" +
+    box.innerHTML = '<p class="at-sub ra-area-what"' + (R.place ? "" : ' title="The places above are only where these sit"') + '>Not started: <b>' + what + "</b></p>" +
       '<button type="button" class="ra-area-addb" data-a="add">Add ' + nfl(n) + (n === c.length ? "" : " of them") + " to " + esc(line) + "'s list</button>" +
-      (c.length > ADD_CAP ? '<p class="at-sub">One click adds at most ' + nfl(ADD_CAP) + ". Draw a smaller area for the rest.</p>" : "") +
-      (cap ? '<p class="at-sub">' + cap.trim() + "</p>" : "");
+      ((c.length > ADD_CAP || cap) ? '<p class="at-sub" title="' + (c.length > ADD_CAP ? "One click adds at most " + nfl(ADD_CAP) + ". " : "") + (cap ? cap.trim() : "") + '">Big area. Draw a smaller one to see and add the rest.</p>' : "");
   }
   function areaDoAdd() {
     var c = areaCandidates().slice(0, ADD_CAP), P = window.raProgress;

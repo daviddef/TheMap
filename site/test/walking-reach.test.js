@@ -137,9 +137,8 @@ test("the shelf's \"See the list\" opens the area screen for the place, the view
 });
 
 /* THE PLACE CARD ON v2 is the area screen's look: one strip, the rest on the place page, the body drawn by the area code */
-test("on v2 the place card shows one who-held strip, links to the place page for the rest, and draws its body with the area code", () => {
+test("on v2 the place card shows one who-held strip, leaves the rest to the place page (the page icon), and draws its body with the area code", () => {
   assert.match(map, /if \(TSV2\) \{\s*var main = regs\.filter\(function \(r\) \{ return r\.id !== d\.region; \}\)\[0\] \|\| regs\[0\];/);
-  assert.match(map, /"place\/" \+ esc\(d\.id\) \+ '\/#held">'/, "links to the table on the place page");
   assert.match(map, /if \(TSV2\) \{ h\.push\('<div class="ra-place-body" id="ra-place-body"><\/div>'\); return h\.join\(""\); \}/);
   assert.match(map, /if \(TSV2\) placeBody\(d\);/);
   assert.match(map, /if \(TSV2\) placeBody\(cache\[at\]\);/, "and again when the card is re-drawn for a year");
@@ -314,9 +313,8 @@ test("every list in a v2 card shares one type scale, and each access icon explai
   assert.match(map, /unsurveyed: \["Not checked yet", "Nobody has looked at what this source holds/);
 });
 
-test("the link to the full table of who held a place is a button on v2", () => {
-  const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
-  assert.match(css, /\.fd2-stage \.ra-held-more a \{ display: inline-flex;[\s\S]*?border: 1px solid var\(--rule-strong/);
+test("the card has no «full table of who held it» button: the page icon is that door", () => {
+  assert.doesNotMatch(map, /class="ra-held-more"/);
 });
 
 test("the Visiting header is one line: the note and the walk's hours share a row, and 'working out the walk' is a pulse, not a line", () => {
@@ -347,5 +345,12 @@ test("every foldable section of a v2 card carries the same chevron and no colour
 test("the count in a foldable card section's head sits at the right, in one style", () => {
   const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
   assert.match(css, /details\.ra-area-cov > summary > b, \.fd2-stage details\.ra-area-rd > summary > b, \.fd2-stage details\.ra-in-card > summary\.lab > b \{ margin-left: auto;/);
-  assert.match(map, /"<span>" \+ esc\(T\("Visiting"\)\) \+ "<\/span><b>" \+ count \+ "<\/b><\/summary>"/);
+  assert.match(map, /"<span>" \+ esc\(T\("Visiting"\)\) \+ "<\/span>"[\s\S]*?"<b>" \+ count \+ "<\/b><\/summary>"/);
+});
+
+test("the walk's note sits in the Visiting head, not on a line of its own", () => {
+  const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
+  assert.match(map, /class="ra-sum-note' \+ \(ld \? " ra-sum-ld" : ""\)/);
+  assert.match(map, /if \(h\[0\]\) h\[0\] = bad \?/);
+  assert.match(css, /^\.fd2-stage \.ra-sum-note \{/m);
 });

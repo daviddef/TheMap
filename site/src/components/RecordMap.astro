@@ -2155,8 +2155,7 @@ window.addEventListener("load", async function () {
       var main = regs.filter(function (r) { return r.id !== d.region; })[0] || regs[0];
       h.push('<p class="at-lab">' + esc(T("Who held this ground")) + " \u00b7 " + esc(String(main.label).split(" \u2014 ")[0]) + "</p>");
       h.push(eraBand(main, d.country));
-      h.push('<p class="ra-held-more"><a href="' + BASE + "place/" + esc(d.id) + '/#held">' +
-             esc(regs.length > 1 ? T("The other region and the full table of who held it") : T("The full table of who held it")) + " \u2197</a></p>");
+      /* no «full table of who held it» button: the page icon at the top right of the card is that door */
       return h.join("");
     }
     /* WHY TWO BANDS FOR ONE PLACE. David, looking at Senj under the Kvarner and the Military
@@ -4338,8 +4337,16 @@ window.addEventListener("load", async function () {
       pane.hidden = true;
       var mount = panel.querySelector("#ra-place-body");
       if (visitOld) visitOld.remove();
+      /* THE WALK'S NOTE JOINS THE HEAD. David: «can those 2 lines merge?». «Within a 6 hour walk — 8 places» sits in the section's own head line, after its
+         name; only a failure message (the terrain did not load) keeps a line of its own, and while the walk is being worked out the note pulses. */
+      var nt = document.createElement("div"); nt.innerHTML = h[0] || "";
+      var ld = !!nt.querySelector(".ra-reach-ld"), bad = [].map.call(nt.querySelectorAll(".ra-reach-s:not(.ra-reach-ld)"), function (x) { return x.textContent; }).join(" ");
+      [].forEach.call(nt.querySelectorAll(".ra-reach-s"), function (x) { x.remove(); });
+      var noteTxt = nt.textContent.trim().replace(/\.$/, "");
+      if (h[0]) h[0] = bad ? '<p class="at-sub">' + esc(bad) + "</p>" : "";
       if (mount) mount.insertAdjacentHTML("afterend", '<details class="ra-check-b ra-in-card ra-visit"' + (visitOpen ? " open" : "") + '><summary class="lab">' +
-        "<span>" + esc(T("Visiting")) + "</span><b>" + count + "</b></summary>" + h.join("").replace(/<ul>/g, '<ul class="ra-vl">') + "</details>");
+        "<span>" + esc(T("Visiting")) + "</span>" + (noteTxt ? '<span class="ra-sum-note' + (ld ? " ra-sum-ld" : "") + '">' + esc(noteTxt) + "</span>" : "") + "<b>" + count + "</b></summary>" +
+        h.join("").replace(/<ul>/g, '<ul class="ra-vl">') + "</details>");
       drawCheckPins();
       return;
     }

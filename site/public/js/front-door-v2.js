@@ -164,7 +164,8 @@
   panel.insertBefore(fold, panel.firstChild);
 
   /* ---------- counts, counted up once ---------- */
-  function fmt(n) { return Math.round(n).toLocaleString("en"); }
+  /* millions are written short (1.43M): "1,431,206" is nine characters and does not fit a quarter of the card */
+  function fmt(n) { return n >= 1e6 ? (n / 1e6).toFixed(2) + "M" : Math.round(n).toLocaleString("en"); }
   function countUp() {
     var vals = { places: +stage.getAttribute("data-places"), volumes: +stage.getAttribute("data-volumes"), countries: +stage.getAttribute("data-countries"), archives: +stage.getAttribute("data-archives") };
     [].forEach.call(stats.querySelectorAll("[data-n]"), function (b) {

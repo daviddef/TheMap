@@ -1423,6 +1423,200 @@ window.addEventListener("load", async function () {
     return (rg.archives || []).filter(function (cc) { return cc !== home; });
   }
 
+  /* ---- THE TIME STRIP (the new front door only) -------------------------
+     The band below is the ground's own history. On the new front door it also answers «what about 1951?»: a ruler under the band takes a year
+     (drag it, or the arrow keys), the year is written into the search box after the place («senj 1951»), the era that covers it lights, its
+     detail and flags open, and the shelf can be turned on for those years. Mass-mortality events sit as marks above the band on the same scale;
+     touching one asks for its years. The year lives in the box and nowhere else, so a link, a reload and the shelf all agree.
+
+     THE SCALE. Before 1650 a table that starts before 1500 gets 14% of the width, or the 1200s fill the strip and the centuries a family
+     actually left registers in are squeezed to nothing. A «//» says so on the ruler. */
+  var TSV2 = !!document.getElementById("fd2-stage"), TS_END = 2026, TSMIN = 1500, TSAX = {}, TSEVT = null, tsDrag = null;
+  function tsAxis(a) {
+    var br = a < 1500 ? [1650, 0.14] : null;
+    return {
+      a: a, br: br,
+      x: function (y) {
+        y = Math.max(a, Math.min(TS_END, y));
+        if (br && y < br[0]) return (y - a) / (br[0] - a) * br[1];
+        if (br) return br[1] + (y - br[0]) / (TS_END - br[0]) * (1 - br[1]);
+        return (y - a) / (TS_END - a);
+      },
+      inv: function (f) {
+        f = Math.max(0, Math.min(1, f));
+        if (br && f < br[1]) return a + f / br[1] * (br[0] - a);
+        if (br) return br[0] + (f - br[1]) / (1 - br[1]) * (TS_END - br[0]);
+        return a + f * (TS_END - a);
+      }
+    };
+  }
+  /* the era table's end is TS_END for «still running»: count it as covering the last year too */
+  function tsEraHas(e, a, b) { return e.from <= b && (e.to > a || (e.to >= TS_END && b >= TS_END)); }
+  function tsYears() { return yearsIn(qbox.value).yrs; }
+  function tsPlaceName() { var id = Q.get("at"), c = id && cache[id]; return (c && c.name) || ""; }
+  /* Write the year (or the range) after the place in the box, without opening the suggestion list or closing the card. */
+  function tsWrite(a, b) {
+    var base = yearsIn(qbox.value).text || tsPlaceName();
+    if (!base) return;
+    qbox.value = a == null ? base : base + " " + (b != null && b !== a ? a + "-" + b : a);
+    setQ("q", qbox.value.trim());
+    panelQ = qbox.value;
+    apply(true);
+    if (window.raShelfPing) window.raShelfPing();
+    tsPaintAll(true);
+  }
+  function tsPaintBand(tl, ys, commit) {
+    var X = TSAX[tl.id]; if (!X) return;
+    var mk = tl.querySelector(".ra-ts-mk"), rg = tl.querySelector(".ra-ts-rg"), ln = tl.querySelector(".ra-ts-line"), rl = tl.querySelector(".ra-ts-ruler");
+    var segs = tl.querySelectorAll(".ra-tl-seg");
+    if (!mk || !rl) return;
+    tl.classList.toggle("ra-ts-has", !!ys);
+    if (!ys) {
+      mk.hidden = rg.hidden = ln.hidden = true; rl.removeAttribute("aria-valuenow"); rl.removeAttribute("aria-valuetext");
+      [].forEach.call(segs, function (b) { b.classList.remove("ra-ts-cur"); });
+      return;
+    }
+    var a = ys[0], b = ys[1], xa = X.A.x(a), xb = X.A.x(b);
+    ln.hidden = false; ln.style.left = xa * 100 + "%";
+    mk.hidden = false;
+    if (b !== a) {
+      rg.hidden = false; rg.style.left = xa * 100 + "%"; rg.style.width = Math.max(0.006, xb - xa) * 100 + "%";
+      mk.style.left = (xa + xb) / 2 * 100 + "%"; mk.classList.add("ra-ts-rng"); mk.firstChild.textContent = a + "–" + b;
+    } else {
+      rg.hidden = true; mk.classList.remove("ra-ts-rng"); mk.style.left = xa * 100 + "%"; mk.firstChild.textContent = String(a);
+    }
+    var hit = -1;
+    [].forEach.call(segs, function (sg, i) {
+      var cur = X.eras[i] && tsEraHas(X.eras[i], a, b);
+      sg.classList.toggle("ra-ts-cur", !!cur);
+      if (cur && hit < 0) hit = i;
+    });
+    rl.setAttribute("aria-valuenow", String(a));
+    rl.setAttribute("aria-valuetext", a + (hit > -1 && X.eras[hit] ? ", " + X.eras[hit].polity : ""));
+    /* the era that covers the year opens its detail (flags, who holds the paper, where to look); on release, not on every drag step */
+    if (commit && hit > -1) bandShow(tl, hit);
+  }
+  function tsPaintAll(commit) {
+    var ys = tsDrag || tsYears();
+    [].forEach.call(panel.querySelectorAll(".ra-tl"), function (tl) { tsPaintBand(tl, ys, commit); });
+    if (commit || !tsDrag) tsActs(tsYears());
+    tsRing(ys);
+    [].forEach.call(panel.querySelectorAll(".ra-ts-evb"), function (b) {
+      var e = TSEVT && TSEVT.list[+b.dataset.i], on = !!(e && ys && e.f <= ys[1] && e.t >= ys[0]);
+      b.classList.toggle("ra-ts-on", on);
+    });
+  }
+  /* THE MAP ANSWERS TOO: a dashed ring at the place in the colour of whoever held it that year, with the year and the name beside it */
+  var tsRingLayer = null;
+  function tsRing(ys) {
+    if (tsRingLayer) { map.removeLayer(tsRingLayer); tsRingLayer = null; }
+    var id = Q.get("at"), c = id && cache[id], tl = panel.querySelector(".ra-tl-v2"), X = tl && TSAX[tl.id];
+    if (!ys || !c || c.lat == null || !X) return;
+    var e = X.eras.filter(function (er) { return tsEraHas(er, ys[0], ys[1]); })[0];
+    if (!e) return;
+    var col = e.regime ? getComputedStyle(document.documentElement).getPropertyValue("--r-" + String(e.regime).replace(/[^a-z0-9-]/gi, "")).trim() : "";
+    var yt = ys[0] === ys[1] ? String(ys[0]) : ys[0] + "–" + ys[1];
+    tsRingLayer = L.circleMarker([c.lat, c.lon], { radius: 21, color: col || "#1f5c6b", weight: 3, dashArray: "6 4", fill: false, interactive: false })
+      .bindTooltip(yt + " · " + (e.polity || ""), { permanent: true, direction: "right", offset: [22, 0], className: "ra-ts-ringtip" })
+      .addTo(map);
+  }
+  /* what to do with the year: the shelf for those years, the whole era, clear it; and the deeper pages once a year has been asked */
+  function tsActs(ys) {
+    var tl = panel.querySelector(".ra-tl"); if (!tl) return;
+    var box = tl.querySelector(".ra-ts-act");
+    if (!box) { box = document.createElement("div"); box.className = "ra-ts-act"; tl.appendChild(box); }
+    box.textContent = "";
+    box.hidden = !ys;
+    if (!ys) return;
+    var X = TSAX[tl.id], yt = ys[0] === ys[1] ? String(ys[0]) : ys[0] + "–" + ys[1];
+    function btn(txt, cls, fn) { var b = document.createElement("button"); b.type = "button"; b.textContent = txt; if (cls) b.className = cls; b.addEventListener("click", fn); box.appendChild(b); }
+    btn("Registers for " + yt, "ra-ts-p", function () { if (window.raShelfOn) window.raShelfOn(); });
+    var one = X && ys[0] === ys[1] ? X.eras.filter(function (e) { return tsEraHas(e, ys[0], ys[0]); })[0] : null;
+    if (one && Math.min(one.to, TS_END) - one.from > 1)
+      btn("The whole era, " + one.from + "–" + Math.min(one.to, TS_END), "", function () { tsWrite(one.from, Math.min(one.to, TS_END)); });
+    btn("Clear the year", "", function () { tsWrite(null); });
+    var id = Q.get("at"), c = id && cache[id], cc = c && String(c.country || "").toUpperCase();
+    var deep = [["Flags", FLAG_SLUG[cc] ? BASE + "flags/" + FLAG_SLUG[cc] + "-flags/" : ""],
+                ["History map", BASE + "history/?y=" + ys[0]],
+                ["Place page", id ? BASE + "place/" + id + "/" : ""],
+                ["Mass mortality", BASE + "history/?chapter=mass-mortality"]].filter(function (d) { return d[1]; });
+    var dv = document.createElement("div"); dv.className = "ra-ts-deep";
+    dv.innerHTML = '<span class="ra-ts-deeplab">Go deeper</span>' + deep.map(function (d) { return '<a href="' + esc(d[1]) + '">' + esc(d[0]) + "</a>"; }).join("");
+    box.appendChild(dv);
+  }
+  function tsYearAt(rl, ev) {
+    var tl = rl.closest(".ra-tl"), X = TSAX[tl && tl.id]; if (!X) return null;
+    var r = rl.getBoundingClientRect();
+    return Math.max(TSMIN, Math.round(X.A.inv((ev.clientX - r.left) / Math.max(1, r.width))));
+  }
+  document.addEventListener("pointerdown", function (ev) {
+    var rl = ev.target.closest && ev.target.closest(".ra-ts-ruler"); if (!rl) return;
+    var y = tsYearAt(rl, ev); if (y == null) return;
+    tsDrag = [y, y]; tsDrag.rl = rl;
+    try { rl.setPointerCapture(ev.pointerId); } catch (e) {}
+    tsPaintAll(false);
+  });
+  document.addEventListener("pointermove", function (ev) {
+    if (!tsDrag) return;
+    var y = tsYearAt(tsDrag.rl, ev); if (y == null) return;
+    var rl = tsDrag.rl; tsDrag = [y, y]; tsDrag.rl = rl;
+    tsPaintAll(false);
+  });
+  function tsUp() { if (!tsDrag) return; var y = tsDrag[0]; tsDrag = null; tsWrite(y, y); }
+  document.addEventListener("pointerup", tsUp);
+  document.addEventListener("pointercancel", tsUp);
+  var tsKeyT = 0;
+  document.addEventListener("keydown", function (ev) {
+    var rl = ev.target.closest && ev.target.closest(".ra-ts-ruler"); if (!rl) return;
+    var d = { ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1, PageDown: -10, PageUp: 10 }[ev.key];
+    if (d == null) return;
+    ev.preventDefault();
+    var tl = rl.closest(".ra-tl"), X = TSAX[tl.id], cur = tsDrag || tsYears(), step = Math.abs(d) > 1 ? 1 : (ev.shiftKey ? 10 : 1);
+    var y = Math.max(TSMIN, X.A.a, Math.min(TS_END, (cur ? cur[0] : 1900) + d * step));
+    tsDrag = [y, y]; tsDrag.rl = rl; tsPaintAll(false);
+    clearTimeout(tsKeyT); tsKeyT = setTimeout(function () { tsDrag = null; tsWrite(y, y); }, 450);
+  });
+
+  /* the mass-mortality events for this ground, as marks above the band on the same scale; touching one asks for its years and opens its card */
+  function tsEventLane(hits, pill, box) {
+    var tl = panel.querySelector(".ra-tl-v2"), X = tl && TSAX[tl.id];
+    if (!X) return;
+    var old = tl.querySelector(".ra-ts-evl"); if (old) old.remove();
+    var list = hits.filter(function (e) { return e.t >= X.A.a; });
+    TSEVT = { list: list, pill: pill, box: box };
+    if (!list.length) return;
+    var lane = document.createElement("div"), lanes = [];
+    lane.className = "ra-ts-evl";
+    list.forEach(function (e, i) {
+      var x0 = X.A.x(e.f), x1 = Math.max(X.A.x(Math.min(e.t, TS_END)), x0 + 0.02), ln = 0;
+      while (lanes[ln] != null && lanes[ln] > x0 - 0.006) ln++;
+      lanes[ln] = x1;
+      var b = document.createElement("button"), yrs = e.f === e.t ? String(e.f) : e.f + "–" + (e.t >= TS_END ? "present" : e.t);
+      b.type = "button"; b.className = "ra-ts-evb k-" + e.ty; b.dataset.i = i; b.dataset.ev = hits.indexOf(e);
+      b.style.left = x0 * 100 + "%"; b.style.width = (x1 - x0) * 100 + "%"; b.style.top = ln * 10 + "px";
+      b.title = e.n + ", " + yrs; b.setAttribute("aria-label", e.n + ", " + yrs + ". Shows it in the list below.");
+      lane.appendChild(b);
+    });
+    lane.style.height = Math.max(1, lanes.length) * 10 + "px";
+    tl.insertBefore(lane, tl.querySelector(".ra-tl-band"));
+    tsPaintAll(false);
+  }
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest(".ra-ts-evb"); if (!b || !TSEVT) return;
+    var e = TSEVT.list[+b.dataset.i]; if (!e) return;
+    var box = TSEVT.box, pill = TSEVT.pill, idxEv = b.dataset.ev;
+    if (e.t >= TSMIN) { var lo = Math.max(e.f, TSMIN), hi = Math.min(e.t, TS_END); tsWrite(lo, hi > lo ? hi : null); }
+    /* the panel may have been redrawn by the write: use whatever box is there now */
+    var nb = (TSEVT && TSEVT.box) || box, np = (TSEVT && TSEVT.pill) || pill;
+    nb.hidden = false; np.setAttribute("aria-expanded", "true");
+    var li = nb.querySelector('li[data-ev="' + idxEv + '"]');
+    if (li) {
+      var dt = li.closest("details"); if (dt) dt.open = true;
+      li.classList.remove("ra-ts-flash"); void li.offsetWidth; li.classList.add("ra-ts-flash");
+      li.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  });
+
   var bandN = 0;
   /* `grouped` — this band shares one info block with the band above it, so
      it emits no detail panel of its own. See heldBy(). */
@@ -1434,7 +1628,9 @@ window.addEventListener("load", async function () {
 
     var uid = "ra-tl-" + (++bandN);
     var first = +eras[0].from, last = +eras[eras.length - 1].to;
-    var h = ['<div class="ra-tl" id="' + uid + '">'];
+    var A = TSV2 ? tsAxis(first) : null;
+    if (A) TSAX[uid] = { A: A, eras: eras.map(function (e) { return { from: +e.from, to: +e.to, polity: e.polity, regime: e.regime }; }) };
+    var h = ['<div class="ra-tl' + (A ? " ra-tl-v2" : "") + '" id="' + uid + '">'];
 
     h.push('<div class="ra-tl-band" role="tablist" aria-label="' +
            esc(T("Who held this ground")) + '">');
@@ -1455,21 +1651,35 @@ window.addEventListener("load", async function () {
       var tint = e.regime ? "var(--r-" + String(e.regime).replace(/[^a-z0-9-]/gi, "") + ")" : "";
       h.push('<button type="button" role="tab" class="ra-tl-seg' +
              (held ? "" : " ra-tl-seg-bare") + '"' +
-             (tint ? ' style="--seg:' + tint + ';flex-grow:' + Math.max(yrs, 1) + '"' : "") +
+             (A ? ' style="' + (tint ? "--seg:" + tint + ";" : "") + "left:" + (A.x(+e.from) * 100).toFixed(3) + "%;width:" + ((A.x(Math.min(+e.to, TS_END)) - A.x(+e.from)) * 100).toFixed(3) + '%"'
+                : tint ? ' style="--seg:' + tint + ';flex-grow:' + Math.max(yrs, 1) + '"' : "") +
              ' id="' + uid + '-t' + i + '"' +
              ' aria-controls="' + uid + '-p" aria-selected="' +
              (i === eras.length - 1 ? "true" : "false") + '"' +
              ' tabindex="' + (i === eras.length - 1 ? "0" : "-1") + '"' +
              ' data-i="' + i + '"' +
-             (tint ? "" : ' style="flex-grow:' + Math.max(yrs, 1) + '"') +
+             (tint || A ? "" : ' style="flex-grow:' + Math.max(yrs, 1) + '"') +
              ' title="' + esc(e.from + "\u2013" + e.to + " \u2014 " + e.polity) + '">' +
              '<span class="ra-tl-y">' + e.from + "</span>" +
              '<span class="ra-tl-p">' + esc(e.polity) + "</span>" +
              "</button>");
     });
+    if (A) h.push('<i class="ra-ts-line" hidden></i>');
     h.push("</div>");
-    h.push('<p class="ra-tl-axis"><span>' + first + "</span><span>" +
-           last + "</span></p>");
+    if (A) {
+      var tk = [{ y: first, c: "l" }];
+      (A.br ? [1700, 1800, 1900, 2000] : [1900, 1950, 2000]).forEach(function (y) { var x = A.x(y); if (x > 0.1 && x < 0.9) tk.push({ y: y }); });
+      tk.push({ y: TS_END, c: "r" });
+      h.push('<div class="ra-ts-ruler" tabindex="0" role="slider" aria-label="Year, ' + first + " to " + TS_END +
+             '. Arrow keys move one year, shift ten. The year is written after the place in the search box." aria-valuemin="' + Math.max(first, TSMIN) +
+             '" aria-valuemax="' + TS_END + '">' +
+             tk.map(function (t) { return '<span class="' + (t.c || "") + '" style="left:' + (A.x(t.y) * 100).toFixed(2) + '%">' + t.y + "</span>"; }).join("") +
+             (A.br ? '<em style="left:' + (A.br[1] * 100).toFixed(2) + '%" title="The scale tightens before ' + A.br[0] + '">//</em>' : "") +
+             '<i class="ra-ts-rg" hidden></i><b class="ra-ts-mk" hidden><span></span></b></div>');
+    } else {
+      h.push('<p class="ra-tl-axis"><span>' + first + "</span><span>" +
+             last + "</span></p>");
+    }
     if (!grouped)
       h.push('<div class="ra-tl-detail" id="' + uid + '-p" role="tabpanel"' +
              ' aria-live="polite"></div>');
@@ -2952,7 +3162,7 @@ window.addEventListener("load", async function () {
           (e.open ? '<p class="ra-mn-o">' + esc(e.open) + '</p>' : "") +
           '<p class="ra-mn-ty">' + esc(full) + " \u00b7 est. deaths " + esc(mortTollTxt(e.toll)) + "</p>" +
           (rec ? '<p class="ra-mn-g">Where to look</p><p class="ra-mn-w">' + esc(rec) + '</p>' + recHtml + archHtml : "");
-        return '<li class="ra-mn-c k-' + esc(e.ty) + '"><div class="ra-mn-t"><b>' + esc(e.n) + '</b><span class="ra-mn-y">' + esc(yrs) + '</span></div>' +
+        return '<li class="ra-mn-c k-' + esc(e.ty) + '" data-ev="' + hits.indexOf(e) + '"><div class="ra-mn-t"><b>' + esc(e.n) + '</b><span class="ra-mn-y">' + esc(yrs) + '</span></div>' +
           '<p class="ra-mn-m"><span>' + esc(MORT_SHORT[e.ty] || e.ty) + '</span>' + (tollS ? '<span>' + esc(tollS) + ' deaths</span>' : "") + '</p>' +
           line +
           (inner ? '<details class="ra-mn-r"><summary>Details</summary>' + inner + '</details>' : "") + '</li>';
@@ -2977,6 +3187,7 @@ window.addEventListener("load", async function () {
       var mark = head.querySelector(".at-placemark");
       head.insertBefore(pill, mark || null);
       head.insertAdjacentElement("afterend", box);
+      if (TSV2) tsEventLane(hits, pill, box);
     });
   }
   async function open(p) {
@@ -2989,9 +3200,11 @@ window.addEventListener("load", async function () {
     }
     setQ("at", p.i);
     panelAt = p.i; panelQ = qbox.value;
+    TSEVT = null;
     panel.innerHTML = render(d);
     if (window.raShelfPing) window.raShelfPing();
     bandsInit(panel);
+    if (TSV2) tsPaintAll(true);
     paintIcoFlags(panel);
     buildCheck(d, drawHood(d));
     drawFlagResForPlace(d);
@@ -8556,6 +8769,7 @@ window.addEventListener("load", async function () {
     map.on("moveend", function () { if (on) queue(); });
     qbox.addEventListener("input", function () { if (on) queue(); });
     window.raShelfPing = function () { if (on) queue(); };
+    window.raShelfOn = function () { setOn(true); };
     if (btn) { btn.setAttribute("aria-pressed", String(on)); btn.classList.toggle("on", on); }
     if (on) queue();
   })();

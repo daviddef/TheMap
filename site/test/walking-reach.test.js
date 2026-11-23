@@ -354,3 +354,7 @@ test("the walk's note sits in the Visiting head, not on a line of its own", () =
   assert.match(map, /if \(h\[0\]\) h\[0\] = bad \?/);
   assert.match(css, /^\.fd2-stage \.ra-sum-note \{/m);
 });
+
+test("the v2 place card names only the region above its who-held band, not the words «Who held this ground»", () => {
+  assert.match(map, /if \(TSV2\) \{\s*var main = [\s\S]*?h\.push\('<p class="at-lab">' \+ esc\(String\(main\.label\)/);
+});

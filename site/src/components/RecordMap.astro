@@ -2153,7 +2153,8 @@ window.addEventListener("load", async function () {
        strip, from a region that page does not, and says where the rest is. The era's own text opens when a segment is tapped, not before. */
     if (TSV2) {
       var main = regs.filter(function (r) { return r.id !== d.region; })[0] || regs[0];
-      h.push('<p class="at-lab">' + esc(T("Who held this ground")) + " \u00b7 " + esc(String(main.label).split(" \u2014 ")[0]) + "</p>");
+      /* the band says whose ground it was; only the region it describes is named */
+      h.push('<p class="at-lab">' + esc(String(main.label).split(" \u2014 ")[0]) + "</p>");
       h.push(eraBand(main, d.country));
       /* no «full table of who held it» button: the page icon at the top right of the card is that door */
       return h.join("");

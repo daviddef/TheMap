@@ -77,7 +77,8 @@
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !root.hidden && root.contains(document.activeElement)) close(); });
 
   /* The first visit, on the plain home page, with nobody's search or view in the address: open once, then only on request. Never in an automated browser, so a test of the map is not met by a panel on top of it. */
-  if (!seen() && !navigator.webdriver && !location.search && (!location.hash || location.hash === "#") && window.innerWidth >= 900) setTimeout(open, 900);
+  /* the new front door (/v2/) has its own card as the way in, so the panel does not open over it on a first visit */
+  if (!seen() && !document.getElementById("fd2-stage") && !navigator.webdriver && !location.search && (!location.hash || location.hash === "#") && window.innerWidth >= 900) setTimeout(open, 900);
 
   function init() {
     var S = window.raAtlasSummary, E = window.raStory, el = E.el;

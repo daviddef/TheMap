@@ -31,6 +31,7 @@
     tree: '<svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="5" r="2.5"/><circle cx="6" cy="20" r="2.5"/><circle cx="20" cy="20" r="2.5"/><path d="M13 7.5V13M13 13 6 17.5M13 13l7 4.5"/></svg>',
     time: '<svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="13" r="9"/><path d="M13 7v6l4 3"/></svg>',
     read: '<svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h10l5 5v13H6z"/><path d="M9 13h9M9 17h9M9 9h4"/></svg>',
+    resume: '<svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h12v18l-6-4-6 4z"/><path d="M11 10l3 2-3 2z" fill="currentColor"/></svg>',
     share: '<svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 14v7h16v-7M13 4v12M8 9l5-5 5 5"/></svg>'
   };
   /* kind: which hue the door wears (the same four the Atlas uses: teal, brass, brick, green) */
@@ -121,7 +122,8 @@
     '<div><b data-n="countries">0</b><span>countries</span></div><div><b data-n="archives">0</b><span>archives</span></div>');
   var more = el("p", "fd2-more",
     '<a href="' + url("/my-research/") + '">My research</a><a href="' + url("/whats-new/") + '">What\'s new</a><a href="' + url("/providers/") + '">Where to write</a><a href="' + url("/help/") + '">Help</a>');
-  card.append(head, tiles, guide, stats, more);
+  var mine = el("p", "fd2-mine"); mine.hidden = true;
+  card.append(head, tiles, guide, stats, more, mine);
   empty.textContent = ""; empty.appendChild(card);
 
   function showGuide(id) {
@@ -162,6 +164,10 @@
     fold.querySelector(".fd2-fold-x").textContent = f ? "+" : "–";
   });
   panel.insertBefore(fold, panel.firstChild);
+
+  function unfold() {
+    panel.classList.remove("fd2-folded"); fold.setAttribute("aria-expanded", "true"); fold.setAttribute("aria-label", "Fold the card away"); fold.querySelector(".fd2-fold-x").textContent = "–";
+  }
 
   /* ---------- counts, counted up once ---------- */
   /* millions are written short (1.43M): "1,431,206" is nine characters and does not fit a quarter of the card */
@@ -255,7 +261,8 @@
   if (body && window.MutationObserver) {
     new MutationObserver(function () {
       var has = !body.hidden; stage.classList.toggle("fd2-has-result", has);
-      if (has) { panel.scrollTop = 0; panel.classList.remove("fd2-folded"); fold.setAttribute("aria-expanded", "true"); fold.querySelector(".fd2-fold-x").textContent = "–"; }
+      if (has) { panel.scrollTop = 0; unfold(); }
+      else if (!q || !q.value) unfold();   /* back at the start: the card comes back with it, so there is always a way in */
     }).observe(body, { attributes: true, attributeFilter: ["hidden"] });
   }
   /* a story on the map has the map's attention: the card steps aside for it and comes back when the story is cleared */
@@ -268,5 +275,62 @@
     }).observe(find, { attributes: true, attributeFilter: ["class"] });
   }
   /* the guide's own view goes away when the box has a search in it */
-  if (q) q.addEventListener("input", function () { if (q.value && !guide.hidden) { guide.hidden = true; tiles.hidden = false; head.hidden = false; } });
+  if (q) q.addEventListener("input", function () {
+    if (q.value && !guide.hidden) { guide.hidden = true; tiles.hidden = false; head.hidden = false; }
+    /* the box was emptied: the way back to the start is the card itself, not a pill to find */
+    if (!q.value && !(find && find.classList.contains("ra-story-on"))) setTimeout(function () { if (!q.value && body && body.hidden) unfold(); }, 400);
+  });
+
+  /* ---------- the "+" in the box: a photo, a document, or an example ---------- */
+  var EXAMPLE = "My great-grandfather Ivan came from Gallignana to Hamilton around 1905";
+  var plus = find && find.querySelector(".ra-q-add"), fileIn = find && find.querySelector('input[type="file"]');
+  if (plus) {
+    var menu = el("div", "fd2-plus"); menu.hidden = true; menu.setAttribute("role", "menu");
+    function item(label, sub, fn) {
+      var b = el("button", "fd2-plus-i", "<b></b><span></span>"); b.type = "button"; b.setAttribute("role", "menuitem");
+      b.firstChild.textContent = label; b.lastChild.textContent = sub;
+      b.addEventListener("click", function () { menu.hidden = true; fn(); });
+      menu.appendChild(b);
+    }
+    item("Add a photo or document", "a baptism, a letter, a passport", function () { if (fileIn) fileIn.click(); });
+    item("Try an example", "watch the map draw a story", function () { fillBox(EXAMPLE, false); });
+    item("More room to write", "open the story panel", function () { if (window.raStoryBox) window.raStoryBox.open(); });
+    find.appendChild(menu);
+    plus.addEventListener("click", function (e) { e.stopImmediatePropagation(); e.preventDefault(); menu.hidden = !menu.hidden; if (!menu.hidden) { var f = menu.querySelector("button"); if (f) f.focus(); } }, true);
+    plus.setAttribute("aria-haspopup", "menu"); plus.setAttribute("aria-label", "Add a photo or document, or try an example"); plus.title = "Add a photo or document, or try an example";
+    document.addEventListener("click", function (e) { if (!menu.hidden && !menu.contains(e.target) && e.target !== plus) menu.hidden = true; });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !menu.hidden) { menu.hidden = true; plus.focus(); } });
+  }
+
+  /* ---------- keep researching: where the work was left, from this browser's own marks ---------- */
+  var resume = el("a", "fd2-tile k-a wide fd2-resume", '<span class="fd2-ic">' + ICON.resume + '</span><span class="fd2-tt"><b></b><span></span></span><span class="fd2-go" aria-hidden="true">→</span>');
+  resume.hidden = true; resume.style.setProperty("--i", -1); tiles.insertBefore(resume, tiles.firstChild);
+  function ago(iso) {
+    var t = Date.parse(iso); if (!t) return "";
+    var d = Math.floor((Date.now() - t) / 864e5);
+    return d <= 0 ? "today" : d === 1 ? "yesterday" : d < 14 ? d + " days ago" : d < 60 ? Math.round(d / 7) + " weeks ago" : Math.round(d / 30) + " months ago";
+  }
+  function paintMine() {
+    var P = window.raProgress; if (!P || !P.lines) return false;
+    var lines = P.lines(), act = null; lines.forEach(function (l) { if (l.active) act = l; });
+    var n = P.count(), slug = P.active && P.active(), marks = P.all ? P.all() : {}, last = null, week = 0, cut = Date.now() - 7 * 864e5;
+    Object.keys(marks).forEach(function (k) {
+      var b = marks[k] && marks[k].by && marks[k].by[slug]; if (!b || !b.since) return;
+      if (Date.parse(b.since) >= cut) week++;
+      if (!last || b.since > last.since) last = { since: b.since, t: marks[k].t, where: marks[k].where, href: marks[k].href };
+    });
+    if (!n && !(act && act.marks)) {
+      mine.hidden = false; mine.innerHTML = 'Nothing marked yet. <a href="' + url("/my-research/") + '">See how My research works</a>'; resume.hidden = true; return true;
+    }
+    mine.hidden = false;
+    mine.innerHTML = "<b>" + n.toLocaleString("en") + "</b> volume" + (n === 1 ? "" : "s") + " marked" + (week ? " · <b>" + week + "</b> in the last week" : "") +
+      ' · <a href="' + url("/my-research/") + '">see and export them</a>';
+    var name = act && act.name ? act.name : "";
+    resume.querySelector("b").textContent = name ? "Keep researching the " + name + " family" : "Keep researching my family";
+    resume.querySelector(".fd2-tt span").textContent = last ? "last: " + (last.t || "a volume") + (last.where ? ", " + String(last.where).replace(/-/g, " ") : "") + " · " + ago(last.since) : n + " volume" + (n === 1 ? "" : "s") + " marked";
+    resume.href = last && last.href ? last.href : url("/my-research/");
+    resume.hidden = false; return true;
+  }
+  (function () { var tries = 0, w = setInterval(function () { if (paintMine() || ++tries > 40) clearInterval(w); }, 150); })();
+  document.addEventListener("ra-progress-changed", function () { paintMine(); });
 })();

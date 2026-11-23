@@ -6,7 +6,7 @@
 const day = now => new Date(now).toISOString().slice(0, 10);
 const month = now => new Date(now).toISOString().slice(0, 7);
 const KEEP_DAYS = 400;
-const KINDS = ["translate", "transcribe", "document", "casefile", "plan"];
+const KINDS = ["translate", "transcribe", "document", "casefile", "plan", "tidy", "post"];
 const REASONS = ["bot", "paused", "too_large", "limit"];
 const ERR_CLASSES = ["429", "5xx", "4xx", "network"];
 const MODEL_KEY = /^[a-z0-9._-]{1,60}$/;

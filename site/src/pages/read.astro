@@ -60,11 +60,24 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
           <p class="sp-row">
             <label class="sp-add"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 16V5m0 0l-4 4m4-4l4 4M5 19h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Photo or document<input type="file" id="sp-file" accept="image/jpeg,image/png,image/webp" multiple hidden /></label>
             <button type="button" class="sp-ghost" id="sp-eg">Try an example</button>
+            <button type="button" class="sp-ghost" id="sp-tidy" title="Claude rewrites your words as short plain sentences, so the page can read them. You see both before anything changes.">AI ready</button>
+            <button type="button" class="sp-ghost" id="sp-postbtn" title="Paste a post from a forum or group that asks for help: get what it knows, what it asks and a draft reply.">Paste a forum post</button>
             <button type="button" class="sp-ghost" id="sp-read" hidden>Read the writing on it with Claude</button>
             <button type="button" class="sp-ghost" id="sp-clear" hidden>Start over</button>
           </p>
           <p class="sp-fine">Drag a picture onto this box, or paste one. It stays in this tab until you choose to have it read.</p>
         </div>
+        <section class="sp-aipanel" id="sp-aipanel" aria-labelledby="sp-aip-h" hidden>
+          <h3 id="sp-aip-h">Get the story AI ready</h3>
+          <p class="sp-fine" id="sp-aip-note"></p>
+          <div class="sp-aip-in" hidden>
+            <textarea id="sp-aip-in" rows="7" maxlength="8000" spellcheck="false" aria-label="The forum post" placeholder="Paste the post here: for example, someone asking who the parents of their grandfather were, with what they know."></textarea>
+          </div>
+          <label class="sp-aip-ok"><input type="checkbox" id="sp-aip-ok" /> <span id="sp-aip-consent"></span></label>
+          <p class="sp-row"><button type="button" class="sp-btn" id="sp-aip-go" disabled>Make it AI ready</button> <button type="button" class="sp-ghost" id="sp-aip-x">Close</button></p>
+          <p class="sp-status" id="sp-aip-status" role="status" aria-live="polite"></p>
+          <div id="sp-aip-out"></div>
+        </section>
         <div class="sp-did" id="sp-did" hidden></div>
         <div class="sp-chips" id="sp-chips" aria-live="polite"></div>
         <p class="sp-status" id="sp-status" role="status" aria-live="polite"></p>
@@ -253,6 +266,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   <script is:inline src={u("/js/story-engine.js")} defer></script>
   <script is:inline src={u("/js/story-plan.js")} defer></script>
   <script is:inline src={u("/js/story-page.js")} defer></script>
+  <script is:inline src={u("/js/story-ai.js")} defer></script>
   <script is:inline src={u("/js/case-atlas.js")} defer></script>
   <script is:inline src={u("/js/handover.js")} defer></script>
   <script is:inline>
@@ -429,6 +443,21 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp-shot { position: relative; display: inline-block; }
   .sp-shot img { width: 76px; height: 76px; object-fit: cover; border-radius: 10px; border: 1px solid var(--rule-strong); display: block; animation: sp-pop .4s cubic-bezier(.3,1.5,.5,1); }
   .sp-shot button { position: absolute; top: -7px; right: -7px; width: 22px; height: 22px; border-radius: 50%; border: 0; background: var(--ink); color: var(--ground); font-size: 14px; line-height: 1; cursor: pointer; }
+  /* "AI ready" and "Paste a forum post": a panel that opens under the story box, says what will be sent and waits for a tick */
+  .sp-aipanel { background: var(--panel); border: 1px solid var(--rule-strong); border-radius: 14px; padding: 14px clamp(12px, 2vw, 18px); margin: 8px 0; display: grid; gap: 8px; }
+  .sp-aipanel h3 { font: 600 17px/1.2 var(--serif); margin: 0; }
+  .sp-aip-in textarea, .sp-aip-reply textarea { width: 100%; box-sizing: border-box; font: 400 15px/1.5 var(--sans); padding: 10px 12px; border: 1px solid var(--rule-strong); border-radius: 10px; background: var(--ground); color: var(--ink); resize: vertical; }
+  .sp-aip-ok { display: flex; gap: 9px; align-items: flex-start; font-size: 13.5px; line-height: 1.45; color: var(--ink-2); max-width: 72ch; border: 1px dashed var(--rule-strong); border-radius: 8px; padding: 8px 12px; cursor: pointer; }
+  .sp-aip-ok input { margin-top: 3px; flex: none; }
+  .sp-aip-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .sp-aip-col { background: var(--ground); border: 1px solid var(--rule); border-radius: 12px; padding: 12px; min-width: 0; }
+  .sp-aip-col h4, .sp-aip-blk h4 { font: 700 11.5px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); margin: 0 0 6px; }
+  .sp-aip-t { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 15px; line-height: 1.55; margin: 0; color: var(--ink); }
+  .sp-aip-t mark { background: color-mix(in srgb, var(--accent) 22%, transparent); color: inherit; border-radius: 3px; padding: 0 2px; }
+  .sp-aip-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .sp-aip-blk { background: var(--ground); border: 1px solid var(--rule); border-radius: 12px; padding: 12px; min-width: 0; display: grid; gap: 6px; align-content: start; }
+  .sp-aip-blk ul { margin: 0; padding-left: 1.1em; font-size: 14.5px; line-height: 1.5; color: var(--ink-2); } .sp-aip-blk li { margin: 0 0 4px; }
+  @media (max-width: 760px) { .sp-aip-cols, .sp-aip-grid { grid-template-columns: minmax(0, 1fr); } }
   .sp-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 6px 0; }
   .sp-add, .sp-ghost { font: 500 14px/1 var(--sans); padding: 10px 14px; border-radius: 999px; border: 1px solid var(--rule-strong); background: var(--panel); color: var(--ink); cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
   .sp-add:hover, .sp-ghost:hover { background: var(--accent-wash); border-color: var(--accent); }

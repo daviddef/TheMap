@@ -16,7 +16,6 @@ import site from "../data/site.json";
 import "../styles/kit.css"; // the friendly style (cards, pills, step lists), for every page
 /* Counted, not typed. This line is on all 6,000 pages and it is a licence
    attribution — the one kind of number that must not quietly go stale. */
-import osm from "../../public/archives-osm.json";
 
 const { title, dek, eyebrow, bare, jsonld, og = "default", wide, flag, noindex } = Astro.props;
 /* GROUPED, BECAUSE THE STYLESHEET ONLY EVER STYLED GROUPS. styles.css came
@@ -162,28 +161,17 @@ import { volumes as invVolumes } from "../lib/inventory.js";
                color: var(--ink-3); max-width:var(--measure); margin: 0 0 8px; }
   .foot-thin { font-size: 11.5px; }
 
-  /* ---- THE FOOTER, HALVED ---------------------------------------------
-     It was five stacked blocks and half of them repeated the About menu —
-     About, Use the data and Add a source all sit in the navigation above.
-     Those rows are gone, Privacy moved up into that menu, and Feed rides the
-     language line.
-
-     THE ATTRIBUTION BLOCK COULD NOT MOVE, and the reason is worth keeping.
-     GeoNames, Statbel, Istat, the National Records of Scotland,
-     OpenStreetMap, Townlands.ie, Wiktionary and Trove are CC BY or equivalent:
-     attribution is a CONDITION of the licence, owed on the pages that use the
-     data, not a courtesy that can be filed away on /data/. check-built.py
-     fails the build if any of those names leaves the home or place pages —
-     so moving it would not have tidied the footer, it would have broken the
-     licence and then the build. The only saving available on it was
-     horizontal: it drops the 80ch reading measure and spans the wrap, which
-     takes it from five lines to two on a wide screen. */
-  .foot-cred { max-width: none; font-size: 11.5px; line-height: 1.7; }
-  .foot-cred summary { cursor: pointer; list-style: none; color: var(--ink-2); }
-  .foot-cred summary::-webkit-details-marker { display: none; }
-  .foot-cred summary::after { content: " \25BE"; opacity: .7; }
-  .foot-cred[open] summary::after { content: " \25B4"; }
-  .foot-cred[open] summary { margin-bottom: 6px; }
+  /* ---- THE FOOTER ------------------------------------------------------
+     Three rows and no more: the links, then who this is and which language it speaks, then one thin line of credit. It was five stacked
+     blocks once, and then the licence text sat open in a fold of its own. The licence text is now a section of the Sources page, and this
+     line keeps what a CC BY licence asks for on every page: the holders, named, with a link to the terms in full.
+     The names must stay in this file. check-data.py and check-built.py fail the build if one leaves it. */
+  .foot-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 40px; align-items: start; margin: 0 0 4px; }
+  .foot-grid .foot-note { margin: 0; }
+  .foot-grid .ra-lang { text-align: right; }
+  .foot-cred { max-width: none; margin: 12px 0 0; padding-top: 12px; border-top: 1px solid var(--rule); line-height: 1.7; }
+  .foot-cred a { margin-left: 4px; white-space: nowrap; }
+  @media (max-width: 760px) { .foot-grid { grid-template-columns: minmax(0, 1fr); } .foot-grid .ra-lang { text-align: left; } .ra-lang a:first-of-type { margin-left: 0; } }
   .foot-sep { margin: 0 4px 0 10px; color: var(--ink-3); }
     /* NOT A FLEX CONTAINER. It was, and the ins element inside it is a
      block-level flex child with no intrinsic width, so it measured zero and
@@ -498,6 +486,7 @@ import { volumes as invVolumes } from "../lib/inventory.js";
            title="Opens your own mail app. Nothing is sent from this page."><span data-i18n>Like my work? Have a suggestion? Drop me a note.</span></a>
       )}
     </nav>
+    <div class="foot-grid">
     <p class="foot-note">
       <b>Record Atlas</b> — {site.tagline}. <a href={site.repo}>Data and code on GitHub</a>.
       {/* WHEN THIS COPY WAS MADE. A researcher who looked in March and
@@ -533,46 +522,15 @@ import { volumes as invVolumes } from "../lib/inventory.js";
         <span data-vc hidden><span class="foot-sep">·</span> <span data-vc-n>—</span> visits, no cookies (<a href="https://www.goatcounter.com/" rel="noopener">GoatCounter</a>)</span>
       )}
     </p>
-
-    {/* ATTRIBUTION IS A LICENCE CONDITION, NOT A COURTESY, and four of these
-        were missing. This credited OpenStreetMap, Natural Earth and Wikidata
-        and said nothing about GeoNames — which is the gazetteer, and
-        therefore the reason any old place name on this site resolves at all
-        — nor Statbel, Istat or the National Records of Scotland. Three of
-        those four are CC BY, where attribution is the whole of what is
-        asked in return. Found while documenting /data/, which had made the
-        same omission one layer up. */}
-    <details class="foot-note foot-thin foot-cred">
-      <summary>Data credits and licences</summary>
-      Maps and {osm.archives.length} archives &copy; OpenStreetMap contributors,
-      <a href="https://opendatacommons.org/licenses/odbl/">ODbL</a>, as are the Irish
-      townlands via Townlands.ie ·
-      Place names from <a href="https://www.geonames.org/">GeoNames</a>, CC BY 4.0 ·
-      Belgian surnames by commune from <a href="https://statbel.fgov.be/">Statbel</a>,
-      CC BY 4.0 · Italian comuni from Istat, CC BY 3.0 IT ·
-      Scottish civil parishes from the National Records of Scotland, OGL v3.0 ·
-      Estonian parishes from the Rahvusarhiiv ·
-      {/* TROVE ASKS FOR THIS BY NAME, not merely by convention. Its API terms
-          require an application to state that it uses data sourced from Trove
-          and to link to it, and to identify the contributing source of each
-          item as well as Trove — which the volume rows do, each naming the
-          National Library of Australia and linking to the item's own Trove
-          page. This is the site-wide half of the same requirement. */}
-      Australian newspapers from
-      <a href="https://trove.nla.gov.au/">Trove</a>, National Library of
-      Australia ·
-      Country outlines from Natural Earth, public domain ·
-      Base maps from Esri, OpenTopoMap and OpenFreeMap (&copy; OpenMapTiles) ·
-      Archives, churches, cemeteries and surnames from Wikidata, CC0 ·
-      {/* SHARE-ALIKE, SO IT IS OWED HERE AND NOT ONLY ON /data/. What a
-          surname is said to be comes from Wiktionary under CC BY-SA 4.0:
-          attribution is a condition, and check-data.py fails the build if
-          this name leaves the footer. */}
-      What a surname is said to be from
-      <a href="https://en.wiktionary.org/">Wiktionary</a>,
-      <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> ·
-      <a href={u("/data/")}>the whole list, per file</a>
-    </details>
+    </div>
+    {/* THE FULL CREDITS LIVE ON THE SOURCES PAGE (DataCredits, at /providers/#credits), and this line is what is owed on every page: the
+        holders whose licence asks for a credit, named, with a link to the licences in full. check-built.py and check-data.py read these
+        names from this file and from the built home, place and surname pages, so a name may not leave this line without the gate saying so. */}
+    <p class="foot-note foot-thin foot-cred">
+      Built on data from OpenStreetMap contributors, GeoNames, Statbel, Istat, the National Records of Scotland, Townlands.ie, Trove,
+      Wikidata, Wiktionary, Natural Earth, Esri, OpenTopoMap and OpenFreeMap.
+      <a href={u("/providers/#credits")}>Data credits and licences</a>
+    </p>
   </div>
 </footer>
 {site.analytics?.goatcounter && site.analytics?.showCount && (

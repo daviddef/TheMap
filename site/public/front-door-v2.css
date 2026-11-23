@@ -55,7 +55,10 @@ body.fd2 .fd2-classic:hover, body.fd2 .fd2-classic:focus-visible { color: var(--
   .fd2-stage.fd2-has-result .at-panel { width: min(580px, calc(100% - 32px), 48%); }
   @keyframes fd2-card-in { from { opacity: 0; transform: translateX(-18px); } to { opacity: 1; transform: none; } }
   .fd2-stage .at-panel > .ra-sheet-x { display: none !important; }
-  .fd2-stage .at-body { display: block !important; padding: 22px 22px 24px; }
+  /* NOT WHEN IT IS HIDDEN. This said display:block with !important, which beat the hidden attribute: emptying the search box closed the panel
+     (hidden was set) and the card that answered the typing stayed on screen, headed by the words just deleted. */
+  .fd2-stage .at-body:not([hidden]) { display: block !important; padding: 22px 22px 24px; }
+  .fd2-stage .at-body[hidden] { display: none !important; }
   .fd2-stage .at-body > * + * { margin-top: 14px; }
   /* tidy scrollbars so the card reads as one object */
   .fd2-stage .at-panel { scrollbar-width: thin; scrollbar-color: var(--rule-strong, #b6b2a6) transparent; }

@@ -79,6 +79,9 @@ export const nav = [
     ["/looking-for/", "Who are you looking for?"],
     ["/help/", "Help"],
     [null, "The sources"],
+    /* THE LIST OF EVERY SOURCE WAS NOT IN THE MENU. David: «where is the list of every source in the menu? i cant see it». The sources page
+       held the list and the menu held only «Add source», so the way to the page was a link inside another page. */
+    ["/providers/", "Every source"],
     /* "Who holds records" and "What's missing" are tabs of Records by country now (Sources, Gaps), and the Places menu holds the one link. */
     /* The survey queue is a section of /providers/ now (Help check a source); /survey/ redirects there. */
     /* Moved here from the header bar, where it was a pill on every page. */

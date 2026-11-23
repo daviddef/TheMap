@@ -203,3 +203,11 @@ test("years typed in the box switch the Year pill on, and only the box's own swi
   assert.match(map, /qbox\._yt = setTimeout\(syncTypedYears, 400\)/, "after the typing settles");
   assert.match(map, /panelQ = qbox\.value;\s*syncTypedYears\(\);/, "the history strip's years sync as well");
 });
+
+test("on v2 the Year strip moves into the search bar, right of the filter button, and the history theatre still mounts on the map", () => {
+  const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
+  assert.match(map, /fbar\.parentNode\.insertBefore\(timeEl, fbar\.nextSibling\)/);
+  assert.match(map, /var host = document\.getElementById\("ra-map"\);/, "the theatre no longer assumes the strip's parent is the map");
+  assert.match(css, /\.fd2-stage \.ra-bar-find \.ra-time \{ position: static !important;[^}]*order: 9;/);
+  assert.match(css, /body:has\(\.ra-th\) \.fd2-stage \.ra-bar-find \.ra-time \{ display: none; \}/);
+});

@@ -5077,7 +5077,7 @@ window.addEventListener("load", async function () {
   function thOpen(thenTour) {
     if (TH.ui) { if (TH.ctl) { if (thenTour) TH.ctl.tour(); else TH.ctl.play(); } return; }
     stopPlay();
-    var host = document.getElementById("ra-time").parentNode;
+    var host = document.getElementById("ra-map");   // not the strip's parent: on v2 the strip lives in the search bar
     var ui = document.createElement("div");
     ui.className = "ra-th"; ui.id = "ra-th"; ui.innerHTML = thMarkup();
     host.appendChild(ui); TH.ui = ui;
@@ -8152,6 +8152,13 @@ window.addEventListener("load", async function () {
   });
 
   var timeEl = document.getElementById("ra-time");
+  /* THE YEAR BELONGS WITH THE FILTERS. David: «move the year to the right of the filter button, it's aligned to filtering rather than needing to
+     be sitting in the middle of the screen». On the new front door the strip moves out of the map and into the search bar, right of the filter
+     button; the classic page keeps it on the map. */
+  if (timeEl && document.getElementById("fd2-stage")) {
+    var fbar = document.querySelector(".ra-bar-find .ra-bar-filters");
+    if (fbar && fbar.parentNode) fbar.parentNode.insertBefore(timeEl, fbar.nextSibling);
+  }
   if (timeEl && window.L && L.DomEvent) {
     L.DomEvent.disableClickPropagation(timeEl);
     L.DomEvent.disableScrollPropagation(timeEl);

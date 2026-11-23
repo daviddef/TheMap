@@ -400,3 +400,13 @@ body.fd2-immersive .fd2-stage::after { border-radius: 0; }
 .fd2-stage .at-tools .at-ico a svg { width: 15px; height: 15px; }
 .fd2-stage .at-tools .at-ico a.at-ico-flag { padding: 0; }
 .fd2-stage .at-tools .at-ico a.at-ico-flag svg { width: 100%; height: 100%; border: 0; display: block; }
+
+/* the year strip sits in the search bar, right of the filter button (moved there by RecordMap); the history theatre hides it while it is open */
+.fd2-stage .ra-bar-find .ra-time { position: static !important; transform: none !important; left: auto !important; right: auto !important; bottom: auto !important;
+  flex: 0 0 auto; order: 9; align-self: center; max-width: none; margin: 0 0 0 10px; box-sizing: border-box; height: 46px; padding: 0 16px; box-shadow: none; z-index: auto; }
+.fd2-stage .ra-bar-find .ra-time .ra-slider { flex: 0 0 150px; width: 150px; }
+body:has(.ra-th) .fd2-stage .ra-bar-find .ra-time { display: none; }
+@media (max-width: 899px) {
+  .fd2-stage .ra-bar-find .ra-time { flex: 1 1 100%; margin: 8px 0 0; height: 40px; justify-content: space-between; }
+  .fd2-stage .ra-bar-find .ra-time .ra-slider { flex: 1 1 auto; width: auto; }
+}

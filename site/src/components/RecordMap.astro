@@ -2771,9 +2771,28 @@ window.addEventListener("load", async function () {
   /* Repainted whenever a mark changes — VolumeMarks calls this after every
      save, so the map reflects the work without a reload. */
   /* The colours, the key under the switch, and the saved choice. */
+  /* THE NUMBERED PINS WEAR THE COLOUR TOO. David: «i cant see the markers of where my research has been done even though the filter is on».
+     In a place's neighbours view every village with books is a numbered pin sitting right over its shelf dot, and the pin was always navy, so the
+     colour the switch painted was underneath and out of sight. The pin and the number in the list now take the research colour, and are repainted
+     with the dots. */
+  function rcPins() {
+    if (typeof checkPins === "undefined" || !checkPins.length) return;
+    var any = false;
+    checkPins.forEach(function (q) {
+      if (!q.rcp) return; any = true;
+      q.dot = RC.on && ((q.rcp.v || 0) || (q.rcp.c || 0)) ? RC_COL[rcState(q.rcp)] : null;
+    });
+    if (any) drawCheckPins();
+    [].forEach.call(document.querySelectorAll('[data-src^="place:"] .ra-ck-i'), function (d) {
+      var li = d.closest("[data-src]"), id = li && li.getAttribute("data-src").slice(6), q = checkPins.filter(function (z) { return z.rcp && z.rcp.i === id; })[0];
+      if (!q) return;
+      d.style.background = q.dot || ""; d.style.color = q.dot ? inkOn(q.dot) : "";
+    });
+  }
   function rcRepaint() {
     rcIdx = null;
     markers.forEach(rcStyle);
+    rcPins();
     var key = document.getElementById("ra-rc-key"), box = document.getElementById("ra-rc");
     if (box) box.checked = RC.on;
     var lab = document.getElementById("ra-rc-l"); if (lab) lab.classList.toggle("on", RC.on);
@@ -4163,9 +4182,12 @@ window.addEventListener("load", async function () {
      carry is a name, so the label says where it is instead — «A burial ground,
      2 km from Senj» — which is enough for a reader to know which row of their
      dossier is which. */
-  function checkRow(href, name, km, note, dot, num, y, x, mark) {
+  function checkRow(href, name, km, note, dot, num, y, x, mark, rcp) {
+    /* `rcp` is a place whose pin and number take the colour of the research there (Colour places by my research). It colours only; it never
+       stands in for `dot`, which also changes how the row's note is written. */
+    var rcDot = rcp && RC.on && ((rcp.v || 0) || (rcp.c || 0)) ? RC_COL[rcState(rcp)] : null;
     if (num != null && y != null && x != null)
-      checkPins.push({ n: num, y: y, x: x, name: name, dot: dot });
+      checkPins.push({ n: num, y: y, x: x, name: name, dot: dot || rcDot, rcp: rcp || null });
     var at = "";
     if (mark && mark.id) {
       at = ' data-src="' + esc(mark.id) + '"' +
@@ -4177,7 +4199,7 @@ window.addEventListener("load", async function () {
        book tables»: [+] [number] name ........ figure, the classes the books list uses. An archive's access is the number's colour (its words the tooltip); a
        village's volumes and walk time sit on a line under its name. */
     if (TSV2) {
-      var disc2 = num != null ? '<span class="ra-ck-i" title="' + esc(dot && note ? note : T("Show on the map")) + '"' + (dot ? ' style="background:' + dot + ";color:" + inkOn(dot) + '"' : "") + ">" + num + "</span>" : "";
+      var disc2 = num != null ? '<span class="ra-ck-i" title="' + esc(dot && note ? note : T("Show on the map")) + '"' + ((dot || rcDot) ? ' style="background:' + (dot || rcDot) + ";color:" + inkOn(dot || rcDot) + '"' : "") + ">" + num + "</span>" : "";
       return '<li class="ra-vrow"' + at + ">" + disc2 +
         '<span class="ra-vt" title="' + esc(name) + '">' + (href ? '<a href="' + esc(href) + '" target="_blank" rel="noopener">' + esc(name) + "</a>" : esc(name)) +
         (note && !dot ? (mark && /^place:/.test(mark.id)
@@ -4202,7 +4224,7 @@ window.addEventListener("load", async function () {
                       (note ? ' title="' + esc(note) + '" aria-label="' + esc(note) + '"' : "") + "></i>" : "") +
                (note && !dot ? '<span class="ra-ck-n">' + esc(note) + "</span>" : "");
     var disc = num != null
-      ? '<span class="ra-ck-i"' + (dot ? ' style="background:' + dot + ";color:" + inkOn(dot) + '"' : "") +
+      ? '<span class="ra-ck-i"' + ((dot || rcDot) ? ' style="background:' + (dot || rcDot) + ";color:" + inkOn(dot || rcDot) + '"' : "") +
         (note ? ' title="' + esc(note) + '"' : "") + ">" + num + "</span>"
       : "";
     return '<li class="' + (num != null ? "ra-ck-r" : "ra-ck-r ra-ck-nonum") + (num != null && num % 2 === 0 ? " ra-alt" : "") + '"' + at +
@@ -4371,7 +4393,7 @@ window.addEventListener("load", async function () {
                         vol && walk ? vol + " \u00b7 " + walk : vol || walk, null, count, x.p.y, x.p.x,
                         { id: "place:" + x.p.i, t: x.p.n,
                           where: CNAME[x.p.cc] || x.p.cc || "",
-                          href: BASE + "place/" + x.p.i + "/" }));
+                          href: BASE + "place/" + x.p.i + "/" }, x.p));
       });
       if (vs.length > 20)
         h.push('<li class="ra-ck-more">' + esc(T("and") + " " +
@@ -9120,6 +9142,20 @@ window.addEventListener("load", async function () {
     if (add) add.innerHTML = '<p class="at-sub">Reading the books… 0 of ' + total + " places</p>";
     for (var w = 0; w < 6; w++) next();
   }
+  /* WHAT STATE A BOOK IS IN, IN WORDS. David: «can we also show in the overlay the volumes done, partially done and fully done, currently its just
+     a grey icon?» The dot alone said one of four colours and nothing of how far. A line under the book now reads «Done», «Part done · 47 of 174
+     pages», «Started · searched», «On my list», with a small bar when the pages are known. A book nobody has touched stays quiet. */
+  var VST_WORD = { searched: "Searched", found: "Found something", written: "Letter written", blocked: "Blocked" };
+  function volStatHtml(vid) {
+    var st = volStatus(vid); if (st === "none") return "";
+    var v = window.raProgress.get(vid) || {}, pages = (v.done || []).reduce(function (n, r) { return n + (r[1] - r[0] + 1); }, 0), total = v.total || 0, label;
+    if (st === "done") label = "Done" + (total ? " \u00b7 all " + nfl(total) + " pages" : "");
+    else if (st === "list") label = "On my list";
+    else if (pages) label = "Part done \u00b7 " + nfl(pages) + (total ? " of " + nfl(total) : "") + " pages";
+    else label = "Started" + (VST_WORD[v.state] ? " \u00b7 " + VST_WORD[v.state].toLowerCase() : "");
+    var pct = st === "done" ? 100 : (pages && total ? Math.max(4, Math.min(99, Math.round(pages / total * 100))) : 0);
+    return '<span class="ra-vst" data-st="' + st + '">' + (pct ? '<span class="bar"><i style="width:' + pct + '%"></i></span>' : "") + "<b>" + esc(label) + "</b></span>";
+  }
   function areaVolId(v) { return "volume:" + (v.waypoint || v.url || v.t); }
   var AREA_KIND = [/birth|baptis|christen|nati|rođen|rodjen/i, /marri|wedding|vjen|matrim/i, /death|burial|buried|umrl|mort|sepolt/i];
   function areaKindRank(t) { for (var i = 0; i < AREA_KIND.length; i++) if (AREA_KIND[i].test(t)) return i; return 3; }
@@ -9134,7 +9170,7 @@ window.addEventListener("load", async function () {
              '<i' + (st === "busy" ? ' class="pz"' : "") + ' style="background:' + RC_COL[st] + '"></i>' +
              '<span class="ra-vt" title="' + esc(v.t + (v.src ? " \u2014 " + v.src : "")) + '">' + (v.url ? '<a href="' + esc(v.url) + '" target="_blank" rel="noopener">' + esc(v.t) + "</a>" : esc(v.t)) + "</span>" +
              '<span class="ra-vy">' + (v.from ? v.from + "\u2013" + v.to : "") + "</span>" +
-             '<span class="volmark"></span></li>';
+             volStatHtml(vid) + '<span class="volmark"></span></li>';
     }).join("");
   }
   /* the books on a place card follow the year in the box, as it is typed or dragged */
@@ -9166,8 +9202,11 @@ window.addEventListener("load", async function () {
   document.addEventListener("ra-progress-changed", function () {
     if (!AR()) return;
     [].forEach.call(panel.querySelectorAll(".ra-vl > li[data-vol]"), function (li) {
-      var d = li.firstChild, st = volStatus(li.getAttribute("data-vol"));
+      var d = li.firstChild, vid = li.getAttribute("data-vol"), st = volStatus(vid), old = li.querySelector(".ra-vst");
       if (d && d.style) { d.style.background = RC_COL[st]; d.classList.toggle("pz", st === "busy"); }
+      var h = volStatHtml(vid), t = document.createElement("div"); t.innerHTML = h;
+      if (old) { if (h) old.replaceWith(t.firstChild); else old.remove(); }
+      else if (h) { var vm = li.querySelector(".volmark"); if (vm) vm.before(t.firstChild); }
     });
   });
   function areaCandidates() {
@@ -12130,6 +12169,13 @@ window.addEventListener("load", async function () {
   :global(.ra-vt) { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   :global(.ra-vt a) { color: var(--ink); text-decoration: none; }
   :global(.ra-vt a:hover) { color: var(--accent); text-decoration: underline; }
+  :global(.ra-vst) { flex: 1 0 100%; display: flex; align-items: center; gap: 8px; margin: -1px 0 0 72px; font: 500 11px/1.3 var(--sans); }   /* lines up under the book's name: the add button, the dot and their gaps stand to its left */
+  :global(.ra-vst .bar) { flex: none; width: 64px; height: 4px; border-radius: 2px; background: var(--rule); overflow: hidden; }
+  :global(.ra-vst .bar i) { display: block; height: 100%; border-radius: 2px; background: #E08A12; }
+  :global(.ra-vst[data-st="done"] b) { color: #1A6E3F; }
+  :global(.ra-vst[data-st="done"] .bar i) { background: #1E8449; }
+  :global(.ra-vst[data-st="busy"] b) { color: #94560A; }
+  :global(.ra-vst[data-st="list"] b) { color: #2A5F9E; }
   :global(.ra-vy) { flex: none; width: 74px; text-align: right; font: 400 11.5px/1 var(--mono); color: var(--ink-3); font-variant-numeric: tabular-nums; }
   :global(.ra-vl .volmark) { flex: none; }
   :global(.ra-vl .volmark:has(.vm-edit)) { flex: 1 0 100%; padding: 6px 0 2px 18px; }

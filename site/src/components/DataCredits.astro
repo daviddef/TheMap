@@ -1,0 +1,46 @@
+---
+/* THE FULL CREDITS FOR THE DATA, on the Sources page (/providers/#credits). Attribution is a condition of a CC BY licence, owed on the
+   pages that use the data, so the footer of every page keeps the holders' names in one line and links here for the terms in full.
+   check-data.py and check-built.py read the names from the footer, and /data/ lists every file with its licence. */
+import { u } from "../lib/url.js";
+import osm from "../../public/archives-osm.json";
+const rows = [
+  ["OpenStreetMap contributors", `Maps and ${osm.archives.length.toLocaleString("en")} archives. The Irish townlands come via Townlands.ie.`, "ODbL", "https://opendatacommons.org/licenses/odbl/"],
+  ["GeoNames", "Place names, and so the old names of places.", "CC BY 4.0", "https://www.geonames.org/"],
+  ["Statbel", "Belgian surnames by commune.", "CC BY 4.0", "https://statbel.fgov.be/"],
+  ["Istat", "Italian comuni.", "CC BY 3.0 IT", null],
+  ["the National Records of Scotland", "Scottish civil parishes.", "OGL v3.0", null],
+  ["the Rahvusarhiiv", "Estonian parishes.", null, null],
+  ["Trove, National Library of Australia", "Australian newspapers. Trove's terms ask for this credit by name, and each volume row names its contributing source and links to its Trove page.", null, "https://trove.nla.gov.au/"],
+  ["Natural Earth", "Country outlines.", "public domain", null],
+  ["Esri, OpenTopoMap and OpenFreeMap", "The base maps. OpenFreeMap is \u00a9 OpenMapTiles.", null, null],
+  ["Wikidata", "Archives, churches, cemeteries and surnames.", "CC0", null],
+  ["Wiktionary", "What a surname is said to be. Share-alike: the credit is owed wherever the origin is printed.", "CC BY-SA 4.0", "https://en.wiktionary.org/"],
+];
+---
+<section class="dc" id="credits" aria-labelledby="dc-h">
+  <h2 class="k-h" id="dc-h">Data credits and licences</h2>
+  <p class="dc-lead">The map, the names and the places stand on other people's data. Where a licence asks for a credit, it is here, and the footer of every page
+    names the same holders and links to this section.</p>
+  <ul class="dc-list">
+    {rows.map(([who, what, lic, href]) => (
+      <li>
+        <b>{href ? <a href={href}>{who}</a> : who}</b>
+        <span>{what}</span>
+        {lic && <em>{lic}</em>}
+      </li>
+    ))}
+  </ul>
+  <p class="dc-lead"><a href={u("/data/")}>The whole list, per file</a>, with each file's source and licence.</p>
+</section>
+<style>
+  .dc { margin-top: 44px; scroll-margin-top: 80px; }
+  .dc-lead { font: 14px/1.55 var(--sans); color: var(--ink-2); max-width: 80ch; margin: 6px 0 12px; }
+  .dc-list { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 0; max-width: 120ch; border-top: 1px solid var(--rule); }
+  .dc-list li { display: grid; grid-template-columns: minmax(180px, 16rem) minmax(0, 1fr) auto; gap: 4px 18px; align-items: baseline; padding: 9px 0; border-bottom: 1px solid var(--rule); font: 14px/1.5 var(--sans); }
+  .dc-list b { font-weight: 600; color: var(--ink); }
+  .dc-list b a { color: inherit; }
+  .dc-list span { color: var(--ink-2); }
+  .dc-list em { font: 600 11.5px var(--mono); font-style: normal; letter-spacing: .03em; color: var(--ink-3); white-space: nowrap; }
+  @media (max-width: 720px) { .dc-list li { grid-template-columns: minmax(0, 1fr); } }
+</style>

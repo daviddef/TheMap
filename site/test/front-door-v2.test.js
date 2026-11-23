@@ -58,3 +58,19 @@ test("the stylesheet and script v2 loads exist, and the skin is scoped so it can
     .filter((sel) => sel.split(",").some((s) => s.trim() && !/^(body\.fd2|\.fd2-|body\.fd2-)/.test(s.trim())));
   assert.deepEqual(bad, [], "every selector starts with .fd2-… or body.fd2");
 });
+
+test("a closed search panel stays closed: the skin's display rule must not beat the hidden attribute", () => {
+  const css = read("public/front-door-v2.css");
+  assert.match(css, /\.fd2-stage \.at-body\[hidden\]\s*\{\s*display:\s*none\s*!important/, "hidden panel stays hidden");
+});
+
+test("the footer keeps the licence holders by name and sends the full credits to the sources page; every source is in the menu", () => {
+  const base = read("src/layouts/Base.astro"), prov = read("src/pages/providers.astro"), nav = read("src/lib/nav.js");
+  for (const n of ["OpenStreetMap", "GeoNames", "Statbel", "Istat", "National Records of Scotland", "Townlands.ie", "Trove", "Wikidata", "Wiktionary"]) {
+    assert.ok(base.includes(n), "footer names " + n);
+  }
+  assert.match(base, /\/providers\/#credits/, "footer links to the credits section");
+  assert.match(prov, /<DataCredits\s*\/>/, "the sources page carries the credits");
+  assert.ok(existsSync(join(root, "src/components/DataCredits.astro")));
+  assert.match(nav, /\["\/providers\/",\s*"Every source"\]/, "About menu lists every source");
+});

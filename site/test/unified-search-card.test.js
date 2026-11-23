@@ -55,6 +55,14 @@ test("starting a story closes the place card the first words opened, and the sav
   assert.doesNotMatch(sd, /Roots &amp; Routes/, "the tree page is called the Tree Canvas");
 });
 
+test("a story on the map stands alone, and the card does not repeat the words", () => {
+  assert.doesNotMatch(src, /mk\("p", "rs-words"/, "the box grows to show the words, so the card does not echo them");
+  const map = readFileSync(new URL("../src/components/RecordMap.astro", import.meta.url), "utf8");
+  assert.match(map, /storyQuiet = !!storyCcs/, "the map goes quiet when the story reports its countries");
+  assert.match(map, /if \(storyQuiet\) want = false;/, "the shelf and clusters are not drawn while it is quiet");
+  assert.match(map, /if \(storyQuiet\) \{\s+LAYERS\.concat/, "the other layers step off the map");
+});
+
 test("the one box is a growing text box in the mock-up's shape: 50px, 16px radius, Fraunces 17px", () => {
   const map = readFileSync(new URL("../src/components/RecordMap.astro", import.meta.url), "utf8");
   assert.match(map, /<textarea id="ra-q" rows="1"/, "a text box that can grow, not a one-line input");

@@ -38,6 +38,7 @@ const BASE_ = u("/");
   <ProgressKit />
   <link rel="stylesheet" href={u("/story-cards.css")} />
   <script is:inline src={u("/js/stories.js")}></script>
+  <script is:inline src={u("/js/errands.js")}></script>
   <script is:inline src={u("/js/research-file.js")}></script>
   <script is:inline src={u("/js/shard-key.js")}></script>
   <script is:inline src={u("/js/name-intro.js")}></script>
@@ -122,6 +123,7 @@ const BASE_ = u("/");
   <p class="cap" id="mr-dots-hint" hidden></p>
   <div id="mr-mid"></div>
   <div id="mr-stories" class="mr-stories" data-base={u("/")}></div>
+  <div id="mr-errands" class="mr-errands" data-base={u("/")}></div>
 
   <div id="mr-body"></div>
   </div>
@@ -132,6 +134,7 @@ const BASE_ = u("/");
   <script is:inline src={u("/js/research-synopsis.js")}></script>
   <script is:inline src={u("/js/research-overview.js")}></script>
   <script is:inline src={u("/js/research-stories.js")}></script>
+  <script is:inline src={u("/js/research-errands.js")}></script>
 
   <div class="rs-panel mr-panel" id="mr-p-fixes" role="tabpanel" aria-labelledby="mr-t-fixes" hidden>
     <h2 class="mr-h">GEDCOM research still to fix</h2>
@@ -1381,6 +1384,27 @@ const BASE_ = u("/");
   :global(.mrs-when) { color: var(--ink-3); font-family: var(--mono); font-size: 11.5px; }
   :global(.mrs-src) { color: var(--ink-3); }
   :global(.mrs-txt) { margin: 3px 0 0; font: 400 13px/1.45 var(--sans); color: var(--ink-2); }
+  /* errands (research-errands.js): a letter to where the record is */
+  :global(.mre-card) { padding: 14px 16px; margin: 0 0 12px; border: 1px solid var(--rule); border-left: 3px solid var(--accent, #245565); border-radius: 8px; background: var(--bg); }
+  :global(.mre-head) { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+  :global(.mre-name) { margin: 0; font: 600 16px/1.3 var(--serif); color: var(--ink); }
+  :global(.mre-name a) { color: inherit; text-decoration: none; border-bottom: 1px solid var(--rule-strong); }
+  :global(.mre-fam) { padding: 1px 8px; border: 1px solid var(--rule-strong); border-radius: 999px; background: var(--bg); color: var(--ink-2); font: 500 11.5px/1.5 var(--sans); }
+  :global(.mre-meta) { margin: 2px 0 0; font: 400 12.5px var(--sans); color: var(--ink-3); }
+  :global(.mre-note) { margin: 6px 0; font: 400 13px var(--sans); color: var(--brick, #b3452e); }
+  :global(.mre-steps) { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; }
+  :global(.mre-step) { padding: 4px 12px; border: 1px solid var(--rule-strong); border-radius: 999px; background: var(--bg); color: var(--ink-2); font: 500 12.5px var(--sans); cursor: pointer; }
+  :global(.mre-step:hover) { border-color: var(--accent); color: var(--accent); }
+  :global(.mre-on), :global(.mre-on:hover) { background: var(--accent); border-color: var(--accent); color: #fff; }
+  :global(.mre-letter) { margin: 12px 0 0; }
+  :global(.mre-letter > summary) { cursor: pointer; font: 600 13px var(--sans); color: var(--ink-2); }
+  :global(.mre-lab) { display: grid; gap: 4px; margin: 10px 0 0; font: 600 12px var(--sans); color: var(--ink-3); }
+  :global(.mre-in), :global(.mre-body), :global(.mre-notes) { width: 100%; box-sizing: border-box; padding: 7px 9px; border: 1px solid var(--rule-strong); border-radius: 6px; background: var(--bg); color: var(--ink); font: 400 14px/1.5 var(--sans); }
+  :global(.mre-body) { max-width: 72ch; resize: vertical; }
+  :global(.mre-left) { margin: 6px 0 0; font: 400 12.5px var(--sans); color: var(--ink-3); }
+  :global(.mre-warn) { color: #8a5a00; }
+  :global(.mre-row) { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 12px 0 0; }
+  :global(.mre-row a[aria-disabled="true"]) { opacity: .55; }
   :global(.mrfams) { display: inline-flex; flex-wrap: wrap; gap: 4px; margin-left: 8px; }
   :global(.mrfam) { padding: 1px 8px; border: 1px solid var(--rule-strong); border-radius: 999px; background: var(--bg); color: var(--ink-2); font: 500 11px/1.5 var(--sans); white-space: nowrap; }
 </style>

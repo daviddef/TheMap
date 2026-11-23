@@ -350,3 +350,14 @@ test("'then to rhodesia' is a stop, at Zimbabwe, named as the family named it; '
   const q = F.parseStory("He lived in Salisbury, Rhodesia until 1975.", ctx);
   assert.ok(!places({ stops: q.stops }).includes("Rhodesia"), "the country name only chooses the place");
 });
+
+test("'my mother Cheryl who's grandfather was from Argentina' does not make the mother Argentine", () => {
+  const p = F.parseStory("My dad was born in 1951 and moved from Senj, Croatia to Brisbane and then to Johannesburg. He married my mother Cheryl who's grandfather was from Argentina.", ctx);
+  const mother = (p.people || []).filter((x) => x.role === "mother")[0];
+  assert.ok(!mother || !mother.place, "the mother has no place from her grandfather's");
+  assert.deepEqual((p.kin || []).filter((x) => /mother/.test(x.label || "")).map((x) => x.stops.length), []);
+  /* and the plain form still reads: she is from there */
+  const q = F.parseStory("My dad was born in Senj and moved to Brisbane. He married my mother Cheryl who was from Argentina.", ctx);
+  const m2 = (q.people || []).filter((x) => x.role === "mother")[0];
+  assert.ok(m2 && m2.place && m2.place.row.n === "Argentina" || (q.kin || []).some((x) => /mother/.test(x.label || "") && x.stops.some((s) => s.row.n === "Argentina")));
+});

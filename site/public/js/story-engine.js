@@ -882,6 +882,14 @@
      it was given with. "his" is the person the story is about; "my" is the teller. Nothing is read that was not said. It stands down (returns
      null) unless two or more people are named, so a one-person story is still read by parseStory alone. */
   var CONNECT = /^(and|or|but|then|so|is|was|are|were|my|his|her|their|our|the|a|an|of|in|to|from|who|that|we|i)$/i;
+  /* "my mother Cheryl who's grandfather was from Argentina": the words after "who's grandfather" are about HER grandfather, not about her.
+     Returns the text about the person themselves, and what is told of the relative (with the word that names them), if any. */
+  var OF_RELATIVE = /\b(?:who(?:['\u2019]?s|se)|whose)\s+((?:(?:great|step)[- ]?)*(?:grand)?(?:father|mother|dad|mum|mom|parents?|ancestors?|family|people))\b/i;
+  function cutRelative(rest) {
+    var m = OF_RELATIVE.exec(String(rest || ""));
+    if (!m) return { own: rest, rel: null, word: "" };
+    return { own: rest.slice(0, m.index), rel: rest.slice(m.index + m[0].length), word: m[1].toLowerCase() };
+  }
   var KIN_STEP = { father: "F", dad: "F", mother: "M", mum: "M", mom: "M" };
   var KIN_NOUN = { F: "father", M: "mother" };
   var INTRO = /(?:\b(my|his|her|their)\s+)?\b((?:(?:father|dad|mother|mum|mom)(?:'?s)?\s+)*(?:father|dad|mother|mum|mom))(?:'?s)?\s+(?:name\s+)?(?:was|is|named|called)\s+([\p{L}'’-]+)/giu;
@@ -1058,7 +1066,8 @@
         if (x.poss !== "has") prevKey = pk;
         /* "met his father there who was born in X" / "married my mother Cheryl in 1975": a person met, not the one the next words are about, unless "who" says so */
         var objOf = x.bare && cur && cur !== pk && /\b(?:married|marry|wed|met|meet|to|with)\s*$/i.test(sent.slice(0, x.at)) && !/^\s*(?:there\s*)?,?\s*(?:who|that)\b/i.test(rest);
-        if (objOf) { people[cur].chunks.push(rest); spouseOf(cur, rest); mention(pk); return; }
+        if (objOf) { rest = cutRelative(rest).own; people[cur].chunks.push(rest); spouseOf(cur, rest); mention(pk); return; }
+        rest = cutRelative(rest).own;   /* "my mother Cheryl who's grandfather was from X": X is her grandfather's, not hers */
         if (!LINE_OF.test(rest)) p.chunks.push(rest);   /* "came from a long line of Defranceschi who were from X": the line's places, not his */
         cur = pk; mention(pk); spouseOf(pk, rest);
       });
@@ -1154,6 +1163,7 @@
         }
         if (nm && okName(nm[1])) { person(x.key, nm[1]); rest = rest.slice(nm[0].length); }
         else if (nm) rest = rest.slice(nm[0].length - nm[1].length);
+        rest = cutRelative(rest).own;   /* "my mother Cheryl who's grandfather was from X": that is HER grandfather, your great-grandfather, who the tree does not draw yet, so X is not put on her */
         merge(p, readEvents(rest, ctx)); p.occ = p.occ || occIn(rest); mention(x.key);
       });
       /* "my grandfather lived in Crikvenica in 1990" (which side is not said, so none is guessed) */

@@ -459,3 +459,9 @@ test("a whole name typed in the map (given name and surname) is recognised, summ
   assert.match(src, /\(!hits\.length && !\(names && names\.length\)\) \? await nameCardFor\(term\)/);
   assert.match(src, /class="ra-nc"/);
 });
+
+test("the flag icon on a place, country or name card opens the Atlas's own flag hub, not the old Flag-History site", () => {
+  const src = readFileSync(join(root, "src/components/RecordMap.astro"), "utf8");
+  assert.match(src, /href="' \+ BASE \+ "flags\/" \+ FLAG_SLUG\[String\(cc\)\.toUpperCase\(\)\] \+\s*'-flags\/" title="'/);
+  assert.doesNotMatch(src, /FLAG_BASE \+ FLAG_SLUG/);
+});

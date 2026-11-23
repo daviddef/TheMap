@@ -1179,10 +1179,10 @@ window.addEventListener("load", async function () {
          '<path d="M5.6 8.4h4.8M5.6 11h3.2"/>' +
          "</svg></a>";
     if (cc && FLAG_SLUG[String(cc).toUpperCase()]) {
-      var lab = T("Which flags flew over") + " " + name + " \u2014 Flag History";
+      var lab = T("Which flags flew over") + " " + name + " \u2014 the flag history of " + (CNAME[String(cc).toUpperCase()] || cc);
       h += '<a class="at-ico-flag" data-cc="' + esc(String(cc).toUpperCase()) +
-           '" href="' + FLAG_BASE + FLAG_SLUG[String(cc).toUpperCase()] +
-           '-flags.html" target="_blank" rel="noopener" title="' + esc(lab) +
+           '" href="' + BASE + "flags/" + FLAG_SLUG[String(cc).toUpperCase()] +
+           '-flags/" title="' + esc(lab) +
            '" aria-label="' + esc(lab) + '">&#9873;</a>';
     }
     return h + "</span>";

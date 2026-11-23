@@ -526,6 +526,7 @@
       if (gAll[nm]) f.cc.forEach(function (cc) { hint[cc] = 1; });
       if (gTok[nm] && (w.length > 1 || f.drop)) gTok[nm].forEach(function (i) { for (var j = i; j < i + w.length; j++) cov[j] = 1; });
     });
+    ctx.__hint = hint;
     if (!Object.keys(hint).length) return cands;
     cands = cands.filter(function (c) { return !cov[c.at]; });
     cands.forEach(function (c) { c.rows = c.rows.map(function (r, i) { return { r: r, i: i }; }).sort(function (a, b) { return (hint[b.r.cc] ? 1 : 0) - (hint[a.r.cc] ? 1 : 0) || a.i - b.i; }).map(function (x) { return x.r; }); });
@@ -571,6 +572,25 @@
       var row = modern ? Object.assign({}, modern, { exo: e[0] }) : { i: "x-" + e[0].replace(/ /g, "-"), n: e[1], cc: e[2], x: e[3], y: e[4], a: 1, c: 0, w: 1, gaz: true, exo: e[0] };
       rows.unshift(row);
     });
+  }
+
+
+  /* WHICH OF SEVERAL SAME-NAMED PLACES, from the rest of the story. "Brooklyn" is a village in Nova Scotia and a borough of New York; "Liverpool" is in
+     Australia, Canada and England; "Perth" in Scotland and Western Australia. A story about a family names places that belong together, so each place
+     is read in the country the others point to: a country named in the story counts most, a place that has only one reading counts a lot, a place with
+     several counts a little in each. A place the Atlas holds records for counts a little more, and an old name's own place always wins. Only the order
+     of the readings changes: nothing is dropped, and the next reading is still one tap away. */
+  function withContext(cands, ctx) {
+    var votes = Object.create(null), hint = ctx.__hint || {};
+    Object.keys(hint).forEach(function (cc) { votes[cc] = (votes[cc] || 0) + 4; });
+    function ccs(c) { var seen = Object.create(null), out = []; c.rows.forEach(function (r) { if (r.cc && !seen[r.cc]) { seen[r.cc] = 1; out.push(r.cc); } }); return out; }
+    cands.forEach(function (c) { if (c.country) { votes[c.country] = (votes[c.country] || 0) + 4; return; } var l = ccs(c); l.forEach(function (cc) { votes[cc] = (votes[cc] || 0) + (l.length === 1 ? 3 : 1 / l.length); }); });
+    cands.forEach(function (c) {
+      if (c.country || ccs(c).length < 2) return;
+      c.rows = c.rows.map(function (r, i) { return { r: r, i: i, s: (votes[r.cc] || 0) + (r.c > 0 ? 2 : 0) + (r.v > 0 ? 0.5 : 0) + (r.exo ? 100 : 0) - i * 0.01 }; })
+        .sort(function (a, b) { return b.s - a.s; }).map(function (x) { return x.r; });
+    });
+    return cands;
   }
 
   var FORMER = {
@@ -699,7 +719,11 @@
     t = t.replace(/(^|[\s(])['\u2019](\d\d)(?=$|[\s.,;:)])/g, function (m, a, yy) { return a + (Number(yy) > 26 ? "19" : "20") + yy; });   /* "left in '45" */
     var out = { rel: "", given: "", surname: "", name: "", holds: "story", left: null, born: null, from: null, to: null };
     out.teller = teller;
-    var rm = REL.exec(t); if (rm) { out.rel = rm[1].toLowerCase().replace(/ /g, "-"); out.rel = REL_ALIAS[out.rel] || out.rel; }
+    /* A LIFE TOLD IN THE THIRD PERSON ("Born in 1898 in a village near Split, Ivan Kovač inherited his father's hands..."): nobody says "my", so "his father"
+       is the person's own father, not a relation of the reader; and the opening "Born in 1898 in X, Name verb" is the same as "Name was born in 1898 in X." */
+    var firstPerson = /\b(?:my|our|me|mine|we)\b/i.test(t) || /\bI\b/.test(t);
+    if (!firstPerson) t = t.replace(/^\s*Born in (\d{4})(?:,| in)?\s*([^]*?),\s*(\p{Lu}[\p{L}'\u2019-]+(?:\s+\p{Lu}[\p{L}'\u2019-]+)?)\s+(?=\p{Ll})/u, function (m, y, pl, nm) { return nm + " was born in " + y + (pl ? " in " + pl.replace(/^in\s+/i, "") : "") + ". " + nm + " "; });
+    var rm = firstPerson ? REL.exec(t) : null; if (rm) { out.rel = rm[1].toLowerCase().replace(/ /g, "-"); out.rel = REL_ALIAS[out.rel] || out.rel; }
     var ft = S.fold(t), tokens = ft.split(" ").filter(Boolean);
     ctx = Object.assign({}, ctx, { hintTokens: tokens });
     /* "he married a woman named Cheryl": Cheryl is his wife, not him. Names so introduced are taken out before the story's own name is looked for. */
@@ -762,6 +786,7 @@
     var cands = ctx.map ? S.candidates(t, ctx.map, ctx.skip) : [];
     cands = withCountryHints(cands, tokens, ctx);
     cands = withCountries(cands, tokens, ctx, gset);
+    cands = withContext(cands, ctx);
     /* a word that is no place's own name but sits inside the names of several ("Friuli" in Pozzuolo del Friuli) is not a place: it is offered, not used */
     var suggest = [];
     cands = cands.filter(function (c) {

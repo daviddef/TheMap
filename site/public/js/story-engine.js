@@ -405,6 +405,7 @@
     { key: "romance", title: "Love and marriage", re: /(divorc\w+|separated|remarried|widow\w*|annul\w+|bigam\w+|eloped?|\b(?:first|second|third|fourth|fifth|1st|2nd|3rd) (?:wife|husband|marriage)\b|\b(?:twice|three times|four times)\b.*\bmarried|\bmarried\b.*\b(?:twice|three times|four times)\b|love at first|fell in love|sweetheart|courted|courtship|proposed|engaged|affair|cheated|left (?:him|her)|true love|\bmet (?:his|her|a|the|their)\b)/i },
     { key: "family", title: "The family around them", re: /\b(\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|no|many|several) (children|kids|sons|daughters|boys|girls|grandchildren|brothers|sisters|siblings)\b|\b(childless|adopted|stepchild\w*|twins|orphan\w*|raised by|brought up by|foster\w*)\b/i },
     { key: "hard", title: "Hard times", not: /\b(?:never|not|didn'?t|hadn'?t) lost\b|\blost (?:his|her|their) (?:faith|temper|mind|way)\b/i, re: /\b(beat(?:ing|s)? (?:his|her|the|their)|hit (?:his|her|the)|jail|prison|imprison\w+|arrest\w+|convict\w+|sentenced|trial|fined|executed|hanged|deport\w+|intern(?:ed|ment)|camp|prisoner|fled|escaped|refugee|exile\w*|bankrupt\w*|lost (?:his|her|their|everything|the|a)\b|los(?:ing|s of) (?:the|his|her|their|everything|a)\b|took (?:his|her|their|the) (?:money|house|land|farm|home|children|everything)|everything in it|stole|robbed|poverty|poor|starv\w+|hunger|evict\w+|homeless|stillborn|miscarriage|lost a child|illness|sick|disease|injur\w+|accident|crippled|disabled|blind|drank|drunk|alcohol\w*|gambl\w+|debt|fired|unemployed|strike|lockout|war|battle|conscript\w+|drafted|enlisted|fought|wounded|shot|beaten|abus\w+|violen\w+)\b/i },
+    { key: "health", title: "Illness and injury", re: /\b(diph?th?e?r(?:ia|a)|tuberculosis|\bTB\b|consumption|cholera|typhoid|typhus|smallpox|measles|polio|scarlet fever|rheumatic fever|whooping cough|influenza|\bflu\b|pneumonia|malaria|dysentery|tetanus|cancer|leuk(?:a)?emia|epilepsy|paralys\w+|sickly|illness|disease|fever|infection|ill(?= (?:for|with|from|as a|when|in))|sick(?= (?:for|with|from|as a|when|in))|(?:nearly|almost) died|(?:close|near) to death|injur\w+|wounded|broke (?:his|her|their) \w+|lost (?:his|her|their) (?:leg|arm|eye|sight|hearing|hand|foot|voice)|went (?:blind|deaf)|had (?:an? )?(?:operation|surgery)|in (?:the )?hospital)\b/i },
     { key: "gave", title: "What they gave up", re: /\b(sacrific\w+|gave up|went without|worked (?:two|three|\w+ )?jobs|sent money|sending money|saved (?:every|up)|never went back|never saw (?:his|her|them|their)|left (?:his|her|their) (?:family|children|home|village|country)|left behind|put (?:his|her) children)\b/i },
     { key: "wanted", title: "What they wanted", re: /\b(wanted|dreamed|dreamt|hoped|longed|wished|ambition|aspired|planned to|always wanted|yearned|promised)\b/i },
     { key: "world", title: "The weather and the world around them", re: /\b(snow\w*|blizzard|storm\w*|flood\w*|drought|famine|frost\w*|freezing|heat ?wave|earthquake|volcano|eruption|hurricane|cyclone|typhoon|monsoon|tornado|landslide|avalanche|shipwreck\w*|bushfire|fire|epidemic|plague|cholera|locusts|hard winter|bitter winter|voyage|crossing|steamer)\b/i }
@@ -415,6 +416,7 @@
   function readLife(t, ctx, out) {
     var text = String(t || "").replace(/\s+/g, " "), groups = Object.create(null), any = 0, seen = Object.create(null);
     function add(key, clause) {
+      if (clause === clause.toUpperCase() && /\p{L}{3}/u.test(clause)) clause = clause.toLowerCase().replace(/\bi\b/g, "I");   /* typed in capitals: told in sentence case, so the kin prefix below still reads */
       var c = clause.replace(/^[\s,;:-]+|[\s,;:.!?-]+$/g, "").replace(/^(?:and|but|then|so|yet|because|until|after|when|while|before|that|who|which)\s+/i, "")
         .replace(/^(?:[Mm]y|[Oo]ur|[Hh]is|[Hh]er|[Tt]heir)\s+(?:great[- ])*(?:grand\w+|father|mother|dad|mum|mom|uncle|aunt|brother|sister|husband|wife)(?:\s+(?:from|of|in)\s+\p{Lu}[\p{L}'\u2019-]+(?:\s+\p{Lu}[\p{L}'\u2019-]+)?)?\s+(?=\p{L})/u, "");
       if (c.length < 6 || c.length > 160 || c.split(" ").length < 2) return;
@@ -433,7 +435,8 @@
     if ((mt = /\bmarried (twice|three times|four times|five times)\b/i.exec(text))) n = Math.max(n, times[mt[1].toLowerCase()]);
     if (/\bremarried\b/i.test(text)) n = Math.max(n, 2);
     /* how they died: the cause, the year, the age, the place named in that stretch, all as told */
-    var died = null, dm = DEATH_RE.exec(text);
+    var died = null, dm = null, dre = new RegExp(DEATH_RE.source, "gi"), dx;
+    while ((dx = dre.exec(text))) { if (!/\b(?:nearly|almost|barely|just about|could have|might have|may have|would have|should have|didn'?t|did not|never|not)\s+$/i.test(text.slice(Math.max(0, dx.index - 18), dx.index))) { dm = dx; break; } dre.lastIndex = dx.index + dx[1].length; }   /* "nearly died" is a life that went on; the words after it may hold a real death */
     if (dm) {
       var whole = dm[0], cm = CAUSE_RE.exec(whole), ym = /\b(1[4-9][0-9]{2}|20[0-2][0-9])\b/.exec(whole), am = /\b(?:aged?|at the age of|at)\s+(\d{1,3})\b/i.exec(whole);
       var verbCause = /^(drowned|murdered|executed|hanged|shot dead|killed|perished|succumbed|took)/i.test(dm[1]) ? dm[1].toLowerCase().replace(/^took .*/, "took their own life") : "";
@@ -450,11 +453,15 @@
     /* "5 children and 12 grandchildren": counts only, nobody is named */
     var NUMS = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, twenty: 20 }, counts = {}, cre = /\b(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|twenty)\s+(children|kids|grandchildren|grandkids|sons|daughters)\b/gi, cm2;
     while ((cm2 = cre.exec(text))) { var kk = /grand/i.test(cm2[2]) ? "grandchildren" : /^(children|kids)$/i.test(cm2[2]) ? "children" : cm2[2].toLowerCase(), nn = /^\d/.test(cm2[1]) ? Number(cm2[1]) : NUMS[cm2[1].toLowerCase()]; if (nn && counts[kk] == null) counts[kk] = nn; }
+    /* what they were ill with, as told ("had diphtheria"), spelt properly; and whether they came close to dying of it */
+    var ILLS = [[/\bdiph?th?e?r(?:ia|a)\b/i, "diphtheria"], [/\b(?:tuberculosis|TB|consumption)\b/i, "tuberculosis"], [/\bcholera\b/i, "cholera"], [/\btyphoid\b/i, "typhoid"], [/\btyphus\b/i, "typhus"], [/\bsmallpox\b/i, "smallpox"], [/\bmeasles\b/i, "measles"], [/\bpolio\b/i, "polio"], [/\bscarlet fever\b/i, "scarlet fever"], [/\bwhooping cough\b/i, "whooping cough"], [/\b(?:influenza|flu)\b/i, "influenza"], [/\bpneumonia\b/i, "pneumonia"], [/\bmalaria\b/i, "malaria"], [/\bdysentery\b/i, "dysentery"], [/\btetanus\b/i, "tetanus"], [/\bcancer\b/i, "cancer"]], illness = [];
+    ((groups.health) || []).forEach(function (x) { ILLS.forEach(function (il) { if (il[0].test(x) && illness.indexOf(il[1]) < 0 && !(died && died.cause === il[1])) illness.push(il[1]); }); });
+    var nearDeath = /\b(?:nearly|almost) (?:died|dying|lost (?:his|her|their) life)\b|\b(?:close|near) to death\b/i.test(text);
     /* the death is told once, under its own heading, not again as a hard time */
     if (died) Object.keys(groups).forEach(function (k) { groups[k] = groups[k].filter(function (x) { var a = x.toLowerCase(), b = died.clause.toLowerCase(); return b.indexOf(a) < 0 && a.indexOf(b) < 0 && !(died.cause && a.replace(/^(?:he|she|they) (?:was |were )?/, "") === died.cause); }); });
     var occ = (out && out.occupations) || [];
     var gl = LIFE_GROUPS.map(function (g) { return { key: g.key, title: g.title, items: groups[g.key] || [] }; }).filter(function (g) { return g.items.length; });
-    return { groups: gl,
+    return { groups: gl, illness: illness, nearDeath: nearDeath,
       married: n, died: died, occupations: occ, counts: counts, n: gl.reduce(function (a, g) { return a + g.items.length; }, 0) + (n > 1 ? 1 : 0) + (died ? 1 : 0) + occ.length };
   }
   /* The events the Atlas holds for the years of a death that the cause may mean: an influenza death in 1919 and the 1918 pandemic; a famine; a world war
@@ -493,6 +500,7 @@
     if (life.married > 1) group("Marriages", ["Married " + (life.married === 2 ? "twice" : life.married + " times") + ", as told. Each marriage leaves its own record."]);
     life.groups.forEach(function (g) { group(g.title, g.items); });
     var hints = [];
+    if (life.groups.some(function (g) { return g.key === "health"; })) hints.push("a hospital, dispensary or school health register, and letters or a diary from those years");
     if (life.died) hints.push("a death record, a burial entry or a newspaper notice, which often name the cause");
     if (life.married > 1 || life.groups.some(function (g) { return g.key === "romance" && g.items.some(function (x) { return /divorc|separat|annul/i.test(x); }); })) hints.push("one marriage record for each marriage, and a divorce or court file where it ended in one");
     if (life.groups.some(function (g) { return g.key === "hard" && g.items.some(function (x) { return /jail|prison|arrest|convict|sentenc|trial|fined|deport|intern/i.test(x); }); })) hints.push("court, police or prison registers and the local newspaper");
@@ -721,7 +729,9 @@
     var info = W.map(function (i) { var raw = parts[i], core = raw.replace(/^[^\p{L}]+|[^\p{L}]+$/gu, ""), lead = raw.slice(0, raw.indexOf(core)); return { i: i, raw: raw, core: core, lead: lead, trail: raw.slice(lead.length + core.length), f: S.fold(core), cap: /^\p{Lu}/u.test(core) }; });
     function set(k, v) { var w = info[k]; if (v !== w.core) { w.core = v; w.f = S.fold(v); w.cap = /^\p{Lu}/u.test(v); parts[w.i] = w.lead + v + w.trail; } }
     function capw(c) { return c.charAt(0).toUpperCase() + c.slice(1); }
-    function plain(f) { return !f || f.length < 3 || STOP[f] || COMMON[f] || LC[f] || OCC[f] || MONTHS[f] || NUMW[f] || REL.test(f); }
+    /* an adverb between a kin word and a verb is not a name: "my grandfather nearly died" was becoming "my grandfather was Nearly, died" */
+    var ADV = /^(?:nearly|almost|barely|never|always|also|later|soon|then|once|finally|sadly|suddenly|really|still|only|just|already|often|sometimes|probably|maybe|perhaps|quietly|unfortunately|apparently|reportedly|eventually|tragically|slowly|quickly|simply|even|ever|later)$/;
+    function plain(f) { return !f || f.length < 3 || STOP[f] || COMMON[f] || LC[f] || OCC[f] || MONTHS[f] || NUMW[f] || REL.test(f) || ADV.test(f); }
     var given = ctx.given || {}, lastPlaceEnd = -9, lastName = -9, cn = Object.create(null);
     Object.keys(ctx.countries || {}).forEach(function (cc) { cn[S.fold(ctx.countries[cc])] = 1; });
     cn["usa"] = cn["united states"] = cn["uk"] = cn["united kingdom"] = 1;
@@ -799,6 +809,7 @@
       if (!spouse) spouse = { given: cased(g), surname: okSn ? cased(sn) : "" };
       return " ";
     });
+    var sibs = readSiblings(tg, ctx); tg = sibs.rest; out.siblings = sibs.list.map(function (x) { return { rel: x.rel, name: x.name, label: (x.mine ? "your " : /^(?:mother|grandmother|aunt|sister|wife|mum|mom|nonna)/.test(out.rel || "") ? "her " : /^(?:father|grandfather|uncle|brother|husband|dad|nonno)/.test(out.rel || "") ? "his " : "their ") + x.rel }; });
     var gv = ctx.given ? S.givenIn(tg, ctx.given, ctx.skip) : [];
     var gset = Object.create(null); gv.forEach(function (g) { gset[g.word] = 1; });
     if (gv.length) {
@@ -1118,6 +1129,24 @@
     return out;
   }
 
+  /* BROTHERS AND SISTERS, as told: "he had a brother and sister, Robert and Ada", "his brother Robert and sister Ada", "two brothers, Tom and Ned". Their names are
+     the siblings' own: they are taken out of the text before the story's person is named (a story about a man whose brother is Robert was naming the man Robert), and
+     kept as { rel, name }. "your" for the teller's own ("my brother Tom"), "his" or "her" for the person the story is about. Written in capitals or not. */
+  var SIB_NAME = "\\p{Lu}[\\p{L}'\u2019-]+", SIB_NOUN = "(?:[Hh]alf[- ])?(?:[Bb]rothers?|[Ss]isters?|[Ss]iblings?|BROTHERS?|SISTERS?|SIBLINGS?)", SIB_AND = "(?:,|[Aa]nd|AND|&)";
+  var SIB_RE = new RegExp("((?:(?:[Aa]n?|[Oo]ne|[Tt]wo|[Tt]hree|[Ff]our|[Ff]ive|A|AN|ONE|TWO|THREE|FOUR|FIVE|\\d+)\\s+)?" + SIB_NOUN + "(?:\\s*" + SIB_AND + "\\s*(?:(?:[Aa]n?|[Oo]ne|A|AN|ONE)\\s+)?" + SIB_NOUN + ")*)\\s*(?:,|:|\\s(?:[Nn]amed|[Cc]alled|[Ww]ere|[Aa]re|[Ww]as|[Ii]s|NAMED|CALLED|WERE|ARE|WAS|IS))?\\s*(" + SIB_NAME + "(?:\\s*" + SIB_AND + "\\s*(?:" + SIB_AND + "\\s*)?" + SIB_NAME + ")*)", "gu");
+  function readSiblings(text, ctx) {
+    var out = [], rest = String(text || ""), seen = Object.create(null);
+    function ok(w) { var f = S.fold(w); return w.length > 1 && !STOP[f] && !COMMON[f] && !MONTHS[f] && !REL.test(w) && !KINW.test(f) && !OCC[f] && !(ctx && ctx.map && ctx.map[f] && !(ctx.given && ctx.given[f])); }
+    rest = rest.replace(SIB_RE, function (m, nouns, names, at) {
+      var ns = (nouns.match(/brothers?|sisters?|siblings?/gi) || []).map(function (x) { return x.toLowerCase().replace(/s$/, ""); });
+      var nm = names.split(new RegExp("\\s*" + SIB_AND + "\\s*(?:" + SIB_AND + "\\s*)?", "u")).map(function (x) { return x.trim(); }).filter(function (x) { return x && ok(x); });
+      if (!nm.length) return m;
+      var mine = /\b(?:my|our|MY|OUR|[Ii] (?:have|had)|[Ww]e (?:have|had)|I (?:HAVE|HAD))\s*$/.test(rest.slice(Math.max(0, at - 14), at));
+      nm.forEach(function (n, i) { var rel = ns.length === nm.length ? ns[i] : ns.length === 1 ? ns[0] : "sibling", k = rel + "|" + S.fold(n); if (seen[k]) return; seen[k] = 1; out.push({ rel: rel, name: cased(n), mine: mine }); });
+      return m.slice(0, m.length - names.length) + " ";
+    });
+    return { list: out, rest: rest };
+  }
   function readFamily(t, ctx) {
     var people = Object.create(null), order = [], subject = null, cur = null;
     function person(key, name) {

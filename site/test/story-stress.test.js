@@ -343,6 +343,35 @@ test("'i then has 2 children, alessio and mateo' puts the teller's two children 
   assert.ok((p.people || []).some((x) => x.role === "spouse" && x.name === "Cheryl"), "Cheryl is still his wife");
 });
 
+/* "MY FATHER WAS A STRONG MAN, WITH BLUE EYES AND DARK HAIR. HE WAS BORN IN CROATIA. WHEN HE WAS YOUNGER HE HAD DIPTHERIA AND NEARLY DIED. he had a brother and sister , Robert and Ada."
+   came back as Robert's story (his brother's name taken for his), with "As told: DIED" under How they died (he nearly died, and did not), no brother, no sister, and the
+   illness nowhere. Siblings are people of their own; "nearly died" is a life that went on; an illness is kept, spelt properly, as told. */
+const named = { ...ctx, given: A.buildGiven([["Ivan"], ["Robert"], ["Ada"], ["Anton"]].map(([n]) => ({ canon: n, id: n.toLowerCase(), langs: { english: [{ form: n, status: "same" }] } }))) };
+const SHOUT = "MY FATHER WAS A STRONG MAN, WITH BLUE EYES AND DARK HAIR. HE WAS BORN IN CROATIA. WHEN HE WAS YOUNGER HE HAD DIPTHERIA AND NEARLY DIED.   he had a brother and sister , Robert and Ada. ";
+
+test("brothers and sisters are kept, and their names are not the person's", () => {
+  const p = F.parseStory(SHOUT, named, null);
+  assert.equal(p.name, "", "the father is not called Robert");
+  assert.deepEqual(p.siblings.map((x) => [x.rel, x.name, x.label]), [["brother", "Robert", "his brother"], ["sister", "Ada", "his sister"]]);
+  const q = F.parseStory("My father Ivan was born in Senj. His brother Robert and sister Ada were born there too.", named, null);
+  assert.equal(q.name, "Ivan");
+  assert.deepEqual(q.siblings.map((x) => x.rel + " " + x.name), ["brother Robert", "sister Ada"]);
+  const r = F.parseStory("I have a brother Robert. My father Ivan was born in Senj.", named, null);
+  assert.equal(r.siblings[0].label, "your brother", "the teller's own brother is not the father's");
+});
+
+test("nearly died is not a death; an illness is kept, spelt properly, as told", () => {
+  const p = F.parseStory(SHOUT, named, null);
+  assert.equal(p.life.died, null, "nobody died in this story");
+  assert.deepEqual(p.life.illness, ["diphtheria"], "DIPTHERIA is diphtheria");
+  assert.equal(p.life.nearDeath, true);
+  const health = p.life.groups.find((g) => g.key === "health");
+  assert.ok(health && health.items.some((x) => /diptheria/i.test(x)), "the clause is kept in the words told, in sentence case, not in capitals");
+  assert.ok(p.life.groups.every((g) => g.items.every((x) => x !== x.toUpperCase())), "capitals are told in sentence case");
+  const d = F.parseStory("My grandfather nearly died of cholera in 1892, and died in 1930.", named, null);
+  assert.equal(d.life.died && d.life.died.year, 1930, "a later real death is still read");
+});
+
 test("'then to rhodesia' is a stop, at Zimbabwe, named as the family named it; 'Salisbury, Rhodesia' stays Salisbury", () => {
   const bw = { ...ctx, countries: { ...countries, BW: "Botswana" }, map: A.buildMap(rows.concat([P("Gaborone", "BW", 25.9, -24.65)])) };
   const p = F.parseStory("my dad moved from croatia to botswana and then to rhodesia and then later to johannesburg and then to brisbane.", bw);

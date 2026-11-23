@@ -163,12 +163,14 @@
       if (p.name) chips.append(chip(p.name, "", "nm:" + p.name));
       if (p.occupations && p.occupations.length) chips.append(chip("work: " + p.occupations.join(", "), "", "oc:" + p.occupations.join()));
       if (p.life && p.life.died) chips.append(chip("died" + (p.life.died.cause ? (/^(?:murdered|drowned|killed|executed|hanged|shot|perished|taking|succumbed)/.test(p.life.died.cause) ? " " + p.life.died.cause : " of " + p.life.died.cause.replace(/^(?:of|from) /, "")) : "") + (p.life.died.year != null ? ", " + p.life.died.year : ""), "", "dd:" + p.life.died.clause));
+      if (p.life && ((p.life.illness && p.life.illness.length) || p.life.nearDeath)) chips.append(chip((p.life.illness && p.life.illness.length ? "had " + p.life.illness.join(", ") + (p.life.nearDeath ? ", nearly died" : "") : "nearly died"), "", "il:" + (p.life.illness || []).join() + (p.life.nearDeath ? "!" : "")));
       if (p.life && p.life.married > 1) chips.append(chip("married " + (p.life.married === 2 ? "twice" : p.life.married + " times"), "", "mm:" + p.life.married));
       if (p.life && p.life.groups.length) chips.append(chip("heard " + p.life.groups.reduce(function (a, g) { return a + g.items.length; }, 0) + " things about them, kept as told", "", "lf:" + p.life.groups.length));
       if (p.people) p.people.forEach(function (pe) {
         if (p.noRoute || p.sought) { if (pe.role !== "self") chips.append(chip((pe.label || pe.role) + (pe.name ? " " + pe.name : ""), "", "pe:" + pe.key + pe.name)); }
         else if (pe.role !== "self" && pe.name) chips.append(chip("his " + (pe.label || pe.role) + " " + pe.name, "", "pe:" + pe.role + pe.name));
       });
+      (p.siblings || []).forEach(function (sb) { chips.append(chip(sb.label + " " + sb.name, "", "sb:" + sb.rel + sb.name)); });
       var stopsShown = p.stops && p.stops.length ? p.stops : [p.from && Object.assign({ role: "origin" }, p.from), p.to && Object.assign({ role: "move" }, p.to)].filter(Boolean);
       if (!stopsShown.length && !tellable(p) && text.value.trim().length > 12) chips.append(chip("Where did they start? Name the place", "warn", "nof"));
       stopsShown.forEach(function (st) {

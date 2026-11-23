@@ -22,6 +22,9 @@ body.fd2 .fd2-tag span { margin-left: 4px; }
 body.fd2 .fd2-classic { flex: none; font: 600 13px/1 var(--sans, system-ui, sans-serif); color: var(--ink-2, #4c5d66); text-decoration: none; border: 1px solid var(--rule-strong, #b6b2a6); border-radius: 99px; padding: 8px 14px; background: var(--panel, #f7f6f2); }
 body.fd2 .fd2-classic:hover, body.fd2 .fd2-classic:focus-visible { color: var(--accent, #1f5c6b); border-color: var(--accent, #1f5c6b); }
 @media (max-width: 640px) { body.fd2 .fd2-tag span { display: none; } }
+/* the way back to the old layout, small, under the page's words */
+.fd2-classic-foot { margin: 14px 0 6px; font: 400 13px/1.4 var(--sans, system-ui, sans-serif); color: var(--ink-3, #6b7a83); text-align: center; }
+.fd2-classic-foot a { color: var(--ink-2, #4c5d66); }
 
 /* ---------- the stage ---------- */
 .fd2-stage { --ra-ctl: 56px; --fd2-glass: color-mix(in srgb, var(--panel, #f7f6f2) 90%, transparent); --fd2-shadow: 0 18px 50px -18px rgba(10, 24, 32, .5);
@@ -415,10 +418,19 @@ body.fd2-immersive .fd2-stage::after { border-radius: 0; }
 @media (max-width: 899px) {
   .fd2-stage .ra-bar-find .ra-time { flex: 1 1 100%; margin: 8px 0 0; height: var(--ra-ctl, 56px); justify-content: space-between; }
   .fd2-stage .ra-bar-find .ra-time .ra-slider { flex: 1 1 auto; width: auto; }
+  /* ON A PHONE THE YEAR SITS IN THE ROW OF THE BOOKMARK AND FILTER BUTTONS while it is off (David: «move the year option to the row above»): it takes
+     the rest of that row. Switched on, it needs the room for its slider, so it drops to a row of its own, as before. */
+  .fd2-stage .ra-bar-find .ra-time:not(.on) { flex: 1 1 0; min-width: 0; margin: 0; justify-content: flex-start; }
+  .fd2-stage .ra-bar-find #ra-count { order: 10; }   /* its full-width line used to wedge itself between the buttons and the Year, which has order 9 */
 }
 
 /* removed on the new front door (David: «remove this all»): the base-map "looks" strip (the line about volumes marked is removed too, near the top of this file) */
-.fd2-stage .ra-base { display: none !important; }
+/* ...and the choice of looks comes back as ONE button in the map's icon column (the home page cannot have a map nobody can re-dress): the strip opens
+   from it and closes again after a pick. */
+.fd2-stage:not(.fd2-looks-on) .ra-base { display: none !important; }
+.fd2-stage .ra-lookctl a { display: grid; place-items: center; }
+.fd2-stage .ra-lookctl a.on { background: var(--accent, #1f5c6b) !important; color: #fff !important; }
+
 
 /* THE SURNAME CARD wears the place card's and the area card's look (David: «the surname overlay, can it follow the look and feel of layers and
    places?»): flat sections divided by a hairline instead of tinted boxes with a purple edge, the same small mono section label, quiet chips,

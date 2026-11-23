@@ -1461,6 +1461,7 @@ window.addEventListener("load", async function () {
     qbox.value = a == null ? base : base + " " + (b != null && b !== a ? a + "-" + b : a);
     setQ("q", qbox.value.trim());
     panelQ = qbox.value;
+    syncTypedYears();
     apply(true);
     if (window.raShelfPing) window.raShelfPing();
     tsPaintAll(true);
@@ -5245,6 +5246,26 @@ window.addEventListener("load", async function () {
     year = Math.min(a, b); year2 = Math.max(a, b);
   }
 
+  /* YEARS TYPED IN THE BOX SWITCH THE YEAR PILL ON TOO. David: «make typed years switch the Year pill on too». «Senj 1661-1920» (typed, or written
+     there by the place card's history strip) used to narrow only the shelf and the strip; the pill, which narrows the map, the volume lists and
+     the «whose archive» panels, stayed off, so the two disagreed. Now the box sets the pill to the same years. Taking the years out of the box
+     switches the pill off again, but only if the box was what switched it on: a pill the reader set by hand is theirs and stays. */
+  var TYPED_Y = false;
+  function syncTypedYears() {
+    var t = yearsIn(qbox.value);
+    if (t.yrs) {
+      var a = Math.max(1500, t.yrs[0]), b = Math.min(2026, t.yrs[1]);
+      if (a > b) return;
+      if (!(yon.checked && year === a && year2 === b)) {
+        if (!yon.checked) TYPED_Y = true;
+        yin.value = a; yin2.value = b; yon.checked = true; readRange(); yearUI();
+      }
+    } else if (TYPED_Y) {
+      TYPED_Y = false;
+      if (yon.checked) { yon.checked = false; readRange(); yearUI(); }
+    }
+  }
+
   [yin, yin2].forEach(function (el) {
   el.addEventListener("input", function () {
     if (!yon.checked) return;
@@ -7981,6 +8002,7 @@ window.addEventListener("load", async function () {
     setQ("q", qbox.value.trim());
     lastTyped = Date.now();
     recentSync();
+    clearTimeout(qbox._yt); qbox._yt = setTimeout(syncTypedYears, 400);   // after the typing settles, so «1661-19» does not flicker the map
     clearTimeout(qbox._t);
     qbox._t = setTimeout(apply, 140);
     /* The flag cards ride the same keystroke. Debounced together so the two
@@ -8998,8 +9020,9 @@ window.addEventListener("load", async function () {
         if (a === "hide") setOn(false);
         else if (a === "list") shelfList();
         else if (a === "noyears") {
-          if (yon && yon.checked && year) { yon.checked = false; readRange(); yearUI(); }
-          else { var t = typed(); if (t.yrs) { qbox.value = t.text; qbox.dispatchEvent(new Event("input", { bubbles: true })); } }
+          var t = typed();
+          if (t.yrs) { qbox.value = t.text; TYPED_Y = true; qbox.dispatchEvent(new Event("input", { bubbles: true })); }
+          if (yon && yon.checked && year) { yon.checked = false; TYPED_Y = false; readRange(); yearUI(); }
           queue();
         } else if (a === "area" && !areaOn()) { return; }
         else { SH.user = a; SH.areaNew = false; render(); }

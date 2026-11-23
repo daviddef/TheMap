@@ -196,3 +196,10 @@ test("the area card keeps its small print in hover tips, not in paragraphs", () 
   assert.match(map, /Big area\. Draw a smaller one to see and add the rest\./);
   assert.match(map, /Not started: <b>/);
 });
+
+test("years typed in the box switch the Year pill on, and only the box's own switching is undone when they go", () => {
+  assert.match(map, /function syncTypedYears\(\) \{/);
+  assert.match(map, /if \(!yon\.checked\) TYPED_Y = true;/, "a pill the reader set by hand is not claimed");
+  assert.match(map, /qbox\._yt = setTimeout\(syncTypedYears, 400\)/, "after the typing settles");
+  assert.match(map, /panelQ = qbox\.value;\s*syncTypedYears\(\);/, "the history strip's years sync as well");
+});

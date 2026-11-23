@@ -468,6 +468,16 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp .lf-card-self { border-color: var(--accent); background: var(--accent-wash); } .sp .lf-card-you { border-style: dashed; }
   .sp .lf-card-role { font: 600 11px/1 var(--sans); letter-spacing: .09em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
   .sp .lf-card-name { font: 500 18px/1.25 var(--serif); } .sp .lf-card-place, .sp .lf-card-forms { font-size: 13px; color: var(--ink-2); margin-top: 3px; }
+  .sp .lf-card-empty { border-style: dashed; background: transparent; } .sp .lf-card-empty .lf-card-name { color: var(--ink-3); font-size: 15px; font-style: italic; }
+  .sp .lf-card.editing { max-width: 23rem; text-align: left; } .sp .lf-card.editing .lf-card-role, .sp .lf-card.editing .lf-card-name { text-align: center; }
+  .sp .lf-edit { margin-top: 8px; font: 600 12.5px/1 var(--sans); color: var(--accent); background: transparent; border: 1px solid var(--rule-strong); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+  .sp .lf-edit:hover { background: var(--accent-wash); }
+  .sp .lf-form { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; margin-top: 10px; text-align: left; }
+  .sp .lf-form label { display: grid; gap: 3px; grid-column: 1 / -1; font: 600 11px/1.2 var(--sans); color: var(--ink-2); } .sp .lf-form label.sm { grid-column: auto; }
+  .sp .lf-form input { font: 400 14px/1.3 var(--sans); padding: 6px 8px; border: 1px solid var(--rule-strong); border-radius: 8px; background: var(--panel); color: var(--ink); min-width: 0; width: 100%; box-sizing: border-box; }
+  .sp .lf-form-row { grid-column: 1 / -1; display: flex; gap: 8px; } .sp .lf-form-row button { font: 600 13px/1 var(--sans); padding: 8px 14px; border-radius: 999px; border: 1px solid var(--rule-strong); background: var(--panel); color: var(--ink); cursor: pointer; }
+  .sp .lf-form-row button[type="submit"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .sp .lf-form-note { grid-column: 1 / -1; margin: 0; font-size: 11.5px; color: var(--ink-3); }
   .sp-plan { display: grid; gap: 10px; max-width: 54rem; }
   .sp-pstep { background: var(--ground); border: 1px solid var(--rule); border-radius: 14px; padding: 14px 18px 10px; animation: sp-rise .5s ease both; }
   .sp-pstep h3 { font: 500 19px/1.3 var(--serif); margin: 0 0 4px; display: flex; gap: 12px; align-items: baseline; }

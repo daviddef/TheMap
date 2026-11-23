@@ -372,3 +372,9 @@ test("a mother's given name is read in lower case, and before a 'who's grandfath
   const q = F.parseStory("My dad was born in Senj and moved to Brisbane. He married my mother worked in Perth.", ctx);
   assert.ok(!(q.people || []).some((x) => x.name === "Worked"));
 });
+
+test("'my father was named Ivan Kovač' gives the father his name and surname (not the word 'named')", () => {
+  const p = F.parseStory("My dad was born in 1951 in Senj. He married my mother Cheryl. My father was named Ivan Kovač. He worked as a stonemason.", ctx);
+  const fa = (p.people || []).filter((x) => x.role === "father")[0];
+  assert.ok(fa && fa.name === "Ivan Kovač", fa && fa.name);
+});

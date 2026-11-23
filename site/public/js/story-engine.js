@@ -892,7 +892,7 @@
   }
   var KIN_STEP = { father: "F", dad: "F", mother: "M", mum: "M", mom: "M" };
   var KIN_NOUN = { F: "father", M: "mother" };
-  var INTRO = /(?:\b(my|his|her|their)\s+)?\b((?:(?:father|dad|mother|mum|mom)(?:'?s)?\s+)*(?:father|dad|mother|mum|mom))(?:'?s)?\s+(?:name\s+)?(?:was|is|named|called)\s+([\p{L}'’-]+)/giu;
+  var INTRO = /(?:\b(my|his|her|their)\s+)?\b((?:(?:father|dad|mother|mum|mom)(?:'?s)?\s+)*(?:father|dad|mother|mum|mom))(?:'?s)?\s+(?:name\s+)?(?:was|is|named|called)\s+(?:(?:named|called)\s+)?([\p{L}'’-]+)/giu;
   var EV_BORN = /^(born|birth)$/, EV_DIED = /^(died|dies|passed|deceased|buried|murdered|killed)$/, EV_WED = /^(married|wed|wedded|weds)$/;
   var EV_MOVE = /^(moved|move|went|emigrated|migrated|relocated|settled|came|arrived|lived|living|returned|then|travelled|traveled|sailed|left)$/;
   var EV_CAUSE = /^(frmo|fro|from|due|after|of|with|because)$/;
@@ -1153,7 +1153,7 @@
       var re = /\bmy\s+(mother|mum|mom|father|dad)\b/gi, ms = [], m;
       while ((m = re.exec(sent))) ms.push({ at: m.index, end: m.index + m[0].length, key: KIN_STEP[m[1].toLowerCase()] });
       ms.forEach(function (x, i) {
-        var rest = sent.slice(x.end, i + 1 < ms.length ? ms[i + 1].at : sent.length), nm = /^\s+(?:name\s+)?(?:is|was|named|called)\s+([\p{L}'’-]+)/iu.exec(rest), p = person(x.key, "");
+        var rest = sent.slice(x.end, i + 1 < ms.length ? ms[i + 1].at : sent.length), nm = /^\s+(?:name\s+)?(?:is|was|named|called)\s+(?:(?:named|called)\s+)?([\p{L}'’-]+)/iu.exec(rest), p = person(x.key, "");
         var tm = TELLS.exec(rest);
         if (tm) {
           /* what a parent TELLS is about someone else: the person named in the same breath ("told me he"), else the last one mentioned */
@@ -1161,7 +1161,12 @@
           if (tgt) { merge(P[tgt], readEvents(said, ctx)); P[tgt].occ = P[tgt].occ || occIn(said); mention(tgt); }
           mention(x.key); return;
         }
-        if (nm && okName(nm[1])) { person(x.key, nm[1]); rest = rest.slice(nm[0].length); }
+        if (nm && okName(nm[1])) {
+          var sn2 = /^\s+([\p{Lu}][\p{L}'\u2019-]{2,})(?=\s|,|$)/u.exec(rest.slice(nm[0].length)), full = nm[1];   /* "my father was named Ivan Kovač": the surname that follows */
+          rest = rest.slice(nm[0].length);
+          if (sn2 && okName(sn2[1]) && !KINW.test(sn2[1]) && !REL.test(sn2[1]) && !(ctx.map && ctx.map[S.fold(sn2[1])]) && !(ctx.given && ctx.given[S.fold(sn2[1])])) { full += " " + sn2[1]; rest = rest.slice(sn2[0].length); }
+          person(x.key, full);
+        }
         else if (nm) rest = rest.slice(nm[0].length - nm[1].length);
         else {
           /* "my mother Cheryl who's grandfather...", "my mother cheryl": the name follows with no "is/was", capitalised or typed in lower case but a given name the Atlas knows */
@@ -2241,8 +2246,14 @@
 
   /* The family as told: the parents named above the person, and the visitor below. Each card carries the place and the few forms of the name
      the catalogue holds. Nothing is drawn that the story did not say, and a missing parent is left out, not guessed. */
-  function treeBlock(people, rel) {
+  function treeBlock(people, rel, opts) {
     var self = (people || []).filter(function (x) { return x.role === "self"; })[0];
+    /* EDITING THE BOXES (the story page passes opts.onEdit). A box can be filled in by hand: the page turns what is typed into plain sentences in the
+       story, so the story stays the one source and everything else re-reads from it. Only where the words exist to say it: "my father's mother ...". */
+    var onEdit = opts && opts.onEdit, relS = self && self.rel ? String(self.rel).replace(/-/g, " ") : "";
+    var canEdit = !!(onEdit && self && (self.me || /^(?:father|mother)$/.test(relS)) && !self.sought);
+    var selfRef = self ? (self.me ? "I" : "my " + relS) : "";
+    function slotOf(kind) { return { kind: kind, me: !!(self && self.me), ref: kind === "self" ? selfRef : kind === "spouse" ? selfRef : (self && self.me ? "my " : selfRef + "'s ") + kind }; }
     var fa = (people || []).filter(function (x) { return x.role === "father"; })[0], mo = (people || []).filter(function (x) { return x.role === "mother"; })[0];
     if (!self) return null;
     function forms(pe) {
@@ -2252,9 +2263,9 @@
       if (sn && sn.family) sn.family.by.same.concat(sn.family.by.attested, sn.family.by.rule).forEach(function (f) { if (out.length < 8 && out.indexOf(f) < 0 && S.fold(f) !== S.fold(pe.surnameTyped)) out.push(f); });
       return out;
     }
-    function card(pe, label) {
-      var c = el("div", null, "lf-card lf-card-" + pe.role);
-      c.append(el("div", label, "lf-card-role"), el("div", pe.name || (pe.me ? "The one telling the story" : "Name not given"), "lf-card-name"));
+    function card(pe, label, kind) {
+      var c = el("div", null, "lf-card lf-card-" + pe.role + (pe.empty ? " lf-card-empty" : ""));
+      c.append(el("div", label, "lf-card-role"), el("div", pe.name || (pe.empty ? "Not in the story yet" : pe.me ? "The one telling the story" : "Name not given"), "lf-card-name"));
       var hasBorn = (pe.events || []).some(function (e) { return e.type === "born" && e.place; });
       if (pe.place && !hasBorn) c.append(el("div", (pe.role === "self" && !pe.events ? "Born in " : "From ") + (typeof pe.place === "string" ? pe.place : pe.place.word), "lf-card-place"));
       (pe.events || []).forEach(function (e) {
@@ -2265,23 +2276,58 @@
       if (pe.counts) { var cb = []; ["children", "grandchildren", "sons", "daughters"].forEach(function (k2) { if (pe.counts[k2] != null) cb.push(pe.counts[k2] + " " + k2); }); if (cb.length) c.append(el("div", "Told: " + cb.join(", ") + " (not named)", "lf-card-forms")); }
       var f = forms(pe); if (f.length) c.append(el("div", "Also written: " + f.join(", "), "lf-card-forms"));
       if (pe.presumed) c.append(el("div", "Surname assumed the same", "lf-card-forms"));
+      if (canEdit && kind) editor(c, pe, slotOf(kind), label);
       return c;
+    }
+    /* the small form inside a box: what is typed becomes sentences, the page re-reads, the tree is drawn again with it */
+    function editor(c, pe, slot, label) {
+      var btn = el("button", pe.empty || (!pe.name && !(pe.events || []).length && !pe.place) ? "+ Add details" : "Add or change details", "lf-edit"); btn.type = "button";
+      var form = null;
+      btn.addEventListener("click", function () {
+        if (form) { form.remove(); form = null; c.classList.remove("editing"); btn.setAttribute("aria-expanded", "false"); return; }
+        form = el("form", null, "lf-form"); c.classList.add("editing"); btn.setAttribute("aria-expanded", "true");
+        var spouse = slot.kind === "spouse", me = slot.kind === "self" && slot.me, f = {};
+        function field(key, text, ph, small) { var l = el("label", null, small ? "sm" : ""), i = el("input"); i.type = "text"; i.placeholder = ph || ""; i.autocomplete = "off"; l.append(el("span", text), i); form.append(l); f[key] = i; }
+        if (!me) field("name", spouse ? "Their name" : "Name", pe.name ? "now: " + pe.name : "first name and surname");
+        if (spouse) { field("married", "Married in (year)", "1975", true); field("marriedAt", "Married at (place)", "a town", true); }
+        else {
+          field("born", "Born in (year)", "1898", true); field("bornAt", "Born at (place)", "a town", true);
+          if (!me) { field("died", "Died in (year)", "1984", true); field("diedAt", "Died at (place)", "a town", true); }
+          field("lived", me ? "Live in" : "Lived in", "a town or country");
+          field("work", "Work", "stonemason, nurse, …");
+        }
+        field("note", "Anything else", "a sentence about them");
+        var row = el("div", null, "lf-form-row"), go = el("button", "Add to the story"), no = el("button", "Cancel"); go.type = "submit"; no.type = "button"; row.append(go, no); form.append(row);
+        form.append(el("p", "This is written into your story as plain sentences, so you can read and change it there.", "lf-form-note"));
+        no.addEventListener("click", function () { btn.click(); });
+        form.addEventListener("submit", function (ev) {
+          ev.preventDefault();
+          var v = {}; Object.keys(f).forEach(function (k) { v[k] = f[k].value.replace(/\s+/g, " ").trim(); });
+          if (!Object.keys(v).some(function (k) { return v[k]; })) { btn.click(); return; }
+          onEdit(slot, v);
+        });
+        c.append(form); var first = form.querySelector("input"); if (first) first.focus();
+      });
+      c.append(btn);
     }
     var tree = el("div", null, "lf-tree"), others = (people || []).slice();
     function gen(cls) { var g = el("div", null, "lf-gen " + (cls || "")); tree.append(g); return g; }
     var gps = (people || []).filter(function (x) { return x.role === "grandfather" || x.role === "grandmother"; }), sp = (people || []).filter(function (x) { return x.role === "spouse"; })[0];
     if (gps.length) { var g0 = gen("lf-grand"); gps.forEach(function (x) { var lb = x.label || x.role; g0.append(card(x, lb.charAt(0).toUpperCase() + lb.slice(1))); }); tree.append(el("div", null, "lf-tie")); }
-    if (fa || mo || (people || []).some(function (x) { return x.role === "inlaw"; })) { var g1 = gen("lf-parents"); var cap = function (x) { return x.charAt(0).toUpperCase() + x.slice(1); };
+    if (fa || mo || canEdit || (people || []).some(function (x) { return x.role === "inlaw"; })) { var g1 = gen("lf-parents"); var cap = function (x) { return x.charAt(0).toUpperCase() + x.slice(1); };
       var kinOf = self.rel && !self.me && !self.sought ? "Your " + String(self.rel).replace(/-/g, " ") + "'s " : "";
-      if (fa) g1.append(card(fa, self.sought && fa.label ? cap(fa.label) : kinOf ? cap(kinOf) + "father" : "Father")); if (mo) g1.append(card(mo, self.sought && mo.label ? cap(mo.label) : kinOf ? cap(kinOf) + "mother" : "Mother"));
+      /* with editing on, both parents are drawn even when the story names neither: an empty box, to be filled in */
+      if (!fa && canEdit) fa = { role: "father", name: "", empty: true }; if (!mo && canEdit) mo = { role: "mother", name: "", empty: true };
+      if (fa) g1.append(card(fa, self.sought && fa.label ? cap(fa.label) : kinOf ? cap(kinOf) + "father" : "Father", "father")); if (mo) g1.append(card(mo, self.sought && mo.label ? cap(mo.label) : kinOf ? cap(kinOf) + "mother" : "Mother", "mother"));
       (people || []).filter(function (x) { return x.role === "inlaw"; }).forEach(function (x) { g1.append(card(x, cap(x.label || "Spouse"))); });
       tree.append(el("div", null, "lf-tie")); }
     /* the people between are drawn even when the story names nobody there: "my grandfather was Ivan" has a parent between him and you */
     function gap(n, above) { for (var i = 0; i < n; i++) { if (!above) tree.append(el("div", null, "lf-tie")); var gg = gen("lf-gap"), ph = el("div", null, "lf-card lf-card-you"); ph.append(el("div", n > 1 && i === 0 ? "Parent of yours, not named" : "Your parent, not named", "lf-card-role"), el("div", "Not in the story yet: name them to add them here", "lf-card-place")); gg.append(ph); if (above) tree.append(el("div", null, "lf-tie")); } }
     if (self.me && !fa && !mo && gps.length) gap(1, true);
-    var g2 = gen(); g2.append(card(self, self.sought ? self.label : self.me ? "You" : self.rel ? "Your " + self.rel.replace(/-/g, " ") : "The person you asked about"));
+    var g2 = gen(); g2.append(card(self, self.sought ? self.label : self.me ? "You" : self.rel ? "Your " + self.rel.replace(/-/g, " ") : "The person you asked about", "self"));
     var sps = (people || []).filter(function (x) { return x.role === "spouse"; });
-    sps.forEach(function (x, i) { g2.append(card(x, x.label && (i || x.told) ? x.label.charAt(0).toUpperCase() + x.label.slice(1) : self.me ? "Your partner" : self.rel === "father" ? "Wife, your mother" : self.rel === "mother" ? "Husband, your father" : "Spouse")); });
+    sps.forEach(function (x, i) { g2.append(card(x, x.label && (i || x.told) ? x.label.charAt(0).toUpperCase() + x.label.slice(1) : self.me ? "Your partner" : self.rel === "father" ? "Wife, your mother" : self.rel === "mother" ? "Husband, your father" : "Spouse", i ? "" : "spouse")); });
+    if (!sps.length && canEdit) g2.append(card({ role: "spouse", name: "", empty: true }, self.me ? "Your partner" : self.rel === "father" ? "Wife, your mother" : "Husband, your father", "spouse"));
     var kids = (people || []).filter(function (x) { return x.role === "child"; });
     var rl = String(self.rel || ""), between = /grand/.test(rl) && !self.me ? (rl.match(/great/g) || []).length + 1 : 0;
     if (between) gap(between);

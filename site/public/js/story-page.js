@@ -146,6 +146,40 @@
     if (haveYear) { m.append(el("p", "The Atlas holds no epidemic, famine, war or mass-death event whose area covers these places in the years they were there. That is what the Atlas holds, not proof that nothing happened.", "sp-sublede")); return; }
     m.append(el("p", "This fills in once the Atlas knows the years. The story gave ages but no dates. Add the year they were born and it shows the epidemics, famines, wars and leaders of the years they were at each place, and who held the ground.", "sp-sublede"));
   }
+  /* ---- the boxes of the family tree, filled in by hand --------------------------------------------------------------------- */
+  /* What is typed in a box is written into the story as plain sentences (the story stays the one source: read it, change it, and the page follows).
+     A box edited twice replaces its own earlier sentences instead of piling up. */
+  var edits = Object.create(null);
+  function cap1(x) { return x.charAt(0).toUpperCase() + x.slice(1); }
+  function box2sentences(slot, v) {
+    var R = cap1(slot.ref), me = slot.kind === "self" && slot.me, out = [], yr = function (y) { return /^\d{3,4}$/.test(y) ? y : ""; };
+    function when(y, at) { var b = []; if (yr(y)) b.push("in " + y); else if (y) b.push("about " + y); if (at) b.push("in " + at); return b.join(" "); }
+    if (slot.kind === "spouse") {
+      if (!v.name) { if (v.note) out.push(v.note); }
+      else out.push(R + " married " + v.name + (when(v.married, v.marriedAt) ? " " + when(v.married, v.marriedAt) : "") + ".");
+      if (v.name && v.note) out.push(v.note);
+      return out;
+    }
+    if (v.name && !me) out.push(R + " was named " + v.name + ".");
+    if (v.born || v.bornAt) out.push(R + (me ? " was" : " was") + " born " + when(v.born, v.bornAt) + ".");
+    if (v.died || v.diedAt) out.push(R + " died " + when(v.died, v.diedAt) + ".");
+    if (v.lived) out.push(R + (me ? " live in " : " lived in ") + v.lived + ".");
+    if (v.work) out.push(R + (me ? " work as " : " worked as ") + (/^(?:an?|the)\s/i.test(v.work) ? "" : /^[aeiou]/i.test(v.work) ? "an " : "a ") + v.work + ".");
+    if (v.note) out.push(/[.!?]$/.test(v.note) ? v.note : v.note + ".");
+    return out;
+  }
+  function editBox(slot, v) {
+    var key = slot.kind + "|" + slot.ref, prev = edits[key], all = Object.assign({}, prev && prev.v);
+    Object.keys(v).forEach(function (k) { if (v[k]) all[k] = v[k]; });   /* what is typed now is added to what the box already had, and replaces the same field */
+    var add = box2sentences(slot, all).join(" ");
+    if (!add) return;
+    var t = text.value;
+    if (prev && t.indexOf(prev.text) > -1) t = t.replace(prev.text, "").replace(/[ \t]{2,}/g, " ").replace(/\n{2,}/g, "\n").trim();
+    edits[key] = { v: all, text: add };
+    text.value = (t ? t.replace(/\s+$/, "") + "\n" : "") + add; grow();
+    try { sessionStorage.setItem(DRAFT, text.value); } catch (e) { /* none */ }
+    lastSig = ""; run();
+  }
   function drawAll(g) {
     var f = g.facts;
     $("sp-title").textContent = f.name ? f.name + "’s story" : "Their story";
@@ -156,7 +190,7 @@
     var lb = E.lifeBlock(g.life, g.mort), lbox = $("sp-lifebox"); lbox.textContent = ""; secShow("sp-life", !!lb); if (lb) lbox.append(lb);
     var nb = E.namesBlock(g.names, BASE), nbox = $("sp-namesbox"); nbox.textContent = ""; secShow("sp-names", !!nb);
     if (nb) { nbox.append(nb); [].forEach.call(nb.querySelectorAll("details"), function (d) { d.open = true; }); }
-    var tr = E.treeBlock(g.people, f.rel), tbox = $("sp-tree"); tbox.textContent = ""; secShow("sp-family", !!tr); if (tr) tbox.append(tr);
+    var tr = E.treeBlock(g.people, f.rel, { onEdit: editBox }), tbox = $("sp-tree"); tbox.textContent = ""; secShow("sp-family", !!tr); if (tr) tbox.append(tr);
     secShow("sp-setting", true);
     secShow("sp-plan", true); drawSteps(g);
     secShow("sp-keep", true); drawKeep(g);
@@ -255,7 +289,7 @@
 
   /* ---- reading the words ----------------------------------------------------------------------------------------------------- */
   function signature(p) {
-    return JSON.stringify([(p.route || []).map(function (x) { return x.row.i + ":" + x.age; }), p.left, p.born, p.name, (p.people || []).map(function (x) { return x.role + x.name; }), p.holds,
+    return JSON.stringify([(p.route || []).map(function (x) { return x.row.i + ":" + x.age; }), p.left, p.born, p.name, (p.people || []).map(function (x) { return x.role + x.name + (x.occupation || "") + JSON.stringify((x.events || []).map(function (e) { return [e.type, e.year, e.place]; })) + (x.place && x.place.word || ""); }), p.holds,
       p.life && p.life.groups.map(function (g) { return g.items; }), p.life && p.life.illness, p.life && p.life.died, (p.siblings || []).map(function (x) { return x.name; }), (p.kin || []).length]);
   }
   function run() {

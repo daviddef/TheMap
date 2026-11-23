@@ -5191,8 +5191,10 @@ window.addEventListener("load", async function () {
     return true;
   }
 
+  var typedFor = "";   /* the words the panel was last asked about, so emptying the box can take their answer away */
   function apply(noFrame) {
     var t = fold(qbox.value.trim());
+    if (qbox.value.trim()) typedFor = qbox.value.trim();
     searchHit = false;
     /* The lighting belongs to the query that produced it, and nothing else. */
     if (litFor !== null && litFor !== t) { clearLit(); syncCountryDots(); }
@@ -5269,6 +5271,14 @@ window.addEventListener("load", async function () {
       /* Clearing the box clears the map with it. Anything drawn to answer a
          search is an answer to a question nobody is asking any more. */
       if (gmark) { map.removeLayer(gmark); gmark = null; }
+      /* THE CARD THAT ANSWERED THE TYPING GOES WITH IT. Typing «\» left a card headed «\» saying «No places of that name here yet» that
+         stayed after the box was emptied, because only the map was cleared here. If the panel is still headed by the words that were
+         typed, it was their answer: close it. A place the reader opened for themselves is not headed by their typing, so it stays. */
+      if (typedFor) {
+        var hd = panel.hidden ? null : panel.querySelector(".at-h h3"), ht = hd ? String(hd.textContent).trim().toLowerCase() : "", tq = typedFor.toLowerCase();
+        if (ht && (ht === tq || (fold(ht) && fold(tq) && (fold(ht).indexOf(fold(tq)) === 0 || fold(tq).indexOf(fold(ht)) === 0)))) closeSheet();
+        typedFor = "";
+      }
       ctryLayer.clearLayers();
       communeLayer.clearLayers();
       litCC = null;

@@ -1,41 +1,52 @@
 # Record Atlas "Ask Claude" Worker
 
 Paste a line of a register (or a photo of one) and get a draft reading that leans on the Atlas's own cards first.
-Design and why: `docs/reading-the-record-plan.md` section 6b. **Status: built and tested, not deployed, no page uses it yet.**
+Design and why: `docs/reading-the-record-plan.md` section 6b. The Worker runs at `ai.recordatlas.org`; redeploy it (below) after
+changing anything in this folder.
 
 ## What it does and does not keep
 
-It keeps **counts**: per visitor-address per day, per six-word identity per day and month, and for the whole site per day. It does
-not keep pasted text, pictures or answers, and request logging is off. Your Anthropic key is a Worker **secret**: it is never in
-this folder, never in the browser, and no session holds it.
+It keeps **counts**: per visitor-address per day, per six-word identity per day and month, for the whole site per day, and, for
+David's admin page, usage statistics by UTC day (requests, answers, errors, input and output tokens per kind and per model, and
+refusals by reason; the last 400 days). It does not keep pasted text, pictures, plan facts or answers, no name and no address, and
+request logging is off. Your Anthropic key is a Worker **secret**: it is never in this folder, never in the browser, and no session
+holds it. The admin page, its token and its settings are described in `docs/ai-admin.md`.
 
 | Endpoint | Does |
 |---|---|
 | `POST /v1/translate` | `{text, cards, context}` to a draft: plain-English line, each word tagged "card" or "model", doubtful words flagged, what the line does not say |
 | `POST /v1/transcribe` | `{image:{media_type,data}}` to the lines as written, with `[?]` where unreadable (a photo counts as 3) |
-| `GET /v1/allowance` | what an identity has used |
+| `POST /v1/document`, `POST /v1/casefile` | a whole photographed document read field by field; the case file that joins two to six readings (each counts as 2) |
+| `POST /v1/plan` | `{facts, candidates, question}` to a research plan (Haiku): `{headline, summary, groups:[{key,title,items:[{title,detail,source,ref,url,name,where}]}], cautions}`. `facts` is what the story reader understood (never a name or photo); `candidates` are the Atlas records the browser matched (up to 60), the only things that may be tagged `"atlas"`. The server checks every `ref` against them, attaches the link, name and place from the candidate itself, strips any link the model wrote, drops unknown groups and caps counts and lengths. Costs 1 try |
+| `GET /v1/allowance` | what an identity has used; `left` and `of` are `null` when nothing is limited, and `siteOpen` is `true` |
 | `DELETE /v1/id` | forget an identity's counters |
 | `GET /v1/health` | `{ok, v, enabled}` |
+| `GET /admin`, `GET /v1/admin/ping`, `GET /v1/admin/report`, `GET`/`PUT /v1/admin/config` | David's admin page and its JSON routes: 404 until the secret `ADMIN_TOKEN` is set, then a bearer token is needed for the data (`docs/ai-admin.md`) |
 
-Every answer call needs a Turnstile token (`X-Turnstile`). The six-word identity is optional (`X-AI-Id` + `Authorization: Bearer`),
-derived in the browser with its own labels (`ai-id`, `ai-token`), so this service cannot open anyone's saved research.
+Every answer call (including a plan) needs a Turnstile token (`X-Turnstile`). The six-word identity is optional (`X-AI-Id` +
+`Authorization: Bearer`), derived in the browser with its own labels (`ai-id`, `ai-token`), so this service cannot open anyone's
+saved research.
 
-## Allowances (all editable in `wrangler.jsonc`, then redeploy)
+## Limits: none by default, every one configurable
 
-| Who | Allowance |
-|---|---|
-| No six words | 5 a day per address |
-| New six-word identity | 6 a day, plus 2 for every day of age, up to 12 a day and 120 a month |
-| One address, whatever it makes | 20 a day |
-| Everyone together | 150 requests and 600,000 tokens a day, and **2,500 requests a month** (`SITE_MONTHLY_REQUESTS`: this is the number that bounds the bill) |
+Every limit is **off**: in `wrangler.jsonc` they are all `"0"`, and **0, empty or missing means unlimited**. A positive number is
+honoured. They can be set in `wrangler.jsonc` (then redeploy) or from the admin page (no redeploy; a value saved there wins over the
+file). The counters keep counting either way, so use is visible; only the refusals are gone.
 
-A whole document or a case file counts as 2 tries. These numbers were tightened on 8 Nov 2026 (they were 15, 12 to 20, 40, and 400 a
-day with no monthly site cap) so that the free tier has a known ceiling. The page shows the reader a meter (`GET /v1/allowance` returns
-`left`, `of` and `siteOpen`), and a refusal from the site-wide caps hands the reader's own tries back.
+| Setting | Meaning | Was |
+|---|---|---|
+| `ANON_DAILY` | tries a day with no six words, per address | 5 |
+| `ID_NEW_DAILY`, `ID_DAILY`, `ID_MONTHLY` | a new six-word identity starts at `ID_NEW_DAILY` a day, grows by 2 a day of age up to `ID_DAILY`, and has `ID_MONTHLY` a month | 6, 12, 120 |
+| `IP_DAILY` | per address, however many identities it makes | 20 |
+| `SITE_DAILY_REQUESTS`, `SITE_MONTHLY_REQUESTS`, `SITE_DAILY_TOKENS` | everyone together | 150, 2500, 600000 |
 
-The per-person caps are **soft**: anyone can make new six words. The hard limits are the address cap, the site caps, the bot check
-and **the monthly spend limit you set on the key at Anthropic**. Do that first (below). To pause everything at once set
-`"AI_ENABLED": "0"` and redeploy.
+Not limits on use, and still in force: the Turnstile bot check, the `AI_ENABLED` kill switch, the per-answer output caps
+(`MAX_OUT_TOKENS`, `PLAN_MAX_TOKENS`; they bound one answer) and the body size limits. A whole document or a case file counts as 2
+tries when a limit is set. Where limits are set, a refusal from the site-wide caps hands the reader's own tries back.
+
+With the limits off, **the hard ceiling is the monthly spend limit you set on the key at Anthropic** (console.anthropic.com), which
+lives outside this Worker. Do that first (below). To pause everything at once set `"AI_ENABLED": "0"` and redeploy, or switch it off
+on the admin page.
 
 ## Before you deploy: three things in your own accounts
 
@@ -84,6 +95,12 @@ npx wrangler@4 secret put TURNSTILE_SECRET
 npx wrangler@4 secret put ANTHROPIC_API_KEY
 ```
 
+Optional, to turn on the admin page (`docs/ai-admin.md`; until this is set `/admin` and the admin routes answer 404):
+
+```bash
+npx wrangler@4 secret put ADMIN_TOKEN
+```
+
 Check it answers:
 
 ```bash
@@ -108,8 +125,8 @@ The deploy token needs "Workers Scripts: Edit" and, for the Durable Object and t
 ## Taking it back
 
 Pause: set `"AI_ENABLED": "0"` and redeploy. Stop for good: `npx wrangler@4 delete` from this folder. Revoke the key: console.anthropic.com,
-API keys, delete `record-atlas-ai`. Counters are tiny and hold no person; they go with the Worker.
+API keys, delete `record-atlas-ai`. Counters and statistics are tiny and hold no person; they go with the Worker.
 
 ## Run the tests
 
-`cd site && node --test test/ai.test.js` (Claude and Turnstile are faked; no network, no account).
+`cd site && node --test test/ai.test.js test/ai-plan.test.js test/ai-limits.test.js test/ai-admin.test.js` (Claude and Turnstile are faked; no network, no account).

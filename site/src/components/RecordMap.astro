@@ -7481,7 +7481,13 @@ window.addEventListener("load", async function () {
        volumes and once saying it has none, would be the panel arguing with
        itself. */
     var gazSeen = {};
-    places.forEach(function (p) { gazSeen[fold(p.n) + "|" + (p.cc || "")] = 1; });
+    /* The shelf writes a place as «Senj (Senj)» (the settlement in its district) and the gazetteer as «Senj», so the name is also kept WITHOUT the
+       bracket, or the same town was offered twice: once with ten volumes and once saying «no volumes here». */
+    places.forEach(function (p) {
+      var cc = "|" + (p.cc || "");
+      gazSeen[fold(p.n) + cc] = 1;
+      gazSeen[fold(String(p.n).replace(/\s*\([^)]*\)\s*/g, " ").trim()) + cc] = 1;
+    });
     gazetteer(term).then(function (gs) {
       if (sugTerm !== term) return;
       var gkeep = (gs || []).filter(function (g) {

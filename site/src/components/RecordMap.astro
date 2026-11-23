@@ -5975,7 +5975,7 @@ window.addEventListener("load", async function () {
     /* A PLACE THAT IS OPEN, FOR THE SEARCH THAT OPENED IT, IS NOT «NOT HERE». A later pass of apply() (the quiet dots arriving, a filter
        settling) can count zero matches for the label the pick wrote into the box, and the «elsewhere» answer then replaced a place
        panel that was correct: «a refresh on the map suddenly doesn't show anything for a place». Only a changed search may say it. */
-    if (!shown && !atPending && !(panelAt && panelAt === Q.get("at") && qbox.value === panelQ)) elsewhere(qbox.value.trim());
+    if (!shown && !atPending && !(panelAt && panelAt === Q.get("at") && qbox.value === panelQ)) elsewhere(yearsIn(qbox.value).text || qbox.value.trim());   /* the years are the Year control's business, not part of the name: «Defranceski 1851» is the name Defranceski, in 1851 */
   }
 
   /* THE ANSWER TO «A NAME, IN A PLACE».
@@ -7238,6 +7238,15 @@ window.addEventListener("load", async function () {
        that answers when there is no place at all. Every path that stops
        describing a chosen place has to say so. */
     retireVisit();
+    /* THE TYPING NO LONGER NAMES THE OPEN PLACE, SO THE ADDRESS AND THE SHELF STOP NAMING IT. The address kept `at=<last place>` after a search for a surname,
+       and everything that reads «the open place» (the shelf bar, the walk, the card the address reopens) went on describing it. Kept when the words typed
+       are that place's own name (a place and a year: «senj 1951»). */
+    (function () {
+      var atId = Q.get("at"); if (!atId) return;
+      var ap = idx.places.filter(function (x) { return x.i === atId; })[0], an = fold(String((ap && ap.n) || (cache[atId] && cache[atId].name) || "").replace(/\s*\(.*\)\s*$/, "")), ft = fold(term);
+      if (an && ft && (ft.indexOf(an) === 0 || an.indexOf(ft) === 0)) return;
+      setQ("at", ""); if (window.raShelfForget) window.raShelfForget();
+    })();
     /* TYPING A COUNTRY'S NAME SHOULD OPEN THE COUNTRY. David typed «libya» and
        got «Qaṣr Lībiyā», a village whose name happens to contain it, and
        nothing at all about the country — while the country panel, with its
@@ -7942,10 +7951,12 @@ window.addEventListener("load", async function () {
            country the name is oldest in first. The grid sets them side by
            side, which is what .at-body is for and what the place answer
            already does with its three source columns. */
-        order.forEach(function (cc) {
-          if (!cc) return;
+        var withSrc = order.filter(function (cc) { return cc && natProviders(cc).length; });
+        withSrc.forEach(function (cc, i) {
+          /* THE WORLDWIDE SOURCES ONCE, AFTER THE LAST COUNTRY. David, on a name attested in ten countries: «Sources that cover everywhere 49» came back
+             after every country, ten copies of the same list. They are not about any one country. */
           h.push(countrySources(cc, null,
-                                T("The sources for") + " " + (CNAME[cc] || cc)));
+                                T("The sources for") + " " + (CNAME[cc] || cc), undefined, undefined, null, i < withSrc.length - 1));
         });
       } else {
         h.push('<p class="at-sub at-sub-wide">Nothing in this map reaches the countries ' +
@@ -9648,6 +9659,10 @@ window.addEventListener("load", async function () {
     map.on("moveend", function () { if (on) queue(); });
     qbox.addEventListener("input", function () { if (on) queue(); });
     window.raShelfPing = function () { if (on) queue(); };
+    /* A NEW SEARCH THAT IS NOT A PLACE LETS GO OF THE LAST PLACE. David searched «Defranceski 1851» after Saint-Godefroi: the map showed nothing and the shelf
+       still said «On the shelf for Saint-Godefroi». The shelf reads the open place (the address's `at`, else the last one it saw); when the typing stops
+       naming a place, both go. */
+    window.raShelfForget = function () { SH.lastPl = null; if (SH.user === "place" || SH.user === "walk") SH.user = null; if (on) queue(); };
     window.raShelfOn = function () { setOn(true); };
     /* a new area is what the reader is looking at; opening a place takes the shelf back to that place */
     window.raShelfScope = function (a) { SH.areaNew = a === "area"; SH.user = null; if (on) queue(); };

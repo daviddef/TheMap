@@ -37,3 +37,17 @@ test("the place card draws the group after the country's own sources, from the d
   assert.ok(solo.indexOf("familyTreeSites(d.country)") > solo.indexOf("areaCountrySources(R)"), "after the country groups");
   assert.ok(solo.indexOf("familyTreeSites(d.country)") < solo.indexOf("areaGovStates(d)"), "before the governing states");
 });
+
+test("a name attested in several countries lists the worldwide sources once, after the last country that has sources", () => {
+  assert.match(map, /var withSrc = order\.filter\(function \(cc\) \{ return cc && natProviders\(cc\)\.length; \}\);/);
+  assert.match(map, /undefined, undefined, null, i < withSrc\.length - 1\)\);/);
+});
+
+test("a search that does not name the open place lets go of it: the address, and the shelf's memory of it", () => {
+  assert.match(map, /setQ\("at", ""\); if \(window\.raShelfForget\) window\.raShelfForget\(\);/);
+  assert.match(map, /window\.raShelfForget = function \(\) \{ SH\.lastPl = null;/);
+});
+
+test("the years typed after a name are not part of the name that is looked up", () => {
+  assert.match(map, /elsewhere\(yearsIn\(qbox\.value\)\.text \|\| qbox\.value\.trim\(\)\);/);
+});

@@ -10536,6 +10536,17 @@ window.addEventListener("load", async function () {
       background: var(--panel); border: 0;
       border-bottom: 1px solid var(--rule);
     }
+    /* TYPING MUST NOT BE COVERED BY ITS OWN ANSWER. David, on a phone: «I'm trying to type and the overlay keeps popping over the typing area».
+       The sheet is fixed to the bottom of the screen and sized for a screen with no keyboard; while the box has focus the keyboard takes half the
+       screen, the search finds a place after the first letters, the sheet opens, and it sits over the box. While the box is focused the answer
+       flows in under the bar instead (above the map, above the keyboard); when the typing stops it is the sheet again. Not in full screen, where
+       the panel is a row of the fixed grid and does not cover the bar. */
+    :global(body:has(#ra-q:focus) .at-wrap:not(.ra-fs)) { grid-template-areas: "panel" "map" "check"; }
+    :global(body:has(#ra-q:focus) .at-wrap:not(.ra-fs) .at-panel) {
+      position: static; max-height: none; overflow: visible; animation: none;
+      box-shadow: none; border: 1px solid var(--rule); border-radius: 14px; padding: 0 14px 12px;
+    }
+    :global(body:has(#ra-q:focus) .at-wrap:not(.ra-fs) .ra-sheet-x) { display: none; }
   }
   @keyframes ra-sheet-up { from { transform: translateY(18px); opacity: .4; }
                            to   { transform: none; opacity: 1; } }

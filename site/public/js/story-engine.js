@@ -532,6 +532,47 @@
     return cands;
   }
 
+
+  /* OLD AND FOREIGN NAMES the worldwide gazetteer does not index by the name a family used ("Bombay" is a village in New Zealand and four in the US,
+     never Mumbai; "Danzig" is nowhere). Each is the name people wrote for a place that is still there: [old name, modern name, country, longitude, latitude].
+     The modern place is taken from the Atlas's own rows when it has them (so the card links its page), else it is a point of its own. Read from the
+     Wikipedia list of exonyms and the places' own pages; only names that were THE name of one place in the period, never an ambiguous one (no "Canton",
+     no "Queenstown"). Further names are added here, or to data/place-names.json (the dated catalogue) when the place is one the Atlas holds. */
+  var EXO = [
+    ["bombay", "Mumbai", "IN", 72.878, 19.076], ["calcutta", "Kolkata", "IN", 88.364, 22.573], ["madras", "Chennai", "IN", 80.27, 13.083], ["rangoon", "Yangon", "MM", 96.2, 16.867],
+    ["moulmein", "Mawlamyine", "MM", 97.63, 16.49], ["tanjore", "Thanjavur", "IN", 79.139, 10.787], ["poona", "Pune", "IN", 73.857, 18.52], ["benares", "Varanasi", "IN", 83.0, 25.317],
+    ["cawnpore", "Kanpur", "IN", 80.331, 26.449], ["simla", "Shimla", "IN", 77.173, 31.105], ["trivandrum", "Thiruvananthapuram", "IN", 76.936, 8.524], ["peking", "Beijing", "CN", 116.407, 39.904],
+    ["nanking", "Nanjing", "CN", 118.797, 32.06], ["tientsin", "Tianjin", "CN", 117.362, 39.343], ["amoy", "Xiamen", "CN", 118.09, 24.48], ["saigon", "Ho Chi Minh City", "VN", 106.63, 10.823],
+    ["soerabaja", "Surabaya", "ID", 112.75, -7.25], ["salonica", "Thessaloniki", "GR", 22.944, 40.64], ["salonika", "Thessaloniki", "GR", 22.944, 40.64], ["adrianople", "Edirne", "TR", 26.556, 41.677],
+    ["angora", "Ankara", "TR", 32.86, 39.93], ["danzig", "Gdańsk", "PL", 18.646, 54.352], ["konigsberg", "Kaliningrad", "RU", 20.451, 54.71], ["memel", "Klaipėda", "LT", 21.144, 55.703],
+    ["breslau", "Wrocław", "PL", 17.039, 51.107], ["pressburg", "Bratislava", "SK", 17.107, 48.149], ["pozsony", "Bratislava", "SK", 17.107, 48.149], ["cracow", "Kraków", "PL", 19.945, 50.065],
+    ["stettin", "Szczecin", "PL", 14.553, 53.428], ["posen", "Poznań", "PL", 16.931, 52.409], ["reval", "Tallinn", "EE", 24.754, 59.437], ["libau", "Liepāja", "LV", 21.01, 56.51],
+    ["dunaburg", "Daugavpils", "LV", 26.536, 55.875], ["kovno", "Kaunas", "LT", 23.904, 54.898], ["vilna", "Vilnius", "LT", 25.28, 54.687], ["telz", "Telšiai", "LT", 22.247, 55.982],
+    ["kolomea", "Kolomyia", "UA", 25.04, 48.531], ["czernowitz", "Chernivtsi", "UA", 25.935, 48.292], ["agram", "Zagreb", "HR", 15.982, 45.815], ["laibach", "Ljubljana", "SI", 14.506, 46.057],
+    ["spalato", "Split", "HR", 16.44, 43.508], ["ragusa", "Dubrovnik", "HR", 18.094, 42.65], ["cattaro", "Kotor", "ME", 18.771, 42.424], ["albona", "Labin", "HR", 14.123, 45.093],
+    ["parenzo", "Poreč", "HR", 13.595, 45.227], ["rovigno", "Rovinj", "HR", 13.64, 45.081], ["helsingfors", "Helsinki", "FI", 24.94, 60.17], ["fredrikshald", "Halden", "NO", 11.39, 59.12],
+    ["kingstown", "Dún Laoghaire", "IE", -6.135, 53.29], ["leopoldville", "Kinshasa", "CD", 15.322, -4.325], ["elisabethville", "Lubumbashi", "CD", 27.48, -11.66], ["lourenco marques", "Maputo", "MZ", 32.573, -25.966],
+    ["umtali", "Mutare", "ZW", 32.67, -18.97], ["gwelo", "Gweru", "ZW", 29.82, -19.45], ["que que", "Kwekwe", "ZW", 29.82, -18.92], ["hobart town", "Hobart", "AU", 147.33, -42.88],
+    ["van diemens land", "Tasmania", "AU", 146.6, -42.0], ["berlin ontario", "Kitchener", "CA", -80.49, 43.45], ["pernambuco", "Recife", "BR", -34.88, -8.05], ["batavia", "Jakarta", "ID", 106.845, -6.2],
+    ["constantinople", "Istanbul", "TR", 28.978, 41.009], ["smyrna", "Izmir", "TR", 27.14, 38.42], ["trebizond", "Trabzon", "TR", 39.72, 41.0], ["christiania", "Oslo", "NO", 10.75, 59.91],
+    ["lemberg", "Lviv", "UA", 24.03, 49.84], ["lwow", "Lviv", "UA", 24.03, 49.84], ["fiume", "Rijeka", "HR", 14.44, 45.33], ["pola", "Pula", "HR", 13.85, 44.87], ["esseg", "Osijek", "HR", 18.69, 45.55],
+    ["zara", "Zadar", "HR", 15.23, 44.12], ["aintab", "Gaziantep", "TR", 37.38, 37.07]
+  ];
+  var EXO_BY = (function () { var m = Object.create(null); EXO.forEach(function (e) { m[e[0]] = e; }); return m; })();
+  /* put the rows for any old name the story uses at the FRONT of its word, so "Bombay" is the city before it is a village */
+  function withExonyms(text, ctx) {
+    if (!ctx || !ctx.map) return;
+    var f = " " + S.fold(text).replace(/\s+/g, " ") + " ";
+    EXO.forEach(function (e) {
+      if (f.indexOf(" " + e[0] + " ") < 0) return;
+      var rows = ctx.map[e[0]] || (ctx.map[e[0]] = []);
+      if (rows.some(function (r) { return r.exo === e[0]; })) return;
+      var modern = (ctx.map[S.fold(e[1])] || []).filter(function (r) { return r.cc === e[2] && r.c > 0; })[0] || (ctx.map[S.fold(e[1])] || []).filter(function (r) { return r.cc === e[2]; })[0];
+      var row = modern ? Object.assign({}, modern, { exo: e[0] }) : { i: "x-" + e[0].replace(/ /g, "-"), n: e[1], cc: e[2], x: e[3], y: e[4], a: 1, c: 0, w: 1, gaz: true, exo: e[0] };
+      rows.unshift(row);
+    });
+  }
+
   var FORMER = {
     "rhodesia": { cc: ["ZW", "ZM"], stop: "ZW", drop: 1 }, "southern rhodesia": { cc: ["ZW"], stop: "ZW" }, "northern rhodesia": { cc: ["ZM"], stop: "ZM" }, "yugoslavia": { cc: ["HR", "RS", "SI", "BA", "MK", "ME", "XK"], drop: 1 },
     "czechoslovakia": { cc: ["CZ", "SK"], drop: 1 }, "ussr": { cc: ["RU", "UA", "BY", "LT", "LV", "EE", "MD", "GE", "AM", "AZ", "KZ"], drop: 1 }, "soviet union": { cc: ["RU", "UA", "BY", "LT", "LV", "EE", "MD", "GE", "AM", "AZ", "KZ"] },
@@ -645,6 +686,7 @@
   }
 
   function parseStory(text, ctx, attached) {
+    withExonyms(text, ctx);
     var typed = String(text || ""), t = repairCase(typed.replace(/^\u2014 Picture \d+ \([^\n]*\) \u2014[ \t]*$/gm, " "), ctx), teller = "";   /* the line that names a picture read into the story is not story */
     /* "my name is David" says who is telling, not who the story is about */
     t = t.replace(/\bmy name is\s+([\p{L}'’-]+)(?:\s+([\p{Lu}][\p{L}'’-]+))?/iu, function (m, g, sn) { teller = cased(g) + (sn && /^\p{Lu}/u.test(sn) && !CONNECT.test(sn) && !STOP[S.fold(sn)] && !(ctx.map && ctx.map[S.fold(sn)]) ? " " + cased(sn) : ""); return " "; });
@@ -871,6 +913,27 @@
         for (var mk = have + 1; mk <= lf.married; mk++) pl.push({ role: "spouse", name: "", given: "", surname: "", place: null, unnamed: true, told: true, label: (have ? "another " : (ORD[mk] || mk + "th") + " ") + word + " (not named)" });
       }
     }
+    /* EVERY PLACE THE STORY NAMES. A long story names places in sentences the reading of who-went-where does not follow ("the family went down to
+       Christiania and sailed to New York, then west by rail to Duluth"). None of them is thrown away: what no person's route took is kept as "also named
+       in the story", for the map and the records, attributed to nobody. A place in a "whose grandfather came from X" clause is somebody else's, so it is left out. */
+    (function () {
+      var usedW = Object.create(null), usedI = Object.create(null), extra = [];
+      function use(st) { if (!st) return; if (st.word) usedW[st.word] = 1; if (st.row && st.row.i != null) usedI[st.row.i] = 1; }
+      (out.stops || []).forEach(use); (out.route || []).forEach(use); (out.people || []).forEach(function (pe) { use(pe.place); });
+      (out.kin || []).forEach(function (k) { (k.stops || []).forEach(use); });
+      var nameSet = Object.create(null);   /* a word that is part of someone's name, or the story's own surname, is not a place named in passing */
+      [out.name, out.surname, out.given, out.givenWord, teller].concat((out.people || []).map(function (pe) { return pe.name; }), (out.kin || []).map(function (k) { return k.name; })).forEach(function (n) { String(n || "").split(/\s+/).forEach(function (w) { if (w) nameSet[S.fold(w)] = 1; }); });
+      Object.keys(nameW || {}).forEach(function (w) { nameSet[w] = 1; });
+      rolesFor.forEach(function (x) {
+        if (nameSet[x.c.word] || Object.keys(usedW).some(function (k) { return k !== x.c.word && (" " + k + " ").indexOf(" " + x.c.word + " ") > -1; })) return;   /* the short name of a place already told ("Rukavac" in "Gornji Rukavac") */
+        var c = x.c, r0 = c.rows && c.rows[0]; if (!r0 || usedW[c.word] || usedI[r0.i]) return;
+        var win = tokens.slice(Math.max(0, c.at - 9), c.at).join(" ");
+        if (/(?:^| )(?:whose|whos|who s)(?: |$)/.test(win)) return;
+        usedI[r0.i] = 1;
+        extra.push({ row: r0, alts: c.rows.slice(1, 6), word: c.word, role: "mention", year: null, approx: false });
+      });
+      if (extra.length) (out.kin || (out.kin = [])).push({ key: "X", name: "", label: "also named in the story", stops: extra });
+    })();
     return out;
   }
 
@@ -2172,7 +2235,7 @@
         k.stops.forEach(function (st) {
           if (!st.info) return;
           var y = st.year, born = st.role === "born", look = [born ? "Look for the baptism or birth entry of " + (k.name || "this person") + ": it names the parents, and the godparents are often relatives." : "Look for where " + (k.name || "this person") + " lived here: a census or population register and the parish records."];
-          put(st.info, { kicker: who + (born ? " · born here" : st.role === "origin" ? " · from here" : st.role === "married" ? " · married here" : " · lived here"), whenText: y != null ? String(y) : "", year: y, ageText: "", look: look, kinds: born ? ["b"] : [], win: born && y != null ? [y - 1, y + 1] : null, withSources: true, prefix: who + ", ", span: spanOf(y, st.role) });
+          put(st.info, { kicker: who + (born ? " · born here" : st.role === "origin" ? " · from here" : st.role === "married" ? " · married here" : st.role === "mention" ? "" : " · lived here"), whenText: y != null ? String(y) : "", year: y, ageText: "", look: look, kinds: born ? ["b"] : [], win: born && y != null ? [y - 1, y + 1] : null, withSources: true, prefix: who + ", ", span: spanOf(y, st.role) });
         });
       });
       anc.forEach(function (x) {

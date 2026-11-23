@@ -74,7 +74,7 @@
         /* An Atlas place that bears the typed name itself ("Tasmania") comes before one that only lists it among its older or containing names ("Launceston, Tasmania"), whatever their volumes. */
         var hasAl = rows.some(function (r) { return r.al && r.c > 0; });
         var named = function (r) { return hasAl && !r.al && !(r.c > 0) ? 2 : exact(r) === 0 && !own(r) ? 0 : 1; };
-        out.push({ word: w, at: i, rows: rows.slice().sort(function (a, b) { return named(a) - named(b) || (b.c || 0) - (a.c || 0) || (b.v || 0) - (a.v || 0) || exact(a) - exact(b) || own(a) - own(b) || String(a.cc).localeCompare(b.cc); }) });
+        out.push({ word: w, at: i, rows: rows.slice().sort(function (a, b) { return (a.exo ? 0 : 1) - (b.exo ? 0 : 1) || named(a) - named(b) || (b.c || 0) - (a.c || 0) || (b.v || 0) - (a.v || 0) || exact(a) - exact(b) || own(a) - own(b) || String(a.cc).localeCompare(b.cc); }) });
       }
     }
     return out.sort(function (a, b) { return a.at - b.at; });

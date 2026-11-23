@@ -465,3 +465,11 @@ test("the flag icon on a place, country or name card opens the Atlas's own flag 
   assert.match(src, /href="' \+ BASE \+ "flags\/" \+ FLAG_SLUG\[String\(cc\)\.toUpperCase\(\)\] \+\s*'-flags\/" title="'/);
   assert.doesNotMatch(src, /FLAG_BASE \+ FLAG_SLUG/);
 });
+
+test("search list: a bracket that repeats the name is dropped, gazetteer rows have no side rule", () => {
+  const src = readFileSync(join(root, "src/components/RecordMap.astro"), "utf8");
+  assert.match(src, /function sugName\(n\)/);
+  assert.match(src, /esc\(sugName\(p\.n\)\)/);
+  assert.doesNotMatch(src, /\.ra-sug-g\) \{ border-left/);
+  assert.match(src, /no registers held/);
+});

@@ -7985,6 +7985,12 @@ window.addEventListener("load", async function () {
 
      The gazetteer is a fetch, so it arrives the same way surnames already do:
      the list paints on drawn places first and grows when the shard lands. */
+  /* «Senj (Senj)» is the shelf's own «settlement (district)» label; when the
+     bracket only repeats the name it says nothing, so it is not shown. */
+  function sugName(n) {
+    var m = /^(.*?)\s*\(([^)]*)\)\s*$/.exec(String(n));
+    return m && m[1] && fold(m[1]) === fold(m[2]) ? m[1] : String(n);
+  }
   function sugRender(places, names, gaz) {
     sugRows = [];
     var h = [];
@@ -7994,7 +8000,7 @@ window.addEventListener("load", async function () {
         var i = sugRows.length; sugRows.push({ kind: "place", p: p });
         h.push('<button type="button" role="option" aria-selected="false" ' +
                'class="ra-sug-r" data-i="' + i + '">' +
-               '<span class="ra-sug-n">' + esc(p.n) + "</span>" +
+               '<span class="ra-sug-n">' + esc(sugName(p.n)) + "</span>" +
                (p.cc ? '<span class="ra-sug-m">' + esc(CNAME[p.cc] || p.cc) + "</span>" : "") +
                (p.c ? '<span class="ra-sug-c">' + p.c + " " +
                       esc(T(p.c === 1 ? "volume" : "volumes")) + "</span>" : "") +
@@ -8013,7 +8019,7 @@ window.addEventListener("load", async function () {
              (g[3] ? '<span class="ra-sug-m">' + esc(CNAME[g[3]] || g[3]) +
                      "</span>" : "") +
              '<span class="ra-sug-c">' + (g[6] === "isl" ? "island · " : "") +
-             "no volumes here</span></button>");
+             "no registers held</span></button>");
     });
     if (names && names.length) {
       h.push('<p class="ra-sug-h">' + esc(T("Names")) + "</p>");
@@ -11378,10 +11384,10 @@ window.addEventListener("load", async function () {
     font-size: 10.5px; color: var(--ink-3); white-space: nowrap; }
   /* A GAZETTEER ROW IS A REAL ANSWER AND A LESSER ONE. It is the name you
      typed and a place that exists; it is not somewhere this atlas has walked
-     a register. Marked by a rule rather than by dimming — opacity would take
-     the contrast down with it, which this project has already paid for once
-     — so it reads as a second rank without becoming hard to read. */
-  :global(.ra-sug-g) { border-left: 2px solid var(--rule-strong); }
+     a register. Marked by a lighter weight and its own label, with no side
+     rule (it read as a stray bracket) and no opacity (that takes the
+     contrast down with it). */
+  :global(.ra-sug-g .ra-sug-n) { font-weight: 400; color: var(--ink-2); }
 
   .ra-recent { position: absolute; top: calc(100% + 6px); left: 0; right: 0;
                z-index: 40; display: flex; align-items: center; gap: 6px;

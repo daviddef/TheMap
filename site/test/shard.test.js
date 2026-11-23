@@ -25,3 +25,9 @@ test("a bad value is refused, not ignored", () => {
   process.env.RA_SHARD = "9/4";
   try { assert.throws(() => inShard("x")); } finally { delete process.env.RA_SHARD; }
 });
+
+test("none keeps no generated page, and unset still keeps every one", () => {
+  process.env.RA_SHARD = "none";
+  try { assert.equal(inShard("senj"), false); assert.equal(inShard("anything"), false); } finally { delete process.env.RA_SHARD; }
+  assert.equal(inShard("senj"), true);
+});

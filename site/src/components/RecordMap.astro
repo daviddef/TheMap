@@ -3988,12 +3988,8 @@ window.addEventListener("load", async function () {
     var ctl = "";
     if (TSV2) {
       var st = REACH.id === d.id ? REACH.state : "";
-      ctl = '<span class="ra-reach" role="group" aria-label="' + esc(T("How long a walk")) + '">' +
-        REACH_HOURS.map(function (o) {
-          return '<button type="button" data-reach-h="' + o[0] + '" aria-pressed="' + (o[0] === REACH.h) + '">' + esc(T(o[1])) + "</button>";
-        }).join("") +
-        "</span>" +
-        (st === "loading" ? '<span class="ra-reach-s ra-reach-ld" role="status">' + esc(T("Working out the walk…")) + "</span>" : "") +
+      /* the hours are chosen from the neighbours button on the map (reachPop), not here: the card keeps its line for the answer */
+      ctl = (st === "loading" ? '<span class="ra-reach-s ra-reach-ld" role="status">' + esc(T("Working out the walk…")) + "</span>" : "") +
         (st === "failed" ? '<span class="ra-reach-s">' + esc(T("The terrain did not load, so this is a plain circle.")) + "</span>" : "") +
         (st === "clamped" ? '<span class="ra-reach-s">' + esc(T("Cut short at the edge of the terrain loaded.")) + "</span>" : "");
     }
@@ -5662,7 +5658,12 @@ window.addEventListener("load", async function () {
        under a heading that said «1,640 places match "de"» while the box read
        defranceski. Cleared at the top of every search, and rebuilt below only
        if this search has matches of its own. */
-    if (t !== lastHitFor) { hitLayer.clearLayers(); lastHitFor = null; clearHood(); }
+    if (t !== lastHitFor) {
+      hitLayer.clearLayers(); lastHitFor = null;
+      /* a place card still on screen keeps its walk: on first load this ran after the ?at= place had asked for its walk, cancelled it, and left the card
+         saying «Working out the walk…» for good. The branches that answer with something other than a place retire it themselves (retireVisit). */
+      if (!panelAt || panel.hidden) clearHood();
+    }
     splitQuery(t);
     if (qPlace) t = qPlace;
     syncCountryDots();
@@ -8927,6 +8928,51 @@ window.addEventListener("load", async function () {
     rcIdx = null; paintProgressRings(); rcRepaint(); areaRender(); areaAddUi();
   }
   /* The control, the hint bar and the result bar share one click handler on the map's container. */
+  /* THE NEIGHBOURS BUTTON OPENS THE WALK'S HOURS. David: «can the hours be shown when i click the neighbours icon». On v2 the button no longer flips the ring
+     on and off at once: it opens a small panel beside it with 1 h, 2 h, 4 h and 6 h (the same buttons the reach code listens for) and a switch to hide the
+     ring and the numbered places. Choosing an hour also turns them on. */
+  var reachPopEl = null, reachPopBtn = null;
+  function hoodApply(on, tg) {
+    hoodOn = on;
+    try { localStorage.setItem("ra-hood", hoodOn ? "1" : "0"); } catch (x) { /* storage blocked */ }
+    if (hoodOn) { if (hoodLayer.getLayers().length) hoodLayer.addTo(map); if (checkPins.length) checkLayer.addTo(map); }
+    else { map.removeLayer(hoodLayer); map.removeLayer(checkLayer); }
+    if (tg) { tg.classList.toggle("off", !hoodOn); tg.setAttribute("aria-pressed", String(hoodOn)); }
+  }
+  function reachPopSync() {
+    if (!reachPopEl) return;
+    [].forEach.call(reachPopEl.querySelectorAll("[data-reach-h]"), function (b) { b.setAttribute("aria-pressed", String(hoodOn && +b.getAttribute("data-reach-h") === REACH.h)); });
+    var off = reachPopEl.querySelector("[data-rp-off]"); if (off) { off.setAttribute("aria-pressed", String(!hoodOn)); off.textContent = hoodOn ? T("Hide the ring") : T("Show the ring"); }
+  }
+  function reachPopClose() { if (reachPopEl) { reachPopEl.hidden = true; if (reachPopBtn) reachPopBtn.setAttribute("aria-expanded", "false"); } }
+  function reachPopToggle(tg) {
+    var box = map.getContainer();
+    if (!reachPopEl) {
+      reachPopEl = document.createElement("div"); reachPopEl.className = "fd2-reachpop"; reachPopEl.hidden = true; reachPopEl.setAttribute("role", "group"); reachPopEl.setAttribute("aria-label", T("How long a walk"));
+      reachPopEl.innerHTML = '<span class="fd2-rp-l">' + esc(T("Neighbours within a walk of")) + '</span><span class="ra-reach">' +
+        REACH_HOURS.map(function (o) { return '<button type="button" data-reach-h="' + o[0] + '" aria-pressed="false">' + esc(T(o[1])) + "</button>"; }).join("") +
+        '</span><button type="button" class="fd2-rp-off" data-rp-off aria-pressed="false"></button>';
+      L.DomEvent.disableClickPropagation(reachPopEl);
+      reachPopEl.addEventListener("click", function (e) {
+        if (e.target.closest("[data-rp-off]")) { hoodApply(!hoodOn, reachPopBtn); reachPopSync(); return; }
+        if (e.target.closest("[data-reach-h]") && !hoodOn) hoodApply(true, reachPopBtn);
+        setTimeout(reachPopSync, 0);
+      });
+      box.appendChild(reachPopEl);
+      document.addEventListener("keydown", function (e) { if (e.key === "Escape") reachPopClose(); });
+      document.addEventListener("click", function (e) { if (reachPopEl && !reachPopEl.hidden && !e.target.closest(".fd2-reachpop") && !e.target.closest("a[data-hood]")) reachPopClose(); });
+    }
+    reachPopBtn = tg;
+    if (!reachPopEl.hidden) { reachPopClose(); return; }
+    var br = tg.getBoundingClientRect(), cr = box.getBoundingClientRect();
+    reachPopEl.hidden = false; reachSyncPos(br, cr);
+    tg.setAttribute("aria-expanded", "true"); reachPopSync();
+  }
+  function reachSyncPos(br, cr) {
+    var w = reachPopEl.offsetWidth, onRight = (br.left + br.width / 2 - cr.left) > cr.width / 2;
+    reachPopEl.style.top = Math.max(8, br.top - cr.top - 4) + "px";
+    reachPopEl.style.left = (onRight ? Math.max(8, br.left - cr.left - w - 10) : br.right - cr.left + 10) + "px";
+  }
   (function () {
     var Ctl = L.Control.extend({
       onAdd: function () {
@@ -8944,6 +8990,7 @@ window.addEventListener("load", async function () {
         L.DomEvent.disableClickPropagation(d);
         d.addEventListener("click", function (e) {
           var tg = e.target.closest("a[data-hood]");
+          if (tg && TSV2) { e.preventDefault(); reachPopToggle(tg); return; }
           if (tg) {
             e.preventDefault(); hoodOn = !hoodOn;
             try { localStorage.setItem("ra-hood", hoodOn ? "1" : "0"); } catch (x) { /* storage blocked */ }

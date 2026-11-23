@@ -459,8 +459,7 @@ body.fd2-immersive .fd2-stage::after { border-radius: 0; }
 .fd2-stage .ra-surn .ra-chips > :nth-child(n+5) { display: none; }
 .fd2-stage .ra-surn .ra-tw-r { margin: 5px 0; }
 .fd2-stage details.ra-in-card > summary.lab { cursor: pointer; list-style: none; }
-.fd2-stage details.ra-in-card > summary.lab::before { content: "\25B8"; display: inline-block; margin-right: 6px; transition: transform .15s; }
-.fd2-stage details.ra-in-card[open] > summary.lab::before { transform: rotate(90deg); }
+
 
 /* the fold control: a chevron in the same round button as the place card's icons */
 .fd2-stage .fd2-fold .fd2-fold-x { display: inline-grid; place-items: center; }
@@ -499,6 +498,24 @@ body.fd2-immersive .fd2-stage::after { border-radius: 0; }
 .fd2-stage .ra-visit .ra-hood-r { display: flex; justify-content: flex-end; }
 .fd2-stage .ra-visit .ra-reach-s { margin: 0; flex: 1 0 100%; }
 .fd2-stage .ra-visit .ra-reach-ld { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; flex: none; }
-.fd2-stage .ra-visit .ra-reach:has(~ .ra-reach-ld) button[aria-pressed="true"] { animation: fd2-walk 1s ease-in-out infinite alternate; }
+.fd2-stage .ra-visit .ra-hood:has(.ra-reach-ld) .ra-hood-k { animation: fd2-walk 1s ease-in-out infinite alternate; }
 @keyframes fd2-walk { from { opacity: 1; } to { opacity: .45; } }
-@media (prefers-reduced-motion: reduce) { .fd2-stage .ra-visit .ra-reach:has(~ .ra-reach-ld) button[aria-pressed="true"] { animation: none; opacity: .6; } }
+@media (prefers-reduced-motion: reduce) { .fd2-stage .ra-visit .ra-hood:has(.ra-reach-ld) .ra-hood-k { animation: none; opacity: .6; } }
+
+/* the neighbours button's panel: the walk's hours beside the button, and a switch for the ring */
+.fd2-stage .fd2-reachpop { position: absolute; z-index: 1100; display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--rule-strong, #bdb9ad);
+  background: var(--panel, #f7f6f2); box-shadow: 0 6px 22px rgba(10, 20, 26, .22); color: var(--ink, #16222a); }
+.fd2-stage .fd2-reachpop[hidden] { display: none; }
+.fd2-stage .fd2-rp-l { font: 700 10.5px/1.3 var(--mono, ui-monospace, monospace); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2, #4c5d66); }
+.fd2-stage .fd2-reachpop .ra-reach { display: flex; gap: 6px; }
+.fd2-stage .fd2-rp-off { align-self: flex-start; font: 600 12px/1 var(--sans, system-ui, sans-serif); padding: 7px 11px; border-radius: 99px; border: 1px solid var(--rule-strong, #b6b2a6); background: transparent; color: var(--ink-2, #4c5d66); cursor: pointer; }
+.fd2-stage .fd2-rp-off:hover { border-color: var(--accent, #1f5c6b); color: var(--accent, #1f5c6b); }
+
+/* ONE FOLD MARK FOR EVERY SECTION OF A CARD. David: «why different bullets/collapse icons?». The books, the country-wide sources, Visiting and Where to read all
+   fold the same way, so they carry the same small chevron (right when shut, down when open) and none of them carries a coloured dot in front of its name. */
+.fd2-stage details.ra-in-card > summary.lab::before, .fd2-stage details.ra-area-solo-l > summary::before, .fd2-stage details.ra-area-cov > summary::before, .fd2-stage details.ra-area-rd > summary::before {
+  content: ""; flex: none; display: inline-block; width: 6px; height: 6px; margin: 0 9px 2px 3px; border-right: 1.6px solid currentColor; border-bottom: 1.6px solid currentColor; transform: rotate(-45deg); transition: transform .15s; }
+.fd2-stage details[open].ra-in-card > summary.lab::before, .fd2-stage details[open].ra-area-solo-l > summary::before, .fd2-stage details[open].ra-area-cov > summary::before, .fd2-stage details[open].ra-area-rd > summary::before { transform: rotate(45deg); margin-bottom: 4px; }
+.fd2-stage details.ra-area-cov > summary > i, .fd2-stage details.ra-area-rd > summary > i { display: none; }
+.fd2-stage details.ra-area-solo-l > summary, .fd2-stage details.ra-area-cov > summary, .fd2-stage details.ra-area-rd > summary, .fd2-stage details.ra-in-card > summary.lab { cursor: pointer; list-style: none; }
+.fd2-stage details > summary::-webkit-details-marker { display: none; }

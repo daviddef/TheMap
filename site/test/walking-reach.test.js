@@ -326,3 +326,20 @@ test("the Visiting header is one line: the note and the walk's hours share a row
   assert.match(css, /\.ra-reach-ld \{ position: absolute; width: 1px;/);
   assert.match(css, /@keyframes fd2-walk/);
 });
+
+test("on v2 the neighbours button opens the walk's hours (and a switch for the ring); a card that is still on screen keeps its walk when the search settles", () => {
+  const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
+  assert.match(map, /if \(tg && TSV2\) \{ e\.preventDefault\(\); reachPopToggle\(tg\); return; \}/);
+  assert.match(map, /className = "fd2-reachpop"/);
+  assert.doesNotMatch(map, /ctl = '<span class="ra-reach" role="group"/, "the hours are no longer in the card's note");
+  assert.match(map, /if \(!panelAt \|\| panel\.hidden\) clearHood\(\);/);
+  assert.match(css, /^\.fd2-stage \.fd2-reachpop \{/m);
+  assert.doesNotMatch(map, /DBGREACH/);
+});
+
+test("every foldable section of a v2 card carries the same chevron and no coloured dot", () => {
+  const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
+  assert.match(css, /details\.ra-area-solo-l > summary::before, \.fd2-stage details\.ra-area-cov > summary::before/);
+  assert.match(css, /details\.ra-area-cov > summary > i, \.fd2-stage details\.ra-area-rd > summary > i \{ display: none; \}/);
+  assert.doesNotMatch(css, /content: "\\25B8"/, "the old triangle is gone");
+});

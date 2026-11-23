@@ -2267,7 +2267,13 @@
       var c = el("div", null, "lf-card lf-card-" + pe.role + (pe.empty ? " lf-card-empty" : ""));
       c.append(el("div", label, "lf-card-role"), el("div", pe.name || (pe.empty ? "Not in the story yet" : pe.me ? "The one telling the story" : "Name not given"), "lf-card-name"));
       var hasBorn = (pe.events || []).some(function (e) { return e.type === "born" && e.place; });
-      if (pe.place && !hasBorn) c.append(el("div", (pe.role === "self" && !pe.events ? "Born in " : "From ") + (typeof pe.place === "string" ? pe.place : pe.place.word), "lf-card-place"));
+      /* the places told of this person, in order, from the reading of the family (what used to be a row of pills under the story box) */
+      var kinRoute = (opts && opts.kin || []).filter(function (k) { return (k.key && pe.key && k.key === pe.key) || (!pe.key && k.label && new RegExp("\\b" + pe.role + "\\b", "i").test(k.label)); })[0], rs = kinRoute ? (kinRoute.stops || []).filter(function (x) { return x.info; }) : [];
+      if (rs.length) {
+        var first = rs[0].role, rt = (first === "born" ? "Born in " : first === "origin" ? "From " : "Places: ") + rs.map(function (x) { return x.info.name + (x.year != null ? " " + x.year : ""); }).join(" \u2192 ");
+        c.append(el("div", rt, "lf-card-place lf-card-route"));
+      }
+      else if (pe.place && !hasBorn) c.append(el("div", (pe.role === "self" && !pe.events ? "Born in " : "From ") + (typeof pe.place === "string" ? pe.place : pe.place.word), "lf-card-place"));
       (pe.events || []).forEach(function (e) {
         var t = (e.type === "born" ? "Born" : e.type === "married" ? "Married" : e.type === "lived" ? "Lived" : "Died") + (e.year != null ? " " + e.year : "") + (e.place ? (e.year != null ? ", " : " in ") + e.place : "") + (e.cause ? " (" + e.cause + ")" : "");
         c.append(el("div", t, "lf-card-place lf-card-ev"));

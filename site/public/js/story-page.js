@@ -82,36 +82,19 @@
       d.append(document.createTextNode("?")); box.append(d);
     });
   }
+  /* What the page understood is shown where it belongs (the family tree's cards, the place cards), not as a row of pills. What is left here is
+     only what needs a person: a place the Atlas could read two ways, a missing starting place, a picture still unread. */
   function drawChips(p) {
     drawDid(p); chips.textContent = "";
-    if (p.teller) chips.append(chip("you: " + p.teller, "", "teller:" + p.teller));
-    if (p.rel) chips.append(chip(p.rel.replace(/-/g, " "), "", "rel:" + p.rel));
-    if (p.name) chips.append(chip(p.name, "", "nm:" + p.name));
-    if (p.occupations && p.occupations.length) chips.append(chip("work: " + p.occupations.join(", "), "", "oc:" + p.occupations.join()));
-    if (p.life && p.life.died) chips.append(chip("died" + (p.life.died.cause ? (/^(?:murdered|drowned|killed|executed|hanged|shot|perished|taking|succumbed)/.test(p.life.died.cause) ? " " + p.life.died.cause : " of " + p.life.died.cause.replace(/^(?:of|from) /, "")) : "") + (p.life.died.year != null ? ", " + p.life.died.year : ""), "", "dd:" + p.life.died.year));
-    if (p.life && p.life.illness && p.life.illness.length) chips.append(chip("had " + p.life.illness.join(", ") + (p.life.nearDeath ? ", nearly died" : ""), "", "ill:" + p.life.illness.join()));
-    if (p.life && p.life.married > 1) chips.append(chip("married " + (p.life.married === 2 ? "twice" : p.life.married + " times"), "", "mm:" + p.life.married));
-    if (p.life && p.life.groups.length) chips.append(chip("heard " + p.life.groups.reduce(function (a, g) { return a + g.items.length; }, 0) + " things about them, kept as told", "", "lf:" + p.life.groups.length));
-    if (p.siblings && p.siblings.length) p.siblings.forEach(function (sb) { chips.append(chip(sb.label + " " + sb.name, "", "sb:" + sb.label + sb.name)); });
-    if (p.people) p.people.forEach(function (pe) {
-      if (p.noRoute || p.sought) { if (pe.role !== "self") chips.append(chip((pe.label || pe.role) + (pe.name ? " " + pe.name : ""), "", "pe:" + pe.key + pe.name)); }
-      else if (pe.role !== "self" && pe.name) chips.append(chip("his " + (pe.label || pe.role) + " " + pe.name, "", "pe:" + pe.role + pe.name));
-    });
     var stopsShown = p.stops && p.stops.length ? p.stops : [p.from && Object.assign({ role: "origin" }, p.from), p.to && Object.assign({ role: "move" }, p.to)].filter(Boolean);
     if (!stopsShown.length && !tellable(p) && text.value.trim().length > 12) chips.append(chip("Where did they start? Name the place", "warn", "nof"));
     stopsShown.forEach(function (st) {
       var more = st.alts && st.alts.length, lab = placeLabel(st.row);
-      var pre = st.role === "born" ? "born in " : st.role === "origin" ? "from " : st.role === "father-from" ? "his father from " : st.role === "mother-from" ? "his mother from " : st.age != null ? (st.approx ? "about age " : "age ") + st.age + ": " : st.role === "lived" ? "in " : "to ";
-      chips.append(chip(pre + lab + (st.yearTold ? ", " + st.year : "") + (more ? "  ▾" : ""), st.role === "born" || st.role === "origin" ? "from" : "to", "s:" + st.row.i + st.role, more ? function () {
+      if (!more) return;
+      chips.append(chip(lab + (st.yearTold ? ", " + st.year : "") + "  ▾  (not this one? tap to try " + placeLabel(st.alts[0]) + ")", "to", "s:" + st.row.i + st.role, function () {
         ov[st.word] = { row: st.alts[0], alts: st.alts.slice(1).concat([st.row]) }; lastSig = ""; run();
-      } : null));
+      }));
     });
-    (p.kin || []).forEach(function (k) {
-      if (!p.noRoute && !p.sought) return;
-      k.stops.forEach(function (st) { chips.append(chip((k.label || "family") + (k.name ? " " + k.name : "") + ": " + (st.role === "born" ? "born in " : st.role === "origin" ? "from " : st.role === "married" ? "married in " : "to ") + placeLabel(st.row), st.role === "born" || st.role === "origin" ? "from" : "to", "k:" + k.key + st.row.i + st.role)); });
-    });
-    if (p.born) chips.append(chip("born about " + p.born, "", "b:" + p.born));
-    if (p.left && !stopsShown.some(function (st) { return st.yearTold; })) chips.append(chip("about " + p.left, "", "l:" + p.left));
     if (p.holds !== "story" || files.length) chips.append(chip((E.HOLDS[p.holds] || E.HOLDS.story).t.replace(/^a /, "") + (files.length ? ", kept here" : ""), "warn", "h:" + p.holds));
     var unread = files.filter(function (x) { return !x.r; }).length;
     if (unread) chips.append(chip("Read " + (unread === 1 ? "the picture" : unread + " pictures") + " with Claude", "warn", "readpics", function () { readPics(); }));
@@ -191,7 +174,7 @@
     var lb = E.lifeBlock(g.life, g.mort), lbox = $("sp-lifebox"); lbox.textContent = ""; secShow("sp-life", !!lb); if (lb) lbox.append(lb);
     var nb = E.namesBlock(g.names, BASE), nbox = $("sp-namesbox"); nbox.textContent = ""; secShow("sp-names", !!nb);
     if (nb) { nbox.append(nb); [].forEach.call(nb.querySelectorAll("details"), function (d) { d.open = true; }); }
-    var tr = E.treeBlock(g.people, f.rel, { onEdit: editBox }), tbox = $("sp-tree"); tbox.textContent = ""; secShow("sp-family", !!tr); if (tr) tbox.append(tr);
+    var tr = E.treeBlock(g.people, f.rel, { onEdit: editBox, kin: f.kin }), tbox = $("sp-tree"); tbox.textContent = ""; secShow("sp-family", !!tr); if (tr) tbox.append(tr);
     secShow("sp-setting", true);
     secShow("sp-plan", true); drawSteps(g);
     secShow("sp-keep", true); drawKeep(g);

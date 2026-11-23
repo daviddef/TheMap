@@ -822,6 +822,14 @@ LINE_NAME = {
 }
 
 
+# THE KIND OF RECORD IS NOT A FAMILY. David: «theres a family called death?» The Falco archive tags its death registers `Death`, and its list of
+# surnames carries DEATH (a surname in the tree, or a stray field), so the rule that a tag counts as a family when the archive's surname list says
+# so filed the five death-register walks under a family called Death. A word that names a kind of register is never a family tag, whatever the
+# surname list holds; the row falls back to the archive's own family, which is who did the walk.
+RECORD_WORDS = {"death", "deaths", "birth", "births", "marriage", "marriages", "baptism", "baptisms", "christening", "christenings",
+                "burial", "burials", "census", "probate", "banns", "confirmation", "confirmations"}
+
+
 def build_family_index():
     """Which tag words genuinely name a family, per archive.
 
@@ -1136,7 +1144,7 @@ def main():
     cols = build_collection_index()
     fam_names = build_family_index()
     # Words that are not families even when they collide with a surname.
-    not_family = set()
+    not_family = set(RECORD_WORDS)
     for p in (json.load(io.open("data/providers.json", encoding="utf-8"))
               ["providers"]):
         not_family.add(squash(p["id"]))

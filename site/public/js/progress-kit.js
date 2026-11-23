@@ -289,6 +289,39 @@
       });
       return out;
     }
+    /* TWO FAMILIES BECOMING ONE. The work of `b` is folded into `a` the way two machines' work is: pages are unioned, never lost, a note is
+       joined, the state that is further along wins, and the later date stands. Nothing is attributed to a family that did not do it, because
+       the reader asked for the two to be one. */
+    var STATE_RANK = { planned: 1, written: 2, blocked: 3, searched: 4, found: 5, exhausted: 6 };
+    function foldBy(a, b) {
+      a.done = merge((a.done || []).concat(b.done || []));
+      if (!a.done.length) delete a.done;
+      if (b.state && (!a.state || (STATE_RANK[b.state] || 0) > (STATE_RANK[a.state] || 0))) a.state = b.state;
+      if (b.note) a.note = joinNotes(a.note, b.note);
+      if (b.since && (!a.since || b.since > a.since)) a.since = b.since;
+      return a;
+    }
+    /* Move every mark of line `from` under line `into` and drop `from`. Used by mergeLines and, quietly, when a merge made on another
+       machine arrives. Returns how many marks moved. */
+    function moveLine(d, from, into) {
+      var moved = 0;
+      Object.keys(d.marks).forEach(function (k) {
+        var m = d.marks[k]; if (!m.by || !m.by[from]) return;
+        m.by[into] = m.by[into] ? foldBy(m.by[into], m.by[from]) : m.by[from];
+        delete m.by[from]; moved++;
+      });
+      d.alias = d.alias || {};
+      d.alias[from] = into;
+      Object.keys(d.alias).forEach(function (k) { if (d.alias[k] === from) d.alias[k] = into; });
+      delete d.lines[from];
+      if (d.active === from) d.active = into;
+      return moved;
+    }
+    /* A family the reader merged or removed, followed to where its work now lives: a slug, "" for removed, or the slug itself. */
+    function resolveLine(al, sl) {
+      for (var i = 0; sl && al && al[sl] !== undefined && i < 10; i++) sl = al[sl];
+      return sl;
+    }
     function fmt(ranges) {
       return (ranges || []).map(function (p) {
         return p[0] === p[1] ? String(p[0]) : p[0] + "–" + p[1];
@@ -396,6 +429,7 @@
         var base = slugify(name + (where ? "-" + where : "")) || "line";
         var slug = base, n = 2;
         while (d.lines[slug]) { slug = base + "-" + (n++); }
+        if (d.alias) delete d.alias[slug];
         d.lines[slug] = { name: String(name || "Untitled").trim(),
                           where: String(where || "").trim(), made: today() };
         d.active = slug;
@@ -421,9 +455,22 @@
           if (d.marks[k].by) delete d.marks[k].by[slug];
           tidy(k);
         });
+        /* REMEMBERED, so the next publish of the family sessions does not bring it back: a family the reader removed stays removed. */
+        d.alias = d.alias || {}; d.alias[slug] = "";
+        Object.keys(d.alias).forEach(function (k) { if (d.alias[k] === slug) d.alias[k] = ""; });
         if (d.active === slug) d.active = "";
         save();
         return true;
+      },
+      /* TWO FAMILIES ARE ONE. David: «some of these are the same, e.g. defranceski and defranceschi … how do we combine?» Everything `from`
+         holds (pages, states, notes) moves under `into`, `from` is removed, and the choice is remembered, so the published sessions' copy of
+         `from` is folded into `into` from then on instead of coming back as a second family. Returns {moved} or null. */
+      mergeLines: function (from, into) {
+        var d = load();
+        if (!from || !into || from === into || !d.lines[from] || !d.lines[into]) return null;
+        var moved = moveLine(d, from, into);
+        save();
+        return { moved: moved, into: into };
       },
 
       /* ---- MARKS ------------------------------------------------------ */
@@ -531,8 +578,9 @@
       },
       toJSON: function () {
         var d = load();
-        return JSON.stringify({ v: 2, exported: today(), lines: d.lines,
-                                active: d.active, marks: d.marks }, null, 1);
+        var out = { v: 2, exported: today(), lines: d.lines, active: d.active, marks: d.marks };
+        if (d.alias && Object.keys(d.alias).length) out.alias = d.alias;
+        return JSON.stringify(out, null, 1);
       },
       fromJSON: function (text, mode) {
         var inc = JSON.parse(text);
@@ -559,9 +607,37 @@
           });
           inc.marks = lifted;
         } else {
+          /* A FAMILY THE READER MERGED OR REMOVED IS NOT BROUGHT BACK. The choices made here (and on another machine, which sends its own) are
+             followed: an incoming family that was merged lands in the one it was merged into, one that was removed is left out. A "replace"
+             import is a restore and keeps what the file says. */
+          var al = d.alias = d.alias || {};
+          if (mode !== "replace") {
+            Object.keys(inc.alias || {}).forEach(function (k) { if (typeof inc.alias[k] === "string" && !(k in al)) al[k] = inc.alias[k]; });
+            Object.keys(al).forEach(function (k) {
+              var t = al[k];
+              if (t && d.lines[k] && (d.lines[t] || (inc.lines && inc.lines[t]))) {
+                if (!d.lines[t]) d.lines[t] = inc.lines[t];
+                moveLine(d, k, t);
+              }
+            });
+          }
           Object.keys(inc.lines).forEach(function (sl) {
+            if (mode !== "replace" && al[sl] !== undefined) return;
             if (!d.lines[sl]) d.lines[sl] = inc.lines[sl];
           });
+          if (mode !== "replace") {
+            Object.keys(inc.marks).forEach(function (k) {
+              var by = inc.marks[k].by; if (!by) return;
+              Object.keys(by).forEach(function (sl) {
+                if (al[sl] === undefined) return;
+                var t = resolveLine(al, sl);
+                if (t && t !== sl && d.lines[t]) by[t] = by[t] ? foldBy(by[t], by[sl]) : by[sl];
+                delete by[sl];
+              });
+              /* a mark whose only work was a removed family's is not carried in as an empty husk */
+              if (!Object.keys(by).length && !(inc.marks[k].walked || []).length) delete inc.marks[k];
+            });
+          }
         }
         Object.keys(inc.marks).forEach(function (k) {
           var incoming = inc.marks[k];

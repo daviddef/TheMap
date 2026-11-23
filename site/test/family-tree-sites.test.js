@@ -74,3 +74,8 @@ test("the search box offers sources, by name first and then by what they say the
   assert.match(map, /if \(row\.kind === "source"\)/);
   assert.match(map, /function openSource\(p\)/);
 });
+
+test("the typed surname is named in a given-name-plus-surname answer, even when the catalogue holds no family for it", () => {
+  assert.match(map, /tailSur = tpar\.sur/);
+  assert.match(map, /tcard\.indexOf\(T\("Surname"\) \+ "<\/span>"\) < 0/);
+});

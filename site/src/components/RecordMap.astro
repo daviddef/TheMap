@@ -7345,14 +7345,14 @@ window.addEventListener("load", async function () {
        ivan defranceski doesnt?» — «ivan» alone and «Defranceski» alone both drew «Where the name was, and when»; typed together, nothing matched the
        whole string as a surname, so only the catalogue card came back. When the whole string is no surname and no place, take the surname off the end
        the way the name card does and answer with ITS placement (the countries, the bars, the map), under the card that says what the given name is. */
-    var tailName = false;
+    var tailName = false, tailSur = "";
     if (!names.length && !hits.length && !exact) {
       try {
         var tcat = await nameCatalogues(), tpar = tcat && yearsIn(term).text ? ncParse(tcat, yearsIn(term).text) : null;
         if (tpar && tpar.given && tpar.given.length && tpar.sur) {
           var tn = await surnames(tpar.sur);
           if (stale()) return;
-          if (tn.length) { names = tn; tailName = true; }
+          if (tn.length) { names = tn; tailName = true; tailSur = tpar.sur; }
         }
       } catch (e) { /* the card alone is still an answer */ }
     }
@@ -7441,8 +7441,14 @@ window.addEventListener("load", async function () {
     }
     h.push("</div>");
     if (names.length) {
-      if (tailName) { var tcard = await nameCardFor(term); if (stale()) return; if (tcard) h.push(tcard); }
-      h.push(renderSurnames(names, tailName ? names[0].n : term));
+      if (tailName) {
+        var tcard = await nameCardFor(term); if (stale()) return; if (tcard) h.push(tcard);
+        /* THE SURNAME IS NAMED, TOO. David, on the card: «defranceski not showing? just ivan?» The given name had its block and the surname, when the catalogue
+           holds no family for that spelling, had none, so the placement underneath read as if it belonged to «ivan». Say whose it is. */
+        if (!tcard || tcard.indexOf(T("Surname") + "</span>") < 0)
+          h.push('<div class="ra-nc"><div class="ra-nc-u"><h4>' + esc(tailSur) + "<span>" + esc(T("Surname")) + "</span></h4></div></div>");
+      }
+      h.push(renderSurnames(names, tailName ? "" : term));
       /* The strongest evidence for a country wins its outline. A name in both
          a register and an archive is drawn as a register — the stronger claim
          is the true one, and the panel lists both anyway. */

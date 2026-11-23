@@ -1972,7 +1972,7 @@
           given: parsed.given && data.given ? S.givenIn(parsed.givenWord || parsed.given, data.given, null) : [],
           route: route.map(function (x) { return { info: infos[x.row.i], age: x.age, year: x.year, approx: x.approx, yearTold: x.yearTold, role: x.role, country: x.country, ev: x.ev }; }),
           bornApprox: !!parsed.bornApprox, endYear: parsed.endYear != null ? parsed.endYear : null,
-          kin: (parsed.kin || []).map(function (k) { return { key: k.key, name: k.name, label: k.label, stops: k.stops.filter(function (x) { return infos[x.row.i]; }).map(function (x) { return { info: infos[x.row.i], year: x.year, role: x.role }; }) }; }).filter(function (k) { return k.stops.length; }),
+          kin: (parsed.kin || []).map(function (k) { return { key: k.key, name: k.name, label: k.label, stops: k.stops.filter(function (x) { return infos[x.row.i]; }).map(function (x) { return { info: infos[x.row.i], year: x.year, role: x.role, ev: x.ev }; }) }; }).filter(function (k) { return k.stops.length; }),
           ancestors: anc.map(function (x) { return { info: infos[x.row.i], who: x.role === "mother-from" ? "mother" : "father" }; }) };
         var labels = {}; (data.languages || []).forEach(function (l) { labels[l.key] = l.label; });
         var out = r[6].map(function (pe, i) {
@@ -2665,6 +2665,29 @@
       var hasBorn = (pe.events || []).some(function (e) { return e.type === "born" && e.place; });
       /* the places told of this person, in order, from the reading of the family (what used to be a row of pills under the story box) */
       var kinRoute = (opts && opts.kin || []).filter(function (k) { return (k.key && pe.key && k.key === pe.key) || (!pe.key && k.label && new RegExp("\\b" + pe.role + "\\b", "i").test(k.label)); })[0], rs = kinRoute ? (kinRoute.stops || []).filter(function (x) { return x.info; }) : [];
+      if (pe.name) c.setAttribute("data-person", pe.name);
+      /* THE FLAG OF THE TIME, AT BIRTH AND AT DEATH. David: «could we add the flag of the country in here, the flag at the time of that persons birth and death.» The
+         flag is the Atlas's flag history of the country the place is in today (flagAt on its era rows), picked for the year told. With no year told it is today's flag,
+         drawn faint and said so, because a flag of "now" must not read as a flag of "then". */
+      var FB = ((opts && opts.base) || document.documentElement.getAttribute("data-base") || "/").replace(/\/?$/, "/"), marks = [];
+      (function () {
+        var b = rs.filter(function (x) { return x.role === "born" || x.role === "origin"; })[0];
+        if (b && rs.indexOf(b) === 0) marks.push({ word: b.role === "origin" ? "From" : "Born", st: b, year: b.year });
+        var d = rs.filter(function (x) { return (x.ev || []).some(function (v) { return v.type === "died"; }); })[0];
+        if (d) marks.push({ word: "Died", st: d, year: (d.ev.filter(function (v) { return v.type === "died"; })[0] || {}).year });
+      })();
+      var fr = el("div", null, "lf-card-flags");
+      marks.forEach(function (m) {
+        var yr = m.year != null ? m.year : null, fl = flagFor(m.st.info, yr);
+        if (!fl) return;
+        var cap = yr != null ? captionAt(m.st.info, yr) : null, one = el("span", null, "lf-cflag" + (yr == null ? " lf-cflag-now" : "")), im = el("img", null, "lf-cflag-img");
+        im.src = FB + "fl/" + encodeURIComponent(fl) + ".svg"; im.alt = "";
+        var at = (m.word === "From" ? "From " : m.word + " in ") + m.st.info.name;
+        im.title = yr != null ? at + ", " + yr + ": the flag of the time" + (cap && cap.polity ? ", under " + cap.polity : "") + " (from the Atlas's flag history of today's " + m.st.info.countryName + ")"
+                              : at + ", year not told: this is today's flag of " + m.st.info.countryName + ". Add a year to see the flag of the time.";
+        one.append(im, el("span", m.word + (yr != null ? " " + yr : ""), "lf-cflag-t")); fr.append(one);
+      });
+      if (fr.childNodes.length) c.append(fr);
       if (rs.length) {
         var first = rs[0].role, rt = (first === "born" ? "Born in " : first === "origin" ? "From " : "Places: ") + rs.map(function (x) { return x.info.name + (x.year != null ? " " + x.year : ""); }).join(" \u2192 ");
         c.append(el("div", rt, "lf-card-place lf-card-route"));

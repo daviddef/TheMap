@@ -31,7 +31,11 @@
     var sec = $(id), a = rail.querySelector('[data-go="' + id + '"]');
     if (sec) sec.hidden = !on; if (a) a.hidden = !on;
   }
-  function goTo(id) { var t = $(id); if (t) t.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" }); }
+  function goTo(id) {
+    var t = $(id); if (!t) return;
+    t.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: t.classList.contains("lf-card") ? "center" : "start" });
+    if (t.classList.contains("lf-card")) { t.classList.add("lf-card-hit"); setTimeout(function () { t.classList.remove("lf-card-hit"); }, 1600); }
+  }
   rail.addEventListener("click", function (e) {
     var a = e.target.closest("a[data-go]"); if (!a) return;
     e.preventDefault(); goTo(a.getAttribute("data-go"));
@@ -39,13 +43,26 @@
   });
   /* each place of the story gets its own line under "Place by place", so the rail reads like the route */
   function placesRail() {
-    [].forEach.call(rail.querySelectorAll("a.sub"), function (x) { x.remove(); });
+    [].forEach.call(rail.querySelectorAll("a.sub:not(.psub)"), function (x) { x.remove(); });
     var anchor = rail.querySelector('[data-go="sp-places"]'), prev = anchor, secs = $("sp-stops").querySelectorAll(".lf-stop");
     if (!anchor) return;
     [].forEach.call(secs, function (sec, i) {
       sec.id = "sp-stop-" + (i + 1);
       var h = sec.querySelector("h3"), a = document.createElement("a");
       a.className = "sub"; a.href = "#" + sec.id; a.setAttribute("data-go", sec.id); a.textContent = h ? h.textContent : "Place " + (i + 1);
+      prev.after(a); prev = a;
+    });
+  }
+  /* each person of the family, by name, under "The family": a tap goes to the box and lights it for a moment. Only the people the story named. */
+  function peopleRail() {
+    [].forEach.call(rail.querySelectorAll("a.psub"), function (x) { x.remove(); });
+    var anchor = rail.querySelector('[data-go="sp-family"]'), prev = anchor, cards = $("sp-tree").querySelectorAll(".lf-card[data-person]");
+    if (!anchor) return;
+    [].forEach.call(cards, function (c, i) {
+      c.id = "sp-person-" + (i + 1);
+      var role = c.querySelector(".lf-card-role"), a = document.createElement("a"), r = document.createElement("span");
+      a.className = "sub psub"; a.href = "#" + c.id; a.setAttribute("data-go", c.id); a.textContent = c.getAttribute("data-person");
+      r.className = "psub-r"; r.textContent = role ? role.textContent.replace(/^your /i, "").toLowerCase() : ""; if (r.textContent) a.append(r);
       prev.after(a); prev = a;
     });
   }
@@ -174,7 +191,7 @@
     var lb = E.lifeBlock(g.life, g.mort), lbox = $("sp-lifebox"); lbox.textContent = ""; secShow("sp-life", !!lb); if (lb) lbox.append(lb);
     var nb = E.namesBlock(g.names, BASE), nbox = $("sp-namesbox"); nbox.textContent = ""; secShow("sp-names", !!nb);
     if (nb) { nbox.append(nb); [].forEach.call(nb.querySelectorAll("details"), function (d) { d.open = true; }); }
-    var tr = E.treeBlock(g.people, f.rel, { onEdit: editBox, kin: f.kin }), ob = E.othersBlock(g.others), tbox = $("sp-tree"); tbox.textContent = ""; secShow("sp-family", !!(tr || ob)); if (tr) tbox.append(tr); if (ob) tbox.append(ob);
+    var tr = E.treeBlock(g.people, f.rel, { onEdit: editBox, kin: f.kin, base: BASE }), ob = E.othersBlock(g.others), tbox = $("sp-tree"); tbox.textContent = ""; secShow("sp-family", !!(tr || ob)); if (tr) tbox.append(tr); if (ob) tbox.append(ob); peopleRail();
     secShow("sp-setting", true);
     secShow("sp-plan", true); drawSteps(g);
     secShow("sp-keep", true); drawKeep(g);
@@ -182,7 +199,7 @@
     watch();
   }
   function clearReport() {
-    J.clear(); last = null; lastPlan = null; rail.hidden = true; [].forEach.call(rail.querySelectorAll("a.sub"), function (x) { x.remove(); });
+    J.clear(); last = null; lastPlan = null; rail.hidden = true; [].forEach.call(rail.querySelectorAll("a.sub:not(.psub)"), function (x) { x.remove(); });
     ["sp-places", "sp-life", "sp-names", "sp-family", "sp-setting", "sp-plan", "sp-keep"].forEach(function (id) { secShow(id, false); });
     $("sp-ai-out").hidden = true; $("sp-ai-out").textContent = ""; $("sp-title").textContent = "Tell us what you know";
   }

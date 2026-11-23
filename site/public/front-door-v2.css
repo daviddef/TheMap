@@ -558,6 +558,16 @@ body.fd2-immersive .fd2-stage::after { border-radius: 0; }
 .fd2-stage .ra-vbk > .at-sub { margin: 4px 0 8px; }
 
 /* the + on a top-level section's head: the row's own pill, then the chevron; the head's name and count follow */
-.fd2-stage .ra-grp-add { flex: none; margin: 0 10px 0 0; }
+.fd2-stage .ra-grp-add { flex: none; margin: 0 25px 0 0; }
 .fd2-stage .ra-grp-add[hidden] { display: none; }
 .fd2-stage details.ra-in-card > summary.lab, .fd2-stage details.ra-area-solo-l > summary, .fd2-stage details.ra-area-cov > summary { padding-left: 0; }
+
+/* THE HEAD LINES UP WITH THE ROWS UNDER IT. David: «spacing is really inconsistent now». The head's + sits in the same column as every row's +, its name starts
+   where the rows' dots do, and the count is at the same right edge as the rows' years. The fold chevron hangs in the card's left gutter so it takes no room
+   from that column. */
+.fd2-stage details.ra-in-card > summary.lab, .fd2-stage details.ra-area-solo-l > summary, .fd2-stage details.ra-area-cov > summary { position: relative; }
+.fd2-stage details.ra-in-card > summary.lab::before, .fd2-stage details.ra-area-solo-l > summary::before, .fd2-stage details.ra-area-cov > summary::before {
+  position: absolute; left: -15px; top: 50%; margin: -5px 0 0; transform: rotate(-45deg); }
+.fd2-stage details[open].ra-in-card > summary.lab::before, .fd2-stage details[open].ra-area-solo-l > summary::before, .fd2-stage details[open].ra-area-cov > summary::before { margin: -7px 0 0; transform: rotate(45deg); }
+.fd2-stage details.ra-area-solo-l > summary > small { margin-left: auto; padding-left: 10px; font: 600 11px/1 var(--mono, ui-monospace, monospace); letter-spacing: .08em; color: var(--accent, #1f5c6b); text-transform: uppercase; }
+.fd2-stage .ra-vl > li.ra-vnote { display: block; padding: 7px 0 7px 49px; font: 400 11.5px/1.4 var(--sans, system-ui, sans-serif); color: var(--ink-3, #606c72); border-top: 1px solid var(--rule, #d3d0c7); }

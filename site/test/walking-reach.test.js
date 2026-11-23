@@ -384,7 +384,7 @@ test("on v2 the Visiting list's headings are top-level folds of the card, each w
 test("a village in the Visiting list folds out to its books and catalogues, shut until asked, using the primary place's rows", () => {
   const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
   assert.match(map, /function areaVolRows\(p, vs\)/);
-  assert.match(map, /var li = areaVolRows\(e\.p, vs\);/, "the area lists use the same rows");
+  assert.match(map, /var li = areaVolRows\(e\.p, vs\) \+ note;/, "the area lists use the same rows");
   assert.match(map, /class="ra-vn ra-vexp" data-vplace=/);
   assert.match(map, /\(VEXP\[mark\.id\.slice\(6\)\] \? "" : " hidden"\)/, "shut by default");
   assert.match(map, /areaPlaceVols\(d, true\)/);
@@ -399,4 +399,16 @@ test("every top-level section of a v2 place card starts shut and carries a + tha
   assert.match(map, /className = "ra-grp-add vm-pill"/);
   assert.match(map, /P\.setState\(x\.id, "planned"\)/);
   assert.match(css, /^\.fd2-stage \.ra-grp-add \{/m);
+});
+
+test("a year in the search narrows a place card's books, and the big add button is gone on v2", () => {
+  const src = readFileSync(join(root, "src/components/RecordMap.astro"), "utf8");
+  assert.match(src, /var ys = TSV2 && AR\(\)\.place \? tsYears\(\) : null/);
+  assert.match(src, /v\.from <= ys\[1\] && \(v\.to \|\| v\.from\) >= ys\[0\]/);
+  assert.match(src, /class="ra-vnote"/);
+  assert.match(src, /function areaYearRefresh\(\)/);
+  assert.match(src, /\(TSV2 && R\.place \? "" : '<button type="button" class="ra-area-addb"/);
+  const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
+  assert.match(css, /\.ra-grp-add \{ flex: none; margin: 0 25px 0 0; \}/);
+  assert.match(css, /position: absolute; left: -15px/);
 });

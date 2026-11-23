@@ -1495,6 +1495,7 @@ window.addEventListener("load", async function () {
     apply(true);
     if (window.raShelfPing) window.raShelfPing();
     tsPaintAll(true);
+    areaYearRefresh();
   }
   function tsPaintBand(tl, ys, commit) {
     var X = TSAX[tl.id]; if (!X) return;
@@ -8941,16 +8942,29 @@ window.addEventListener("load", async function () {
              '<span class="volmark"></span></li>';
     }).join("");
   }
+  /* the books on a place card follow the year in the box, as it is typed or dragged */
+  var areaYrT = 0;
+  function areaYearRefresh() { if (TSV2 && AR() && AR().place && AR().vols) areaFillVolumes(); }
+  if (TSV2) qbox.addEventListener("input", function () { clearTimeout(areaYrT); areaYrT = setTimeout(areaYearRefresh, 250); });
   function areaFillVolumes() {
     var R = AR(); if (!R || !R.vols) return;
     var ids = Object.keys(R.vols), openAll = ids.length <= 8;
     ids.forEach(function (id) {
       var box = panel.querySelector('[data-vols="' + id + '"]'); if (!box) return;
       var e = R.vols[id], vs = e.vols.slice(); if (!vs.length) { box.classList.add("ra-area-nolist"); return; }
-      var li = areaVolRows(e.p, vs);
+      /* A YEAR IN THE SEARCH NARROWS THE BOOKS TO THE ONES THAT COVER IT. David: «if i search "senj 1810" then why do i still see the older books?».
+         On the place card (v2) a typed year or range keeps the books whose years overlap it, says so, and opens the list. */
+      var ys = TSV2 && AR().place ? tsYears() : null, all = vs.length, note = "";
+      if (ys) {
+        vs = vs.filter(function (v) { return v.from && v.from <= ys[1] && (v.to || v.from) >= ys[0]; });
+        var yl = ys[0] === ys[1] ? ys[0] : ys[0] + "\u2013" + ys[1];
+        note = vs.length === all ? "" : '<li class="ra-vnote">' + (vs.length ? "Only the books that cover " + yl + ". " : "No book here covers " + yl + ". ") + 'Clear the year to see all ' + all + ".</li>";
+      }
+      var li = areaVolRows(e.p, vs) + note;
       box.querySelector(".ra-vl").innerHTML = li;
-      box.querySelector(".ra-area-n").textContent = vs.length + " book" + (vs.length === 1 ? "" : "s");
-      if (!(AR() && AR().place) && (openAll || rcState(e.p) !== "none")) box.open = true;   /* a place card keeps its books shut until asked */
+      box.querySelector(".ra-area-n").textContent = ys && vs.length !== all ? vs.length + " of " + all + " books" : vs.length + " book" + (vs.length === 1 ? "" : "s");
+      if (ys && AR().place && vs.length) box.open = true;
+      else if (!(AR() && AR().place) && (openAll || rcState(e.p) !== "none")) box.open = true;   /* a place card keeps its books shut until asked */
     });
   }
   /* A mark made in the list recolours the dots at once; the groups themselves stay put until Show, so a row does not jump away under the pointer. */
@@ -8999,7 +9013,7 @@ window.addEventListener("load", async function () {
       return;
     }
     box.innerHTML = '<p class="at-sub ra-area-what"' + (R.place ? "" : ' title="The places above are only where these sit"') + '>Not started: <b>' + what + "</b></p>" +
-      '<button type="button" class="ra-area-addb" data-a="add">Add ' + nfl(n) + (n === c.length ? "" : " of them") + " to " + esc(line) + "'s list</button>" +
+      (TSV2 && R.place ? "" : '<button type="button" class="ra-area-addb" data-a="add">Add ' + nfl(n) + (n === c.length ? "" : " of them") + " to " + esc(line) + "'s list</button>") +
       ((c.length > ADD_CAP || cap) ? '<p class="at-sub" title="' + (c.length > ADD_CAP ? "One click adds at most " + nfl(ADD_CAP) + ". " : "") + (cap ? cap.trim() : "") + '">Big area. Draw a smaller one to see and add the rest.</p>' : "");
   }
   function areaDoAdd() {

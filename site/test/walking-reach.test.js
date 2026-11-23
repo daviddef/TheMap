@@ -282,7 +282,7 @@ test("source rows carry a + like the books do, access is a picture with its word
   assert.equal((map.match(/'<li' \+ srcAttrs\(/g) || []).length, 3, "the place card, the archives and the country-wide lists");
   assert.match(map, /'<li' \+ \(pv\.id \? srcAttrs\(pv\.id/, "the Where to read rows");
   assert.match(map, /function accTxt\(a\)[\s\S]*?if \(!TSV2 \|\| !ACC_SVG\[a\]\) return esc\(label\);/, "words stay off v2");
-  assert.match(map, /role="img" title="' \+ esc\(label\) \+ '" aria-label="'/, "the words are the tooltip and the name");
+  assert.match(map, /role="img" tabindex="0" style="color:' \+ esc\(.*?\) \+ '" title="' \+ esc\(label\) \+ '" aria-label="'/, "the words are the tooltip and the name");
   assert.match(map, /if \(!TSV2\) h\.push\('<a class="at-go"/, "no Read more line beside the page icon");
   assert.match(css, /^\.fd2-stage \.ra-acc \{/m);
 });

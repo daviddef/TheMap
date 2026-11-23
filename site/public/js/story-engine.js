@@ -1537,7 +1537,8 @@
         var lastOwn = null;
         gl.forEach(function (g, i) {
           var own = g.own;
-          if (!own) { var want = g.pro === "his" ? "M" : "F"; own = lastOwn && sexOf(lastOwn) === want ? lastOwn : (function () { for (var q = hist.length - 1; q >= 0; q--) if ((hist[q] === "F" || hist[q] === "M") && sexOf(hist[q]) === want) return hist[q]; return null; })(); }
+          if (!own) { if (!(P.F && P.M)) return;   /* a bare "his mother" in a story about one parent is that parent's own, read as the one-person story; it is the PARENTS' parent only when both of the teller's parents are told */
+            var want = g.pro === "his" ? "M" : "F"; own = lastOwn && sexOf(lastOwn) === want ? lastOwn : (function () { for (var q = hist.length - 1; q >= 0; q--) if ((hist[q] === "F" || hist[q] === "M") && sexOf(hist[q]) === want) return hist[q]; return null; })(); }
           if (!own || !okName(g.name)) return;
           lastOwn = own; var gkey = own + g.step, gper = person(gkey, g.name);
           var gnext = i + 1 < gl.length ? gl[i + 1].at : sent.length, grest = sent.slice(g.end, gnext);

@@ -224,6 +224,10 @@ body.fd2-immersive .fd2-stage::after { border-radius: 0; }
 @media (max-width: 700px) {
   .fd2-stage:has(#ra-q:focus) .at-panel { position: static; order: -1; max-height: none; overflow: visible; animation: none; box-shadow: none; border: 1px solid var(--rule); border-radius: 16px; padding: 0 14px 12px; }
   .fd2-stage:has(#ra-q:focus) .ra-sheet-x { display: none; }
+  /* ONE LAYER AT A TIME. The list of suggestions hangs from the box and the answer flows in under the box, so while both were open the list lay
+     on top of the answer (two cards stacked, each cutting the other off). While the list is open it is the thing to act on, so the answer waits
+     and comes back the moment a row is chosen or the list closes. */
+  .fd2-stage:has(#ra-q:focus):has(.ra-sug:not([hidden])) .at-panel { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

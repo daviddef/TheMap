@@ -74,3 +74,8 @@ test("the footer keeps the licence holders by name and sends the full credits to
   assert.ok(existsSync(join(root, "src/components/DataCredits.astro")));
   assert.match(nav, /\["\/providers\/",\s*"Every source"\]/, "About menu lists every source");
 });
+
+test("on a phone the suggestion list and the answer card are never open together", () => {
+  const css = read("public/front-door-v2.css");
+  assert.match(css, /\.fd2-stage:has\(#ra-q:focus\):has\(\.ra-sug:not\(\[hidden\]\)\) \.at-panel\s*\{\s*display:\s*none/, "the answer waits while the list is open");
+});

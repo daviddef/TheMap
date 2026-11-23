@@ -1157,7 +1157,7 @@
       }
       return p;
     }
-    var hist = [];
+    var hist = [], myParents = Object.create(null);
     function mention(k) { var i = hist.indexOf(k); if (i > -1) hist.splice(i, 1); hist.push(k); }
     function sexOf(k) { var q = people[k]; if (q && q.sex) return q.sex; return /F$/.test(k) ? "M" : /M$/.test(k) ? "F" : null; }
     /* "THEY" is the couple just told of: the last two people mentioned, when one is a man and one a woman ("his mother ... his father ... They moved to Harare") */
@@ -1241,6 +1241,7 @@
         var base = x.poss === "my" || !subject ? "" : subject, key;
         if (x.poss === "has") { if (!prevKey) return; base = prevKey; }   /* prevKey stays the person the list belongs to: "has a mother X and a father Y" are both HIS */
         key = base + x.steps;
+        if (x.poss === "my" && x.steps.length === 1 && (key === "F" || key === "M")) myParents[key] = true;
         if (!subject) { if (x.poss !== "my" || x.steps.length !== 1) return; subject = key; }
         var rest = sent.slice(x.end, i + 1 < ms.length ? ms[i + 1].at : sent.length), nm = unnamed ? "" : x.name;
         if (x.bare) { var nx = /^\s+([\p{L}'’-]{2,})(?=\s|,|$)/u.exec(rest); if (nx && nameWord(nx[1])) { nm = nx[1]; rest = rest.slice(nx[0].length); } }
@@ -1258,6 +1259,11 @@
       });
     });
     if (!subject || order.length < 2) return null;
+    /* "My mother Ana was born in Split. My father died in 1999 in Brisbane.": the teller's OWN two parents, each told with "my", and nobody's parents
+       above them. The story is the teller's family, told from the middle, not the mother's with her husband beside her: the first parent told is
+       not "the subject" just because they came first, and adding a sentence about the other one must not change who the page is about.
+       (Only for a short telling, one or two sentences about each parent: a life told at length, "My father ... went to Cracow ... married ... moved to Danzig", is the parent's own story. When BOTH are named, "My father Marco ... My mother Lucia ...", the first named is the person the page follows: that is the reading the tests fix.) */
+    if ((subject === "F" || subject === "M") && myParents.F && myParents.M && people[subject].chunks.length <= 2 && !(people[subject].name && (people.S || people[subject === "F" ? "M" : "F"] || {}).name) && !order.some(function (k) { return k.length > 1 && k !== "S"; })) return null;
     /* each stretch is read on its own: the place finder names a word once per text, and a town may be told twice ("then Johannesburg ... married in Johannesburg") */
     order.forEach(function (k) {
       var all = { origin: null, born: null, died: null, married: null, moves: [] };
@@ -1463,6 +1469,8 @@
       else if (e.origin) st.push({ row: e.origin.row, alts: e.origin.alts, word: e.origin.word, role: "origin", year: null, approx: false });
       if (e.married && e.married.place && (key === "F" || key === "M")) st.push({ row: e.married.place.row, alts: e.married.place.alts, word: e.married.place.word, role: "married", year: e.married.year, approx: false });
       e.moves.forEach(function (mv) { st.push({ row: mv.place.row, alts: mv.place.alts, word: mv.place.word, role: "move", year: mv.year, approx: false }); });
+      /* where they died is a place on their line, with the year they died told for it: "my father died in 1999 in Brisbane" */
+      if (e.died && e.died.place) { var dsame = st.filter(function (x) { return x.row.i === e.died.place.row.i; })[0]; if (dsame) (dsame.ev = dsame.ev || []).push({ type: "died", year: e.died.year }); else st.push({ row: e.died.place.row, alts: e.died.place.alts, word: e.died.place.word, role: "move", year: e.died.year, approx: false, ev: [{ type: "died", year: e.died.year }] }); }
       if (st.length) kin.push({ key: key, name: pe.name, label: label, stops: st });
     }
     put("ME", "self", "");
@@ -1503,7 +1511,7 @@
     function stopFor(pl) { for (var i = 0; i < rs.length; i++) if (pl && rs[i].row.i === pl.row.i) return rs[i]; return null; }
     var stopEv = [];
     if (ev.married) { var ms = stopFor(ev.married.place); if (ms) { if (ev.married.year != null && ms.year == null) { ms.year = ev.married.year; ms.told = true; } (ms.ev = ms.ev || []).push({ type: "married", year: ev.married.year }); } }
-    if (ev.died) { var dsx = stopFor(ev.died.place); if (!dsx && ev.died.place) { add(ev.died.place, "move", null); dsx = rs[rs.length - 1]; } if (dsx) (dsx.ev = dsx.ev || []).push({ type: "died", year: ev.died.year, cause: ev.died.cause || "" }); }
+    if (ev.died) { var dsx = stopFor(ev.died.place); if (!dsx && ev.died.place) { add(ev.died.place, "move", ev.died.year); dsx = rs[rs.length - 1]; } if (dsx) (dsx.ev = dsx.ev || []).push({ type: "died", year: ev.died.year, cause: ev.died.cause || "" }); }
     var kids = rs.length;
     /* when was he born: told, else worked out from the mother, the father, or the marriage, and said to be about */
     var born = ev.born && ev.born.year != null ? ev.born.year : null, bornApprox = false;
@@ -1564,6 +1572,7 @@
       if (e.born && e.born.place) st.push({ row: e.born.place.row, alts: e.born.place.alts, word: e.born.place.word, role: "born", year: e.born.year, approx: false });
       else if (e.origin) st.push({ row: e.origin.row, alts: e.origin.alts, word: e.origin.word, role: "origin", year: null, approx: false });
       e.moves.forEach(function (mv) { st.push({ row: mv.place.row, alts: mv.place.alts, word: mv.place.word, role: "move", year: mv.year, approx: false }); });
+      if (e.died && e.died.place) { var dsame2 = st.filter(function (x) { return x.row.i === e.died.place.row.i; })[0]; if (dsame2) (dsame2.ev = dsame2.ev || []).push({ type: "died", year: e.died.year }); else st.push({ row: e.died.place.row, alts: e.died.place.alts, word: e.died.place.word, role: "move", year: e.died.year, approx: false, ev: [{ type: "died", year: e.died.year }] }); }
       if (k !== "S" && e.married && e.married.place && !st.some(function (x) { return x.row.i === e.married.place.row.i; })) st.push({ row: e.married.place.row, alts: e.married.place.alts, word: e.married.place.word, role: "married", year: e.married.year, approx: false });
       if (st.length) kin.push({ key: k, name: pe.name, label: (lab(k) ? cased(P[sk].given || "His") + "'s " + lab(k) : "") , stops: st });
     });

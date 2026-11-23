@@ -334,7 +334,7 @@ test("a move told 'and when he was around 18 he moved to Johannesburg' is the so
   const p = F.parseStory(longStory, longCtx());
   assert.deepEqual(places({ stops: p.stops }), ["Botswana", "Salisbury", "Johannesburg"]);
   assert.deepEqual(stopsOf(p, "FM"), ["Senj", "Botswana", "Salisbury"]);
-  assert.deepEqual(stopsOf(p, "FF"), ["Crikvenica", "Botswana", "Salisbury"], "and a long line from Carnia is not a route he took");
+  assert.deepEqual(stopsOf(p, "FF"), ["Crikvenica", "Botswana", "Salisbury", "Senj"], "a long line from Carnia is not a route he took; Senj is where he died, told as such");
 });
 
 test("'i then has 2 children, alessio and mateo' puts the teller's two children on the tree", () => {
@@ -406,4 +406,18 @@ test("'my father was named Ivan Kovač' gives the father his name and surname (n
   const p = F.parseStory("My dad was born in 1951 in Senj. He married my mother Cheryl. My father was named Ivan Kovač. He worked as a stonemason.", ctx);
   const fa = (p.people || []).filter((x) => x.role === "father")[0];
   assert.ok(fa && fa.name === "Ivan Kovač", fa && fa.name);
+});
+
+/* "My mother Ana was born in Split. My father died in 1999 in Brisbane.": the teller's own two parents, each told with "my". The page is the teller's family; the
+   first parent told is not "the subject" because they came first, and a sentence about the other one does not change who it is about. Both named is the one
+   reading that follows the first (story 33). */
+test("the teller's two parents, one named, are a family told from the middle, and a sentence about the other changes nothing", () => {
+  const base = "My mother Ana was born in Split in 1925. My father was born in Senj in 1920.";
+  const a = F.parseStory(base, named, null), b = F.parseStory(base + " My father died in 1999 in Brisbane.", named, null);
+  assert.equal(a.rel, ""); assert.equal(b.rel, "", "adding the father's death does not make the page his, or hers");
+  assert.deepEqual((b.people || []).map((x) => x.role), (a.people || []).map((x) => x.role));
+  const f = (b.kin || []).find((k) => /father/.test(k.label));
+  assert.deepEqual(f.stops.map((x) => [x.row.n.replace(/ \(.*/, ""), x.year]), [["Senj", 1920], ["Brisbane", 1999]], "his death place is on his line, at the year told");
+  const c = F.parseStory("My father Ivan was born in Senj in 1920. My mother Ana was born in Split in 1925.", named, null);
+  assert.equal(c.name, "Ivan", "both parents named: the first is the one the page follows");
 });

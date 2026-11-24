@@ -428,7 +428,8 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp-sec { border-top: 1px solid var(--rule); padding-top: 20px; margin-top: 10px; display: flex; flex-direction: column; gap: 12px; scroll-margin-top: 12px; }
   .sp-sec[hidden] { display: none; }
   .sp-sec > h2 { font: 600 22px/1.2 var(--serif); margin: 0; }
-  .sp-did { font-size: 14.5px; color: var(--ink-2); }
+  .sp-did { font-size: 14.5px; line-height: 1.7; color: var(--ink-2); padding: 8px 14px; border-left: 3px solid var(--accent); background: var(--panel); border-radius: 0 10px 10px 0; display: flex; flex-direction: column; gap: 2px; }
+  .sp-did[hidden] { display: none; }
   .sp-did button { font: inherit; margin: 0 4px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--accent); background: var(--panel); color: var(--accent); cursor: pointer; }
   .sp-btn { font: 600 15px/1 var(--sans); padding: 13px 20px; border: 0; border-radius: 12px; background: var(--accent); color: #fff; cursor: pointer; white-space: nowrap; transition: background .2s; }
   .sp-btn:hover { background: var(--accent-2); } .sp-btn:disabled { opacity: .55; cursor: default; }
@@ -473,20 +474,24 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp-shot img { width: 76px; height: 76px; object-fit: cover; border-radius: 10px; border: 1px solid var(--rule-strong); display: block; animation: sp-pop .4s cubic-bezier(.3,1.5,.5,1); }
   .sp-shot button { position: absolute; top: -7px; right: -7px; width: 22px; height: 22px; border-radius: 50%; border: 0; background: var(--ink); color: var(--ground); font-size: 14px; line-height: 1; cursor: pointer; }
   /* "AI ready" and "Paste a forum post": a panel that opens under the story box, says what will be sent and waits for a tick */
-  .sp-aipanel { background: var(--panel); border: 1px solid var(--rule-strong); border-radius: 14px; padding: 14px clamp(12px, 2vw, 18px) 16px; margin: 10px 0; display: grid; gap: 12px; max-width: 46rem; }
+  .sp-aipanel { background: var(--panel); border: 1px solid var(--rule-strong); border-radius: 14px; padding: 14px clamp(12px, 2vw, 18px) 16px; margin: 0; display: grid; gap: 12px; }
   .sp-aipanel[hidden], .sp-aip-in[hidden], .sp-aip-send[hidden] { display: none; }
   .sp-aip-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .sp-aipanel h3 { font: 600 19px/1.2 var(--serif); margin: 0; }
   .sp-aip-close { flex: none; }
   .sp-aip-note { margin: 0; font-size: 15px; line-height: 1.55; color: var(--ink-2); max-width: 62ch; }
   .sp-aip-lab { display: block; font: 700 11.5px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 6px; }
-  .sp-aip-quote { margin: 0; padding: 10px 14px; border-left: 3px solid var(--rule-strong); background: var(--ground); border-radius: 0 8px 8px 0; font-size: 14.5px; line-height: 1.55; color: var(--ink-2); max-height: 7.5em; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .sp-aip-quote { margin: 0; padding: 10px 14px; border-left: 3px solid var(--rule-strong); background: var(--ground); border-radius: 0 8px 8px 0; font-size: 14.5px; line-height: 1.55; color: var(--ink-2); max-height: 5.2em; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .sp-aipanel[data-stage="result"] .sp-aip-send, .sp-aipanel[data-stage="result"] .sp-aip-ok, .sp-aipanel[data-stage="result"] .sp-aip-act, .sp-aipanel[data-stage="result"] .sp-aip-in, .sp-aipanel[data-stage="result"] .sp-aip-note,
+  .sp-aipanel[data-stage="done"] .sp-aip-send, .sp-aipanel[data-stage="done"] .sp-aip-ok, .sp-aipanel[data-stage="done"] .sp-aip-act, .sp-aipanel[data-stage="done"] .sp-aip-in, .sp-aipanel[data-stage="done"] .sp-aip-note, .sp-aipanel[data-stage="done"] .sp-aip-head { display: none; }
+  .sp-aipanel[data-stage="done"] { padding: 10px 14px; background: var(--accent-wash); border-color: var(--accent); }
+  .sp-aipanel[data-stage="done"] #sp-aip-out { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+  .sp-aipanel[data-stage="done"] #sp-aip-out p { margin: 0; }
   .sp-aip-act { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
   .sp-aipanel .sp-status:empty, #sp-aip-out:empty { display: none; }
   .sp-aip-why { font-size: 13.5px; color: var(--ink-3); }
   .sp-aip-in textarea, .sp-aip-reply textarea { width: 100%; box-sizing: border-box; font: 400 15px/1.5 var(--sans); padding: 10px 12px; border: 1px solid var(--rule-strong); border-radius: 10px; background: var(--ground); color: var(--ink); resize: vertical; }
-  .sp-aip-ok { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.5; color: var(--ink-2); max-width: 72ch; border: 1px solid var(--rule-strong); border-radius: 10px; padding: 10px 14px; cursor: pointer; background: var(--ground); }
-  .sp-aip-ok:has(input:checked) { border-color: var(--accent); }
+  .sp-aip-ok { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.5; color: var(--ink-2); max-width: 72ch; padding: 2px 0; cursor: pointer; }
   .sp-aip-ok input { margin-top: 3px; flex: none; }
   .sp-aip-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .sp-aip-col { background: var(--ground); border: 1px solid var(--rule); border-radius: 12px; padding: 12px; min-width: 0; }

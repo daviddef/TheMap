@@ -68,6 +68,18 @@ export const nav = [
      and where a person who does not never has to read past them. What's new is in About, and About flashes when there is news. */
   /* THE SOURCES JOINED ABOUT, AS A SECOND TIER. David: «can we merge sources into about? maybe in a 2 tier menu?» A row whose first
      element is null is a heading, not a link: the panel reads "Learn" then four pages, "The sources" then four pages. */
+  /* TOOLS ARE THEIR OWN MENU. David: «a new menu "Tools", and add the read register, decode a date, find a word, tell a story and the 2 data items: they're more tools
+     than "about"». The four are the tools on /read/ (a hash picks which one opens), then the two ways to take the data away. */
+  ["Tools", [
+    ["/read/#story", "Tell a story"],
+    ["/read/#ask", "Read a register entry"],
+    ["/read/#date", "Decode a date"],
+    ["/read/#word", "Find a word"],
+    ["/tree-canvas/", "Tree Canvas", { newTab: true }],   /* David: «also add the tree canvas to that menu»; it still opens in a new tab */
+    [null, "The data"],
+    ["/data/", "Use the data"],
+    ["/connect/", "Connect to the Atlas"],
+  ]],
   ["About", [
     [null, "Learn"],
     ["/whats-new/", "What's new"],
@@ -76,7 +88,6 @@ export const nav = [
        script the link lands on the Play button on /start/. The round play icon in the bar and the T key do the same. */
     ["/start/", "Start here"],
     ["/start/#story", "The story (key T)"],
-    ["/read/#story", "Tell a story"],
     ["/help/", "Help"],
     [null, "The sources"],
     /* THE LIST OF EVERY SOURCE WAS NOT IN THE MENU. David: «where is the list of every source in the menu? i cant see it». The sources page
@@ -86,11 +97,7 @@ export const nav = [
     /* The survey queue is a section of /providers/ now (Help check a source); /survey/ redirects there. */
     /* Moved here from the header bar, where it was a pill on every page. */
     ["/add/", "Add source"],
-    /* THE DATA IS A THIRD TIER OF ABOUT, NOT A NEW WORD IN THE BAR. David asked for the Connect page in the top menu. The bar is kept to
-       a few nouns (see FOUR ROWS above), so it joins Use the data under its own heading; the footer still carries both. */
-    [null, "The data"],
-    ["/data/", "Use the data"],
-    ["/connect/", "Connect to the Atlas"],
+    /* Use the data and Connect to the Atlas moved to the Tools menu above; the footer still carries both. */
   ]],
 ];
 

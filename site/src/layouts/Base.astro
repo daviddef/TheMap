@@ -261,7 +261,7 @@ import { volumes as invVolumes } from "../lib/inventory.js";
           : <details class="menu">
               <summary data-spot={"menu-" + label.toLowerCase().replace(/[^a-z]+/g, "-")}>{label}</summary>
               <div class:list={["panel", links.length > 14 ? "long" : ""]}>
-                {links.map(([h, l]) => h === null ? <span class="ph">{l}</span> : <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}
+                {links.map(([h, l, o]) => h === null ? <span class="ph">{l}</span> : <a href={u(h)} class={here === u(h) ? "on" : ""} target={o?.newTab ? "_blank" : undefined} rel={o?.newTab ? "noopener" : undefined}>{l}</a>)}
               </div>
             </details>
       ))}
@@ -360,7 +360,7 @@ import { volumes as invVolumes } from "../lib/inventory.js";
       typeof links === "string"
         ? <div class="dgrp"><a href={u(links)} class={here === u(links) ? "on" : ""} target={opt?.newTab ? "_blank" : undefined} rel={opt?.newTab ? "noopener" : undefined}>{label}</a></div>
         : <div class="dgrp"><span class="gl">{label}</span>
-            {links.map(([h, l]) => h === null ? <span class="gl gl2">{l}</span> : <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}
+            {links.map(([h, l, o]) => h === null ? <span class="gl gl2">{l}</span> : <a href={u(h)} class={here === u(h) ? "on" : ""} target={o?.newTab ? "_blank" : undefined} rel={o?.newTab ? "noopener" : undefined}>{l}</a>)}
           </div>
     ))}
       <div class="dgrp"><span class="gl">Contribute</span>

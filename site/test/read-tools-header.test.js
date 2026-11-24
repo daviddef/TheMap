@@ -33,3 +33,24 @@ test("the tools are the site's pills: small, rounded, the accent wash when on, s
   assert.match(css, /\.rd-tab\.is-on \{[^}]*var\(--accent-wash\)/);
   assert.match(css, /@media \(min-width: 900px\) \{ \.pagehead-tools \{ position: absolute; right: 0;/);
 });
+
+/* THE TOOLS MENU. David: «a new menu "Tools", and add the read register, decode a date, find a word, tell a story and the 2 data items»; then «add the tree canvas to that menu». */
+test("the Tools menu holds the tools, the Tree Canvas and the two data links, and About no longer does", async () => {
+  const { nav } = await import("../src/lib/nav.js");
+  const tools = nav.find(([l]) => l === "Tools"), about = nav.find(([l]) => l === "About");
+  assert.ok(tools && Array.isArray(tools[1]));
+  const hrefs = tools[1].map((r) => r[0]);
+  for (const h of ["/read/#story", "/read/#ask", "/read/#date", "/read/#word", "/tree-canvas/", "/data/", "/connect/"]) assert.ok(hrefs.includes(h), h);
+  assert.equal(tools[1].find((r) => r[0] === "/tree-canvas/")[2].newTab, true);
+  const aboutHrefs = about[1].map((r) => r[0]);
+  for (const h of ["/read/#story", "/data/", "/connect/"]) assert.ok(!aboutHrefs.includes(h), h);
+  assert.ok(nav.findIndex(([l]) => l === "Tools") < nav.findIndex(([l]) => l === "About"));
+});
+
+test("a menu row may open in a new tab, in the bar and in the drawer", () => {
+  for (const f of ["../src/layouts/Base.astro", "../src/pages/roots/index.astro"]) {
+    const s = fs.readFileSync(path.join(here, f), "utf8");
+    assert.equal((s.match(/links\.map\(\(\[h, l, o\]\)/g) || []).length, 2, f);
+    assert.match(s, /href=\{u\(h\)\}[^>]*target=\{o\?\.newTab/);
+  }
+});

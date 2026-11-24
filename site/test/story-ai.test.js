@@ -141,7 +141,7 @@ test("a reply is posted with full addresses for the Atlas pages it points at", (
 
 test("the story page has the two buttons, a panel that needs a tick before it sends, and the script and hook that wire them", () => {
   const astro = read("src/pages/read.astro"), js = read("public/js/story-ai.js"), page = read("public/js/story-page.js");
-  for (const id of ["sp-tidy", "sp-postbtn", "sp-aipanel", "sp-aip-ok", "sp-aip-go", "sp-aip-in"]) assert.match(astro, new RegExp('id="' + id + '"'), id);
+  for (const id of ["sp-tidy", "sp-postbtn", "sp-aipanel", "sp-aip-ok", "sp-aip-go"]) assert.match(astro, new RegExp('id="' + id + '"'), id);
   assert.match(astro, /<script is:inline src=\{u\("\/js\/story-ai\.js"\)\} defer><\/script>/);
   assert.match(astro, /id="sp-aip-go" disabled/, "the send button starts off");
   assert.match(js, /go\.disabled = busy \|\| !ok\.checked/, "it stays off until the tick");

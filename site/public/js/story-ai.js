@@ -60,7 +60,7 @@
   if (!text || !panel) return;
   BASE = (document.documentElement.getAttribute("data-base") || "/").replace(/\/?$/, "/");
 
-  var title = $("sp-aip-h"), note = $("sp-aip-note"), postIn = $("sp-aip-in"), ok = $("sp-aip-ok"), go = $("sp-aip-go"), stat = $("sp-aip-status"), out = $("sp-aip-out");
+  var title = $("sp-aip-h"), note = $("sp-aip-note"), ok = $("sp-aip-ok"), go = $("sp-aip-go"), stat = $("sp-aip-status"), out = $("sp-aip-out");
   var mode = null, undo = null, lastPost = null, busy = false;
 
   function say(m, bad) { stat.textContent = m || ""; stat.className = "sp-status" + (bad ? " bad" : ""); }
@@ -68,27 +68,26 @@
   function loadScript(src) { return new Promise(function (res, rej) { var s = document.createElement("script"); s.src = BASE + "js/" + src; s.onload = res; s.onerror = function () { rej(new Error(src)); }; document.head.appendChild(s); }); }
   function ready() { return window.raStoryRead && window.raStoryRead.call ? Promise.resolve() : loadScript("story-read.js"); }
   var why = $("sp-aip-why"), send = $("sp-aip-send"), preview = $("sp-aip-preview");
-  function short(mode2) { return mode2 === "post" ? postIn.value.trim().length < 20 : text.value.trim().length < 10; }
+  function short(mode2) { return mode2 === "post" ? text.value.trim().length < 20 : text.value.trim().length < 10; }
   function sync() {
     go.disabled = busy || !ok.checked || short(mode);
     /* say why the button is off, instead of leaving a grey button */
-    if (why) why.textContent = busy ? "Claude is reading it…" : short(mode) ? (mode === "post" ? "Paste the post first (a few lines at least)." : "Write a little of the story first, then come back.") : !ok.checked ? "Tick the box above to switch this on." : "";
-    if (preview && mode === "tidy") preview.textContent = text.value.trim();
+    if (why) why.textContent = busy ? "Claude is reading it…" : short(mode) ? (mode === "post" ? "Paste the post into the story box first (a few lines at least)." : "Write a little of the story first, then come back.") : !ok.checked ? "Tick the box above to switch this on." : "";
+    if (preview && mode) preview.textContent = text.value.trim();
   }
 
   function open(m) {
     mode = m; panel.hidden = false; panel.setAttribute("data-stage", "ask"); out.textContent = ""; say(""); ok.checked = false; lastPost = null;
     panel.setAttribute("data-mode", m);
-    postIn.parentNode.hidden = m !== "post"; if (send) send.hidden = m !== "tidy";
+    if (send) send.hidden = false;
     if (m === "tidy") {
       title.textContent = "Get the story AI ready";
       note.textContent = "Claude rewrites what is in the story box as short, plain sentences, one fact each, saying who each is about, and adds nothing. You see the old and the new side by side before anything changes.";
       go.textContent = "Make it AI ready";
     } else {
-      title.textContent = "Paste a forum post";
-      note.textContent = "Paste a post that asks for help with a family. Claude reads it as a request: what it knows, what it asks, a story the page can draw, and a draft reply for the group.";
+      title.textContent = "Draft a reply";
+      note.textContent = "For a post that asks for help with a family, pasted into the story box. Claude reads it as a request: what it knows, what it asks, and a draft reply for the group.";
       go.textContent = "Read this post";
-      try { postIn.focus(); } catch (e) { /* fine */ }
     }
     $("sp-aip-consent").textContent = "Send this text to Claude (Haiku) once, to be read. It goes through ai.recordatlas.org, which keeps no text and no names, only counts. Nothing is sent until I press the button.";
     sync(); panel.scrollIntoView({ block: "nearest", behavior: "smooth" });
@@ -138,13 +137,6 @@
     [list("What the post says", r.known), list("What it does not know", r.unknown), list("What it asks", r.questions)].forEach(function (x) { if (x) g.append(x); });
     out.append(g);
     if (r.living) out.append(el("p", "The post names people who may be alive. The reply keeps to what the post itself says about them.", "sp-fine"));
-    if (r.story) {
-      var s = el("div", null, "sp-aip-blk"); s.append(el("h4", "The story, ready for the page")); s.append(el("p", r.story, "sp-aip-t"));
-      var row = el("p", null, "sp-row"), put = el("button", "Put this in the story box", "sp-btn"); put.type = "button";
-      put.addEventListener("click", function () { undo = text.value; setStory(r.story); say("It is in the story box: the page is reading it. " + (undo ? "The words that were there are kept: “Put my words back” returns them." : ""));
-        if (undo) { var b = el("button", "Put my words back", "sp-ghost"); b.type = "button"; b.addEventListener("click", function () { setStory(undo); undo = null; b.remove(); }); row.append(b); } });
-      row.append(put); s.append(row); out.append(s);
-    }
     drawReply(r);
   }
   function drawReply(r) {
@@ -175,7 +167,7 @@
     if (busy) return; busy = true; sync();
     var isPost = mode === "post";
     say(isPost ? "Claude Haiku is reading the post… this takes up to half a minute." : "Claude Haiku is tidying your words… this takes up to half a minute.");
-    var original = text.value, post = postIn.value;
+    var original = text.value, post = text.value;
     ready().then(function () { return window.raStoryRead.call(isPost ? "post" : "tidy", isPost ? postBody(post, cands) : tidyBody(original)); })
       .then(function (j) { say(typeof j.left === "number" ? j.left + " tries left today." : ""); if (isPost) drawPost(j.result); else drawTidy(original, j.result); })
       .then(null, function (e) { var m = (e && e.message) || ""; say(/^not found/i.test(m) ? "This part of Ask Claude is not switched on yet. Nothing was sent." : m || "That could not be done just now.", true); })
@@ -185,7 +177,7 @@
   $("sp-tidy").addEventListener("click", function () { open("tidy"); });
   $("sp-postbtn").addEventListener("click", function () { open("post"); });
   $("sp-aip-x").addEventListener("click", close);
-  ok.addEventListener("change", sync); postIn.addEventListener("input", sync); text.addEventListener("input", sync);
+  ok.addEventListener("change", sync); text.addEventListener("input", sync);
   go.addEventListener("click", function () { run(null); });
   panel.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
 })(typeof window !== "undefined" ? window : (typeof globalThis !== "undefined" ? globalThis : this));

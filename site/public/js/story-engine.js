@@ -954,6 +954,14 @@
       out.givenWord = cased(out.givenWord); if (out.surname) out.surname = cased(out.surname);
       out.name = out.givenWord + (out.surname ? " " + out.surname : "");
     }
+    /* A SURNAME THE STORY SAYS IS ONE: «the surname was Kosina», «family name: Kosina». The answer to the page's own «What was the surname?» is that sentence, and it was not read. */
+    if (!out.surname) {
+      var sm = /\b(?:sur|family|last)\s?names?(?:\s+(?:was|is|were))?\s*:?\s+(\p{L}[\p{L}'\u2019-]{2,})/iu.exec(tg);
+      if (sm) {
+        var sx = S.fold(sm[1]), scap = /^\p{Lu}/u.test(sm[1]);
+        if (!STOP[sx] && !REL.test(sm[1]) && !MONTHS[sx] && (scap || (/^\s*(?:[.!?;,]|$)/.test(tg.slice(sm.index + sm[0].length)) && !COMMON[sx] && !/(?:ed|ing)$/.test(sx) && !(ctx.map && ctx.map[sx] && ctx.map[sx].length > 2)))) { out.surname = cased(sm[1]); out.name = (out.givenWord ? out.givenWord + " " : "") + out.surname; }
+      }
+    }
     var all = [];
     if (/\b(photo|photograph|picture|snapshot|portrait)\b/i.test(t)) all.push("photo");
     if (/\b(document|certificate|passport|papers|record|register|manifest|visa)\b/i.test(t)) all.push("document");

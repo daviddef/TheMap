@@ -42,6 +42,7 @@ const BASE_ = u("/");
   <script is:inline src={u("/js/research-file.js")}></script>
   <script is:inline src={u("/js/shard-key.js")}></script>
   <script is:inline src={u("/js/name-intro.js")}></script>
+  <script is:inline src={u("/js/place-strip.js")}></script>
   <script is:inline>
     (function () {
       /* this script sits in the head slot, before the container exists: the container is looked up when drawing, not now */
@@ -655,7 +656,8 @@ const BASE_ = u("/");
                   var span = v.from ? (v.to && v.to !== v.from ? v.from + "\u2013" + v.to : String(v.from)) : "";
                   var walkedBy = marks["volume:" + id] && marks["volume:" + id].walked &&
                                  marks["volume:" + id].walked.length;
-                  return '<li class="mrrow"><div class="mrline mrline-t">' +
+                  var vy = v.from ? [+v.from, +(v.to || v.from)] : (window.raPlaceStrip ? window.raPlaceStrip.yearsIn(v.t) : null);
+                  return '<li class="mrrow"' + (vy ? ' data-yf="' + vy[0] + '" data-yt="' + vy[1] + '"' : "") + '><div class="mrline mrline-t">' +
                     (v.url ? '<a class="mrt" href="' + esc(v.url) +
                              '" target="_blank" rel="noopener">' + esc(v.t || id) + " \u2197</a>"
                            : '<span class="mrt">' + esc(v.t || id) + "</span>") +
@@ -794,6 +796,66 @@ const BASE_ = u("/");
 
         body.innerHTML = h.join("");
         fill();
+        decorate();
+      }
+
+      /* THE PLACE HEADER: the country, the four doors the place page offers (Country, Flags, Archives, Map) and the ground's own history as a
+         strip of eras with the mass-mortality events that reached it. Pressing an era or an event shows only the books for those years in
+         that card (js/place-strip.js holds the rules and the drawing). The data is fetched once, and the page is drawn again when it has
+         arrived; the chosen period is kept per place across redraws. A card with no data for it simply has no strip. */
+      var STRIP = { asked: false, regions: null, mort: null, flags: null }, PERIOD = {}, CCN = null;
+      function loadStrip() {
+        if (STRIP.asked) return; STRIP.asked = true;
+        function j(u, dflt) { return fetch(BASE + u).then(function (r) { return r.ok ? r.json() : dflt; }).catch(function () { return dflt; }); }
+        Promise.all([j("regions.json", null), j("mortality.json", null), j("flag-map.json", null)]).then(function (a) {
+          STRIP.regions = a[0] || { regions: [] }; STRIP.mort = a[1] || { events: [] }; STRIP.flags = a[2] || {};
+          decorate();
+        });
+      }
+      function applyPeriod(sec, pid) {
+        var PS = window.raPlaceStrip, per = PERIOD[pid] || null, shown = 0, hid = 0, nodate = 0;
+        [].forEach.call(sec.querySelectorAll(".mrrow"), function (li) {
+          var f = li.getAttribute("data-yf"), t = li.getAttribute("data-yt");
+          if (f == null) nodate++;
+          var keep = !per || PS.keeps(f == null ? null : +f, t == null ? null : +t, per[0], per[1]);
+          li.hidden = !keep; if (keep) shown++; else hid++;
+        });
+        var note = sec.querySelector(".mrpg-note"); if (!note) return;
+        note.textContent = "";
+        if (!per) { note.hidden = true; return; }
+        note.hidden = false;
+        note.append("Showing the books for " + PS.span(per[0], per[1]) + ": " + shown + " shown, " + hid + " hidden" + (nodate ? " (" + nodate + " with no years in the title stay)" : "") + ". ");
+        var b = document.createElement("button"); b.type = "button"; b.className = "mrpg-clear"; b.textContent = "Show all";
+        b.addEventListener("click", function () { PERIOD[pid] = null; decorate(); });
+        note.append(b);
+      }
+      function decorate() {
+        var PS = window.raPlaceStrip; if (!PS) return;
+        loadStrip();
+        if (!CCN) { try { CCN = JSON.parse(document.getElementById("mr-cn").textContent) || {}; } catch (e) { CCN = {}; } }
+        [].forEach.call(document.querySelectorAll("section.mrp[data-place]"), function (sec) {
+          var pid = sec.getAttribute("data-place"), d = PLACEC[pid], head = sec.querySelector("header.mrph");
+          if (!d || !head || sec.querySelector(".mrpg")) return;
+          var cc = String(d.country || "").toUpperCase(), country = CCN[cc] || cc;
+          var h3 = head.querySelector("h3");
+          if (h3 && country && !head.querySelector(".mrcc")) { var c = document.createElement("span"); c.className = "mrcc"; c.textContent = country; h3.after(c); }
+          if (!STRIP.flags) return;   /* the doors and the strip arrive with their data; the card is drawn again then */
+          var wrap = document.createElement("div"); wrap.className = "mrpg";
+          wrap.appendChild(PS.doors({ base: BASE, id: pid, name: d.name || pid, lat: d.lat, lon: d.lon, cc: cc, country: country, flagMap: STRIP.flags }));
+          var reg = (STRIP.regions.regions || []).filter(function (r) { return r.id === d.region; })[0];
+          var eras = reg ? reg.eras : [];
+          var first = eras.length ? +eras[0].from : 1500;
+          var evs = PS.eventsFor(STRIP.mort.events, d.lat, d.lon, first);
+          var st = PS.strip({ eras: eras, events: evs, period: PERIOD[pid] || null, onPick: function (per) { PERIOD[pid] = per; applyPeriod(sec, pid); } });
+          if (st) {
+            var lab = document.createElement("p"); lab.className = "mrpg-lab";
+            lab.textContent = (reg ? "Who held this ground" + (reg.label ? ": " + reg.label : "") : "Mass-mortality events that reached here") + (evs.length ? ", with " + evs.length + " mass-mortality event" + (evs.length === 1 ? "" : "s") + " above" : "") + ". Press one to show only the books for those years.";
+            wrap.append(lab, st);
+          }
+          var note = document.createElement("p"); note.className = "mrpg-note"; note.hidden = true; wrap.appendChild(note);
+          head.after(wrap);
+          applyPeriod(sec, pid);
+        });
       }
 
       /* HOW A THING IS DONE: at your desk, in person, or by email or letter. The list used to mix FamilySearch books, archives you must visit and
@@ -880,7 +942,8 @@ const BASE_ = u("/");
             }).join("; ") + "</span></div>" : "";
         var warn = (isFilm && m.transcript)
           ? '<div class="mrline mrline-n"><span class="mrnote">' + esc(m.transcript) + "</span></div>" : "";
-        return '<li class="mrrow">' +
+        var ry = window.raPlaceStrip ? window.raPlaceStrip.yearsIn(m.t) : null;
+        return '<li class="mrrow"' + (ry ? ' data-yf="' + ry[0] + '" data-yt="' + ry[1] + '"' : "") + '>' +
           '<div class="mrline mrline-t">' +
             (m.href ? '<a class="mrt" href="' + esc(m.href) + '">' + esc(m.t || raw) + "</a>"
                     : '<span class="mrt">' + esc(m.t || raw) + "</span>") +
@@ -1427,6 +1490,31 @@ const BASE_ = u("/");
     background: transparent; color: var(--accent); cursor: pointer; flex: 0 0 auto; }
   :global(.mradd:hover), :global(.mraddall:hover) { background: var(--accent);
     color: var(--panel); }
+  :global(.mrcc) { font: 500 13px/1.2 var(--sans); color: var(--ink-2); letter-spacing: .02em; }
+  :global(.mrpg) { padding: 12px 18px 6px; border-bottom: 1px solid var(--rule); background: var(--panel-2); }
+  :global(.mrpg-links) { list-style: none; margin: 0 0 12px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  :global(.mrpg-chip) { display: inline-flex; align-items: center; gap: 10px; padding: 6px 14px 6px 10px; border: 1px solid var(--rule); border-radius: 10px; background: var(--bg); color: var(--ink); text-decoration: none; font: 400 14px/1.25 var(--sans); }
+  :global(.mrpg-chip:hover) { border-color: var(--accent); }
+  :global(.mrpg-chip small) { display: block; font: 500 10px/1.3 var(--mono); text-transform: uppercase; letter-spacing: .07em; color: var(--ink-3); }
+  :global(.mrpg-flag) { width: 32px; height: 21px; border: 1px solid var(--rule); border-radius: 2px; flex: none; }
+  :global(.mrpg-i) { width: 22px; height: 22px; flex: none; fill: none; stroke: var(--accent); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  :global(.mrpg-lab) { margin: 0 0 6px; font: 400 12.5px/1.4 var(--sans); color: var(--ink-2); }
+  :global(.mrpg-tl) { position: relative; margin: 0 0 14px; }
+  :global(.mrpg-evl) { position: relative; margin: 0 0 6px; }
+  :global(.mrpg-ev) { position: absolute; height: 8px; min-width: 6px; padding: 0; border: 0; border-radius: 2px; background: #a4302a; cursor: pointer; }
+  :global(.mrpg-ev::after) { content: ""; position: absolute; inset: -7px -3px; }
+  :global(.mrpg-ev:hover), :global(.mrpg-ev.on) { outline: 2px solid var(--ink); outline-offset: 1px; }
+  :global(.mrpg-band) { position: relative; height: 54px; border-radius: 4px; overflow: hidden; background: var(--rule); }
+  :global(.mrpg-seg) { position: absolute; top: 0; bottom: 0; min-width: 8px; padding: 0 6px; border: 0; border-left: 1px solid var(--bg); border-top: 5px solid var(--seg); background: color-mix(in srgb, var(--seg) 22%, var(--panel)); color: var(--ink); text-align: left; cursor: pointer; overflow: hidden; }
+  :global(.mrpg-seg:hover), :global(.mrpg-seg.on) { background: color-mix(in srgb, var(--seg) 42%, var(--panel)); outline: 2px solid var(--ink); outline-offset: -2px; }
+  :global(.mrpg-segt) { display: block; font: 400 11.5px/1.3 var(--sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-top: 4px; }
+  :global(.mrpg-tl.has .mrpg-seg:not(.on)), :global(.mrpg-tl.has .mrpg-ev:not(.on)) { opacity: .45; }
+  :global(.mrpg-ax) { position: relative; height: 16px; border-top: 1px solid var(--rule-strong); margin-top: 2px; font: 400 11px/1 var(--mono); color: var(--ink-3); }
+  :global(.mrpg-ax span) { position: absolute; top: 3px; transform: translateX(-50%); }
+  :global(.mrpg-ax span:first-child) { transform: none; }
+  :global(.mrpg-ax span:last-child) { transform: translateX(-100%); }
+  :global(.mrpg-note) { margin: 0 0 8px; font: 500 13px/1.5 var(--sans); color: var(--ink); }
+  :global(.mrpg-clear) { border: 0; background: none; padding: 0; color: var(--accent); text-decoration: underline; font: inherit; cursor: pointer; }
   :global(.mrhow) { display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--rule-strong); background: var(--bg); color: var(--ink-2); font: 500 11px/1.5 var(--sans); white-space: nowrap; vertical-align: middle; }
   :global(.mrhow-desk) { border-color: var(--accent); color: var(--accent); }
   :global(.mrhow-visit) { border-style: dashed; color: var(--brass); border-color: var(--brass); }

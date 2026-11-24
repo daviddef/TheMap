@@ -1900,9 +1900,38 @@
       countries: row && row.countries ? row.countries.map(function (c) { return c.cc; }).slice(0, 8) : [] };
   }
 
+  /* WHICH LANGUAGES A CLERK WOULD HAVE USED, from where a person lived and when. David: «we can deduce which alternate spellings he would have based on who held the ground / the country
+     of the time of his life, rather than throwing all languages up». A person born in Senj in 1951 was written in Croatian (Yugoslavia) and, in Sydney, in English; not in Latin, Italian or
+     Hungarian, which Senj's registers used under other rulers. The language of the country as it is now is always included; the polity of each era the person was there adds the language its
+     administration wrote (Austria-Hungary: German, and Hungarian for the Hungarian half); Latin is the language of Catholic registers until the 1940s. Everything not expected is kept, folded
+     away, never dropped: a clerk can surprise. `stays` = [{info, from, to}] with from/to the years they were there (null when not told). Returns null when nothing can be said. */
+  var NATIVE_LANG = { HR: ["croatian"], SI: ["slovene"], RS: ["serbian"], BA: ["croatian", "serbian"], ME: ["serbian"], MK: ["macedonian"], XK: ["albanian", "serbian"], BG: ["bulgarian"], GR: ["greek"], AL: ["albanian"], IT: ["italian"], SM: ["italian"], VA: ["italian", "latin"],
+    AT: ["german"], DE: ["german"], LI: ["german"], HU: ["hungarian"], SK: ["slovak"], CZ: ["czech"], PL: ["polish"], RO: ["romanian"], MD: ["romanian", "russian"], UA: ["ukrainian"], BY: ["belarusian"], RU: ["russian"], LT: ["lithuanian"], LV: ["latvian"], EE: ["estonian"],
+    FI: ["finnish", "swedish"], SE: ["swedish"], NO: ["norwegian"], DK: ["danish"], IS: ["icelandic"], FO: ["faroese"], NL: ["dutch"], BE: ["dutch", "french"], FR: ["french"], LU: ["french", "german"], CH: ["german", "french", "italian"], ES: ["spanish"], PT: ["portuguese"],
+    MT: ["maltese"], TR: ["turkish"], IL: ["hebrew", "english"], GB: ["english"], IE: ["english", "irish"], US: ["english"], CA: ["english", "french"], AU: ["english"], NZ: ["english"], ZA: ["english", "afrikaans"], MX: ["spanish"], AR: ["spanish"], UY: ["spanish"],
+    CL: ["spanish"], PE: ["spanish"], CO: ["spanish"], VE: ["spanish"], BO: ["spanish"], PY: ["spanish"], EC: ["spanish"], CU: ["spanish"], DO: ["spanish"], BR: ["portuguese"] };
+  var POLITY_LANG = [[/austria|habsburg|austrian|k\.u\.k|imperial and royal/i, ["german"]], [/hungar/i, ["hungarian"]], [/ital|venice|venetian|veneto|fiume|dalmatia|fascis|savoy|piedmont/i, ["italian"]], [/venice|venetian/i, ["venetian"]],
+    [/napoleon|illyria|french|france/i, ["french"]], [/german|prussia|reich|bavaria|saxony|wurttemberg|baden/i, ["german"]], [/russia|soviet|ussr|tsar/i, ["russian"]], [/ottoman|turk/i, ["turkish"]], [/polish|poland/i, ["polish"]], [/spanish|spain/i, ["spanish"]],
+    [/portug/i, ["portuguese"]], [/british|england|english|united kingdom|dominion|crown colony|empire of india/i, ["english"]], [/dutch|netherlands/i, ["dutch"]], [/danish|denmark/i, ["danish"]], [/swedish|sweden/i, ["swedish"]]];
+  function clerkLanguages(stays) {
+    var keys = {}, notes = [], any = false;
+    (stays || []).forEach(function (st) {
+      var info = st && st.info; if (!info) return;
+      var got = {}, from = st.from, to = st.to != null ? st.to : st.from;
+      (NATIVE_LANG[info.cc] || []).forEach(function (l) { got[l] = 1; });
+      var eras = info.eras || [];
+      if (from != null) eras.forEach(function (e) { if (e.to > from && e.from <= to) POLITY_LANG.forEach(function (r) { if (r[0].test((e.polity || "") + " " + ((info.regimes && info.regimes[e.regime] && info.regimes[e.regime].label) || ""))) r[1].forEach(function (l) { got[l] = 1; }); }); });
+      if (from == null || from < 1946) got.latin = 1;
+      var ls = Object.keys(got); if (!ls.length) return;
+      any = true; ls.forEach(function (l) { keys[l] = 1; });
+      notes.push({ place: info.name, from: from, to: to, langs: ls });
+    });
+    return any ? { keys: keys, notes: notes } : null;
+  }
+
   var api = { toYear: toYear, suggest: suggest, windows: windows, volumesFor: volumesFor, captionAt: captionAt, progress: progress, between: between,
               readFamily: readFamily, readMe: readMe, readEvents: readEvents, repairCase: repairCase, givenForms: givenForms, volLabel: volLabel, buildPlan: buildPlan, parseStory: parseStory, startFamily: startFamily, familyName: familyName, flagFor: flagFor, leaderAt: leaderAt, leadersBetween: leadersBetween, givenGroups: givenGroups, surnameBlock: surnameBlock, short: short, yearsIn: yearsIn,
-              HOLDS: HOLDS, YEAR_MIN: YEAR_MIN, YEAR_MAX: YEAR_MAX, readLife: readLife, gazWants: gazWants, gazMerge: gazMerge, didYouMean: didYouMean, aliasMerge: aliasMerge, countryPoints: countryPoints, repairCase: repairCase };
+              HOLDS: HOLDS, YEAR_MIN: YEAR_MIN, YEAR_MAX: YEAR_MAX, readLife: readLife, gazWants: gazWants, gazMerge: gazMerge, didYouMean: didYouMean, aliasMerge: aliasMerge, countryPoints: countryPoints, repairCase: repairCase, clerkLanguages: clerkLanguages };
   if (typeof module !== "undefined" && module.exports) { module.exports = api; return; }
   window.raStory = api;
 
@@ -2017,10 +2046,20 @@
           kin: (parsed.kin || []).map(function (k) { return { key: k.key, name: k.name, label: k.label, stops: k.stops.filter(function (x) { return infos[x.row.i]; }).map(function (x) { return { info: infos[x.row.i], year: x.year, role: x.role, ev: x.ev }; }) }; }).filter(function (k) { return k.stops.length; }),
           ancestors: anc.map(function (x) { return { info: infos[x.row.i], who: x.role === "mother-from" ? "mother" : "father" }; }) };
         var labels = {}; (data.languages || []).forEach(function (l) { labels[l.key] = l.label; });
+        /* where, and when, each person lived: the story's own route for the person asked about; the family's place (or the start of the route) around that person's birth for the rest */
+        var bornY = parsed.born != null ? parsed.born : null;
+        function yr(x) { return x.year != null ? x.year : (bornY != null && x.age != null ? bornY + x.age : null); }
+        var routeStays = route.map(function (x, k) { var y = yr(x), nx = route[k + 1], ny = nx ? yr(nx) : null, to = ny != null ? ny : (k === 0 && parsed.left != null ? parsed.left : (k === route.length - 1 && parsed.endYear != null ? parsed.endYear : y)); return { info: infos[x.row.i], from: y, to: to }; }).filter(function (z) { return z.info; });
+        function staysOf(pe) {
+          if (pe.role === "self") return routeStays;
+          var inf = pe.place && infos[pe.place.row.i], around = bornY != null ? [bornY - 40, bornY + 10] : [null, null];
+          if (inf) return [{ info: inf, from: around[0], to: around[1] }];
+          return routeStays.length ? [{ info: routeStays[0].info, from: around[0], to: around[1] }] : [];
+        }
         var out = r[6].map(function (pe, i) {
           var gr = pe.given && data.given ? S.givenIn(pe.given, data.given, null) : [];
           return { role: pe.role, rel: pe.rel, name: pe.name, given: gr.length ? { canon: gr[0].row.canon, typed: pe.given, groups: givenGroups(gr[0].row, labels) } : (pe.given ? { canon: "", typed: pe.given, groups: [] } : null),
-            surname: r[5][i], surnameTyped: pe.surname, occupation: pe.occupation || "", counts: pe.counts || null, told: !!pe.told, presumed: !!pe.presumed, me: !!pe.me, sought: !!pe.sought, key: pe.key, place: pe.place && infos[pe.place.row.i] ? infos[pe.place.row.i].name : "", label: pe.label || "",
+            langs: clerkLanguages(staysOf(pe)), surname: r[5][i], surnameTyped: pe.surname, occupation: pe.occupation || "", counts: pe.counts || null, told: !!pe.told, presumed: !!pe.presumed, me: !!pe.me, sought: !!pe.sought, key: pe.key, place: pe.place && infos[pe.place.row.i] ? infos[pe.place.row.i].name : "", label: pe.label || "",
             events: (pe.events || []).map(function (e) { var inf = e.place && infos[e.place.row.i]; if (e.type === "told") return { type: "told", text: e.text }; return { type: e.type, year: e.year, place: inf ? inf.name : (e.place ? e.place.word : e.text ? e.text + " (not among the Atlas's places)" : ""), country: inf ? inf.countryName : "", cause: e.cause || "" }; }) };
         });
         return { facts: facts, plan: buildPlan(facts), mort: r[2], names: { people: out }, people: out, others: parsed.others || [], life: parsed.life || null };
@@ -2290,8 +2329,10 @@
         }
         var seen = Object.create(null), evl = [];
         stops.concat(anc).forEach(function (st) { (evMap.get(st.info) || []).forEach(function (e) { if (seen[e.id]) return; seen[e.id] = 1; evl.push({ e: e, where: st.info.name }); }); });
+        /* «nearby» and «in the wider world» read side by side, two columns, and stack on a phone */
+        var duo = el("div", null, "lf-duo"), colA = el("div", null, "lf-col"), colB = el("div", null, "lf-col");
         if (evl.length) {
-          E.moments.append(el("h4", "What was going on: epidemics, famines, wars and mass deaths nearby"));
+          colA.append(el("h4", "What was going on: epidemics, famines, wars and mass deaths nearby"));
           var ue = el("ul", null, "lf-events");
           evl.slice(0, 8).forEach(function (x) {
             var li = el("li", null, "lf-ev lf-ev-" + x.e.ty), t = x.e.toll && x.e.toll.text ? " " + short(x.e.toll.text, 160) : "";
@@ -2299,20 +2340,22 @@
             if (x.e.open) li.append(el("div", "Disputed: " + short(x.e.open, 160), "lf-filed"));
             ue.append(li);
           });
-          E.moments.append(ue);
+          colA.append(ue);
         }
         /* An event that has no area (the Second World War, a pandemic) belongs to every place and so to none on a map: it is said once, for the years of the story. */
         var wide = ((mort && mort.events) || []).filter(function (e) { return e.g && e.f <= t1 && e.t >= t0 && !seen[e.id]; });
         if (wide.length) {
-          E.moments.append(el("h4", "In the wider world in those years"));
+          colB.append(el("h4", "In the wider world in those years"));
           var uw = el("ul", null, "lf-events");
           wide.slice(0, 4).forEach(function (e) {
             var li = el("li", null, "lf-ev lf-ev-" + e.ty);
             li.append(el("b", e.f + (e.t !== e.f ? "\u2013" + e.t : "") + " "), el("span", typeLabel(e.ty), "lf-tag"), document.createTextNode(" " + e.n + ". " + short(e.says, 200) + (e.toll && e.toll.text ? " " + short(e.toll.text, 160) : "")));
             uw.append(li);
           });
-          E.moments.append(uw);
+          colB.append(uw);
         }
+        if (colA.childNodes.length) duo.append(colA); if (colB.childNodes.length) duo.append(colB);
+        if (duo.childNodes.length) { if (duo.childNodes.length === 1) duo.className = "lf-duo lf-duo-one"; E.moments.append(duo); }
         var seenCc = Object.create(null);
         stops.concat(anc).forEach(function (st) {
           var info = st.info; if (!info.leaders || seenCc[info.cc]) return; seenCc[info.cc] = 1;
@@ -2753,19 +2796,34 @@
   }
 
   /* How one person's first name and surname were written: the catalogue's forms, with leads kept apart. Null when it holds nothing. */
-  function personNames(g, sn, base) {
+  function personNames(g, sn, base, langs) {
     var box = el("div", null, "lf-pnames"), any = false;
     if (g && g.groups && g.groups.length) {
       any = true;
       box.append(el("h4", "First name: " + g.typed + " is also written"));
-      var ul = el("ul", null, "lf-forms lf-forms-cols"), shown = Object.create(null), leads = [];
-      g.groups.forEach(function (x) {
-        x.forms.forEach(function (f) { shown[S.fold(f)] = 1; });
-        if (x.forms.length) { var li = el("li"); li.append(el("b", x.label + ": "), document.createTextNode(x.forms.slice(0, 8).join(", ") + (x.forms.length > 8 ? " and " + (x.forms.length - 8) + " more case endings and spellings" : ""))); ul.append(li); }
-      });
-      g.groups.forEach(function (x) { x.leads.forEach(function (f) { var k = S.fold(f); if (!shown[k]) { shown[k] = 1; leads.push(f); } }); });
-      if (leads.length) { var ll = el("li"); ll.append(el("b", "Worth trying, in other languages (never yet seen on a record): "), document.createTextNode(leads.slice(0, 14).join(", ") + (leads.length > 14 ? " and " + (leads.length - 14) + " more" : ""))); ul.append(ll); }
-      box.append(ul);
+      /* the languages a clerk would have used where and when this person lived come first; the rest are kept, folded away, because a clerk can surprise */
+      var want = langs && langs.keys, main = g.groups, rest = [];
+      if (want) { main = g.groups.filter(function (x) { return want[x.lang]; }); rest = g.groups.filter(function (x) { return !want[x.lang]; }); if (!main.length) { main = g.groups; rest = []; } }
+      if (want && rest.length) {
+        var lab = {}; g.groups.forEach(function (x) { lab[x.lang] = x.label; });
+        var parts = langs.notes.map(function (n) { return n.langs.map(function (l) { return lab[l] || l.charAt(0).toUpperCase() + l.slice(1); }).join(", ") + " (" + n.place + (n.from != null ? ", " + (n.to != null && n.to !== n.from ? n.from + "\u2013" + n.to : n.from) : "") + ")"; });
+        box.append(el("p", "What the clerks wrote where and when they lived: " + parts.join(" \u00b7 "), "lf-filed lf-lang-why"));
+      }
+      function listFor(groups, withLeads) {
+        var ul = el("ul", null, "lf-forms lf-forms-cols"), shown = Object.create(null), leads = [];
+        groups.forEach(function (x) {
+          x.forms.forEach(function (f) { shown[S.fold(f)] = 1; });
+          if (x.forms.length) { var li = el("li"); li.append(el("b", x.label + ": "), document.createTextNode(x.forms.slice(0, 8).join(", ") + (x.forms.length > 8 ? " and " + (x.forms.length - 8) + " more case endings and spellings" : ""))); ul.append(li); }
+        });
+        groups.forEach(function (x) { x.leads.forEach(function (f) { var k = S.fold(f); if (!shown[k]) { shown[k] = 1; leads.push(f); } }); });
+        if (leads.length && withLeads !== false) { var ll = el("li", null, "lf-leads"); ll.append(el("b", "Worth trying (never yet seen on a record): "), document.createTextNode(leads.slice(0, 14).join(", ") + (leads.length > 14 ? " and " + (leads.length - 14) + " more" : ""))); ul.append(ll); }
+        return ul;
+      }
+      box.append(listFor(main));
+      if (rest.length) {
+        var n = rest.reduce(function (a, x) { return a + x.forms.length + x.leads.length; }, 0), dt = el("details", null, "lf-otherlangs"), sm = el("summary", "Show the other " + rest.length + " language" + (rest.length === 1 ? "" : "s") + ": not expected where they lived, kept in case a clerk used one");
+        dt.append(sm, listFor(rest)); box.append(dt);
+      }
     }
     if (sn) {
       var f = sn.family, pos = f ? f.by.same.concat(f.by.attested, f.by.rule) : [];
@@ -2794,15 +2852,23 @@
   /* The names panel: how each person's names were written, in the languages of the clerks. A node for the page to place.
      `names` = {people: [{role, rel, name, given, surname, presumed}]}; nothing about a person is in it but the names the visitor typed. */
   function namesBlock(names, base) {
-    var box = el("div", null, "lf-names"), any = false;
+    var box = el("div", null, "lf-names"), any = false, seen = [];
     base = (base || "/").replace(/\/?$/, "/");
-    ((names && names.people) || []).forEach(function (pe, i, all) {
-      var inner = personNames(pe.given, pe.surname, base);
+    /* two people who share a first name and a surname (the person asked about and his father, both Ivan) read the same: one card says both */
+    var people = ((names && names.people) || []), cards = [];
+    people.forEach(function (pe, i) {
+      var inner = personNames(pe.given, pe.surname, base, pe.langs);
       if (!inner) return;
+      var key = (pe.given ? pe.given.canon + "|" + pe.given.typed : "") + "|" + (pe.surname ? pe.surnameTyped || pe.surname.name : "") + "|" + inner.textContent;
+      var hit = cards.filter(function (c) { return c.key === key; })[0];
+      if (hit) { hit.labels.push(roleLabel(pe, people) + (pe.presumed ? " (surname assumed the same)" : "")); return; }
+      cards.push({ key: key, pe: pe, inner: inner, labels: [roleLabel(pe, people) + (pe.presumed ? " (surname assumed the same)" : "")] });
+    });
+    cards.forEach(function (c, i) {
       any = true;
       var d = el("details", null, "lf-person"); if (i === 0) d.open = true;
-      var sm = el("summary"); sm.append(el("b", pe.name || roleLabel(pe, all)), el("span", " · " + roleLabel(pe, all) + (pe.presumed ? " (surname assumed the same)" : ""), "lf-filed"));
-      d.append(sm, inner); box.append(d);
+      var sm = el("summary"); sm.append(el("b", c.pe.name || roleLabel(c.pe, people)), el("span", " \u00b7 " + c.labels.join(", and "), "lf-filed"));
+      d.append(sm, c.inner); box.append(d);
     });
     if (any) {
       var p = el("p", null, "cap"); p.append("Leads are where to look, not findings. ");

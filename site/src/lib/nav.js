@@ -72,9 +72,7 @@ export const nav = [
      than "about"». The four are the tools on /read/ (a hash picks which one opens), then the two ways to take the data away. */
   ["Tools", [
     ["/read/#story", "Tell a story"],
-    ["/read/#ask", "Read a register entry"],
-    ["/read/#date", "Decode a date"],
-    ["/read/#word", "Find a word"],
+    ["/read/#read", "Interpret a record"],
     ["/tree-canvas/", "Tree Canvas", { newTab: true }],   /* David: «also add the tree canvas to that menu»; it still opens in a new tab */
     [null, "The data"],
     ["/data/", "Use the data"],

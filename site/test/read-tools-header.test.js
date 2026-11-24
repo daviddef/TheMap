@@ -14,7 +14,8 @@ test("the header has a slot for tools, and the page puts its three tools there",
   assert.match(base, /Astro\.slots\.has\("headtools"\)/);
   assert.match(base, /<slot name="headtools" \/>/);
   assert.match(page, /<div slot="headtools" class="rd-tools" role="tablist"/);
-  for (const t of ["ask", "date", "word"]) assert.match(page, new RegExp('data-tool="' + t + '"'));
+  assert.match(page, /data-tool="read"/, "the three tools are one: Interpret a record");
+  for (const t of ["ask", "date", "word"]) assert.doesNotMatch(page, new RegExp('data-tool="' + t + '"'));
 });
 
 test("there is no «Start with your story» tab: the story is the page", () => {
@@ -40,7 +41,7 @@ test("the Tools menu holds the tools, the Tree Canvas and the two data links, an
   const tools = nav.find(([l]) => l === "Tools"), about = nav.find(([l]) => l === "About");
   assert.ok(tools && Array.isArray(tools[1]));
   const hrefs = tools[1].map((r) => r[0]);
-  for (const h of ["/read/#story", "/read/#ask", "/read/#date", "/read/#word", "/tree-canvas/", "/data/", "/connect/"]) assert.ok(hrefs.includes(h), h);
+  for (const h of ["/read/#story", "/read/#read", "/tree-canvas/", "/data/", "/connect/"]) assert.ok(hrefs.includes(h), h);
   assert.equal(tools[1].find((r) => r[0] === "/tree-canvas/")[2].newTab, true);
   const aboutHrefs = about[1].map((r) => r[0]);
   for (const h of ["/read/#story", "/data/", "/connect/"]) assert.ok(!aboutHrefs.includes(h), h);

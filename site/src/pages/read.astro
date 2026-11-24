@@ -19,16 +19,12 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
 <Base
   title="Reading the record"
   eyebrow={`${terms.length} terms in ${Object.values(langCount).filter(Boolean).length} languages · every one sourced · the finder and date decoder keep everything in your browser`}
-  dek="Type a word as you see it in the register, or a whole date, and see what it is, what it does not tell you, and where it comes from."
+  dek="Type a word, a date or a whole line as you see it in the register, and see what it is, what it does not tell you, and where it comes from."
   description="A searchable guide to the words of old registers, in Latin and in the languages of their catalogue titles, with how often each turns up in the Atlas's own records, and a decoder for dates such as 'die 30 7bris 1671'.">
 
   <div slot="headtools" class="rd-tools" role="tablist" aria-label="Tools">
-    <button type="button" role="tab" id="tab-ask" class="rd-tab" aria-selected="false" aria-controls="tool-ask" data-tool="ask" title="Claude drafts a reading of a line or page image, when you press.">
-      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M7 3.5h7l4 4V20H7z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.5 12h6M9.5 15.5h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Read a register entry</button>
-    <button type="button" role="tab" id="tab-date" class="rd-tab" aria-selected="false" aria-controls="tool-date" data-tool="date" title="7bris 1671: what day it was.">
-      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 10h16M9 3v4M15 3v4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Decode a date</button>
-    <button type="button" role="tab" id="tab-word" class="rd-tab" aria-selected="false" aria-controls="tool-word" data-tool="word" title="uxoris, obiit: what it means.">
-      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="10.5" cy="10.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 15l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Find a word</button>
+    <button type="button" role="tab" id="tab-read" class="rd-tab" aria-selected="false" aria-controls="tool-read" data-tool="read" title="A word, a date or a whole line from a register: type it and see what it means. Claude can draft a reading of a line or a photo when you ask.">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M7 3.5h7l4 4V20H7z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.5 12h6M9.5 15.5h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Interpret a record</button>
   </div>
 
   <section id="tool-story" class="rd-panel" aria-label="Your story">
@@ -136,7 +132,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
               <h2 id="sp-plan-h">Your research plan</h2>
               <p class="sp-sublede">Who to contact, what to read, where to look. Built from your story and the Atlas&rsquo;s own records of archives and registers.</p>
             </div>
-            <button type="button" class="sp-btn" id="sp-ai-btn">Build my research plan</button>
+            <button type="button" class="sp-btn sp-btn-ai" id="sp-ai-btn"><svg class="sp-spark" viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M10 3l1.9 5.1L17 10l-5.1 1.9L10 17l-1.9-5.1L3 10l5.1-1.9z" fill="currentColor"/><path d="M18 14l.9 2.1L21 17l-2.1.9L18 20l-.9-2.1L15 17l2.1-.9z" fill="currentColor"/><path d="M18.5 3l.6 1.4L20.5 5l-1.4.6-.6 1.4-.6-1.4L16.5 5l1.4-.6z" fill="currentColor"/></svg> Build my research plan</button>
           </div>
           <p class="sp-ai-note" id="sp-ai-note">Nothing is sent until you press the button. Then only what the story says (places, relationships, years and the Atlas records matched to them) goes to Claude Haiku. Not the picture, not the full text, and no name.</p>
           <p class="sp-status" id="sp-ai-status" role="status" aria-live="polite"></p>
@@ -164,8 +160,35 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
     </div>
   </section>
 
-  <section id="tool-ask" class="rd-panel" role="tabpanel" aria-labelledby="tab-ask" hidden>
-    <p class="rd-lead">This is the part that uses Claude. Paste one register entry, or drop up to four pictures of the page, and press the button: you get a draft reading to check against the page, and what the Atlas knows about that place and year. If you want a family story turned into a journey and a plan instead, use <a href="#story" data-tool-link="story">the story box</a>.</p>
+  <section id="tool-read" class="rd-panel" role="tabpanel" aria-labelledby="tab-read" hidden>
+    <div class="one" id="rr-find">
+      <div class="lab">Interpret a record</div>
+      <p class="cap" style="margin-top:6px">Type or paste anything from a register: a word (<i>uxoris</i>), a date (<i>die 30 7bris 1671</i>) or a whole line. The page works out which it is and shows what each part means. Everything you type stays in your browser; for a whole line or a photo, Claude can draft a reading when you ask.</p>
+      <p><input type="search" id="rr-q" autocomplete="off" spellcheck="false" aria-label="A word, a date or a line from the register" placeholder="uxoris · die 30 7bris 1671 · natus est Joannes filius" /></p>
+      <details class="rr-narrow"><summary>Narrow the words by kind of record or language</summary>
+      <p class="rr-filters" role="group" aria-label="Kind of record">
+        {Object.entries(eventNames).map(([k, v]) => <label><input type="checkbox" class="rr-ev" value={k} /> {v}</label>)}
+        <label>Language <select id="rr-lang"><option value="">All</option>{Object.entries(langNames).filter(([l]) => langCount[l]).map(([l, n]) => <option value={l}>{n} ({langCount[l]})</option>)}</select></label>
+      </p>
+      <div id="rr-out" role="status" aria-live="polite"></div>
+      </details>
+      <p class="cap rr-chips">Try: {chips.concat(dateChips.slice(0, 2)).map((c) => <button type="button" class="chip rr-chip" data-q={c}>{c}</button>)}</p>
+      <div id="rr-dout" role="status" aria-live="polite"></div>
+      <div id="rr-out" role="status" aria-live="polite"></div>
+      <div id="rr-claude" class="rr-claude" hidden>
+        <p><b>This looks like a whole entry.</b> The words above are what the Atlas can look up. Claude can read the line as a whole and draft what it says, which you then check against the page.</p>
+        <p><button type="button" class="chip is-primary" id="rr-claude-go">Read it with Claude</button> <span class="cap">Only when you press it; nothing is sent before.</span></p>
+      </div>
+      <details class="rr-alldet">
+      <summary><b>Browse all {terms.length} terms, A to Z</b> <span class="rr-m">the whole list the word finder searches, not only what matched</span></summary>
+      <ul class="rr-all">
+        {terms.map((t) => (
+          <li><b>{t.forms[0]}</b> <span class="rr-m">{langNames[t.lang] || t.lang} · {t.means}</span></li>
+        ))}
+      </ul>
+    </details>
+    </div>
+    <p class="rd-lead">The part that uses Claude: paste one register entry, or drop up to four pictures of the page, and press the button for a draft reading and what the Atlas knows about that place and year.</p>
     <div class="one ask-card" id="ask" hidden>
       <div class="ask-head">
         <span class="ask-spark" aria-hidden="true"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4z" fill="currentColor"/><path d="M18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z" fill="currentColor"/></svg></span>
@@ -212,40 +235,6 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
     </div>
   </section>
 
-  <section id="tool-date" class="rd-panel" role="tabpanel" aria-labelledby="tab-date" hidden>
-    <div class="one" id="rr-date">
-      <div class="lab">Decode a date</div>
-      <p class="cap" style="margin-top:6px">Digits, Roman numerals or Latin words. The old signs 7bris, 8bris, 9bris and 10bris (Xbris) are
-      September to December. The answer shows its working, and says what it could not read.</p>
-      <p><input type="text" id="rr-d" autocomplete="off" spellcheck="false" aria-label="A date as written in the register" placeholder="die 30 7bris 1671" /></p>
-      <p class="cap rr-chips">Try: {dateChips.map((c) => <button type="button" class="chip rr-dchip" data-q={c}>{c}</button>)}</p>
-      <div id="rr-dout" role="status" aria-live="polite"></div>
-    </div>
-  </section>
-
-  <section id="tool-word" class="rd-panel" role="tabpanel" aria-labelledby="tab-word" hidden>
-    <div class="one" id="rr-find">
-      <div class="lab">Find a word</div>
-      <p class="cap" style="margin-top:6px">Spell it as written. Capitals, accents, i for j and u for v do not matter, and another ending finds the same word
-      (uxoris, uxorem). English works too.</p>
-      <p><input type="search" id="rr-q" autocomplete="off" spellcheck="false" aria-label="A word from the register" placeholder="uxoris" /></p>
-      <p class="rr-filters" role="group" aria-label="Kind of record">
-        {Object.entries(eventNames).map(([k, v]) => <label><input type="checkbox" class="rr-ev" value={k} /> {v}</label>)}
-        <label>Language <select id="rr-lang"><option value="">All</option>{Object.entries(langNames).filter(([l]) => langCount[l]).map(([l, n]) => <option value={l}>{n} ({langCount[l]})</option>)}</select></label>
-      </p>
-      <p class="cap rr-chips">Try: {chips.map((c) => <button type="button" class="chip rr-chip" data-q={c}>{c}</button>)}</p>
-      <div id="rr-out" role="status" aria-live="polite"></div>
-      <details class="rr-alldet">
-      <summary><b>Browse all {terms.length} terms, A to Z</b> <span class="rr-m">the whole list the word finder searches, not only what matched</span></summary>
-      <ul class="rr-all">
-        {terms.map((t) => (
-          <li><b>{t.forms[0]}</b> <span class="rr-m">{langNames[t.lang] || t.lang} · {t.means}</span></li>
-        ))}
-      </ul>
-    </details>
-    </div>
-  </section>
-
   <ProgressKit />
   <script type="application/json" id="rr-data" set:html={JSON.stringify({ terms, seen, langs: langNames, sources: Object.fromEntries(Object.entries(sources).map(([k, s]) => [k, s.title])) })}></script>
   <script is:inline>
@@ -276,10 +265,11 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
       /* a Tools-menu link used while the page is already open only changes the part after the #: open that tool (never toggle it off) */
       window.addEventListener("hashchange", function () {
         var n = (location.hash || "").slice(1);
-        if ((n === "story" || n === "ask" || n === "date" || n === "word") && n !== now) { now = ""; pick(n); }
+        if (n === "ask" || n === "date" || n === "word") n = "read";          /* the three old tools are one now: old links and bookmarks open it */
+        if ((n === "story" || n === "read") && n !== now) { now = ""; pick(n); }
       });
       var h = (location.hash || "").slice(1);
-      pick(/[?&]q=/.test(location.search) ? "word" : (h === "date" || h === "word" || h === "ask" ? h : "story"));
+      pick(/[?&]q=/.test(location.search) || h === "date" || h === "word" || h === "ask" || h === "read" ? "read" : "story");
     })();
   </script>
   <script is:inline src={u("/js/record-reader.js")}></script>
@@ -301,7 +291,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
       var R = window.raReadRecord; if (!R) return;
       var D = JSON.parse(document.getElementById("rr-data").textContent), idx = R.index(D.terms);
       var q = document.getElementById("rr-q"), out = document.getElementById("rr-out");
-      var d = document.getElementById("rr-d"), dout = document.getElementById("rr-dout");
+      var dout = document.getElementById("rr-dout"), claudeBox = document.getElementById("rr-claude");
       var EV = { baptism: "baptism", marriage: "marriage", burial: "burial", all: "any record" };
       function el(tag, text, cls) { var e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; }
       function events() { return [].slice.call(document.querySelectorAll(".rr-ev:checked")).map(function (c) { return c.value; }); }
@@ -350,27 +340,39 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
         var v = q.value.trim(); if (!v) return;
         var r = R.find(idx, v, { events: events() }), lg = document.getElementById("rr-lang").value;
         if (lg) { var partial = r.partial; r = r.filter(function (x) { return x.term.lang === lg; }); r.partial = partial; }
-        if (!r.length) { out.append(el("p", "No term here matches that. That is not a finding about the word: the list is short so far. Try fewer letters, or the English.", "cap")); return; }
+        if (!r.length) { if (!dout.childNodes.length && !R.decodeDate(v).text) out.append(el("p", "No term here matches that. That is not a finding about the word: the list is short so far. Try fewer letters, or the English.", "cap")); return; }
         if (r.partial) out.append(el("p", "No single card holds that whole phrase, so these are the cards for its words, one word at a time.", "cap"));
         r.slice(0, 12).forEach(function (x) { out.append(card(x.term)); });
         if (r.length > 12) out.append(el("p", "…and " + (r.length - 12) + " more. Type more of the word.", "cap"));
       }
+      /* ONE BOX FOR A WORD, A DATE OR A WHOLE LINE. The date reader answers when the words hold a date (a month or a day read, or the whole thing is date-sized); the word finder answers for
+         the words; a line of five words or more also offers Claude, which reads it as a whole when asked and never before. */
       function runDate() {
         dout.textContent = "";
-        var v = d.value.trim(); if (!v) return;
-        var r = R.decodeDate(v), c = el("div", null, "rr-card");
-        c.append(el("h3", r.text || "Nothing read"));
+        var v = q.value.trim(); if (!v) return;
+        var r = R.decodeDate(v), words = v.split(/\s+/).length;
+        if (!r.text || !(r.working.length >= 2 || words <= 3)) return;
+        var c = el("div", null, "rr-card");
+        c.append(el("h3", "A date: " + r.text));
         if (r.working.length) { var ul = el("ul", null, "cap"); r.working.forEach(function (w) { ul.append(el("li", w)); }); c.append(ul); }
         r.warnings.forEach(function (w) { c.append(el("p", w, "rr-note")); });
         dout.append(c);
       }
-      q.addEventListener("input", run);
-      d.addEventListener("input", runDate);
+      function nudge() {
+        var v = q.value.trim(), words = v ? v.split(/\s+/).length : 0;
+        if (claudeBox) claudeBox.hidden = words < 5 || !document.getElementById("ask");
+      }
+      function runAll() { run(); runDate(); nudge(); }
+      q.addEventListener("input", runAll);
       document.querySelectorAll(".rr-ev").forEach(function (b) { b.addEventListener("change", run); });
       document.getElementById("rr-lang").addEventListener("change", run);
-      document.querySelectorAll(".rr-chip").forEach(function (b) { b.addEventListener("click", function () { q.value = b.dataset.q; run(); }); });
-      document.querySelectorAll(".rr-dchip").forEach(function (b) { b.addEventListener("click", function () { d.value = b.dataset.q; runDate(); }); });
-      var m = location.search.match(/[?&]q=([^&]*)/); if (m) { q.value = decodeURIComponent(m[1].replace(/\+/g, " ")); run(); }
+      document.querySelectorAll(".rr-chip").forEach(function (b) { b.addEventListener("click", function () { q.value = b.dataset.q; runAll(); }); });
+      var cg = document.getElementById("rr-claude-go");
+      if (cg) cg.addEventListener("click", function () {
+        var box = document.getElementById("ask"), t = document.getElementById("ask-text"); if (!box || !t) return;
+        box.hidden = false; t.value = q.value.trim(); t.dispatchEvent(new Event("input", { bubbles: true })); box.scrollIntoView({ behavior: "smooth", block: "start" }); try { t.focus({ preventScroll: true }); } catch (e) { t.focus(); }
+      });
+      var m = location.search.match(/[?&]q=([^&]*)/); if (m) { q.value = decodeURIComponent(m[1].replace(/\+/g, " ")); runAll(); }
     })();
   </script>
 </Base>
@@ -443,6 +445,8 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp-btn { font: 600 15px/1 var(--sans); padding: 13px 20px; border: 0; border-radius: 12px; background: var(--accent); color: #fff; cursor: pointer; white-space: nowrap; transition: background .2s; }
   .sp-btn:hover { background: var(--accent-2); } .sp-btn:disabled { opacity: .55; cursor: default; }
   .sp-btn-ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent); } .sp-btn-ghost:hover { background: var(--accent-wash); }
+  .rr-narrow { margin: 0 0 8px; font-size: 14px; } .rr-narrow summary { cursor: pointer; color: var(--ink-3); }
+  .rr-claude { margin: 12px 0; padding: 12px 16px; border: 1.5px solid var(--accent); border-radius: 14px; background: var(--accent-wash); } .rr-claude p { margin: 4px 0; }
   .sp-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .sp-fa { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
   .sp-fa select, .sp-fa input { font: 400 15px/1 var(--sans); padding: 12px 12px; border-radius: 10px; border: 1px solid var(--rule-strong); background: var(--panel); color: var(--ink); min-width: 0; max-width: 100%; }
@@ -467,7 +471,9 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp-ai-foot button { font: inherit; color: var(--accent); background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; }
   @media (max-width: 860px) {
     .sp, .sp:has(.sp-rail:not([hidden])) { grid-template-columns: minmax(0, 1fr); gap: 14px; }
-    .sp-rail { position: static; flex-direction: row; flex-wrap: wrap; gap: 6px; }
+    .sp-rail { position: sticky; top: 0; z-index: 20; flex-direction: row; flex-wrap: nowrap; gap: 6px; overflow-x: auto; margin: 0 -16px; padding: 6px 16px; background: var(--bg); scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .sp-rail::-webkit-scrollbar { display: none; }
+    .sp-rail a { white-space: nowrap; flex: none; }
     .sp-rail .sp-grp { display: none; }
     .sp-rail a.sub { display: none; }
     .sp-rail a { border: 1px solid var(--rule-strong); border-radius: 999px; padding: 7px 12px; }
@@ -515,6 +521,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp-add, .sp-ghost { font: 500 14px/1 var(--sans); padding: 10px 14px; border-radius: 999px; border: 1px solid var(--rule-strong); background: var(--panel); color: var(--ink); cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
   .sp-icon { padding: 10px; }
   .sp-spark { color: var(--accent); flex: none; }
+  .sp-btn-ai { display: inline-flex; align-items: center; gap: 8px; } .sp-btn-ai .sp-spark { color: inherit; }
   .sp-add:hover, .sp-ghost:hover { background: var(--accent-wash); border-color: var(--accent); }
   .sp-ghost[hidden] { display: none; }
   /* HOW THE PAGE READ THE WORDS, when it made who-is-whose explicit first. */
@@ -596,9 +603,16 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp-mirror, .sp-drop textarea { font: 400 18px/1.55 var(--sans); padding: 0; margin: 0; letter-spacing: normal; word-spacing: normal; text-indent: 0; text-transform: none; }
   .sp-mirror { position: absolute; inset: 0; overflow: hidden; white-space: pre-wrap; overflow-wrap: break-word; word-break: normal; color: transparent; pointer-events: none; box-sizing: border-box; tab-size: 8; }
   .sp-edit textarea { position: relative; z-index: 1; display: block; }
-  .sp-mirror mark { color: transparent; border-radius: 6px; background: var(--accent-wash); box-shadow: 0 0 0 2px var(--accent-wash), 0 2px 0 0 var(--accent); }
-  .sp-mirror mark.sp-mk-place { box-shadow: 0 0 0 2px var(--accent-wash), 0 2px 0 0 var(--accent); background: color-mix(in srgb, var(--accent-wash) 60%, transparent); }
-  .sp-mirror mark.is-on { background: color-mix(in srgb, var(--accent) 32%, transparent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 32%, transparent), 0 2px 0 0 var(--accent); }
+  :root { --hl-person: #ffd84d; --hl-place: #6fe0c8; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --hl-person: #8a6a00; --hl-place: #12705f; } }
+  :root[data-theme="dark"] { --hl-person: #8a6a00; --hl-place: #12705f; }
+  /* the marker pen: a bright highlight behind the word, swept on when the word is first recognised. A person's name is yellow, a place is mint. */
+  .sp-mirror mark { color: transparent; border-radius: 5px; background: var(--hl-person); box-shadow: 0 0 0 2px var(--hl-person); }
+  .sp-mirror mark.sp-mk-place { background: var(--hl-place); box-shadow: 0 0 0 2px var(--hl-place); }
+  .sp-mirror mark.is-new { animation: sp-sweep .6s cubic-bezier(.2,.8,.2,1) both; }
+  .sp-mirror mark.is-on { outline: 2px solid var(--accent); outline-offset: 2px; }
+  @keyframes sp-sweep { from { clip-path: inset(-6px 100% -6px -6px); } to { clip-path: inset(-6px -6px -6px -6px); } }
+  @media (prefers-reduced-motion: reduce) { .sp-mirror mark.is-new { animation: none; } }
   .sp-edit.has-toks textarea { cursor: text; }
   .sp-toks-kb { display: flex; gap: 6px; flex-wrap: wrap; position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
   .sp-toks-kb:focus-within { position: static; width: auto; height: auto; overflow: visible; clip: auto; margin: 4px 0; }
@@ -609,6 +623,14 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp .lf-capbox { display: grid; gap: 8px; max-width: var(--measure); margin: 6px 0 10px; }
   .sp .lf-capline { font: 400 16px/1.45 var(--sans); padding: 10px 14px; border-left: 4px solid var(--accent); background: var(--ground); border-radius: 0 8px 8px 0; }
   .sp .lf-filed { color: var(--ink-2); font-size: 14px; margin-top: 3px; } .sp .lf-regime { color: var(--ink-2); }
+  .sp .lf-duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 28px; align-items: start; } .sp .lf-duo-one { grid-template-columns: minmax(0, 1fr); } .sp .lf-duo .lf-col { min-width: 0; }
+  @media (max-width: 760px) { .sp .lf-duo { grid-template-columns: minmax(0, 1fr); } }
+  .sp .lf-duo ul { max-width: none; }
+  /* the names cards: side by side, two to a row where there is room */
+  .sp .lf-names { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 10px; align-items: start; } .sp .lf-names > .cap { grid-column: 1 / -1; margin: 2px 0 0; }
+  .sp .lf-names .lf-person { margin: 0; min-width: 0; }
+  .sp .lf-lang-why { margin: 0 0 6px; font-size: 13px; }
+  .sp .lf-otherlangs { margin-top: 8px; font-size: 13.5px; } .sp .lf-otherlangs summary { cursor: pointer; color: var(--ink-3); } .sp .lf-otherlangs[open] summary { margin-bottom: 6px; }
   .sp .lf-moments ul { padding-left: 18px; max-width: var(--measure); } .sp .lf-moments .cap { color: var(--ink-2); font-size: 13px; }
   .sp .lf-capline { position: relative; }
   .sp li:has(> .lf-flag) { display: flow-root; }

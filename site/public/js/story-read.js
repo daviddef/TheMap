@@ -84,13 +84,17 @@
   if (typeof document === "undefined") return;
 
   /* ---- the call to the Worker ---------------------------------------------------------------------------------------------- */
-  var token = null, wid = null, tsLoading = null, host = null, aiId = null;
+  var token = null, wid = null, tsLoading = null, host = null, aiId = null, tsErr = null;
+  function tsMessage(code) {
+    var h = location.hostname || "";
+    return "The bot check could not connect" + (code && code !== "x" ? " (Cloudflare error " + code + ")" : "") + ". " + (h && !/(^|\.)recordatlas\.org$/.test(h) ? "It only works on recordatlas.org, and this is " + h + ". " : "") + "Reload the page; if it happens again, turn off a VPN, ad blocker or privacy extension for challenges.cloudflare.com and try once more.";
+  }
   function loadTurnstile() {
     if (tsLoading) return tsLoading;
     tsLoading = new Promise(function (ok, fail) {
       host = document.createElement("div"); host.style.cssText = "position:fixed;right:12px;bottom:12px;z-index:3000"; document.body.appendChild(host);
       window.__raTsReady2 = function () {
-        try { wid = window.turnstile.render(host, { sitekey: SITEKEY, theme: "auto", callback: function (t) { token = t; }, "expired-callback": function () { token = null; }, "error-callback": function () { token = null; } }); ok(); } catch (e) { fail(e); }
+        try { wid = window.turnstile.render(host, { sitekey: SITEKEY, theme: "auto", callback: function (t) { token = t; }, "expired-callback": function () { token = null; }, "error-callback": function (c) { token = null; tsErr = String(c || "x"); } }); ok(); } catch (e) { fail(e); }
       };
       if (window.turnstile) { window.__raTsReady2(); return; }
       var s = document.createElement("script"); s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=__raTsReady2"; s.async = true;
@@ -100,7 +104,7 @@
   }
   function takeToken() {
     return loadTurnstile().then(function () { return new Promise(function (ok, fail) {
-      var n = 0, t = setInterval(function () { if (token) { clearInterval(t); var v = token; token = null; ok(v); } else if (++n > 80) { clearInterval(t); fail(new Error("The bot check is taking too long. Reload the page and try again.")); } }, 250);
+      var n = 0, t = setInterval(function () { if (token) { clearInterval(t); var v = token; token = null; tsErr = null; ok(v); } else if (tsErr) { clearInterval(t); var em = tsErr; tsErr = null; fail(new Error(tsMessage(em))); } else if (++n > 80) { clearInterval(t); fail(new Error("The bot check is taking too long. Reload the page and try again.")); } }, 250);
     }); });
   }
   function identity() {

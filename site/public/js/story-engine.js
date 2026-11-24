@@ -2097,6 +2097,8 @@
         var y0 = f.born != null ? f.born : f.left - 25;
         return { mode: "year", stops: route.length === 1 ? [{ info: route[0].info, t: y0 }] : route.map(function (x, i) { return { info: x.info, t: i === 0 ? y0 : (i === route.length - 1 ? f.left : Math.round(y0 + (f.left - y0) * i / (route.length - 1))), age: x.age, approx: x.approx, role: x.role }; }), left: f.left };
       }
+      /* no year and no age told: the places still play, one after another in the order the story gave them, with no year claimed */
+      if (route.length > 1) return { mode: "order", stops: route.map(function (x, i) { return { info: x.info, t: i * 6, age: null, role: x.role }; }) };
       return { mode: "none", stops: route.map(function (x) { return { info: x.info, t: null, age: x.age, role: x.role }; }) };
     }
     /* Where they are at time t: the stop they have reached, and the point between stops when they are on the way. */
@@ -2112,8 +2114,20 @@
     }
     function ageWord(st) { return st.age == null ? "" : (st.approx ? "sometime near age " : "age ") + st.age; }
 
+    /* A story about the family told through one relative (\"my father was from Senj. He moved to Botswana...\") has no route of its own: the person it follows
+       is a relative, and the relative's places are what should play. The one with the longest journey becomes the route; the others stay as they were. */
+    function asTraveller(f) {
+      if ((f.route && f.route.length) || f.from || f.to) return f;
+      var ks = (f.kin || []).filter(function (k) { return k.stops && k.stops.filter(function (x) { return x.info; }).length > 1; });
+      if (!ks.length) return f;
+      ks.sort(function (a, b) { return b.stops.length - a.stops.length; });
+      var k = ks[0], route = k.stops.filter(function (x) { return x.info; }).map(function (x) { return { info: x.info, age: null, year: x.year != null ? x.year : null, approx: !!x.approx, role: x.role }; });
+      return Object.assign({}, f, { route: route, kin: f.kin.filter(function (x) { return x !== k; }) });
+    }
+
     function draw(f, mort, names) {
       clear();
+      f = asTraveller(f);
       var tl = timeline(f), stops = tl.stops, anc = (f.ancestors || []).filter(function (x) { return x.info; });
       /* the others in the family who travel too: each pin appears at its year, so the story plays the ancestry first, then the person's own journey */
       var kin = (f.kin || []).map(function (k) { return { name: k.name, label: k.label, stops: k.stops.filter(function (x) { return x.info; }) }; }).filter(function (k) { return k.stops.length; }), kinMarks = [];
@@ -2138,7 +2152,7 @@
       if (!stops.length && !anc.length && !kin.length) { E.cap.textContent = "Say where they started and where they arrived to see the journey."; return Promise.resolve(); }
       var t0 = null, t1 = null;
       if (can) {
-        t0 = stops[0].t; t1 = stops[stops.length - 1].t + (tl.mode === "age" ? 4 : 10);
+        t0 = stops[0].t; t1 = stops[stops.length - 1].t + (tl.mode === "age" ? 4 : tl.mode === "order" ? 3 : 10);
         if (tl.mode === "year") {
           t1 = Math.min(t1, YEAR_MAX); if (tl.left != null) t1 = Math.min(tl.left + 12, YEAR_MAX);
           var ky = []; kin.forEach(function (k) { k.stops.forEach(function (x) { if (x.year != null) ky.push(x.year); }); });
@@ -2199,8 +2213,8 @@
         }
         anc.forEach(function (x) { E.cap.append(line(x.info, tl.mode === "year" ? t : null, evMap.get(x.info), "His " + x.who + "'s family, ", "")); });
         if (E.slider) E.slider.value = String(t);
-        if (E.yearOut) E.yearOut.textContent = tl.mode === "age" ? "age " + t : String(t);
-        if (E.slider) E.slider.setAttribute("aria-valuetext", (tl.mode === "age" ? "age " : "") + t + (cur ? ". " + (at.moving ? "On the way" : "At " + cur.info.name) : ""));
+        if (E.yearOut) E.yearOut.textContent = tl.mode === "age" ? "age " + t : tl.mode === "order" ? (stops.length ? "Stop " + (at.idx + 1) + " of " + stops.length : "") : String(t);
+        if (E.slider) E.slider.setAttribute("aria-valuetext", (tl.mode === "age" ? "age " : "") + (tl.mode === "order" ? "stop " + (at.idx + 1) + " of " + stops.length : t) + (cur ? ". " + (at.moving ? "On the way" : "At " + cur.info.name) : ""));
         legs.forEach(function (lg) {
           var kk = Math.min(1, Math.max(0, (t - lg.t0) / Math.max(1, lg.t1 - lg.t0))), pt = between(lg.a, lg.b, kk), on = t >= lg.t0;
           lg.dot.setLatLng(pt); lg.dot.setStyle({ opacity: on ? 1 : 0, fillOpacity: on ? 1 : 0 }); lg.line.setStyle({ opacity: on ? .55 : .12 });
@@ -2227,7 +2241,7 @@
             if (raf) { stopPlay(); return; }
             try { document.dispatchEvent(new CustomEvent("ra-playback", { detail: { who: "story" } })); } catch (e) { /* not in a page */ }
             E.play.textContent = "❚❚ Pause";
-            var from = Number(E.slider.value) >= t1 ? t0 : Number(E.slider.value), ts0 = null, span = (t1 - from) * (tl.mode === "age" ? 260 : 450);
+            var from = Number(E.slider.value) >= t1 ? t0 : Number(E.slider.value), ts0 = null, span = (t1 - from) * (tl.mode === "age" ? 260 : tl.mode === "order" ? 280 : 450);
             function tick(ts) { if (ts0 == null) ts0 = ts; var k = Math.min(1, (ts - ts0) / span); setT(Math.round(from + (t1 - from) * k)); if (k < 1) raf = requestAnimationFrame(tick); else stopPlay(); }
             raf = requestAnimationFrame(tick);
           };

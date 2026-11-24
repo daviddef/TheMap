@@ -195,7 +195,7 @@
           var f2 = el("form", null, "sp-gap-row"), i3 = el("input", null, "sp-gap-in"), g3 = el("button", "Add", "sp-gap-go");
           i3.type = "text"; i3.placeholder = oo.ph; i3.maxLength = 160; i3.autocomplete = "off"; i3.setAttribute("aria-label", oo.label + ": " + tk.name); g3.type = "submit";
           f2.addEventListener("submit", function (ev) {
-            ev.preventDefault(); var sn = G.sentence(tk.kind, tk.ref || tk.name, oo.id, i3.value); if (!sn) return;
+            ev.preventDefault(); var sn = G.sentence(tk.kind, (oo.id === "father" || oo.id === "mother") && tk.name && tk.kind === "person" ? tk.name : (tk.ref || tk.name), oo.id, i3.value); if (!sn) return;
             gapOpt = ""; text.value = G.append(text.value, " " + sn).slice(0, 8000); grow(); text.focus();
             try { text.setSelectionRange(text.value.length, text.value.length); } catch (e) { /* the caret stays */ }
             try { sessionStorage.setItem(DRAFT, text.value); } catch (e) { /* none */ }

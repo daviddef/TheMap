@@ -681,7 +681,7 @@
   /* people named right after the word for what they are to someone, with the birth and death years the same sentence gives them */
   function apposed(t, ctx) {
     var out = [], seen = Object.create(null), text = String(t || "");
-    var re = /\b(my|our|his|her|their)\s+((?:(?:older|elder|younger|little|big|eldest|youngest|late|first|second|step)\s+)?(?:grand(?:father|mother)|father|mother|dad|mum|mom|brother|sister|uncle|aunt|cousin|wife|husband|son|daughter|nephew|niece))\s+(\p{Lu}[\p{L}'\u2019-]+)(?:\s+(\p{Lu}[\p{L}'\u2019-]+))?/gu, m;
+    var re = /\b([Mm]y|[Oo]ur|[Hh]is|[Hh]er|[Tt]heir)\s+((?:(?:older|elder|younger|little|big|eldest|youngest|late|first|second|step)\s+)?(?:grand(?:father|mother)|father|mother|dad|mum|mom|brother|sister|uncle|aunt|cousin|relative|wife|husband|son|daughter|nephew|niece))\s+(\p{Lu}[\p{L}'\u2019-]+)(?:\s+(\p{Lu}[\p{L}'\u2019-]+))?/gu, m;
     while ((m = re.exec(text))) {
       var nm = m[3].replace(/['\u2019]s$/i, ""), f = S.fold(nm);
       if (nm.length < 2 || STOP[f] || COMMON[f] || MONTHS[f] || KINW.test(f) || REL.test(nm) || (ctx.map && ctx.map[f] && !(ctx.given && ctx.given[f])) || seen[f]) continue;
@@ -866,7 +866,23 @@
       return false;                                                  /* «his father ...», «her mother ...» */
     }).join("").replace(/\b(?:married|marry|marrying|wed|divorced|divorce|died|dies|passed away|buried|death|funeral|engaged)\b[^.!?;]*?\b(?:1[5-9]\d\d|20[0-2]\d)\b/gi, function (x) { return x.replace(/\b(?:1[5-9]\d\d|20[0-2]\d)\b/g, ""); });
   }
+  /* «IVAN'S FATHER MATE WAS BORN IN SENJ», said of the person the story is about by his first name instead of «his father». David: «father still not showing». Once the story has
+     named its person, «Ivan's father» / «Ivan's mother» is read as «his father» / «his mother» when no parent of that kind has been found yet, and the story is read again. */
   function parseStory(text, ctx, attached) {
+    var out = parseStory1(text, ctx, attached), g = out && out.givenWord;
+    if (g && /['\u2019]s\s+(?:father|dad|mother|mum|mom)\b/i.test(text)) {
+      var have = {}; (out.people || []).forEach(function (p) { have[p.role] = 1; });
+      var changed = false, re = /(\p{Lu}[\p{L}-]+?)(?:'s|\u2019s)\s+(father|dad|mother|mum|mom)\b/gu;
+      var t2 = String(text).replace(re, function (m, nm, kin) {
+        var role = /^(?:mother|mum|mom)$/i.test(kin) ? "mother" : "father";
+        if (S.fold(nm) !== S.fold(g) || have[role]) return m;
+        changed = true; return "his " + kin;
+      });
+      if (changed) return parseStory1(t2, ctx, attached);
+    }
+    return out;
+  }
+  function parseStory1(text, ctx, attached) {
     withExonyms(text, ctx);
     withWorldCities(text, ctx);
     var typed = String(text || ""), t = repairCase(typed.replace(/^\u2014 Picture \d+ \([^\n]*\) \u2014[ \t]*$/gm, " "), ctx), teller = "";   /* the line that names a picture read into the story is not story */
@@ -1343,7 +1359,7 @@
     function heFor(pro) { var want = /^he$/i.test(pro) ? "M" : "F"; for (var i = hist.length - 1; i >= 0; i--) { var sx = sexOf(hist[i]); if (!sx || sx === want) return hist[i]; } return null; }
     /* "was married to Hedviga": a wife (or husband) of that person, a person of her own. The subject's is S, anyone else's is their key and S. */
     function spouseOf(key, chunk) {
-      var sm = /\bmarried\s+(?:to\s+)?(\p{Lu}[\p{L}'’-]{2,})(?:\s+(\p{Lu}[\p{L}'’-]{2,}))?/u.exec(chunk);
+      var sm = /\bmarried\s+(?:to\s+)?(\p{Lu}[\p{L}'’-]{2,})(?:\s+(\p{Lu}[\p{L}'’-]{2,}))?/u.exec(chunk) || /\b(?:[Hh]is|[Hh]er|[Tt]heir)\s+(?:wife|husband|spouse|partner)\s+(?:(?:was|is|named|called)\s+)?(\p{Lu}[\p{L}'’-]{2,})(?:\s+(\p{Lu}[\p{L}'’-]{2,}))?/u.exec(chunk);
       if (!sm || STOP[S.fold(sm[1])] || COMMON[S.fold(sm[1])] || MONTHS[S.fold(sm[1])] || /^(?:In|On|At|My|His|Her|Their|The|And)$/.test(sm[1])) return;
       var sk2 = key === subject ? "S" : key + "S"; if (people[sk2] && people[sk2].name) return;
       var sn = sm[2] && !STOP[S.fold(sm[2])] && !COMMON[S.fold(sm[2])] && !(ctx.map && ctx.map[S.fold(sm[2])]) && !(ctx.given && ctx.given[S.fold(sm[2])]) ? " " + sm[2] : "";
@@ -1394,6 +1410,18 @@
         if (sn1) {
           var hk = null; order.forEach(function (k) { if (people[k].given && S.fold(people[k].given) === S.fold(sn1[1]) && (!hk || k.length > hk.length)) hk = k; });
           if (hk && nameWord(sn1[3])) { var nk = hk + KIN_STEP[sn1[2].toLowerCase()]; person(nk, sn1[3]); return; }   /* not "mentioned": the couple that "they" means is still the parents */
+        } }
+      /* "IVAN'S FATHER MATE WAS BORN IN SENJ IN 1920", "Ivan's father was Mate": the father (or mother) of a person already NAMED, told with his name rather than "his father".
+         David: «Ivan's father Mate was born in Senj in 1920 ... father still not showing». The person is the one step up from whoever has that first name; what is said of the new
+         one after his name is kept for him. A name no one in the story bears is left to the rules below. */
+      { var np1 = /(\p{Lu}[\p{L}'\u2019-]+?)(?:'s|\u2019s)\s+(father|dad|mother|mum|mom)\s+(?:name\s+)?(?:(?:was|is|named|called)\s+)?(\p{Lu}[\p{L}'\u2019-]+)/u.exec(sent);
+        if (np1) {
+          var hk2 = null; order.forEach(function (k) { if (people[k].given && S.fold(people[k].given) === S.fold(np1[1]) && (!hk2 || k.length > hk2.length)) hk2 = k; });
+          if (hk2 && nameWord(np1[3]) && KIN_STEP[np1[2].toLowerCase()]) {
+            var nk2 = hk2 + KIN_STEP[np1[2].toLowerCase()], pp2 = person(nk2, np1[3]);
+            var after = sent.slice(np1.index + np1[0].length).replace(/^\s*,?\s*/, ""); if (after) pp2.chunks.push(" " + after);
+            mention(nk2); return;
+          }
         } }
       /* "WHEN MY FATHER WAS AROUND 3 THEY MOVED TO BOTSWANA": the move is the couple's (his parents), and the child went with them, so it is told of him too */
       { var wm = /^\W*(?:when|while|once|after)\s+(my|his|her)\s+(father|dad|mother|mum|mom)\s+was\s+(?:(?:only|just|about|around|aged?|nearly|almost)\s+)*\d{1,2}(?:\s+years?(?:\s+old)?)?\s*,?\s+(?=they\b)(.*)$/i.exec(sent);
@@ -3001,6 +3029,13 @@
     /* the people between are drawn even when the story names nobody there: "my grandfather was Ivan" has a parent between him and you */
     function gap(n, above) { for (var i = 0; i < n; i++) { if (!above) tree.append(el("div", null, "lf-tie")); var gg = gen("lf-gap"), ph = el("div", null, "lf-card lf-card-you"); ph.append(el("div", n > 1 && i === 0 ? "Parent of yours, not named" : "Your parent, not named", "lf-card-role"), el("div", "Not in the story yet: name them to add them here", "lf-card-place")); gg.append(ph); if (above) tree.append(el("div", null, "lf-tie")); } }
     if (self.me && !fa && !mo && gps.length) gap(1, true);
+    /* BROTHERS AND SISTERS HAVE PARENTS. David: «if he has siblings, surely we should show unknown parents». When the story names the person's brothers or sisters but not their parents,
+       the parents are drawn above the row as boxes waiting to be told, the way a father's parents already are. */
+    if (((opts && opts.siblings) || []).length && !fa && !mo && !self.me && !self.sought) {
+      var gsb = gen("lf-parents"), whoS = String(self.name || "").split(/\s+/)[0] || "Their";
+      gsb.append(card({ role: "father", name: "", empty: true }, whoS + "'s father"), card({ role: "mother", name: "", empty: true }, whoS + "'s mother"));
+      tree.append(el("div", null, "lf-tie"));
+    }
     var g2 = gen(); g2.append(card(self, self.sought ? self.label : self.me ? "You" : self.rel ? "Your " + self.rel.replace(/-/g, " ") : "The person you asked about", "self"));
     var sps = (people || []).filter(function (x) { return x.role === "spouse"; });
     var rl0 = String(self.rel || "");

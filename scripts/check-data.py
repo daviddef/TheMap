@@ -1833,6 +1833,24 @@ def main():
 
     floors()
 
+    # 2b · NO GAP MAY QUIETLY REOPEN. The mirror of the floors: data/_floors.json "ceilings" caps each gap (unsurveyed sources, countries with no source,
+    # volumes with no place, ...). scripts/corpus_state.py measures them; a ceiling comes down with --lower after a verified gain.
+    def ceilings():
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("corpus_state", os.path.join(os.path.dirname(os.path.abspath(__file__)), "corpus_state.py"))
+        cs = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cs)
+        ce = json.load(open("data/_floors.json")).get("ceilings") or {}
+        mm = cs.measure()
+        for k, c in sorted(ce.items()):
+            if k not in mm:
+                err(f"_floors.json has a ceiling for '{k}' and nothing measures it")
+            elif mm[k] > c:
+                err(f"{cs.LABEL.get(k, k)}: {mm[k]:,} is over its ceiling of {c:,} — a gap that was closed has been reopened. Fix it, or raise the ceiling in "
+                    f"data/_floors.json and say why.")
+
+    ceilings()
+
     # 1 · NO BUILD-TIME SCRIPT MAY READ OUTSIDE THIS REPOSITORY.
     # build-surnames.py read the sibling archives through an absolute path. It
     # worked on the laptop and returned nothing in CI, and nothing is a valid

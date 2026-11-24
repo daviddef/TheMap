@@ -11,13 +11,14 @@
    (public/vendor/maplibre/) and fetched only the first time one of them is shown. Imagery at night is Esri's imagery under a CSS filter, with
    Esri's dark place names on top. No look needs a key or an account.
 
-   THE DEFAULT FOLLOWS THE THEME: DEFAULT_BY_THEME is the ONE constant to change. Dark site theme opens on Night dots, light on the light
-   map. "Dark" is read the way the whole site reads it (theme.js): <html data-theme="dark"|"light"> when the reader chose, else the device's
+   THE DEFAULT: DEFAULT_BY_THEME is the ONE constant to change. It is set to Satellite for both themes (25 Nov 2026, David's request), so the
+   map opens on imagery until a reader chooses another look; it used to open on Night dots in the dark theme and the light map in the light
+   one, and the constant still holds one entry per theme so that can come back. "Dark" is read the way the whole site reads it (theme.js): <html data-theme="dark"|"light"> when the reader chose, else the device's
    prefers-color-scheme.
 
    A READER'S OWN CHOICE ALWAYS WINS, in this order: ?base= in the address bar (the Atlas map only), the choice they last made with a
-   switcher (kept in this browser, key ra-basemap), and only then the theme's default. With no choice made, the default follows the theme
-   live: toggle the theme and the map follows. Once they have chosen, it stays, even if the look was made for the other theme.
+   switcher (kept in this browser, key ra-basemap), and only then the theme's default. With no choice made, the default is read per theme
+   live (today the same look in both, so toggling the theme changes nothing). Once they have chosen, it stays, even if the look was made for the other theme.
 
    THE SWITCHER lists the looks that suit the current theme first, then Terrain and Satellite, then a "More looks" fold with the other
    theme's looks. If the look in use is one of those, the fold is open, so the pressed button is never hidden.
@@ -36,7 +37,7 @@
 })(typeof window !== "undefined" ? window : this, function (self) {
   "use strict";
 
-  var DEFAULT_BY_THEME = { light: "map", dark: "night" };   /* the one constant */
+  var DEFAULT_BY_THEME = { light: "satellite", dark: "satellite" };   /* the one constant: Satellite opens in both themes until a reader picks another look */
   var STORE = "ra-basemap";
   var MAPLIBRE_VERSION = "5.24.1";                           /* public/vendor/maplibre/NOTICE.txt */
   var HERE = (self && self.src) || "";

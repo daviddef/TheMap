@@ -57,13 +57,14 @@ test("the fold is open when the reader opened it, and always when the look in us
   assert.equal(BM.layout("dark", BM.ATLAS_KEYS, "satellite", false).open, false, "Satellite is in the bar for either theme");
 });
 
-test("the default follows the theme, from the ONE constant: dark opens on Night dots, light on the light map", () => {
-  assert.deepEqual(BM.DEFAULT_BY_THEME, { light: "map", dark: "night" });
-  assert.equal(BM.defaultFor("dark"), "night");
-  assert.equal(BM.defaultFor("light"), "map");
-  assert.equal(BM.defaultFor(undefined), "map");
+test("the default comes from the ONE constant: Satellite opens in both themes until a reader chooses", () => {
+  assert.deepEqual(BM.DEFAULT_BY_THEME, { light: "satellite", dark: "satellite" });
+  assert.equal(BM.defaultFor("dark"), "satellite");
+  assert.equal(BM.defaultFor("light"), "satellite");
+  assert.equal(BM.defaultFor(undefined), "satellite");
+  assert.ok(BM.EMBED_KEYS.includes(BM.DEFAULT_BY_THEME.light), "Compass and History offer the default too");
   for (const k of Object.values(BM.DEFAULT_BY_THEME)) assert.ok(BM.ATLAS_KEYS.includes(k));
-  assert.equal(BM.LOOKS[BM.DEFAULT_BY_THEME.light].suits, "light"); assert.equal(BM.LOOKS[BM.DEFAULT_BY_THEME.dark].suits, "dark");
+  for (const k of Object.values(BM.DEFAULT_BY_THEME)) assert.equal(BM.LOOKS[k].suits, "any", "the default must suit both themes while it is one look for both");
   /* any look can be made the default by changing the one constant: every one is a valid default */
   for (const k of BM.ATLAS_KEYS) assert.equal(BM.choose({ keys: BM.ATLAS_KEYS, url: null, stored: "", theme: "dark" }).explicit, false, k);
 });
@@ -89,18 +90,18 @@ test("a reader's own choice always wins: the address bar, then the saved choice,
   assert.deepEqual(BM.choose({ keys: K, url: "", stored: "liberty", theme: "dark" }), { key: "liberty", explicit: true, from: "saved" });
   assert.deepEqual(BM.choose({ keys: K, url: "imagenight", stored: "ink", theme: "light" }), { key: "imagenight", explicit: true, from: "url" });
   for (const k of K) assert.equal(BM.choose({ keys: K, url: k, stored: "", theme: "light" }).key, k, k + " can be asked for");
-  assert.deepEqual(BM.choose({ keys: K, url: null, stored: "", theme: "dark" }), { key: "night", explicit: false, from: "theme" });
-  assert.deepEqual(BM.choose({ keys: K, url: null, stored: "", theme: "light" }), { key: "map", explicit: false, from: "theme" });
+  assert.deepEqual(BM.choose({ keys: K, url: null, stored: "", theme: "dark" }), { key: "satellite", explicit: false, from: "theme" });
+  assert.deepEqual(BM.choose({ keys: K, url: null, stored: "", theme: "light" }), { key: "satellite", explicit: false, from: "theme" });
   assert.equal(BM.choose({ keys: K, url: "map", stored: "", theme: "dark" }).key, "map", "?base=map in dark theme is the light map");
 });
 
 test("unknown values are no choice at all, so they fall back to the theme's default", () => {
   for (const bad of [null, undefined, "", "Night", "night ", "dark", "constructor", "__proto__", "toString", 3, ["night"]]) {
     assert.equal(BM.valid(bad, BM.ATLAS_KEYS), "", String(bad));
-    assert.deepEqual(BM.choose({ keys: BM.ATLAS_KEYS, url: bad, stored: bad, theme: "dark" }), { key: "night", explicit: false, from: "theme" });
+    assert.deepEqual(BM.choose({ keys: BM.ATLAS_KEYS, url: bad, stored: bad, theme: "dark" }), { key: "satellite", explicit: false, from: "theme" });
   }
   /* Compass and History have no Terrain: a saved "terrain" from the Atlas map is not one of theirs, and the theme decides */
-  assert.deepEqual(BM.choose({ keys: BM.EMBED_KEYS, stored: "terrain", theme: "light" }), { key: "map", explicit: false, from: "theme" });
+  assert.deepEqual(BM.choose({ keys: BM.EMBED_KEYS, stored: "terrain", theme: "light" }), { key: "satellite", explicit: false, from: "theme" });
   assert.deepEqual(BM.choose({ keys: BM.EMBED_KEYS, stored: "smooth", theme: "dark" }), { key: "smooth", explicit: true, from: "saved" });
 });
 

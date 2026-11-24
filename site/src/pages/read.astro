@@ -90,6 +90,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
           <p class="sp-status" id="sp-aip-status" role="status" aria-live="polite"></p>
           <div id="sp-aip-out"></div>
         </section>
+        <div class="sp-lang" id="sp-lang" hidden aria-live="polite"></div>
         <div class="sp-did" id="sp-did" hidden></div>
         <div class="sp-chips" id="sp-chips" aria-live="polite"></div>
         <div class="sp-gaps" id="sp-gaps" hidden aria-live="polite"></div>
@@ -280,6 +281,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   <script is:inline src={u("/js/story-plan.js")} defer></script>
   <script is:inline src={u("/js/story-link.js")} defer></script>
   <script is:inline src={u("/js/story-gaps.js")} defer></script>
+  <script is:inline src={u("/js/story-lang.js")} defer></script>
   <script is:inline src={u("/js/story-page.js")} defer></script>
   <script is:inline src={u("/js/story-ai.js")} defer></script>
   <script is:inline src={u("/js/case-atlas.js")} defer></script>
@@ -497,6 +499,20 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp-add, .sp-ghost { font: 500 14px/1 var(--sans); padding: 10px 14px; border-radius: 999px; border: 1px solid var(--rule-strong); background: var(--panel); color: var(--ink); cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
   .sp-add:hover, .sp-ghost:hover { background: var(--accent-wash); border-color: var(--accent); }
   .sp-ghost[hidden] { display: none; }
+  /* THE STORY IS NOT IN ENGLISH: the language found, and how it is being read. */
+  .sp-lang { margin: 8px 0 4px; padding: 10px 12px 12px; border: 1px solid var(--rule); border-left: 3px solid var(--terra, var(--accent)); border-radius: 8px; background: var(--panel); display: grid; gap: 8px; max-width: 46rem; }
+  .sp-lang[hidden] { display: none; }
+  .sp-lang-h { margin: 0; font-size: 15px; color: var(--ink); } .sp-lang-h b { font-weight: 600; }
+  .sp-lang-via { font: 600 10.5px/1 var(--mono, ui-monospace, monospace); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); background: var(--accent-wash); padding: 3px 7px; border-radius: 999px; margin-left: 6px; white-space: nowrap; }
+  .sp-lang-note { margin: 0; font-size: 13.5px; color: var(--ink-3); }
+  .sp-lang-warn { margin: 0; font-size: 13.5px; color: var(--ochre); }
+  .sp-lang-en { margin: 0; white-space: pre-wrap; font-size: 14.5px; line-height: 1.5; color: var(--ink-2); max-height: 14rem; overflow: auto; padding: 8px 10px; border-radius: 6px; background: var(--ground, var(--bg)); border: 1px solid var(--rule); }
+  .sp-lang details > summary { cursor: pointer; font-size: 13.5px; color: var(--accent); }
+  .sp-lang-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .sp-lang-ok { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; line-height: 1.45; color: var(--ink-2); max-width: 62ch; cursor: pointer; }
+  .sp-lang-ok input { margin-top: 3px; flex: none; }
+  .sp-lang-own { font: inherit; font-size: 12.5px; background: none; border: 0; padding: 0; color: var(--ink-3); text-decoration: underline; cursor: pointer; }
+  .sp-lang-bar { height: 4px; border-radius: 2px; background: var(--rule); overflow: hidden; } .sp-lang-bar i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .2s; }
   /* THE GAPS AS A SMALL HUNT: a count and dots, a card per clue with a little answer box, and a word of thanks when one is found. */
   .sp-gaps { margin: 6px 0 8px; display: grid; gap: 8px; }
   .sp-gaps-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }

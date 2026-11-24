@@ -128,7 +128,7 @@
   function drawGaps(p) {
     var box = $("sp-gaps"), G = window.raStoryGaps; if (!box || !G) return;
     box.textContent = "";
-    var t = text.value.trim();
+    var t = readingText(text.value).trim();
     if (t.length < 8) { box.hidden = true; clueReset(); return; }
     var list = G.gaps(p, t, { files: files.length, place: function (w) { return !!(data && data.map && data.map[S.fold(w)]); } }), top = gapsAll ? list : list.slice(0, 3);
     box.hidden = false;
@@ -426,8 +426,96 @@
     return JSON.stringify([(p.route || []).map(function (x) { return x.row.i + ":" + x.age; }), p.left, p.born, p.name, (p.people || []).map(function (x) { return x.role + x.name + (x.occupation || "") + JSON.stringify((x.events || []).map(function (e) { return [e.type, e.year, e.place]; })) + (x.place && x.place.word || ""); }), p.holds,
       p.life && p.life.groups.map(function (g) { return g.items; }), p.life && p.life.illness, p.life && p.life.died, (p.siblings || []).map(function (x) { return x.name; }), (p.kin || []).length]);
   }
+  /* ---- A STORY IN ANOTHER LANGUAGE (story-lang.js) --------------------------------------------------------------------------------
+     David: «this isnt a croatian site, its supposed to be global... we need a ai language detect and translation built in». The reader understands English, so a story in
+     any other language is read into English first and THAT is what is parsed; the box keeps the writer's own words. The language is found here, on the device, as they type.
+     Where the browser can translate on the device it does, by itself; where it needs a small language pack it asks first; where it cannot, the reader can have Claude do it,
+     behind a tick that says the text is sent. The English is shown, with a note of any name that did not come through, and can be put in the box. */
+  var LG = window.raStoryLang, lang = { seen: "", det: null, src: "", english: "", via: "", lost: [], status: "", busy: false, pct: 0, ok: false, err: "", skip: Object.create(null), tok: 0 };
+  function readingText(raw) { return lang.english && lang.src === raw ? lang.english : raw; }
+  function langReset() { lang.seen = ""; lang.det = null; lang.src = ""; lang.english = ""; lang.via = ""; lang.lost = []; lang.status = ""; lang.busy = false; lang.pct = 0; lang.err = ""; lang.tok++; var b = $("sp-lang"); if (b) { b.hidden = true; b.textContent = ""; } }
+  function checkLang(raw) {
+    var box = $("sp-lang"); if (!box || !LG) return;
+    if (raw.trim().length < 25) { if (lang.det || lang.english) langReset(); return; }
+    if (lang.seen === raw) return;
+    var had = lang.det && lang.det.code, d = LG.detect(raw);
+    lang.seen = raw;
+    if (d.english || !d.code || lang.skip[d.code]) { var wasShown = !!lang.det; lang.det = null; lang.english = ""; lang.src = ""; if (wasShown) { box.hidden = true; box.textContent = ""; } return; }
+    if (!d.sure) { LG.detectBest(raw).then(function (b) { if (lang.seen !== raw || !b || b.english || !b.code || lang.skip[b.code]) return; settle(raw, b); }); return; }
+    settle(raw, d, had);
+  }
+  /* the language is known: if the text changed under a translation it is stale, then ask what the browser can do */
+  function settle(raw, d) {
+    lang.det = d; if (lang.src !== raw) { lang.english = ""; lang.src = ""; lang.lost = []; lang.via = ""; }
+    lang.err = ""; var my = ++lang.tok; drawLang();
+    LG.deviceStatus(d.code).then(function (st) {
+      if (my !== lang.tok) return; lang.status = st;
+      if (st === "available" && !lang.english) return viaDevice(raw, d);   /* nothing to download: it just works */
+      drawLang();
+    });
+  }
+  function done(raw, english, via) {
+    lang.english = english; lang.src = raw; lang.via = via; lang.busy = false; lang.err = "";
+    lang.lost = LG.lostNames(raw, english); lastSig = ""; drawLang(); run();
+  }
+  function viaDevice(raw, d) {
+    var my = lang.tok; lang.busy = true; lang.pct = 0; lang.err = ""; drawLang();
+    return LG.deviceTranslate(raw, d.code, function (f) { lang.pct = f; drawLang(); }).then(function (en) { if (my !== lang.tok || text.value !== raw) return; done(raw, en, "device"); })
+      .catch(function (e) { if (my !== lang.tok) return; lang.busy = false; lang.status = "unavailable"; lang.err = "This browser could not translate it on the device."; drawLang(); });
+  }
+  function viaClaude(raw) {
+    var my = lang.tok; lang.busy = true; lang.err = ""; drawLang();
+    (window.raStoryRead && window.raStoryRead.call ? Promise.resolve() : loadScript("story-read.js")).then(function () { return window.raStoryRead.call("english", { text: raw.slice(0, 8000) }); }).then(function (j) {
+      if (my !== lang.tok || text.value !== raw) return;
+      var r = j && j.result; if (!r || r.unparsed || !r.text) throw new Error("Claude's answer could not be laid out.");
+      if (r.lang === "en") { lang.skip[lang.det && lang.det.code] = 1; lang.busy = false; langReset(); lastSig = ""; return run(); }
+      if (r.lang && lang.det && r.lang !== lang.det.code) lang.det = { code: r.lang, name: r.language || LG.names[r.lang] || r.lang, confidence: 1, sure: true };
+      done(raw, r.text, "claude"); if (r.added && r.added.length) { lang.err = "The English holds numbers that are not in your words: " + r.added.join(", ") + ". Check it before you rely on it."; drawLang(); }
+    }).catch(function (e) { if (my !== lang.tok) return; lang.busy = false; lang.err = (e && e.message) || "Claude could not translate it just now."; drawLang(); });
+  }
+  function drawLang() {
+    var box = $("sp-lang"), d = lang.det; if (!box) return;
+    if (!d) { box.hidden = true; box.textContent = ""; return; }
+    var raw = text.value, have = lang.english && lang.src === raw, nm = d.note || d.name;
+    box.hidden = false; box.textContent = "";
+    var h = el("p", null, "sp-lang-h");
+    h.append(el("b", have ? "Read from " + nm : "This looks like " + nm));
+    if (have) h.append(el("span", lang.via === "claude" ? "Translated by Claude" : "Translated on this device", "sp-lang-via"));
+    box.append(h);
+    if (lang.busy) {
+      box.append(el("p", lang.pct && lang.pct < 1 ? "Getting the " + d.name + " language pack… " + Math.round(lang.pct * 100) + "%" : "Translating…", "sp-lang-note"));
+      if (lang.pct && lang.pct < 1) { var bar = el("div", null, "sp-lang-bar"), fill = el("i"); fill.style.width = Math.round(lang.pct * 100) + "%"; bar.append(fill); box.append(bar); }
+    } else if (have) {
+      box.append(el("p", "The page reads it in English; your own words stay in the box.", "sp-lang-note"));
+      if (lang.lost.length) box.append(el("p", "Check these names in the English, they may have changed: " + lang.lost.join(", ") + ".", "sp-lang-warn"));
+      var det = el("details"); det.append(el("summary", "How it reads in English"), el("p", lang.english, "sp-lang-en"));
+      var row0 = el("p", null, "sp-lang-row"), use = el("button", "Put the English in the box", "sp-ghost");
+      use.type = "button"; use.addEventListener("click", function () { var en = lang.english; lang.skip[d.code] = 1; langReset(); text.value = en; grow(); lastSig = ""; try { sessionStorage.setItem(DRAFT, text.value); } catch (e) { /* none */ } run(); });
+      row0.append(use); det.append(row0); box.append(det);
+    } else if (lang.status === "available") {
+      box.append(el("p", "Reading it in English on this device…", "sp-lang-note"));
+    } else if (lang.status === "downloadable" || lang.status === "downloading") {
+      box.append(el("p", "The page reads English. Your browser can translate " + d.name + " on this device, free and private, after a one-time download of a small language pack.", "sp-lang-note"));
+      var r1 = el("p", null, "sp-lang-row"), go1 = el("button", "Translate on this device", "sp-add"); go1.type = "button";
+      go1.addEventListener("click", function () { viaDevice(raw, d); }); r1.append(go1); box.append(r1);
+    }
+    if (!have && !lang.busy && lang.status !== "available") {
+      if (lang.status !== "downloadable" && lang.status !== "downloading") box.append(el("p", "The page reads English, so this needs translating first. Your own words stay as they are.", "sp-lang-note"));
+      var lab = el("label", null, "sp-lang-ok"), cb = el("input"); cb.type = "checkbox"; cb.checked = lang.ok;
+      lab.append(cb, el("span", "Send this text to Claude once, to be translated into English. It goes through ai.recordatlas.org, which keeps no text and no names, only counts. Nothing is sent until I press the button."));
+      var r2 = el("p", null, "sp-lang-row"), go2 = el("button", "Translate with Claude", lang.status === "downloadable" ? "sp-ghost" : "sp-add"); go2.type = "button"; go2.disabled = !lang.ok;
+      cb.addEventListener("change", function () { lang.ok = cb.checked; go2.disabled = !lang.ok; });
+      go2.addEventListener("click", function () { if (lang.ok) viaClaude(raw); });
+      r2.append(go2); box.append(lab, r2);
+    }
+    if (lang.err) box.append(el("p", lang.err, "sp-lang-warn"));
+    var own = el("button", "It is not " + (d.note ? d.name : nm) + " — read it as it is", "sp-lang-own"); own.type = "button";
+    own.addEventListener("click", function () { lang.skip[d.code] = 1; langReset(); lastSig = ""; run(); });
+    box.append(own);
+  }
+
   function run() {
-    var t = text.value;
+    var raw = text.value, t = readingText(raw); checkLang(raw);
     $("sp-clear").hidden = !t.trim() && !files.length; $("sp-link").hidden = !t.trim();
     if (t.trim().length > 12) say("Reading your story…");
     return LD.resolveMissing(t).catch(function () { return LD.load(); }).then(function (d) {
@@ -466,7 +554,7 @@
     files.forEach(function (x) { URL.revokeObjectURL(x.url); }); files = []; drawShots(); text.value = ""; grow(); chips.textContent = ""; $("sp-did").hidden = true;
     ov = Object.create(null); parsed = null; shown = Object.create(null); lastSig = ""; clearReport(); say("");
     try { sessionStorage.removeItem(DRAFT); } catch (e) { /* none */ }
-    $("sp-clear").hidden = true; $("sp-link").hidden = true; $("sp-gaps").hidden = true; clueReset(); text.focus();
+    $("sp-clear").hidden = true; $("sp-link").hidden = true; $("sp-gaps").hidden = true; clueReset(); langReset(); lang.skip = Object.create(null); text.focus();
   });
   /* A LINK THAT CARRIES THE WORDS, for sending to somebody who asked for help in a group. The words ride after the # and are never sent to a server (story-link.js). */
   $("sp-link").addEventListener("click", function () {

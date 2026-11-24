@@ -13,10 +13,10 @@
    the deployed vars once per request (one Durable Object call).
 
    Beside the answers there are: POST /v1/plan (a research plan, Haiku, grounded against the Atlas records the browser sent), POST /v1/tidy
-   ("AI ready": the reader's whole story rewritten as plain sentences, no fact added) and POST /v1/post (a forum post read as a request: what is
+   ("AI ready": the reader's whole story rewritten as plain sentences, no fact added) and POST /v1/english (a story in any language read into English, names and places left as written; the whole text is sent, so the page asks first) and POST /v1/post (a forum post read as a request: what is
    known, what is asked, the story to draw, a draft reply; the whole text is sent, so the page asks first) and the
    admin routes (admin.js: a page, a report of counts by day, the config), which exist only once the secret ADMIN_TOKEN is set. */
-import { TRANSLATE_SYSTEM, TRANSCRIBE_SYSTEM, DOCUMENT_SYSTEM, CASEFILE_SYSTEM, PLAN_SYSTEM, TIDY_SYSTEM, POST_SYSTEM, cleanTidyRequest, tidyMessage, groundTidy, cleanPostRequest, postMessage, groundPost, translateMessage, documentMessage, casefileMessage, planMessage, cleanPlanRequest, groundPlan, IMAGE_TYPES, parseJson } from "./prompt.js";
+import { TRANSLATE_SYSTEM, TRANSCRIBE_SYSTEM, DOCUMENT_SYSTEM, CASEFILE_SYSTEM, PLAN_SYSTEM, TIDY_SYSTEM, POST_SYSTEM, ENGLISH_SYSTEM, cleanEnglishRequest, englishMessage, groundEnglish, cleanTidyRequest, tidyMessage, groundTidy, cleanPostRequest, postMessage, groundPost, translateMessage, documentMessage, casefileMessage, planMessage, cleanPlanRequest, groundPlan, IMAGE_TYPES, parseJson } from "./prompt.js";
 import { json, sha256Hex, stub } from "./util.js";
 import { limit, pos, effectiveEnv, DEFAULTS } from "./config.js";
 import { handleAdmin } from "./admin.js";
@@ -26,7 +26,7 @@ const TOKEN_RE = /^[A-Za-z0-9_-]{43}$/;
 const MAX_JSON = 80 * 1024;      // a tidy or a post is at most 8,000 characters, a plan's candidates a few thousand: all well inside this
 const MAX_IMAGE_B64 = 2_200_000;                     // about 1.6 MB of picture; the browser shrinks it first
 const IMAGE_COST = 3;
-const KINDS = ["translate", "transcribe", "document", "casefile", "plan", "tidy", "post"];
+const KINDS = ["translate", "transcribe", "document", "casefile", "plan", "tidy", "post", "english"];
 const num = (v, d) => { const n = Number(v); return Number.isFinite(n) && n >= 0 ? n : d; };      // for the per-kind costs, which are not limits
 
 const allowed = env => String(env.ALLOW_ORIGINS || "").split(",").map(s => s.trim()).filter(Boolean);
@@ -152,6 +152,11 @@ export async function handle(request, env0, o = {}) {
     if (p.error) return json({ error: p.error }, 400, h);
     tidyOriginal = p.text; system = TIDY_SYSTEM; content = tidyMessage(p);
     model = env.PLAN_MODEL || DEFAULTS.PLAN_MODEL; maxTokens = Math.min(pos(env.PLAN_MAX_TOKENS, DEFAULTS.PLAN_MAX_TOKENS), 6000);
+  } else if (kind === "english") {
+    const p = cleanEnglishRequest(body);
+    if (p.error) return json({ error: p.error }, 400, h);
+    tidyOriginal = p.text; system = ENGLISH_SYSTEM; content = englishMessage(p);
+    model = env.PLAN_MODEL || DEFAULTS.PLAN_MODEL; maxTokens = Math.min(pos(env.PLAN_MAX_TOKENS, DEFAULTS.PLAN_MAX_TOKENS), 6000);
   } else if (kind === "post") {
     const p = cleanPostRequest(body);
     if (p.error) return json({ error: p.error }, 400, h);
@@ -209,6 +214,7 @@ export async function handle(request, env0, o = {}) {
   const unparsed = { unparsed: true, draft: String(out.text).slice(0, 4000) };
   if (kind === "plan") return json({ kind, result: (parsed && groundPlan(parsed, planCands)) || unparsed, model, left, of }, 200, h);
   if (kind === "tidy") return json({ kind, result: (parsed && groundTidy(parsed, tidyOriginal)) || unparsed, model, left, of }, 200, h);
+  if (kind === "english") return json({ kind, result: (parsed && groundEnglish(parsed, tidyOriginal)) || unparsed, model, left, of }, 200, h);
   if (kind === "post") return json({ kind, result: (parsed && groundPost(parsed, planCands)) || unparsed, model, left, of }, 200, h);
   return json({ kind, result: parsed || unparsed, left, of }, 200, h);
 }

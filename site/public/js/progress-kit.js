@@ -582,6 +582,8 @@
         if (d.alias && Object.keys(d.alias).length) out.alias = d.alias;
         return JSON.stringify(out, null, 1);
       },
+      /* READ THE STORED RESEARCH AGAIN. The kit holds one copy in memory; the live tour swaps what is stored for a throwaway copy and back, and needs the kit to follow. */
+      reload: function () { mem = null; load(); },
       fromJSON: function (text, mode) {
         var inc = JSON.parse(text);
         if (!inc || !inc.marks) throw new Error("not a Record Atlas progress file");

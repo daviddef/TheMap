@@ -3343,6 +3343,23 @@ window.addEventListener("load", async function () {
     };
   })();
 
+  /* THE LIVE TOUR DRIVES THE REAL MAP THROUGH THIS, AND ONLY THIS. David: «bring it into the canvas ... make it really work as though we're doing it». The tour (js/live-tour.js)
+     types into the real search box for show, then calls these to land on the exact place, country or source, because a typed search is ambiguous (Lviv is also Lemberge in
+     Belgium) and a tour that depends on which of eight matches comes first is a tour that breaks. Each one is what a click on the same thing does. */
+  window.raTourApi = {
+    get box() { return qbox; },
+    place: function (id, name) { if (!window.raPlacePanel) return null; qbox.value = name || id; clearTimeout(qbox._t); sugHide(); var pl = idx.places.filter(function (x) { return x.i === id; })[0]; if (pl && !map.getBounds().contains([pl.y, pl.x])) map.setView([pl.y, pl.x], Math.max(map.getZoom(), 9)); return window.raPlacePanel.open(id, name); },
+    source: function (id) { var p = PROV[id]; if (!p) return false; qbox.value = p.name; clearTimeout(qbox._t); sugHide(); openSource(p); return true; },
+    country: async function (cc) {
+      var list = await cptsReady, c = list.filter(function (x) { return x.cc === String(cc).toUpperCase(); })[0]; if (!c) return false;
+      retireVisit(); if (gmark) { map.removeLayer(gmark); gmark = null; } ctryLayer.clearLayers(); communeLayer.clearLayers(); litCC = null;
+      qbox.value = c.n; clearTimeout(qbox._t); sugHide(); openCountry(c); showCountries([{ cc: c.cc, how: "register" }], function () { return false; });
+      return true;
+    },
+    search: function (term) { qbox.value = term; qbox.dispatchEvent(new Event("input", { bubbles: true })); },
+    clear: function () { qbox.value = ""; qbox.dispatchEvent(new Event("input", { bubbles: true })); }
+  };
+
   function render(d) {
     var h = [];
     /* ONE LINE, NOT FOUR. David: «"everything about gracisce" does it really

@@ -50,29 +50,47 @@ const BASE_ = u("/");
       var base = (document.documentElement.getAttribute("data-base") || "/").replace(/\/?$/, "/"), names = {}, cache = {}, token = 0;
       function getJ(u) { return cache[u] || (cache[u] = fetch(u).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })); }
       function show(node) { if (!host) return; host.textContent = ""; if (node) { host.append(node); host.hidden = false; } else host.hidden = true; }
+      /* ONE CARD FOR EACH FAMILY THE PAGE READS. The map and the lists follow the families ticked in the header picker, so the name card must too:
+         David ticked four families and the page still said «About the name Defranceschi». Nothing ticked (or one) means the family you mark
+         under, as before; several give one shut card each, in the order of the picker. A card is drawn for a surname only. */
+      function readNames() {
+        var P = window.raProgress, SY = window.raSynopsis; if (!P) return [];
+        var lines = P.lines(), me = lines.filter(function (l) { return l.active; })[0], stored = null;
+        try { stored = JSON.parse(localStorage.getItem("ra-synopsis-scope") || "null"); } catch (e) { /* none */ }
+        var slugs = SY ? SY.scopeOf(lines, me && me.slug, stored) : (me ? [me.slug] : []);
+        return lines.filter(function (l) { return slugs.indexOf(l.slug) > -1 && !/^(My research so far|Research Names)$/.test(l.name); })
+          .sort(function (a, b) { return a.name.localeCompare(b.name); }).map(function (l) { return l.name; });
+      }
+      function cardFor(name) {
+        return getJ(base + "shards.json").then(function (sh) {
+          var key = window.raShardKey(window.raFold(name), sh && sh.s); if (!key) return null;
+          return getJ(base + "s/" + encodeURIComponent(key) + ".json");
+        }).then(function (rows) {
+          /* a shard that could not be fetched is not a finding: say nothing */
+          if (!rows) return null;
+          var row = N.pick(rows, name);
+          if (!row) { var gap = N.build(null); gap.name = name; return N.render(gap, base); }
+          return Promise.all([getJ(base + "flag-eras.json"), getJ(base + "flag-map.json")]).then(function (a) {
+            return N.render(N.build(row, { names: names, eras: a[0] && a[0].eras, map: a[1] }), base);
+          });
+        });
+      }
       function draw() {
         var P = window.raProgress; if (!P) return;
         host = document.getElementById("mr-intro"); if (!host) return;
         if (!Object.keys(names).length) { try { names = JSON.parse(document.getElementById("mr-cn").textContent) || {}; } catch (e) {} }
-        var me = P.lines().filter(function (l) { return l.active; })[0];
-        if (!me || /^(My research so far|Research Names)$/.test(me.name)) { token++; show(null); return; }
-        var my = ++token, f = window.raFold(me.name);
-        getJ(base + "shards.json").then(function (sh) {
-          var key = window.raShardKey(f, sh && sh.s); if (!key) return null;
-          return getJ(base + "s/" + encodeURIComponent(key) + ".json");
-        }).then(function (rows) {
+        var list = readNames();
+        if (!list.length) { token++; show(null); return; }
+        var my = ++token;
+        Promise.all(list.map(cardFor)).then(function (cards) {
           if (my !== token) return;
-          /* a shard that could not be fetched is not a finding: say nothing */
-          if (!rows) { show(null); return; }
-          var row = N.pick(rows, me.name);
-          if (!row) { show(N.render(N.build(null), base)); return; }
-          return Promise.all([getJ(base + "flag-eras.json"), getJ(base + "flag-map.json")]).then(function (a) {
-            if (my !== token) return;
-            show(N.render(N.build(row, { names: names, eras: a[0] && a[0].eras, map: a[1] }), base));
-          });
+          var got = cards.filter(Boolean);
+          if (!got.length) { show(null); return; }
+          host.textContent = ""; got.forEach(function (c) { host.append(c); }); host.hidden = false;
         });
       }
       document.addEventListener("ra-progress-changed", draw);
+      document.addEventListener("ra-scope-changed", draw);
       if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { setTimeout(draw, 0); }); else setTimeout(draw, 0);
     })();
   </script>

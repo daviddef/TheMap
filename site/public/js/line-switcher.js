@@ -71,6 +71,7 @@
       if (tgCount) tgCount.textContent = n + " of " + tot + " ticked";
     }
     document.addEventListener("ra-scope-changed", syncTicks);
+    document.addEventListener("ra-scope-changed", function () { if (fam) drawAdmin(P.lines().filter(function (l) { return l.active; })[0]); });
     window.addEventListener("storage", syncTicks);
 
     function labelOf(l) { return (l.name === "My research so far" ? "Research Names" : l.name) + (l.where ? " of " + l.where : ""); }
@@ -304,11 +305,22 @@
       bar.append(fam.panel);
       if (after) bar.insertBefore(after, fam.panel);
     }
+    /* THE FAMILIES THE PAGE IS READING, when more than one is ticked: the bar, the page title and the name card must say so, because the map and
+       the lists below follow the ticks and not only the family you mark under. Fewer than two ticked means the one you mark under, as before. */
+    function readSet() {
+      var x = readScope(), ls = P.lines(), out = x && x.all ? ls : ls.filter(function (l) { return ((x && x.slugs) || []).indexOf(l.slug) > -1; });
+      return out;
+    }
+    function joinNames(a) { return a.length < 2 ? a.join("") : a.slice(0, -1).join(", ") + " and " + a[a.length - 1]; }
     function drawAdmin(me) {
       if (!fam) return;
-      fam.who.textContent = me ? labelOf(me) : "No family chosen";
+      var set = readSet(), many = set.length > 1;
+      bar.classList.toggle("ra-lines-many", many);
+      fam.who.textContent = many ? joinNames(set.map(labelOf)) : me ? labelOf(me) : "No family chosen";
       fam.sess.textContent = "";
-      if (me) {
+      if (many) {
+        fam.sess.append("Reading " + set.length + " families together" + (me ? ". Your marks go under " + labelOf(me) + "." : "."));
+      } else if (me) {
         var ar = me.archives || [];
         if (ar.length) {
           fam.sess.append("From the research session" + (ar.length > 1 ? "s " : " "));
@@ -318,7 +330,7 @@
       fam.tools.hidden = !me;
       if (GROUPS) badge(); else loadGroups(badge);
       /* the page's own title says whose research it is */
-      var h = document.querySelector(".pagehead h1"), ttl = me ? "My research: " + labelOf(me) : "My research";
+      var h = document.querySelector(".pagehead h1"), ttl = many ? "My research: " + (set.length > 3 ? set.length + " families" : joinNames(set.map(labelOf))) : me ? "My research: " + labelOf(me) : "My research";
       if (h) h.textContent = ttl;
       var tail = /\s[|\u2014\u2013-]\s.*$/.exec(origTitle); document.title = ttl + (tail ? tail[0] : "");
     }

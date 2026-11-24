@@ -59,3 +59,14 @@ test("sounds-alike spellings are carried as a guess, never as records", () => {
   const m = N.build(ROW, { names: NAMES, eras: ERAS, map: MAP });
   assert.deepEqual(m.sounds, ["Añil", "Anila"]);
 });
+
+test("My research reads every ticked family: one name card each, and the bar names the whole set", () => {
+  const page = fs.readFileSync(path.join(here, "../src/pages/my-research.astro"), "utf8");
+  const bar = fs.readFileSync(path.join(here, "../public/js/line-switcher.js"), "utf8");
+  assert.match(page, /SY\.scopeOf\(lines, me && me\.slug, stored\)/, "the cards read the same set as the map and the lists");
+  assert.match(page, /Promise\.all\(list\.map\(cardFor\)\)/, "one card per family");
+  assert.match(page, /addEventListener\("ra-scope-changed", draw\)/, "ticking a family redraws the cards");
+  assert.match(bar, /Reading " \+ set\.length \+ " families together/, "the bar says several families are being read");
+  assert.match(bar, /Your marks go under/, "and which one the marks go under");
+  assert.match(fs.readFileSync(path.join(here, "../public/js/name-intro.js"), "utf8"), /"About the name" \+ \(m\.name \? " " \+ m\.name : ""\)/, "a card for a name with no entry still says whose it is");
+});

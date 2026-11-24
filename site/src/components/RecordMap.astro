@@ -474,6 +474,7 @@ try {
     this project has already paid twice for the build and the client working
     the key out separately. */}
 <script is:inline src={base.replace(/\/$/, "") + "/js/shard-key.js"}></script>
+<script is:inline src={base.replace(/\/$/, "") + "/js/surname-rules.js"}></script>
 {/* WHICH BASEMAP OPENS, DECIDED BEFORE THE MAP IS BUILT. A small classic script, so the answer (the reader's own choice, else the
     theme's default: Night dots in dark theme) is known when the first tile is asked for and the light map never flashes up first. */}
 <script is:inline src={base.replace(/\/$/, "") + "/js/basemaps.js"}></script>
@@ -7445,6 +7446,13 @@ window.addEventListener("load", async function () {
       }
     }
     h.push("</div>");
+    /* FORMS TO TRY, BY RULE. The family-group question was «Kauzlarić», «Brozenić», «Bunčić»: names a clerk wrote as they sounded (Kauzlarich, Brozenich, Buncich). The catalogue keeps
+       only a spelling with a record behind it, so for a surname it does not hold this says what the usual respellings are, as a lead to type and never as a finding. */
+    var rtext = yearsIn(term).text || "", rf = (!tailName && window.raSurnameRules && /^[^\s,]+$/.test(rtext)) ? window.raSurnameRules.forms(rtext) : [];
+    if (rf.length)
+      h.push('<div class="ra-nc ra-forms"><div class="ra-nc-u"><h4>' + esc(T("Forms to try")) + "<span>" + esc(T("by rule")) + '</span></h4><p class="ra-nc-n">' +
+             esc(T("A name is written as it sounded to the clerk. These are the usual ways a name like this is respelt when it crosses a border. None is known to be your family's until a record shows it.")) +
+             '</p><p class="ra-nc-f">' + rf.slice(0, 10).map(function (x) { return "<span>" + esc(x) + "</span>"; }).join("") + "</p></div></div>");
     if (names.length) {
       if (tailName) {
         var tcard = await nameCardFor(term); if (stale()) return; if (tcard) h.push(tcard);

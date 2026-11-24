@@ -474,6 +474,7 @@ try {
     this project has already paid twice for the build and the client working
     the key out separately. */}
 <script is:inline src={base.replace(/\/$/, "") + "/js/shard-key.js"}></script>
+<script is:inline src={base.replace(/\/$/, "") + "/js/surname-rules.js"}></script>
 {/* WHICH BASEMAP OPENS, DECIDED BEFORE THE MAP IS BUILT. A small classic script, so the answer (the reader's own choice, else the
     theme's default: Night dots in dark theme) is known when the first tile is asked for and the light map never flashes up first. */}
 <script is:inline src={base.replace(/\/$/, "") + "/js/basemaps.js"}></script>
@@ -3342,6 +3343,23 @@ window.addEventListener("load", async function () {
     };
   })();
 
+  /* THE LIVE TOUR DRIVES THE REAL MAP THROUGH THIS, AND ONLY THIS. David: «bring it into the canvas ... make it really work as though we're doing it». The tour (js/live-tour.js)
+     types into the real search box for show, then calls these to land on the exact place, country or source, because a typed search is ambiguous (Lviv is also Lemberge in
+     Belgium) and a tour that depends on which of eight matches comes first is a tour that breaks. Each one is what a click on the same thing does. */
+  window.raTourApi = {
+    get box() { return qbox; },
+    place: function (id, name) { if (!window.raPlacePanel) return null; qbox.value = name || id; clearTimeout(qbox._t); sugHide(); var pl = idx.places.filter(function (x) { return x.i === id; })[0]; if (pl && !map.getBounds().contains([pl.y, pl.x])) map.setView([pl.y, pl.x], Math.max(map.getZoom(), 9)); return window.raPlacePanel.open(id, name); },
+    source: function (id) { var p = PROV[id]; if (!p) return false; qbox.value = p.name; clearTimeout(qbox._t); sugHide(); openSource(p); return true; },
+    country: async function (cc) {
+      var list = await cptsReady, c = list.filter(function (x) { return x.cc === String(cc).toUpperCase(); })[0]; if (!c) return false;
+      retireVisit(); if (gmark) { map.removeLayer(gmark); gmark = null; } ctryLayer.clearLayers(); communeLayer.clearLayers(); litCC = null;
+      qbox.value = c.n; clearTimeout(qbox._t); sugHide(); openCountry(c); showCountries([{ cc: c.cc, how: "register" }], function () { return false; });
+      return true;
+    },
+    search: function (term) { qbox.value = term; qbox.dispatchEvent(new Event("input", { bubbles: true })); },
+    clear: function () { qbox.value = ""; qbox.dispatchEvent(new Event("input", { bubbles: true })); }
+  };
+
   function render(d) {
     var h = [];
     /* ONE LINE, NOT FOUR. David: «"everything about gracisce" does it really
@@ -5528,6 +5546,12 @@ window.addEventListener("load", async function () {
   var TYPED_Y = false;
   function syncTypedYears() {
     var t = yearsIn(qbox.value);
+    /* A STORY IS NOT A YEAR FILTER. «My great-grandfather Ivan came from Gallignana to Hamilton around 1905» holds a year, but the reader is telling a story, not asking
+       for the records of 1905: switching the pill on emptied the map and raised «nothing on this map can answer for 1905» over the story card. The story draws its own years. */
+    var fnd = qbox.closest && qbox.closest(".ra-find");
+    /* the box is only known to hold a story a moment after the typing settles, so when the story is recognised the pill the box switched on is switched off */
+    if (fnd && !fnd._ytw && window.MutationObserver) { fnd._ytw = 1; new MutationObserver(function () { if (fnd.classList.contains("ra-story-on")) syncTypedYears(); }).observe(fnd, { attributes: true, attributeFilter: ["class"] }); }
+    if (fnd && fnd.classList.contains("ra-story-on")) t = { yrs: null };
     if (t.yrs) {
       var a = Math.max(1500, t.yrs[0]), b = Math.min(2026, t.yrs[1]);
       if (a > b) return;
@@ -5540,7 +5564,6 @@ window.addEventListener("load", async function () {
       if (yon.checked) { yon.checked = false; readRange(); yearUI(); }
     }
   }
-
   [yin, yin2].forEach(function (el) {
   el.addEventListener("input", function () {
     if (!yon.checked) return;
@@ -7504,6 +7527,13 @@ window.addEventListener("load", async function () {
       if (al1.length) h.push('<span class="at-also">' + esc(T("also written")) + " " + al1.map(function (x) { return "<em>" + esc(x) + "</em>"; }).join(" \u00b7 ") + "</span>");
     }
     h.push("</div>");
+    /* FORMS TO TRY, BY RULE. The family-group question was «Kauzlarić», «Brozenić», «Bunčić»: names a clerk wrote as they sounded (Kauzlarich, Brozenich, Buncich). The catalogue keeps
+       only a spelling with a record behind it, so for a surname it does not hold this says what the usual respellings are, as a lead to type and never as a finding. */
+    var rtext = yearsIn(term).text || "", rf = (!tailName && window.raSurnameRules && /^[^\s,]+$/.test(rtext)) ? window.raSurnameRules.forms(rtext) : [];
+    if (rf.length)
+      h.push('<div class="ra-nc ra-forms"><div class="ra-nc-u"><h4>' + esc(T("Forms to try")) + "<span>" + esc(T("by rule")) + '</span></h4><p class="ra-nc-n">' +
+             esc(T("A name is written as it sounded to the clerk. These are the usual ways a name like this is respelt when it crosses a border. None is known to be your family's until a record shows it.")) +
+             '</p><p class="ra-nc-f">' + rf.slice(0, 10).map(function (x) { return "<span>" + esc(x) + "</span>"; }).join("") + "</p></div></div>");
     if (names.length) {
       if (tailName) {
         var tcard = await nameCardFor(term); if (stale()) return; if (tcard) h.push(tcard);

@@ -55,6 +55,7 @@
 
   function pass(force) {
     var st = state();
+    if (window.raDemo) return Promise.resolve();   /* the live tour runs on a throwaway copy of the research: nothing it does is ever saved online */
     if (!st || busy || !SY || !RF || !RF.exportAll) return Promise.resolve();
     if (navigator.onLine === false) return Promise.resolve();
     if (!force && Date.now() - lastPull < 3000) return Promise.resolve();

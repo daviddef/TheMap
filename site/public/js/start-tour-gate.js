@@ -107,10 +107,21 @@
       state.loading.catch(function () { state.loading = null; if (hostEl.parentNode) hostEl.parentNode.removeChild(hostEl); });
       return state.loading;
     }
+    /* ON THE MAP, THE TOUR IS THE MAP (js/live-tour.js, loaded only now); anywhere else, or if that cannot start, it is the film. A tour closed by closing the
+       page leaves the reader's research copied aside, so a page that finds that copy loads the same file, which puts it back. */
+    function live() {
+      if (!d.getElementById("ra-map") || !w.raTourApi) return Promise.resolve(false);
+      if (w.raLiveTour) return Promise.resolve(!!w.raLiveTour.open());
+      return script(base + "js/live-tour.js").then(function () { return !!(w.raLiveTour && w.raLiveTour.open()); }, function () { return false; });
+    }
+    try { if (w.sessionStorage.getItem("ra-tour-backup")) script(base + "js/live-tour.js"); } catch (e) { /* none */ }
     function open(from, auto) {
-      if (state.api && state.api.S.open) return;
+      if (state.api && state.api.S.open || w.raLiveTour && w.raLiveTour.isOpen) return;
       markSeen();
       var opener = from || d.activeElement;
+      (auto ? Promise.resolve(false) : live()).then(function (ok) { if (!ok) film(opener, auto); });
+    }
+    function film(opener, auto) {
       load().then(function (api) {
         api.open(0, opener, function () {
           if (w.location.hash === "#story") { try { w.history.replaceState(null, "", w.location.pathname + w.location.search); } catch (e) { /* leave it */ } }
@@ -151,7 +162,7 @@
     });
     d.addEventListener("keydown", function (e) {
       if (!isTourKey(e)) return;
-      if (state.api && state.api.S.open) return;
+      if (state.api && state.api.S.open || w.raLiveTour && w.raLiveTour.isOpen) return;
       e.preventDefault(); open(d.activeElement, false);
     });
 

@@ -4180,6 +4180,10 @@ window.addEventListener("load", async function () {
   function gazPlaceCards(hits) {
     var out = ['<div class="ra-area ra-area-solo ra-gaz">'], multi = hits.length > 1, ccs = [];
     out.push('<p class="at-sub">' + esc(T("Nobody has read a book for this name yet. That is a gap in this map, not in the record.")) + "</p>");
+    /* WHO HELD THIS GROUND, FOR A PLACE THAT HAS NO BOOKS. David, on Dresden: «why no flag history in the overlay?» The strip was written for a place with a
+       page; a gazetteer place carries a point and a country, which is all heldBy() reads. Only the first, which is the one the map flew to. */
+    try { var held0 = hits[0] && heldBy({ lat: hits[0][1], lon: hits[0][2], country: hits[0][3], region: null });
+      if (held0) out.push('<div class="ra-area ra-area-solo ra-gaz-held">' + held0 + "</div>"); } catch (e) { /* the cards below still answer */ }
     hits.slice(0, 4).forEach(function (r) {
       var cn = CNAME[r[3]] || r[3], near = nearestBooks(r[1], r[2], 6, 60);
       if (ccs.indexOf(r[3]) < 0) ccs.push(r[3]);
@@ -5742,6 +5746,24 @@ window.addEventListener("load", async function () {
 
   /* ---- find, filter, count ----------------------------------------------- */
   var qbox = document.getElementById("ra-q"), count = document.getElementById("ra-count");
+  /* THE PANEL STARTS BELOW THE SEARCH BOX, HOWEVER TALL IT HAS GROWN. David: «i keep getting stuck with my search box overlapping the overlay». The box is a textarea that
+     grows with what is typed (a story, a name and a place), and the panel sat at a fixed 92px, so a second line of typing ran underneath it. The bar's own bottom edge is
+     measured and handed to the panel as --ra-panel-top (the stylesheet keeps 92px when this cannot measure). */
+  (function () {
+    var bar = document.querySelector(".ra-bar-find"), stage = document.querySelector(".fd2-stage");
+    if (!bar || !stage || !window.ResizeObserver) return;
+    var raf = 0;
+    function place() {
+      raf = 0;
+      try {
+        var b = bar.getBoundingClientRect(), s = stage.getBoundingClientRect();
+        var top = Math.max(92, Math.round(b.bottom - s.top + 12));
+        stage.style.setProperty("--ra-panel-top", top + "px");
+      } catch (e) { /* the fixed offset stays */ }
+    }
+    var ro = new ResizeObserver(function () { if (!raf) raf = requestAnimationFrame(place); });
+    ro.observe(bar); place();
+  })();
   /* A SHARED LINK MUST LAND ON THE PLACE, NOT ON A SEARCH FOR ITS FIRST LETTERS. David: «when i select
      senj as a place it works, but the url ...&at=senj&q=Senj ... when i share it takes people not to
      the place, but to a long list of all results with senj in the name». Picking a suggestion put the
@@ -7152,7 +7174,7 @@ window.addEventListener("load", async function () {
     return best;
   }
 
-  async function showCountries(list, stale, origin) {
+  async function showCountries(list, stale, origin, keepView) {
     if (list && list.length) { searchHit = true; noteSearch(); retireVisit(); }
     litFor = fold(yearsIn(qbox.value).text);
     /* THE FLAG CARDS FOLLOW THE SURNAME, NOT THE TEXT. David: «when I search
@@ -7209,7 +7231,8 @@ window.addEventListener("load", async function () {
        drawn and lit, so nothing is hidden, they are simply not what the view
        is centred on. Register towns still win over both — a town a state
        counted people in is a sharper answer than a whole country. */
-    if (communeBox) map.fitBounds(communeBox, { padding: [40, 40], maxZoom: 9 });
+    if (keepView) { /* a place typed in full has the map; the surname's countries are lit but do not move it */ }
+    else if (communeBox) map.fitBounds(communeBox, { padding: [40, 40], maxZoom: 9 });
     else if (origin && originBox) map.fitBounds(originBox, { padding: [30, 30], maxZoom: 6 });
     else if (box) map.fitBounds(box, { padding: [30, 30], maxZoom: 7 });
   }
@@ -7663,6 +7686,7 @@ window.addEventListener("load", async function () {
       h.push('<div class="ra-nc ra-forms"><div class="ra-nc-u"><h4>' + esc(T("Forms to try")) + "<span>" + esc(T("by rule")) + '</span></h4><p class="ra-nc-n">' +
              esc(T("A name is written as it sounded to the clerk. These are the usual ways a name like this is respelt when it crosses a border. None is known to be your family's until a record shows it.")) +
              '</p><p class="ra-nc-f">' + rf.slice(0, 10).map(function (x) { return "<span>" + esc(x) + "</span>"; }).join("") + "</p></div></div>");
+    var placeAt = h.length;   /* where a place typed in full goes: after the heading, before the surname card */
     if (names.length) {
       if (tailName) {
         var tcard = await nameCardFor(term); if (stale()) return; if (tcard) h.push(tcard);
@@ -7733,7 +7757,7 @@ window.addEventListener("load", async function () {
       }
       lit.forEach(function (c) { litCC[c.cc] = 1; });
       syncCountryDots();
-      showCountries(lit, stale);
+      showCountries(lit, stale, undefined, !!(hits.length && !exact && fold(hits[0][0]) === f));
 
       /* And where a state counted by town rather than by country, draw
          the towns. Belgium is the only one, and the panel says so — a
@@ -7926,9 +7950,13 @@ window.addEventListener("load", async function () {
          to go to the village, and the map jumping there buries the answer. */
       if (!names.length || fold(top[0]) === f)
         map.setView([top[1], top[2]], Math.max(map.getZoom(), 8));
+      /* WITH A SURNAME ALSO ANSWERING, SOMETHING LATER REFITS THE MAP (the countries the name is in), so the place asks once more when that has settled. */
+      if (names.length && fold(top[0]) === f)
+        setTimeout(function () { if (!stale()) map.setView([top[1], top[2]], Math.max(map.getZoom(), 8)); }, 900);
       if (!names.length) h.push(gazPlaceCards(hits));
       else {
-      h.push('<div class="ra-juris"><div class="lab">That name is a place</div>');
+      var hmark = h.length, exactPl = fold(top[0]) === f;
+      h.push('<div class="ra-juris' + (exactPl ? " ra-isplace" : "") + '"><div class="lab">' + (exactPl ? "It is also a place" : "That name is a place") + "</div>");
       /* TWO PLACES CAN SHARE A NAME AND OFTEN DO. Croatia has two Lovinacs,
          forty kilometres apart, and the panel printed them as two identical
          lines — «Lovinac — Croatia» twice, with nothing to say which was
@@ -7994,6 +8022,13 @@ window.addEventListener("load", async function () {
                  "name for it</span>" : "") + nearLine + "</p>");
       });
       h.push("</div>");
+      /* A PLACE TYPED IN FULL IS THE PLACE, NOT A FOOTNOTE TO A SURNAME. David typed Dresden and got the Dutch surname, with the city in Germany
+         under four screens of sources. The surname stays, but when the words are exactly a place's name the place goes first, with who held
+         the ground; the surname follows, under its own heading. */
+      if (exactPl) {
+        try { var heldTop = heldBy({ lat: top[1], lon: top[2], country: top[3], region: null }); if (heldTop) h.push(heldTop); } catch (e) { /* none */ }
+        var blk = h.splice(hmark); h.splice(placeAt, 0, blk.join(""));
+      }
       }
     }
     /* Only worth printing when it adds something. Typing "Ireland" and being
@@ -8227,7 +8262,7 @@ window.addEventListener("load", async function () {
                "this name is attested in yet — which is exactly the kind of gap worth " +
                "telling us about.</p>");
       }
-      panel.innerHTML = h.join("");
+      panel.innerHTML = h.join(""); try { bandsInit(panel); } catch (e) { /* the strip stays unwired */ }
       return;
     }
     /* IT IS A DIFFERENT SENTENCE WHEN THE PLACE WAS FOUND. «No places of that
@@ -8237,7 +8272,7 @@ window.addEventListener("load", async function () {
        volumes here, and does this place exist — and only the first is «no». */
     var ncard = (!hits.length && !(names && names.length)) ? await nameCardFor(term) : "";
     if (stale()) return;
-    if (hits.length && !(names && names.length)) { panel.innerHTML = h.join(""); return; }   /* a place: its card above says all of it */
+    if (hits.length && !(names && names.length)) { panel.innerHTML = h.join(""); try { bandsInit(panel); } catch (e) { /* the strip stays unwired */ } return; }   /* a place: its card above says all of it */
     if (ncard) { h.push(ncard); h.push('<p class="at-sub">' + esc(T("No place on the map is called that.")) + "</p>"); }
     else h.push(hits.length
       ? '<p class="at-what"><b>The place is here. The volumes are not.</b> ' +
@@ -8266,7 +8301,7 @@ window.addEventListener("load", async function () {
       h.push('<p class="at-sub">Nothing in this map reaches it either — which is exactly the ' +
              "kind of gap worth telling us about.</p>");
     }
-    panel.innerHTML = h.join("");
+    panel.innerHTML = h.join(""); try { bandsInit(panel); } catch (e) { /* the strip stays unwired */ }
   }
   /* ---- what you looked for last time -------------------------------------
      localStorage, because this is a convenience and not a record: it is
@@ -8456,6 +8491,8 @@ window.addEventListener("load", async function () {
     var row = sugRows[i];
     if (!row) return;
     sugHide();
+    /* A PICK ENDS THE SEARCH. On a touch screen the keyboard stayed up over the panel that had just opened; it goes away now. On a desktop the box keeps focus, as before. */
+    setTimeout(function () { try { if (window.matchMedia && matchMedia("(pointer: coarse)").matches) qbox.blur(); } catch (e) { /* the box keeps focus */ } }, 0);
     if (row.kind === "gaz") {
       /* No place page to open and no marker to light: this name is in the
          gazetteer and not on the shelf. apply() already handles it — it draws
@@ -8550,9 +8587,19 @@ window.addEventListener("load", async function () {
      further down, so the dropdown is a shortcut past it rather than a
      replacement for it. */
   qbox.addEventListener("input", function () { sugFor(qbox.value); });
+  /* FOCUS ALONE DOES NOT REOPEN THE LIST OVER A PANEL THAT IS ALREADY THE ANSWER. David: «i keep getting stuck with my search box overlapping the overlay». The list is
+     drawn over the top of the open place panel, and it came back every time the box was focused, even when the box held exactly the name that had just opened the panel
+     and there was nothing to suggest. Typing still opens it; focusing a box that holds a different, unanswered name still does. */
   qbox.addEventListener("focus", function () {
-    if (qbox.value.trim().length >= 2) sugFor(qbox.value);
+    if (qbox.value.trim().length >= 2 && !(panelQ && qbox.value === panelQ && !panel.hidden)) sugFor(qbox.value);
   });
+  /* A PRESS ANYWHERE ELSE CLOSES IT, not only the box losing focus: a drag on the map or a scroll of the panel does not always take focus off a box, and the list stayed over the panel. */
+  document.addEventListener("pointerdown", function (ev) {
+    if (!sugBox || sugBox.hidden) return;
+    var t = ev.target;
+    if (t === qbox || (t && t.closest && (t.closest("#ra-sug") || t.closest(".ra-find")))) return;
+    sugHide();
+  }, true);
   /* A click inside the list must land before the blur closes it. */
   qbox.addEventListener("blur", function () { setTimeout(sugHide, 160); });
 

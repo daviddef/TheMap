@@ -120,11 +120,14 @@ const rows = page.data.map((p) => {
       actually asked. It is hidden until the script runs: a search box that
       does nothing is worse than no search box, and a reader without
       JavaScript still has the country directory and the list below. */}
+  {/* THE GAZETTEER IS PASSED IN (gazShards), because the box says «not in the gazetteer either» when it finds nothing, and until
+      this was added that was never true here: «dresden» answered «nothing», on the page that lists the atlas's places, while the
+      map found Dresden in Germany. Same shards the map and /your-name/ read. */}
   {/* THE FLAT LIST BECAME A RANKED DROPDOWN. It answered «south» with sixty
       links in four columns, the country code run onto the name, a country and
       four American states looking identical. See SmartFind.astro. */}
   <SmartFind flagRows={flagSearchRows()} placesIndex={u("/index.json")} quietIndex={u("/index-quiet.json")}
-             base={u("/")} />
+             base={u("/")} gazShards={u("/g/")} />
 
   {/* THE SAME CARDS /countries/ USES, NOT A SECOND DESCRIPTION OF THE SAME
       COUNTRIES. David: «every country can just move to "places"? surely and

@@ -18,7 +18,7 @@ test("gazPlaceCards builds the usual folds: nearest books, country sources (sort
 
 test("a name that is only a place renders the cards and stops: no box, no paragraph, no 57-row list", () => {
   assert.match(src, /if \(!names\.length\) h\.push\(gazPlaceCards\(hits\)\);/);
-  assert.match(src, /if \(hits\.length && !\(names && names\.length\)\) \{ panel\.innerHTML = h\.join\(""\); return; \}/);
+  assert.match(src, /if \(hits\.length && !\(names && names\.length\)\) \{ panel\.innerHTML = h\.join\(""\);[^\n]*? return; \}/);
 });
 
 test("a single place carries its country and other names in the heading, like a place card", () => {

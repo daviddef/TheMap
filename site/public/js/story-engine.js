@@ -2729,7 +2729,7 @@
     if (g && g.groups && g.groups.length) {
       any = true;
       box.append(el("h4", "First name: " + g.typed + " is also written"));
-      var ul = el("ul", null, "lf-forms"), shown = Object.create(null), leads = [];
+      var ul = el("ul", null, "lf-forms lf-forms-cols"), shown = Object.create(null), leads = [];
       g.groups.forEach(function (x) {
         x.forms.forEach(function (f) { shown[S.fold(f)] = 1; });
         if (x.forms.length) { var li = el("li"); li.append(el("b", x.label + ": "), document.createTextNode(x.forms.slice(0, 8).join(", ") + (x.forms.length > 8 ? " and " + (x.forms.length - 8) + " more case endings and spellings" : ""))); ul.append(li); }

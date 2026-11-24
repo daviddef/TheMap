@@ -422,11 +422,11 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp-grp:first-child { padding-top: 2px; }
   .sp-main { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
   .sp-head .sp-title { font: 600 clamp(26px, 3.2vw, 34px)/1.15 var(--serif); margin: 0; text-wrap: balance; }
-  .sp-lede { color: var(--ink-2); margin: 6px 0 0; max-width: 62ch; }
-  .sp-sublede { color: var(--ink-2); font-size: 15px; margin: 0; max-width: 64ch; }
-  .sp-cont { font-size: 14px; line-height: 1.5; color: var(--ink-2); margin: 0 0 8px; max-width: 70ch; background: var(--panel); border-left: 3px solid var(--accent); padding: 8px 12px; border-radius: 0 6px 6px 0; }
+  .sp-lede { color: var(--ink-2); margin: 6px 0 0; }
+  .sp-sublede { color: var(--ink-2); font-size: 15px; margin: 0; }
+  .sp-cont { font-size: 14px; line-height: 1.5; color: var(--ink-2); margin: 0 0 8px; background: var(--panel); border-left: 3px solid var(--accent); padding: 8px 12px; border-radius: 0 6px 6px 0; }
   .sp-linkbtn { background: none; border: 0; padding: 0 2px; font: inherit; color: var(--accent); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
-  .sp-fine { font-size: 13px; line-height: 1.5; color: var(--ink-3); margin: 4px 0; max-width: 70ch; } .sp-fine a { color: var(--accent); }
+  .sp-fine { font-size: 13px; line-height: 1.5; color: var(--ink-3); margin: 4px 0; } .sp-fine a { color: var(--accent); }
   .sp-sec { border-top: 1px solid var(--rule); padding-top: 20px; margin-top: 10px; display: flex; flex-direction: column; gap: 12px; scroll-margin-top: 12px; }
   .sp-sec[hidden] { display: none; }
   .sp-sec > h2 { font: 600 22px/1.2 var(--serif); margin: 0; }
@@ -443,7 +443,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp-out { color: var(--ink-2); } .sp-out:empty { display: none; }
   .sp-planbox { background: var(--panel); border: 1px solid var(--rule-strong); border-radius: 16px; padding: 18px clamp(14px, 2.4vw, 22px); }
   .sp-plan-h { display: flex; flex-wrap: wrap; gap: 14px 20px; align-items: center; justify-content: space-between; }
-  .sp-ai-note { font-size: 13.5px; color: var(--ink-3); margin: 0; max-width: 70ch; border: 1px dashed var(--rule-strong); border-radius: 8px; padding: 8px 12px; }
+  .sp-ai-note { font-size: 13.5px; color: var(--ink-3); margin: 0; border: 1px dashed var(--rule-strong); border-radius: 8px; padding: 8px 12px; }
   .sp-steps-h { font: 600 17px/1.2 var(--serif); margin: 10px 0 0; }
   .sp-ai-lead { font: 400 17px/1.5 var(--serif); max-width: 66ch; margin: 4px 0 0; }
   .sp-ai-legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--ink-3); align-items: center; margin: 4px 0; }
@@ -456,7 +456,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp-src { font: 600 10.5px/1 var(--sans); letter-spacing: .06em; text-transform: uppercase; display: inline-block; border-radius: 5px; padding: 3px 7px; margin-right: 6px; vertical-align: 1px; }
   .sp-src.atlas { background: var(--accent-wash); color: var(--accent); }
   .sp-src.suggested { border: 1px dashed var(--ochre); color: var(--ochre); }
-  .sp-ai-foot { font-size: 13px; color: var(--ink-3); margin: 8px 0 0; max-width: 70ch; }
+  .sp-ai-foot { font-size: 13px; color: var(--ink-3); margin: 8px 0 0; }
   .sp-ai-foot button { font: inherit; color: var(--accent); background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; }
   @media (max-width: 860px) {
     .sp, .sp:has(.sp-rail:not([hidden])) { grid-template-columns: minmax(0, 1fr); gap: 14px; }
@@ -595,6 +595,12 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp .lf-ev { padding: 6px 10px; border-left: 3px solid var(--tagc, var(--accent)); background: var(--ground); border-radius: 0 8px 8px 0; font-size: 14px; line-height: 1.4; }
   .sp .lf-moments h4, .sp .lf-names h4 { display: block; font: 600 11.5px/1 var(--sans); letter-spacing: .09em; text-transform: uppercase; color: var(--accent); margin: 14px 0 6px; }
   .sp .lf-forms { margin: 0 0 6px; padding-left: 18px; font-size: 14px; line-height: 1.5; } .sp .lf-forms li { margin: 0 0 4px; }
+  /* the first names, three to a row: one language per cell; the long «worth trying» line takes the whole row */
+  .sp .lf-forms-cols { list-style: none; padding: 0; display: grid; grid-template-columns: 1fr; gap: 6px 24px; }
+  @media (min-width: 620px) { .sp .lf-forms-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 900px) { .sp .lf-forms-cols { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .sp .lf-forms-cols li { margin: 0; padding: 6px 10px; background: var(--ground); border-radius: 8px; overflow-wrap: anywhere; }
+  .sp .lf-forms-cols li:last-child { grid-column: 1 / -1; }
   .sp .lf-names .cap { color: var(--ink-2); font-size: 12.5px; }
   /* the "Try:" examples are buttons: without a ground of their own the browser paints them light grey, and pale text on that is unreadable in dark mode */
   .rr-seen { margin: 8px 0; padding: 8px 12px; border-left: 3px solid var(--accent); background: var(--accent-wash); border-radius: 0 8px 8px 0; }

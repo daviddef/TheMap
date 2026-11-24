@@ -910,6 +910,73 @@ window.addEventListener("load", async function () {
     h.push("</ul></details>");
     return h.join("");
   }
+  /* THE ORDER TO DO IT IN. David, on a search for Farley: «really tough if i was starting from scratch to search for a name and get so many things put in front of me ... is there
+     a category that says do this first then that, then x, then y ... the first 10 things, then the next 10». The per-country folds (217, 191, 258 sources) listed everything and
+     ranked nothing. This sorts a country's sources into steps by rules a reader can read: what it costs to see (the access class), whether it is searched by name (an index) or
+     read page by page (images), and who you have to ask (paper in a building). The first ten of a step show; the rest are in tens behind «the next 10».
+     NOTHING HERE IS A CLAIM ABOUT WHICH SOURCE IS BEST. It is an order to try them in, from what the directory already says about each. */
+  var PLAN_IDX = { index: 1, aggregator: 1, volunteer: 1, memorial: 1, statistics: 1, catalogue: 0 };
+  var PLAN_KIND = ["aggregator", "index", "national-archive", "national-library", "memorial", "statistics", "catalogue", "volunteer"];
+  function planSteps(cc) {
+    var nat = natProviders(cc), ww = wwProviders(), used = {}, FREE = { free: 1, account: 1, index: 1 };
+    var take = function (list, test) { return list.filter(function (p) { if (used[p.id] || !test(p)) return false; return (used[p.id] = 1); }); };
+    var byKind = function (a, b) { var ka = PLAN_KIND.indexOf(a.kind), kb = PLAN_KIND.indexOf(b.kind); return (ka < 0 ? 99 : ka) - (kb < 0 ? 99 : kb); };
+    /* THE BIG FREE ONES THAT REACH EVERYWHERE FIRST (the few the directory ranks as family-tree sites), then this country's own, the national bodies before the volunteers. */
+    var s1 = take(ww, function (p) { return FREE[p.access] && p.family_tree && p.family_tree <= 6; }).sort(function (a, b) { return a.family_tree - b.family_tree; })
+      .concat(take(nat.slice().sort(byKind), function (p) { return FREE[p.access] && PLAN_IDX[p.kind]; }));
+    var s2 = take(nat, function (p) { return p.access === "free" || p.access === "account"; });
+    var s3 = familyTreeSites(cc).filter(function (p) { return !used[p.id] && (used[p.id] = 1); });
+    var s4 = take(nat, function (p) { return p.access === "onsite" || p.access === "catalogue"; });
+    return [s1, s2, s3, s4];
+  }
+  function planRows(list, where) {
+    var rows = function (l) {
+      return "<ul>" + l.map(function (p) {
+        return "<li" + srcAttrs(p.id, p.name, where, BASE + "archive/" + p.id + "/") + '><a class="ra-area-p" target="_blank" rel="noopener" href="' + BASE + "archive/" + esc(p.id) + '/"><span>' + esc(p.name) + "</span><small>" + accTxt(p.access) + "</small></a></li>";
+      }).join("") + "</ul>";
+    };
+    list = list.slice(0, 30);
+    var o = [rows(list.slice(0, 10))];
+    for (var i = 10; i < list.length; i += 10) {
+      var chunk = list.slice(i, i + 10);
+      o.push('<details class="ra-plan-more"><summary>' + esc(T("The next") + " " + chunk.length) + "</summary>" + rows(chunk) + "</details>");
+    }
+    return o.join("");
+  }
+  function namePlan(ccs, term) {
+    ccs = ccs.slice(0, 3); if (!ccs.length) return "";
+    var STEP = [
+      [T("Start here"), T("Free, and searched by name. No register to read yet: try your name in each.")],
+      [T("Then read the pages"), T("Once a name search gives you a place and a year: the register images, free to see.")],
+      [T("Family-tree and genealogy sites"), T("Other people's trees, and the big records sites. Check what they say, then check the record.")],
+      [T("Then write to the record holder"), T("Not online as images: on paper in a building, or a catalogue entry. Open the pencil beside one for a drafted letter.")]
+    ];
+    var h = ['<div class="ra-plan" data-plan="1"><p class="at-lab">' + esc(T("What to do, in order")) + "</p>"];
+    if (ccs.length > 1) {
+      h.push('<p class="at-sub">' + esc(T("Which country is your family from?")) + "</p><p class=\"ra-plan-c\">" +
+             ccs.map(function (cc, i) { return '<button type="button" class="ra-plan-chip' + (i ? "" : " on") + '" data-cc="' + esc(cc) + '">' + esc(CNAME[cc] || cc) + "</button>"; }).join("") + "</p>");
+    }
+    ccs.forEach(function (cc, ci) {
+      var st = planSteps(cc), where = CNAME[cc] || cc, n = 0;
+      h.push('<div class="ra-plan-cc" data-cc="' + esc(cc) + '"' + (ci ? " hidden" : "") + ">");
+      for (var k = 0; k < 4; k++) {
+        if (!st[k].length) continue;
+        n++;
+        h.push('<details class="ra-area-g ra-plan-s"' + (n === 1 ? " open" : "") + '><summary><span class="ra-plan-n">' + n + "</span>" + esc(STEP[k][0]) + " <b>" + nfl(Math.min(30, st[k].length)) + "</b></summary>" +
+               '<p class="at-sub">' + esc(STEP[k][1]) + "</p>" + planRows(st[k], where) + "</details>");
+      }
+      h.push('<p class="at-sub ra-plan-more-note">' + esc(T("Each step shows the first thirty. Everything else is in “All the sources, by country” below.")) + "</p>");
+      h.push("</div>");
+    });
+    h.push('<p class="at-sub ra-plan-how">' + esc(T("Order, by rule: free before paid, searched by name before read page by page, and the country the name is oldest in first. It is an order to try things in, not a ranking of which is best.")) + "</p></div>");
+    return h.join("");
+  }
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest(".ra-plan-chip"); if (!b) return;
+    var box = b.closest(".ra-plan"); if (!box) return;
+    box.querySelectorAll(".ra-plan-chip").forEach(function (x) { x.classList.toggle("on", x === b); });
+    box.querySelectorAll(".ra-plan-cc").forEach(function (x) { x.hidden = x.getAttribute("data-cc") !== b.getAttribute("data-cc"); });
+  });
   function countrySources(cc, hint, heading, lat, lon, id, noWw) {
     if (!cc) return "";
     /* THE SAME FALLBACK THE PAGE MAKES, because the panel is the surface most
@@ -6511,7 +6578,9 @@ window.addEventListener("load", async function () {
                       + "notable of the name \u2014 thin before 1900")) +
             "</span></p>");
         }
-        rows.slice(0, 14).forEach(function (row) {
+        /* FOUR COUNTRIES SHOW, THE REST FOLD. David: «so many things put in front of me ... real estate and visuals could be better». A name in ten countries drew ten bars before anything else; the four strongest are enough to read the shape, and the others are one click away on the same scale. */
+        rows.slice(0, 14).forEach(function (row, ri) {
+          if (ri === 4) wh.push('<details class="ra-tw-more"><summary>' + esc((Math.min(rows.length, 14) - 4) + " " + T("more countries")) + "</summary>");
           var f0 = CC2FLAG && CC2FLAG[row.cc];
           /* NO DATES IS A FINDING, AND IT IS WRITTEN OUT. The row exists
              because a register or an archive names this surname in this
@@ -6591,6 +6660,7 @@ window.addEventListener("load", async function () {
           });
           wh.push("</span></div>");
         });
+        if (rows.length > 4) wh.push("</details>");
         if (rows.length > 14)
           wh.push('<p class="cap">' + esc(T("and") + " " + (rows.length - 14) + " " +
                   T("more countries")) + "</p>");
@@ -8043,12 +8113,16 @@ window.addEventListener("load", async function () {
            side, which is what .at-body is for and what the place answer
            already does with its three source columns. */
         var withSrc = order.filter(function (cc) { return cc && natProviders(cc).length; });
+        /* THE PLAN FIRST, THE FULL LISTS AFTER IT IN ONE FOLD. A reader starting from nothing gets steps of ten; the per-country lists stay, closed, for the one who wants them all. */
+        h.push(namePlan(withSrc, term));
+        h.push('<details class="ra-area-g ra-plan-all"><summary><i style="background:#5B7A8C"></i>' + esc(T("All the sources, by country")) + "</summary>");
         withSrc.forEach(function (cc, i) {
           /* THE WORLDWIDE SOURCES ONCE, AFTER THE LAST COUNTRY. David, on a name attested in ten countries: «Sources that cover everywhere 49» came back
              after every country, ten copies of the same list. They are not about any one country. */
           h.push(countrySources(cc, null,
                                 T("The sources for") + " " + (CNAME[cc] || cc), undefined, undefined, null, i < withSrc.length - 1));
         });
+        h.push("</details>");
       } else {
         h.push('<p class="at-sub at-sub-wide">Nothing in this map reaches the countries ' +
                "this name is attested in yet — which is exactly the kind of gap worth " +
@@ -12395,6 +12469,14 @@ window.addEventListener("load", async function () {
   :global(.ra-area-nolist > summary .ra-chev) { visibility: hidden; }
   :global(.ra-area-pl > .ra-vl) { margin: 2px 0 8px 31px; }
   :global(.ra-area-no) { padding-left: 21px; }
+  :global(.ra-surn > .lab:only-child) { display: none; }
+  :global(.ra-tw-more > summary) { cursor: pointer; font-size: 12px; padding: 4px 0; color: #1d3a4a; }
+  :global(.ra-plan-c) { margin: 4px 0 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+  :global(.ra-plan-chip) { font: inherit; font-size: 12px; padding: 3px 10px; border: 1px solid #c9c5b8; border-radius: 999px; background: transparent; color: inherit; cursor: pointer; }
+  :global(.ra-plan-chip.on) { background: #1d3a4a; color: #fff; border-color: #1d3a4a; }
+  :global(.ra-plan-n) { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; margin-right: 8px; border-radius: 50%; background: #1d3a4a; color: #fff; font-size: 11px; flex: none; }
+    :global(.ra-plan-more > summary) { cursor: pointer; font-size: 12px; padding: 6px 0; color: #1d3a4a; }
+  :global(.ra-plan-how) { margin-top: 10px; }
   :global(.ra-area-cov > .at-sub) { margin: 4px 0 2px; font-size: 12px; }
   :global(.ra-area-cov .ra-area-p small) { white-space: normal; text-align: right; }
   @media (prefers-reduced-motion: reduce) { :global(.ra-chev) { transition: none; } }

@@ -61,7 +61,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
             <label class="sp-add"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 16V5m0 0l-4 4m4-4l4 4M5 19h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Photo or document<input type="file" id="sp-file" accept="image/jpeg,image/png,image/webp" multiple hidden /></label>
             <button type="button" class="sp-ghost" id="sp-eg">Try an example</button>
             <button type="button" class="sp-ghost" id="sp-tidy" title="Claude rewrites your words as short plain sentences, so the page can read them. You see both before anything changes.">AI ready</button>
-            <button type="button" class="sp-ghost" id="sp-postbtn" title="Paste a post from a forum or group that asks for help: get what it knows, what it asks and a draft reply.">Paste a forum post</button>
+            <button type="button" class="sp-ghost" id="sp-postbtn" title="For a post that asks for help: Claude reads the words in the box as a request and drafts a reply for the group. Paste the post into the box first.">Draft a reply</button>
             <button type="button" class="sp-ghost" id="sp-read" hidden>Read the writing on it with Claude</button>
             <button type="button" class="sp-ghost" id="sp-link" hidden title="Copies an address with your words in it, after the #. That part is never sent to a server.">Copy a link</button>
             <button type="button" class="sp-ghost" id="sp-clear" hidden>Start over</button>
@@ -74,10 +74,6 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
             <button type="button" class="sp-ghost sp-aip-close" id="sp-aip-x" aria-label="Close this panel">Close</button>
           </header>
           <p class="sp-aip-note" id="sp-aip-note"></p>
-          <div class="sp-aip-in" hidden>
-            <label class="sp-aip-lab" for="sp-aip-in">The post to read</label>
-            <textarea id="sp-aip-in" rows="7" maxlength="8000" spellcheck="false" placeholder="Paste the post here: for example, someone asking who the parents of their grandfather were, with what they know."></textarea>
-          </div>
           <div class="sp-aip-send" id="sp-aip-send" hidden>
             <span class="sp-aip-lab">What will be sent</span>
             <blockquote class="sp-aip-quote" id="sp-aip-preview"></blockquote>
@@ -473,7 +469,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp-shot { position: relative; display: inline-block; }
   .sp-shot img { width: 76px; height: 76px; object-fit: cover; border-radius: 10px; border: 1px solid var(--rule-strong); display: block; animation: sp-pop .4s cubic-bezier(.3,1.5,.5,1); }
   .sp-shot button { position: absolute; top: -7px; right: -7px; width: 22px; height: 22px; border-radius: 50%; border: 0; background: var(--ink); color: var(--ground); font-size: 14px; line-height: 1; cursor: pointer; }
-  /* "AI ready" and "Paste a forum post": a panel that opens under the story box, says what will be sent and waits for a tick */
+  /* "AI ready" and "Draft a reply": a panel that opens under the story box, says what will be sent and waits for a tick */
   .sp-aipanel { background: var(--panel); border: 1px solid var(--rule-strong); border-radius: 14px; padding: 14px clamp(12px, 2vw, 18px) 16px; margin: 0; display: grid; gap: 12px; }
   .sp-aipanel[hidden], .sp-aip-in[hidden], .sp-aip-send[hidden] { display: none; }
   .sp-aip-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }

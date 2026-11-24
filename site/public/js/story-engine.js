@@ -323,7 +323,9 @@
     var map = ctx && ctx.map; if (!map) return [];
     var idx = map["#bk"];
     if (!idx) { idx = Object.create(null); Object.keys(map).forEach(function (k) { if (k.indexOf(" ") > -1 || k.length < 4 || k.charAt(0) === "#") return; var b = k.charAt(0) + k.length; (idx[b] = idx[b] || []).push(k); }); try { Object.defineProperty(map, "#bk", { value: idx, enumerable: false }); } catch (e) { /* not cached */ } }
-    var out = [], tx = String(text || ""), m, seen = Object.create(null), words = [];
+    var out = [], tx = String(text || ""), m, seen = Object.create(null), words = [], said = Object.create(null), ftx = " " + S.fold(tx) + " ";
+    Object.keys(ctx.countries || {}).forEach(function (cc) { var nm = S.fold(ctx.countries[cc]); if (nm && ftx.indexOf(" " + nm + " ") > -1) said[cc] = 1; });
+    Object.keys(FORMER).forEach(function (nm) { if (ftx.indexOf(" " + nm + " ") > -1) (FORMER[nm].cc || []).forEach(function (cc) { said[cc] = 1; }); });
     /* a story typed all in lower case has no capitals to tell a place by, so any word after "to" or in a list of places is looked at ("then salisburg, rhodesia") */
     var lower = tx === tx.toLowerCase(), W = lower ? "\\p{L}" : "\\p{Lu}";
     var re = new RegExp("\\b(?:in|at|from|near|to|into|en|nach|iz|u)\\s+(" + W + "[\\p{L}'\u2019-]{3,})((?:\\s*(?:,|and|then|&)\\s+(?:(?:and|then)\\s+)*" + W + "[\\p{L}'\u2019-]{3,})*)", "gu"), wre = new RegExp(W + "[\\p{L}'\u2019-]{3,}", "gu");
@@ -340,7 +342,12 @@
       ["om", "em", "ju", "u", "a", "i", "e"].forEach(function (suf) { if (L > suf.length + 3 && w.slice(-suf.length) === suf && map[w.slice(0, -suf.length)] && keys.indexOf(w.slice(0, -suf.length)) < 0) keys.push(w.slice(0, -suf.length)); });
       if (!keys.length) continue;
       keys.sort(function (a, b) { var ra = map[a][0], rb = map[b][0]; return ((rb.c || 0) - (ra.c || 0)) || ((rb.v || 0) - (ra.v || 0)); });
-      out.push({ typed: m[1], kind: "typo", options: keys.slice(0, 3).map(function (k) { var r = map[k][0]; return { n: String(r.n).replace(/\s*\([^)]*\)/g, ""), cc: r.cc, cn: ctx.countries && ctx.countries[r.cc] || r.cc }; }) });
+      out.push({ typed: m[1], kind: "typo", options: keys.slice(0, 3).map(function (k) {
+        /* of the places that go by the name, the one in a country the story itself names ("Salisburg, Rhodesia" is Salisbury in Zimbabwe, not North Carolina) */
+        var rows = map[k], r = rows.filter(function (x) { return said[x.cc]; })[0] || rows[0], nm = String(r.n).replace(/\s*\([^)]*\)/g, "");
+        if (S.fold(nm) !== k) nm = k.charAt(0).toUpperCase() + k.slice(1);   /* the old name the typed word was close to, not the name the Atlas files it under now */
+        return { n: nm, cc: r.cc, cn: ctx.countries && ctx.countries[r.cc] || r.cc };
+      }) });
     }
     return out.slice(0, 4);
   }
@@ -648,7 +655,7 @@
     var votes = Object.create(null), hint = ctx.__hint || {};
     Object.keys(hint).forEach(function (cc) { votes[cc] = (votes[cc] || 0) + 4; });
     function ccs(c) { var seen = Object.create(null), out = []; c.rows.forEach(function (r) { if (r.cc && !seen[r.cc]) { seen[r.cc] = 1; out.push(r.cc); } }); return out; }
-    cands.forEach(function (c) { if (c.country) { votes[c.country] = (votes[c.country] || 0) + 4; return; } var l = ccs(c); if (l.length === 1) votes[l[0]] = (votes[l[0]] || 0) + 3; });   /* only a place with one reading votes: a namesake-rich country (every name has a village in the US) would win them all */
+    cands.forEach(function (c) { if (c.country) { if (c.word !== "america") votes[c.country] = (votes[c.country] || 0) + 4; return; }   /* "went to America" is where they ended up, not a hint where the rest of the places are */ var l = ccs(c); if (l.length === 1) votes[l[0]] = (votes[l[0]] || 0) + 3; });   /* only a place with one reading votes: a namesake-rich country (every name has a village in the US) would win them all */
     /* and a reading near the other places of the story counts: Tanta in Egypt sits beside Alexandria and Cairo, Tanta in Bolivia beside nothing */
     function km(a, b) { var r = Math.PI / 180, dl = (b.x - a.x) * r, dn = (b.y - a.y) * r, h = Math.sin(dn / 2) * Math.sin(dn / 2) + Math.cos(a.y * r) * Math.cos(b.y * r) * Math.sin(dl / 2) * Math.sin(dl / 2); return 12742 * Math.asin(Math.sqrt(h)); }
     var located = cands.filter(function (c) { return !c.country && c.rows.some(function (r) { return r.x != null && r.y != null; }); });
@@ -657,7 +664,7 @@
       var sum = 0;
       located.forEach(function (c) {
         if (c === self) return;
-        var best = 0; c.rows.forEach(function (o) { if (o.x == null || o.y == null) return; var k = Math.exp(-km(r, o) / 1000); if (k > best) best = k; });
+        var best = 0; c.rows.forEach(function (o) { if (o.x == null || o.y == null) return; var d = km(r, o), k = d < 1500 ? Math.exp(-d / 1000) : 0; if (k > best) best = k;   /* beyond about 1,500 km nothing is "beside": a family's places are far apart, and distance must not tip Sydney to Nova Scotia because it is nearer Croatia */ });
         sum += best / Math.max(1, ccs(c).length);
       });
       return sum;
@@ -715,7 +722,8 @@
   };
   /* "a woman named Cheryl", "married a man called Ivan Kosina", "his daughter named Anna": the person named is not the one the story is about */
   var KIN_NAMED = /\b(married(?:\s+an?\s+\p{L}+)?|woman|lady|wife|husband|spouse|partner|bride|groom|man|girl|daughter|son|boy|child)\s+(?:named|called)\s+([\p{L}'\u2019-]+)(?:\s+([\p{Lu}][\p{L}'\u2019-]+))?/giu;
-  var COUNTRY_ALIAS = { "usa": "US", "united states": "US", "united states of america": "US", "uk": "GB", "united kingdom": "GB" };
+  /* "moved to America" is the United States (see withCountries: only straight after to / in / from, so "South America" and "Captain America" are not) */
+  var COUNTRY_ALIAS = { "usa": "US", "united states": "US", "united states of america": "US", "america": "US", "uk": "GB", "united kingdom": "GB" };
   var PLACE_MARK = /^(?:from|to|in|of|at|into|near|towards|toward)$/;
   /* A COUNTRY NAMED IN A STORY IS A COUNTRY. "from County Cork in Ireland" is not a village called Ireland in Canada. A country the gazetteer holds a
      place of that name for (South Africa) is that place; one it does not (Ireland) is a stop at the middle of the places the Atlas holds in it,
@@ -731,6 +739,7 @@
       if (!free) continue;
       var w = tokens.slice(i, i + len).join(" "), cc = byName[w];
       if (!cc || !cen[cc]) continue;
+      if (w === "america" && !PLACE_MARK.test(tokens[i - 1] || "")) continue;
       if (len === 1 && ((gset[w] && !PLACE_MARK.test(tokens[i - 1] || "")) || STOP[w] || COMMON[w])) continue;
       if (cands.some(function (c) { var cl = c.word.split(" ").length; return cl > len && c.at <= i && i < c.at + cl; })) continue;   /* "Jersey City" is not the island of Jersey */
       for (j = i; j < i + len; j++) used[j] = 1;
@@ -801,7 +810,7 @@
     function plain(f) { return !f || f.length < 3 || STOP[f] || COMMON[f] || LC[f] || OCC[f] || MONTHS[f] || NUMW[f] || REL.test(f) || ADV.test(f); }
     var given = ctx.given || {}, lastPlaceEnd = -9, lastName = -9, sentStart = 0, cn = Object.create(null);
     Object.keys(ctx.countries || {}).forEach(function (cc) { cn[S.fold(ctx.countries[cc])] = 1; });
-    cn["usa"] = cn["united states"] = cn["uk"] = cn["united kingdom"] = 1;
+    cn["usa"] = cn["united states"] = cn["uk"] = cn["united kingdom"] = cn["america"] = 1;
     function known(ph) { return !!(ctx.map[ph] || cn[ph]); }
     for (var k = 0; k < info.length; k++) {
       var w = info[k], p1 = k ? info[k - 1].f : "", p2 = k > 1 ? info[k - 2].f : "";
@@ -978,6 +987,7 @@
       var exact = c.rows.some(function (r) { return S.fold(String(r.n).replace(/\s*\([^)]*\)/g, "")) === c.word || S.fold(String(r.n).split(",")[0]) === c.word; });
       if (exact || !c.rows.every(function (r) { return (" " + S.fold(r.n) + " ").indexOf(" " + c.word + " ") > -1; })) return true;
       if (gset && gset[c.word]) return false;   /* "mother Catherine" is a person: not offered as Saint Catherine Parish */
+      if (!PREP_PLACE.test(tokens[c.at - 1] || "")) return false;   /* "the Church of St Anne", "the family name Schmidt": only a word the story puts after in / at / from / to is offered as a place */
       suggest.push({ typed: c.word.charAt(0).toUpperCase() + c.word.slice(1), kind: "partial", options: c.rows.slice(0, 3).map(function (r) { return { n: String(r.n).replace(/\s*\([^)]*\)/g, ""), cc: r.cc, cn: ctx.countries && ctx.countries[r.cc] || r.cc }; }) });
       return false;
     });
@@ -1062,6 +1072,11 @@
       stops.forEach(function (st) { var end = st.at + st.len; if (end <= i && i - end <= 4 && st.year == null) before = st; if (!after && st.at > i && st.at - i <= 5 && st.year == null) after = st; });
       var own = before || after; if (own) { own.year = Number(w); own.yearTold = true; }
     });
+    /* the same place twice running is one stop: "Fiume (now Rijeka)" names it by its two names, and the year told of either is the place's */
+    for (var di = stops.length - 1; di > 0; di--) {
+      var d1 = stops[di], d0 = stops[di - 1];
+      if (d1.row.i === d0.row.i && !d1.again) { if (d0.year == null && d1.year != null) { d0.year = d1.year; d0.yearTold = d1.yearTold; } stops.splice(di, 1); }
+    }
     /* a country named on its way to a place in it ("to South Africa ... then to Johannesburg") is that place's country, not a stop of its own; its year goes on */
     for (var ci = stops.length - 1; ci >= 0; ci--) {
       var cs = stops[ci], nx = stops[ci + 1];

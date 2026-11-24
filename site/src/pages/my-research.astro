@@ -536,6 +536,7 @@ const BASE_ = u("/");
         var pids = Object.keys(byPlace).sort();
         if (pids.length) {
           h.push('<div class="lab">' + (several ? "Where these families have been worked" : "Where this family has been worked") + "</div>");
+          h.push(HOW_LEGEND);
           h.push('<p class="mrlead">Opening a place lets you mark its books \u2014 ' +
                  "and shows the villages within a day's walk, whose registers " +
                  "may hold this family under their own name.</p>");
@@ -620,6 +621,7 @@ const BASE_ = u("/");
               (held ? '<span class="mrbar" role="img" aria-label="' + books + " of " + held +
                       ' books marked"><i style="width:' + pct + '%"></i></span>' : "") +
               "</header>");
+            var nextAt = h.length; h.push("");   /* «found in» and «next», filled in once the unmarked books are known */
             h.push('<ul class="mrlist">');
             rows.forEach(function (r) { h.push(rowHtml(r)); });
             h.push("</ul>");
@@ -657,6 +659,7 @@ const BASE_ = u("/");
                     (v.url ? '<a class="mrt" href="' + esc(v.url) +
                              '" target="_blank" rel="noopener">' + esc(v.t || id) + " \u2197</a>"
                            : '<span class="mrt">' + esc(v.t || id) + "</span>") +
+                    howHtml("volume:" + id) +
                     '<button type="button" class="mradd" data-pid="' + esc(pid) + '" data-wp="' +
                     esc(id) + '" data-t="' + esc(v.t || id) + '">+ to do</button></div>' +
                     '<div class="mrline mrline-r">' +
@@ -666,6 +669,35 @@ const BASE_ = u("/");
                     "</div></li>";
                 }).join("") + "</ul></details>");
             }
+            /* WHICH BOOK, FOR WHOM, AND WHAT NEXT. The heading said «found something» and left the reader to hunt for the row. It now names each
+               book where something was found and who found it, then gives one suggested next step, worked out from what is recorded:
+               a book part-read says where to start again; a find with unmarked books says which unmarked book is nearest in years; a
+               find with none left says so. It is a suggestion from the marks and the years in the titles, not a finding. */
+            var fnd = rows.filter(function (r) { return r.b.state === "found"; });
+            var who = function (r) { var ns = (r.fams && r.fams.length ? r.fams : slugs).map(function (s2) { return nameOf[s2] || s2; }); return ns.join(", "); };
+            var nx = "", nextTxt = "", part = rows.filter(function (r) { return r.cov.length && r.m.total && P.covered(r.cov) < r.m.total && r.b.state !== "exhausted"; })[0];
+            if (fnd.length) {
+              nx += '<p class="mrfound"><b>Found something in:</b> ' + fnd.map(function (r) {
+                return "<span><b>" + esc(r.m.t || r.id) + "</b> <i>(" + esc(who(r)) + ")</i></span>";
+              }).join(" \u00b7 ") + "</p>";
+            }
+            if (part) nextTxt = "Carry on with <b>" + esc(part.m.t || part.id) + "</b> from image " + P.resume(part.cov) + ".";
+            else if (fnd.length && todo.length) {
+              var ty = yearsOf(fnd[0].m.t), best = null, bd = 1e9;
+              if (ty) todo.forEach(function (v) {
+                var vy = [v.from || yearsOf(v.t) && yearsOf(v.t)[0], v.to || v.from || yearsOf(v.t) && yearsOf(v.t)[1]];
+                if (!vy[0]) return;
+                var d = ty[0] > vy[1] ? ty[0] - vy[1] : ty[1] < vy[0] ? vy[0] - ty[1] : 0;
+                if (d < bd) { bd = d; best = v; }
+              });
+              nextTxt = best
+                ? "The unmarked book nearest in years to <b>" + esc(fnd[0].m.t || fnd[0].id) + "</b> is <b>" + esc(best.t || best.waypoint) + "</b>" +
+                  (bd ? " (" + bd + " year" + (bd === 1 ? "" : "s") + " away)" : " (it overlaps)") + ". Open it, or add it to the to-do list below."
+                : "Read the books either side of what was found, then mark what you read.";
+            } else if (fnd.length) nextTxt = "Every book listed here is marked. Open the place for the villages within a day's walk.";
+            else if (nPlan) nextTxt = nPlan + " book" + (nPlan === 1 ? " is" : "s are") + " on the to-do list: open one and mark what you read.";
+            if (nextTxt) nx += '<p class="mrnextstep"><b>Next:</b> ' + nextTxt + "</p>";
+            h[nextAt] = nx;
             h.push('<p class="mrnext">' + (held != null && !todo.length && held <= books
               ? "Every book here is marked \u2014 " : "") +
               '<a href="' + BASE + "place/" + esc(pid) + '/">Open ' + esc(label) +
@@ -764,6 +796,44 @@ const BASE_ = u("/");
         fill();
       }
 
+      /* HOW A THING IS DONE: at your desk, in person, or by email or letter. The list used to mix FamilySearch books, archives you must visit and
+         archives you must write to, all looking alike. The way in comes from what the atlas knows and nothing more: a FamilySearch or Antenati
+         book is images you open online; an archive's own access class says whether its images are online (free, account, paid, mixed), only an
+         index is online, the paper is in the building (onsite), or only a catalogue entry exists; a published email or postal address adds
+         «by email or letter». An archive nobody has surveyed says so rather than guessing. */
+      var HOW_LEGEND = '<p class="mrhowkey"><b>How each one is done:</b> ' +
+        '<span class="mrhow mrhow-desk">At your desk</span> images or an index you open online \u00b7 ' +
+        '<span class="mrhow mrhow-visit">In person</span> the paper is held in a building, so you go there \u00b7 ' +
+        '<span class="mrhow mrhow-mail">By email or letter</span> you write to the archive (the Letters out list below keeps what you sent).</p>';
+      function howOf(id) {
+        var kind = id.split(":")[0], out = [];
+        if (kind === "volume" || kind === "film") return [["desk", "At your desk", "FamilySearch images, opened online"]];
+        if (kind === "antenati") return [["desk", "At your desk", "Antenati images, opened online"]];
+        if (kind === "source") {
+          var pid = id.slice(7), p = PROVS ? PROVS[pid] : null, a = p && p.access;
+          if (!p) return [];
+          var c = (CONTACTS && p.wikidata && CONTACTS[p.wikidata]) || null;
+          if (a === "free") out.push(["desk", "At your desk", "Images, free, no account"]);
+          else if (a === "account") out.push(["desk", "At your desk", "Images, free, but you need an account"]);
+          else if (a === "paid") out.push(["desk", "At your desk \u00b7 paid", "Images behind a paywall"]);
+          else if (a === "mixed") out.push(["desk", "At your desk \u00b7 partly paid", "Partly free, partly paid"]);
+          else if (a === "index") out.push(["desk", "At your desk \u00b7 index only", "An index, no images: the entry tells you what to ask for"]);
+          else if (a === "onsite") out.push(["visit", "In person", "The paper is in the building"]);
+          else if (a === "catalogue") out.push(["visit", "In person or by letter", "A catalogue entry only: the paper is not photographed"]);
+          else out.push(["unknown", "Not checked yet", "Nobody has walked this archive's access yet"]);
+          if ((a === "onsite" || a === "catalogue") && c && (c.email || c.post)) out.push(["mail", "By email or letter", "An address is recorded for this archive"]);
+          return out;
+        }
+        return [];
+      }
+      function howHtml(id) {
+        return howOf(id).map(function (h) { return '<span class="mrhow mrhow-' + h[0] + '" title="' + esc(h[2]) + '">' + esc(h[1]) + "</span>"; }).join("");
+      }
+      /* the first and last year in a title like «Óbitos 1977, Abr-Ago» or «Listas Eleitorais 1870-1875» */
+      function yearsOf(t) {
+        var ys = (String(t || "").match(/\b(1[4-9]\d\d|20[0-2]\d)\b/g) || []).map(Number);
+        return ys.length ? [Math.min.apply(null, ys), Math.max.apply(null, ys)] : null;
+      }
       function rowHtml(r) {
         var m = r.m, b = r.b, cov = r.cov;
         var raw = r.id.replace(/^(volume|film|source|collection|antenati):/, "");
@@ -814,6 +884,7 @@ const BASE_ = u("/");
           '<div class="mrline mrline-t">' +
             (m.href ? '<a class="mrt" href="' + esc(m.href) + '">' + esc(m.t || raw) + "</a>"
                     : '<span class="mrt">' + esc(m.t || raw) + "</span>") +
+            howHtml(r.id) +
             (CUR.several && r.fams && r.fams.length ? '<span class="mrfams">' + r.fams.map(function (s) { return '<span class="mrfam">' + esc(CUR.nameOf[s] || s) + "</span>"; }).join("") + "</span>" : "") +
             (r.mineHere ? '<button type="button" class="mrdel" data-id="' + esc(r.id) + '">forget</button>' : "") +
           "</div>" +
@@ -1356,6 +1427,16 @@ const BASE_ = u("/");
     background: transparent; color: var(--accent); cursor: pointer; flex: 0 0 auto; }
   :global(.mradd:hover), :global(.mraddall:hover) { background: var(--accent);
     color: var(--panel); }
+  :global(.mrhow) { display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--rule-strong); background: var(--bg); color: var(--ink-2); font: 500 11px/1.5 var(--sans); white-space: nowrap; vertical-align: middle; }
+  :global(.mrhow-desk) { border-color: var(--accent); color: var(--accent); }
+  :global(.mrhow-visit) { border-style: dashed; color: var(--brass); border-color: var(--brass); }
+  :global(.mrhow-mail) { border-style: double; border-width: 3px; padding: 0 7px; }
+  :global(.mrhow-unknown) { border-style: dotted; color: var(--ink-3); }
+  :global(.mrhowkey) { margin: 4px 0 14px; color: var(--ink-2); font: 400 13px/1.9 var(--sans); }
+  :global(.mrhowkey .mrhow) { margin-left: 0; }
+  :global(.mrfound), :global(.mrnextstep) { margin: 0; padding: 8px 18px; font: 400 14px/1.5 var(--sans); color: var(--ink); background: var(--panel-2); border-bottom: 1px solid var(--rule); }
+  :global(.mrfound i) { color: var(--ink-2); }
+  :global(.mrnextstep) { color: var(--ink); }
   :global(.mrstate-planned) { color: var(--brass); background: var(--panel-2); }
   :global(.mrshared) { margin: 2px 0 10px; font-family: var(--sans); font-size: 12px;
     color: var(--ink-3); max-width:var(--measure); }

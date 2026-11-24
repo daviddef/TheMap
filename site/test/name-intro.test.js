@@ -78,3 +78,14 @@ test("the family picker ticks a whole archive at once, and finds its families by
   assert.match(bar, /\(l\.archives \|\| \[\]\)\.map\(archName\)\.join/, "the search box matches an archive's name");
   assert.match(bar, /names = Object\.keys\(byArch\)\.sort\(function \(a, b\) \{ return a\.localeCompare\(b\); \}\)/, "the archives are alphabetical, not by size");
 });
+
+test("My research place cards say which book was found in and for whom, a next step, and how each item is done", () => {
+  const page = fs.readFileSync(path.join(here, "../src/pages/my-research.astro"), "utf8");
+  assert.match(page, /Found something in:/);
+  assert.match(page, /class="mrnextstep"><b>Next:<\/b>/);
+  assert.match(page, /function howOf\(id\)/);
+  for (const [cls, say] of [["desk", "At your desk"], ["visit", "In person"], ["mail", "By email or letter"]]) assert.ok(page.includes(`mrhow mrhow-${cls}">${say}`), cls + " is explained in the key");
+  assert.match(page, /a === "onsite"[\s\S]{0,120}"In person"/, "an archive whose paper is in the building is an in-person visit");
+  assert.match(page, /else out\.push\(\["unknown", "Not checked yet"/, "an archive nobody has surveyed says so and is not guessed at");
+  assert.match(page, /howHtml\("volume:" \+ id\)/, "the unmarked books carry the tag too");
+});

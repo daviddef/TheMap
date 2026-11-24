@@ -929,10 +929,25 @@ window.addEventListener("load", async function () {
     var s4 = take(nat, function (p) { return p.access === "onsite" || p.access === "catalogue"; });
     return [s1, s2, s3, s4];
   }
-  function planRows(list, where) {
+  /* A LINK STRAIGHT TO THE SITE'S RESULTS FOR THE NAME. David: «no links? odd? is there a way to deeplink to that site for our research name?». A row opens the Atlas's own page for the source; where the site takes a surname in its address, a second link goes there. Only for the few sites whose address is known to take one (the same ones the family-tree viewer's look-up links use, plus any provider whose directory row carries a {surname} or {q} template). Nothing is sent until the reader clicks, and the link says so. */
+  var PLAN_SEARCH = {
+    familysearch: "https://www.familysearch.org/search/record/results?q.surname={s}",
+    findagrave: "https://www.findagrave.com/memorial/search?lastname={s}",
+    geni: "https://www.geni.com/search?search_type=people&names={s}",
+    wikitree: "https://www.wikitree.com/genealogy/{S}"
+  };
+  function planSearchUrl(p, name) {
+    var t = PLAN_SEARCH[p.id] || ((/\{(surname|q|SURNAME)\}/.test(p.deepLink || "")) ? p.deepLink : "");
+    if (!t || !name) return "";
+    var e = encodeURIComponent(name);
+    return t.replace(/\{(s|surname|q)\}/g, e).replace(/\{(S|SURNAME)\}/g, encodeURIComponent(name.toUpperCase().replace(/\s+/g, "_")));
+  }
+  function planRows(list, where, name) {
     var rows = function (l, hid) {
       return "<ul" + (hid ? ' hidden class="ra-plan-chunk"' : "") + ">" + l.map(function (p) {
-        return "<li" + srcAttrs(p.id, p.name, where, BASE + "archive/" + p.id + "/") + '><a class="ra-area-p" target="_blank" rel="noopener" href="' + BASE + "archive/" + esc(p.id) + '/"><span>' + esc(p.name) + "</span><small>" + accTxt(p.access) + "</small></a></li>";
+        var go = planSearchUrl(p, name);
+        return "<li" + srcAttrs(p.id, p.name, where, BASE + "archive/" + p.id + "/") + '><a class="ra-area-p" target="_blank" rel="noopener" href="' + BASE + "archive/" + esc(p.id) + '/"><span>' + esc(p.name) + "</span><small>" + accTxt(p.access) + "</small></a>" +
+          (go ? '<a class="ra-plan-go" target="_blank" rel="noopener" href="' + esc(go) + '" title="' + esc(T("Opens") + " " + p.name + " " + T("with this name searched. Your browser sends the name to that site when you click.")) + '">' + esc(T("Search") + " " + name) + " \u2197</a>" : "") + "</li>";
       }).join("") + "</ul>";
     };
     /* THE NEXT TEN ARE SIBLINGS OF THE FIRST TEN, NOT A FOLD INSIDE IT. The list rows are styled as direct children of the step's fold; a fold within it lost them (the + disc dropped above each name). A button reveals the next ten in the same list style. */
@@ -953,6 +968,7 @@ window.addEventListener("load", async function () {
     }).join("") + "</ul>" : "";
   }
   function namePlan(ccs, term) {
+    var nm = String(term || "").replace(/^./, function (c) { return c.toUpperCase(); });
     ccs = ccs.slice(0, 3); if (!ccs.length) return "";
     var STEP = [
       [T("Start here"), T("Free, and searched by name. No register to read yet: try your name in each.")],
@@ -978,7 +994,7 @@ window.addEventListener("load", async function () {
         if (!st[k].length) continue;
         n++;
         h.push('<details class="ra-area-g ra-plan-s"' + (n === 1 ? " open" : "") + '><summary><span class="ra-plan-n">' + n + "</span>" + esc(STEP[k][0]) + " <b>" + nfl(Math.min(30, st[k].length)) + "</b></summary>" +
-               '<p class="at-sub">' + esc(STEP[k][1]) + "</p>" + planRows(st[k], where) + "</details>");
+               '<p class="at-sub">' + esc(STEP[k][1]) + "</p>" + planRows(st[k], where, nm) + "</details>");
       }
       h.push('<p class="at-sub ra-plan-more-note">' + esc(T("Each step shows the first thirty. Everything else is in “All the sources, by country” below.")) + "</p>");
       h.push("</div>");
@@ -12545,7 +12561,8 @@ window.addEventListener("load", async function () {
   :global(.ra-plan-chip) { font: inherit; font-size: 12px; padding: 3px 10px; border: 1px solid #c9c5b8; border-radius: 999px; background: transparent; color: inherit; cursor: pointer; }
   :global(.ra-plan-chip.on) { background: #1d3a4a; color: #fff; border-color: #1d3a4a; }
   :global(.ra-plan-n) { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; margin-right: 8px; border-radius: 50%; background: #1d3a4a; color: #fff; font-size: 11px; flex: none; }
-    :global(.ra-plan-next) { font: inherit; font-size: 12px; margin: 4px 0 2px 2px; padding: 4px 12px; border: 1px solid #c9c5b8; border-radius: 999px; background: transparent; color: #1d3a4a; cursor: pointer; }
+    :global(.ra-area-g > ul > li[data-src] > .ra-plan-go) { flex: none; font-size: 11px; padding: 2px 8px; border: 1px solid #c9c5b8; border-radius: 999px; color: #1d3a4a; text-decoration: none; white-space: nowrap; }
+  :global(.ra-plan-next) { font: inherit; font-size: 12px; margin: 4px 0 2px 2px; padding: 4px 12px; border: 1px solid #c9c5b8; border-radius: 999px; background: transparent; color: #1d3a4a; cursor: pointer; }
   :global(.ra-plan-how) { margin-top: 10px; }
   :global(.ra-area-cov > .at-sub) { margin: 4px 0 2px; font-size: 12px; }
   :global(.ra-area-cov .ra-area-p small) { white-space: normal; text-align: right; }

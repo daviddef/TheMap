@@ -4070,6 +4070,37 @@ window.addEventListener("load", async function () {
     out.sort(function (a, b) { return a.d - b.d; });
     return out.slice(0, n || 3);
   }
+  /* A PLACE THE MAP KNOWS AND HAS NO BOOKS FOR, IN THE SAME CARD A PLACE WITH BOOKS GETS. It used to be a blue box, a paragraph of regret and fifty-seven unsorted
+     sources; David: «layout doesnt match our usual layout/branding/grouping». The same folds now: the nearest places that have books (the next parish along), the
+     sources that cover the whole country, and the family-tree sites. Several places can share a name, so each gets its own nearest-books fold, named for it. */
+  function gazPlaceCards(hits) {
+    var out = ['<div class="ra-area ra-area-solo ra-gaz">'], multi = hits.length > 1, ccs = [];
+    out.push('<p class="at-sub">' + esc(T("Nobody has read a book for this name yet. That is a gap in this map, not in the record.")) + "</p>");
+    hits.slice(0, 4).forEach(function (r) {
+      var cn = CNAME[r[3]] || r[3], near = nearestBooks(r[1], r[2], 6, 60);
+      if (ccs.indexOf(r[3]) < 0) ccs.push(r[3]);
+      out.push('<details class="ra-area-g ra-area-near" open><summary><i style="background:#2F6B5A"></i>' + esc(T("Nearest places with books")) + (multi ? " \u00b7 " + esc(r[0]) + ", " + esc(cn) : "") + " <b>" + near.length + "</b></summary>" +
+        (near.length
+          ? '<p class="at-sub">' + esc(T("A village's registers are often filed under the next parish along.")) + "</p><ul>" +
+            near.map(function (x) { return '<li><a class="ra-area-p ra-near" href="#" data-i="' + esc(String(x.p.i)) + '" data-n="' + esc(x.p.n) + '"><i style="background:#2F6B5A"></i><span>' + esc(x.p.n) + "</span><small>" + Math.max(1, Math.round(x.d)) + " km</small></a></li>"; }).join("") + "</ul>"
+          : '<p class="at-sub">' + esc(T("None within 60 km on this map.")) + "</p>") + "</details>");
+    });
+    ccs.slice(0, 2).forEach(function (cc) {
+      var r0 = hits.filter(function (r) { return r[3] === cc; })[0];
+      var list = natProviders(cc, r0[1], r0[2]).filter(function (p) { return p.kind !== "regional-archive" && p.kind !== "diocesan"; });
+      if (list.length) {
+        out.push('<details class="ra-area-g ra-area-cov"' + (list.length <= 8 ? " open" : "") + '><summary><i style="background:#5B7A8C"></i>' + esc(T("Sources that cover all of")) + " " + esc(CNAME[cc] || cc) + " <b>" + nfl(list.length) + "</b></summary><ul>");
+        list.slice().sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); }).forEach(function (a) {
+          var st = volStatus("source:" + a.id);
+          out.push("<li" + srcAttrs(a.id, a.name, CNAME[cc] || cc, BASE + "archive/" + a.id + "/") + '><a class="ra-area-p" target="_blank" rel="noopener" href="' + BASE + "archive/" + esc(a.id) + '/"><i title="' + RC_LAB[st] + ' (your research on this source)" style="background:' + RC_COL[st] + '"></i><span>' + esc(a.name) + "</span><small>" + accTxt(a.access) + "</small></a></li>");
+        });
+        out.push("</ul></details>");
+      }
+      var ft = familyTreeGroup(cc); if (ft && out.indexOf(ft) < 0) out.push(ft);   /* the same sites once, not once per country */
+    });
+    out.push("</div>");
+    return out.join("");
+  }
   document.addEventListener("click", function (ev) {
     var a = ev.target.closest && ev.target.closest(".ra-near"); if (!a) return;
     ev.preventDefault();
@@ -5648,7 +5679,7 @@ window.addEventListener("load", async function () {
      and still shows the places — «we hold no register for this name» and
      «nobody of this name lived there» are different statements and only the
      first one is ours to make. */
-  var qPlace = null, qName = null, qNear = null;
+  var qPlace = null, qName = null, qNear = null, qStrict = false;
   /* the typed string the «name, in a place» panel was last written for; any other answer clears it */
   var bothFor = null;
   /* DID THE SEARCH ACTUALLY FIND ANYTHING. The remembered-searches list used
@@ -5673,11 +5704,15 @@ window.addEventListener("load", async function () {
     var v = qbox.value.trim();
     if (v.length >= 2 && searchHit) recentAdd(v);
   }
+  /* a word of the name BEGINS with the text: «istria» is Istria and Istria County, and not Zadnistriani or Transnistria, which only contain it */
+  function nameStarts(p, t) {
+    return fold(p.n).split(/[\s()\-]+/).some(function (w) { return w.indexOf(t) === 0; }) || !!(p.q && wordHit(p.q, t));
+  }
   function nameMatch(p, t) {
     return fold(p.n).indexOf(t) > -1 || !!(p.q && wordHit(p.q, t));
   }
   function splitQuery(t) {
-    qPlace = qName = qNear = null;
+    qPlace = qName = qNear = null; qStrict = false;
     if (!t || t.indexOf(" ") < 0) return;
     if (markers.some(function (m) { return nameMatch(m._p, t); })) return;
     var w = t.split(/\s+/).filter(Boolean);
@@ -5693,8 +5728,8 @@ window.addEventListener("load", async function () {
         nearA.forEach(function (a) { if (nearB.some(function (b) { return haversine(a._p.y, a._p.x, b._p.y, b._p.x) <= 60; })) { near[a._p.i] = 1; nn++; } });
         if (nn) { qPlace = left; qNear = near; return; }
       }
-      if (markers.some(function (m) { return nameMatch(m._p, right); })) {
-        qPlace = right; qName = left; return;
+      if (markers.some(function (m) { return nameStarts(m._p, right); })) {
+        qPlace = right; qName = left; qStrict = true; return;
       }
     }
   }
@@ -5722,7 +5757,7 @@ window.addEventListener("load", async function () {
        The place's own name is still matched loosely, so typing part of a
        name still finds it. It is the blob, which carries the country, that
        has to respect word boundaries. */
-    if (t && fold(p.n).indexOf(t) < 0 && !(p.q && wordHit(p.q, t))) return false;
+    if (t && (qStrict ? !nameStarts(p, t) : fold(p.n).indexOf(t) < 0 && !(p.q && wordHit(p.q, t)))) return false;
     if (qNear && !qNear[p.i]) return false;
     if (year && p.s && (p.s[0] > year2 || p.s[1] < year)) return false;
     /* ANY of the chosen kinds, not all of them: somebody after church records
@@ -5960,24 +5995,21 @@ window.addEventListener("load", async function () {
          One line saying what was framed, and which places they are. */
       if (vis.length > 1) {
         empty.hidden = true; panel.hidden = false; retireVisit();
-        var some = vis.slice(0, 12);
+        /* THE MATCHES IN THE CARD'S OWN FOLD, A TO Z. David: «can we neaten the search up». A bare list of twelve in no order, then «and N more», is replaced by the
+           fold every card uses: all of them (up to 60), by name, each opening its card in the panel. */
+        var some = vis.slice().sort(function (x, y) { return String(x._p.n).localeCompare(String(y._p.n)); }).slice(0, 60);
         var hh = ['<div class="at-h"><h3>' + esc(qbox.value.trim()) + "</h3>" +
-                  '<span class="at-n">' + vis.length.toLocaleString() +
-                  " places</span></div>"];
-        hh.push('<p class="at-what"><b>' + vis.length.toLocaleString() +
-                " places match, and the map is framed on them.</b> Click a dot for " +
-                "what stands there, or narrow the name.</p>");
-        hh.push('<ul class="at-films">');
+                  '<span class="at-n">' + vis.length.toLocaleString() + " " + esc(T("places")) + "</span></div>"];
+        hh.push('<p class="at-sub">' + esc(T("The map is framed on them. Narrow the name, or open one.")) + "</p>");
+        hh.push('<div class="ra-area ra-area-solo"><details class="ra-area-g ra-area-near" open><summary><i style="background:#2F6B5A"></i>' + esc(T("Places that match")) + " <b>" + vis.length.toLocaleString() + "</b></summary><ul>");
         some.forEach(function (m) {
-          var p = m._p;
-          hh.push('<li><a href="' + BASE + "place/" + esc(p.i) + '/">' + esc(p.n) +
-                  "</a>" + (p.c ? ' <span class="ra-who">' + p.c +
-                  " collection" + (p.c === 1 ? "" : "s") + "</span>" : "") + "</li>");
+          var p = m._p, n = (p.v || 0) || (p.c || 0);
+          hh.push('<li><a class="ra-area-p ra-near" href="#" data-i="' + esc(String(p.i)) + '" data-n="' + esc(p.n) + '"><i style="background:#2F6B5A"></i><span>' + esc(p.n) + "</span><small>" +
+                  (n ? n.toLocaleString() + " " + esc(T(n === 1 ? "book" : "books")) : "") + "</small></a></li>");
         });
-        hh.push("</ul>");
+        hh.push("</ul></details></div>");
         if (vis.length > some.length)
-          hh.push('<p class="cap">and ' + (vis.length - some.length).toLocaleString() +
-                  " more on the map.</p>");
+          hh.push('<p class="at-sub">' + esc(T("and")) + " " + (vis.length - some.length).toLocaleString() + " " + esc(T("more on the map. Narrow the name to reach them.")) + "</p>");
         panel.innerHTML = hh.join("");
         return;
       }
@@ -7489,6 +7521,11 @@ window.addEventListener("load", async function () {
         if (TSV2) h.push("</span>");
       }
     }
+    if (!names.length && hits.length === 1) {
+      var h1 = hits[0], al1 = (h1[4] || []).filter(function (a) { return fold(a) !== fold(h1[0]); }).slice(0, 4);
+      h.push('<span class="at-n">' + esc(CNAME[h1[3]] || h1[3]) + "</span>");
+      if (al1.length) h.push('<span class="at-also">' + esc(T("also written")) + " " + al1.map(function (x) { return "<em>" + esc(x) + "</em>"; }).join(" \u00b7 ") + "</span>");
+    }
     h.push("</div>");
     /* FORMS TO TRY, BY RULE. The family-group question was «Kauzlarić», «Brozenić», «Bunčić»: names a clerk wrote as they sounded (Kauzlarich, Brozenich, Buncich). The catalogue keeps
        only a spelling with a record behind it, so for a surname it does not hold this says what the usual respellings are, as a lead to type and never as a finding. */
@@ -7760,6 +7797,8 @@ window.addEventListener("load", async function () {
          to go to the village, and the map jumping there buries the answer. */
       if (!names.length || fold(top[0]) === f)
         map.setView([top[1], top[2]], Math.max(map.getZoom(), 8));
+      if (!names.length) h.push(gazPlaceCards(hits));
+      else {
       h.push('<div class="ra-juris"><div class="lab">That name is a place</div>');
       /* TWO PLACES CAN SHARE A NAME AND OFTEN DO. Croatia has two Lovinacs,
          forty kilometres apart, and the panel printed them as two identical
@@ -7826,6 +7865,7 @@ window.addEventListener("load", async function () {
                  "name for it</span>" : "") + nearLine + "</p>");
       });
       h.push("</div>");
+      }
     }
     /* Only worth printing when it adds something. Typing "Ireland" and being
        told "Ireland" is noise; typing "HR" and being told "Croatia" is not. */
@@ -8064,6 +8104,7 @@ window.addEventListener("load", async function () {
        volumes here, and does this place exist — and only the first is «no». */
     var ncard = (!hits.length && !(names && names.length)) ? await nameCardFor(term) : "";
     if (stale()) return;
+    if (hits.length && !(names && names.length)) { panel.innerHTML = h.join(""); return; }   /* a place: its card above says all of it */
     if (ncard) { h.push(ncard); h.push('<p class="at-sub">' + esc(T("No place on the map is called that.")) + "</p>"); }
     else h.push(hits.length
       ? '<p class="at-what"><b>The place is here. The volumes are not.</b> ' +

@@ -170,3 +170,11 @@ test("the page draws the read-back paragraph with tappable pills, and the person
   assert.match(js, /PERSONAL = \/\^\(\?:name\|given\|surname\|rel\|maiden\)\$\//);
   assert.match(page, /\.sp-tok \{/);
 });
+
+test("with a name or a place in the story the page shows only the pills in the words, and a person's pill offers religion and travel", () => {
+  const js = src("story-page.js");
+  assert.match(js, /if \(toks\.length\) return;\s*\n\s*var head = el\("div", null, "sp-gaps-top"\)/);
+  const ids = G.about("person").map((o) => o.id);
+  for (const id of ["born", "died", "faith", "travelled", "siblings"]) assert.ok(ids.includes(id), id);
+  assert.equal(G.sentence("person", "my father", "faith", "Catholic"), "My father was Catholic.");
+});

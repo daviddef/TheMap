@@ -105,3 +105,20 @@ test("nothing in the menu, the front door or the start page still points at the 
   for (const f of ["../src/lib/nav.js", "../public/js/front-door-v2.js", "../src/lib/start-tour-markup.js", "../src/pages/start.astro", "../src/pages/sitemap-index.xml.js"])
     assert.doesNotMatch(read(f), /looking-for/, f);
 });
+
+test("every gap id has a short clue name, and an inline answer is added as a finished sentence, never into the middle of one", () => {
+  const ids = ["from", "village", "name", "given", "surname", "to", "when", "rel", "holds", "maiden", "faith", "family", "ship", "end"];
+  ids.forEach((id) => assert.ok(G.clue(id)[0] && G.clue(id)[0] !== id, "clue name for " + id));
+  assert.equal(G.answer("My grandfather came from Senj.", " They left around ", "1905"), "My grandfather came from Senj. They left around 1905.");
+  assert.equal(G.answer("My grandfather came from Senj", " They went to ", "  Chicago.. "), "My grandfather came from Senj. They went to Chicago.");
+  assert.equal(G.answer("Text.", " They went to ", "   "), "Text.", "an empty answer adds nothing");
+});
+
+test("the story page draws the gaps as a hunt: a count, a box on each clue, and a word when one is found", () => {
+  const js = src("story-page.js"), page = read("../src/pages/read.astro");
+  assert.match(js, /Clues to find/);
+  assert.match(js, /found"/);
+  assert.match(js, /G\.answer\(text\.value, g\.add, value\)/);
+  assert.match(js, /clueReset\(\)/);
+  assert.match(page, /@media \(prefers-reduced-motion: reduce\)[^}]*sp-dots i\.on/);
+});

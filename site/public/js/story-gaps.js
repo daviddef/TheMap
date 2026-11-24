@@ -77,7 +77,23 @@
     return text + (/[.!?]$/.test(text) ? " " : ". ") + lead;
   }
 
-  var api = { gaps: gaps, append: append };
+  /* The clue each gap is, in two or three words, and what a reader might type into its small box. Only a hint of the shape of an answer, never a suggestion of a person. */
+  var CLUE = {
+    from: ["Where from", "a village, parish or town"], village: ["The village", "the village or nearest town"], name: ["A name", "a surname, or any name on the photo"],
+    given: ["First name", "Ivan, Marija, a nickname"], surname: ["Surname", "spelled the way your family does"], to: ["Where to", "the town they settled in"],
+    when: ["When", "a decade is enough: 1905, the 1920s"], rel: ["Who to you", "grandfather, great-aunt"], holds: ["The paper", ""], maiden: ["Birth name", "her name before she married"],
+    faith: ["The church", "Catholic, Orthodox, Jewish"], family: ["Family", "who they married, and where"], ship: ["The crossing", "a ship, or a port like Trieste"], end: ["The end", "where and when, as far as you know"]
+  };
+  gaps.clue = function (id) { return CLUE[id] || [id, ""]; };
+
+  /* THE SENTENCE AN INLINE ANSWER ADDS: the start of the sentence this clue's tap would add, finished with the words typed, and a full stop. */
+  function answer(text, stub, value) {
+    value = String(value || "").replace(/\s+/g, " ").trim().replace(/[.!?]+$/, "");
+    if (!value) return String(text || "");
+    return append(text, (stub || "") + value + ".");
+  }
+
+  var api = { gaps: gaps, append: append, clue: gaps.clue, answer: answer };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (root) root.raStoryGaps = api;
 })(typeof window !== "undefined" ? window : (typeof globalThis !== "undefined" ? globalThis : this));

@@ -94,13 +94,18 @@
     function say(msg, bad) { status.textContent = msg || ""; status.className = "cap ask-status" + (bad ? " ask-bad" : ""); }
 
     /* Turnstile, loaded on first use. A token is good for one call; reset() asks for the next. */
+    var tsErr = null;
+    function tsMessage(code) {
+      var h = location.hostname || "";
+      return "The bot check could not connect" + (code && code !== "x" ? " (Cloudflare error " + code + ")" : "") + ". " + (h && !/(^|\.)recordatlas\.org$/.test(h) ? "It only works on recordatlas.org, and this is " + h + ". " : "") + "Reload the page; if it happens again, turn off a VPN, ad blocker or privacy extension for challenges.cloudflare.com and try once more.";
+    }
     function loadTurnstile() {
       if (tsLoading) return tsLoading;
       tsLoading = new Promise(function (ok, fail) {
         window.__raTsReady = function () {
           try {
             wid = window.turnstile.render(ts, { sitekey: SITEKEY, theme: "auto", callback: function (t) { token = t; },
-              "expired-callback": function () { token = null; }, "error-callback": function () { token = null; } });
+              "expired-callback": function () { token = null; }, "error-callback": function (c) { token = null; tsErr = String(c || "x"); } });
             ok();
           } catch (e) { fail(e); }
         };
@@ -116,7 +121,8 @@
       return loadTurnstile().then(function () {
         return new Promise(function (ok, fail) {
           var n = 0, t = setInterval(function () {
-            if (token) { clearInterval(t); var v = token; token = null; ok(v); }
+            if (token) { clearInterval(t); var v = token; token = null; tsErr = null; ok(v); }
+            else if (tsErr) { clearInterval(t); var em = tsErr; tsErr = null; fail(new Error(tsMessage(em))); }
             else if (++n > 80) { clearInterval(t); fail(new Error("The bot check is taking too long. Reload the page and try again.")); }
           }, 250);
         });

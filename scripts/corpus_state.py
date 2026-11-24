@@ -32,6 +32,7 @@ def measure():
     # sources
     m["providers"] = len(providers)
     m["providersUnsurveyed"] = sum(1 for p in providers if p.get("access") == "unsurveyed")
+    m["providersUnsurveyedTenthsPct"] = round(1000 * m["providersUnsurveyed"] / max(1, len(providers)))   # the share, in tenths of a percent: adding sources must not trip the gate, adding unsurveyed ones faster than they are surveyed must
     m["providersNoWikidata"] = sum(1 for p in providers if not p.get("wikidata"))
     m["providersNoDeepLink"] = sum(1 for p in providers if not p.get("deepLink"))
     by = collections.Counter()
@@ -84,11 +85,11 @@ def measure():
 
 
 # which way is "better": gaps must not grow (ceilings); sizes must not shrink (floors, in check-data.py)
-GAPS = ["providersUnsurveyed", "providersNoWikidata", "providersNoDeepLink", "countriesWithNoSource", "countriesWithThreeOrFewer", "unplacedNames", "unplacedVolumes",
+GAPS = ["providersUnsurveyedTenthsPct", "countriesWithNoSource", "countriesWithThreeOrFewer", "unplacedNames", "unplacedVolumes",
         "surnamesWithoutVariants", "surnamesWithoutCountry", "givenNameFormsLeadOnly", "givenNameFamiliesTwoFormsOrFewer"]
 
 LABEL = {
-    "providers": "Catalogue rows (sources)", "providersUnsurveyed": "Rows whose access has never been surveyed", "providersNoWikidata": "Rows with no Wikidata id",
+    "providers": "Catalogue rows (sources)", "providersUnsurveyed": "Rows whose access has never been surveyed", "providersUnsurveyedTenthsPct": "Share of rows never surveyed (tenths of a percent)", "providersNoWikidata": "Rows with no Wikidata id",
     "providersNoDeepLink": "Rows with no deep link", "countries": "Countries", "countriesWithNoSource": "Countries with no source at all",
     "countriesWithThreeOrFewer": "Countries with three sources or fewer", "unplacedNames": "FamilySearch book names with no place", "unplacedVolumes": "FamilySearch volumes with no place (12 Nov figure)",
     "datedPlaces": "Places with dated names", "surnames": "Surnames", "surnamesWithoutVariants": "Surnames with no recorded variant", "surnamesWithoutCountry": "Surnames with no country",

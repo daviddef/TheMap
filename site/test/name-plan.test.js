@@ -53,3 +53,11 @@ test("a books step lists the places with the most registers, and says it does no
   assert.match(f, /ra-near/);
   assert.match(src, /Not shown to hold this name/);
 });
+
+test("a row links to the site's own results for the name where the address is known to take one", () => {
+  const f = src.slice(src.indexOf("var PLAN_SEARCH"), src.indexOf("function planBooks"));
+  for (const id of ["familysearch", "findagrave", "geni", "wikitree"]) assert.match(f, new RegExp(id + ": \"https://"));
+  assert.ok(f.includes("surname|q|SURNAME"), "and any directory row with a name template");
+  assert.match(f, /class="ra-plan-go"/);
+  assert.match(f, /Your browser sends the name to that site when you click/);
+});

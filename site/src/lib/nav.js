@@ -74,6 +74,7 @@ export const nav = [
     ["/read/#story", "Tell a story"],
     ["/read/#read", "Interpret a record"],
     ["/tree-canvas/", "Tree Canvas", { newTab: true }],   /* David: «also add the tree canvas to that menu»; it still opens in a new tab */
+    ["/tree-canvas/?demo=compass", "Compass: a family on the map", { newTab: true }],   /* David, 24 Nov 2026: «compass is almost not a feature at all»; the round blue icon in the bar reopens YOUR tree on it */
     [null, "The data"],
     ["/data/", "Use the data"],
     ["/connect/", "Connect to the Atlas"],

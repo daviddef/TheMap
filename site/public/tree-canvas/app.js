@@ -654,6 +654,7 @@ let lastGroups = [], lastKept = [];
 async function drawLists() {
   const kept = rememberOn() ? await recentList() : [], groups = W.groupTrees(kept, W.list(), W.listViews());
   lastGroups = groups; lastKept = kept;
+  { const w = document.querySelector('.stwrap'); if (w) w.classList.toggle('haskept', !!groups.length); }   // someone with a tree kept is offered it first
   for (const [boxId, ulId] of [['stRecent', 'stList'], ['yfRecent', 'yfList']]) drawTrees($('#' + boxId), $('#' + ulId), groups, kept);
   for (const id of ['stForget', 'yfForget']) { const b = $('#' + id); if (b) b.hidden = !kept.length; }   // nothing kept: nothing to forget, so no button that would seem to do nothing
   savedFix(); noFiles();
@@ -993,7 +994,17 @@ function swSync() {
   const open = id => { const n = $(id); return !!n && !n.hidden; }, cv = $('#cv');
   sw.show(!!window.RR && !!cv && !cv.hidden && !open('#start') && !open('#yf') && !open('#sg') && !open('#fx'));
   sw.mark(open('#cp') ? 'compass' : 'canvas');
+  atlasTarget();
 }
+/* THE ATLAS LINK OPENS IN THIS TAB WHEN THE TREE IS KEPT (so Back, and the Atlas's own Canvas button, bring it straight back), and in a new tab when it is not (the invented family, "Keep the last
+   files" off, or a file too big to keep), so the open tree is never lost by leaving. */
+async function atlasTarget() {
+  const a = document.querySelector('#sw [data-v="atlas"]'); if (!a) return;
+  let kept = false; try { kept = !example && rememberOn() && !!curName && (await recentList()).some(r => r.name === curName); } catch (e) { /* not kept */ }
+  if (kept) { a.removeAttribute('target'); a.removeAttribute('rel'); a.title = 'Record Atlas. Your tree is kept in this browser: the Atlas has a Canvas button that brings it straight back'; }
+  else { a.target = '_blank'; a.rel = 'noopener'; a.title = 'Record Atlas, in a new tab so your tree stays open here (Alt-click to leave this page instead)'; }
+}
+
 { const mo = new MutationObserver(swSync); for (const id of ['#start', '#yf', '#sg', '#fx', '#cp']) { const n = $(id); if (n) mo.observe(n, { attributes: true, attributeFilter: ['hidden'] }); } }
 
 {
@@ -1020,5 +1031,14 @@ function swSync() {
     showStart(); const box = $('#stUrl'); box.value = asked.slice(0, 2000); const p = parseFileLink(box.value);
     linkMsg(p.ok ? 'This page was opened with a link to a file on ' + p.host + '. Nothing has been fetched yet: press Open link if you want it.' : p.error, !p.ok);
     $('#stGo').focus();
+  } else if (new URLSearchParams(location.search).get('resume')) {
+    /* THE WAY BACK FROM THE ATLAS (and the Atlas's own Canvas and Compass buttons): the tree you were last on is kept in this browser (the same tcRecent), so a hop from another page
+       opens it again, on the canvas or, with to=compass, on Compass. Nothing is kept when "Keep the last files" is off, and then this says so and shows the front page. */
+    const to = new URLSearchParams(location.search).get('to') === 'compass' ? 'compass' : null;
+    try { history.replaceState(null, '', location.pathname); } catch (e) { /* ignore */ }
+    (async () => { const kept = rememberOn() ? await recentList() : []; if (kept[0]) openKept(kept[0], to); else { await showStart(); say('No tree is kept in this browser yet. Choose your file, or try the invented family.'); } })();
+  } else if (new URLSearchParams(location.search).get('demo') === 'compass') {
+    try { history.replaceState(null, '', location.pathname); } catch (e) { /* ignore */ }
+    example = true; start(new TextEncoder().encode(makeSample()).buffer, undefined, undefined, undefined, 'compass');
   } else if (want) openArchive(want); else showStart();
 }

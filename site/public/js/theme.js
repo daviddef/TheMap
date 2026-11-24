@@ -27,7 +27,27 @@
     });
   }
   function flip() { try { localStorage.setItem(KEY, effective() === "dark" ? "light" : "dark"); } catch (e) { /* storage blocked: it lasts until the page closes */ root.setAttribute("data-theme", effective() === "dark" ? "light" : "dark"); } apply(); paint(); }
-  function make(cls) { var b = document.createElement("button"); b.type = "button"; b.className = cls; b.addEventListener("click", flip); buttons.push(b); return b; }
+  /* THE NEWEST KEPT TREE, if any: the canvas keeps its last files in this browser's own database (tcRecent, store m). Only its metadata is read, never the file; and the database is never created here
+   (indexedDB.databases() says whether it exists). cb(null) for none, for "Keep the last files" off, and for anything that is not supported. */
+function keptTree(cb) {
+  try {
+    if (localStorage.getItem("tcRemember") === "0" || !window.indexedDB || !indexedDB.databases) return cb(null);
+    indexedDB.databases().then(function (l) {
+      if (!l.some(function (d) { return d.name === "tcRecent"; })) return cb(null);
+      var r = indexedDB.open("tcRecent", 1);
+      r.onerror = function () { cb(null); };
+      r.onsuccess = function () {
+        var db = r.result;
+        try {
+          var q = db.transaction("m").objectStore("m").getAll();
+          q.onsuccess = function () { db.close(); var a = (q.result || []).sort(function (x, y) { return (y.when || 0) - (x.when || 0); }); cb(a[0] || null); };
+          q.onerror = function () { db.close(); cb(null); };
+        } catch (e) { db.close(); cb(null); }
+      };
+    }).catch(function () { cb(null); });
+  } catch (e) { cb(null); }
+}
+function make(cls) { var b = document.createElement("button"); b.type = "button"; b.className = cls; b.addEventListener("click", flip); buttons.push(b); return b; }
   function mount() {
     var nav = document.querySelector("header.site nav.topnav"), wrap = document.querySelector("header.site .drawer .wrap");
     if (!nav && !wrap) return false;
@@ -50,6 +70,25 @@
       var ctip = T("Tree Canvas: draw a family tree file on one canvas"); cv.title = ctip; cv.setAttribute("aria-label", ctip);
       if (location.pathname.replace(/\/+$/, "").slice(-12) === "/tree-canvas") cv.setAttribute("aria-current", "page");
       nav.appendChild(cv);
+    }
+    /* THE COMPASS IS A THIRD ROUND ICON, beside the canvas (David, 24 Nov 2026: «compass is almost not a feature at all»). It is the same tree on the map through time. With a tree kept in this browser
+       (the canvas keeps the last files, tcRecent) both icons REOPEN IT, in this tab, so going from the Atlas to the canvas or the Compass and back never loses the file; with none, the Compass
+       opens an invented family so there is something to see. The names are never read here, only the newest kept file's name for the hover text. */
+    if (nav && !nav.querySelector(".ra-compass")) {
+      var cp = document.createElement("a"), pbase = (root.getAttribute("data-base") || "/").replace(/\/?$/, "/");
+      cp.className = "ra-compass"; cp.href = pbase + "tree-canvas/?demo=compass"; cp.target = "_blank"; cp.rel = "noopener";
+      cp.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 4v14M15 6v14" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>';
+      var ptip = T("Compass: a family on the map, through time (an invented one until you open your own tree)"); cp.title = ptip; cp.setAttribute("aria-label", ptip);
+      var cvn = nav.querySelector(".ra-canvas"); if (cvn && cvn.nextSibling) nav.insertBefore(cp, cvn.nextSibling); else nav.appendChild(cp);
+      keptTree(function (k) {
+        if (!k) return;
+        var nm = String(k.tree || k.name || "your tree").slice(0, 60);
+        var cvb = nav.querySelector(".ra-canvas");
+        if (cvb) { cvb.href = pbase + "tree-canvas/?resume=1"; cvb.removeAttribute("target"); cvb.removeAttribute("rel"); cvb.title = T("Tree Canvas: open") + " " + nm + " " + T("again"); cvb.setAttribute("aria-label", cvb.title); }
+        cp.href = pbase + "tree-canvas/?resume=1&to=compass"; cp.removeAttribute("target"); cp.removeAttribute("rel"); cp.title = T("Compass:") + " " + nm + " " + T("on the map, through time"); cp.setAttribute("aria-label", cp.title);
+        document.querySelectorAll("#ra-quick .dq-canvas").forEach(function (d) { d.href = cvb ? cvb.href : d.href; d.removeAttribute("target"); d.removeAttribute("rel"); });
+        document.querySelectorAll("#ra-quick .dq-compass").forEach(function (d) { d.href = cp.href; d.removeAttribute("target"); d.removeAttribute("rel"); });
+      });
     }
     /* WHAT'S NEW IS A ROUND SPARKLE ICON, like the other sites have: beside the Tree Canvas, before the toggle. Hover text only. It takes the
        same orange dot as the About menu when there is news (raNewsDot in Base.astro). */

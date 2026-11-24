@@ -35,7 +35,7 @@ import { u } from "../../lib/url.js";
         <rect class="stnode c2" x="78" y="42" width="36" height="20" rx="6"/>
       </svg>
       <h1 id="stTitle">Tree Canvas</h1>
-      <p class="stlead">Draw your family tree on one big canvas. Your file never leaves this browser.</p>
+      <p class="stlead">Your family tree, drawn and put on the map. Drop a file in: it never leaves this browser.</p>
     </header>
 
     <section id="stCur" class="stcard stcur" hidden aria-labelledby="stCurTitle">
@@ -53,7 +53,7 @@ import { u } from "../../lib/url.js";
     </section>
 
     <section id="stRecent" class="stplain stshelf" hidden aria-labelledby="stRecTitle">
-      <h2 id="stRecTitle">Your trees</h2>
+      <h2 id="stRecTitle">Pick up where you left off</h2>
       <ul id="stList"></ul>
       <div class="trfoot">
         <button type="button" class="stlink" id="stForget" title="Forgets only the kept copies of your files. Your saved views and where you left off stay.">Forget the kept files</button>
@@ -68,19 +68,14 @@ import { u } from "../../lib/url.js";
       <a class="stsub stfixlink" href={u("/my-research/#fixes")} title="Only counts and the place text as typed are kept, never a name">See it in My research</a>
     </section>
 
+    <ul class="stviews" aria-label="What you get from one file">
+      <li><b>Canvas</b><small>Draw and arrange the tree</small></li>
+      <li><b>Compass</b><small>Watch your family move across the map, through time</small></li>
+      <li><b>Atlas</b><small>The places, rulers and record books behind each person</small></li>
+    </ul>
+
     <section id="stArch" class="stplain" aria-labelledby="stArchTitle">
-      <h2 id="stArchTitle">Just looking around?</h2>
-      <p class="stsub">Open one of the family archives, or try a made-up family first.</p>
-      <div class="starch" id="stArchBtns">
-        <button type="button" class="stchip" data-k="defranceski">Defranceski</button>
-        <button type="button" class="stchip" data-k="booyzen">Booyzen</button>
-        <button type="button" class="stchip" data-k="luwinski">Luwinski</button>
-        <button type="button" class="stchip" data-k="lerena">Lerena</button>
-        <button type="button" class="stchip" data-k="falco">Falco</button>
-        <button type="button" class="stchip" data-k="blazevic">Blažević</button>
-        <button type="button" class="stchip" data-k="darcy">D'Arcy</button>
-        <button type="button" class="stchip" data-k="mazza">Mazza</button>
-      </div>
+      <h2 id="stArchTitle">No file yet?</h2>
       <div class="sttiles">
         <button type="button" class="sttile" id="stDemo" title="An invented family, to see how it works">
           <svg viewBox="0 0 48 36" width="46" height="34" aria-hidden="true" focusable="false"><path d="M24 11v6M11 27v-10h26v10" fill="none"/><rect x="16" y="3" width="16" height="8" rx="3"/><rect x="3" y="27" width="16" height="8" rx="3"/><rect x="29" y="27" width="16" height="8" rx="3"/></svg>
@@ -91,9 +86,31 @@ import { u } from "../../lib/url.js";
           <span class="sttxt"><b>Watch a family move across the map</b><small>The same invented family, on the Compass.</small></span>
         </button>
       </div>
+    </section>
+
+    <details class="stfold stlinksec" id="stLink">
+      <summary>More ways to start</summary>
+      <p class="stsub">Open one of the family archives:</p>
+      <div class="starch" id="stArchBtns">
+        <button type="button" class="stchip" data-k="defranceski">Defranceski</button>
+        <button type="button" class="stchip" data-k="booyzen">Booyzen</button>
+        <button type="button" class="stchip" data-k="luwinski">Luwinski</button>
+        <button type="button" class="stchip" data-k="lerena">Lerena</button>
+        <button type="button" class="stchip" data-k="falco">Falco</button>
+        <button type="button" class="stchip" data-k="blazevic">Blažević</button>
+        <button type="button" class="stchip" data-k="darcy">D'Arcy</button>
+        <button type="button" class="stchip" data-k="mazza">Mazza</button>
+      </div>
       <p class="stex">Or open an example file: <button type="button" class="stlink" data-ex="/examples/example-family.ged">GEDCOM</button> &middot;
         <button type="button" class="stlink" data-ex="/examples/example-family.tree.json">tree.json</button></p>
-    </section>
+      <p class="stsub">Or open a public file from a web address:</p>
+      <div class="stlinkrow">
+        <label for="stUrl" class="stvh">Web address of a public GEDCOM or tree.json</label>
+        <input type="url" id="stUrl" class="stlinkin" inputmode="url" autocomplete="off" spellcheck="false" maxlength="2000" placeholder="https://… a link to a GEDCOM or tree.json">
+        <button type="button" class="stbtn" id="stGo">Open link</button>
+      </div>
+      <p id="stLinkMsg" class="stmsg" role="status" aria-live="polite" hidden></p>
+    </details>
 
     <div class="stfoot">
       <section id="stKeep" class="stplain" aria-labelledby="stKeepTitle">
@@ -105,16 +122,6 @@ import { u } from "../../lib/url.js";
       <p class="stsettings"><button type="button" class="stlink" id="stSettings">Settings</button>
         <span class="stsub" id="stRoots"><a href={u("/roots/")}>Older tree views</a></span></p>
     </div>
-
-    <details class="stfold stlinksec" id="stLink">
-      <summary>Open a file from a web address</summary>
-      <div class="stlinkrow">
-        <label for="stUrl" class="stvh">Web address of a public GEDCOM or tree.json</label>
-        <input type="url" id="stUrl" class="stlinkin" inputmode="url" autocomplete="off" spellcheck="false" maxlength="2000" placeholder="https://… a link to a GEDCOM or tree.json">
-        <button type="button" class="stbtn" id="stGo">Open link</button>
-      </div>
-      <p id="stLinkMsg" class="stmsg" role="status" aria-live="polite" hidden></p>
-    </details>
 
     <details class="stfold sthelp" id="stHelp">
       <summary>About these files and links</summary>

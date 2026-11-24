@@ -5625,7 +5625,7 @@ window.addEventListener("load", async function () {
      and still shows the places — «we hold no register for this name» and
      «nobody of this name lived there» are different statements and only the
      first one is ours to make. */
-  var qPlace = null, qName = null;
+  var qPlace = null, qName = null, qNear = null;
   /* the typed string the «name, in a place» panel was last written for; any other answer clears it */
   var bothFor = null;
   /* DID THE SEARCH ACTUALLY FIND ANYTHING. The remembered-searches list used
@@ -5654,13 +5654,22 @@ window.addEventListener("load", async function () {
     return fold(p.n).indexOf(t) > -1 || !!(p.q && wordHit(p.q, t));
   }
   function splitQuery(t) {
-    qPlace = qName = null;
+    qPlace = qName = qNear = null;
     if (!t || t.indexOf(" ") < 0) return;
     if (markers.some(function (m) { return nameMatch(m._p, t); })) return;
     var w = t.split(/\s+/).filter(Boolean);
     for (var i = 1; i < w.length; i++) {
-      var left = w.slice(0, i).join(" "), right = w.slice(i).join(" ");
+      var left = w.slice(0, i).join(" ").replace(/[,;]+$/, ""), right = w.slice(i).join(" ").replace(/^[,;]+/, "");   // «Gorica, Karlovac»: the comma is punctuation, not part of either name
       if (left.length < 3 || right.length < 3) continue;
+      /* «GORICA, KARLOVAC» IS A PLACE AND WHERE IT IS, NOT A SURNAME AND A PLACE. A village name is shared by dozens (fourteen Goricas), and the family group's way of saying which is
+         the county or the town beside it. When the first part names places and the last part names a place exactly, the answer is the first part's places within 60 km of the second. */
+      var nearA = markers.filter(function (m) { return nameMatch(m._p, left); });
+      var nearB = nearA.length ? markers.filter(function (m) { return fold(m._p.n).replace(/\s*\([^)]*\)\s*$/, "") === right; }) : [];
+      if (nearA.length && nearB.length) {
+        var near = {}, nn = 0;
+        nearA.forEach(function (a) { if (nearB.some(function (b) { return haversine(a._p.y, a._p.x, b._p.y, b._p.x) <= 60; })) { near[a._p.i] = 1; nn++; } });
+        if (nn) { qPlace = left; qNear = near; return; }
+      }
       if (markers.some(function (m) { return nameMatch(m._p, right); })) {
         qPlace = right; qName = left; return;
       }
@@ -5691,6 +5700,7 @@ window.addEventListener("load", async function () {
        name still finds it. It is the blob, which carries the country, that
        has to respect word boundaries. */
     if (t && fold(p.n).indexOf(t) < 0 && !(p.q && wordHit(p.q, t))) return false;
+    if (qNear && !qNear[p.i]) return false;
     if (year && p.s && (p.s[0] > year2 || p.s[1] < year)) return false;
     /* ANY of the chosen kinds, not all of them: somebody after church records
        and censuses wants both sorts of place, not only the places holding

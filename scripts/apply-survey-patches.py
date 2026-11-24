@@ -23,7 +23,7 @@ import glob, json, os, sys, collections
 CLASSES = {"free", "account", "index", "mixed", "paid", "catalogue", "onsite"}
 KINDS = {"aggregator", "national-archive", "regional-archive", "diocesan", "volunteer", "library", "national-library",
          "index", "catalogue", "statistics", "commercial"}
-TODAY = "2026-11-09"
+TODAY = __import__("time").strftime("%Y-%m-%d")   # was a hard-coded 2026-11-09, which dated every later survey as that day
 
 
 def load(p):

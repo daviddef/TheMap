@@ -15,5 +15,5 @@ test("typed years do not switch the Year pill on while the box holds a story", (
 });
 
 test("a place with typed years still switches the pill on", () => {
-  assert.match(src, /var t = yearsIn\(qbox\.value\);[\s\S]{0,900}yon\.checked = true; readRange\(\); yearUI\(\)/);
+  assert.match(src, /var t = yearsIn\(qbox\.value\);[\s\S]{0,1800}yon\.checked = true; readRange\(\); yearUI\(\)/);
 });

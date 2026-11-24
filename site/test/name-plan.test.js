@@ -61,3 +61,13 @@ test("a row links to the site's own results for the name where the address is kn
   assert.match(f, /class="ra-plan-go"/);
   assert.match(f, /Your browser sends the name to that site when you click/);
 });
+
+test("a name and a place together get the plan too, with that place's own books and the nearest parishes", () => {
+  const i = src.indexOf("async function both(vis, name, raw)"), j = src.indexOf("if (r) h.push(renderSurnames([r], r.n));", i);
+  assert.ok(i > 0 && j > i);
+  const f = src.slice(i, j + 80);
+  assert.match(f, /namePlan\(pccs, asked, \{ books: bk/);
+  assert.match(f, /nearestBooks\(pl0\.y, pl0\.x, 10, 60\)/, "the books are the place's and its neighbours'");
+  assert.ok(f.indexOf("namePlan(") < f.indexOf("renderSurnames("), "the plan comes before the name's own block");
+  assert.match(f, /ra-plan-all/, "the full lists stay in the closed fold");
+});

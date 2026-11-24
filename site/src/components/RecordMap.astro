@@ -967,7 +967,7 @@ window.addEventListener("load", async function () {
       return '<li><a class="ra-area-p ra-near" href="#" data-i="' + esc(String(p.i)) + '" data-n="' + esc(p.n) + '"><i style="background:#2F6B5A"></i><span>' + esc(p.n) + "</span><small>" + nfl(p.v) + " " + esc(T(p.v === 1 ? "book" : "books")) + "</small></a></li>";
     }).join("") + "</ul>" : "";
   }
-  function namePlan(ccs, term) {
+  function namePlan(ccs, term, opts) {
     var nm = String(term || "").replace(/^./, function (c) { return c.toUpperCase(); });
     ccs = ccs.slice(0, 3); if (!ccs.length) return "";
     var STEP = [
@@ -984,12 +984,12 @@ window.addEventListener("load", async function () {
     ccs.forEach(function (cc, ci) {
       var st = planSteps(cc), where = CNAME[cc] || cc, n = 0;
       h.push('<div class="ra-plan-cc" data-cc="' + esc(cc) + '"' + (ci ? " hidden" : "") + ">");
-      var books = planBooks(cc);
+      var books = opts && opts.books && opts.books[cc] != null ? opts.books[cc] : planBooks(cc);
       for (var k = 0; k < 4; k++) {
         if (k === 1 && books) {
           n++;
-          h.push('<details class="ra-area-g ra-plan-s"><summary><span class="ra-plan-n">' + n + "</span>" + esc(T("Books to start with")) + " <b>10</b></summary>" +
-                 '<p class="at-sub">' + esc(T("Where the most registers stand in") + " " + where + ". Not shown to hold this name: open a place for its books, then look for the years the name was there.") + "</p>" + books + "</details>");
+          h.push('<details class="ra-area-g ra-plan-s"><summary><span class="ra-plan-n">' + n + "</span>" + esc(T("Books to start with")) + " <b>" + ((books.match(/<li/g) || []).length) + "</b></summary>" +
+                 '<p class="at-sub">' + esc(opts && opts.booksHint && opts.books && opts.books[cc] != null ? opts.booksHint : T("Where the most registers stand in") + " " + where + ". Not shown to hold this name: open a place for its books, then look for the years the name was there.") + "</p>" + books + "</details>");
         }
         if (!st[k].length) continue;
         n++;
@@ -6261,6 +6261,28 @@ window.addEventListener("load", async function () {
     if (vis.length > 14)
       h.push('<p class="cap">and ' + (vis.length - 14).toLocaleString() +
              " more on the map.</p>");
+    /* THE PLAN, FOR THE PLACE AND THE NAME TOGETHER. David, on «defranceski crikvenica»: «nothing shows on what to research / sources / volumes». The panel said the name is attested
+       in Croatia and listed the place, then stopped: the order to do things in only came for a name alone. Here it is for the place's own country first (and the other countries
+       the name is attested in as chips), and «Books to start with» is the place itself and the nearest places that have books, not the country's busiest ten. */
+    var pl0 = vis[0]._p, pcc = pl0.cc ? String(pl0.cc).toUpperCase() : "", pccs = [];
+    if (pcc) pccs.push(pcc);
+    ccs.forEach(function (c) { var k = String(c.cc).toUpperCase(); if (pccs.indexOf(k) < 0) pccs.push(k); });
+    pccs = pccs.filter(function (cc) { return natProviders(cc).length; });
+    if (pccs.length) {
+      var bk = {}, bkRows = function (l) {
+        return l.length ? "<ul>" + l.map(function (x) {
+          return '<li><a class="ra-area-p ra-near" href="#" data-i="' + esc(String(x.p.i)) + '" data-n="' + esc(x.p.n) + '"><i style="background:#2F6B5A"></i><span>' + esc(x.p.n) + "</span><small>" +
+                 (x.d < 1.5 ? "" : Math.max(1, Math.round(x.d)) + " km \u00b7 ") + nfl(x.p.v) + " " + esc(T(x.p.v === 1 ? "book" : "books")) + "</small></a></li>";
+        }).join("") + "</ul>" : "";
+      };
+      if (pcc && pl0.y != null) bk[pcc] = bkRows(nearestBooks(pl0.y, pl0.x, 10, 60));
+      h.push(namePlan(pccs, asked, { books: bk, booksHint: T("The books at") + " " + pl0.n + " and the nearest places that have them. A village's registers are often filed under the next parish along; not shown to hold this name, so look for the years it was there." }));
+      h.push('<details class="ra-area-g ra-plan-all"><summary><i style="background:#5B7A8C"></i>' + esc(T("All the sources, by country")) + "</summary>");
+      pccs.forEach(function (cc, i) {
+        h.push(countrySources(cc, null, T("The sources for") + " " + (CNAME[cc] || cc), undefined, undefined, null, i < pccs.length - 1));
+      });
+      h.push("</details>");
+    }
     if (r) h.push(renderSurnames([r], r.n));
     panel.innerHTML = h.join("");
     if (r) showCountries(r.countries, function () { return mine !== searchTok; },

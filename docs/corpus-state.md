@@ -4,14 +4,14 @@ Written by `scripts/corpus_state.py` from the data files in the repository. Each
 
 | Measure | Now | Ceiling |
 |---|--:|--:|
-| Catalogue rows (sources) | 2,615 |  |
-| Rows whose access has never been surveyed | 1,277 |  |
-| Share of rows never surveyed (tenths of a percent) | 488 | 488 |
-| Rows with no Wikidata id | 1,425 |  |
-| Rows with no deep link | 1,475 |  |
+| Catalogue rows (sources) | 2,635 |  |
+| Rows whose access has never been surveyed | 1,297 |  |
+| Share of rows never surveyed (tenths of a percent) | 492 | 488 |
+| Rows with no Wikidata id | 1,445 |  |
+| Rows with no deep link | 1,495 |  |
 | Countries | 237 |  |
 | Countries with no source at all | 35 | 35 |
-| Countries with three sources or fewer | 142 | 142 |
+| Countries with three sources or fewer | 140 | 142 |
 | FamilySearch book names with no place | 7,180 | 7,180 |
 | FamilySearch volumes with no place (12 Nov figure) | 45,153 | 45,153 |
 | Places with dated names | 375 |  |

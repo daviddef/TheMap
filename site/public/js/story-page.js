@@ -24,6 +24,9 @@
   function loadScript(src) { return new Promise(function (ok, fail) { var s = document.createElement("script"); s.src = BASE + "js/" + src; s.onload = ok; s.onerror = function () { fail(new Error("Could not load " + src + ". Check your connection, then try again.")); }; document.head.appendChild(s); }); }
   function tellable(p) { return !!(p && (p.from || (p.kin && p.kin.length) || (p.people || []).some(function (x) { return x.sought; }))); }
   function say(m, bad) { status.textContent = m || ""; status.className = "sp-status" + (bad ? " bad" : ""); }
+  /* what a button said it did (a picture read, a failure) stays until the reader types or starts over: the page re-reads the story straight after, and must not wipe it */
+  var hold = null;
+  function sayDone() { if (hold) say(hold.m, hold.bad); else say(""); }
 
   /* ---- the sections and the rail --------------------------------------------------------------------------------------------- */
   var rail = $("sp-rail");
@@ -202,7 +205,7 @@
     if (!parsed) return;
     parsed.born = y; (parsed.route || []).forEach(function (st) { if (st.age != null) st.year = y + st.age; });
     say("Reading the Atlas…");
-    LD.gather(parsed).then(function (g) { say(""); last = g; drawAll(g); }).catch(function () { say("Some Atlas files did not load. Check your connection.", true); });
+    LD.gather(parsed).then(function (g) { sayDone(); last = g; drawAll(g); }).catch(function () { say("Some Atlas files did not load. Check your connection.", true); });
   }
   function lede(f) {
     var bits = (f.route || []).filter(function (x) { return x.info; }).map(function (x, i) {
@@ -536,7 +539,7 @@
       parsed = p; drawChips(p);
       var sig = signature(p);
       if (sig === lastSig || !tellable(p)) {
-        if (status.textContent === "Reading your story…") say("");
+        if (status.textContent === "Reading your story…") sayDone();
         if (!tellable(p) && sig !== lastSig) { lastSig = ""; clearReport(); }
         return;
       }
@@ -544,7 +547,7 @@
       var my = ++token; say("Reading the Atlas…");
       return LD.gather(p).then(function (g) {
         if (my !== token) return;
-        say(""); last = g; lastPlan = null; aiOut.hidden = true; aiOut.textContent = ""; aiBtn.textContent = "Build my research plan";
+        sayDone(); last = g; lastPlan = null; aiOut.hidden = true; aiOut.textContent = ""; aiBtn.textContent = "Build my research plan";
         drawAll(g);
       }).catch(function (e) { if (window.console) console.error("story draw", e); say("Some Atlas files did not load. Check your connection.", true); });
     }).catch(function (e) { if (window.console) console.error("story read", e); say("The Atlas files did not load. Check your connection.", true); });
@@ -562,13 +565,14 @@
   var tm = null;
   function grow() { text.style.height = "auto"; text.style.height = Math.min(Math.max(text.scrollHeight, 110), 420) + "px"; }
   text.addEventListener("input", function () {
+    hold = null;
     grow(); try { sessionStorage.setItem(DRAFT, text.value); } catch (e) { /* a private window: the draft is just not kept */ }
     clearTimeout(tm); tm = setTimeout(run, 650);
   });
   $("sp-eg").addEventListener("click", function () { text.value = HINT; grow(); run(); });
   $("sp-clear").addEventListener("click", function () {
     files.forEach(function (x) { URL.revokeObjectURL(x.url); }); files = []; drawShots(); text.value = ""; grow(); chips.textContent = ""; $("sp-did").hidden = true;
-    ov = Object.create(null); parsed = null; shown = Object.create(null); lastSig = ""; clearReport(); say("");
+    ov = Object.create(null); parsed = null; shown = Object.create(null); lastSig = ""; clearReport(); hold = null; say("");
     try { sessionStorage.removeItem(DRAFT); } catch (e) { /* none */ }
     $("sp-clear").hidden = true; $("sp-link").hidden = true; $("sp-gaps").hidden = true; clueReset(); langReset(); lang.skip = Object.create(null); readingNow = ""; drawRead(null); text.focus();
   });
@@ -602,7 +606,7 @@
   /* READ THE PICTURES: on the press, each is read as a document by Claude, and what it says about the people with the story's surnames is added to the story's words */
   function readPics() {
     var btn = $("sp-read"); if (!files.length) return;
-    btn.disabled = true;
+    hold = null; btn.disabled = true; var btnWas = btn.textContent; btn.textContent = "Reading…"; say("Reading the picture. This can take up to half a minute.");
     var keys = []; ((parsed && parsed.people) || []).forEach(function (pe) { if (pe.surname && keys.indexOf(pe.surname) < 0) keys.push(pe.surname); }); if (parsed && parsed.surname && keys.indexOf(parsed.surname) < 0) keys.push(parsed.surname);
     Promise.all([window.raStoryPics ? null : loadScript("story-pics.js"), window.raStoryRead && window.raStoryRead.read ? null : loadScript("story-read.js")]).then(function () {
       return window.raStoryRead.read(files, keys, function (m) { say(m); });
@@ -611,10 +615,11 @@
       files.forEach(function (x, i) { if (x.r) blocks.push(R.block(i + 1, x.f.name || "picture", x.r)); });
       text.value = (base + (blocks.length ? "\n\n" + blocks.join("\n\n") : "")).slice(0, 8000); grow();
       var nf = files.filter(function (x) { return x.r && !x.r.found; }).length;
-      say(res.failed ? "Read " + res.got + " of " + files.length + ", then it stopped: " + (res.failed.message || "something went wrong.")
-        : "Read " + res.got + " picture" + (res.got === 1 ? "" : "s") + ". What they say is now in your story above." + (nf ? " " + nf + " had nobody with a matching surname on it." : ""));
+      hold = { bad: !!res.failed, m: res.failed ? "Read " + res.got + " of " + files.length + ", then it stopped: " + (res.failed.message || "something went wrong.")
+        : "Read " + res.got + " picture" + (res.got === 1 ? "" : "s") + ". What they say is now in your story above." + (nf ? " " + nf + " had nobody with a matching surname on it." : "") };
+      say(hold.m, hold.bad);
       drawShots(); lastSig = ""; run();
-    }).catch(function (e) { say((e && e.message) || "The pictures could not be read.", true); }).then(function () { btn.disabled = false; });
+    }).catch(function (e) { hold = { m: (e && e.message) || "The pictures could not be read.", bad: true }; say(hold.m, true); }).then(function () { btn.disabled = false; btn.textContent = btnWas; });
   }
   $("sp-read").addEventListener("click", readPics);
 

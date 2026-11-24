@@ -67,6 +67,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
             <button type="button" class="sp-ghost" id="sp-clear" hidden>Start over</button>
           </p>
           <p class="sp-fine">Drag a picture onto this box, or paste one. It stays in this tab until you choose to have it read.</p>
+          <p class="sp-status" id="sp-status" role="status" aria-live="polite"></p>
         </div>
         <section class="sp-aipanel" id="sp-aipanel" aria-labelledby="sp-aip-h" hidden>
           <header class="sp-aip-head">
@@ -91,7 +92,6 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
         <div class="sp-did" id="sp-did" hidden></div>
         <div class="sp-chips" id="sp-chips" aria-live="polite"></div>
         <div class="sp-gaps" id="sp-gaps" hidden aria-live="polite"></div>
-        <p class="sp-status" id="sp-status" role="status" aria-live="polite"></p>
 
         <section class="sp-sec" id="sp-places" aria-labelledby="sp-places-h" hidden>
           <h2 id="sp-places-h">Place by place</h2>
@@ -555,7 +555,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp-nudge { border-color: var(--accent); background: var(--accent-wash); animation: sp-pop .5s cubic-bezier(.3,1.5,.5,1); }
   .sp-chip.pop { animation: sp-pop .4s cubic-bezier(.3,1.5,.5,1); }
   @keyframes sp-pop { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
-  .sp-status { min-height: 1.2em; font-size: 14px; color: var(--ink-2); margin: 4px 0; } .sp-status.bad { color: var(--brick); }
+  .sp-status { min-height: 1.2em; font-size: 14px; color: var(--ink-2); margin: 4px 0; } .sp-status:empty { display: none; } .sp-status.bad { color: var(--brick); }
   .sp-map { height: clamp(280px, 44vh, 440px); border: 1px solid var(--rule); border-radius: 14px; background: var(--panel-2); margin: 4px 0 10px; }
   .sp-time { display: flex; gap: 14px; align-items: center; margin: 8px 0; }
   .sp-time[hidden], .sp-play[hidden] { display: none; }

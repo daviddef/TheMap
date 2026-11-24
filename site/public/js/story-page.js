@@ -119,29 +119,58 @@
 
   /* WHAT IS STILL MISSING, ASKED AS YOU TYPE (story-gaps.js). Three at a time, the ones that unlock the most records first. A tap adds the start of a sentence
      to the box for the reader to finish; nothing is filled in for them. The box redraws on the same pause as the reading, so it follows what they have typed. */
-  var gapsAll = false;
+  var gapsAll = false, clueSeen = Object.create(null), clueOpen = null, clueNews = [];
+  /* A NEW STORY STARTS A NEW HUNT: what was found in the last one is not found in this. */
+  function clueReset() { clueSeen = Object.create(null); clueOpen = null; clueNews = []; gapsAll = false; }
+  /* THE GAPS, AS A SMALL HUNT. David: «i feel like we can make this section more fun». What is still missing is a clue to find, not a form to fill: the count of those
+     found so far, a small answer box on each (type it, press Enter, and it is added to the story as a sentence), and a word of thanks when one is found. The numbers
+     are honest: a clue counts only once it has been open in this story, so «2 of 5» grows when the story shows a new gap and never claims a clue that was never asked. */
   function drawGaps(p) {
     var box = $("sp-gaps"), G = window.raStoryGaps; if (!box || !G) return;
     box.textContent = "";
     var t = text.value.trim();
-    if (t.length < 8) { box.hidden = true; return; }
+    if (t.length < 8) { box.hidden = true; clueReset(); return; }
     var list = G.gaps(p, t, { files: files.length, place: function (w) { return !!(data && data.map && data.map[S.fold(w)]); } }), top = gapsAll ? list : list.slice(0, 3);
     box.hidden = false;
-    if (!list.length) { box.append(el("p", "Nothing obvious is missing. The plan below is built from what you told us; add more at any time.", "sp-gaps-ok")); return; }
-    box.append(el("p", "To make this stronger, tell us", "sp-gaps-h"));
+    var nowOpen = Object.create(null); list.forEach(function (g) { nowOpen[g.id] = 1; clueSeen[g.id] = 1; });
+    if (clueOpen) Object.keys(clueOpen).forEach(function (id) { if (!nowOpen[id]) clueNews.push(id); });
+    clueOpen = nowOpen;
+    var seenN = Object.keys(clueSeen).length, found = seenN - list.length;
+    var head = el("div", null, "sp-gaps-top");
+    head.append(el("p", list.length ? "Clues to find" : "Every clue found", "sp-gaps-h"));
+    var dots = el("span", null, "sp-dots"); dots.setAttribute("role", "img"); dots.setAttribute("aria-label", found + " of " + seenN + " clues found");
+    for (var d = 0; d < seenN; d++) dots.append(el("i", null, d < found ? "on" : ""));
+    head.append(dots, el("span", found + " of " + seenN + " found", "sp-gaps-n"));
+    box.append(head);
+    /* a word for each clue found since the last draw, once, then gone */
+    var news = clueNews.splice(0, 2);
+    if (news.length) box.append(el("p", "Found: " + news.map(function (id) { return G.clue(id)[0].toLowerCase(); }).join(" and ") + ". That points to more records.", "sp-gaps-yes"));
+    if (!list.length) { box.append(el("p", "Nothing obvious is missing now. The plan below is built from what you told us; add more at any time.", "sp-gaps-ok")); return; }
+    box.append(el("p", "Each answer opens another register. Skip any you do not know.", "sp-gaps-sub"));
+    var add = function (g, value) {
+      text.value = (value ? G.answer(text.value, g.add, value) : G.append(text.value, g.add)).slice(0, 8000); grow(); text.focus();
+      try { text.setSelectionRange(text.value.length, text.value.length); } catch (e) { /* the caret stays */ }
+      try { sessionStorage.setItem(DRAFT, text.value); } catch (e) { /* none */ }
+      clearTimeout(tm); tm = setTimeout(run, 650);
+    };
     top.forEach(function (g) {
-      var b = el("button", null, "sp-gap"); b.type = "button";
-      b.append(el("b", g.ask), el("span", g.why));
-      b.addEventListener("click", function () {
-        if (g.action === "photo") { var f = $("sp-file"); if (f) f.click(); return; }
-        text.value = G.append(text.value, g.add).slice(0, 8000); grow(); text.focus();
-        try { text.setSelectionRange(text.value.length, text.value.length); } catch (e) { /* the caret stays */ }
-        try { sessionStorage.setItem(DRAFT, text.value); } catch (e) { /* none */ }
-        clearTimeout(tm); tm = setTimeout(run, 650);
-      });
-      box.append(b);
+      var c = el("div", null, "sp-gap"), cl = G.clue(g.id);
+      c.append(el("span", cl[0], "sp-gap-tag"), el("b", g.ask), el("span", g.why, "sp-gap-why"));
+      if (g.action === "photo") {
+        var ph = el("button", "Add a photo or document", "sp-gap-go"); ph.type = "button";
+        ph.addEventListener("click", function () { var f = $("sp-file"); if (f) f.click(); });
+        c.append(ph);
+      } else {
+        var row = el("form", null, "sp-gap-row"), inp = el("input", null, "sp-gap-in"), go = el("button", "Add", "sp-gap-go");
+        inp.type = "text"; inp.placeholder = cl[1] || "your words"; inp.maxLength = 160; inp.autocomplete = "off"; inp.setAttribute("aria-label", g.ask);
+        go.type = "submit";
+        row.addEventListener("submit", function (ev) { ev.preventDefault(); add(g, inp.value); });
+        var own = el("button", "write it in the story", "sp-gap-own"); own.type = "button"; own.addEventListener("click", function () { add(g, ""); });
+        row.append(inp, go); c.append(row, own);
+      }
+      box.append(c);
     });
-    if (list.length > top.length) { var more = el("button", "and " + (list.length - top.length) + " more question" + (list.length - top.length === 1 ? "" : "s"), "sp-gaps-more"); more.type = "button"; more.addEventListener("click", function () { gapsAll = true; drawGaps(p); }); box.append(more); }
+    if (list.length > top.length) { var more = el("button", "and " + (list.length - top.length) + " more clue" + (list.length - top.length === 1 ? "" : "s"), "sp-gaps-more"); more.type = "button"; more.addEventListener("click", function () { gapsAll = true; drawGaps(p); }); box.append(more); }
   }
 
   /* ---- the journey: map, years, who held the ground ------------------------------------------------------------------------- */
@@ -437,7 +466,7 @@
     files.forEach(function (x) { URL.revokeObjectURL(x.url); }); files = []; drawShots(); text.value = ""; grow(); chips.textContent = ""; $("sp-did").hidden = true;
     ov = Object.create(null); parsed = null; shown = Object.create(null); lastSig = ""; clearReport(); say("");
     try { sessionStorage.removeItem(DRAFT); } catch (e) { /* none */ }
-    $("sp-clear").hidden = true; $("sp-link").hidden = true; $("sp-gaps").hidden = true; gapsAll = false; text.focus();
+    $("sp-clear").hidden = true; $("sp-link").hidden = true; $("sp-gaps").hidden = true; clueReset(); text.focus();
   });
   /* A LINK THAT CARRIES THE WORDS, for sending to somebody who asked for help in a group. The words ride after the # and are never sent to a server (story-link.js). */
   $("sp-link").addEventListener("click", function () {
@@ -495,7 +524,7 @@
     if (!hw) return false;
     text.value = hw; try { sessionStorage.setItem(DRAFT, hw); } catch (e) { /* none */ }
     try { history.replaceState(null, "", location.pathname + location.search + "#story"); } catch (e) { /* the address keeps them */ }
-    ov = Object.create(null); lastSig = ""; gapsAll = false; grow(); $("sp-clear").hidden = false; run(); return true;
+    ov = Object.create(null); lastSig = ""; clueReset(); grow(); $("sp-clear").hidden = false; run(); return true;
   }
   /* a link pasted into a tab that already has the page open changes only the part after the #, which does not reload it */
   window.addEventListener("hashchange", takeAddress);

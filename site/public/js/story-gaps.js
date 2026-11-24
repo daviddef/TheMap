@@ -22,11 +22,15 @@
   function surnameGuess(text, p, o) {
     var folds = {}, skip = /^(?:I|My|Our|He|She|They|The|We|His|Her|Their|It|All|Only|A|An|In|At|On|From|To|But|And)$/;
     ((p && p.stops) || []).forEach(function (s) { if (s.word) folds[String(s.word).toLowerCase()] = 1; });
-    var re = [/\b(?:[Mm]y|[Oo]ur)\s+(?:[a-z]+(?:-[a-z]+)*\s+){1,2}?(\p{Lu}[\p{L}'\u2019-]{2,})/u, /\b[Tt]he\s+(\p{Lu}[\p{L}'\u2019-]{2,})\s+family\b/u, /\bsurname(?:d)?\s+(?:was\s+|is\s+)?(\p{Lu}[\p{L}'\u2019-]{2,})/u];
+    var re = [/\b(?:[Mm]y|[Oo]ur)\s+(?:[a-z]+(?:-[a-z]+)*\s+){1,2}?(\p{Lu}[\p{L}'\u2019-]{2,})/u, /\b[Tt]he\s+(\p{Lu}[\p{L}'\u2019-]{2,})\s+family\b/u, /\b[Ss]urname(?:d)?:?\s+(?:was\s+|is\s+)?(\p{Lu}[\p{L}'\u2019-]{2,})/u,
+              /\b(?:maiden|birth|family|last)\s+name:?\s+(?:was\s+|is\s+)?(\p{Lu}[\p{L}'\u2019-]{2,})/u, /\bn[\u00e9e]e\s+(\p{Lu}[\p{L}'\u2019-]{2,})/u,
+              /\b(?:[Oo]bitelj|[Pp]rezime|[Pp]orodica|[Ff]amiglia|[Cc]ognome|[Ff]amilia|[Aa]pellido|[Ff]amilie|[Nn]achname)\s+(\p{Lu}[\p{L}'\u2019-]{2,})/u,
+              /^\s*(\p{Lu}[\p{L}'\u2019-]{2,})(?:[\s,]+\1)*[\s,:!?-]+(?:anyone|anybody|family|name|relatives|any\s)/u];
     for (var i = 0; i < re.length; i++) {
       var m = re[i].exec(text); if (!m) continue;
       var w = m[1], f = w.toLowerCase();
-      if (skip.test(w) || folds[f] || (o && o.place && o.place(w))) continue;
+      if (skip.test(w) || folds[f]) continue;
+      if (i === 0 && o && o.place && o.place(w)) continue;   /* only the loose «my … X» guess is vetoed by a place of that name; «surname X», «née X», «obitelj X» say it is one */
       return w;
     }
     return "";
@@ -77,7 +81,23 @@
     return text + (/[.!?]$/.test(text) ? " " : ". ") + lead;
   }
 
-  var api = { gaps: gaps, append: append };
+  /* The clue each gap is, in two or three words, and what a reader might type into its small box. Only a hint of the shape of an answer, never a suggestion of a person. */
+  var CLUE = {
+    from: ["Where from", "a village, parish or town"], village: ["The village", "the village or nearest town"], name: ["A name", "a surname, or any name on the photo"],
+    given: ["First name", "Ivan, Marija, a nickname"], surname: ["Surname", "spelled the way your family does"], to: ["Where to", "the town they settled in"],
+    when: ["When", "a decade is enough: 1905, the 1920s"], rel: ["Who to you", "grandfather, great-aunt"], holds: ["The paper", ""], maiden: ["Birth name", "her name before she married"],
+    faith: ["The church", "Catholic, Orthodox, Jewish"], family: ["Family", "who they married, and where"], ship: ["The crossing", "a ship, or a port like Trieste"], end: ["The end", "where and when, as far as you know"]
+  };
+  gaps.clue = function (id) { return CLUE[id] || [id, ""]; };
+
+  /* THE SENTENCE AN INLINE ANSWER ADDS: the start of the sentence this clue's tap would add, finished with the words typed, and a full stop. */
+  function answer(text, stub, value) {
+    value = String(value || "").replace(/\s+/g, " ").trim().replace(/[.!?]+$/, "");
+    if (!value) return String(text || "");
+    return append(text, (stub || "") + value + ".");
+  }
+
+  var api = { gaps: gaps, append: append, clue: gaps.clue, answer: answer };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (root) root.raStoryGaps = api;
 })(typeof window !== "undefined" ? window : (typeof globalThis !== "undefined" ? globalThis : this));

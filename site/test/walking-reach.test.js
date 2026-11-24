@@ -257,7 +257,7 @@ test("clicking one area on the map (its shape or its number) ticks that one alon
 test("the surname card on v2 is a glance: name, languages, origin and the country timeline, with the long notes left to the name's own page", () => {
   const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
   assert.match(map, /class="ra-tw-r ra-tw-nd"/, "a country with no dates is marked so v2 can leave it out");
-  assert.match(css, /> \.ra-surn ~ \.ra-surn,[\s\S]*?> \.ra-note,[\s\S]*?> \.ra-juris,[\s\S]*?> \.at-sec \{ display: none; \}/);
+  assert.match(css, /> \.ra-surn ~ \.ra-surn,[\s\S]*?> \.ra-note,[\s\S]*?> \.ra-juris(?::not\(\.ra-isplace\))?,[\s\S]*?> \.at-sec \{ display: none; \}/);
   assert.match(css, /\.ra-surn \.ra-tw-nd \{ display: none; \}/);
   assert.match(css, /\.ra-surn \.ra-chips > :nth-child\(n\+5\) \{ display: none; \}/);
 });

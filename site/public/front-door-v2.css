@@ -59,7 +59,7 @@ body.fd2 .fd2-classic:hover, body.fd2 .fd2-classic:focus-visible { color: var(--
   .fd2-stage .ra-bar-find #ra-info { margin-left: 0; }
 
   /* ---- the card ---- */
-  .fd2-stage .at-panel { position: absolute; left: 16px; top: 92px; width: min(412px, calc(100% - 32px)); max-height: calc(100% - 92px - 16px); height: auto; overflow: auto; overscroll-behavior: contain;
+  .fd2-stage .at-panel { position: absolute; left: 16px; top: var(--ra-panel-top, 92px); width: min(412px, calc(100% - 32px)); max-height: calc(100% - var(--ra-panel-top, 92px) - 16px); height: auto; overflow: auto; overscroll-behavior: contain;
     z-index: 1200; padding: 0 !important; border-radius: 24px; border: 1px solid color-mix(in srgb, var(--rule-strong, #b6b2a6) 75%, transparent);
     background: var(--fd2-glass); backdrop-filter: blur(16px) saturate(1.25); -webkit-backdrop-filter: blur(16px) saturate(1.25);
     box-shadow: var(--fd2-shadow), inset 0 1px 0 rgba(255, 255, 255, .45); transition: width .4s cubic-bezier(.2, .8, .2, 1), max-height .3s; animation: fd2-card-in .7s .2s cubic-bezier(.2, .8, .2, 1) both; }
@@ -463,7 +463,7 @@ body.fd2-immersive .fd2-stage::after { border-radius: 0; }
    lists are on the name's own page (the link under its title) and stay out of the card. */
 .fd2-stage .at-body:has(> .ra-surn) > .ra-surn ~ .ra-surn,
 .fd2-stage .at-body:has(> .ra-surn) > .ra-note,
-.fd2-stage .at-body:has(> .ra-surn) > .ra-juris,
+.fd2-stage .at-body:has(> .ra-surn) > .ra-juris:not(.ra-isplace),  /* a place typed in full is shown: Dresden is a city before it is a surname */
 .fd2-stage .at-body:has(> .ra-surn) > .at-sec { display: none; }
 .fd2-stage .ra-surn .ra-orig-s, .fd2-stage .ra-surn .ra-vars, .fd2-stage .ra-surn .ra-filed, .fd2-stage .ra-surn .ra-how, .fd2-stage .ra-surn .ra-first .ra-who, .fd2-stage .ra-surn .ra-tw-nd { display: none; }
 .fd2-stage .ra-surn .ra-chips > :nth-child(n+5) { display: none; }

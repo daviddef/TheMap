@@ -1,6 +1,6 @@
 {
  "note": "Countries whose surname data was sought. Those still not obtained are in `refused`, with what was actually tried; those since obtained are in `resolved`, with how. A gap somebody can see is worth more than a gap they cannot, and without this file the next person spends the same afternoon finding the same walls. A «not found» verdict is weaker than a «refused» one: it means this project looked and did not find, not that the data is absent. Both are worth writing down and they are not the same claim. Italy was the weakest entry here — «not found» — and retrying it is what closed it, which is the argument for keeping this file honest about the difference. TWO CORRECTIONS ON 22 SEPTEMBER, BOTH THE SAME MISTAKE. A reader asked why Croatia was blank and sent the Bureau of Statistics' own name application, which answers. Checking the other six the same way — the institution's website, not its API — closed Denmark outright and rewrote Sweden and Finland. Four of these entries had searched an API exhaustively and concluded about an organisation. That is the failure this file now exists to catch, and it was not caught by this project.",
- "checked": "2026-10-09",
+ "checked": "2026-11-24",
  "refused": [
   {
    "country": "CZ",
@@ -73,6 +73,20 @@
    "verdict": "found, licensed, and the host will not answer us",
    "why": "The best lead of the sweep and the most frustrating. Argentina's registry of persons publishes surname distribution BY PROVINCE under CC BY 4.0 — the same grain that makes Belgium the richest thing in this directory, for a country where this atlas already holds places and which took a great deal of European emigration. The catalogue entry is real, the licence is clear, the file names are known. datosabiertos.renaper.gob.ar resolves, accepts a TCP connection on 443, and then never completes the TLS handshake, at sixty seconds or at a hundred and eighty. That is not a gate and not a refusal: nothing said no. It may be geography, it may be a server having a bad day. Worth retrying, and worth one person in Argentina fetching three CSVs if it stays shut.",
    "rechecked": "2026-09-22"
+  },
+  {
+   "country": "HU",
+   "name": "Hungary",
+   "tried": [
+    "ksh.hu — robots.txt allows everything but /apps/; searches of the KSH site, STADAT and the 2022 census pages turn up first-name tables (the infografika PDFs) and no surname table at all",
+    "data.gov.hu CKAN package_search — timed out twice at 40 seconds (not a refusal; not retried, because the page below settles the licence)",
+    "hu.wikipedia.org «Leggyakoribb magyar családnevek listája» — its counts are from the Interior Ministry's Nyilvántartások Vezetéséért Felelős Helyettes Államtitkárság, file kozerdeku_csaladnev_2025.xlsx on nyilvantarto.hu, whose link it marks dead; not KSH",
+    "kormany.hu/nyilvantartasok/statisztika/lakossagi-szamadatok — the ministry's own page, robots.txt allows it; «Családnév statisztika: a nyilvántartásban előforduló 100 leggyakoribb családi név statisztikája», one xlsx per year 2011-2026 (the 2018 one is 3.7 MB, which suggests it is longer than a hundred rows; not downloaded)",
+    "the licence, read on that page and on its Impresszum and Közérdekű adatok links: NONE STATED. The only notice is «© Magyarország Kormánya, 2026»; the Adatkezelési tájékoztató is about personal data"
+   ],
+   "verdict": "found, and no licence — not ingested",
+   "why": "CHECKED 2026-11-24. KSH, which the brief named, does not publish surname frequencies. The Hungarian surname counts that exist are the Interior Ministry's, from the personal-data and address register, published on kormany.hu as the 100 commonest family names for each year since 2011. Neither that page nor the files' host says what anyone may do with them: no licence, no reuse terms, only a copyright line. A surname-frequency list is an aggregate and carries no person, so privacy is not the obstacle; the missing licence is, and this atlas ingests nothing whose terms it cannot quote. It would also be a hundred names, the ones every researcher already knows, plus (perhaps, in the 2018 file) a longer list. What would close it: a licence line from the ministry, or a written answer to a közérdekű adatigénylés under Act CXII of 2011 that says the list may be reused. The Hungarian researcher's real source remains Hajdú Mihály's Családnevek enciklopédiája (2010), which is a book and not data.",
+   "rechecked": "2026-11-24"
   }
  ],
  "resolved": [
@@ -143,6 +157,33 @@
    "rechecked": "2026-09-22",
    "resolved": "2026-10-09",
    "how": "RETESTED 9 October and it answers. THE PORTAL MOVED: avoindata.fi now redirects to avoindata.suomi.fi, and the September probe did not follow the redirect — a 301 unfollowed is indistinguishable from a refusal if you only read the status code. Nobody changed their mind about crawlers; the address changed. package_search?q=sukunimi returns «Väestötietojärjestelmän suomalaisten nimiaineistot», the DVV's own name lists, CC BY 4.0, dated 2026-08-04, as two spreadsheets. scripts/harvest-finland-surnames.py reads the surname sheet with the standard library — an .xlsx is a zip of XML — and writes data/frequencies/fi.json: 23,265 surnames and 4,917,684 bearers, Korhonen 21,144 at the top. The DVV withholds any surname with fewer than twenty bearers, so the file is complete above twenty and silent below it."
+  },
+  {
+   "country": "GB",
+   "name": "United Kingdom (England and Wales only)",
+   "tried": [
+    "ons.gov.uk FOI responses: «complete list of all forenames and surnames in the UK» — declined as a bespoke dataset; «top 500 surnames» and «census surname data» — no table",
+    "ons.gov.uk FOI-2026-3785 — points to the published user-requested dataset 3674",
+    "ons.gov.uk/.../adhocs/3674babysurnamesbirthsregisteredineachyearenglandandwales1996to2025 — 200, released 13 October 2026, one 11.6 MB xlsx; ons.gov.uk/robots.txt is a 404, so nothing is disallowed",
+    "licence read on that page's footer and on the workbook's cover sheet: Open Government Licence v3.0, with the requested accreditation «Source: Office for National Statistics licensed under the Open Government Licence.»"
+   ],
+   "verdict": "closed for England and Wales as BIRTHS; there is no population table and no Scotland or Northern Ireland",
+   "why": "ONS has no head-count of surnames, and refuses to make one on request. What it does publish is the surname given to every baby whose birth was registered in England and Wales, each year 1996-2025, with counts of two or fewer redacted. Harvested by scripts/harvest-frequencies.py --country gb into data/frequencies/gb.json: 74,039 surnames, 15,688,420 births, rows carrying `b` and never `c`, `basis: births`, `counted: false`, exactly as Ireland's. It says a name is borne in England and Wales and roughly how often it was given to children in thirty years; it says nothing of Scotland (National Records of Scotland) or Northern Ireland (NISRA), which this atlas has not looked for yet, and a name absent from it may only never have reached three births in a year.",
+   "resolved": "2026-11-24",
+   "how": "Found through ONS's own FOI disclosure log rather than its data catalogue — the same lesson as Croatia and Denmark."
+  },
+  {
+   "country": "NO",
+   "name": "Norway",
+   "tried": [
+    "data.ssb.no PxWeb: the table search for «etternavn» returns one table, 12891 «Etternavn brukt av 200 personer eller flere», 2018-2025",
+    "ssb.no/diverse/lisens — CC BY 4.0, attribution to SSB with a link, read 2026-11-24",
+    "ssb.no/omssb/tjenester-og-verktoy/api — «I likhet med resten av ssb.no benytter API-ene lisensen CC BY 4.0»; data.ssb.no/robots.txt only redirects to that page, ssb.no/robots.txt disallows nothing relevant"
+   ],
+   "verdict": "already complete: the file holds everything SSB publishes",
+   "why": "CHECKED 2026-11-24. The Norwegian file was thought to be only the rules; it is the table. 3,620 surnames at 200 or more people in 2025, 2,837,795 people, reproduced exactly from the API. SSB publishes nothing below 200 and no other surname table, so there is no larger Norwegian list to fetch. The only addition possible is 86 names that were at 200 or more in some year from 2018 to 2024 and have since dropped under it; those are now in the file marked `y` with no count.",
+   "resolved": "2026-11-24",
+   "how": "licence re-read and recorded in the file; earlier-year names added; no new count exists to ingest"
   }
  ]
 }

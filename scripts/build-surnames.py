@@ -206,13 +206,16 @@ def display(name):
 def main():
     rec = {}          # folded name -> record
     SRC = {}          # short key -> the source it stands for
+    FORMS = {}        # folded name -> {spelling: weight}, see the end of main()
     dropped = [0]
 
-    def touch(name):
+    def touch(name, weight=1):
         k = fold(name)
         if not k or JUNK.search(name or ""):
             dropped[0] += 1
             return None
+        f = FORMS.setdefault(k, {})
+        f[display(name)] = f.get(display(name), 0) + (weight or 1)
         r = rec.get(k)
         if not r:
             r = rec[k] = {"n": display(name), "variants": [], "countries": []}
@@ -243,7 +246,7 @@ def main():
                 src["variants"].append({"n": dst, "how": how})
 
     def attest(name, cc, how, who, n=None):
-        r = touch(name)
+        r = touch(name, n)
         if not r:
             return
         for c in r["countries"]:
@@ -750,6 +753,16 @@ def main():
             if c["how"] == "register":
                 m["how"] = "register"
         r["countries"] = sorted(merged.values(), key=lambda c: c["cc"])
+        # THE SPELLING MOST PEOPLE CARRY IS THE ONE TO PRINT. touch() prefers
+        # an accented form because a caron knocked off is information lost,
+        # but it chose the accent over the number of bearers: the Finnish
+        # register's Hansén (131 people) made the Hansen row, with 47,879 in
+        # Norway and 137,977 in the US, print itself «Hansén». Where one
+        # spelling outweighs the others, that is the display; the accent rule
+        # only breaks a tie, which is the Žubrinić case it was written for.
+        f = FORMS.get(k) or {}
+        if len(f) > 1:
+            r["n"] = max(f, key=lambda x: (f[x], _marks(x)))
         r["skel"] = skeleton(r["n"])
         r["q"] = k
         out.append(r)

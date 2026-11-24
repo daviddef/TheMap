@@ -16,6 +16,9 @@
   var KIN = "father|mother|grandfather|grandmother|uncle|aunt|brother|sister|husband|wife|son|daughter|great-grandfather|great-grandmother|great grandfather|great grandmother";
   var MALE = /^(?:father|grandfather|uncle|brother|husband|son|great[- ]grandfather)$/i;
   var NOTNAME = /^(?:the|a|an|his|her|my|our|their|two|three|four|parents|wife|husband|mother|father|him|them|us|me|and|or|but|to|of|in|at|on|from|who|whom|that|this|one|each|both|all|go|see|be|have|do|get)$/i;
+  /* three-letter names are not in the given-name map the page loads (names under four letters are left out of it); these are common enough, after a word like wife or sister, to be names */
+  var SHORT = /^(?:ada|ann|amy|eva|ina|ida|ema|ivo|ivy|joe|tom|tim|sam|ben|dan|jim|bob|ted|ray|roy|ian|leo|max|pat|kim|sue|zoe|una|mia|ela|eli|rob|ana|ivi|jan|jon|kay|liz|meg|nan|pam|ron|stu|viv|win|lou|abe|ned|hal|gus|les|len|bea|dot|flo|fay|joy|mae|may|ola|ora|ria|sia|tea|tia|uma|vic|zan|zac)$/i;
+  var NOTVERB = /^(?:born|died|came|left|lived|moved|married|was|were|had|has|have|still|also|then|later|too|now|ever|never|never|always|stayed|went|sailed|arrived|worked|passed|raised|brought|said|told|says|did|does|got|would|could|will|can|may|just|only|very|really|here|there|where|when|while|after|before|since|until|because|though|although|about|around|over|under|into|onto|with|without|for|by|as|if|so|not|no|yes|old|young|dead|alive|gone|well|good|sick|ill|poor|rich)$/i;
   var NAME = "([\\p{L}][\\p{L}'\\u2019-]{1,})";
   /* names that end in a and are men's (Croatian and neighbours): the common ones; any other name in -a, -e, -ica, -ina, -ka is taken as a woman's */
   var MASC_A = /^(?:luka|nikola|ilija|toma|sava|jura|andrija|mirza|kosta|bora|vuka|jovica|kuzma|žarko|zarko|joša|josa|ante|tonći|tonci)$/i;
@@ -46,6 +49,15 @@
 
     src.forEach(function (raw) {
       var s = raw, trail = (s.match(/\s*$/) || [""])[0], body = s.slice(0, s.length - trail.length), m;
+
+      /* A NAME TYPED IN LOWER CASE AFTER THE WORD FOR WHAT THEY ARE: «his wife was cheryl», «a sister ada». The reader takes a name from a capital or from the given
+         names it knows; a name this page knows (isGiven) and that stands straight after wife, brother, sister ... gets its capital, and the page says so. */
+      var capNotes = [];
+      body = body.replace(new RegExp("\\b(" + KIN + ")(\\s+(?:(?:was|is|called|named|were)\\s+)?)(\\p{Ll}[\\p{L}'\u2019-]{2,})(?![\\p{L}'\u2019-])", "giu"), function (all, kin, mid, w) {
+        if (w.charAt(0) === w.charAt(0).toUpperCase() || NOTNAME.test(w) || NOTVERB.test(w) || !(isGiven(w) || SHORT.test(w))) return all;
+        capNotes.push(w); return kin + mid + cap(w);
+      });
+      if (capNotes.length) { s = body + trail; changed = true; notes.push("«" + capNotes.join("», «") + "» written with a capital: " + (capNotes.length === 1 ? "a name" : "names") + " after " + (capNotes.length === 1 ? "the word for who they are" : "the words for who they are") + "."); }
 
       /* WHO THE SENTENCE IS ABOUT: «my father ivan ...», «my mother ...», «I was ...»; he and she keep the last */
       if ((m = /^\s*(?:(?:and|but|so|also)\s+)?my\s+(?:great[- ])?(father|mother)\b(?:\s+(\p{L}[\p{L}'’-]*))?/iu.exec(body))) {

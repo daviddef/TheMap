@@ -108,6 +108,11 @@ def main():
             if not final:
                 tried.append(f"{c['name']} ({c['url']}): {why}")
                 continue
+            if not final.startswith("https://"):
+                # The build refuses a provider whose url is not https, and a
+                # card that stops every deploy is worse than no card.
+                tried.append(f"{c['name']} ({final}): answers on http only")
+                continue
             pid = slug(c["name"] + "-" + cc)
             if pid in have:
                 pid += "-2"

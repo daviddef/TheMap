@@ -2001,7 +2001,7 @@
         r[0].forEach(function (i) { i.provs = provs.filter(function (x) { return (x.countries || []).indexOf(i.cc) > -1; }).sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); }); i.pname = pname; i.world = provs.filter(function (x) { return (x.countries || []).indexOf("*") > -1; }); i.flagRows = fm ? fm[String(i.cc || "").toUpperCase()] : null; i.leaders = lead ? lead[String(i.cc || "").toUpperCase()] : null; });
         r[0].forEach(function (i) { i.near = i.p && (i.cols || []).length ? [] : nearbyVolumes(i); });
         var from = parsed.from ? infos[parsed.from.row.i] : null, to = parsed.to ? infos[parsed.to.row.i] : null;
-        var facts = { rel: parsed.rel, name: parsed.name, holds: parsed.holds, holdsAll: parsed.holdsAll, left: parsed.left, born: parsed.born, from: from, to: to, base: BASE,
+        var facts = { rel: parsed.rel, name: parsed.name, siblings: parsed.siblings || [], holds: parsed.holds, holdsAll: parsed.holdsAll, left: parsed.left, born: parsed.born, from: from, to: to, base: BASE,
           providers: to ? provs.filter(function (p) { return (p.countries || []).indexOf(to.cc) > -1; }) : (from ? provs.filter(function (p) { return (p.countries || []).indexOf(from.cc) > -1; }) : []),
           given: parsed.given && data.given ? S.givenIn(parsed.givenWord || parsed.given, data.given, null) : [],
           route: route.map(function (x) { return { info: infos[x.row.i], age: x.age, year: x.year, approx: x.approx, yearTold: x.yearTold, role: x.role, country: x.country, ev: x.ev }; }),
@@ -2908,7 +2908,10 @@
     if (self.me && !fa && !mo && gps.length) gap(1, true);
     var g2 = gen(); g2.append(card(self, self.sought ? self.label : self.me ? "You" : self.rel ? "Your " + self.rel.replace(/-/g, " ") : "The person you asked about", "self"));
     var sps = (people || []).filter(function (x) { return x.role === "spouse"; });
-    sps.forEach(function (x, i) { g2.append(card(x, x.label && (i || x.told) ? x.label.charAt(0).toUpperCase() + x.label.slice(1) : self.me ? "Your partner" : self.rel === "father" ? "Wife, your mother" : self.rel === "mother" ? "Husband, your father" : "Spouse", i ? "" : "spouse")); });
+    var rl0 = String(self.rel || "");
+    sps.forEach(function (x, i) { g2.append(card(x, x.label && (i || x.told) ? x.label.charAt(0).toUpperCase() + x.label.slice(1) : self.me ? "Your partner" : self.rel === "father" ? "Wife, your mother" : self.rel === "mother" ? "Husband, your father" : /(?:father|uncle|brother)$/.test(rl0) ? "His wife" : /(?:mother|aunt|sister)$/.test(rl0) ? "Her husband" : "Spouse", i ? "" : "spouse")); });
+    /* THE SIBLINGS THE STORY NAMES ("he had a brother Robert and a sister Ada") stand beside the person they are siblings of, on the same row, as told */
+    ((opts && opts.siblings) || []).forEach(function (sb) { var lb = String(sb.label || sb.rel || "sibling"); g2.append(card({ role: "sibling", name: sb.name }, lb.charAt(0).toUpperCase() + lb.slice(1))); });
     if (!sps.length && canEdit) g2.append(card({ role: "spouse", name: "", empty: true }, self.me ? "Your partner" : self.rel === "father" ? "Wife, your mother" : "Husband, your father", "spouse"));
     var kids = (people || []).filter(function (x) { return x.role === "child"; });
     var rl = String(self.rel || ""), between = /grand/.test(rl) && !self.me ? (rl.match(/great/g) || []).length + 1 : 0;
@@ -2922,8 +2925,9 @@
   }
 
   /* The others the story names by what they are to someone ("her father Ola, born 1868"): small cards under the tree, as told. */
-  function othersBlock(others) {
-    var list = (others || []).filter(function (o) { return !o.inTree; }); if (!list.length) return null;
+  function othersBlock(others, siblings) {
+    var sibs = Object.create(null); (siblings || []).forEach(function (x) { sibs[x.rel + "|" + S.fold(x.name)] = 1; });
+    var list = (others || []).filter(function (o) { return !o.inTree && !sibs[o.kin + "|" + S.fold(o.name)]; }); if (!list.length) return null;
     var box = el("div", null, "lf-others"); box.append(el("div", "Also named in the story", "lf-others-h"));
     var row = el("div", null, "lf-others-row");
     list.forEach(function (o) {

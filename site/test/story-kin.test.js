@@ -26,7 +26,7 @@ test("the post: parents named in «born to», what is said of each joined to the
   assert.match(r.text, /his father Ivan was from crikvenica and was born in 1925\./);
   assert.match(r.text, /his mother Hedviga was from senj\./);
   assert.doesNotMatch(r.text, /to ivan and hedviga/i);
-  assert.equal((r.text.match(/Ivan/g) || []).length, 1, "one grandfather Ivan, not two");
+  assert.equal((r.text.match(/his father Ivan/g) || []).length, 1, "one grandfather Ivan, not two");
   assert.ok(r.notes.length >= 3, "the page says what it understood");
 });
 

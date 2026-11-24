@@ -22,18 +22,16 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   dek="Type a word as you see it in the register, or a whole date, and see what it is, what it does not tell you, and where it comes from."
   description="A searchable guide to the words of old registers, in Latin and in the languages of their catalogue titles, with how often each turns up in the Atlas's own records, and a decoder for dates such as 'die 30 7bris 1671'.">
 
-  <div class="rd-pick" role="tablist" aria-label="What would you like to do?">
-    <button type="button" role="tab" id="tab-story" class="rd-tab is-on" aria-selected="true" aria-controls="tool-story" data-tool="story">
-      <span class="rd-n">1</span><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg><b>Start with your story</b><span class="rd-d">Their journey, family and what to do first. No AI.</span></button>
-    <button type="button" role="tab" id="tab-ask" class="rd-tab" aria-selected="false" aria-controls="tool-ask" data-tool="ask">
-      <span class="rd-n">2</span><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M7 3.5h7l4 4V20H7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.5 12h6M9.5 15.5h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><b>Read a register entry</b><span class="rd-d">Claude drafts a reading of a line or page image, when you press.</span></button>
-    <button type="button" role="tab" id="tab-date" class="rd-tab" aria-selected="false" aria-controls="tool-date" data-tool="date">
-      <span class="rd-n">3</span><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 10h16M9 3v4M15 3v4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><b>Decode a date</b><span class="rd-d">7bris 1671: what day it was.</span></button>
-    <button type="button" role="tab" id="tab-word" class="rd-tab" aria-selected="false" aria-controls="tool-word" data-tool="word">
-      <span class="rd-n">4</span><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><circle cx="10.5" cy="10.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M15 15l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><b>Find a word</b><span class="rd-d">uxoris, obiit: what it means.</span></button>
+  <div slot="headtools" class="rd-tools" role="tablist" aria-label="Tools">
+    <button type="button" role="tab" id="tab-ask" class="rd-tab" aria-selected="false" aria-controls="tool-ask" data-tool="ask" title="Claude drafts a reading of a line or page image, when you press.">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M7 3.5h7l4 4V20H7z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.5 12h6M9.5 15.5h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Read a register entry</button>
+    <button type="button" role="tab" id="tab-date" class="rd-tab" aria-selected="false" aria-controls="tool-date" data-tool="date" title="7bris 1671: what day it was.">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 10h16M9 3v4M15 3v4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Decode a date</button>
+    <button type="button" role="tab" id="tab-word" class="rd-tab" aria-selected="false" aria-controls="tool-word" data-tool="word" title="uxoris, obiit: what it means.">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="10.5" cy="10.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 15l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Find a word</button>
   </div>
 
-  <section id="tool-story" class="rd-panel" role="tabpanel" aria-labelledby="tab-story">
+  <section id="tool-story" class="rd-panel" aria-label="Your story">
     <div class="sp" id="sp" aria-label="Your story">
       <nav class="sp-rail" id="sp-rail" aria-label="On this page" hidden>
         <span class="sp-grp">Your story</span>
@@ -162,7 +160,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   </section>
 
   <section id="tool-ask" class="rd-panel" role="tabpanel" aria-labelledby="tab-ask" hidden>
-    <p class="rd-lead">This is the part that uses Claude. Paste one register entry, or drop up to four pictures of the page, and press the button: you get a draft reading to check against the page, and what the Atlas knows about that place and year. If you want a family story turned into a journey and a plan instead, use <a href="#story" data-tool-link="story">Start with your story</a>.</p>
+    <p class="rd-lead">This is the part that uses Claude. Paste one register entry, or drop up to four pictures of the page, and press the button: you get a draft reading to check against the page, and what the Atlas knows about that place and year. If you want a family story turned into a journey and a plan instead, use <a href="#story" data-tool-link="story">the story box</a>.</p>
     <div class="one ask-card" id="ask" hidden>
       <div class="ask-head">
         <span class="ask-spark" aria-hidden="true"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4z" fill="currentColor"/><path d="M18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z" fill="currentColor"/></svg></span>
@@ -247,27 +245,31 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   <script type="application/json" id="rr-data" set:html={JSON.stringify({ terms, seen, langs: langNames, sources: Object.fromEntries(Object.entries(sources).map(([k, s]) => [k, s.title])) })}></script>
   <script is:inline>
     (function () {
-      var tabs = [].slice.call(document.querySelectorAll(".rd-tab"));
+      var tabs = [].slice.call(document.querySelectorAll(".rd-tab")), now = "story";
+      /* The story is the page; the three tools open over it and a second press (or the story link) goes back to it. */
       function pick(name, focus) {
+        if (name === now && name !== "story") name = "story";
+        now = name;
         tabs.forEach(function (t) {
           var on = t.dataset.tool === name;
-          t.classList.toggle("is-on", on); t.setAttribute("aria-selected", on ? "true" : "false"); t.tabIndex = on ? 0 : -1;
+          t.classList.toggle("is-on", on); t.setAttribute("aria-selected", on ? "true" : "false"); t.tabIndex = 0;
           document.getElementById("tool-" + t.dataset.tool).hidden = !on;
           if (on && focus) t.focus();
         });
+        document.getElementById("tool-story").hidden = name !== "story";
         if (!/^#story=/.test(location.hash) && !/^#[a-z]+=/.test(location.hash)) { try { history.replaceState(null, "", "#" + name); } catch (e) {} }   /* words or an old link in the address are read by the story page first, which then tidies it */
       }
       window.raReadPick = pick;
-      [].forEach.call(document.querySelectorAll("[data-tool-link]"), function (a) { a.addEventListener("click", function (e) { e.preventDefault(); pick(a.getAttribute("data-tool-link")); }); });
+      [].forEach.call(document.querySelectorAll("[data-tool-link]"), function (a) { a.addEventListener("click", function (e) { e.preventDefault(); now = ""; pick(a.getAttribute("data-tool-link")); }); });
       tabs.forEach(function (t, i) {
         t.addEventListener("click", function () { pick(t.dataset.tool); });
         t.addEventListener("keydown", function (e) {
           var n = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
-          if (n) { e.preventDefault(); pick(tabs[(i + n + tabs.length) % tabs.length].dataset.tool, true); }
+          if (n) { e.preventDefault(); tabs[(i + n + tabs.length) % tabs.length].focus(); }
         });
       });
       var h = (location.hash || "").slice(1);
-      pick(/[?&]q=/.test(location.search) ? "word" : (h === "date" || h === "word" || h === "ask" || h === "story" ? h : "story"));
+      pick(/[?&]q=/.test(location.search) ? "word" : (h === "date" || h === "word" || h === "ask" ? h : "story"));
     })();
   </script>
   <script is:inline src={u("/js/record-reader.js")}></script>
@@ -364,7 +366,6 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
 </Base>
 
 <style is:global>
-  .rd-pick { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
   .rd-lead { max-width: var(--measure); color: var(--ink-2); margin: 10px 0 14px; }
   /* THE STORY PAGE: a rail on the left, one column that reads top to bottom on the right. */
   .sp { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; align-items: start; }

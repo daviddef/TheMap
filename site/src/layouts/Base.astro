@@ -393,7 +393,7 @@ import { volumes as invVolumes } from "../lib/inventory.js";
         confuses the parser just as badly. Both spellings fail with a line
         number in the GENERATED file that points nowhere near this one. */}
     {!bare && (
-      <div class={"pagehead" + (flag ? " pagehead-flagged" : "")}
+      <div class={"pagehead" + (flag ? " pagehead-flagged" : "") + (Astro.slots.has("headtools") ? " has-tools" : "")}
            style={flag && flag.color ? `--edge:${flag.color}` : undefined}>
         {eyebrow && <div class="lab">{eyebrow}</div>}
         <div class="pagehead-title">
@@ -419,6 +419,7 @@ import { volumes as invVolumes } from "../lib/inventory.js";
           <h1>{title}</h1>
         </div>
         {dek && <p class="dek">{dek}</p>}
+        {Astro.slots.has("headtools") && <div class="pagehead-tools"><slot name="headtools" /></div>}
       </div>
     )}
     <slot />

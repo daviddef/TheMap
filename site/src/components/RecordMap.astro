@@ -474,6 +474,7 @@ try {
     this project has already paid twice for the build and the client working
     the key out separately. */}
 <script is:inline src={base.replace(/\/$/, "") + "/js/shard-key.js"}></script>
+<script is:inline src={base.replace(/\/$/, "") + "/js/surname-rules.js"}></script>
 {/* WHICH BASEMAP OPENS, DECIDED BEFORE THE MAP IS BUILT. A small classic script, so the answer (the reader's own choice, else the
     theme's default: Night dots in dark theme) is known when the first tile is asked for and the light map never flashes up first. */}
 <script is:inline src={base.replace(/\/$/, "") + "/js/basemaps.js"}></script>
@@ -3342,6 +3343,23 @@ window.addEventListener("load", async function () {
     };
   })();
 
+  /* THE LIVE TOUR DRIVES THE REAL MAP THROUGH THIS, AND ONLY THIS. David: «bring it into the canvas ... make it really work as though we're doing it». The tour (js/live-tour.js)
+     types into the real search box for show, then calls these to land on the exact place, country or source, because a typed search is ambiguous (Lviv is also Lemberge in
+     Belgium) and a tour that depends on which of eight matches comes first is a tour that breaks. Each one is what a click on the same thing does. */
+  window.raTourApi = {
+    get box() { return qbox; },
+    place: function (id, name) { if (!window.raPlacePanel) return null; qbox.value = name || id; clearTimeout(qbox._t); sugHide(); var pl = idx.places.filter(function (x) { return x.i === id; })[0]; if (pl && !map.getBounds().contains([pl.y, pl.x])) map.setView([pl.y, pl.x], Math.max(map.getZoom(), 9)); return window.raPlacePanel.open(id, name); },
+    source: function (id) { var p = PROV[id]; if (!p) return false; qbox.value = p.name; clearTimeout(qbox._t); sugHide(); openSource(p); return true; },
+    country: async function (cc) {
+      var list = await cptsReady, c = list.filter(function (x) { return x.cc === String(cc).toUpperCase(); })[0]; if (!c) return false;
+      retireVisit(); if (gmark) { map.removeLayer(gmark); gmark = null; } ctryLayer.clearLayers(); communeLayer.clearLayers(); litCC = null;
+      qbox.value = c.n; clearTimeout(qbox._t); sugHide(); openCountry(c); showCountries([{ cc: c.cc, how: "register" }], function () { return false; });
+      return true;
+    },
+    search: function (term) { qbox.value = term; qbox.dispatchEvent(new Event("input", { bubbles: true })); },
+    clear: function () { qbox.value = ""; qbox.dispatchEvent(new Event("input", { bubbles: true })); }
+  };
+
   function render(d) {
     var h = [];
     /* ONE LINE, NOT FOUR. David: «"everything about gracisce" does it really
@@ -4040,6 +4058,23 @@ window.addEventListener("load", async function () {
             Math.sin((e - b) * p / 2) * Math.sin((e - b) * p / 2);
     return 2 * 6371 * Math.asin(Math.sqrt(x));
   }
+
+  /* THE NEAREST PLACES THAT HAVE BOOKS. A village's registers are very often filed under the next parish along (Perušić's books for its hamlets, Lipovljani for Kozarice), so
+     «no books here» is only half the answer for somebody deciding where to look. From the places the map already holds, with distance as the crow flies: a pointer, not a boundary. */
+  function nearestBooks(lat, lon, n, maxKm) {
+    var out = [];
+    markers.forEach(function (m) {
+      var p = m._p; if (!p || !(p.v > 0) || p.y == null || p.x == null) return;
+      var d = haversine(lat, lon, p.y, p.x); if (d <= (maxKm || 40)) out.push({ p: p, d: d });
+    });
+    out.sort(function (a, b) { return a.d - b.d; });
+    return out.slice(0, n || 3);
+  }
+  document.addEventListener("click", function (ev) {
+    var a = ev.target.closest && ev.target.closest(".ra-near"); if (!a) return;
+    ev.preventDefault();
+    if (window.raPlacePanel) window.raPlacePanel.open(a.getAttribute("data-i"), a.getAttribute("data-n"));
+  });
 
   /* A ring with no caption is decoration. This says what it holds, in the
      panel, using the counts the place record already carries. */
@@ -5480,6 +5515,12 @@ window.addEventListener("load", async function () {
   var TYPED_Y = false;
   function syncTypedYears() {
     var t = yearsIn(qbox.value);
+    /* A STORY IS NOT A YEAR FILTER. «My great-grandfather Ivan came from Gallignana to Hamilton around 1905» holds a year, but the reader is telling a story, not asking
+       for the records of 1905: switching the pill on emptied the map and raised «nothing on this map can answer for 1905» over the story card. The story draws its own years. */
+    var fnd = qbox.closest && qbox.closest(".ra-find");
+    /* the box is only known to hold a story a moment after the typing settles, so when the story is recognised the pill the box switched on is switched off */
+    if (fnd && !fnd._ytw && window.MutationObserver) { fnd._ytw = 1; new MutationObserver(function () { if (fnd.classList.contains("ra-story-on")) syncTypedYears(); }).observe(fnd, { attributes: true, attributeFilter: ["class"] }); }
+    if (fnd && fnd.classList.contains("ra-story-on")) t = { yrs: null };
     if (t.yrs) {
       var a = Math.max(1500, t.yrs[0]), b = Math.min(2026, t.yrs[1]);
       if (a > b) return;
@@ -5492,7 +5533,6 @@ window.addEventListener("load", async function () {
       if (yon.checked) { yon.checked = false; readRange(); yearUI(); }
     }
   }
-
   [yin, yin2].forEach(function (el) {
   el.addEventListener("input", function () {
     if (!yon.checked) return;
@@ -5608,7 +5648,7 @@ window.addEventListener("load", async function () {
      and still shows the places — «we hold no register for this name» and
      «nobody of this name lived there» are different statements and only the
      first one is ours to make. */
-  var qPlace = null, qName = null;
+  var qPlace = null, qName = null, qNear = null;
   /* the typed string the «name, in a place» panel was last written for; any other answer clears it */
   var bothFor = null;
   /* DID THE SEARCH ACTUALLY FIND ANYTHING. The remembered-searches list used
@@ -5637,13 +5677,22 @@ window.addEventListener("load", async function () {
     return fold(p.n).indexOf(t) > -1 || !!(p.q && wordHit(p.q, t));
   }
   function splitQuery(t) {
-    qPlace = qName = null;
+    qPlace = qName = qNear = null;
     if (!t || t.indexOf(" ") < 0) return;
     if (markers.some(function (m) { return nameMatch(m._p, t); })) return;
     var w = t.split(/\s+/).filter(Boolean);
     for (var i = 1; i < w.length; i++) {
-      var left = w.slice(0, i).join(" "), right = w.slice(i).join(" ");
+      var left = w.slice(0, i).join(" ").replace(/[,;]+$/, ""), right = w.slice(i).join(" ").replace(/^[,;]+/, "");   // «Gorica, Karlovac»: the comma is punctuation, not part of either name
       if (left.length < 3 || right.length < 3) continue;
+      /* «GORICA, KARLOVAC» IS A PLACE AND WHERE IT IS, NOT A SURNAME AND A PLACE. A village name is shared by dozens (fourteen Goricas), and the family group's way of saying which is
+         the county or the town beside it. When the first part names places and the last part names a place exactly, the answer is the first part's places within 60 km of the second. */
+      var nearA = markers.filter(function (m) { return nameMatch(m._p, left); });
+      var nearB = nearA.length ? markers.filter(function (m) { return fold(m._p.n).replace(/\s*\([^)]*\)\s*$/, "") === right; }) : [];
+      if (nearA.length && nearB.length) {
+        var near = {}, nn = 0;
+        nearA.forEach(function (a) { if (nearB.some(function (b) { return haversine(a._p.y, a._p.x, b._p.y, b._p.x) <= 60; })) { near[a._p.i] = 1; nn++; } });
+        if (nn) { qPlace = left; qNear = near; return; }
+      }
       if (markers.some(function (m) { return nameMatch(m._p, right); })) {
         qPlace = right; qName = left; return;
       }
@@ -5674,6 +5723,7 @@ window.addEventListener("load", async function () {
        name still finds it. It is the blob, which carries the country, that
        has to respect word boundaries. */
     if (t && fold(p.n).indexOf(t) < 0 && !(p.q && wordHit(p.q, t))) return false;
+    if (qNear && !qNear[p.i]) return false;
     if (year && p.s && (p.s[0] > year2 || p.s[1] < year)) return false;
     /* ANY of the chosen kinds, not all of them: somebody after church records
        and censuses wants both sorts of place, not only the places holding
@@ -7440,6 +7490,13 @@ window.addEventListener("load", async function () {
       }
     }
     h.push("</div>");
+    /* FORMS TO TRY, BY RULE. The family-group question was «Kauzlarić», «Brozenić», «Bunčić»: names a clerk wrote as they sounded (Kauzlarich, Brozenich, Buncich). The catalogue keeps
+       only a spelling with a record behind it, so for a surname it does not hold this says what the usual respellings are, as a lead to type and never as a finding. */
+    var rtext = yearsIn(term).text || "", rf = (!tailName && window.raSurnameRules && /^[^\s,]+$/.test(rtext)) ? window.raSurnameRules.forms(rtext) : [];
+    if (rf.length)
+      h.push('<div class="ra-nc ra-forms"><div class="ra-nc-u"><h4>' + esc(T("Forms to try")) + "<span>" + esc(T("by rule")) + '</span></h4><p class="ra-nc-n">' +
+             esc(T("A name is written as it sounded to the clerk. These are the usual ways a name like this is respelt when it crosses a border. None is known to be your family's until a record shows it.")) +
+             '</p><p class="ra-nc-f">' + rf.slice(0, 10).map(function (x) { return "<span>" + esc(x) + "</span>"; }).join("") + "</p></div></div>");
     if (names.length) {
       if (tailName) {
         var tcard = await nameCardFor(term); if (stale()) return; if (tcard) h.push(tcard);
@@ -7753,13 +7810,20 @@ window.addEventListener("load", async function () {
            list them. `r[6]` is only present on rows built after islands were
            admitted; an older shard is six long and reads exactly as before. */
         var isIsland = r[6] === "isl";
+        var nb = nearestBooks(r[1], r[2], 4).filter(function (x) { return !(x.d < 1.5 && fold(x.p.n) === fold(r[0])); });
+        var ownBooks = nearestBooks(r[1], r[2], 4).some(function (x) { return x.d < 1.5 && fold(x.p.n) === fold(r[0]); });
+        var nearLine = (nb.length && !ownBooks)
+          ? '<br><span class="ra-who ra-nearbooks">' + esc(T("No books are catalogued under this name. Nearest places that have them")) + ": " +
+            nb.slice(0, 3).map(function (x) { return '<a href="#" class="ra-near" data-i="' + esc(String(x.p.i)) + '" data-n="' + esc(x.p.n) + '">' + esc(x.p.n) + "</a> " + Math.max(1, Math.round(x.d)) + " km"; }).join(" \u00b7 ") +
+            ". " + esc(T("A village's registers are often filed under the next parish along.")) + "</span>"
+          : "";
         h.push("<p><b>" + esc(r[0]) + "</b> — " +
                (isIsland ? "an island, " : "") + esc(CNAME[r[3]] || r[3]) + where +
                (older.length ? '<br><span class="ra-who">also written ' +
                  older.map(esc).join(" · ") + "</span>" : "") +
                (matchedOn ? '<br><span class="ra-who">contains what you typed, ' +
                  "\u00ab" + esc(matchedOn) + "\u00bb \u2014 it is not another " +
-                 "name for it</span>" : "") + "</p>");
+                 "name for it</span>" : "") + nearLine + "</p>");
       });
       h.push("</div>");
     }

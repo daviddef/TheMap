@@ -38,6 +38,7 @@ import { u } from "../lib/url.js";
       <label><input type="radio" name="holds" value="story" /> the family story</label>
     </fieldset>
     <p class="lf-actions"><button id="lf-go" class="lf-go" type="button">Show me their journey and what to do first</button>
+      <button id="lf-link" class="lf-go lf-quiet" type="button" title="Copies an address that opens this page with these boxes already filled in">Copy a link to this</button>
       <span id="lf-status" class="lf-status" role="status" aria-live="polite"></span></p>
     <p class="lf-fine">Only the places and years matter; every box is optional. The page reads the Atlas's own files in your browser: nothing you type is sent anywhere or kept.
       Please do not enter details of anyone who may be alive.</p>
@@ -97,6 +98,8 @@ import { u } from "../lib/url.js";
   .lf-actions { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin: 4px 0 8px; }
   .lf-go { font: 600 17px/1 var(--sans); background: var(--accent); color: #fff; border: 0; border-radius: 10px; padding: 15px 22px; cursor: pointer; }
   .lf-go:hover { background: var(--accent-2); }
+  .lf-quiet { background: transparent; color: var(--accent); border: 1.5px solid var(--accent); margin-left: 8px; font-size: 15px; padding: 13px 18px; }
+  .lf-quiet:hover { background: var(--accent-wash, rgba(31,92,107,.1)); color: var(--accent-2); }
   .lf-status { font: 500 15px/1.4 var(--sans); color: var(--ink-2); } .lf-status.lf-bad { color: var(--brick); }
   .lf-fine { font: 400 14px/1.5 var(--sans); color: var(--ink-2); max-width: var(--measure); }
 

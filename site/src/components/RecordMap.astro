@@ -885,6 +885,30 @@ window.addEventListener("load", async function () {
     });
   }
 
+  /* The family-tree sites that reach a country: those flagged `family_tree` in the directory that cover everywhere or that country, in the rank the
+     directory gives (the free and the big first). */
+  function familyTreeSites(cc) {
+    cc = String(cc || "").toUpperCase();
+    return provs.providers.filter(function (p) {
+      var c = p.countries || [];
+      return p.family_tree && (c.indexOf("*") > -1 || (cc && c.indexOf(cc) > -1));
+    }).sort(function (a, b) { return a.family_tree - b.family_tree; });
+  }
+
+  /* The family-tree and genealogy sites as one closed fold, the same on a place card and a country card. "" when none reach the country. */
+  function familyTreeGroup(cc) {
+    var fts = familyTreeSites(cc), h = [];
+    if (!fts.length) return "";
+    h.push('<details class="ra-area-g ra-area-cov ra-area-ft"><summary><i style="background:#7A5C8E"></i>' + esc(T("Family-tree and genealogy sites")) + " <b>" + nfl(fts.length) + "</b></summary>" +
+           '<p class="at-sub">' + esc(T("Not about this place in particular: the big family-tree and records sites that reach here.")) + "</p><ul>");
+    fts.forEach(function (a) {
+      var st = volStatus("source:" + a.id);
+      h.push('<li' + srcAttrs(a.id, a.name, T("Everywhere"), BASE + "archive/" + a.id + "/") + '><a class="ra-area-p" target="_blank" rel="noopener" href="' + BASE + "archive/" + esc(a.id) + '/"><i title="' + RC_LAB[st] + ' (' + esc(T("your research on this source")) + ')" style="background:' + RC_COL[st] + '"></i><span>' + esc(a.name) + "</span><small>" +
+             accTxt(a.access) + "</small></a></li>");
+    });
+    h.push("</ul></details>");
+    return h.join("");
+  }
   function countrySources(cc, hint, heading, lat, lon, id, noWw) {
     if (!cc) return "";
     /* THE SAME FALLBACK THE PAGE MAKES, because the panel is the surface most
@@ -1346,13 +1370,14 @@ window.addEventListener("load", async function () {
          Almería: the places with a record region show who held the ground,
          the regimes and the flags; the others showed a bare strip. So the
          label says whose it is, and the hint says what it can and cannot tell. */
-      h.push('<p class="at-lab">' + esc(CNAME[String(d.country).toUpperCase()] || d.country) +
-             " \u00b7 " + esc(T("the country's regimes and flags")) + "</p>");
-      h.push('<p class="at-hint" style="margin:0 0 6px">' +
-             esc(T("This place has no era table of its own yet, so these are the " +
+      /* SHORT, AND THE LONG WORDS ON HOVER. David, on France: «way too wordy. move some of that flag history, regimes to icons at the top, and make this way less
+         wordy.» The label said whose history this is and a paragraph said what it cannot tell; the paragraph is now the label's tooltip, and the Flag History
+         link is the flag icon at the top of the card. */
+      h.push('<p class="at-lab" title="' + esc(T("This place has no era table of its own yet, so these are the " +
                    "country's eras, not this ground's: borders moved, and it may have " +
                    "been held by another power for part of this. It does not say which " +
-                   "archive holds the paper.")) + "</p>");
+                   "archive holds the paper.")) + '">' + esc(CNAME[String(d.country).toUpperCase()] || d.country) +
+             " \u00b7 " + esc(T("flags and regimes")) + "</p>");
     }
     h.push('<div class="ra-tl-band" role="tablist" aria-label="' +
            esc(T("Flags over time")) + '">');
@@ -1428,17 +1453,13 @@ window.addEventListener("load", async function () {
              eraFacts(sp.e) +
              '<p class="at-hint" style="margin:0"><a href="' + BASE +
              esc(flagHref(sp.e.page) || ("flags/" + slug + "-flags/")) + "#" +
-             esc(sp.e.id) + '">' + esc(T("This flag on Flag History")) +
+             esc(sp.e.id) + '">' + esc(T("Flag History")) +
              " \u2192</a></p>";
     });
 
     /* In supplement mode the flag beside the place's name already links to
        the same page, so a second link would be the third thing on screen
        pointing at Flag History. */
-    if (!supplement)
-      h.push('<p class="at-hint"><a href="' + BASE + "flags/" + slug +
-             '-flags/">' + esc(T("The flags these regimes flew")) +
-             " \u2192</a></p>");
     return h.join("") + "</div>";
   }
 
@@ -3457,13 +3478,9 @@ window.addEventListener("load", async function () {
            carries the explanation instead. */
       }
     } else {
-      h.push('<div class="ra-juris ra-unmapped"><div class="lab">Whose ground this was</div>' +
-             "<p>Not yet mapped. " + REGIONS_N + " record regions carry a place-level " +
-             "era table so far — Istria, the Kvarner, Carnia, Dalmatia, Galicia, " +
-             "Bukovina, Bohemia, Moravia, Hungary, Transylvania, East Prussia, " +
-             "Pomerania and the rest — and this place is outside all of them. Above is " +
-             "the country's own history instead. That is a gap in this map, not a gap " +
-             "in the record, and it is on the list to close.</p></div>");
+      h.push('<div class="ra-juris ra-unmapped" title="' + esc(REGIONS_N + " record regions carry a place-level era table so far, and this place is outside all of them. " +
+             "That is a gap in this map, not a gap in the record, and it is on the list to close.") + '"><p>' +
+             esc(T("Whose ground this was") + ": " + T("not yet mapped")) + ". " + esc(T("The country's history is above.")) + "</p></div>");
     }
 
     /* The link to this place's own page moved up onto the heading line.
@@ -4642,39 +4659,30 @@ window.addEventListener("load", async function () {
            (c.c ? " · " + c.c + " collection" + (c.c === 1 ? "" : "s") + " cover it" : "") +
            "</p>");
 
-    if (c.fs) {
-      h.push('<div class="at-sec"><div class="lab">Where to start</div>');
-      h.push('<ul class="at-films"><li><a href="https://www.familysearch.org/en/wiki/' +
-             esc(c.fs) + '_Genealogy" target="_blank" rel="noopener">FamilySearch ' +
-             "Research Wiki — " + esc(c.n) + " &#8599;</a> " +
-             '<span class="ra-who">a research guide FamilySearch keeps for every ' +
-             "country: what records exist, from when, and who holds them</span></li></ul>");
-      h.push("</div>");
-    }
-    if (warch[c.cc]) {
-      h.push('<div class="at-sec"><div class="lab">National sources, unverified</div>');
-      h.push('<ul class="at-films">');
-      warch[c.cc].slice(0, 6).forEach(function (r) {
-        h.push('<li><a href="' + esc(r.url) + '" target="_blank" rel="noopener">' +
-               esc(r.name) + " &#8599;</a> " + '<span class="ra-who">' +
-               (r.kind === "national-archive" ? "national archive" : "national library") +
-               "</span></li>");
-      });
-      h.push("</ul></div>");
-    }
+    /* THE COUNTRY CARD IS THE PLACE CARD'S BODY. David: «if i click on the country marker why does the overlay not follow the styling/branding as the rest?».
+       It was the old three-list layout (underlined serif links under small headings); the place card's sections are shut folds with a + on each row and
+       the access icon at the right. A country gets the same folds, in the same order: where to start, its own sources, the family-tree sites. */
+    var fold1 = function (title, hint, rows, n, open) {
+      return '<details class="ra-area-g ra-area-cov ra-era-g"' + (open ? " open" : "") + '><summary><i style="background:#5B7A8C"></i>' + esc(title) + " <b>" + nfl(n) + "</b></summary>" +
+             (hint ? '<p class="at-sub">' + esc(hint) + "</p>" : "") + "<ul>" + rows + "</ul></details>";
+    };
     var nat = provs.providers.filter(function (p) {
       return (p.countries || []).indexOf(c.cc) > -1;
     });
-    if (nat.length) {
-      h.push('<div class="at-sec"><div class="lab">Checked sources for ' +
-             esc(c.n) + "</div><ul class=\"at-films\">");
-      nat.slice(0, 8).forEach(function (p) {
-        h.push('<li><a href="' + esc(p.url) + '" target="_blank" rel="noopener">' +
-               esc(p.name) + " &#8599;</a> " + '<span class="ra-who">' +
-               accTxt(p.access) + "</span></li>");
-      });
-      h.push("</ul></div>");
+    var body = [];
+    if (c.fs) {
+      body.push(fold1(T("Where to start"), "", '<li><a class="ra-area-p" target="_blank" rel="noopener" href="https://www.familysearch.org/en/wiki/' + esc(c.fs) + '_Genealogy"><span>FamilySearch Research Wiki \u2014 ' + esc(c.n) + "</span><small>" +
+        esc(T("a research guide: what records exist, from when, and who holds them")) + "</small></a></li>", 1, true));
     }
+    if (warch[c.cc]) {
+      var wr = warch[c.cc].slice(0, 6).map(function (r) {
+        return '<li><a class="ra-area-p" target="_blank" rel="noopener" href="' + esc(r.url) + '"><span>' + esc(r.name) + "</span><small>" + (r.kind === "national-archive" ? esc(T("national archive")) : esc(T("national library"))) + "</small></a></li>";
+      }).join("");
+      body.push(fold1(T("National sources, unverified"), "", wr, Math.min(6, warch[c.cc].length), false));
+    }
+    if (nat.length) body.push(countrySources(c.cc, null, T("The sources for") + " " + c.n));
+    body.push(familyTreeGroup(c.cc));
+    if (body.join("")) h.push('<div class="ra-area ra-area-solo">' + body.join("") + "</div>");
     if (!c.fs && !warch[c.cc] && !nat.length) {
       h.push('<p class="at-what"><b>This map holds nothing for ' + esc(c.n) +
              " at all.</b> Not a collection, not an archive, not a research guide. " +
@@ -5972,7 +5980,7 @@ window.addEventListener("load", async function () {
     /* A PLACE THAT IS OPEN, FOR THE SEARCH THAT OPENED IT, IS NOT «NOT HERE». A later pass of apply() (the quiet dots arriving, a filter
        settling) can count zero matches for the label the pick wrote into the box, and the «elsewhere» answer then replaced a place
        panel that was correct: «a refresh on the map suddenly doesn't show anything for a place». Only a changed search may say it. */
-    if (!shown && !atPending && !(panelAt && panelAt === Q.get("at") && qbox.value === panelQ)) elsewhere(qbox.value.trim());
+    if (!shown && !atPending && !(panelAt && panelAt === Q.get("at") && qbox.value === panelQ)) elsewhere(yearsIn(qbox.value).text || qbox.value.trim());   /* the years are the Year control's business, not part of the name: «Defranceski 1851» is the name Defranceski, in 1851 */
   }
 
   /* THE ANSWER TO «A NAME, IN A PLACE».
@@ -7235,6 +7243,15 @@ window.addEventListener("load", async function () {
        that answers when there is no place at all. Every path that stops
        describing a chosen place has to say so. */
     retireVisit();
+    /* THE TYPING NO LONGER NAMES THE OPEN PLACE, SO THE ADDRESS AND THE SHELF STOP NAMING IT. The address kept `at=<last place>` after a search for a surname,
+       and everything that reads «the open place» (the shelf bar, the walk, the card the address reopens) went on describing it. Kept when the words typed
+       are that place's own name (a place and a year: «senj 1951»). */
+    (function () {
+      var atId = Q.get("at"); if (!atId) return;
+      var ap = idx.places.filter(function (x) { return x.i === atId; })[0], an = fold(String((ap && ap.n) || (cache[atId] && cache[atId].name) || "").replace(/\s*\(.*\)\s*$/, "")), ft = fold(term);
+      if (an && ft && (ft.indexOf(an) === 0 || an.indexOf(ft) === 0)) return;
+      setQ("at", ""); if (window.raShelfForget) window.raShelfForget();
+    })();
     /* TYPING A COUNTRY'S NAME SHOULD OPEN THE COUNTRY. David typed «libya» and
        got «Qaṣr Lībiyā», a village whose name happens to contain it, and
        nothing at all about the country — while the country panel, with its
@@ -7324,6 +7341,21 @@ window.addEventListener("load", async function () {
       return wordHit(fold(p.name), f);
     });
     var names = await surnames(term);
+    /* «IVAN DEFRANCESKI» IS A GIVEN NAME AND A SURNAME, AND THE SURNAME HAS A PLACEMENT. David: «ivan as a name shows me a country placement, but
+       ivan defranceski doesnt?» — «ivan» alone and «Defranceski» alone both drew «Where the name was, and when»; typed together, nothing matched the
+       whole string as a surname, so only the catalogue card came back. When the whole string is no surname and no place, take the surname off the end
+       the way the name card does and answer with ITS placement (the countries, the bars, the map), under the card that says what the given name is. */
+    var tailName = false, tailSur = "";
+    if (!names.length && !hits.length && !exact) {
+      try {
+        var tcat = await nameCatalogues(), tpar = tcat && yearsIn(term).text ? ncParse(tcat, yearsIn(term).text) : null;
+        if (tpar && tpar.given && tpar.given.length && tpar.sur) {
+          var tn = await surnames(tpar.sur);
+          if (stale()) return;
+          if (tn.length) { names = tn; tailName = true; tailSur = tpar.sur; }
+        }
+      } catch (e) { /* the card alone is still an answer */ }
+    }
     /* PICKING «Lerena» SHOULD NOT ANSWER WITH LERENARD. David, on the new
        dropdown: «why if i now have "smart" search and i select the exact named
        record do you then still show me all the variation in names?» — because
@@ -7370,7 +7402,7 @@ window.addEventListener("load", async function () {
        and then repeated the spellings and the page link further down the card
        as two more labelled rows. Same furniture, same line, same order —
        a count, the other spellings, the page, the icons. */
-    var nrow = names.length ? names[0] : null;
+    var nrow = names.length && !tailName ? names[0] : null;   /* the heading's count and spellings are the surname's, not the typed pair's */
     var h = ['<div class="at-h"><h3>' + esc(canon || term) + "</h3>"];
     if (nrow) {
       var nccs = (nrow.countries || []).length;
@@ -7409,7 +7441,14 @@ window.addEventListener("load", async function () {
     }
     h.push("</div>");
     if (names.length) {
-      h.push(renderSurnames(names, term));
+      if (tailName) {
+        var tcard = await nameCardFor(term); if (stale()) return; if (tcard) h.push(tcard);
+        /* THE SURNAME IS NAMED, TOO. David, on the card: «defranceski not showing? just ivan?» The given name had its block and the surname, when the catalogue
+           holds no family for that spelling, had none, so the placement underneath read as if it belonged to «ivan». Say whose it is. */
+        if (!tcard || tcard.indexOf(T("Surname") + "</span>") < 0)
+          h.push('<div class="ra-nc"><div class="ra-nc-u"><h4>' + esc(tailSur) + "<span>" + esc(T("Surname")) + "</span></h4></div></div>");
+      }
+      h.push(renderSurnames(names, tailName ? "" : term));
       /* The strongest evidence for a country wins its outline. A name in both
          a register and an archive is drawn as a register — the stronger claim
          is the true one, and the panel lists both anyway. */
@@ -7939,10 +7978,12 @@ window.addEventListener("load", async function () {
            country the name is oldest in first. The grid sets them side by
            side, which is what .at-body is for and what the place answer
            already does with its three source columns. */
-        order.forEach(function (cc) {
-          if (!cc) return;
+        var withSrc = order.filter(function (cc) { return cc && natProviders(cc).length; });
+        withSrc.forEach(function (cc, i) {
+          /* THE WORLDWIDE SOURCES ONCE, AFTER THE LAST COUNTRY. David, on a name attested in ten countries: «Sources that cover everywhere 49» came back
+             after every country, ten copies of the same list. They are not about any one country. */
           h.push(countrySources(cc, null,
-                                T("The sources for") + " " + (CNAME[cc] || cc)));
+                                T("The sources for") + " " + (CNAME[cc] || cc), undefined, undefined, null, i < withSrc.length - 1));
         });
       } else {
         h.push('<p class="at-sub at-sub-wide">Nothing in this map reaches the countries ' +
@@ -8007,8 +8048,51 @@ window.addEventListener("load", async function () {
      containing it. Within a tier, the place with more volumes first — that is
      the one most likely to be meant, and it is the only signal here that is
      not about spelling. */
-  var SUG_PLACES = 7, SUG_NAMES = 3, SUG_GAZ = 4;
+  var SUG_PLACES = 7, SUG_NAMES = 3, SUG_GAZ = 4, SUG_SRC = 4;
   var sugBox, sugRows = [], sugIdx = -1, sugTerm = "";
+
+  /* SOURCES ARE SEARCHABLE FROM THE ONE BOX. David: «if i search e.g. geni, looking for a source, it doesnt find it. could sources also be included in the unified
+     search? including their "what it is" metadata used in the find?» The box offered places and names only; a source (Geni, MyHeritage, an archive) was reachable
+     by the sources page or by guessing a country. Matched on the source's own name first (the whole name, then a word of it), then on a word of what it says it is;
+     the family-tree sites come first within a tier, because they are the ones people look for by name. */
+  function sugSources(f) {
+    if (!provs || !provs.providers) return [];
+    var out = [];
+    provs.providers.forEach(function (p) {
+      var n = fold(p.name || ""), tier = null;
+      if (n === f) tier = 0;
+      else if (n.indexOf(f) === 0) tier = 1;
+      else if (wordHit(n, f)) tier = 2;
+      else if (f.length >= 4 && wordHit(fold(p.what || ""), f)) tier = 3;
+      if (tier !== null) out.push([tier, p.family_tree || 99, n, p]);
+    });
+    out.sort(function (a, b) { return a[0] - b[0] || a[1] - b[1] || (a[2] < b[2] ? -1 : a[2] > b[2] ? 1 : 0); });
+    return out.slice(0, SUG_SRC).map(function (x) { return x[3]; });
+  }
+  function srcReach(p) {
+    var c = p.countries || [];
+    if (!c.length || c.indexOf("*") > -1) return T("worldwide");
+    return c.length > 3 ? c.length + " " + T("countries") : c.map(function (k) { return CNAME[k] || k; }).join(", ");
+  }
+  /* A source picked from the box: what it is, who it reaches, what it costs to look, and the way in. The map shows the countries it reaches when they are few. */
+  function openSource(p) {
+    bothFor = null; var mine = ++searchTok;
+    retireVisit();
+    if (Q.get("at")) { setQ("at", ""); if (window.raShelfForget) window.raShelfForget(); }
+    if (gmark) { map.removeLayer(gmark); gmark = null; }
+    ctryLayer.clearLayers(); communeLayer.clearLayers(); litCC = null;
+    empty.hidden = true; panel.hidden = false;
+    var h = ['<div class="at-h"><h3>' + esc(p.name) + '</h3><span class="at-n">' + esc(String(p.kind || "source").replace(/-/g, " ")) + "</span></div>"];
+    if (p.what) h.push('<p class="at-what">' + esc(p.what) + "</p>");
+    h.push('<div class="at-sec at-sec-wide"><div class="lab">' + esc(T("Where it reaches")) + '</div><p class="at-sub">' + esc(srcReach(p)) + "</p></div>");
+    h.push('<ul class="at-films"><li><a href="' + esc(p.url) + '" target="_blank" rel="noopener">' + esc(T("Open the site")) + " &#8599;</a> " +
+           '<span class="ra-who">' + accTxt(p.access) + "</span> " + mailIcon(p.em, p.name) + "</li></ul>");
+    h.push('<p class="at-sub"><a href="' + esc(BASE + "providers/?q=" + encodeURIComponent(p.name)) + '">' + esc(T("See it on the sources page")) + " &rarr;</a></p>");
+    panel.innerHTML = h.join("");
+    var cc = (p.countries || []).filter(function (k) { return k !== "*"; });
+    if (cc.length && cc.length <= 8 && p.countries.indexOf("*") < 0)
+      showCountries(cc.map(function (k) { return { cc: k, how: "register" }; }), function () { return mine !== searchTok; });
+  }
   var sugNames = null, sugGaz = null;
 
   function sugPlaces(f) {
@@ -8046,7 +8130,7 @@ window.addEventListener("load", async function () {
     var m = /^(.*?)\s*\(([^)]*)\)\s*$/.exec(String(n));
     return m && m[1] && fold(m[1]) === fold(m[2]) ? m[1] : String(n);
   }
-  function sugRender(places, names, gaz) {
+  function sugRender(places, names, gaz, srcs) {
     sugRows = [];
     var h = [];
     if (places.length || (gaz && gaz.length)) {
@@ -8076,6 +8160,16 @@ window.addEventListener("load", async function () {
              '<span class="ra-sug-c">' + (g[6] === "isl" ? "island · " : "") +
              "no registers held</span></button>");
     });
+    if (srcs && srcs.length) {
+      h.push('<p class="ra-sug-h">' + esc(T("Sources")) + "</p>");
+      srcs.forEach(function (p) {
+        var i = sugRows.length; sugRows.push({ kind: "source", p: p });
+        h.push('<button type="button" role="option" aria-selected="false" class="ra-sug-r" data-i="' + i + '">' +
+               '<span class="ra-sug-n">' + esc(p.name) + "</span>" +
+               '<span class="ra-sug-m">' + esc(String(p.kind || "source").replace(/-/g, " ")) + "</span>" +
+               '<span class="ra-sug-c">' + esc(srcReach(p)) + "</span></button>");
+      });
+    }
     if (names && names.length) {
       h.push('<p class="ra-sug-h">' + esc(T("Names")) + "</p>");
       names.forEach(function (r) {
@@ -8136,6 +8230,13 @@ window.addEventListener("load", async function () {
       apply();
       return;
     }
+    if (row.kind === "source") {
+      qbox.value = row.p.name;
+      setQ("q", row.p.name);
+      clearTimeout(qbox._t);
+      openSource(row.p);
+      return;
+    }
     if (row.kind === "place") {
       var p = row.p;
       /* The box keeps the name that was chosen, not the fragment typed — but
@@ -8158,7 +8259,8 @@ window.addEventListener("load", async function () {
     if (f.length < 2 || !idx.places) { sugHide(); return; }
     sugNames = null; sugGaz = null;
     var places = sugPlaces(f);
-    sugRender(places, null, null);
+    var srcs = sugSources(f);
+    sugRender(places, null, null, srcs);
     /* DEDUPED AGAINST WHAT IS ALREADY ON THE LIST, by name and country. Many
        gazetteer rows ARE drawn places; offering «Senj» twice, once with its
        volumes and once saying it has none, would be the panel arguing with
@@ -8179,7 +8281,7 @@ window.addEventListener("load", async function () {
         gazSeen[k] = 1;
         return true;
       }).slice(0, SUG_GAZ);
-      if (gkeep.length) { sugGaz = gkeep; sugRender(places, sugNames, gkeep); }
+      if (gkeep.length) { sugGaz = gkeep; sugRender(places, sugNames, gkeep, srcs); }
     }).catch(function () {});
     /* The surname shard is a fetch, so the list appears on places first and
        grows a «Names» section when it lands — rather than the whole dropdown
@@ -8200,7 +8302,7 @@ window.addEventListener("load", async function () {
          names wiping out the gazetteer or the other way about, depending on
          which file was quicker. */
       sugNames = keep;
-      if (keep.length) sugRender(places, keep, sugGaz);
+      if (keep.length) sugRender(places, keep, sugGaz, srcs);
     }).catch(function () {});
   }
 
@@ -8938,7 +9040,12 @@ window.addEventListener("load", async function () {
   function areaRenderSolo(R) {
     var d = R.place, pp = R.places[0], h = ['<div class="ra-area ra-area-solo">'];
     h.push('<div class="ra-area-add" id="ra-area-add"></div>');
-    h.push('<details class="ra-area-pl ra-area-solo-l" data-vols="' + esc(pp.i) + '"><summary><span>' + esc(T("The books and catalogues for") + " " + d.name) + '</span> <small><span class="ra-area-n"></span></small></summary><ul class="ra-vl"></ul></details>');
+    /* TWO LISTS, NOT ONE WITH A TALLY. David, on France: «instead of showing the row "60 books, 60 on family search" can we just have 2 sections, one for
+       family search, and one for others? no need to merge them or add that line». The books on FamilySearch and the books in every other holder each get their own
+       fold, named for what they are; an empty one is not drawn (areaFillVolumes). */
+    [["fs", "Books and catalogues on FamilySearch"], ["ot", "Books and catalogues in other collections"]].forEach(function (g) {
+      h.push('<details class="ra-area-pl ra-area-solo-l" data-vols="' + esc(pp.i) + '" data-grp="' + g[0] + '" hidden><summary><span>' + esc(T(g[1])) + '</span> <small><span class="ra-area-n"></span></small></summary><ul class="ra-vl"></ul></details>');
+    });
     if (!(d.volumes || []).length && !(d.collections || []).length) h.push('<p class="at-sub">' + esc(T("No volumes recorded here yet.")) + "</p>");
     areaCountrySources(R).forEach(function (c, ix, all) {
       h.push('<details class="ra-area-g ra-area-cov"><summary><i style="background:#5B7A8C"></i>Sources that cover all of ' + esc(CNAME[c.cc] || c.cc) + " <b>" + nfl(c.list.length) + "</b></summary><ul>");
@@ -8949,6 +9056,12 @@ window.addEventListener("load", async function () {
       });
       h.push("</ul></details>");
     });
+    /* THE FAMILY-TREE AND GENEALOGY SITES, ON EVERY PLACE. David: «these just dont look complete. e.g. myheritage, geni, ancestry, findmypast, etc.
+       do we need a separate category for those "always show" sources for global family tree / genealogical resources?». They were in the directory
+       (countries: ["*"]) but only the name-search and era panels drew the «cover everywhere» group, so a place card never showed them. A provider row
+       carries `family_tree: <rank>` for the dozen that are worth offering anywhere (FamilySearch, Ancestry, MyHeritage, Geni, ...); a regional one
+       (Findmypast, GenealogyBank) shows only where its countries reach. The specialist worldwide sources (Holocaust, maps, memorials) stay out of it. */
+    h.push(familyTreeGroup(d.country));
     /* EVERY STATE THAT GOVERNED THIS GROUND, WITH NOTHING CHOSEN. David: «why doesnt it show all the records for all governing states/countries? when nothings
        selected?». The era strip shows one era's archives when you tap it; with none tapped the card only had today's country. The states of every era (not
        today's) each get their archives here, as a shut fold named for the years they governed, and the list steps aside while an era is chosen. */
@@ -9163,7 +9276,7 @@ window.addEventListener("load", async function () {
       if (i >= want.length) return;
       var p = want[i++];
       (cache[p.i] ? Promise.resolve(cache[p.i]) : fetch(DETAIL + p.i + ".json").then(function (r) { return r.json(); }))
-        .then(function (d) { cache[p.i] = d; R.vols[p.i] = { p: p, vols: areaPlaceVols(d) }; })
+        .then(function (d) { cache[p.i] = d; R.vols[p.i] = { p: p, vols: areaPlaceVols(d), total: d.volumesTotal || 0 }; })
         .catch(function () { R.vols[p.i] = { p: p, vols: [] }; })
         .then(function () {
           done++;
@@ -9210,12 +9323,15 @@ window.addEventListener("load", async function () {
   var areaYrT = 0;
   function areaYearRefresh() { if (TSV2 && AR() && AR().place && AR().vols) areaFillVolumes(); }
   if (TSV2) qbox.addEventListener("input", function () { clearTimeout(areaYrT); areaYrT = setTimeout(areaYearRefresh, 250); });
+  function areaIsFS(v) { return /familysearch\.org/i.test(v.url || "") || /^familysearch/i.test(v.src || ""); }
+  function areaHasOther(vs) { return vs.some(function (v) { return !areaIsFS(v); }); }
   function areaFillVolumes() {
     var R = AR(); if (!R || !R.vols) return;
     var ids = Object.keys(R.vols), openAll = ids.length <= 8;
     ids.forEach(function (id) {
-      var box = panel.querySelector('[data-vols="' + id + '"]'); if (!box) return;
-      var e = R.vols[id], vs = e.vols.slice(); if (!vs.length) { box.classList.add("ra-area-nolist"); return; }
+      var boxes = [].slice.call(panel.querySelectorAll('[data-vols="' + id + '"]')); if (!boxes.length) return;
+      var e = R.vols[id], vs = e.vols.slice();
+      if (!vs.length) { boxes.forEach(function (b) { b.classList.add("ra-area-nolist"); }); return; }
       /* A YEAR IN THE SEARCH NARROWS THE BOOKS TO THE ONES THAT COVER IT. David: «if i search "senj 1810" then why do i still see the older books?».
          On the place card (v2) a typed year or range keeps the books whose years overlap it, says so, and opens the list. */
       var ys = TSV2 && AR().place ? tsYears() : null, all = vs.length, note = "";
@@ -9224,11 +9340,20 @@ window.addEventListener("load", async function () {
         var yl = ys[0] === ys[1] ? ys[0] : ys[0] + "\u2013" + ys[1];
         note = vs.length === all ? "" : '<li class="ra-vnote">' + (vs.length ? "Only the books that cover " + yl + ". " : "No book here covers " + yl + ". ") + 'Clear the year to see all ' + all + ".</li>";
       }
-      var li = areaVolRows(e.p, vs) + note;
-      box.querySelector(".ra-vl").innerHTML = li;
-      box.querySelector(".ra-area-n").textContent = ys && vs.length !== all ? vs.length + " of " + all + " books" : vs.length + " book" + (vs.length === 1 ? "" : "s");
-      if (ys && AR().place && vs.length) box.open = true;
-      else if (!(AR() && AR().place) && (openAll || rcState(e.p) !== "none")) box.open = true;   /* a place card keeps its books shut until asked */
+      /* THE DETAIL FILE KEEPS ONLY THE OLDEST 60 BOOKS OF A PLACE (build.py, to keep the files small) AND CARRIES THE TRUE TOTAL, which the card now says. David, on
+         France: «it only shows the first 60 books?» It did, and nothing said so. */
+      var more = e.total && e.total > e.vols.length && !ys ? '<li class="ra-vnote">' + esc(T("The oldest") + " " + e.vols.length + " " + T("of") + " " + nfl(e.total) + " " + T("books are listed here. The rest are on the catalogue itself, and the place page counts them all.")) + "</li>" : "";
+      var fsV = vs.filter(areaIsFS), otV = vs.filter(function (v) { return !areaIsFS(v); }), lastG = otV.length ? "ot" : "fs";
+      boxes.forEach(function (box) {
+        var g = box.getAttribute("data-grp");
+        var mine = g ? (g === "fs" ? fsV : otV) : vs;
+        if (!mine.length && g !== lastG) { box.hidden = true; return; }   /* an empty list is not drawn; the last one stays to carry a note */
+        box.hidden = false;
+        box.querySelector(".ra-vl").innerHTML = areaVolRows(e.p, mine) + (!g || g === lastG ? note + more : "");
+        box.querySelector(".ra-area-n").textContent = mine.length + " book" + (mine.length === 1 ? "" : "s");
+        if (ys && AR().place && mine.length) box.open = true;
+        else if (!(AR() && AR().place) && (openAll || rcState(e.p) !== "none")) box.open = true;   /* a place card keeps its books shut until asked */
+      });
     });
   }
   /* A mark made in the list recolours the dots at once; the groups themselves stay put until Show, so a row does not jump away under the pointer. */
@@ -9279,7 +9404,7 @@ window.addEventListener("load", async function () {
         '<button type="button" data-a="yes">Yes, add them</button><button type="button" data-a="no">Cancel</button></p>';
       return;
     }
-    box.innerHTML = '<p class="at-sub ra-area-what"' + (R.place ? "" : ' title="The places above are only where these sit"') + '>Not started: <b>' + what + "</b></p>" +
+    box.innerHTML = (TSV2 && R.place ? "" : '<p class="at-sub ra-area-what"' + (R.place ? "" : ' title="The places above are only where these sit"') + '>Not started: <b>' + what + "</b></p>") +
       (TSV2 && R.place ? "" : '<button type="button" class="ra-area-addb" data-a="add">Add ' + nfl(n) + (n === c.length ? "" : " of them") + " to " + esc(line) + "'s list</button>") +
       ((c.length > ADD_CAP || cap) ? '<p class="at-sub" title="' + (c.length > ADD_CAP ? "One click adds at most " + nfl(ADD_CAP) + ". " : "") + (cap ? cap.trim() : "") + '">Big area. Draw a smaller one to see and add the rest.</p>' : "");
   }
@@ -9629,6 +9754,10 @@ window.addEventListener("load", async function () {
     map.on("moveend", function () { if (on) queue(); });
     qbox.addEventListener("input", function () { if (on) queue(); });
     window.raShelfPing = function () { if (on) queue(); };
+    /* A NEW SEARCH THAT IS NOT A PLACE LETS GO OF THE LAST PLACE. David searched «Defranceski 1851» after Saint-Godefroi: the map showed nothing and the shelf
+       still said «On the shelf for Saint-Godefroi». The shelf reads the open place (the address's `at`, else the last one it saw); when the typing stops
+       naming a place, both go. */
+    window.raShelfForget = function () { SH.lastPl = null; if (SH.user === "place" || SH.user === "walk") SH.user = null; if (on) queue(); };
     window.raShelfOn = function () { setOn(true); };
     /* a new area is what the reader is looking at; opening a place takes the shelf back to that place */
     window.raShelfScope = function (a) { SH.areaNew = a === "area"; SH.user = null; if (on) queue(); };
@@ -11725,7 +11854,7 @@ window.addEventListener("load", async function () {
  :global(.ra-tl) { margin: 6px 0 12px; }
   :global(.ra-tl-band) { display: flex; align-items: stretch; gap: 2px;
     border: 1px solid var(--rule); border-radius: 3px;
-    background: var(--ground); padding: 2px; overflow: hidden; }
+    background: var(--ground); padding: 2px; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
   :global(.ra-tl-seg) { --seg: var(--accent);
     flex: 1 1 38px; min-width: 38px; position: relative;
     display: flex; flex-direction: column; justify-content: flex-start;
@@ -12179,6 +12308,8 @@ window.addEventListener("load", async function () {
   :global(.ra-area-ok) { margin: 0; padding: 10px 12px; border-radius: 8px; background: rgba(31, 157, 85, .13); font: 400 13px/1.4 var(--sans); }
   :global(.ra-area-ok button) { font: 600 12.5px/1 var(--sans); margin-left: 8px; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--rule-strong); background: var(--panel); cursor: pointer; }
   :global(.ra-area-g) { margin: 0 0 8px; border-top: 1px solid var(--rule); padding-top: 8px; }
+  /* a fold whose rows cannot be added to the research (an unverified list) has no + , so its title keeps the place the + would have taken and lines up with the others */
+  :global(.ra-area-solo .ra-area-g > summary:has(> .ra-grp-add[hidden])) { padding-left: 49px; }
   :global(.ra-area-g > summary) { cursor: pointer; font: 700 12px/1.4 var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); list-style: none; }
   :global(.ra-area-g > ul) { list-style: none; margin: 6px 0 0; padding: 0; }
   :global(.ra-area-g > ul > li) { margin: 0; padding: 2px 0; }
@@ -12203,6 +12334,7 @@ window.addEventListener("load", async function () {
   :global(.ra-area-cov > .at-sub) { margin: 4px 0 2px; font-size: 12px; }
   :global(.ra-area-cov .ra-area-p small) { white-space: normal; text-align: right; }
   @media (prefers-reduced-motion: reduce) { :global(.ra-chev) { transition: none; } }
+  :global(.ra-vl > li.ra-vnote) { font-size: 12px; color: var(--ink-3); display: block; }
   :global(.ra-vl) { list-style: none; margin: 6px 0 0; padding: 0; border-top: 1px solid var(--rule); }
   :global(.ra-vl > li) { display: flex; align-items: center; flex-wrap: wrap; gap: 0 10px; padding: 7px 0; border-bottom: 1px solid var(--rule); font: 400 12.5px/1.35 var(--sans); }
   :global(.ra-vl > li > i) { width: 8px; height: 8px; border-radius: 50%; flex: none; }

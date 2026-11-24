@@ -279,7 +279,7 @@ test("the Year pill is spaced like its neighbours: no extra margin beside the fl
 test("source rows carry a + like the books do, access is a picture with its words as the tooltip, and the surname card does not repeat its own page link", () => {
   const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
   assert.match(map, /function srcAttrs\(id, name, where, href\)/);
-  assert.equal((map.match(/'<li' \+ srcAttrs\(/g) || []).length, 3, "the place card, the archives and the country-wide lists");
+  assert.equal((map.match(/'<li' \+ srcAttrs\(/g) || []).length, 4, "the place card, the archives, the country-wide lists and the country card");
   assert.match(map, /'<li' \+ \(pv\.id \? srcAttrs\(pv\.id/, "the Where to read rows");
   assert.match(map, /function accTxt\(a\)[\s\S]*?if \(!TSV2 \|\| !ACC_SVG\[a\]\) return esc\(label\);/, "words stay off v2");
   assert.match(map, /role="img" tabindex="0" style="color:' \+ esc\(.*?\) \+ '" title="' \+ esc\(label\) \+ '" aria-label="'/, "the words are the tooltip and the name");
@@ -384,7 +384,7 @@ test("on v2 the Visiting list's headings are top-level folds of the card, each w
 test("a village in the Visiting list folds out to its books and catalogues, shut until asked, using the primary place's rows", () => {
   const css = readFileSync(join(root, "public/front-door-v2.css"), "utf8");
   assert.match(map, /function areaVolRows\(p, vs\)/);
-  assert.match(map, /var li = areaVolRows\(e\.p, vs\) \+ note;/, "the area lists use the same rows");
+  assert.match(map, /areaVolRows\(e\.p, mine\) \+ \(!g \|\| g === lastG \? note \+ more : ""\)/, "the area lists use the same rows");
   assert.match(map, /class="ra-vn ra-vexp" data-vplace=/);
   assert.match(map, /\(VEXP\[mark\.id\.slice\(6\)\] \? "" : " hidden"\)/, "shut by default");
   assert.match(map, /areaPlaceVols\(d, true\)/);

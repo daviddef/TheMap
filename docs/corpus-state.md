@@ -11,9 +11,9 @@ Written by `scripts/corpus_state.py` from the data files in the repository. Each
 | Rows with no deep link | 1,494 |  |
 | Countries | 237 |  |
 | Countries with no source at all | 36 | 36 |
-| Countries with three sources or fewer | 140 | 142 |
-| FamilySearch book names with no place | 6,969 | 7,180 |
-| FamilySearch volumes with no place (12 Nov figure) | 39,124 | 45,153 |
+| Countries with three sources or fewer | 140 | 140 |
+| FamilySearch book names with no place | 6,881 | 6,969 |
+| FamilySearch volumes with no place (12 Nov figure) | 37,763 | 39,124 |
 | Places with dated names | 375 |  |
 | Surname families (hand-built) | 129 |  |
 | Given-name families | 1,074 |  |

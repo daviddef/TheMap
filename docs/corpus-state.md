@@ -4,11 +4,11 @@ Written by `scripts/corpus_state.py` from the data files in the repository. Each
 
 | Measure | Now | Ceiling |
 |---|--:|--:|
-| Catalogue rows (sources) | 2,576 |  |
-| Rows whose access has never been surveyed | 1,238 |  |
-| Share of rows never surveyed (tenths of a percent) | 481 | 481 |
-| Rows with no Wikidata id | 1,386 |  |
-| Rows with no deep link | 1,436 |  |
+| Catalogue rows (sources) | 2,635 |  |
+| Rows whose access has never been surveyed | 1,297 |  |
+| Share of rows never surveyed (tenths of a percent) | 492 | 488 |
+| Rows with no Wikidata id | 1,445 |  |
+| Rows with no deep link | 1,495 |  |
 | Countries | 237 |  |
 | Countries with no source at all | 35 | 35 |
 | Countries with three sources or fewer | 140 | 142 |

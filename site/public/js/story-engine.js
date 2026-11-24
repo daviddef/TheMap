@@ -1990,6 +1990,34 @@
   /* The journey: a year slider, play button and captions for who held each place in each year, a still list of what changed, and a
      dashed line with a moving dot on a map. `o.els` = {cap, slider, yearOut, play, moments, time, mapBox}; `o.getMap()` resolves to
      {L, map}, so the page's own map or the home map can host it; `o.pad` is the room to leave round the places (the drawer). */
+  /* THE EVENTS ON THE JOURNEY MAP, AS SMALL, SLOW ANIMATIONS. David: «could it show some of the events like war, genocide, pandemic as little animations on the map?». The area of
+     each event that covers a place in the story is drawn in a colour for its kind and moves in a way that suits it: a war's edge marches, an epidemic breathes and drifts in
+     dots, a famine slowly fades, a genocide or massacre glows slowly and does not move its edge. A war or epidemic with a small area also sends out a soft ring from its centre.
+     These are mass deaths, so nothing flashes, shakes or counts: slow, low, and a legend names what is on the map in the year shown. A button hides them all. Under
+     «reduce motion» they are still, not gone. Only the events whose area covers a place in the story's years are drawn, as before; nothing is placed that the Atlas does not hold. */
+  var EVC = { war: "#b3452e", genocide: "#7b1f1f", epidemic: "#8e3f78", famine: "#a8741a", massacre: "#8a2a2a", atrocity: "#6b2d3a", displacement: "#4f6b7a" };
+  var EV_CSS = ".ev-t-war{--c:#b3452e}.ev-t-genocide{--c:#7b1f1f}.ev-t-epidemic{--c:#8e3f78}.ev-t-famine{--c:#a8741a}.ev-t-massacre{--c:#8a2a2a}.ev-t-atrocity{--c:#6b2d3a}.ev-t-displacement{--c:#4f6b7a}" +
+    ".ev-pg{transition:fill-opacity .6s ease,stroke-opacity .6s ease}" +
+    ".ev-pg.ev-on{animation:evBreath 3.4s ease-in-out infinite}" +
+    ".ev-pg.ev-t-war.ev-on{stroke-dasharray:7 6;animation:evBreath 2.6s ease-in-out infinite,evMarch 1.6s linear infinite}" +
+    ".ev-pg.ev-t-epidemic.ev-on{stroke-dasharray:1 8;stroke-linecap:round;stroke-width:3;animation:evBreath 3.8s ease-in-out infinite,evMarch 6s linear infinite}" +
+    ".ev-pg.ev-t-famine.ev-on{animation:evWilt 6s ease-in-out infinite}" +
+    ".ev-pg.ev-t-genocide.ev-on,.ev-pg.ev-t-massacre.ev-on,.ev-pg.ev-t-atrocity.ev-on{animation:evBreath 6s ease-in-out infinite}" +
+    ".ev-pg.ev-t-displacement.ev-on{stroke-dasharray:2 9;stroke-linecap:round;animation:evBreath 4s ease-in-out infinite,evMarch 5s linear infinite}" +
+    "@keyframes evBreath{0%,100%{fill-opacity:.05}50%{fill-opacity:.24}}@keyframes evWilt{0%{fill-opacity:.26}100%{fill-opacity:.03}}@keyframes evMarch{to{stroke-dashoffset:-28}}" +
+    ".ev-rip{display:block;width:0;height:0}.ev-rip b{position:absolute;left:-34px;top:-34px;width:68px;height:68px;border-radius:50%;border:2px solid var(--c);opacity:0;pointer-events:none}" +
+    ".ev-rip.ev-halo b:nth-child(2){display:none}.ev-rip.ev-halo.ev-on b{border-width:3px;animation:evHalo 5.5s ease-in-out infinite}@keyframes evHalo{0%,100%{transform:scale(.5);opacity:.3}50%{transform:scale(.85);opacity:.6}}" +
+    ".ev-rip.ev-on b{animation:evRip 3.2s ease-out infinite}.ev-rip.ev-on b:nth-child(2){animation-delay:1.6s}@keyframes evRip{0%{transform:scale(.15);opacity:.6}100%{transform:scale(1.7);opacity:0}}" +
+    ".ev-leg{position:absolute;left:10px;bottom:24px;z-index:800;max-width:min(80%,440px);display:flex;flex-direction:column;gap:5px;align-items:flex-start;pointer-events:none;font:13px/1.35 system-ui,sans-serif}" +
+    ".ev-leg .ev-row{background:rgba(255,255,255,.93);color:#1c2630;border:1px solid rgba(0,0,0,.12);border-left:4px solid var(--c);border-radius:6px;padding:4px 9px;box-shadow:0 1px 4px rgba(0,0,0,.12);animation:evIn .6s ease both}" +
+    ".ev-leg .ev-row b{font-weight:700}.ev-leg .ev-row i{font-style:normal;opacity:.75}" +
+    ".ev-leg .ev-btn{pointer-events:auto;font:inherit;font-size:12px;padding:2px 9px;border-radius:999px;border:1px solid rgba(0,0,0,.25);background:rgba(255,255,255,.93);color:#1c2630;cursor:pointer}" +
+    "@keyframes evIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}" +
+    "@media (prefers-reduced-motion:reduce){.ev-pg.ev-on{animation:none!important;fill-opacity:.14}.ev-rip.ev-on b,.ev-leg .ev-row{animation:none!important}.ev-rip.ev-on b{opacity:.35;transform:scale(.8)}}";
+  function ensureEvStyle() {
+    if (typeof document === "undefined" || document.getElementById("ev-style")) return;
+    var st = document.createElement("style"); st.id = "ev-style"; st.textContent = EV_CSS; document.head.appendChild(st);
+  }
   function createJourney(o) {
     var E = o.els, layers = null, stopPlay = null, askEl = null;
     var reduce = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
@@ -2025,7 +2053,7 @@
       });
       return d;
     }
-    function clear() { if (stopPlay) stopPlay(); if (layers) { if (layers.map && layers.tidy) layers.map.off("moveend zoomend", layers.tidy); layers.group.remove(); layers = null; } if (askEl) askEl.hidden = true; }
+    function clear() { if (stopPlay) stopPlay(); if (layers) { if (layers.map && layers.tidy) layers.map.off("moveend zoomend", layers.tidy); layers.group.remove(); if (layers.legend) layers.legend.remove(); layers = null; } if (askEl) askEl.hidden = true; }
 
     /* The stops with a time each: years when the story gives a birth year or dates, else ages, else none. */
     function timeline(f) {
@@ -2070,7 +2098,8 @@
       var tl = timeline(f), stops = tl.stops, anc = (f.ancestors || []).filter(function (x) { return x.info; });
       /* the others in the family who travel too: each pin appears at its year, so the story plays the ancestry first, then the person's own journey */
       var kin = (f.kin || []).map(function (k) { return { name: k.name, label: k.label, stops: k.stops.filter(function (x) { return x.info; }) }; }).filter(function (k) { return k.stops.length; }), kinMarks = [];
-      var legs = [], stopMarks = [], mortPgs = [];
+      var legs = [], stopMarks = [], mortPgs = [], curT = null, legKey = "", evShow = true;
+      try { evShow = sessionStorage.getItem("ra-journey-events") !== "0"; } catch (e) { evShow = true; }
       function kinTag(k) { return ((k.label ? k.label + " " : "") + (k.name || "")).trim() || "Family"; }
       var can = stops.length > 0 && tl.mode !== "none" && (stops.length > 1 || tl.mode === "year");
       if (E.time) E.time.hidden = !can;
@@ -2105,6 +2134,33 @@
       var evMap = new Map(); stops.concat(anc).forEach(function (st) { if (!evMap.has(st.info)) evMap.set(st.info, evs(st.info)); });
       kin.forEach(function (k) { k.stops.forEach(function (st) { if (!evMap.has(st.info)) evMap.set(st.info, evs(st.info)); }); });
 
+      /* each event's area moves while the year shown is inside its years; the legend names those, at most three, newest to oldest as the years run */
+      function paintEvents(t) {
+        var act = [];
+        mortPgs.forEach(function (m) {
+          var on = t != null && t >= m.f && t <= m.t, show = on && evShow;
+          var p = m.pg.getElement && m.pg.getElement(), r = m.rip && m.rip.getElement && m.rip.getElement();
+          if (p && p.classList) p.classList.toggle("ev-on", show);
+          if (r && r.classList) r.classList.toggle("ev-on", show);
+          m.pg.setStyle({ opacity: show ? .8 : (evShow ? .2 : 0), fillOpacity: show ? .08 : 0 });
+          if (show) act.push(m);
+        });
+        if (!layers || !layers.legend) return;
+        var key = evShow + "|" + act.map(function (m) { return m.ev.id || m.ev.n; }).join(",");
+        if (key === legKey) return; legKey = key;
+        var lg = layers.legend; lg.textContent = "";
+        if (!mortPgs.length) return;
+        act.slice(0, 3).forEach(function (m) {
+          var row = el("div", null, "ev-row ev-t-" + m.ev.ty);
+          row.append(el("b", m.ev.f + (m.ev.t !== m.ev.f ? "\u2013" + m.ev.t : "") + " "), document.createTextNode(typeLabel(m.ev.ty) + " \u00b7 "), el("i", m.ev.n));
+          lg.append(row);
+        });
+        var btn = el("button", evShow ? "Hide events" : "Show events", "ev-btn"); btn.type = "button";
+        btn.setAttribute("aria-pressed", evShow ? "true" : "false");
+        btn.addEventListener("click", function () { evShow = !evShow; try { sessionStorage.setItem("ra-journey-events", evShow ? "1" : "0"); } catch (e) { /* the choice lasts this page */ } legKey = ""; paintEvents(curT); });
+        lg.append(btn);
+      }
+
       function setT(t) {
         E.cap.textContent = "";
         var at = stops.length ? along(stops, t) : { idx: 0, pt: null, moving: false }, cur = stops[at.idx];
@@ -2131,7 +2187,7 @@
           lg.dot.setLatLng(pt); lg.dot.setStyle({ opacity: on ? 1 : 0, fillOpacity: on ? 1 : 0 }); lg.line.setStyle({ opacity: on ? .55 : .12 });
         });
         stopMarks.forEach(function (m) { var on = m.t == null || t >= m.t, tp = m.ly.getTooltip(); m.ly.setStyle({ opacity: on ? 1 : .3, fillOpacity: on ? 1 : .3 }); if (tp && tp.setOpacity) tp.setOpacity(on ? 1 : .35); });
-        mortPgs.forEach(function (m) { var on = t >= m.f && t <= m.t; m.pg.setStyle({ opacity: on ? .85 : .12, fillOpacity: on ? .06 : 0 }); });
+        curT = t; paintEvents(t);
         kinMarks.forEach(function (m) { var on = m.t == null || t >= m.t, tp = m.ly.getTooltip(); m.ly.setStyle({ opacity: on ? 1 : .3, fillOpacity: on ? 1 : .3 }); if (tp && tp.setOpacity) tp.setOpacity(on ? 1 : .35); });
         if (layers && layers.dot) layers.dot.setStyle({ opacity: begun ? 1 : 0, fillOpacity: begun ? 1 : 0 });
         if (layers && layers.dot && at.pt) {
@@ -2258,6 +2314,8 @@
           });
         }
         layers = { group: g };
+        ensureEvStyle();
+        if (E.mapBox && E.mapBox.appendChild) { var lgEl = el("div", null, "ev-leg"); lgEl.setAttribute("aria-hidden", "true"); layers.legend = lgEl; E.mapBox.appendChild(lgEl); if (L.DomEvent) L.DomEvent.disableClickPropagation(lgEl); }
         /* the mass-mortality events (epidemics, famines, wars, genocides) of the countries in the story, as black outlines, and only those of the
            years the story gives: a story with no year draws none, and says so */
         var yrs = [];
@@ -2266,6 +2324,8 @@
         if (f.born != null) yrs.push(f.born); if (f.endYear != null) yrs.push(f.endYear);
         if (mort && mort.events && yrs.length) {
           var y0 = Math.min.apply(null, yrs), y1 = Math.max.apply(null, yrs), pts = [], seenEv = Object.create(null);
+          /* the years the map PLAYS, not only the years the story names: the list under the map («What was going on») already reads from the start of the timeline to its end, and the map must show the same events */
+          if (can && t0 != null && t1 != null && tl.mode === "year") { y0 = Math.min(y0, t0); y1 = Math.max(y1, t1); }
           function addPt(i) { if (i && i.lat != null) pts.push(i); }
           stops.concat(anc).forEach(function (st) { addPt(st.info); });
           kin.forEach(function (k) { k.stops.forEach(function (st) { addPt(st.info); }); });
@@ -2273,13 +2333,18 @@
           pts.forEach(function (i) {
             S.eventsAt(mort.events, i.lat, i.lon, (y0 + y1) / 2, (y1 - y0) / 2).forEach(function (ev) {
               if (seenEv[ev.id || ev.n] || !ev.poly || !ev.poly.length) return; seenEv[ev.id || ev.n] = 1;
-              var pg = L.polygon(ev.poly, { color: "#000", weight: 1.6, opacity: .85, fillColor: "#000", fillOpacity: .06, dashArray: "5 4" }).addTo(g);
+              var evc = EVC[ev.ty] || "#444444";
+              var pg = L.polygon(ev.poly, { className: "ev-pg ev-t-" + ev.ty, color: evc, weight: 1.6, opacity: .2, fillColor: evc, fillOpacity: 0, dashArray: "3 5" }).addTo(g);
               pg.bindTooltip(ev.f + (ev.t !== ev.f ? "\u2013" + ev.t : "") + " " + typeLabel(ev.ty) + ": " + ev.n + " (covers " + i.name + ")", { sticky: true, className: "lf-mort-tip" });
               if (pg.bringToBack) pg.bringToBack();
-              mortPgs.push({ pg: pg, f: ev.f, t: ev.t });
+              /* a marker at the centre only where the area is small enough for a centre to mean a place (a siege, a bombing, a camp), never for a country or a continent: a ring that spreads for a war or an epidemic, one slow halo that does not spread for a genocide, massacre or atrocity. It keeps its size at any zoom, so a small area is still seen on a map framed on a whole journey. */
+              var rip = null, bb = pg.getBounds && pg.getBounds();
+              if (ev.at && ev.at.length === 2 && (ev.ty === "war" || ev.ty === "epidemic" || ev.ty === "genocide" || ev.ty === "massacre" || ev.ty === "atrocity") && bb && (bb.getNorth() - bb.getSouth()) < 12 && (bb.getEast() - bb.getWest()) < 20)
+                rip = L.marker(ev.at, { interactive: false, keyboard: false, icon: L.divIcon({ className: "ev-rip ev-t-" + ev.ty + (ev.ty === "war" || ev.ty === "epidemic" ? "" : " ev-halo"), iconSize: [0, 0], html: "<b></b><b></b>" }) }).addTo(g);
+              mortPgs.push({ pg: pg, f: ev.f, t: ev.t, ev: ev, rip: rip });
             });
           });
-          if (can) setT(Number(E.slider.value));
+          if (can) setT(Number(E.slider.value)); else paintEvents(null);
         } else if (mort && mort.events) E.moments.append(el("p", "Give a year, even a rough one, and the mass-mortality events of those years in these countries are drawn here as black outlines.", "lf-filed"));
         var rp = stops.filter(function (st) { return st.info.lat != null; }).map(function (st) { return [st.info.lat, st.info.lon]; });
         if (rp.length > 1) {

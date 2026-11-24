@@ -154,6 +154,21 @@
     });
   }
   var J = E.createJourney({ els: { cap: $("sp-cap"), slider: $("sp-year"), yearOut: $("sp-yearout"), play: $("sp-play"), moments: $("sp-moments"), time: $("sp-time"), mapBox: $("sp-map") }, getMap: getMap, askBox: $("sp-ask"), onBorn: function (y) { setBorn(y); } });
+  /* THE JOURNEY PLAYS ONCE, THE FIRST TIME IT IS SEEN. David: «the map doesn't play». It did, but behind a button under the family tree, and nothing said so. Now the map is the
+     first thing under the words, and the first time it comes into view with a timeline it plays through by itself, once for the page and never when the visitor has asked
+     their device for less motion. Pressing Pause stops it; typing redraws it without playing again. */
+  var played = false, watcher = null;
+  function playOnce() {
+    if (played || reduce || !("IntersectionObserver" in window)) return;
+    var map = $("sp-map"), btn = $("sp-play"); if (!map || !btn || $("sp-time").hidden) return;
+    if (watcher) watcher.disconnect();
+    watcher = new IntersectionObserver(function (ents) {
+      if (played || !ents.some(function (en) { return en.isIntersecting; })) return;
+      played = true; watcher.disconnect();
+      setTimeout(function () { if (!$("sp-time").hidden && /Play/.test(btn.textContent)) btn.click(); }, 700);
+    }, { threshold: 0.5 });
+    watcher.observe(map);
+  }
   function setBorn(y) {
     if (!parsed) return;
     parsed.born = y; (parsed.route || []).forEach(function (st) { if (st.age != null) st.year = y + st.age; });
@@ -222,7 +237,7 @@
     secShow("sp-setting", true);
     secShow("sp-plan", true); drawSteps(g);
     secShow("sp-keep", true); drawKeep(g);
-    J.draw(f, g.mort).then(function () { settingNote(g); }, function () { settingNote(g); });
+    J.draw(f, g.mort).then(function () { settingNote(g); playOnce(); }, function () { settingNote(g); });
     watch();
   }
   function clearReport() {

@@ -104,7 +104,6 @@
   function drawChips(p) {
     drawDid(p); chips.textContent = "";
     var stopsShown = p.stops && p.stops.length ? p.stops : [p.from && Object.assign({ role: "origin" }, p.from), p.to && Object.assign({ role: "move" }, p.to)].filter(Boolean);
-    if (!stopsShown.length && !tellable(p) && text.value.trim().length > 12) chips.append(chip("Where did they start? Name the place", "warn", "nof"));
     stopsShown.forEach(function (st) {
       var more = st.alts && st.alts.length, lab = placeLabel(st.row);
       if (!more) return;
@@ -115,6 +114,34 @@
     if (p.holds !== "story" || files.length) chips.append(chip((E.HOLDS[p.holds] || E.HOLDS.story).t.replace(/^a /, "") + (files.length ? ", kept here" : ""), "warn", "h:" + p.holds));
     var unread = files.filter(function (x) { return !x.r; }).length;
     if (unread) chips.append(chip("Read " + (unread === 1 ? "the picture" : unread + " pictures") + " with Claude", "warn", "readpics", function () { readPics(); }));
+    drawGaps(p);
+  }
+
+  /* WHAT IS STILL MISSING, ASKED AS YOU TYPE (story-gaps.js). Three at a time, the ones that unlock the most records first. A tap adds the start of a sentence
+     to the box for the reader to finish; nothing is filled in for them. The box redraws on the same pause as the reading, so it follows what they have typed. */
+  var gapsAll = false;
+  function drawGaps(p) {
+    var box = $("sp-gaps"), G = window.raStoryGaps; if (!box || !G) return;
+    box.textContent = "";
+    var t = text.value.trim();
+    if (t.length < 8) { box.hidden = true; return; }
+    var list = G.gaps(p, t, { files: files.length, place: function (w) { return !!(data && data.map && data.map[S.fold(w)]); } }), top = gapsAll ? list : list.slice(0, 3);
+    box.hidden = false;
+    if (!list.length) { box.append(el("p", "Nothing obvious is missing. The plan below is built from what you told us; add more at any time.", "sp-gaps-ok")); return; }
+    box.append(el("p", "To make this stronger, tell us", "sp-gaps-h"));
+    top.forEach(function (g) {
+      var b = el("button", null, "sp-gap"); b.type = "button";
+      b.append(el("b", g.ask), el("span", g.why));
+      b.addEventListener("click", function () {
+        if (g.action === "photo") { var f = $("sp-file"); if (f) f.click(); return; }
+        text.value = G.append(text.value, g.add).slice(0, 8000); grow(); text.focus();
+        try { text.setSelectionRange(text.value.length, text.value.length); } catch (e) { /* the caret stays */ }
+        try { sessionStorage.setItem(DRAFT, text.value); } catch (e) { /* none */ }
+        clearTimeout(tm); tm = setTimeout(run, 650);
+      });
+      box.append(b);
+    });
+    if (list.length > top.length) { var more = el("button", "and " + (list.length - top.length) + " more question" + (list.length - top.length === 1 ? "" : "s"), "sp-gaps-more"); more.type = "button"; more.addEventListener("click", function () { gapsAll = true; drawGaps(p); }); box.append(more); }
   }
 
   /* ---- the journey: map, years, who held the ground ------------------------------------------------------------------------- */
@@ -357,7 +384,7 @@
   }
   function run() {
     var t = text.value;
-    $("sp-clear").hidden = !t.trim() && !files.length;
+    $("sp-clear").hidden = !t.trim() && !files.length; $("sp-link").hidden = !t.trim();
     if (t.trim().length > 12) say("Reading your story…");
     return LD.resolveMissing(t).catch(function () { return LD.load(); }).then(function (d) {
       data = d;
@@ -395,7 +422,14 @@
     files.forEach(function (x) { URL.revokeObjectURL(x.url); }); files = []; drawShots(); text.value = ""; grow(); chips.textContent = ""; $("sp-did").hidden = true;
     ov = Object.create(null); parsed = null; shown = Object.create(null); lastSig = ""; clearReport(); say("");
     try { sessionStorage.removeItem(DRAFT); } catch (e) { /* none */ }
-    $("sp-clear").hidden = true; text.focus();
+    $("sp-clear").hidden = true; $("sp-link").hidden = true; $("sp-gaps").hidden = true; gapsAll = false; text.focus();
+  });
+  /* A LINK THAT CARRIES THE WORDS, for sending to somebody who asked for help in a group. The words ride after the # and are never sent to a server (story-link.js). */
+  $("sp-link").addEventListener("click", function () {
+    var L = window.raStoryLink, t = text.value.trim(); if (!L || !t) return;
+    var h = L.hashFor(t), u = location.origin + location.pathname + h.hash;
+    var done = function (ok) { say(ok ? "Link copied. Whoever opens it sees this page with your words in it; they stay in the link and are not sent anywhere." + (h.cut ? " Only the first " + L.MAX + " characters fit." : "") : "Copy this address: " + u); };
+    try { navigator.clipboard.writeText(u).then(function () { done(true); }, function () { done(false); }); } catch (e) { done(false); }
   });
 
   /* ---- pictures: dropped, pasted or chosen; kept in this tab only ------------------------------------------------------------ */
@@ -441,10 +475,21 @@
   window.raStoryPage = { graph: function () { return last; }, countries: function () { return data && data.countries; }, base: BASE };
 
   /* ---- starting: the words handed over from the home page, or a draft kept in this tab ---------------------------------------- */
+  function takeAddress() {
+    var hw = window.raStoryLink ? window.raStoryLink.textFromHash(location.hash) : "";
+    if (!hw) return false;
+    text.value = hw; try { sessionStorage.setItem(DRAFT, hw); } catch (e) { /* none */ }
+    try { history.replaceState(null, "", location.pathname + location.search + "#story"); } catch (e) { /* the address keeps them */ }
+    ov = Object.create(null); lastSig = ""; gapsAll = false; grow(); $("sp-clear").hidden = false; run(); return true;
+  }
+  /* a link pasted into a tab that already has the page open changes only the part after the #, which does not reload it */
+  window.addEventListener("hashchange", takeAddress);
   (function boot() {
     var h = null; try { h = JSON.parse(localStorage.getItem(HAND) || "null"); localStorage.removeItem(HAND); } catch (e) { h = null; }
     var draft = ""; try { draft = sessionStorage.getItem(DRAFT) || ""; } catch (e) { draft = ""; }
     var sid = QS.get("story");
+    /* WORDS IN THE ADDRESS (#story=...), or an old /looking-for/ link turned into a sentence: they win over a kept draft, and are taken off the address once read */
+    if (!sid && takeAddress()) return;
     if (sid) {
       openSaved(sid).then(function (ok) { if (ok) { $("sp-clear").hidden = false; run(); } else if (draft) { text.value = draft; grow(); run(); } });
       return;

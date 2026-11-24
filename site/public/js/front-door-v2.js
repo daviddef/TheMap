@@ -79,7 +79,7 @@
     else if (a === "photo") { var add = $(".ra-q-add"); if (add) add.click(); else q && q.focus(); }
     else if (a === "names") location.href = url("/your-name/");
     else if (a === "history") location.href = url("/history/");
-    else if (a === "looking") location.href = url("/looking-for/");
+    else if (a === "looking") location.href = url("/read/#story");
     else if (a === "play") location.href = historyUrl();
     else if (a === "handoff") {
       if (q && q.value.trim() && window.raStoryBox) window.raStoryBox.handoff();

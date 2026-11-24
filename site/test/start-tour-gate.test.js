@@ -23,7 +23,7 @@ test("never again once seen, and never when this browser cannot remember", () =>
 });
 
 test("a deep link is never interrupted", () => {
-  for (const path of ["/map/", "/your-name/", "/tree-canvas/", "/places/rijeka/", "/flags/", "/help/", "/looking-for/", "/read/"])
+  for (const path of ["/map/", "/your-name/", "/tree-canvas/", "/places/rijeka/", "/flags/", "/help/", "/read/"])
     assert.equal(G.shouldAutoOpen(fresh({ path })), false, path);
   for (const search of ["?q=Gallignana", "?spot=rijeka", "?layers=shelf&years=1800,1920", "?view=45.1,14.3,8"])
     assert.equal(G.shouldAutoOpen(fresh({ search })), false, search);

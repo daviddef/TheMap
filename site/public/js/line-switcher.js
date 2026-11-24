@@ -57,6 +57,15 @@
     /* NOTHING CHOSEN YET MEANS THE FAMILY YOU ARE ON, which is what the page did before this existed. «All» is a choice, never the default. */
     function readScope() { try { var x = JSON.parse(localStorage.getItem(SKEY) || "null"); if (x && typeof x === "object") return x; } catch (e) { /* none */ } var a = P.active(); return { all: false, slugs: a ? [a] : [] }; }
     function writeScope(x) { try { localStorage.setItem(SKEY, JSON.stringify(x)); } catch (e) { /* storage blocked: lasts until the page closes */ } document.dispatchEvent(new CustomEvent("ra-scope-changed")); }
+    var archChips = [];   /* the archive buttons in the open list: { b, slugs } */
+    function archName(a) { return String(a.name).replace(/^The /, "").replace(/ Archive$/, ""); }
+    /* AN ARCHIVE TICKS ALL ITS FAMILIES. Every family a research session publishes belongs to the archive that did the work (Mazza, Falco,
+       D'Arcy...), so one press ticks every family under it, or unticks them when they are all ticked already; the other ticks are left alone. */
+    function setMany(slugs, on) {
+      var all = P.lines().map(function (l) { return l.slug; }), x = readScope(), cur = x.all ? all.slice() : (x.slugs || []).filter(function (s2) { return all.indexOf(s2) > -1; });
+      slugs.forEach(function (s2) { var i = cur.indexOf(s2); if (on && i < 0) cur.push(s2); else if (!on && i > -1) cur.splice(i, 1); });
+      writeScope({ all: cur.length === all.length, slugs: cur });
+    }
     function inScope(slug) { var x = readScope(); return !!x.all || (x.slugs || []).indexOf(slug) > -1; }
     function toggleScope(slug) {
       var all = P.lines().map(function (l) { return l.slug; }), x = readScope(), cur = x.all ? all.slice() : (x.slugs || []).filter(function (s2) { return all.indexOf(s2) > -1; }), i = cur.indexOf(slug);
@@ -69,6 +78,10 @@
       [].forEach.call(list.querySelectorAll(".ra-cb-tog"), function (c) { c.checked = inScope(c.getAttribute("data-slug")); });
       var x = readScope(); n = x.all ? tot : (x.slugs || []).length;
       if (tgCount) tgCount.textContent = n + " of " + tot + " ticked";
+      archChips.forEach(function (c) {
+        var k = c.slugs.filter(inScope).length, state = k === c.slugs.length ? "true" : k ? "mixed" : "false";
+        c.b.setAttribute("aria-pressed", state); c.b.classList.toggle("on", state === "true"); c.b.classList.toggle("part", state === "mixed");
+      });
     }
     document.addEventListener("ra-scope-changed", syncTicks);
     document.addEventListener("ra-scope-changed", function () { if (fam) drawAdmin(P.lines().filter(function (l) { return l.active; })[0]); });
@@ -77,7 +90,7 @@
     function labelOf(l) { return (l.name === "My research so far" ? "Research Names" : l.name) + (l.where ? " of " + l.where : ""); }
     function paintList() {
       var f = fold(q.value), lines = P.lines();
-      shownLines = lines.filter(function (l) { return !f || fold(l.name + " " + l.where).indexOf(f) > -1; });
+      shownLines = lines.filter(function (l) { return !f || fold(l.name + " " + l.where + " " + (l.archives || []).map(archName).join(" ")).indexOf(f) > -1; });   /* typing an archive's name finds its families */
       /* the ones made here, then the ones the family research sessions publish; each alphabetical. The headings show only when both exist. */
       var mine = shownLines.filter(function (l) { return !l.session; }), theirs = shownLines.filter(function (l) { return l.session; });
       shownLines = mine.concat(theirs);
@@ -96,6 +109,20 @@
         tg.append(bt("Select all", function () { writeScope({ all: true, slugs: [] }); }), bt("Clear", function () { writeScope({ all: false, slugs: [] }); }), cnt, go);
         tg.title = "Read several together: tick families to read them as one on My research. Clicking a family's name still chooses the one you mark under.";
         list.append(tg);
+        /* THE ARCHIVES, alphabetical: one button each, with how many of its families there are */
+        archChips = [];
+        var byArch = {}; lines.forEach(function (l) { (l.archives || []).forEach(function (a) { var k = archName(a); (byArch[k] = byArch[k] || []).push(l.slug); }); });
+        var names = Object.keys(byArch).sort(function (a, b) { return a.localeCompare(b); });
+        if (names.length) {
+          var ar = mk("li", "ra-cb-arcs"); ar.append(mk("span", "ra-cb-arcs-l", "Tick a whole archive"));
+          names.forEach(function (k) {
+            var slugs = byArch[k], b = mk("button", "ra-cb-arcbtn", k + " \u00b7 " + slugs.length); b.type = "button";
+            b.title = "Tick all " + slugs.length + (slugs.length === 1 ? " family" : " families") + " of the " + k + " archive, or untick them if they are all ticked";
+            b.addEventListener("mousedown", function (e) { e.preventDefault(); e.stopPropagation(); setMany(slugs, !slugs.every(inScope)); syncTicks(); });
+            archChips.push({ b: b, slugs: slugs }); ar.append(b);
+          });
+          list.append(ar);
+        }
         syncTicks();
       }
       shownLines.forEach(function (l, i) {

@@ -30,7 +30,7 @@ const here = Astro.url.pathname;
       {nav.map(([label, links, opt]) => (
         typeof links === "string"
           ? <a class:list={["menulink", here === u(links) ? "on" : ""]} href={u(links)} target={opt?.newTab ? "_blank" : undefined} rel={opt?.newTab ? "noopener" : undefined}>{label}</a>
-          : <details class="menu"><summary>{label}</summary><div class:list={["panel", links.length > 14 ? "long" : ""]}>{links.map(([h, l]) => h === null ? <span class="ph">{l}</span> : <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}</div></details>
+          : <details class="menu"><summary>{label}</summary><div class:list={["panel", links.length > 14 ? "long" : ""]}>{links.map(([h, l, o]) => h === null ? <span class="ph">{l}</span> : <a href={u(h)} class={here === u(h) ? "on" : ""} target={o?.newTab ? "_blank" : undefined} rel={o?.newTab ? "noopener" : undefined}>{l}</a>)}</div></details>
       ))}
       <a class="findbtn" href={u("/add/")}>Add source</a>
       <a class="ra-canvas" href={u("/tree-canvas/")} target="_blank" rel="noopener" title="Tree Canvas: draw a family tree file on one canvas" aria-label="Tree Canvas: draw a family tree file on one canvas"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="3" y="4" width="7" height="5" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="14" y="15" width="7" height="5" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="14" y="4" width="7" height="5" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M10 6.5h4M6.5 9v8.5H14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
@@ -40,7 +40,7 @@ const here = Astro.url.pathname;
     <div class="wrap">{nav.map(([label, links, opt]) => (
       typeof links === "string"
         ? <div class="dgrp"><a href={u(links)} class={here === u(links) ? "on" : ""} target={opt?.newTab ? "_blank" : undefined} rel={opt?.newTab ? "noopener" : undefined}>{label}</a></div>
-        : <div class="dgrp"><span class="gl">{label}</span>{links.map(([h, l]) => h === null ? <span class="gl gl2">{l}</span> : <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}</div>
+        : <div class="dgrp"><span class="gl">{label}</span>{links.map(([h, l, o]) => h === null ? <span class="gl gl2">{l}</span> : <a href={u(h)} class={here === u(h) ? "on" : ""} target={o?.newTab ? "_blank" : undefined} rel={o?.newTab ? "noopener" : undefined}>{l}</a>)}</div>
     ))}
       <div class="dgrp"><span class="gl">Contribute</span><a href={u("/add/")}>Add a source</a></div>
     </div>

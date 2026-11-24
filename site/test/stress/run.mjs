@@ -1,5 +1,7 @@
 import { F, ctx, parse } from "./ctx.mjs";
-import { C } from "./corpus.mjs";
+import { C as C1 } from "./corpus.mjs";
+import { C as C2 } from "./corpus-adversarial.mjs";
+const C = C1.concat(C2);
 const only = process.argv[2];
 const fold = (s) => String(s||"").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g,"");
 let pass=0, fail=0, known=0; const bad=[], gapsSeen=[];
@@ -19,6 +21,7 @@ for (const c of C) {
       const ok = e.stops.length===got.length && e.stops.every((x,i)=>fold(got[i]).includes(fold(x)));
       if (!ok) probs.push("stops "+JSON.stringify(got.slice(0,8))+(got.length>8?" …("+got.length+")":"")+"  want "+JSON.stringify(e.stops));
     }
+    if (e.cc) { const gc=pl.map(s=>s.row.cc); if (JSON.stringify(gc)!==JSON.stringify(e.cc)) probs.push("countries "+JSON.stringify(gc)+" want "+JSON.stringify(e.cc)); }
     if (e.years && pl.length===e.years.length) { if (JSON.stringify(yrs)!==JSON.stringify(e.years)) probs.push("years "+JSON.stringify(yrs)+" want "+JSON.stringify(e.years)); }
     if (e.rel && p.rel!==e.rel) probs.push("rel '"+p.rel+"' want "+e.rel);
     if (e.suggest) { const sg=(p.suggest||[]).map(x=>x.typed); if (JSON.stringify(sg)!==JSON.stringify(e.suggest)) probs.push("suggest "+JSON.stringify(sg)+" want "+JSON.stringify(e.suggest)); }

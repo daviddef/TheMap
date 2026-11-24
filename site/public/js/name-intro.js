@@ -97,7 +97,7 @@
     sum.addEventListener("click", function () { setTimeout(function () { try { localStorage.setItem(KEY, root.open ? "1" : "0"); } catch (e) {} }, 0); });
     root.append(sum);
     if (!m.found) {
-      sum.append(el("h2", "ni-h", "About the name"));
+      sum.append(el("h2", "ni-h", "About the name" + (m.name ? " " + m.name : "")));
       root.append(el("p", "ni-p", "The registers held here have no entry for this surname yet. That is a gap in our data, not a finding about the name."));
       return root;
     }

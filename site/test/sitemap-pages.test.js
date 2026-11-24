@@ -20,6 +20,7 @@ const LEFT_OUT = {
   "roots": "the GEDCOM page works on a file only the visitor has; the page is noindex",
   "jurisdictions": "redirects to the Whose archive view of /providers/; noindex",
   "survey": "redirects to Help check a source on /providers/; noindex",
+  "looking-for": "redirects to the story page, /read/#story, and turns old links into a sentence; noindex (24 Nov 2026)",
   "worklist": "the atlas's own to-do list, public for transparency but not a page for a search engine; noindex (22 Nov 2026)",
   "errands": "drafted letters to archives, and which have been sent; noindex (22 Nov 2026)",
   "changelog": "a generated commit log; noindex (22 Nov 2026)",

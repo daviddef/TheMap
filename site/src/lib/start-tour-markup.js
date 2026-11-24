@@ -57,7 +57,7 @@ export function tourMarkup({ n, ex, sr, b, data }) {
         <div class="field"><input id="tr-q" name="q" type="text" inputmode="search" enterkeyhint="search" placeholder="${ex.placeholder}" spellcheck="false" autocapitalize="off"><button class="btn pri" type="submit">Go</button></div>
         <div class="chips" aria-label="Examples to try"><span class="note">Try</span>${ex.chips}</div>
         <p class="hint" id="tr-hint" role="status"></p>
-        <p class="doors-q">Or start with <a href="${b}/your-name/">a name</a> &middot; <a href="${b}/tree-canvas/">a tree file</a> &middot; <a href="${b}/looking-for/">a story</a></p>
+        <p class="doors-q">Or start with <a href="${b}/your-name/">a name</a> &middot; <a href="${b}/tree-canvas/">a tree file</a> &middot; <a href="${b}/read/#story">a story</a></p>
       </form>
     </div>
   </section>
@@ -255,7 +255,7 @@ export function tourMarkup({ n, ex, sr, b, data }) {
         <p class="cap" data-at="3">Each move, in order.</p>
         <p class="cap" data-at="9">With the registers to ask for.</p>
       </div>
-      <p class="atl">On the Atlas: <a href="${b}/tree-canvas/">Tree Canvas</a> &middot; <a href="${b}/looking-for/">Who are you looking for?</a></p>
+      <p class="atl">On the Atlas: <a href="${b}/tree-canvas/">Tree Canvas</a> &middot; <a href="${b}/read/#story">Tell a story</a></p>
     </div>
   </section>
 
@@ -334,7 +334,7 @@ export function tourMarkup({ n, ex, sr, b, data }) {
       <div class="big3 tl" data-at="0.4">
         <a class="door" href="${b}/your-name/"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 38l8-3 20-20-5-5L11 30z"/><path d="M28 10l5 5"/></svg><b>Type a name</b><span>A place, a surname, a first name</span></a>
         <a class="door" href="${b}/tree-canvas/"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 40V22M24 22l-10-8M24 22l10-8M24 30l-8-5"/><circle cx="14" cy="12" r="4"/><circle cx="34" cy="12" r="4"/><circle cx="24" cy="42" r="3"/></svg><b>Drop in a tree</b><span>A GEDCOM, read in your browser</span></a>
-        <a class="door" href="${b}/looking-for/"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 6h22l8 8v28H10z"/><path d="M32 6v8h8M16 24h18M16 31h18M16 38h10"/></svg><b>Tell a story</b><span>Who you are looking for, in a sentence</span></a>
+        <a class="door" href="${b}/read/#story"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 6h22l8 8v28H10z"/><path d="M32 6v8h8M16 24h18M16 31h18M16 38h10"/></svg><b>Tell a story</b><span>Who you are looking for, in a sentence</span></a>
       </div>
       <ul class="quiet tl" data-at="1.2">
         <li><a href="${b}/"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>Map</a></li>

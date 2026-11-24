@@ -1,7 +1,7 @@
 /* THE STORY ENGINE: what the Atlas can say about "my great-grandfather Ivan came from Gallignana to Hamilton around 1905".
 
    One engine, three front doors: the guided start in the home page's drawer (story-drawer.js), the guided Ask on /read/ (story-guide.js)
-   and the plain sentence page (looking-for.js). It reads a story out of free text, finds the places and years in it, says who held the
+   and the story page (story-page.js). It reads a story out of free text, finds the places and years in it, says who held the
    ground in each year, builds a short plan of the registers and sources to look at first, and can turn the plan into a research family.
 
    It is DRAWN FROM THE ATLAS'S OWN FILES, in the browser. There is no model, no account and nothing is sent or saved: the place index,

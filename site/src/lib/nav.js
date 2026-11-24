@@ -76,7 +76,7 @@ export const nav = [
        script the link lands on the Play button on /start/. The round play icon in the bar and the T key do the same. */
     ["/start/", "Start here"],
     ["/start/#story", "The story (key T)"],
-    ["/looking-for/", "Who are you looking for?"],
+    ["/read/#story", "Tell a story"],
     ["/help/", "Help"],
     [null, "The sources"],
     /* THE LIST OF EVERY SOURCE WAS NOT IN THE MENU. David: «where is the list of every source in the menu? i cant see it». The sources page

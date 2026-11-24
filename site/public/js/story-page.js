@@ -185,6 +185,8 @@
         box.append(panel);
       }
     }
+    /* with a name or a place in the story the pills in the words are the whole experience: no second row of clues, no count (David: «stick to the pill ... tap ivan, show religion») */
+    if (toks.length) return;
     var head = el("div", null, "sp-gaps-top");
     head.append(el("span", list.length ? (toks.length ? "Also missing" : "Add a clue") : "Every clue found", "sp-gaps-h"));
     var dots = el("span", null, "sp-dots"); dots.setAttribute("role", "img"); dots.setAttribute("aria-label", found + " of " + seenN + " clues found");

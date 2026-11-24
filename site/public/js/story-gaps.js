@@ -132,6 +132,7 @@
   var ABOUT_PERSON = [
     ["born", "Born", "was born in ", "a year, and where: 1951, Senj"], ["died", "Died", "died in ", "a year, and where"], ["married", "Married", "married ", "who, and when: Cheryl, 1980"],
     ["children", "Children", "had children: ", "names, or how many"], ["job", "Job", "worked as ", "a trade or a job"], ["moved", "Moved", "moved to ", "a town, and when"],
+    ["faith", "Religion", "was ", "Catholic, Orthodox, Jewish, Lutheran"], ["travelled", "How they travelled", "travelled by ", "a ship, or a port like Trieste"],
     ["father", "His father", "'s father was ", "a name, and where from"], ["mother", "His mother", "'s mother was ", "a name, and where from"], ["siblings", "Brothers, sisters", "had brothers and sisters: ", "names, or how many"]
   ];
   var ABOUT_PLACE = [["when", "When", "{}: they were there in ", "a year or a decade"], ["what", "What happened", "In {}, ", "what they did, or what happened"], ["who", "Who else", "{}: others from the family there were ", "names, and how they are related"]];

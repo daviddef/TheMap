@@ -77,7 +77,7 @@
   }
 
   function open(m) {
-    mode = m; panel.hidden = false; out.textContent = ""; say(""); ok.checked = false; lastPost = null;
+    mode = m; panel.hidden = false; panel.setAttribute("data-stage", "ask"); out.textContent = ""; say(""); ok.checked = false; lastPost = null;
     panel.setAttribute("data-mode", m);
     postIn.parentNode.hidden = m !== "post"; if (send) send.hidden = m !== "tidy";
     if (m === "tidy") {
@@ -97,7 +97,7 @@
 
   /* ---- AI ready: the old and the new side by side ----------------------------------------------------------------------------- */
   function drawTidy(original, r) {
-    out.textContent = "";
+    out.textContent = ""; panel.setAttribute("data-stage", "result");
     if (!r || r.unparsed || !r.text) { out.append(el("p", "Claude's answer could not be laid out, so nothing was changed.", "sp-fine")); return; }
     var segs = diffWords(original, r.text), n = changedCount(segs);
     var cols = el("div", null, "sp-aip-cols"), a = el("div", null, "sp-aip-col"), b = el("div", null, "sp-aip-col");
@@ -115,8 +115,8 @@
     row.append(use, keep); out.append(row);
   }
   function drawUndo() {
-    out.textContent = "";
-    out.append(el("p", "The story box now holds the AI ready version.", "sp-fine"));
+    out.textContent = ""; panel.setAttribute("data-stage", "done");
+    out.append(el("p", "\u2713 The story box now holds the AI ready version.", "sp-fine"));
     var row = el("p", null, "sp-row"), back = el("button", "Put my words back", "sp-ghost"), done = el("button", "Done", "sp-ghost");
     back.type = done.type = "button";
     back.addEventListener("click", function () { if (undo != null) setStory(undo); undo = null; close(); });
@@ -131,7 +131,7 @@
     var ul = el("ul"); items.forEach(function (x) { ul.append(el("li", x)); }); d.append(ul); return d;
   }
   function drawPost(r) {
-    out.textContent = "";
+    out.textContent = ""; panel.setAttribute("data-stage", "result");
     if (!r || r.unparsed) { out.append(el("p", "Claude's answer could not be laid out. Nothing was changed.", "sp-fine")); return; }
     lastPost = r;
     var g = el("div", null, "sp-aip-grid");

@@ -81,9 +81,9 @@
     panel.setAttribute("data-mode", m);
     if (send) send.hidden = false;
     if (m === "tidy") {
-      title.textContent = "Get the story AI ready";
+      title.textContent = "Tidy the story with AI";
       note.textContent = "Claude rewrites what is in the story box as short, plain sentences, one fact each, saying who each is about, and adds nothing. You see the old and the new side by side before anything changes.";
-      go.textContent = "Make it AI ready";
+      go.textContent = "Tidy it with AI";
     } else {
       title.textContent = "Draft a reply";
       note.textContent = "For a post that asks for help with a family, pasted into the story box. Claude reads it as a request: what it knows, what it asks, and a draft reply for the group.";
@@ -101,7 +101,7 @@
     var segs = diffWords(original, r.text), n = changedCount(segs);
     var cols = el("div", null, "sp-aip-cols"), a = el("div", null, "sp-aip-col"), b = el("div", null, "sp-aip-col");
     a.append(el("h4", "Your words")); a.append(el("p", original, "sp-aip-t"));
-    b.append(el("h4", "AI ready")); var p = el("p", null, "sp-aip-t");
+    b.append(el("h4", "Tidied")); var p = el("p", null, "sp-aip-t");
     segs.forEach(function (s) { if (s.c && /\S/.test(s.t)) { var m = el("mark", s.t.replace(/\s+$/, "")); p.append(m, document.createTextNode(s.t.slice(s.t.replace(/\s+$/, "").length))); } else p.append(document.createTextNode(s.t)); });
     b.append(p); cols.append(a, b); out.append(cols);
     out.append(el("p", n ? n + " word" + (n === 1 ? " is" : "s are") + " new or changed (marked). Check them before you use it." : "No word is new: it is your words, re-laid out.", "sp-fine"));
@@ -115,7 +115,7 @@
   }
   function drawUndo() {
     out.textContent = ""; panel.setAttribute("data-stage", "done");
-    out.append(el("p", "\u2713 The story box now holds the AI ready version.", "sp-fine"));
+    out.append(el("p", "\u2713 The story box now holds the tidied version.", "sp-fine"));
     var row = el("p", null, "sp-row"), back = el("button", "Put my words back", "sp-ghost"), done = el("button", "Done", "sp-ghost");
     back.type = done.type = "button";
     back.addEventListener("click", function () { if (undo != null) setStory(undo); undo = null; close(); });

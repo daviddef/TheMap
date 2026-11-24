@@ -1,5 +1,5 @@
 /* The AI ready panel put away its question once it has an answer: David's screen showed the tick box, the "what will be sent" copy and the button still sitting
-   above "The story box now holds the AI ready version". The panel is in three stages (ask, result, done), set by story-ai.js and read by the CSS. */
+   above "The story box now holds the tidied version". The panel is in three stages (ask, result, done), set by story-ai.js and read by the CSS. */
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";

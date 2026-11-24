@@ -1,4 +1,4 @@
-/* The "Get the story AI ready" panel: closed until asked for, and says why its button is off. */
+/* The "Tidy the story with AI" panel: closed until asked for, and says why its button is off. */
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";

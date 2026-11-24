@@ -842,6 +842,21 @@
     return parts.join("");
   }
 
+  /* THE YEARS OF THE MAIN PERSON ONLY. «he married my mother in 1980», «his father ivan was born in 1925», «my grandfather ivan was born in 1925»: the story's born and left years were
+     taken from every year in the text, so a marriage became a departure, a grandfather's birth year became the father's, and a father born in 1951 was drawn as born in 1955.
+     The sentences that start with another relation (his father, her mother, my grandmother ...) are about someone else (the family reader reads those into the family tree), and a
+     year that comes after married, died, buried or divorced is that event's, not the journey's. Words are not changed anywhere else; this only decides which years count here. */
+  function mainYearsText(t) {
+    t = String(t || "");
+    var first = /\bmy\s+(?:great[- ])*(father|mother|grandfather|grandmother|uncle|aunt|brother|sister|husband|wife|son|daughter)\b/i.exec(t), main = first ? first[1].toLowerCase() : "";
+    var other = /^\s*(?:(?:and|but|so|also)\s+)?(?:(?:his|her|their)\s+(?:great[- ])*(?:father|mother|parents?|grandfather|grandmother|uncle|aunt|brother|sister|wife|husband|son|daughter)\b|my\s+(?:great[- ])*(father|mother|grandfather|grandmother|uncle|aunt|brother|sister|husband|wife|son|daughter)\b)/i;
+    var parts = t.match(/[^.!?\n]+[.!?\n]*/g) || [t];
+    return parts.filter(function (p) {
+      var m = other.exec(p); if (!m) return true;
+      if (m[1]) return main && m[1].toLowerCase() === main;           /* «my father ...» is the main person, «my grandfather ...» is not */
+      return false;                                                  /* «his father ...», «her mother ...» */
+    }).join("").replace(/\b(?:married|marry|marrying|wed|divorced|divorce|died|dies|passed away|buried|death|funeral|engaged)\b[^.!?;]*?\b(?:1[5-9]\d\d|20[0-2]\d)\b/gi, function (x) { return x.replace(/\b(?:1[5-9]\d\d|20[0-2]\d)\b/g, ""); });
+  }
   function parseStory(text, ctx, attached) {
     withExonyms(text, ctx);
     withWorldCities(text, ctx);
@@ -942,7 +957,7 @@
     out.occupations = [];
     (t.match(/[\p{L}]+/gu) || []).forEach(function (w) { var f = S.fold(w); if (OCC[f] && f.length > 3 && out.occupations.indexOf(f) < 0 && out.occupations.length < 4 && !(ctx.given && ctx.given[f] && /^[A-ZÀ-ÖØ-Þ]/.test(w))) out.occupations.push(f); });
     out.occupation = out.occupations[0] || "";
-    var ys = yearsIn(t), born = null, left = null, rest = [];
+    var ys = yearsIn(mainYearsText(t)), born = null, left = null, rest = [];
     ys.forEach(function (y) { if (/(born|birth|b|b\.)(?:\s+in)?\s*$/.test(y.before) && born == null) born = y.y; else rest.push(y); });
     if (rest.length) {
       var lab = rest.filter(function (y) { return /(came|arriv|left|emigrat|sail|around|about|circa|c\.|abt|in|by|moved)\s*$/.test(y.before); })[0] || rest[rest.length - 1];
@@ -1256,7 +1271,7 @@
     }
     if (out.married) {
       var sm = /\bmarried\s+(?:to\s+)?(?:my\s+)?(?:(?:other|mother|mum|mom|wife)\s+)?([\p{L}'’-]{2,})(?:\s+([\p{Lu}][\p{L}'’-]+))?/iu.exec(text);
-      if (sm && !/^(in|on|at|a|the|her|him|and)$/i.test(sm[1])) out.married.spouse = cased(sm[1]) + (sm[2] && /^[\p{Lu}]/u.test(sm[2]) && !STOP[S.fold(sm[2])] && !COMMON[S.fold(sm[2])] && !(ctx.map && ctx.map[S.fold(sm[2])]) ? " " + cased(sm[2]) : "");
+      if (sm && !/^(in|on|at|a|the|her|his|him|their|and)$/i.test(sm[1])) out.married.spouse = cased(sm[1]) + (sm[2] && /^[\p{Lu}]/u.test(sm[2]) && !STOP[S.fold(sm[2])] && !COMMON[S.fold(sm[2])] && !(ctx.map && ctx.map[S.fold(sm[2])]) ? " " + cased(sm[2]) : "");
     }
     return out;
   }

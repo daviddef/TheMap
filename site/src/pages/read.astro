@@ -91,6 +91,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
           <div id="sp-aip-out"></div>
         </section>
         <div class="sp-lang" id="sp-lang" hidden aria-live="polite"></div>
+        <details class="sp-read" id="sp-rewrite" hidden></details>
         <div class="sp-did" id="sp-did" hidden></div>
         <div class="sp-chips" id="sp-chips" aria-live="polite"></div>
         <div class="sp-gaps" id="sp-gaps" hidden aria-live="polite"></div>
@@ -282,6 +283,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   <script is:inline src={u("/js/story-link.js")} defer></script>
   <script is:inline src={u("/js/story-gaps.js")} defer></script>
   <script is:inline src={u("/js/story-lang.js")} defer></script>
+  <script is:inline src={u("/js/story-kin.js")} defer></script>
   <script is:inline src={u("/js/story-page.js")} defer></script>
   <script is:inline src={u("/js/story-ai.js")} defer></script>
   <script is:inline src={u("/js/case-atlas.js")} defer></script>
@@ -499,6 +501,12 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp-add, .sp-ghost { font: 500 14px/1 var(--sans); padding: 10px 14px; border-radius: 999px; border: 1px solid var(--rule-strong); background: var(--panel); color: var(--ink); cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
   .sp-add:hover, .sp-ghost:hover { background: var(--accent-wash); border-color: var(--accent); }
   .sp-ghost[hidden] { display: none; }
+  /* HOW THE PAGE READ THE WORDS, when it made who-is-whose explicit first. */
+  .sp-read { margin: 6px 0 2px; font-size: 14px; color: var(--ink-2); max-width: 46rem; }
+  .sp-read[hidden] { display: none; }
+  .sp-read > summary { cursor: pointer; color: var(--accent); font-size: 13.5px; }
+  .sp-read-t { margin: 6px 0 0; padding: 8px 10px; border-radius: 6px; background: var(--panel); border: 1px solid var(--rule); white-space: pre-wrap; line-height: 1.5; }
+  .sp-read ul { margin: 6px 0 0; padding-left: 18px; color: var(--ink-3); font-size: 13.5px; }
   /* THE STORY IS NOT IN ENGLISH: the language found, and how it is being read. */
   .sp-lang { margin: 8px 0 4px; padding: 10px 12px 12px; border: 1px solid var(--rule); border-left: 3px solid var(--terra, var(--accent)); border-radius: 8px; background: var(--panel); display: grid; gap: 8px; max-width: 46rem; }
   .sp-lang[hidden] { display: none; }

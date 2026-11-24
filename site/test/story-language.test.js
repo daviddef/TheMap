@@ -95,8 +95,8 @@ test("the device translator is run a paragraph at a time and reports the languag
 test("the story page reads the English copy, keeps the writer's words, asks before sending anything, and offers every way out", () => {
   const js = read("../public/js/story-page.js"), page = read("../src/pages/read.astro");
   assert.match(js, /function readingText\(raw\)/);
-  assert.match(js, /var raw = text\.value, t = readingText\(raw\); checkLang\(raw\);/);
-  assert.match(js, /var t = readingText\(text\.value\)\.trim\(\);/, "the gaps read the English copy too");
+  assert.match(js, /var raw = text\.value, t = readingText\(raw\)(?:, rw = null)?; checkLang\(raw\);/);
+  assert.match(js, /var t = \(readingNow \|\| readingText\(text\.value\)\)\.trim\(\);/, "the gaps read the English copy too");
   assert.match(js, /call\("english", \{ text: raw/);
   assert.match(js, /if \(lang\.ok\) viaClaude\(raw\)/, "Claude is only asked after the tick");
   assert.match(js, /Translated on this device/); assert.match(js, /Translated by Claude/);

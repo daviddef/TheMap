@@ -25,3 +25,24 @@
   #sw .sw-i { width: 40px; height: 40px; }
 }
 @media (prefers-reduced-motion: reduce) { #sw .sw-i { transition: none; } }
+
+/* LABELLED, AND THREE COLOURS (David, 24 Nov 2026: «compass is almost not a feature at all»). Three identical orange circles with no words made the Compass look like a decoration. Now one pill with the
+   words in it, each view in its own colour (the same three as the round icons in the Atlas's bar: orange canvas, blue Compass, green Atlas), and the one you are on filled in. Under 1000px wide the
+   words go and the colours stay; on a phone the pill is a column at the left, as before. */
+#sw { --sw-c-canvas: #C4721F; --sw-c-compass: #2E62B0; --sw-c-atlas: #3F8A33; --sw-on: #fff; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #sw { --sw-c-canvas: #DD7D17; --sw-c-compass: #5B9BE8; --sw-c-atlas: #5DB04B; --sw-on: #1b1208; } }
+:root[data-theme="dark"] #sw { --sw-c-canvas: #DD7D17; --sw-c-compass: #5B9BE8; --sw-c-atlas: #5DB04B; --sw-on: #1b1208; }
+#sw { gap: 4px; padding: 4px; border: 2px solid var(--sw-line); border-radius: 99px; background: var(--sw-card); box-shadow: 0 3px 0 var(--sw-line); }
+#sw .sw-b { --c: var(--sw-orange); gap: 7px; padding: 0 12px 0 0; border: 2px solid transparent; border-radius: 99px; }
+#sw .sw-b[data-v="canvas"] { --c: var(--sw-c-canvas); } #sw .sw-b[data-v="compass"] { --c: var(--sw-c-compass); } #sw .sw-b[data-v="atlas"] { --c: var(--sw-c-atlas); }
+#sw .sw-i { width: 34px; height: 34px; border-color: var(--c); background: var(--c); color: var(--sw-on); box-shadow: none; transform: none; }
+#sw .sw-i svg { width: 20px; height: 20px; }
+#sw .sw-l { position: static; width: auto; height: auto; clip: auto; overflow: visible; white-space: nowrap; font: 800 13.5px/1 Nunito, system-ui, sans-serif; display: none; }
+#sw .sw-b:hover .sw-i { transform: none; filter: brightness(1.08); }
+#sw .sw-b:hover { background: color-mix(in srgb, var(--c) 14%, transparent); }
+#sw .sw-b:active .sw-i, #sw .sw-b[aria-current="page"] .sw-i { transform: none; box-shadow: none; }
+#sw .sw-b[aria-current="page"] { background: color-mix(in srgb, var(--c) 22%, var(--sw-card)); border-color: var(--c); }
+@media (min-width: 1000px) { #sw .sw-l { display: inline; } }
+@media (min-width: 761px) { #sw { top: 8px; left: 200px; } #sw .sw-i { width: 34px; height: 34px; } #sw .sw-b { padding-right: 4px; } }
+@media (min-width: 1000px) { #sw .sw-b { padding-right: 14px; } }
+@media (max-width: 760px) { #sw { padding: 4px; border-radius: 28px; } #sw .sw-b { padding-right: 0; } #sw .sw-i { width: 36px; height: 36px; } }

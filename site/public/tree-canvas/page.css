@@ -528,3 +528,19 @@ html, body { height: 100%; margin: 0; background: #efe6d2; color: #2b2118; font:
   .stfoot { flex-direction: column; }
 }
 @media (prefers-reduced-motion: reduce) { #start *, #yf * { transition: none !important; animation: none !important; } }
+
+/* THE FRONT PAGE IN ONE LINE OF SIGHT (David, 24 Nov 2026: «needs real work, still not simple and intuitive enough»). Someone with a kept tree is offered it FIRST, with Canvas and
+   Compass on the card; someone without sees one big drop zone, what they get from a file (Canvas, Compass, Atlas), and two ways to try it with nothing. Everything else is under
+   "More ways to start" or in the foot. */
+.sthead { order: -4; } #stCur { order: -3; }
+.stwrap.haskept #stRecent { order: -2; }
+.stviews { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; }
+.stviews li { display: grid; gap: 3px; align-content: start; padding: 12px 14px; border: 2px solid var(--line); border-radius: 16px; background: var(--card); text-align: left; }
+.stviews b { font: 800 15px/1.2 system-ui, sans-serif; display: flex; align-items: center; gap: 8px; }
+.stviews b::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: #D9822B; flex: none; }
+.stviews li:nth-child(2) b::before { background: #3A74C9; } .stviews li:nth-child(3) b::before { background: #4E9A3E; }
+.stviews small { font: 400 13px/1.35 system-ui, sans-serif; color: var(--soft); }
+@media (max-width: 560px) { .stviews { grid-template-columns: 1fr; } .stviews li { grid-template-columns: auto 1fr; align-items: baseline; column-gap: 10px; } }
+#stArch h2 { font-size: 15px; }
+.stfold .starch { margin: 4px 0; } .stfold .stex { margin: 8px 0; }
+.stfold > .stlinkrow { margin-top: 6px; }

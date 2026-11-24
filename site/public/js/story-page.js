@@ -129,17 +129,18 @@
      found so far, a small answer box on each (type it, press Enter, and it is added to the story as a sentence), and a word of thanks when one is found. The numbers
      are honest: a clue counts only once it has been open in this story, so «2 of 5» grows when the story shows a new gap and never claims a clue that was never asked. */
   /* the highlight layer behind the textarea: the same words, the recognised ones wrapped in <mark>. The text itself is drawn by the textarea on top. */
-  var mirrorToks = [], mirrorEl = $("sp-mirror"), editEl = $("sp-edit");
+  var mirrorToks = [], mirrorKnown = Object.create(null), mirrorEl = $("sp-mirror"), editEl = $("sp-edit");
   function mirrorDraw() {
     if (!mirrorEl) return;
-    var raw = text.value, pos = 0, frag = document.createDocumentFragment();
+    var raw = text.value, pos = 0, frag = document.createDocumentFragment(), now = Object.create(null);
     mirrorToks.slice().sort(function (a, b) { return a.start - b.start; }).forEach(function (k) {
       if (k.start < pos || k.end > raw.length) return;
       if (k.start > pos) frag.append(document.createTextNode(raw.slice(pos, k.start)));
-      var m = document.createElement("mark"); m.className = "sp-mk-" + k.kind + (gapTok === k.kind + ":" + k.name.toLowerCase() ? " is-on" : ""); m.textContent = raw.slice(k.start, k.end); frag.append(m); pos = k.end;
+      var mk = k.kind + ":" + raw.slice(k.start, k.end).toLowerCase(); now[mk] = 1;
+      var m = document.createElement("mark"); m.className = "sp-mk-" + k.kind + (gapTok === k.kind + ":" + k.name.toLowerCase() ? " is-on" : "") + (mirrorKnown[mk] ? "" : " is-new"); m.textContent = raw.slice(k.start, k.end); frag.append(m); pos = k.end;
     });
     frag.append(document.createTextNode(raw.slice(pos) + (/\n$/.test(raw) ? " " : "")));
-    mirrorEl.textContent = ""; mirrorEl.append(frag); mirrorEl.scrollTop = text.scrollTop;
+    mirrorKnown = now; mirrorEl.textContent = ""; mirrorEl.append(frag); mirrorEl.scrollTop = text.scrollTop;
     if (editEl) editEl.classList.toggle("has-toks", mirrorToks.length > 0);
   }
   /* while typing, the marks follow the words: what lies before the edit stays, what lies after it moves by the change, what the edit touched goes until the page reads again */

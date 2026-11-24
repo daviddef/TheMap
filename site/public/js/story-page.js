@@ -122,9 +122,9 @@
 
   /* WHAT IS STILL MISSING, ASKED AS YOU TYPE (story-gaps.js). Three at a time, the ones that unlock the most records first. A tap adds the start of a sentence
      to the box for the reader to finish; nothing is filled in for them. The box redraws on the same pause as the reading, so it follows what they have typed. */
-  var gapsAll = false, clueSeen = Object.create(null), clueOpen = null, clueNews = [];
+  var gapsAll = false, gapActive = "", gapTok = "", gapOpt = "", clueSeen = Object.create(null), clueOpen = null, clueNews = [];
   /* A NEW STORY STARTS A NEW HUNT: what was found in the last one is not found in this. */
-  function clueReset() { clueSeen = Object.create(null); clueOpen = null; clueNews = []; gapsAll = false; }
+  function clueReset() { clueSeen = Object.create(null); clueOpen = null; clueNews = []; gapsAll = false; gapActive = ""; gapTok = ""; gapOpt = ""; }
   /* THE GAPS, AS A SMALL HUNT. David: «i feel like we can make this section more fun». What is still missing is a clue to find, not a form to fill: the count of those
      found so far, a small answer box on each (type it, press Enter, and it is added to the story as a sentence), and a word of thanks when one is found. The numbers
      are honest: a clue counts only once it has been open in this story, so «2 of 5» grows when the story shows a new gap and never claims a clue that was never asked. */
@@ -133,47 +133,101 @@
     box.textContent = "";
     var t = (readingNow || readingText(text.value)).trim();
     if (t.length < 8) { box.hidden = true; clueReset(); return; }
-    var list = G.gaps(p, t, { files: files.length, place: function (w) { return !!(data && data.map && data.map[S.fold(w)]); } }), top = gapsAll ? list : list.slice(0, 3);
+    var list = G.gaps(p, t, { files: files.length, place: function (w) { return !!(data && data.map && data.map[S.fold(w)]); } }), PERSONAL = /^(?:name|given|surname|rel|maiden)$/, rest = list.filter(function (g) { return !PERSONAL.test(g.id); }), top = gapsAll ? rest : rest.slice(0, 3);
     box.hidden = false;
     var nowOpen = Object.create(null); list.forEach(function (g) { nowOpen[g.id] = 1; clueSeen[g.id] = 1; });
     if (clueOpen) Object.keys(clueOpen).forEach(function (id) { if (!nowOpen[id]) clueNews.push(id); });
     clueOpen = nowOpen;
     var seenN = Object.keys(clueSeen).length, found = seenN - list.length;
+    /* THE CLUES ARE PART OF THE PARAGRAPH, NOT A FORM BELOW IT. David: «is there a better way to integrate the clues with the paragraph? bold tappable pills ... one experience».
+       They sit inside the story box, under the words: a pill for each clue still open. Tap one and a single answer line opens right there, with the question; answer it and
+       the words go into the story as a sentence, the pill is ticked off, and the next clue's pill is waiting. */
+    var STICKER = { from: "\ud83c\udfe1", village: "\ud83c\udfe1", name: "\ud83d\udd0e", given: "\ud83d\udcac", surname: "\ud83c\udff7\ufe0f", to: "\ud83e\udded", when: "\u23f3", rel: "\ud83d\udc6a", holds: "\ud83d\udcf7", maiden: "\ud83c\udf38", faith: "\u26ea", family: "\ud83d\udc8d", ship: "\ud83d\udea2", end: "\ud83d\udd6f\ufe0f" };
+    /* THE STORY, READ BACK WITH ITS NAMES AND PLACES AS PILLS. David: «"my fathers name was ivan", can we flash/pill "ivan" and on tap show some things to ask? e.g. add his
+       year of birth, death, etc.» The words are the ones typed; a recognised person or place is a bold pill. Tap it and what can be added about it opens underneath; answer, and
+       the sentence goes into the story, in that person's name. */
+    var raw = text.value, toks = G.tokens ? G.tokens(raw, p) : [];
+    if (toks.length) {
+      var told = el("p", null, "sp-told"), pos = 0, keyOf = function (k) { return k.kind + ":" + k.name.toLowerCase(); };
+      toks.forEach(function (k) {
+        if (k.start > pos) told.append(document.createTextNode(raw.slice(pos, k.start)));
+        var b = el("button", raw.slice(k.start, k.end), "sp-tok sp-tok-" + k.kind + (gapTok === keyOf(k) ? " is-on" : "")); b.type = "button"; b.setAttribute("aria-expanded", gapTok === keyOf(k) ? "true" : "false");
+        b.title = k.kind === "person" ? "Add something about " + k.name : "Add something about " + k.name;
+        b.addEventListener("click", function () { gapActive = ""; gapOpt = ""; gapTok = gapTok === keyOf(k) ? "" : keyOf(k); drawGaps(p); });
+        told.append(b); pos = k.end;
+      });
+      if (pos < raw.length) told.append(document.createTextNode(raw.slice(pos)));
+      box.append(el("span", "Tap a name or a place to add to it", "sp-gaps-h"), told);
+      var tk = toks.filter(function (k) { return gapTok === keyOf(k); })[0];
+      if (tk) {
+        var panel = el("div", null, "sp-gap sp-about"), ttl = el("div", null, "sp-gap-q");
+        ttl.append(el("b", "About " + tk.name + (tk.label ? " \u00b7 " + tk.label : "")), el("span", tk.kind === "person" ? "Tap what you know; the words go into the story." : "What do you know about it?", "sp-gap-why"));
+        var opts = el("div", null, "sp-pills");
+        G.about(tk.kind).forEach(function (o) {
+          var ob = el("button", o.label, "sp-pill sp-pill-sm" + (gapOpt === o.id ? " is-on" : "")); ob.type = "button";
+          ob.addEventListener("click", function () { gapOpt = gapOpt === o.id ? "" : o.id; drawGaps(p); var i2 = box.querySelector(".sp-about .sp-gap-in"); if (i2) i2.focus(); });
+          opts.append(ob);
+        });
+        panel.append(ttl, opts);
+        var oo = G.about(tk.kind).filter(function (o) { return o.id === gapOpt; })[0];
+        if (oo) {
+          var f2 = el("form", null, "sp-gap-row"), i3 = el("input", null, "sp-gap-in"), g3 = el("button", "Add", "sp-gap-go");
+          i3.type = "text"; i3.placeholder = oo.ph; i3.maxLength = 160; i3.autocomplete = "off"; i3.setAttribute("aria-label", oo.label + ": " + tk.name); g3.type = "submit";
+          f2.addEventListener("submit", function (ev) {
+            ev.preventDefault(); var sn = G.sentence(tk.kind, tk.ref || tk.name, oo.id, i3.value); if (!sn) return;
+            gapOpt = ""; text.value = G.append(text.value, " " + sn).slice(0, 8000); grow(); text.focus();
+            try { text.setSelectionRange(text.value.length, text.value.length); } catch (e) { /* the caret stays */ }
+            try { sessionStorage.setItem(DRAFT, text.value); } catch (e) { /* none */ }
+            clearTimeout(tm); tm = setTimeout(run, 650);
+          });
+          f2.append(i3, g3); panel.append(f2);
+        }
+        box.append(panel);
+      }
+    }
     var head = el("div", null, "sp-gaps-top");
-    head.append(el("p", list.length ? "Clues to find" : "Every clue found", "sp-gaps-h"));
+    head.append(el("span", list.length ? (toks.length ? "Also missing" : "Add a clue") : "Every clue found", "sp-gaps-h"));
     var dots = el("span", null, "sp-dots"); dots.setAttribute("role", "img"); dots.setAttribute("aria-label", found + " of " + seenN + " clues found");
     for (var d = 0; d < seenN; d++) dots.append(el("i", null, d < found ? "on" : ""));
-    head.append(dots, el("span", found + " of " + seenN + " found", "sp-gaps-n"));
+    head.append(dots, el("span", found + " of " + seenN, "sp-gaps-n"));
     box.append(head);
-    /* a word for each clue found since the last draw, once, then gone */
     var news = clueNews.splice(0, 2);
     if (news.length) box.append(el("p", "Found: " + news.map(function (id) { return G.clue(id)[0].toLowerCase(); }).join(" and ") + ". That points to more records.", "sp-gaps-yes"));
     if (!list.length) { box.append(el("p", "Nothing obvious is missing now. The plan below is built from what you told us; add more at any time.", "sp-gaps-ok")); return; }
-    box.append(el("p", "Each answer opens another register. Skip any you do not know.", "sp-gaps-sub"));
     var add = function (g, value) {
+      gapActive = "";
       text.value = (value ? G.answer(text.value, g.add, value) : G.append(text.value, g.add)).slice(0, 8000); grow(); text.focus();
       try { text.setSelectionRange(text.value.length, text.value.length); } catch (e) { /* the caret stays */ }
       try { sessionStorage.setItem(DRAFT, text.value); } catch (e) { /* none */ }
       clearTimeout(tm); tm = setTimeout(run, 650);
     };
+    if (gapActive && !list.some(function (g) { return g.id === gapActive; })) gapActive = "";
+    var pills = el("div", null, "sp-pills"); pills.setAttribute("role", "group"); pills.setAttribute("aria-label", "Clues to add to the story");
     top.forEach(function (g) {
-      var c = el("div", null, "sp-gap"), cl = G.clue(g.id);
-      c.append(el("span", cl[0], "sp-gap-tag"), el("b", g.ask), el("span", g.why, "sp-gap-why"));
-      if (g.action === "photo") {
-        var ph = el("button", "Add a photo or document", "sp-gap-go"); ph.type = "button";
-        ph.addEventListener("click", function () { var f = $("sp-file"); if (f) f.click(); });
-        c.append(ph);
-      } else {
-        var row = el("form", null, "sp-gap-row"), inp = el("input", null, "sp-gap-in"), go = el("button", "Add", "sp-gap-go");
-        inp.type = "text"; inp.placeholder = cl[1] || "your words"; inp.maxLength = 160; inp.autocomplete = "off"; inp.setAttribute("aria-label", g.ask);
-        go.type = "submit";
-        row.addEventListener("submit", function (ev) { ev.preventDefault(); add(g, inp.value); });
-        var own = el("button", "write it in the story", "sp-gap-own"); own.type = "button"; own.addEventListener("click", function () { add(g, ""); });
-        row.append(inp, go); c.append(row, own);
-      }
-      box.append(c);
+      var cl = G.clue(g.id), pill = el("button", null, "sp-pill" + (gapActive === g.id ? " is-on" : "")); pill.type = "button"; pill.title = g.ask + " " + g.why;
+      var ic = el("span", STICKER[g.id] || "\u2728", "sp-pill-ico"); ic.setAttribute("aria-hidden", "true"); pill.append(ic, el("span", cl[0]), el("span", "+", "sp-pill-plus"));
+      pill.setAttribute("aria-expanded", gapActive === g.id ? "true" : "false");
+      pill.addEventListener("click", function () {
+        if (g.action === "photo") { var f = $("sp-file"); if (f) f.click(); return; }
+        gapActive = gapActive === g.id ? "" : g.id; drawGaps(p);
+        if (gapActive) { var inp = box.querySelector(".sp-gap-in"); if (inp) inp.focus(); }
+      });
+      pills.append(pill);
     });
-    if (list.length > top.length) { var more = el("button", "and " + (list.length - top.length) + " more clue" + (list.length - top.length === 1 ? "" : "s"), "sp-gaps-more"); more.type = "button"; more.addEventListener("click", function () { gapsAll = true; drawGaps(p); }); box.append(more); }
+    if (rest.length > top.length) { var more = el("button", "+" + (rest.length - top.length) + " more", "sp-pill sp-pill-more"); more.type = "button"; more.addEventListener("click", function () { gapsAll = true; drawGaps(p); }); pills.append(more); }
+    box.append(pills);
+    var act = list.filter(function (g) { return g.id === gapActive && g.action !== "photo"; })[0];
+    if (act) {
+      var cl2 = G.clue(act.id), card = el("form", null, "sp-gap");
+      var q = el("div", null, "sp-gap-q"); q.append(el("b", act.ask), el("span", act.why, "sp-gap-why"));
+      var inp2 = el("input", null, "sp-gap-in"), go = el("button", "Add", "sp-gap-go"), own = el("button", "write it myself", "sp-gap-own");
+      inp2.type = "text"; inp2.placeholder = cl2[1] || "your words"; inp2.maxLength = 160; inp2.autocomplete = "off"; inp2.setAttribute("aria-label", act.ask);
+      go.type = "submit"; own.type = "button"; own.title = "Put the start of the sentence in the story and finish it there";
+      card.addEventListener("submit", function (ev) { ev.preventDefault(); add(act, inp2.value); });
+      own.addEventListener("click", function () { add(act, ""); });
+      var row = el("div", null, "sp-gap-row"); row.append(inp2, go, own);
+      card.append(q, row); box.append(card);
+    }
   }
 
   /* ---- the journey: map, years, who held the ground ------------------------------------------------------------------------- */

@@ -114,10 +114,12 @@ test("every gap id has a short clue name, and an inline answer is added as a fin
   assert.equal(G.answer("Text.", " They went to ", "   "), "Text.", "an empty answer adds nothing");
 });
 
-test("the story page draws the gaps as a hunt: a count, a box on each clue, and a word when one is found", () => {
+test("the story page draws the gaps as pills inside the story box: a count, one answer line for the open pill, and a word when one is found", () => {
   const js = src("story-page.js"), page = read("../src/pages/read.astro");
-  assert.match(js, /Clues to find/);
-  assert.match(js, /found"/);
+  assert.match(js, /Add a clue/);
+  assert.match(js, /sp-pill/);
+  assert.match(page, /<ul class="sp-shots"[^\n]*\n\s*<div class="sp-gaps" id="sp-gaps"/, "the clues sit inside the story box, under the words");
+  assert.match(js, /found"|clues found/);
   assert.match(js, /G\.answer\(text\.value, g\.add, value\)/);
   assert.match(js, /clueReset\(\)/);
   assert.match(page, /@media \(prefers-reduced-motion: reduce\)[^}]*sp-dots i\.on/);
@@ -140,4 +142,31 @@ test("a bare gazetteer name takes the gazetteer's first (largest) place before t
   F.gazMerge(map, { ph: "dresden", ccs: null, more: true }, [["Dresden", 51.05, 13.74, "DE", ["Dresda"]], ["Dresden", 40.12, -82.01, "US", []]]);
   assert.equal(map.dresden[0].cc, "DE");
   assert.ok(map.dresden.some((r) => r.cc === "US" && r.i === "dresden-us-1"), "the index's rows stay as the other readings");
+});
+
+/* THE STORY READ BACK WITH ITS NAMES AND PLACES AS PILLS. David: «"my fathers name was ivan", can we flash/pill "ivan" and on tap show some things to ask?» */
+test("tokens: the names and places the reader found are spans in the words as typed, once each, never overlapping", () => {
+  const p = { rel: "", people: [{ role: "self", name: "Ivan" }, { role: "father", name: "Ivan" }, { role: "spouse", name: "Cheryl" }], siblings: [{ rel: "brother", name: "Robert", label: "his brother" }], stops: [{ word: "croatia", isCountry: true }, { word: "johannesburg" }, { word: "brisbane" }] };
+  const t = "my fathers name was ivan. he came from croatia, via johannesburg and then moved to brisbane in 2019. His wife was Cheryl and a brother Robert.";
+  const k = G.tokens(t, p);
+  assert.deepEqual(k.map((x) => x.word), ["ivan", "johannesburg", "brisbane", "Cheryl", "Robert"], "a whole country is not pilled; each word once");
+  assert.equal(k[0].ref, "my father", "the same name as the story's person and as «my father»: the relation is kept");
+  for (let i = 1; i < k.length; i++) assert.ok(k[i].start >= k[i - 1].end);
+});
+
+test("what can be added about a person or a place becomes a sentence in that person's own words", () => {
+  assert.equal(G.sentence("person", "my father", "born", "1951, Senj"), "My father was born in 1951, Senj.");
+  assert.equal(G.sentence("person", "Cheryl", "married", "Ivan, 1980."), "Cheryl married Ivan, 1980.");
+  assert.equal(G.sentence("person", "Ivan", "father", "Mate"), "Ivan's father was Mate.");
+  assert.equal(G.sentence("place", "Brisbane", "when", "1975"), "Brisbane: they were there in 1975.");
+  assert.equal(G.sentence("person", "Ivan", "born", "  "), "", "nothing typed adds nothing");
+  assert.ok(G.about("person").some((o) => o.id === "died") && G.about("place").some((o) => o.id === "what"));
+});
+
+test("the page draws the read-back paragraph with tappable pills, and the person-clues leave the clue pills", () => {
+  const js = src("story-page.js"), page = read("../src/pages/read.astro");
+  assert.match(js, /G\.tokens\(raw, p\)/);
+  assert.match(js, /sp-tok sp-tok-/);
+  assert.match(js, /PERSONAL = \/\^\(\?:name\|given\|surname\|rel\|maiden\)\$\//);
+  assert.match(page, /\.sp-tok \{/);
 });

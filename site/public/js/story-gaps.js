@@ -97,7 +97,55 @@
     return append(text, (stub || "") + value + ".");
   }
 
-  var api = { gaps: gaps, append: append, clue: gaps.clue, answer: answer };
+  /* THE WORDS IN THE STORY THE PAGE HAS RECOGNISED, as spans to draw as tappable pills: a person's name, a place. David: «"my fathers name was ivan", can we flash/pill "ivan"
+     and on tap show some things to ask? e.g. add his year of birth, death, etc.» Each span is found in the words as typed (case ignored), once, never overlapping another.
+     Nothing here reads anything new: the names and places are the ones the reader already found. */
+  var ROLE = { father: "your father", mother: "your mother", grandfather: "your grandfather", grandmother: "your grandmother", uncle: "your uncle", aunt: "your aunt", brother: "your brother", sister: "your sister", husband: "your husband", wife: "your wife", son: "your son", daughter: "your daughter" };
+  function esc(w) { return String(w).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+  function tokens(text, p) {
+    text = String(text || ""); p = p || {};
+    var out = [], taken = [];
+    function free(a, b) { return !taken.some(function (t) { return a < t[1] && b > t[0]; }); }
+    function put(word, kind, name, label, ref) {
+      word = String(word || "").trim(); if (word.length < 2) return;
+      var m = new RegExp("(^|[^\\p{L}])(" + esc(word) + ")(?![\\p{L}])", "iu"), at = -1, hit;
+      var re = new RegExp(m.source, "giu");
+      while ((hit = re.exec(text))) { var st = hit.index + hit[1].length; if (free(st, st + word.length)) { at = st; break; } }
+      if (at < 0) return;
+      taken.push([at, at + word.length]); out.push({ start: at, end: at + word.length, kind: kind, name: name || word, label: label || "", ref: ref || "", word: text.slice(at, at + word.length) });
+    }
+    /* the same name twice (the story's person, and «my father» of the same name): the one with a relation is the one meant */
+    var ppl = (p.people || []).slice().sort(function (x, y) { return (ROLE[y.role] ? 1 : 0) - (ROLE[x.role] ? 1 : 0); });
+    ppl.forEach(function (pe) {
+      if (!pe.name) return;
+      var given = String(pe.name).split(/\s+/)[0], rel = pe.role === "self" ? (p.rel ? ROLE[p.rel] || "your " + String(p.rel).replace(/-/g, " ") : "") : pe.role === "spouse" ? "his or her partner" : pe.role === "child" ? "a child" : ROLE[pe.role] ? "the " + pe.role : "";
+      var ref = pe.role === "self" && p.rel && !pe.me ? "my " + String(p.rel).replace(/-/g, " ") : (pe.role === "father" || pe.role === "mother") && !p.rel ? "my " + pe.role : "";
+      if (ref) rel = "your " + ref.slice(3);
+      put(pe.name, "person", given, rel, ref); if (!out.some(function (t) { return t.name === given && t.kind === "person"; })) put(given, "person", given, rel, ref);
+    });
+    (p.siblings || []).forEach(function (sb) { put(sb.name, "person", sb.name, (sb.label || sb.rel || "").replace(/^(?:his|her|their)\b/, "their")); });
+    (p.stops || []).forEach(function (st) { if (st.word && !st.isCountry) put(st.word, "place", st.word, ""); });
+    out.sort(function (a, b) { return a.start - b.start; });
+    return out;
+  }
+  /* WHAT CAN BE ADDED ABOUT A PERSON OR A PLACE: each is the start of a sentence in the person's own name, and what a reader might type to finish it. */
+  var ABOUT_PERSON = [
+    ["born", "Born", "was born in ", "a year, and where: 1951, Senj"], ["died", "Died", "died in ", "a year, and where"], ["married", "Married", "married ", "who, and when: Cheryl, 1980"],
+    ["children", "Children", "had children: ", "names, or how many"], ["job", "Job", "worked as ", "a trade or a job"], ["moved", "Moved", "moved to ", "a town, and when"],
+    ["father", "His father", "'s father was ", "a name, and where from"], ["mother", "His mother", "'s mother was ", "a name, and where from"], ["siblings", "Brothers, sisters", "had brothers and sisters: ", "names, or how many"]
+  ];
+  var ABOUT_PLACE = [["when", "When", "{}: they were there in ", "a year or a decade"], ["what", "What happened", "In {}, ", "what they did, or what happened"], ["who", "Who else", "{}: others from the family there were ", "names, and how they are related"]];
+  function about(kind) { return (kind === "place" ? ABOUT_PLACE : ABOUT_PERSON).map(function (x) { return { id: x[0], label: x[1], stub: x[2], ph: x[3] }; }); }
+  /* the sentence one answer adds: «Ivan was born in 1951, Senj.» */
+  function sentence(kind, name, opt, value) {
+    value = String(value || "").replace(/\s+/g, " ").trim().replace(/[.!?]+$/, ""); if (!value) return "";
+    var o = about(kind).filter(function (x) { return x.id === opt; })[0]; if (!o) return "";
+    if (kind === "place") return o.stub.replace("{}", name) + value + ".";
+    var who = String(name || ""); who = who.charAt(0).toUpperCase() + who.slice(1);   /* «my father» is «My father»: said of the person the story is about, the way the reader already understands it */
+    return who + (/^'s /.test(o.stub) ? "" : " ") + o.stub + value + ".";
+  }
+
+  var api = { gaps: gaps, append: append, clue: gaps.clue, answer: answer, tokens: tokens, about: about, sentence: sentence };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (root) root.raStoryGaps = api;
 })(typeof window !== "undefined" ? window : (typeof globalThis !== "undefined" ? globalThis : this));

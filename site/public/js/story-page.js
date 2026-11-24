@@ -128,7 +128,7 @@
   function drawGaps(p) {
     var box = $("sp-gaps"), G = window.raStoryGaps; if (!box || !G) return;
     box.textContent = "";
-    var t = readingText(text.value).trim();
+    var t = (readingNow || readingText(text.value)).trim();
     if (t.length < 8) { box.hidden = true; clueReset(); return; }
     var list = G.gaps(p, t, { files: files.length, place: function (w) { return !!(data && data.map && data.map[S.fold(w)]); } }), top = gapsAll ? list : list.slice(0, 3);
     box.hidden = false;
@@ -515,10 +515,16 @@
   }
 
   function run() {
-    var raw = text.value, t = readingText(raw); checkLang(raw);
+    var raw = text.value, t = readingText(raw), rw = null; checkLang(raw);
     $("sp-clear").hidden = !t.trim() && !files.length; $("sp-link").hidden = !t.trim();
     if (t.trim().length > 12) say("Reading your story…");
-    return LD.resolveMissing(t).catch(function () { return LD.load(); }).then(function (d) {
+    /* WHO IS WHOSE PARENT is made explicit first (story-kin.js), once the given names are loaded, so «born in 1951 to ivan and hedviga» is two parents and not a journey to a
+       village called Ivan. The page shows how it read the words. */
+    return LD.load().then(function (d0) {
+      var K = window.raStoryKin; if (K) { rw = K.rewrite(t, function (w) { return !!(d0 && d0.given && d0.given[S.fold(w)]); }); if (rw.changed) t = rw.text; }
+      readingNow = t; drawRead(rw, raw);
+      return LD.resolveMissing(t);
+    }).catch(function () { return LD.load(); }).then(function (d) {
       data = d;
       var attached = files.length ? "photo" : null;
       var p = E.parseStory(t, { map: d.map, given: d.given, skip: d.skip, countries: d.countries }, attached);
@@ -543,6 +549,16 @@
       }).catch(function (e) { if (window.console) console.error("story draw", e); say("Some Atlas files did not load. Check your connection.", true); });
     }).catch(function (e) { if (window.console) console.error("story read", e); say("The Atlas files did not load. Check your connection.", true); });
   }
+  /* how the words were read, when they were rewritten into plain who-is-whose sentences */
+  var readingNow = "";
+  function drawRead(rw, raw) {
+    var box = $("sp-rewrite"); if (!box) return;
+    if (!rw || !rw.changed) { box.hidden = true; box.textContent = ""; return; }
+    box.hidden = false; box.textContent = "";
+    box.append(el("summary", "How the page read your words"));
+    box.append(el("p", rw.text, "sp-read-t"));
+    var ul = el("ul"); rw.notes.forEach(function (n) { ul.append(el("li", n)); }); box.append(ul);
+  }
   var tm = null;
   function grow() { text.style.height = "auto"; text.style.height = Math.min(Math.max(text.scrollHeight, 110), 420) + "px"; }
   text.addEventListener("input", function () {
@@ -554,7 +570,7 @@
     files.forEach(function (x) { URL.revokeObjectURL(x.url); }); files = []; drawShots(); text.value = ""; grow(); chips.textContent = ""; $("sp-did").hidden = true;
     ov = Object.create(null); parsed = null; shown = Object.create(null); lastSig = ""; clearReport(); say("");
     try { sessionStorage.removeItem(DRAFT); } catch (e) { /* none */ }
-    $("sp-clear").hidden = true; $("sp-link").hidden = true; $("sp-gaps").hidden = true; clueReset(); langReset(); lang.skip = Object.create(null); text.focus();
+    $("sp-clear").hidden = true; $("sp-link").hidden = true; $("sp-gaps").hidden = true; clueReset(); langReset(); lang.skip = Object.create(null); readingNow = ""; drawRead(null); text.focus();
   });
   /* A LINK THAT CARRIES THE WORDS, for sending to somebody who asked for help in a group. The words ride after the # and are never sent to a server (story-link.js). */
   $("sp-link").addEventListener("click", function () {

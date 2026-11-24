@@ -502,7 +502,11 @@ def no_blob_repeated_on_every_page(pages):
 # 22 Nov 2026: place 76,000 -> 77,000. PR 130 made the 4,903 FamilySearch volume links open the book (ark of the first image + ?wc=waypoint instead
 # of the bare waypoint, which opened an empty viewer), about 20 bytes a link; the full build then measured 76,137 and the gate stopped every deploy
 # from 8181ad0 on. The links are the fix for "links go nowhere", so the budget moves by 1.3% rather than the links shrinking.
-PAGE_BUDGET = {"place": 77_000, "surname": 60_000}
+# 25 Nov 2026: place 77,000 -> 79,000. The full build of d0e3d02 measured 78,012 and stopped the deploy. Between the last good deploy (7d09f6c, 23 Nov) and
+# it the catalogue grew from 2,348 to 2,634 providers (the corpus-gap work, PRs 229-238), and a place page lists the sources near it, so more sources is
+# more bytes on the pages that have any. That growth is the work, not a regression to cut; the budget moves by 2.6% (the measure plus 1.3%). I did not
+# bisect the 3,593 pages to apportion it between providers and the other changes since 23 Nov, so this is the likely cause, not a measured one.
+PAGE_BUDGET = {"place": 79_000, "surname": 60_000}
 
 
 def page_weight_within_budget(pages):

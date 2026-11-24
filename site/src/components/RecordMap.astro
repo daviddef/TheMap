@@ -930,18 +930,27 @@ window.addEventListener("load", async function () {
     return [s1, s2, s3, s4];
   }
   function planRows(list, where) {
-    var rows = function (l) {
-      return "<ul>" + l.map(function (p) {
+    var rows = function (l, hid) {
+      return "<ul" + (hid ? ' hidden class="ra-plan-chunk"' : "") + ">" + l.map(function (p) {
         return "<li" + srcAttrs(p.id, p.name, where, BASE + "archive/" + p.id + "/") + '><a class="ra-area-p" target="_blank" rel="noopener" href="' + BASE + "archive/" + esc(p.id) + '/"><span>' + esc(p.name) + "</span><small>" + accTxt(p.access) + "</small></a></li>";
       }).join("") + "</ul>";
     };
+    /* THE NEXT TEN ARE SIBLINGS OF THE FIRST TEN, NOT A FOLD INSIDE IT. The list rows are styled as direct children of the step's fold; a fold within it lost them (the + disc dropped above each name). A button reveals the next ten in the same list style. */
     list = list.slice(0, 30);
     var o = [rows(list.slice(0, 10))];
     for (var i = 10; i < list.length; i += 10) {
       var chunk = list.slice(i, i + 10);
-      o.push('<details class="ra-plan-more"><summary>' + esc(T("The next") + " " + chunk.length) + "</summary>" + rows(chunk) + "</details>");
+      o.push('<button type="button" class="ra-plan-next"' + (i > 10 ? " hidden" : "") + ">" + esc(T("The next") + " " + chunk.length) + "</button>" + rows(chunk, true));
     }
     return o.join("");
+  }
+  /* THE BOOKS TO START WITH. David: «if start here is FamilySearch, cant we add the books to start with? actually give them the volumes». No volume in this atlas is indexed by who is written in it, so this does not say a book holds the name. It says where the most paper stands in the country: the places with the most catalogued books, each opening its own list of them. */
+  function planBooks(cc) {
+    var l = markers.filter(function (m) { var p = m._p; return p && p.cc === cc && p.v > 0; })
+      .map(function (m) { return m._p; }).sort(function (a, b) { return b.v - a.v || String(a.n).localeCompare(String(b.n)); }).slice(0, 10);
+    return l.length ? "<ul>" + l.map(function (p) {
+      return '<li><a class="ra-area-p ra-near" href="#" data-i="' + esc(String(p.i)) + '" data-n="' + esc(p.n) + '"><i style="background:#2F6B5A"></i><span>' + esc(p.n) + "</span><small>" + nfl(p.v) + " " + esc(T(p.v === 1 ? "book" : "books")) + "</small></a></li>";
+    }).join("") + "</ul>" : "";
   }
   function namePlan(ccs, term) {
     ccs = ccs.slice(0, 3); if (!ccs.length) return "";
@@ -959,7 +968,13 @@ window.addEventListener("load", async function () {
     ccs.forEach(function (cc, ci) {
       var st = planSteps(cc), where = CNAME[cc] || cc, n = 0;
       h.push('<div class="ra-plan-cc" data-cc="' + esc(cc) + '"' + (ci ? " hidden" : "") + ">");
+      var books = planBooks(cc);
       for (var k = 0; k < 4; k++) {
+        if (k === 1 && books) {
+          n++;
+          h.push('<details class="ra-area-g ra-plan-s"><summary><span class="ra-plan-n">' + n + "</span>" + esc(T("Books to start with")) + " <b>10</b></summary>" +
+                 '<p class="at-sub">' + esc(T("Where the most registers stand in") + " " + where + ". Not shown to hold this name: open a place for its books, then look for the years the name was there.") + "</p>" + books + "</details>");
+        }
         if (!st[k].length) continue;
         n++;
         h.push('<details class="ra-area-g ra-plan-s"' + (n === 1 ? " open" : "") + '><summary><span class="ra-plan-n">' + n + "</span>" + esc(STEP[k][0]) + " <b>" + nfl(Math.min(30, st[k].length)) + "</b></summary>" +
@@ -972,6 +987,12 @@ window.addEventListener("load", async function () {
     return h.join("");
   }
   document.addEventListener("click", function (ev) {
+    var nx = ev.target.closest && ev.target.closest(".ra-plan-next");
+    if (nx) {
+      var ul = nx.nextElementSibling; if (ul) ul.hidden = false;
+      var more = ul && ul.nextElementSibling; if (more && more.classList.contains("ra-plan-next")) more.hidden = false;
+      nx.hidden = true; return;
+    }
     var b = ev.target.closest && ev.target.closest(".ra-plan-chip"); if (!b) return;
     var box = b.closest(".ra-plan"); if (!box) return;
     box.querySelectorAll(".ra-plan-chip").forEach(function (x) { x.classList.toggle("on", x === b); });
@@ -12510,13 +12531,21 @@ window.addEventListener("load", async function () {
   :global(.ra-area-nolist > summary .ra-chev) { visibility: hidden; }
   :global(.ra-area-pl > .ra-vl) { margin: 2px 0 8px 31px; }
   :global(.ra-area-no) { padding-left: 21px; }
-  :global(.ra-surn > .lab:only-child) { display: none; }
+  :global(.ra-surn > .lab) { display: none; }
+  /* THE HEADER ON FOUR LINES, NOT SEVEN. David, twice: «still doesnt need 4 lines?». The «The name» and «Where the name was» labels say what the rows already show; the chips and the origin share a row, then the bars. */
+  :global(.ra-surn:has(> .ra-tw)) { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+  :global(.ra-surn:has(> .ra-tw) > *) { flex: 0 0 100%; }
+  :global(.ra-surn:has(> .ra-tw) > .ra-chips) { flex: 0 1 auto; }
+  :global(.ra-surn:has(> .ra-tw) > .ra-tw) { display: contents; }
+  :global(.ra-surn:has(> .ra-tw) > .ra-tw > *) { flex: 0 0 100%; }
+  :global(.ra-surn:has(> .ra-tw) > .ra-tw > .at-lab) { display: none; }
+  :global(.ra-surn:has(> .ra-tw) > .ra-tw > .ra-first) { flex: 1 1 auto; margin: 0; }
   :global(.ra-tw-more > summary) { cursor: pointer; font-size: 12px; padding: 4px 0; color: #1d3a4a; }
   :global(.ra-plan-c) { margin: 4px 0 8px; display: flex; flex-wrap: wrap; gap: 6px; }
   :global(.ra-plan-chip) { font: inherit; font-size: 12px; padding: 3px 10px; border: 1px solid #c9c5b8; border-radius: 999px; background: transparent; color: inherit; cursor: pointer; }
   :global(.ra-plan-chip.on) { background: #1d3a4a; color: #fff; border-color: #1d3a4a; }
   :global(.ra-plan-n) { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; margin-right: 8px; border-radius: 50%; background: #1d3a4a; color: #fff; font-size: 11px; flex: none; }
-    :global(.ra-plan-more > summary) { cursor: pointer; font-size: 12px; padding: 6px 0; color: #1d3a4a; }
+    :global(.ra-plan-next) { font: inherit; font-size: 12px; margin: 4px 0 2px 2px; padding: 4px 12px; border: 1px solid #c9c5b8; border-radius: 999px; background: transparent; color: #1d3a4a; cursor: pointer; }
   :global(.ra-plan-how) { margin-top: 10px; }
   :global(.ra-area-cov > .at-sub) { margin: 4px 0 2px; font-size: 12px; }
   :global(.ra-area-cov .ra-area-p small) { white-space: normal; text-align: right; }

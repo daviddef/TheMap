@@ -35,6 +35,21 @@ test("the plan says it is an order to try things in, not a ranking", () => {
 });
 
 test("the surname header drops an empty label and folds countries past the fourth", () => {
-  assert.match(src, /\.ra-surn > \.lab:only-child\) \{ display: none; \}/);
+  assert.match(src, /:global\(\.ra-surn > \.lab\) \{ display: none; \}/);
+  assert.match(src, /\.ra-surn:has\(> \.ra-tw\) > \.ra-tw\) \{ display: contents; \}/, "the chips and the origin share a row");
   assert.match(src, /if \(ri === 4\) wh\.push\('<details class="ra-tw-more">/);
+});
+
+test("the next ten are siblings of the first ten, so they keep the list's own row style", () => {
+  const f = src.slice(src.indexOf("function planRows"), src.indexOf("function planBooks"));
+  assert.match(f, /class="ra-plan-next"/);
+  assert.doesNotMatch(f, /<details class="ra-plan-more"/);
+  assert.match(src, /var nx = ev\.target\.closest && ev\.target\.closest\("\.ra-plan-next"\)/);
+});
+
+test("a books step lists the places with the most registers, and says it does not claim the name is in them", () => {
+  const f = src.slice(src.indexOf("function planBooks"), src.indexOf("function namePlan"));
+  assert.match(f, /b\.v - a\.v/);
+  assert.match(f, /ra-near/);
+  assert.match(src, /Not shown to hold this name/);
 });

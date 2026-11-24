@@ -70,3 +70,11 @@ test("My research reads every ticked family: one name card each, and the bar nam
   assert.match(bar, /Your marks go under/, "and which one the marks go under");
   assert.match(fs.readFileSync(path.join(here, "../public/js/name-intro.js"), "utf8"), /"About the name" \+ \(m\.name \? " " \+ m\.name : ""\)/, "a card for a name with no entry still says whose it is");
 });
+
+test("the family picker ticks a whole archive at once, and finds its families by the archive's name", () => {
+  const bar = fs.readFileSync(path.join(here, "../public/js/line-switcher.js"), "utf8");
+  assert.match(bar, /Tick a whole archive/);
+  assert.match(bar, /setMany\(slugs, !slugs\.every\(inScope\)\)/, "one press ticks them all, or unticks them when all are ticked");
+  assert.match(bar, /\(l\.archives \|\| \[\]\)\.map\(archName\)\.join/, "the search box matches an archive's name");
+  assert.match(bar, /names = Object\.keys\(byArch\)\.sort\(function \(a, b\) \{ return a\.localeCompare\(b\); \}\)/, "the archives are alphabetical, not by size");
+});

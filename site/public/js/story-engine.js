@@ -385,7 +385,11 @@
     hit = hit.filter(function (r) { return part || !have.some(function (h) { return h.cc === r[3] && h.y != null && Math.abs(h.y - r[1]) < 0.25 && Math.abs(h.x - r[2]) < 0.25; }); });
     hit = hit.slice(0, w.ccs || part ? 20 : 8); if (!hit.length) return 0;
     var rows = hit.map(function (r) { return { i: "g-" + w.ph.replace(/ /g, "-") + "-" + String(r[3]).toLowerCase() + "-" + Math.round(r[1] * 100), n: r[0], y: r[1], x: r[2], cc: r[3], c: 0, gaz: 1 }; });
-    map[w.ph] = part ? rows.concat(have.map(function (h) { return Object.assign({}, h, { partial: 1 }); })) : (map[w.ph] || []).concat(rows);   /* the place itself comes before the counties and villages that only carry its name */
+    /* THE GAZETTEER'S ORDER IS ITS IMPORTANCE (Dresden in Germany before the Dresdens of Ohio and Ontario), and an index that holds the name only as bare rows (no
+       volumes, no count) has no evidence to put one of its own first. David, on Dresden: «isnt dresden in germany?». Where the index has a row with books or a count,
+       it still comes first, as before. */
+    var bare = !w.ccs && !part && have.length && thin(have);
+    map[w.ph] = part ? rows.concat(have.map(function (h) { return Object.assign({}, h, { partial: 1 }); })) : bare ? rows.concat(have) : (map[w.ph] || []).concat(rows);   /* the place itself comes before the counties and villages that only carry its name */
     return rows.length;
   }
 

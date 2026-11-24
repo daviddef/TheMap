@@ -122,3 +122,22 @@ test("the story page draws the gaps as a hunt: a count, a box on each clue, and 
   assert.match(js, /clueReset\(\)/);
   assert.match(page, /@media \(prefers-reduced-motion: reduce\)[^}]*sp-dots i\.on/);
 });
+
+test("a surname told the way a Facebook post tells it (maiden name, «Surname X», obitelj X, a bare name) is a name, so the page asks for the first name and not «do you know their name?»", () => {
+  const ids = (t) => G.gaps({ stops: [{ word: "senj" }] }, t, { place: () => false }).map((g) => g.id);
+  [
+    "My grandmother was born in Senj in 1921. Her maiden name was Kauzlarić. Does anyone know this family?",
+    "Tražim obitelj Mažuranić iz Senja, otišli su u Ameriku oko 1900.",
+    "My great grandparents came from Senj to Cleveland. Surname Rukavina.",
+    "Kauzlarić Kauzlarić anyone from this name??",
+    "My mother née Horvat came from Senj",
+  ].forEach((t) => { assert.ok(ids(t).includes("given"), t); assert.ok(!ids(t).includes("name"), t); });
+  assert.ok(ids("I came from Senj and it was hot").includes("name"), "a story with no name still asks for one");
+});
+
+test("a bare gazetteer name takes the gazetteer's first (largest) place before the index's bare rows: Dresden is the city in Germany", () => {
+  const map = { dresden: [{ i: "dresden-us-1", n: "Dresden", cc: "US", y: 40.1, x: -82, c: 0 }, { i: "dresden-ca-2", n: "Dresden", cc: "CA", y: 42.6, x: -82.2, c: 0 }] };
+  F.gazMerge(map, { ph: "dresden", ccs: null, more: true }, [["Dresden", 51.05, 13.74, "DE", ["Dresda"]], ["Dresden", 40.12, -82.01, "US", []]]);
+  assert.equal(map.dresden[0].cc, "DE");
+  assert.ok(map.dresden.some((r) => r.cc === "US" && r.i === "dresden-us-1"), "the index's rows stay as the other readings");
+});

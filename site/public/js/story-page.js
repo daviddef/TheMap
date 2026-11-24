@@ -129,7 +129,7 @@
     var box = $("sp-gaps"), G = window.raStoryGaps; if (!box || !G) return;
     box.textContent = "";
     var t = text.value.trim();
-    if (t.length < 8) { box.hidden = true; return; }
+    if (t.length < 8) { box.hidden = true; clueReset(); return; }
     var list = G.gaps(p, t, { files: files.length, place: function (w) { return !!(data && data.map && data.map[S.fold(w)]); } }), top = gapsAll ? list : list.slice(0, 3);
     box.hidden = false;
     var nowOpen = Object.create(null); list.forEach(function (g) { nowOpen[g.id] = 1; clueSeen[g.id] = 1; });

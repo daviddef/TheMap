@@ -22,11 +22,15 @@
   function surnameGuess(text, p, o) {
     var folds = {}, skip = /^(?:I|My|Our|He|She|They|The|We|His|Her|Their|It|All|Only|A|An|In|At|On|From|To|But|And)$/;
     ((p && p.stops) || []).forEach(function (s) { if (s.word) folds[String(s.word).toLowerCase()] = 1; });
-    var re = [/\b(?:[Mm]y|[Oo]ur)\s+(?:[a-z]+(?:-[a-z]+)*\s+){1,2}?(\p{Lu}[\p{L}'\u2019-]{2,})/u, /\b[Tt]he\s+(\p{Lu}[\p{L}'\u2019-]{2,})\s+family\b/u, /\bsurname(?:d)?\s+(?:was\s+|is\s+)?(\p{Lu}[\p{L}'\u2019-]{2,})/u];
+    var re = [/\b(?:[Mm]y|[Oo]ur)\s+(?:[a-z]+(?:-[a-z]+)*\s+){1,2}?(\p{Lu}[\p{L}'\u2019-]{2,})/u, /\b[Tt]he\s+(\p{Lu}[\p{L}'\u2019-]{2,})\s+family\b/u, /\b[Ss]urname(?:d)?:?\s+(?:was\s+|is\s+)?(\p{Lu}[\p{L}'\u2019-]{2,})/u,
+              /\b(?:maiden|birth|family|last)\s+name:?\s+(?:was\s+|is\s+)?(\p{Lu}[\p{L}'\u2019-]{2,})/u, /\bn[\u00e9e]e\s+(\p{Lu}[\p{L}'\u2019-]{2,})/u,
+              /\b(?:[Oo]bitelj|[Pp]rezime|[Pp]orodica|[Ff]amiglia|[Cc]ognome|[Ff]amilia|[Aa]pellido|[Ff]amilie|[Nn]achname)\s+(\p{Lu}[\p{L}'\u2019-]{2,})/u,
+              /^\s*(\p{Lu}[\p{L}'\u2019-]{2,})(?:[\s,]+\1)*[\s,:!?-]+(?:anyone|anybody|family|name|relatives|any\s)/u];
     for (var i = 0; i < re.length; i++) {
       var m = re[i].exec(text); if (!m) continue;
       var w = m[1], f = w.toLowerCase();
-      if (skip.test(w) || folds[f] || (o && o.place && o.place(w))) continue;
+      if (skip.test(w) || folds[f]) continue;
+      if (i === 0 && o && o.place && o.place(w)) continue;   /* only the loose «my … X» guess is vetoed by a place of that name; «surname X», «née X», «obitelj X» say it is one */
       return w;
     }
     return "";

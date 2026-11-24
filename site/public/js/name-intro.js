@@ -89,11 +89,12 @@
 
   /* BASE: the site root with its trailing slash, for the links and the flag images. */
   function render(m, base) {
-    /* A DETAILS, OPEN BY DEFAULT: the card is long, and the research under it is the page's job. Closing it is remembered. */
+    /* A DETAILS, SHUT BY DEFAULT: the card is long (about 500px), and the page's job is the map and the research under it. Opening it is remembered; it
+       is stored only when the reader presses the heading, so the card being drawn does not count as a choice. */
     var root = el("details", "ni"), sum = el("summary", "ni-sum");
-    var KEY = "ra-name-intro-closed";
-    try { root.open = localStorage.getItem(KEY) !== "1"; } catch (e) { root.open = true; }
-    root.addEventListener("toggle", function () { try { localStorage.setItem(KEY, root.open ? "0" : "1"); } catch (e) {} });
+    var KEY = "ra-name-intro-open";
+    try { root.open = localStorage.getItem(KEY) === "1"; } catch (e) { root.open = false; }
+    sum.addEventListener("click", function () { setTimeout(function () { try { localStorage.setItem(KEY, root.open ? "1" : "0"); } catch (e) {} }, 0); });
     root.append(sum);
     if (!m.found) {
       sum.append(el("h2", "ni-h", "About the name"));

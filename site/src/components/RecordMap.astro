@@ -4041,6 +4041,23 @@ window.addEventListener("load", async function () {
     return 2 * 6371 * Math.asin(Math.sqrt(x));
   }
 
+  /* THE NEAREST PLACES THAT HAVE BOOKS. A village's registers are very often filed under the next parish along (Perušić's books for its hamlets, Lipovljani for Kozarice), so
+     «no books here» is only half the answer for somebody deciding where to look. From the places the map already holds, with distance as the crow flies: a pointer, not a boundary. */
+  function nearestBooks(lat, lon, n, maxKm) {
+    var out = [];
+    markers.forEach(function (m) {
+      var p = m._p; if (!p || !(p.v > 0) || p.y == null || p.x == null) return;
+      var d = haversine(lat, lon, p.y, p.x); if (d <= (maxKm || 40)) out.push({ p: p, d: d });
+    });
+    out.sort(function (a, b) { return a.d - b.d; });
+    return out.slice(0, n || 3);
+  }
+  document.addEventListener("click", function (ev) {
+    var a = ev.target.closest && ev.target.closest(".ra-near"); if (!a) return;
+    ev.preventDefault();
+    if (window.raPlacePanel) window.raPlacePanel.open(a.getAttribute("data-i"), a.getAttribute("data-n"));
+  });
+
   /* A ring with no caption is decoration. This says what it holds, in the
      panel, using the counts the place record already carries. */
   /* HEADS THE CHECKLIST INSTEAD OF SITTING UNDER THE MAP. David: «can this
@@ -7753,13 +7770,20 @@ window.addEventListener("load", async function () {
            list them. `r[6]` is only present on rows built after islands were
            admitted; an older shard is six long and reads exactly as before. */
         var isIsland = r[6] === "isl";
+        var nb = nearestBooks(r[1], r[2], 4).filter(function (x) { return !(x.d < 1.5 && fold(x.p.n) === fold(r[0])); });
+        var ownBooks = nearestBooks(r[1], r[2], 4).some(function (x) { return x.d < 1.5 && fold(x.p.n) === fold(r[0]); });
+        var nearLine = (nb.length && !ownBooks)
+          ? '<br><span class="ra-who ra-nearbooks">' + esc(T("No books are catalogued under this name. Nearest places that have them")) + ": " +
+            nb.slice(0, 3).map(function (x) { return '<a href="#" class="ra-near" data-i="' + esc(String(x.p.i)) + '" data-n="' + esc(x.p.n) + '">' + esc(x.p.n) + "</a> " + Math.max(1, Math.round(x.d)) + " km"; }).join(" \u00b7 ") +
+            ". " + esc(T("A village's registers are often filed under the next parish along.")) + "</span>"
+          : "";
         h.push("<p><b>" + esc(r[0]) + "</b> — " +
                (isIsland ? "an island, " : "") + esc(CNAME[r[3]] || r[3]) + where +
                (older.length ? '<br><span class="ra-who">also written ' +
                  older.map(esc).join(" · ") + "</span>" : "") +
                (matchedOn ? '<br><span class="ra-who">contains what you typed, ' +
                  "\u00ab" + esc(matchedOn) + "\u00bb \u2014 it is not another " +
-                 "name for it</span>" : "") + "</p>");
+                 "name for it</span>" : "") + nearLine + "</p>");
       });
       h.push("</div>");
     }

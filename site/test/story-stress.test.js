@@ -76,6 +76,12 @@ const PLACES = [
   ["grandad born cork 1900 left 1923 boston never came back", ["Cork", "Boston"]],
   ["Mio nonno nacque a Udine nel 1900 e si trasferì a Buenos Aires nel 1925.", ["Udine", "Buenos Aires"]],
   ["Moj djed je rođen u Senj 1880. godine.", ["Senj"]],
+  ["Moj djed je rođen u Senju 1880. godine.", ["Senj"]],
+  ["Ivan \"Johnny\" Horvat was born in Senj.", ["Senj"]],
+  ["The Horvat brothers, Ivan and Petar, left Senj in 1905.", ["Senj"]],
+  ["He lived at 1923 Main Street in Cork.", ["Cork"]],
+  ["He\u00a0was\u00a0born\u00a0in\u00a0Cork\u200b.", ["Cork"]],
+  ["Born in Cork in 1900. He died in Boston.", ["Cork", "Boston"]],
   ["<script>alert(1)</script> My grandfather lived in <b>Cork</b>.", ["Cork"]],
   ["See https://www.example.com/cork for my grandfather from Perth.", ["Perth"]],
   ["\"My dad always said we came from Galway,\" she said, \"and then Boston.\"", ["Galway", "Boston"]],
@@ -176,12 +182,15 @@ test("words that only look like details are not details: a street called Warwick
 });
 
 /* ---- the gaps that were fixed on 9 Nov (docs/story-reading-gaps-2026-11-09.md) ---- */
-test("a near miss is offered, never used: Brisban, Melborne in a list, Senju", () => {
+test("a near miss is offered, never used: Brisban, Melborne in a list; a Croatian case ending is read (Senju is Senj)", () => {
   const p = F.parseStory("My grandfather came from Brisban and Melborne.", { ...ctx, map: A.buildMap(rows.concat([P("Melbourne", "AU", 144.96, -37.81)])) });
   assert.deepEqual(places(p), []);
   assert.deepEqual(p.suggest.map((x) => x.typed), ["Brisban", "Melborne"]);
   assert.deepEqual(p.suggest[0].options.map((o) => o.n), ["Brisbane"]);
-  assert.deepEqual(F.parseStory("Moj djed je rođen u Senju 1880.", ctx).suggest.map((x) => x.typed), ["Senju"]);
+  /* «u Senju» is the case Croatian puts Senj in, not a near miss: the ending is read, nothing is guessed that the index does not hold */
+  const sj = F.parseStory("Moj djed je rođen u Senju 1880.", ctx);
+  assert.deepEqual(places(sj), ["Senj"]);
+  assert.deepEqual(sj.suggest, []);
   assert.deepEqual(F.parseStory("He came from Cork.", ctx).suggest, []);
 });
 

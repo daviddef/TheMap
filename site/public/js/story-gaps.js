@@ -124,6 +124,7 @@
       put(pe.name, "person", given, rel, ref); if (!out.some(function (t) { return t.name === given && t.kind === "person"; })) put(given, "person", given, rel, ref);
     });
     (p.siblings || []).forEach(function (sb) { put(sb.name, "person", sb.name, (sb.label || sb.rel || "").replace(/^(?:his|her|their)\b/, "their")); });
+    (p.others || []).forEach(function (o) { if (o && o.name) put(o.name, "person", String(o.name).split(/\s+/)[0], (o.poss ? o.poss.replace(/^(?:my|our)$/, "your") + " " : "") + (o.kin || "")); });
     (p.stops || []).forEach(function (st) { if (st.word && !st.isCountry) put(st.word, "place", st.word, ""); });
     out.sort(function (a, b) { return a.start - b.start; });
     return out;
@@ -135,12 +136,18 @@
     ["faith", "Religion", "was ", "Catholic, Orthodox, Jewish, Lutheran"], ["travelled", "How they travelled", "travelled by ", "a ship, or a port like Trieste"],
     ["father", "His father", "'s father was ", "a name, and where from"], ["mother", "His mother", "'s mother was ", "a name, and where from"], ["siblings", "Brothers, sisters", "had brothers and sisters: ", "names, or how many"]
   ];
-  var ABOUT_PLACE = [["when", "When", "{}: they were there in ", "a year or a decade"], ["what", "What happened", "In {}, ", "what they did, or what happened"], ["who", "Who else", "{}: others from the family there were ", "names, and how they are related"]];
+  var ABOUT_PLACE = [["when", "When", "{}: they were there in ", "a year or a decade"], ["what", "What happened", "In {}, ", "what they did, or what happened"], ["who", "Who else", "{}: others from the family there were ", "a name, then how they are related: Hedviga, cousin"]];
   function about(kind) { return (kind === "place" ? ABOUT_PLACE : ABOUT_PERSON).map(function (x) { return { id: x[0], label: x[1], stub: x[2], ph: x[3] }; }); }
   /* the sentence one answer adds: «Ivan was born in 1951, Senj.» */
   function sentence(kind, name, opt, value) {
     value = String(value || "").replace(/\s+/g, " ").trim().replace(/[.!?]+$/, ""); if (!value) return "";
     var o = about(kind).filter(function (x) { return x.id === opt; })[0]; if (!o) return "";
+    if (kind === "place" && opt === "who") {
+      /* «Hedviga, cousin» or «cousin Hedviga» or «Hedviga»: said as a sentence the story reader takes as a person, «His cousin Hedviga lived in Senj.» */
+      var KINS = "cousin|uncle|aunt|brother|sister|niece|nephew|relative|son|daughter", wm = new RegExp("^(\\p{Lu}[\\p{L}'\u2019-]+)(?:\\s*[,(-]\\s*(?:his |her |a |the )?(" + KINS + ")\\)?)?$", "iu").exec(value), wk = new RegExp("^(" + KINS + ")\\s+(\\p{Lu}[\\p{L}'\u2019-]+)$", "iu").exec(value);
+      var nm = wm ? wm[1] : wk ? wk[2] : "", rel = wm ? (wm[2] || "relative") : wk ? wk[1] : "";
+      if (nm) { nm = nm.charAt(0).toUpperCase() + nm.slice(1); return "His " + rel.toLowerCase() + " " + nm + " lived in " + name + "."; }
+    }
     if (kind === "place") return o.stub.replace("{}", name) + value + ".";
     var who = String(name || ""); who = who.charAt(0).toUpperCase() + who.slice(1);   /* «my father» is «My father»: said of the person the story is about, the way the reader already understands it */
     return who + (/^'s /.test(o.stub) ? "" : " ") + o.stub + value + ".";

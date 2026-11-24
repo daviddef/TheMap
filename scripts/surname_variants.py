@@ -148,6 +148,54 @@ def typography_forms(form):
     return res
 
 
+
+# ------------------------------------------------ ending rules (computed, never stored)
+# The same algorithm as site/public/js/surname-rules.js; site/test/surname-rules.test.js holds the two to the same answers.
+RULE_ENDS = ["itsch", "itch", "ich", "ics", "ish", "itz", "ić", "ič", "ik", "ic"]
+RULE_TRY = ["ich", "ic", "itch", "ić", "ič", "ish", "ik", "ics", "itsch", "itz"]
+RULE_DIA = {"ć": ("c", "ch"), "č": ("c", "ch"), "š": ("s", "sh"), "ž": ("z", "zh"), "đ": ("d", "dj")}
+
+
+def rule_forms(word):
+    """The usual ways a South-Slavic surname is respelt across a border (Kauzlarić -> Kauzlarich, Kauzlaritsch, Kauzlarics), by rule.
+    For searching only: nothing here has been seen on a record, so none of it is a catalogue form or counts toward `cover`."""
+    w = re.sub(r"[^\w]|[\d_]", "", unicodedata.normalize("NFC", word or "").lower())
+    if len(w) < 5:
+        return []
+    stem, has_end = w, False
+    for e in RULE_ENDS:
+        if len(w) - len(e) >= 3 and w.endswith(e):
+            stem, has_end = w[: -len(e)], True
+            break
+    has_dia = any(c in RULE_DIA for c in w)
+    if not has_end and not has_dia:
+        return []
+    plain = "".join(RULE_DIA[c][0] if c in RULE_DIA else c for c in stem)
+    digraph = "".join(RULE_DIA[c][1] if c in RULE_DIA else c for c in stem)
+    orig = stem.replace("zh", "ž").replace("sh", "š").replace("dj", "đ")
+    stems = []
+    for s in (plain, digraph, orig, stem):
+        if s not in stems:
+            stems.append(s)
+    out, got = [], {w}
+    cap = lambda s: s[:1].upper() + s[1:]
+    for s in stems:
+        for t in RULE_TRY:
+            if not has_end and t not in ("ić", "ich", "ic"):
+                continue
+            f = s + t
+            if f in got:
+                continue
+            got.add(f)
+            out.append(cap(f))
+    if not has_end:
+        for f2 in (plain, digraph):
+            if f2 not in got:
+                got.add(f2)
+                out.append(cap(f2))
+    return out[:14]
+
+
 # ------------------------------------------------------------- the catalogue
 
 def load(path=None):
@@ -406,6 +454,13 @@ def cmd_terms(a):
             print("\nNOT THE SAME NAME — expect these in results and do not count them")
             for m in t["notSame"]:
                 print(f"  {m['form']}: {m['why']}")
+    rf = [] if GIVEN else [x for x in rule_forms(a.name) if fold_key(x) != fold_key(a.name)]
+    if rf:
+        have_r = {fold_key(m["form"]) for s in STATUSES for m in t["tiers"][s]}
+        rf = [x for x in rf if fold_key(x) not in have_r]
+    if rf:
+        print("\nTRY — by ending rule (computed, not seen on any record; a lead, never a finding; `cover` does not ask for these)")
+        print("  " + " · ".join(rf))
     if a.graph:
         have = {fold_key(m["form"]) for s in STATUSES for m in t["tiers"][s]}
         g = [x for x in graph_leads(a.name) if fold_key(x) not in have]
@@ -694,6 +749,8 @@ def main():
     p.add_argument("--graph", action="store_true", help="add the atlas's computed spelling links as leads")
     p.add_argument("--typed", action="store_true", help="show the typed forms of each")
     p.set_defaults(fn=cmd_terms)
+    p = sub.add_parser("rule-forms", help="the ending-rule respellings of a surname, as JSON (computed, for searching only)")
+    p.add_argument("name"); p.set_defaults(fn=lambda a: print(json.dumps(rule_forms(a.name), ensure_ascii=False)))
     p = sub.add_parser("cover", help="did your search list cover the family? exit 1 if not")
     p.add_argument("name"); p.add_argument("--tried", required=True)
     p.set_defaults(fn=cmd_cover)

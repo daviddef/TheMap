@@ -12,7 +12,7 @@
     var form = $("lf-form");
     if (!form) return;
     var BASE = (document.documentElement.getAttribute("data-base") || "/").replace(/\/?$/, "/");
-    var LD = E.createLoader(BASE), data = null, chosen = { from: null, to: null };
+    var LD = E.createLoader(BASE), data = null, chosen = { from: null, to: null }, onlySur = "";
 
     function picker(key, input, list) {
       var shown = [], at = -1;
@@ -93,7 +93,7 @@
         data = d;
         var fromRow = resolve("from", $("lf-from")), toRow = resolve("to", $("lf-to"));
         if (!fromRow && $("lf-from").value.trim()) { bad(manyPlaces(data, $("lf-from").value) ? "The Atlas found several places called \"" + $("lf-from").value.trim() + "\". Pick the right one from the list that appears as you type." : "The Atlas did not recognise \"" + $("lf-from").value.trim() + "\" as one place. Pick one from the list that appears as you type, or try an older name."); throw new Error("stop"); }
-        var parsed = { rel: $("lf-rel").value, name: $("lf-name").value.trim().slice(0, 80), given: ($("lf-name").value.trim().split(/\s+/)[0] || ""), surname: ($("lf-name").value.trim().split(/\s+/).length > 1 ? $("lf-name").value.trim().split(/\s+/).slice(-1)[0] : ""), givenWord: ($("lf-name").value.trim().split(/\s+/)[0] || ""),
+        var parsed = { rel: $("lf-rel").value, name: $("lf-name").value.trim().slice(0, 80), given: (onlySur && $("lf-name").value.trim() === onlySur ? "" : $("lf-name").value.trim().split(/\s+/)[0] || ""), surname: (onlySur && $("lf-name").value.trim() === onlySur ? onlySur : $("lf-name").value.trim().split(/\s+/).length > 1 ? $("lf-name").value.trim().split(/\s+/).slice(-1)[0] : ""), givenWord: (onlySur && $("lf-name").value.trim() === onlySur ? "" : $("lf-name").value.trim().split(/\s+/)[0] || ""),
           holds: form.elements["holds"].value || "story", left: left, born: born, from: fromRow ? { row: fromRow } : null, to: toRow ? { row: toRow } : null };
         if (!toRow && $("lf-to").value.trim()) { bad("The Atlas found several places called \"" + $("lf-to").value.trim() + "\". Pick the right one from the list that appears as you type."); throw new Error("stop"); }
         return LD.gather(parsed);
@@ -128,6 +128,39 @@
         $("lf-out").scrollIntoView({ behavior: window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
       }).catch(function (e) { if (e && e.message !== "stop") bad("Something did not load. Check your connection and try again."); });
     });
+    /* A LINK THAT FILLS THE SENTENCE IN. Somebody helping in a group, or an archive replying to an e-mail, sends one address and the reader opens a page
+       already drawn: /looking-for/#surname=Kauzlarić&from=Fužine,%20Croatia&to=Pittsburgh&left=1928. It rides in the part after the # on purpose: that part is never sent to a
+       server, so a name in a link goes to the person who opens it and nowhere else. Every key is optional; with a place in it the page runs itself. Text only: values go into
+       boxes, never into markup. */
+    var KEYS = ["rel", "name", "surname", "from", "to", "left", "born", "holds"];
+    function fromHash() {
+      var h = String(location.hash || "").replace(/^#/, ""); if (!h || h.indexOf("=") < 0) return false;
+      var q; try { q = new URLSearchParams(h); } catch (e) { return false; }
+      var any = false;
+      function v(k, max) { var s = q.get(k); return s == null ? "" : s.replace(/[\u0000-\u001f<>]/g, "").trim().slice(0, max || 80); }
+      var rel = v("rel"); if (rel) [].forEach.call($("lf-rel").options, function (o) { if (o.text === rel) { $("lf-rel").value = o.value || o.text; any = true; } });
+      var sur = v("surname"), nm = v("name");
+      if (sur && !nm) { onlySur = sur; $("lf-name").value = sur; any = true; } else if (nm) { $("lf-name").value = sur && nm.indexOf(sur) < 0 ? nm + " " + sur : nm; any = true; }
+      ["from", "to"].forEach(function (k) { var s = v(k); if (s) { $("lf-" + k).value = s; any = true; } });
+      ["left", "born"].forEach(function (k) { var s = v(k, 4); if (s) { $("lf-" + k).value = s; any = true; } });
+      var holds = v("holds"); if (holds && form.elements["holds"]) [].forEach.call(form.querySelectorAll('input[name="holds"]'), function (r) { if (r.value === holds) r.checked = true; });
+      return any && !!($("lf-from").value || $("lf-to").value || $("lf-name").value);
+    }
+    function makeLink() {
+      var q = new URLSearchParams(), nm = $("lf-name").value.trim();
+      q.set("rel", $("lf-rel").value);
+      if (nm) { var w = nm.split(/\s+/); if (onlySur && nm === onlySur || w.length === 1) q.set("surname", nm); else q.set("name", nm); }
+      ["from", "to", "left", "born"].forEach(function (k) { var s = $("lf-" + k).value.trim(); if (s) q.set(k, s); });
+      var hv = form.elements["holds"] && form.elements["holds"].value; if (hv) q.set("holds", hv);
+      return location.origin + location.pathname + "#" + q.toString().replace(/\+/g, "%20");
+    }
+    var cp = $("lf-link");
+    if (cp) cp.addEventListener("click", function () {
+      var u = makeLink(), say = $("lf-status");
+      var done = function (ok) { say.className = "lf-status"; say.textContent = ok ? "Link copied. Whoever opens it sees this page filled in; the names stay in the link and are not sent anywhere." : u; };
+      try { navigator.clipboard.writeText(u).then(function () { done(true); }, function () { done(false); }); } catch (e) { done(false); }
+    });
+    if (fromHash()) setTimeout(function () { $("lf-go").click(); }, 0);
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot); else boot();
 })();

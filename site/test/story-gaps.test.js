@@ -163,12 +163,33 @@ test("what can be added about a person or a place becomes a sentence in that per
   assert.ok(G.about("person").some((o) => o.id === "died") && G.about("place").some((o) => o.id === "what"));
 });
 
-test("the page draws the read-back paragraph with tappable pills, and the person-clues leave the clue pills", () => {
+test("the story is ONE box: names and places are marked in the words being typed, and a tap on one opens what to add", () => {
   const js = src("story-page.js"), page = read("../src/pages/read.astro");
   assert.match(js, /G\.tokens\(raw, p\)/);
-  assert.match(js, /sp-tok sp-tok-/);
+  assert.match(js, /createElement\("mark"\)/, "the marks are drawn behind the textarea");
+  assert.match(js, /text\.addEventListener\("click"/, "a tap with the caret in a marked word opens its panel");
+  assert.doesNotMatch(js, /el\("p", null, "sp-told"\)/, "no second read-back paragraph");
   assert.match(js, /PERSONAL = \/\^\(\?:name\|given\|surname\|rel\|maiden\)\$\//);
-  assert.match(page, /\.sp-tok \{/);
+  assert.match(page, /id="sp-mirror"/);
+  assert.match(page, /\.sp-mirror mark \{/);
+});
+
+test("the buttons sit below the box, the places section has no visible title, and the play bar is on the map", () => {
+  const page = read("../src/pages/read.astro");
+  const drop = page.slice(page.indexOf('id="sp-drop"'), page.indexOf('class="sp-under"'));
+  assert.doesNotMatch(drop, /class="sp-row"/, "the button row is outside the dashed box");
+  assert.match(page, /class="sp-under"[\s\S]*class="sp-row"[\s\S]*id="sp-eg"/);
+  assert.match(page, /<h2 id="sp-places-h" class="sp-sr">/);
+  assert.match(page, /class="sp-mapwrap">\s*<div class="sp-map" id="sp-map"[\s\S]*?<div class="sp-time" id="sp-time"/);
+  assert.match(page, /\.sp-time \{ position: absolute;/);
+});
+
+test("a place's era list shows only the eras of the stay, with a way to open the rest", () => {
+  const js = src("story-engine.js");
+  assert.match(js, /data-extra/);
+  assert.match(js, /Who held this ground while they were there/);
+  assert.match(js, /lf-eras-more/);
+  assert.match(js, /function stay\(y, i\)/);
 });
 
 test("with a name or a place in the story the page shows only the pills in the words, and a person's pill offers religion and travel", () => {

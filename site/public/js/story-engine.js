@@ -2559,10 +2559,19 @@
       function ground(info, years, span) {
         var wrap = el("div", null, "lf-ground"), eras = info.eras || [];
         if (eras.length) {
-          wrap.append(el("h5", "Who held this ground, era by era"));
-          var ul = el("ul", null, "lf-eras"), now = new Date().getFullYear();
+          wrap.append(el("h5", (eras.length && years.length ? "Who held this ground while they were there" : "Who held this ground, era by era")));
+          var ul = el("ul", null, "lf-eras"), now = new Date().getFullYear(), hiddenN = 0;
+          /* ONLY THE ERAS THEY WERE THERE FOR. David: «he was born 1951 and left in 1954, no need to show a 1200-1469 era». The stay runs from the first year told here to the year
+             the next place begins (the year they left); with no year told, every era is shown, as before, and the rest can always be opened. */
+          var lo = null, hi = null;
+          if (years.length) {
+            lo = Math.min.apply(null, years); hi = Math.max.apply(null, years);
+            if (f.left != null && f.left >= lo && f.left - lo < 80 && f.route && f.route[0] && f.route[0].info && f.route[0].info.name === info.name && f.route[0].info.cc === info.cc) hi = Math.max(hi, f.left);
+            (f.route || []).forEach(function (r, i, all) { if (r.info === info || (r.info && r.info.name === info.name && r.info.cc === info.cc)) { var nx = all.slice(i + 1).filter(function (z) { return yearOf(z) != null; })[0], ny = nx ? yearOf(nx) : null; if (ny != null && ny > hi && ny - hi < 80) hi = ny; } });
+          }
           eras.forEach(function (e) {
             var li = el("li", null, years.some(function (y) { return y >= e.from && y < e.to; }) ? "on" : ""), fl = flagFor(info, e.from);
+            if (lo != null && !(e.to > lo && e.from <= hi)) { li.hidden = true; li.setAttribute("data-extra", "1"); hiddenN++; }
             /* the flag and the name of the era go to that era on the country's flag page (its entries are anchored by the year their flag begins); the years open the History theatre at that year */
             var fr = info.flagRows ? info.flagRows.filter(function (r) { return e.from >= r[0] && (r[1] == null || e.from < r[1]); }).sort(function (a, b) { return b[0] - a[0]; })[0] : null;
             var fhref = info.flagSlug ? base + "flags/" + info.flagSlug + "/" + (fr ? "#era-" + fr[0] : "") : "";
@@ -2579,6 +2588,11 @@
             ul.append(li);
           });
           wrap.append(ul);
+          if (hiddenN) {
+            var more = el("button", "Show the other " + hiddenN + " era" + (hiddenN === 1 ? "" : "s") + " of " + info.name, "lf-eras-more"); more.type = "button"; more.setAttribute("aria-expanded", "false");
+            more.addEventListener("click", function () { var open = more.getAttribute("aria-expanded") === "true"; [].forEach.call(ul.querySelectorAll("li[data-extra]"), function (x) { x.hidden = open; }); more.setAttribute("aria-expanded", open ? "false" : "true"); more.textContent = open ? "Show the other " + hiddenN + " era" + (hiddenN === 1 ? "" : "s") + " of " + info.name : "Show only the years they were there"; });
+            wrap.append(more);
+          }
         } else wrap.append(el("p", "The Atlas has no era table for this area, so there is no era-by-era list here: it is " + (info.countryName || "today's country") + " as it is now.", "lf-filed"));
         /* only the years the people there could have lived through (a war of 306 is no part of a life that began in 1874) */
         var evs = mort && info.lat != null ? (span ? S.eventsAt(mort.events, info.lat, info.lon, (span[0] + span[1]) / 2, (span[1] - span[0]) / 2) : S.eventsAt(mort.events, info.lat, info.lon, 1500, 1500)) : [];
@@ -2692,6 +2706,13 @@
         box.append(sec);
       }
       var w = windows(f.left, f.born);
+      /* the years they were at this stop, when both ends are told: arrival (or birth) to the year the next place begins. A little either side, never the whole life. */
+      function stay(y, i) {
+        if (y == null) return null;
+        if (!route[i + 1]) return i === 0 && f.left != null && f.left >= y && f.left - y < 80 ? [y - 1, f.left + 1] : null;
+        var ny = yearOf(route[i + 1]); if (ny == null || ny < y || ny - y > 80) return null;
+        return [y - 1, ny + 1];
+      }
       route.forEach(function (x, i) {
         var info = x.info, first = i === 0, last = i === route.length - 1 && route.length > 1, y = yearOf(x), look = [], kinds = [], win = null;
         var kicker = first ? (x.role === "born" ? "Born here" : "Where it starts") : last ? "Where they arrived" : "On the way";
@@ -2711,7 +2732,7 @@
           if (e.type === "died") { look.push("He died here" + (e.year != null ? " in " + e.year : "") + (e.cause ? " (" + e.cause + ")" : "") + ": look for the death notice, the death certificate, probate, the burial or cremation record and an obituary. The certificate names the parents."); if (kinds.indexOf("d") < 0) kinds.push("d"); if (!win) win = win2; }
         });
         var tags = (x.ev || []).map(function (e) { return e.type === "married" ? "married here" + (e.year != null ? " in " + e.year : "") : "died here" + (e.year != null ? " in " + e.year : ""); }).join(", ");
-        put(info, { kicker: kicker + (tags ? " · " + tags : ""), whenText: when(x, y), year: y, ageText: x.age != null ? (x.approx ? "about age " : "age ") + x.age : "", look: look, kinds: kinds, win: win, withSources: true, prefix: "", span: spanOf(y, x.role) }, true);
+        put(info, { kicker: kicker + (tags ? " · " + tags : ""), whenText: when(x, y), year: y, ageText: x.age != null ? (x.approx ? "about age " : "age ") + x.age : "", look: look, kinds: kinds, win: win, withSources: true, prefix: "", span: stay(y, i) || spanOf(y, x.role) }, true);
       });
       (f.kin || []).forEach(function (k) {
         var who = ((k.label ? k.label + " " : "") + (k.name || "")).trim() || "Family";

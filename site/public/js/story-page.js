@@ -128,11 +128,36 @@
   /* THE GAPS, AS A SMALL HUNT. David: «i feel like we can make this section more fun». What is still missing is a clue to find, not a form to fill: the count of those
      found so far, a small answer box on each (type it, press Enter, and it is added to the story as a sentence), and a word of thanks when one is found. The numbers
      are honest: a clue counts only once it has been open in this story, so «2 of 5» grows when the story shows a new gap and never claims a clue that was never asked. */
+  /* the highlight layer behind the textarea: the same words, the recognised ones wrapped in <mark>. The text itself is drawn by the textarea on top. */
+  var mirrorToks = [], mirrorEl = $("sp-mirror"), editEl = $("sp-edit");
+  function mirrorDraw() {
+    if (!mirrorEl) return;
+    var raw = text.value, pos = 0, frag = document.createDocumentFragment();
+    mirrorToks.slice().sort(function (a, b) { return a.start - b.start; }).forEach(function (k) {
+      if (k.start < pos || k.end > raw.length) return;
+      if (k.start > pos) frag.append(document.createTextNode(raw.slice(pos, k.start)));
+      var m = document.createElement("mark"); m.className = "sp-mk-" + k.kind + (gapTok === k.kind + ":" + k.name.toLowerCase() ? " is-on" : ""); m.textContent = raw.slice(k.start, k.end); frag.append(m); pos = k.end;
+    });
+    frag.append(document.createTextNode(raw.slice(pos) + (/\n$/.test(raw) ? " " : "")));
+    mirrorEl.textContent = ""; mirrorEl.append(frag); mirrorEl.scrollTop = text.scrollTop;
+    if (editEl) editEl.classList.toggle("has-toks", mirrorToks.length > 0);
+  }
+  /* while typing, the marks follow the words: what lies before the edit stays, what lies after it moves by the change, what the edit touched goes until the page reads again */
+  var mirrorPrev = "";
+  function mirrorShift() {
+    var a = mirrorPrev, b = text.value, pl = 0, sl = 0;
+    while (pl < a.length && pl < b.length && a[pl] === b[pl]) pl++;
+    while (sl < a.length - pl && sl < b.length - pl && a[a.length - 1 - sl] === b[b.length - 1 - sl]) sl++;
+    var d = b.length - a.length;
+    mirrorToks = mirrorToks.filter(function (k) { return k.end <= pl || k.start >= a.length - sl; }).map(function (k) { return k.start >= a.length - sl && d ? Object.assign({}, k, { start: k.start + d, end: k.end + d }) : k; });
+    mirrorPrev = b; mirrorDraw();
+  }
   function drawGaps(p) {
     var box = $("sp-gaps"), G = window.raStoryGaps; if (!box || !G) return;
     box.textContent = "";
     var t = (readingNow || readingText(text.value)).trim();
-    if (t.length < 8) { box.hidden = true; clueReset(); return; }
+    mirrorPrev = text.value;
+    if (t.length < 8) { box.hidden = true; clueReset(); mirrorToks = []; mirrorDraw(); return; }
     var list = G.gaps(p, t, { files: files.length, place: function (w) { return !!(data && data.map && data.map[S.fold(w)]); } }), PERSONAL = /^(?:name|given|surname|rel|maiden)$/, rest = list.filter(function (g) { return !PERSONAL.test(g.id); }), top = gapsAll ? rest : rest.slice(0, 3);
     box.hidden = false;
     var nowOpen = Object.create(null); list.forEach(function (g) { nowOpen[g.id] = 1; clueSeen[g.id] = 1; });
@@ -146,18 +171,13 @@
     /* THE STORY, READ BACK WITH ITS NAMES AND PLACES AS PILLS. David: «"my fathers name was ivan", can we flash/pill "ivan" and on tap show some things to ask? e.g. add his
        year of birth, death, etc.» The words are the ones typed; a recognised person or place is a bold pill. Tap it and what can be added about it opens underneath; answer, and
        the sentence goes into the story, in that person's name. */
-    var raw = text.value, toks = G.tokens ? G.tokens(raw, p) : [];
+    var raw = text.value, toks = G.tokens ? G.tokens(raw, p) : [], keyOf = function (k) { return k.kind + ":" + k.name.toLowerCase(); };
+    /* ONE BOX. David: «do we really need two areas for the same text? or would it happen smartly in the same box im typing?» The words stay where they are typed; a name or a
+       place the page recognised is marked IN them (a soft highlight drawn behind the text), and a tap on it opens what can be added, underneath. */
+    mirrorToks = toks; mirrorDraw();
     if (toks.length) {
-      var told = el("p", null, "sp-told"), pos = 0, keyOf = function (k) { return k.kind + ":" + k.name.toLowerCase(); };
-      toks.forEach(function (k) {
-        if (k.start > pos) told.append(document.createTextNode(raw.slice(pos, k.start)));
-        var b = el("button", raw.slice(k.start, k.end), "sp-tok sp-tok-" + k.kind + (gapTok === keyOf(k) ? " is-on" : "")); b.type = "button"; b.setAttribute("aria-expanded", gapTok === keyOf(k) ? "true" : "false");
-        b.title = k.kind === "person" ? "Add something about " + k.name : "Add something about " + k.name;
-        b.addEventListener("click", function () { gapActive = ""; gapOpt = ""; gapTok = gapTok === keyOf(k) ? "" : keyOf(k); drawGaps(p); });
-        told.append(b); pos = k.end;
-      });
-      if (pos < raw.length) told.append(document.createTextNode(raw.slice(pos)));
-      box.append(el("span", "Tap a name or a place to add to it", "sp-gaps-h"), told);
+      box.append(el("span", gapTok ? "" : "Tap a highlighted name or place to add to it", "sp-gaps-h"));
+      if (!gapTok) { var kb = el("div", null, "sp-toks-kb"); toks.forEach(function (k) { var kbtn = el("button", "Add to " + k.name, "sp-ghost"); kbtn.type = "button"; kbtn.addEventListener("click", function () { gapActive = ""; gapOpt = ""; gapTok = keyOf(k); drawGaps(p); }); kb.append(kbtn); }); box.append(kb); }
       var tk = toks.filter(function (k) { return gapTok === keyOf(k); })[0];
       if (tk) {
         var panel = el("div", null, "sp-gap sp-about"), ttl = el("div", null, "sp-gap-q");
@@ -622,8 +642,16 @@
   function grow() { text.style.height = "auto"; text.style.height = Math.min(Math.max(text.scrollHeight, 110), 420) + "px"; }
   text.addEventListener("input", function () {
     hold = null;
-    grow(); try { sessionStorage.setItem(DRAFT, text.value); } catch (e) { /* a private window: the draft is just not kept */ }
+    grow(); mirrorShift(); try { sessionStorage.setItem(DRAFT, text.value); } catch (e) { /* a private window: the draft is just not kept */ }
     clearTimeout(tm); tm = setTimeout(run, 650);
+  });
+  text.addEventListener("scroll", function () { if (mirrorEl) mirrorEl.scrollTop = text.scrollTop; });
+  /* a tap (or click) with the caret inside a marked word opens that word's panel; a tap elsewhere in the words closes it. Typing never opens anything. */
+  text.addEventListener("click", function () {
+    if (text.selectionStart !== text.selectionEnd || !parsed || !mirrorToks.length) return;
+    var c = text.selectionStart, hit = mirrorToks.filter(function (k) { return c >= k.start && c <= k.end; })[0], key = hit ? hit.kind + ":" + hit.name.toLowerCase() : "";
+    if (key === gapTok) return;
+    gapActive = ""; gapOpt = ""; gapTok = key; drawGaps(parsed);
   });
   $("sp-eg").addEventListener("click", function () { text.value = HINT; grow(); run(); });
   $("sp-clear").addEventListener("click", function () {

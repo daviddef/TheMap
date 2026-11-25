@@ -101,3 +101,12 @@ test("My research can be shared: the address carries who is read and any period,
   assert.doesNotMatch(page.slice(page.indexOf("function applyView"), page.indexOf("/* the address follows the view")), /setActive/, "opening a link never changes the family your marks go under");
   assert.match(page, /location\.pathname \+ location\.search \+ \(n === "families"/, "changing tab keeps the query");
 });
+
+test("My research draws the Atlas map's looks, and a card whose shard failed to load is still drawn, not dropped", () => {
+  const page = fs.readFileSync(path.join(here, "../src/pages/my-research.astro"), "utf8");
+  assert.match(page, /js\/basemaps\.js/, "the shared basemaps script is loaded");
+  assert.match(page, /raBasemaps\.attach\(L, mrMap, \{ light: lightGround, labelsPane: "baseLabels" \}\)/, "the map takes its looks and switcher from the Atlas's module");
+  assert.match(page, /delete cache\[u\]/, "a failed fetch is not cached");
+  assert.match(page, /fail\.failed = true/, "a family whose shard did not load still gets a card");
+  assert.match(fs.readFileSync(path.join(here, "../public/js/name-intro.js"), "utf8"), /m\.failed \?/, "and the card says it could not load");
+});

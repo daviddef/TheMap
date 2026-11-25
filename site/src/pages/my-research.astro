@@ -43,13 +43,21 @@ const BASE_ = u("/");
   <script is:inline src={u("/js/shard-key.js")}></script>
   <script is:inline src={u("/js/name-intro.js")}></script>
   <script is:inline src={u("/js/place-strip.js")}></script>
+  <script is:inline src={u("/js/basemaps.js")}></script>
   <script is:inline>
     (function () {
       /* this script sits in the head slot, before the container exists: the container is looked up when drawing, not now */
       var host = null, N = window.raNameIntro;
       if (!N) return;
       var base = (document.documentElement.getAttribute("data-base") || "/").replace(/\/?$/, "/"), names = {}, cache = {}, token = 0;
-      function getJ(u) { return cache[u] || (cache[u] = fetch(u).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })); }
+      /* A FAILED FETCH IS NOT KEPT: caching the null meant one slow or dropped request hid a family's card until the page was reloaded (a third
+         family ticked, two cards drawn). Only an answer is remembered; a miss is asked again on the next redraw. */
+      function getJ(u) {
+        if (cache[u]) return cache[u];
+        var p = fetch(u).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+        cache[u] = p; p.then(function (v) { if (v == null && cache[u] === p) delete cache[u]; });
+        return p;
+      }
       function show(node) { if (!host) return; host.textContent = ""; if (node) { host.append(node); host.hidden = false; } else host.hidden = true; }
       /* ONE CARD FOR EACH FAMILY THE PAGE READS. The map and the lists follow the families ticked in the header picker, so the name card must too:
          David ticked four families and the page still said «About the name Defranceschi». Nothing ticked (or one) means the family you mark
@@ -67,8 +75,9 @@ const BASE_ = u("/");
           var key = window.raShardKey(window.raFold(name), sh && sh.s); if (!key) return null;
           return getJ(base + "s/" + encodeURIComponent(key) + ".json");
         }).then(function (rows) {
-          /* a shard that could not be fetched is not a finding: say nothing */
-          if (!rows) return null;
+          /* a shard that could not be fetched is not a finding about the name, but the family still gets its card, saying so, so that the
+             cards always match the families ticked */
+          if (!rows) { var fail = N.build(null); fail.name = name; fail.failed = true; return N.render(fail, base); }
           var row = N.pick(rows, name);
           if (!row) { var gap = N.build(null); gap.name = name; return N.render(gap, base); }
           return Promise.all([getJ(base + "flag-eras.json"), getJ(base + "flag-map.json")]).then(function (a) {
@@ -1199,18 +1208,22 @@ const BASE_ = u("/");
             if (b) b.addEventListener("click", function () { planPlace(b); mrMap.closePopup(); });
           });
           mrMap.on("popupclose", function () { mrMap._raPop = false; drawDots(); });
-          /* The same quiet ground as the main map: Esri's light grey canvas, with
-             its place names in a separate pane above the tiles and below the pins. */
-          L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
-            attribution: "Esri, HERE, Garmin &middot; &copy; OpenStreetMap contributors",
-            maxNativeZoom: 16, maxZoom: 18
-          }).addTo(mrMap);
+          /* THE SAME LOOK AS THE ATLAS MAP. This map used to draw Esri's light grey only, while the main map opens on Satellite and lets the
+             reader pick a look; David: «why does the map not look/feel like our regular map style?». The light grey is now just the "Map"
+             look, and js/basemaps.js (shared with the Atlas, History and Compass maps) chooses the opening look, adds the same switcher and
+             remembers the reader's pick in the same key, so a look chosen on one map holds on this one. Place names go in a pane above the
+             tiles and below the pins. */
           mrMap.createPane("baseLabels");
           mrMap.getPane("baseLabels").style.zIndex = 250;
           mrMap.getPane("baseLabels").style.pointerEvents = "none";
-          L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}", {
-            pane: "baseLabels", maxNativeZoom: 16, maxZoom: 18
-          }).addTo(mrMap);
+          var lightGround = [
+            L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+              attribution: "Esri, HERE, Garmin &middot; &copy; OpenStreetMap contributors", maxNativeZoom: 16, maxZoom: 18 }),
+            L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}", {
+              pane: "baseLabels", maxNativeZoom: 16, maxZoom: 18 })
+          ];
+          if (window.raBasemaps) window.raBasemaps.attach(L, mrMap, { light: lightGround, labelsPane: "baseLabels" });
+          else lightGround.forEach(function (l) { l.addTo(mrMap); });
         }
         if (mrMap._raPins) mrMap.removeLayer(mrMap._raPins);
         var g = L.layerGroup();

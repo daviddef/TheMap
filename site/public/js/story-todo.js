@@ -28,6 +28,41 @@
   function has(v) { return v != null && v !== ""; }
   function inRing(pt, ring) { var c = false; for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) { var yi = ring[i][0], xi = ring[i][1], yj = ring[j][0], xj = ring[j][1]; if ((yi > pt[0]) !== (yj > pt[0]) && pt[1] < (xj - xi) * (pt[0] - yi) / (yj - yi) + xi) c = !c; } return c; }
 
+  /* ---- burial grounds: only the one-degree squares around a place --------------------------------------------------------------------------------
+     scripts/build-cemetery-cells.py cuts every ground the Atlas holds into public/cem/{osm|wd}/{lat}_{lon}.json (rows [lat, lon, name|null, id]) and lists the squares in
+     cem/index.json. A square the index does not list holds nothing; a listed square that does not arrive is MISSING, and the plan then never says «there is none». */
+  var CEM_KM = 15, CEM_NAMED = 10;
+  function cellsFor(lat, lon, index) {
+    var dLat = CEM_KM / 110.5, dLon = CEM_KM / (111.2 * Math.max(0.01, Math.cos(Math.min(89.9, Math.abs(lat) + dLat) * Math.PI / 180))), out = [];
+    Object.keys((index && index.sources) || {}).forEach(function (src) {
+      var s = index.sources[src], seen = Object.create(null);
+      for (var y = Math.floor(lat - dLat); y <= Math.floor(lat + dLat); y++) for (var x = Math.floor(lon - dLon); x <= Math.floor(lon + dLon); x++) {
+        var key = y + "_" + (((x + 180) % 360 + 360) % 360 - 180);   /* across the date line */
+        if (seen[key] || !(s.cells || {})[key]) continue;
+        seen[key] = 1;
+        for (var i = 0, n = (s.parts || {})[key] || 1; i < n; i++) out.push({ src: src, path: "cem/" + src + "/" + key + (i ? "-" + i : "") + ".json" });
+      }
+    });
+    return out;
+  }
+  /* `get(path)` resolves to the parsed file, or null when it did not arrive. */
+  function cemeteriesFrom(index, files, docs) {
+    var o = { osm: [], wd: [], missing: 0, regions: (((index.sources || {}).osm) || {}).regions || 0 };
+    files.forEach(function (f, i) {
+      var d = docs[i];
+      if (!d || !d.rows) { o.missing++; return; }
+      d.rows.forEach(function (r) { var c = { y: r[0], x: r[1], n: r[2] || "" }; c[f.src === "wd" ? "q" : "id"] = r[3]; (o[f.src] || (o[f.src] = [])).push(c); });
+    });
+    return o;
+  }
+  function loadCemeteries(lat, lon, get) {
+    return Promise.resolve(get("cem/index.json")).then(function (index) {
+      if (!index || !index.sources) return { failed: true };
+      var files = cellsFor(lat, lon, index);
+      return Promise.all(files.map(function (f) { return get(f.path); })).then(function (docs) { return cemeteriesFrom(index, files, docs); });
+    });
+  }
+
   /* ---- the years the story's people were alive ----------------------------------------------------------------------------------------------- */
   function yearsOf(g) {
     var f = (g && g.facts) || {}, ys = [];
@@ -110,6 +145,33 @@
   function destSource(info) {
     return (info.provs || []).filter(function (p) { return p && p.url && KINDRANK[p.kind] != null && !VICTIMS.test(p.id + " " + p.name); })
       .sort(function (a, b) { return KINDRANK[a.kind] - KINDRANK[b.kind] || (ACC[a.access] != null ? ACC[a.access] : 8) - (ACC[b.access] != null ? ACC[b.access] : 8); })[0] || null;
+  }
+
+  /* the burial grounds within reach: the named ones nearest first, then one line for those with no name. `cem` is {osm, wd, missing, regions}, {pending} or {failed}. */
+  function ground(cem, info, item) {
+    var graves = "Graves are found through the parish and the municipality that runs the ground; volunteer indexes such as Find a Grave and BillionGraves may list names.", find = "https://www.findagrave.com/cemetery";
+    if (!cem || cem.pending) return [item("Looking for burial grounds near " + info.name, "The cemetery lists for this part of the map are still loading.", { gap: true })];
+    if (cem.failed || info.lat == null) return [item("The cemetery lists were not loaded", "So the plan cannot say what lies near " + info.name + ". Reload the page to try again.", { gap: true, detail: graves, href: find })];
+    var all = (cem.osm || []).map(function (c) { return { n: c.n, y: c.y, x: c.x, src: "OpenStreetMap", href: "https://www.openstreetmap.org/" + (String(c.id).charAt(0) === "w" ? "way/" : String(c.id).charAt(0) === "r" ? "relation/" : "node/") + String(c.id).slice(1) }; })
+      .concat((cem.wd || []).map(function (c) { return { n: c.n, y: c.y, x: c.x, src: "Wikidata", href: "https://www.wikidata.org/wiki/" + c.q }; }))
+      .map(function (c) { c.km = hav(info.lat, info.lon, c.y, c.x); return c; }).filter(function (c) { return c.km <= CEM_KM; }).sort(function (a, b) { return a.km - b.km; });
+    function far(km) { return km < 1 ? "less than 1 km" : Math.round(km) + " km"; }
+    var named = [], bare = [];
+    all.forEach(function (c) { if (c.n && !named.some(function (s) { return s.n.toLowerCase() === c.n.toLowerCase() && hav(s.y, s.x, c.y, c.x) < 1; })) named.push(c); });
+    /* every unnamed ground the map holds is counted; only the other source's point on the same spot is the same ground */
+    all.forEach(function (c) { if (!c.n && !all.some(function (o) { return o.src === "OpenStreetMap" && c.src !== o.src && hav(o.y, o.x, c.y, c.x) < 0.15; })) bare.push(c); });
+    var gr = named.slice(0, CEM_NAMED).map(function (c) {
+      return item(c.n, "A named burial ground " + far(c.km) + " from " + info.name + ", listed by " + c.src + ".", { href: c.href, tag: (c.km < 1 ? "<1" : Math.round(c.km)) + " km" });
+    });
+    var map = "https://www.openstreetmap.org/#map=12/" + info.lat.toFixed(4) + "/" + info.lon.toFixed(4);
+    if (named.length > CEM_NAMED) gr.push(item((named.length - CEM_NAMED) + " more named burial grounds within " + CEM_KM + " km", "Only the " + CEM_NAMED + " nearest are listed here; the map shows the ground around " + info.name + ".", { href: map }));
+    if (bare.length) gr.push(item(bare.length + (named.length ? " more" : "") + " burial ground" + (bare.length === 1 ? "" : "s") + " with no name on the map, nearest " + far(bare[0].km),
+      "Within " + CEM_KM + " km of " + info.name + ". A small village ground is often mapped without a name; the link opens the nearest one.", { href: bare[0].href }));
+    var covers = "The Atlas gathered burial grounds only inside " + (cem.regions ? cem.regions + " of its record regions" : "some of its record regions");
+    if (cem.missing) gr.push(item("Some of the cemetery lists did not load", gr.length ? "This list may be short. Reload the page to try again." : "So the plan cannot say what lies near " + info.name + ". Reload the page to try again.", { gap: true, detail: graves, href: find }));
+    else if (!gr.length) gr.push(item("The Atlas lists no burial ground within " + CEM_KM + " km of " + info.name, covers + ", from OpenStreetMap and Wikidata, so this is not proof there is none.", { gap: true, detail: graves, href: find }));
+    if (all.length) gr.push(item("What these lists cannot tell you", covers + "; positions are unchecked, and nothing here says who is buried where.", { gap: true, detail: graves }));
+    return gr;
   }
 
   /* ---- build ------------------------------------------------------------------------------------------------------------------------------- */
@@ -203,18 +265,8 @@
     nb.push(item("The district and court seats of the time, and the parish next door", "The Atlas does not hold the district (kotar / Bezirk / contea) or court seats of past states, nor a list of parishes.", { gap: true, detail: "Ask the archive in Write to which parish the village belonged to in your years: it is usually one line." }));
     section("near", "Look nearby", nb);
 
-    /* 5 · ON THE GROUND: cemeteries */
-    var gr = [], cem = deps.cemeteries;
-    if (cem && info.lat != null) {
-      var seenC = []; var all = (cem.osm || []).map(function (c) { return { n: c.n, y: c.y, x: c.x, src: "OpenStreetMap", href: "https://www.openstreetmap.org/" + (String(c.id).charAt(0) === "w" ? "way/" : String(c.id).charAt(0) === "r" ? "relation/" : "node/") + String(c.id).slice(1) }; })
-        .concat((cem.wd || []).map(function (c) { return { n: c.n, y: c.y, x: c.x, src: "Wikidata", href: "https://www.wikidata.org/wiki/" + c.q }; }));
-      all.map(function (c) { return { c: c, km: hav(info.lat, info.lon, c.y, c.x) }; }).filter(function (x) { return x.km <= 15 && x.c.n; }).sort(function (a, b) { return a.km - b.km; }).forEach(function (x) {
-        if (gr.length >= 6) return; if (seenC.some(function (s) { return s.n.toLowerCase() === x.c.n.toLowerCase() && hav(s.y, s.x, x.c.y, x.c.x) < 1; })) return; seenC.push(x.c);
-        gr.push(item(x.c.n, "A named cemetery " + (x.km < 1 ? "less than 1" : Math.round(x.km)) + " km from " + info.name + ", listed by " + x.c.src + ". To find a grave you still ask the parish or the municipality that runs it.", { href: x.c.href, tag: (x.km < 1 ? "<1" : Math.round(x.km)) + " km" }));
-      });
-    }
-    if (!gr.length) gr.push(item("The Atlas has no cemetery list near " + info.name, cem ? "No named cemetery within 15 km is listed in the Atlas's OpenStreetMap or Wikidata data, which cover only the regions it has mapped." : "The cemetery lists were not loaded.", { gap: true, detail: "Graves are found through the parish and the municipality that runs the cemetery; volunteer indexes such as Find a Grave and BillionGraves may list names.", href: "https://www.findagrave.com/cemetery" }));
-    else gr.push(item("The Atlas's cemetery positions are unchecked", "OpenStreetMap and Wikidata name these places; neither says whose graves are there or whether a burial index exists.", { gap: true }));
+    /* 5 · ON THE GROUND: burial grounds */
+    var gr = ground(deps.cemeteries, info, item);
     section("ground", "Where it would be on the ground", gr);
 
     /* 6 · WHAT WAS HAPPENING: events whose mapped area holds the place, in the years the people were alive */
@@ -297,7 +349,7 @@
     mount.append(el("p", "Worked out on this device from the Atlas's own files; nothing is sent anywhere. A line only appears where a file says it. Grey lines say what the Atlas does not hold. Cemetery positions: OpenStreetMap contributors (ODbL) and Wikidata (CC0).", "sp-fine"));
   }
 
-  var api = { build: build, render: render, asText: asText, anchorOf: anchorOf, pickRegion: pickRegion, yearsOf: yearsOf, erasFor: erasFor, draft: draft, hav: hav, inRing: inRing };
+  var api = { build: build, cellsFor: cellsFor, cemeteriesFrom: cemeteriesFrom, loadCemeteries: loadCemeteries, render: render, asText: asText, anchorOf: anchorOf, pickRegion: pickRegion, yearsOf: yearsOf, erasFor: erasFor, draft: draft, hav: hav, inRing: inRing };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (root) root.raStoryTodo = api;
 })(typeof window !== "undefined" ? window : (typeof globalThis !== "undefined" ? globalThis : this));

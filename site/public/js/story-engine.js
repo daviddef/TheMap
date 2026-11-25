@@ -2813,6 +2813,15 @@
       countries: row && row.countries ? row.countries.map(function (c) { return c.cc; }).slice(0, 8) : [] };
   }
 
+  /* SITES THAT KEEP A PAGE FOR EACH SURNAME, asked for by David («maybe we add a link to acta on last names?»): any directory row whose address takes the
+     name ({surname}, or {SURNAME} where the site wants capitals) and whose countries touch `ccs` (on the story page, the countries of the story's places).
+     A link only: the atlas reads nothing from them, and the name goes to that site when the reader clicks. lib/name-links.js is the surname page's copy of this rule and a test holds the two together. */
+  function nameLinks(providers, name, ccs) {
+    if (!name) return [];
+    return (providers || []).filter(function (p) { return /\{(surname|SURNAME)\}/.test(p.deepLink || "") && (p.countries || []).some(function (c) { return (ccs || []).indexOf(c) > -1; }); })
+      .map(function (p) { return { id: p.id, name: String(p.name).split(" \u2014 ")[0], url: p.deepLink.replace("{surname}", encodeURIComponent(name)).replace("{SURNAME}", encodeURIComponent(name.toUpperCase().replace(/\s+/g, "_"))) }; });
+  }
+
   /* WHICH LANGUAGES A CLERK WOULD HAVE USED, from where a person lived and when. David: «we can deduce which alternate spellings he would have based on who held the ground / the country
      of the time of his life, rather than throwing all languages up». A person born in Senj in 1951 was written in Croatian (Yugoslavia) and, in Sydney, in English; not in Latin, Italian or
      Hungarian, which Senj's registers used under other rulers. The language of the country as it is now is always included; the polity of each era the person was there adds the language its
@@ -2843,7 +2852,7 @@
   }
 
   var api = { toYear: toYear, suggest: suggest, windows: windows, volumesFor: volumesFor, spansOf: spansOf, bookNeeds: bookNeeds, keyBooks: keyBooks, captionAt: captionAt, progress: progress, between: between,
-              readFamily: readFamily, readMe: readMe, readEvents: readEvents, repairCase: repairCase, givenForms: givenForms, volLabel: volLabel, buildPlan: buildPlan, parseStory: parseStory, startFamily: startFamily, familyName: familyName, flagFor: flagFor, leaderAt: leaderAt, leadersBetween: leadersBetween, givenGroups: givenGroups, surnameBlock: surnameBlock, short: short, yearsIn: yearsIn,
+              readFamily: readFamily, readMe: readMe, readEvents: readEvents, repairCase: repairCase, givenForms: givenForms, volLabel: volLabel, buildPlan: buildPlan, parseStory: parseStory, startFamily: startFamily, familyName: familyName, flagFor: flagFor, leaderAt: leaderAt, leadersBetween: leadersBetween, givenGroups: givenGroups, surnameBlock: surnameBlock, nameLinks: nameLinks, short: short, yearsIn: yearsIn,
               HOLDS: HOLDS, YEAR_MIN: YEAR_MIN, YEAR_MAX: YEAR_MAX, readLife: readLife, gazWants: gazWants, gazMerge: gazMerge, didYouMean: didYouMean, aliasMerge: aliasMerge, countryPoints: countryPoints, repairCase: repairCase, clerkLanguages: clerkLanguages };
   if (typeof module !== "undefined" && module.exports) { module.exports = api; return; }
   window.raStory = api;
@@ -2987,7 +2996,7 @@
         var out = r[6].map(function (pe, i) {
           var gr = pe.given && data.given ? S.givenIn(pe.given, data.given, null) : [];
           return { role: pe.role, rel: pe.rel, name: pe.name, given: gr.length ? { canon: gr[0].row.canon, typed: pe.given, groups: givenGroups(gr[0].row, labels) } : (pe.given ? { canon: "", typed: pe.given, groups: [] } : null),
-            langs: clerkLanguages(staysOf(pe)), surname: r[5][i], surnameTyped: pe.surname, maiden: pe.maiden || "", married: pe.married || "", occupation: pe.occupation || "", counts: pe.counts || null, told: !!pe.told, presumed: !!pe.presumed, me: !!pe.me, sought: !!pe.sought, key: pe.key, ofSubject: !!pe.ofSubject, nameNote: pe.nameNote || "", place: pe.place && infos[pe.place.row.i] ? infos[pe.place.row.i].name : "", placeSaid: pe.place && pe.place.said || "", placeNear: pe.place && pe.place.nearTo && pe.place.nearTo.row && infos[pe.place.nearTo.row.i] ? infos[pe.place.nearTo.row.i].name.replace(/\s*\(area\)$/, "") : "", label: pe.label || "", side: pe.side || "", up: !!pe.up,
+            langs: clerkLanguages(staysOf(pe)), surname: r[5][i] && Object.assign(r[5][i], { links: nameLinks(provs, pe.surname, r[0].map(function (x) { return x.cc; })) }), surnameTyped: pe.surname, maiden: pe.maiden || "", married: pe.married || "", occupation: pe.occupation || "", counts: pe.counts || null, told: !!pe.told, presumed: !!pe.presumed, me: !!pe.me, sought: !!pe.sought, key: pe.key, ofSubject: !!pe.ofSubject, nameNote: pe.nameNote || "", place: pe.place && infos[pe.place.row.i] ? infos[pe.place.row.i].name : "", placeSaid: pe.place && pe.place.said || "", placeNear: pe.place && pe.place.nearTo && pe.place.nearTo.row && infos[pe.place.nearTo.row.i] ? infos[pe.place.nearTo.row.i].name.replace(/\s*\(area\)$/, "") : "", label: pe.label || "", side: pe.side || "", up: !!pe.up,
             events: (pe.events || []).map(function (e) { var inf = e.place && infos[e.place.row.i]; if (e.type === "told") return { type: "told", text: e.text }; return { type: e.type, said: e.said || "", year: e.year, place: inf ? inf.name : (e.place ? e.place.word : e.text ? e.text + " (not among the Atlas's places)" : ""), country: inf ? inf.countryName : "", cause: e.cause || "" }; }) };
         });
         return { facts: facts, plan: buildPlan(facts), mort: r[2], names: { people: out }, people: out, others: parsed.others || [], life: parsed.life || null };
@@ -3845,10 +3854,11 @@
       }
     }
     if (sn) {
-      var f = sn.family, pos = f ? f.by.same.concat(f.by.attested, f.by.rule) : [];
-      if (f || sn.spelling.length || sn.sounds.length) {
+      var f = sn.family, pos = (f ? f.by.same.concat(f.by.attested, f.by.rule) : []).filter(function (x) { return x.toLowerCase() !== String(sn.name).toLowerCase(); });   /* the name itself is not another spelling of it */
+      var links = sn.links || [], spelt = pos.length || (f && (f.by.lead.length || f.by["case-by-case"].length || f.notSame.length)) || sn.spelling.length || sn.sounds.length;
+      if (spelt || links.length) {
         any = true;
-        box.append(el("h4", "Surname: " + sn.name + " may be written"));
+        box.append(el("h4", "Surname: " + sn.name + (spelt ? " may be written" : "")));
         var u2 = el("ul", null, "lf-forms");
         function row(b, t) { var l = el("li"); l.append(el("b", b), document.createTextNode(t)); u2.append(l); }
         if (pos.length) row("Recorded spellings of the same name: ", pos.join(", "));
@@ -3857,7 +3867,12 @@
         if (sn.spelling.length) row("Close spellings in the Atlas's name lists (leads): ", sn.spelling.join(", "));
         if (sn.sounds.length) row("Names that sound alike (leads): ", sn.sounds.join(", "));
         if (f && f.notSame.length) row("Look alike, but a different name: ", f.notSame.slice(0, 6).map(function (x) { return x[0]; }).join(", "));
-        box.append(u2);
+        if (u2.firstChild) box.append(u2);
+        links.forEach(function (x) {
+          var p = el("p", null, "lf-namelink"), a = el("a", "Look up " + sn.name + " on " + x.name + " \u2197");
+          a.href = x.url; a.target = "_blank"; a.rel = "noopener"; a.title = "Your browser sends the name to " + x.name + " when you click.";
+          p.append(a); box.append(p);
+        });
       }
     }
     return any ? box : null;

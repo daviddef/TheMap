@@ -18,6 +18,8 @@ import SurnameMap from "../../components/SurnameMap.astro";
 import { u } from "../../lib/url.js";
 import { atlas as idx } from "../../lib/atlas.js";
 import { sourcesFor, access as PACCESS } from "../../lib/sources-by-country.js";
+import { nameLinks } from "../../lib/name-links.js";
+import provDir from "../../../public/providers.json";
 import { curveFor } from "../../lib/fr-curve.js";
 import { corpus } from "../../lib/surname-corpus.js";
 import { surnameMapData } from "../../lib/surname-map.js";
@@ -118,7 +120,10 @@ const wk = wiktionaryFor(r.n);
    evidence somebody read off a record outranks a rule of the language, which
    outranks an algorithm's guess. */
 const fh = familyFor(r.n);
-const fam = fh && fh.role === "member" ? fh.fam : null;
+/* A FAMILY OF ONE FORM, that no archive keeps and that rules nothing out, has no spellings to show: the entry is what earns the name its page (a census
+   count), and «met on this line's records» over it would claim a family line nobody holds. The count itself is under Country by country. */
+const lone = (f) => f.members.length < 2 && !(f.notSame || []).length && !(f.archives || []).length;
+const fam = fh && fh.role === "member" && !lone(fh.fam) ? fh.fam : null;
 const famNot = fh && fh.role === "notSame" ? fh : null;
 const famGroups = fam ? membersByStatus(fam) : null;
 const famSearch = fam ? searchList(fam) : [];
@@ -160,6 +165,7 @@ const countryBlocks = ccs.map((c) => {
   const flag = flagFor(c.cc);
   const src = sourcesFor(c.cc).slice(0, 6);
   const row = tlByCc[c.cc];
+  const elsewhere = nameLinks(provDir.providers, r.n, [c.cc]);
   const decades = row ? Object.keys(row.d).map(Number).sort((a, b) => a - b) : null;
   const vTotal = totalVolumes(c.cc);
   /* THREE STATES FROM JOB 3, plus a fourth this atlas has to admit to: no
@@ -172,7 +178,7 @@ const countryBlocks = ccs.map((c) => {
   const enumerableSrc = [...new Set((c.by || [])
     .filter((b) => attestedBy[b]?.enumerable === false)
     .map((b) => attestedBy[b].name))];
-  return { c, flag, src, decades, vol, enumerableSrc };
+  return { c, flag, src, decades, vol, enumerableSrc, elsewhere };
 });
 
 /* PLACES THIS NAME IS ALSO THE NAME OF, drawn rather than only listed.
@@ -600,7 +606,7 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
     <h2 class="k-h2">Country by country</h2>
     <details class="k-more"><summary><span class="k-mt">How to read the three kinds of evidence</span></summary><div><p class="cap">Each country can carry three kinds of evidence, and none is the same claim. A <b>register</b> is a head-count. A <b>record</b> is one document naming the surname there. A <b>volume overlapping these dates</b> is a book from the right place and years, never one known to name this surname. None of them means the name exists only here, or nowhere else.</p></div></details>
 
-    {countryBlocks.map(({ c, flag, src, decades, vol, enumerableSrc }) => (
+    {countryBlocks.map(({ c, flag, src, decades, vol, enumerableSrc, elsewhere }) => (
       <div class="cblock">
         <h3>
           {flag && (
@@ -616,6 +622,10 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
           {c.n ? <><b>{c.n.toLocaleString()}</b>{" "}</> : ""}
           {KIND_OF[c.how] || c.how} — {(c.by || []).map((b) => attestedBy[b]?.name || b).join("; ") || c.how}.
         </p>
+        {elsewhere.map((x) => (
+          <p class="namelink"><a href={x.url} target="_blank" rel="noopener"
+            title={`Your browser sends the name to ${x.name} when you click.`}>Look up {r.n} on {x.name} ↗</a></p>
+        ))}
         {/* WHEN A SOURCE CANNOT BE ENUMERATED, ITS SILENCE IS NOT EVIDENCE.
             DZS answers one surname at a time and will not say which surnames
             exist, so this atlas asked only about names it already attests on
@@ -856,6 +866,7 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
   .cblock h3 a { text-decoration: none; }
   .cblock h3 a:hover { text-decoration: underline; }
   .ctop { margin-top: 0; }
+  .namelink { margin: 6px 0 0; font-size: 14.5px; }
   .ccflag { width: 22px; height: auto; vertical-align: -4px; margin-right: 8px;
     border-radius: 4px; box-shadow: 0 0 0 1px var(--rule); }
   .cflag-l:hover .ccflag { box-shadow: 0 0 0 2px var(--hue, var(--accent)); }

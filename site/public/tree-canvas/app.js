@@ -317,12 +317,10 @@ function jsonAfter(html, marker) {
   }
   throw new Error('unterminated');
 }
-/* an archive's published roots page: its tree and its Atlas extract, read here (a plain request for a public page; no credentials, no referrer) */
+/* an archive's published tree and Atlas extract, read here from the viewer file its person pages frame (a plain request for a public page; no credentials, no referrer) */
 async function fetchArchive(key, signal, o) {
   const a = ARCH[key];
-  const r = await fetch('https://' + a.host + '/roots/', { credentials: 'omit', referrerPolicy: 'no-referrer', signal });
-  if (!r.ok) throw new Error('HTTP ' + r.status);
-  const html = await r.text();
+  const html = await CS.readArchiveHtml(a.host, (u, sig) => fetch(u, { credentials: 'omit', referrerPolicy: 'no-referrer', signal: sig }), signal);   // /roots/view.html, then the old /roots/ page
   return { tree: jsonAfter(html, 'const TREE='), atlas: jsonAfter(html, 'const ATLAS='), archive: { key, name: a.name, host: a.host, color: a.color, graded: a.graded }, lines: a.lines && !(o && o.lines === false) ? await fetchLines(a) : null };
 }
 /* an archive's drawing of its research lines (/roots/lines.json), if it publishes one: read here and handed to the canvas in memory, where it is cleaned before use. It is optional,

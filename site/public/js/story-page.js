@@ -676,7 +676,7 @@
     box.textContent = "";
     if (!first) { box.hidden = true; return; }
     var m = document.createElement("p"); m.className = "sp-doubt-t";
-    m.textContent = "I’m not sure I read this right: " + first.what.replace(/^./, function (c) { return c.toLowerCase(); }).replace(/[.\s]+$/, "") + ". Check the places and the family below against your words, or let the careful reader have a go.";
+    m.textContent = "I’m not sure I read this right: " + first.what.replace(/^(?!I[\s\u2019']).|^(?=I$)/, function (c) { return c.toLowerCase(); }).replace(/[.\s]+$/, "") + ". Check the places and the family below against your words, or let the careful reader have a go.";
     var b = document.createElement("button"); b.type = "button"; b.className = "sp-doubt-b"; b.textContent = "Tidy with AI";
     b.addEventListener("click", function () { var t2 = $("sp-tidy"); if (t2) t2.click(); });
     box.append(m, b); box.hidden = false;

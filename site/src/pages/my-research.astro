@@ -43,13 +43,21 @@ const BASE_ = u("/");
   <script is:inline src={u("/js/shard-key.js")}></script>
   <script is:inline src={u("/js/name-intro.js")}></script>
   <script is:inline src={u("/js/place-strip.js")}></script>
+  <script is:inline src={u("/js/basemaps.js")}></script>
   <script is:inline>
     (function () {
       /* this script sits in the head slot, before the container exists: the container is looked up when drawing, not now */
       var host = null, N = window.raNameIntro;
       if (!N) return;
       var base = (document.documentElement.getAttribute("data-base") || "/").replace(/\/?$/, "/"), names = {}, cache = {}, token = 0;
-      function getJ(u) { return cache[u] || (cache[u] = fetch(u).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })); }
+      /* A FAILED FETCH IS NOT KEPT: caching the null meant one slow or dropped request hid a family's card until the page was reloaded (a third
+         family ticked, two cards drawn). Only an answer is remembered; a miss is asked again on the next redraw. */
+      function getJ(u) {
+        if (cache[u]) return cache[u];
+        var p = fetch(u).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+        cache[u] = p; p.then(function (v) { if (v == null && cache[u] === p) delete cache[u]; });
+        return p;
+      }
       function show(node) { if (!host) return; host.textContent = ""; if (node) { host.append(node); host.hidden = false; } else host.hidden = true; }
       /* ONE CARD FOR EACH FAMILY THE PAGE READS. The map and the lists follow the families ticked in the header picker, so the name card must too:
          David ticked four families and the page still said «About the name Defranceschi». Nothing ticked (or one) means the family you mark
@@ -67,8 +75,9 @@ const BASE_ = u("/");
           var key = window.raShardKey(window.raFold(name), sh && sh.s); if (!key) return null;
           return getJ(base + "s/" + encodeURIComponent(key) + ".json");
         }).then(function (rows) {
-          /* a shard that could not be fetched is not a finding: say nothing */
-          if (!rows) return null;
+          /* a shard that could not be fetched is not a finding about the name, but the family still gets its card, saying so, so that the
+             cards always match the families ticked */
+          if (!rows) { var fail = N.build(null); fail.name = name; fail.failed = true; return N.render(fail, base); }
           var row = N.pick(rows, name);
           if (!row) { var gap = N.build(null); gap.name = name; return N.render(gap, base); }
           return Promise.all([getJ(base + "flag-eras.json"), getJ(base + "flag-map.json")]).then(function (a) {
@@ -83,11 +92,30 @@ const BASE_ = u("/");
         var list = readNames();
         if (!list.length) { token++; show(null); return; }
         var my = ++token;
-        Promise.all(list.map(cardFor)).then(function (cards) {
-          if (my !== token) return;
-          var got = cards.filter(Boolean);
-          if (!got.length) { show(null); return; }
-          host.textContent = ""; got.forEach(function (c) { host.append(c); }); host.hidden = false;
+        /* EVERY TICKED FAMILY GETS ITS PLACE AT ONCE, AND ITS CARD WHEN IT ARRIVES. This used to wait for all the cards together
+           (Promise.all) and draw nothing until the last one came: one slow or hung shard request kept the PREVIOUS cards on the page, so
+           David ticked five families and the page still showed the two cards from before (Blažević and Boraś, with the other three missing).
+           Now each family has a shut stub in the picker's order the moment the set changes, each is replaced by its card as it loads, and a card
+           that throws or takes too long is replaced by a plain line saying so. */
+        host.textContent = ""; host.hidden = false;
+        var slots = list.map(function (name) {
+          var d = document.createElement("details"); d.className = "ni";
+          var sm = document.createElement("summary"); sm.className = "ni-sum";
+          var h = document.createElement("h2"); h.className = "ni-h"; h.textContent = "About the name " + name;
+          sm.append(h); d.append(sm); host.append(d); return d;
+        });
+        function failed(name) { var f = N.build(null); f.name = name; f.failed = true; return N.render(f, base); }
+        list.forEach(function (name, i) {
+          var cur = slots[i], real = false;
+          function put(card, isReal) {
+            if (real || my !== token || !card || cur.parentNode !== host) return;
+            host.replaceChild(card, cur); cur = card; real = !!isReal;
+          }
+          /* a family that is not a surname has no card: its stub goes */
+          cardFor(name).then(function (c) { if (c) put(c, true); else if (my === token && cur.parentNode === host) host.removeChild(cur); },
+            function () { put(failed(name), false); });
+          /* a late real card still replaces the "could not load" line */
+          setTimeout(function () { put(failed(name), false); }, 12000);
         });
       }
       document.addEventListener("ra-progress-changed", draw);
@@ -96,6 +124,10 @@ const BASE_ = u("/");
     })();
   </script>
   <LineSwitcher admin />
+
+  {/* THE SHARE NOTE: when a link names a family this browser does not have, one line says so. The link itself is copied by the icon in the
+      bar above (js/line-switcher.js); the address follows the view (the «share» block in the main script). */}
+  <p class="mr-share-note" id="mr-share-note" hidden></p>
 
   {/* AN INTRODUCTION TO THE NAME, between the bar and the tabs: what the surname is, where the registers count it, and whose flag flew
       there. Drawn by js/name-intro.js from the same shard the map's search reads; empty (and hidden) for a family that is not a surname. */}
@@ -106,12 +138,8 @@ const BASE_ = u("/");
 
   {/* WHERE THE BACKUP WENT. The "where this lives" note, the back-up / import / share buttons and the six-word online copy were
       all here, and David asked for them to have a page of their own: /backup/ (Connection & Backup), which the pulsing dot in
-      the header opens. What stays is one line saying where this page's data lives, and the way there. */}
-  <div class="one" style="border-left-color:var(--brick)">
-    <div class="lab">Where this lives</div>
-    <p class="cap"><b>In this browser, and nowhere else</b> unless you back it up. <span id="mr-conn"></span>
-    <a href={BASE_ + "backup/"}>Connection &amp; Backup</a> is where you save a file, keep a copy online, or share what you found.</p>
-  </div>
+      the header opens. What stays is one line saying where this page's data lives, and the way there; it now sits in the page footer (slot
+      "footnote"), at the end of the page, because it is something to know and not the thing to do. */}
 
   {/* THE DOSSIER ON A MAP. David: «can the dossier include a map with a marker
       to places?» The page lists where a family has been worked as text, which
@@ -242,7 +270,7 @@ const BASE_ = u("/");
           var on = k === n, t = document.getElementById("mr-t-" + k), p = document.getElementById("mr-p-" + k);
           if (!t || !p) return; t.setAttribute("aria-selected", String(on)); t.tabIndex = on ? 0 : -1; p.hidden = !on;
         });
-        if (push) { try { history.replaceState(null, "", n === "families" ? location.pathname + location.search : "#" + n); } catch (e) { /* no history */ } }
+        if (push) { try { history.replaceState(null, "", location.pathname + location.search + (n === "families" ? "" : "#" + n)); } catch (e) { /* no history */ } }
         if (n === "families") setTimeout(function () { window.dispatchEvent(new Event("resize")); }, 30);   // the map was drawn while hidden
         document.dispatchEvent(new CustomEvent("ra-tab-shown", { detail: n }));
       }
@@ -826,7 +854,7 @@ const BASE_ = u("/");
         note.hidden = false;
         note.append("Showing the books for " + PS.span(per[0], per[1]) + ": " + shown + " shown, " + hid + " hidden" + (nodate ? " (" + nodate + " with no years in the title stay)" : "") + ". ");
         var b = document.createElement("button"); b.type = "button"; b.className = "mrpg-clear"; b.textContent = "Show all";
-        b.addEventListener("click", function () { PERIOD[pid] = null; decorate(); });
+        b.addEventListener("click", function () { PERIOD[pid] = null; decorate(); window.dispatchEvent(new Event("ra-period-changed")); });
         note.append(b);
       }
       function decorate() {
@@ -846,7 +874,7 @@ const BASE_ = u("/");
           var eras = reg ? reg.eras : [];
           var first = eras.length ? +eras[0].from : 1500;
           var evs = PS.eventsFor(STRIP.mort.events, d.lat, d.lon, first);
-          var st = PS.strip({ eras: eras, events: evs, period: PERIOD[pid] || null, onPick: function (per) { PERIOD[pid] = per; applyPeriod(sec, pid); } });
+          var st = PS.strip({ eras: eras, events: evs, period: PERIOD[pid] || null, onPick: function (per) { PERIOD[pid] = per; applyPeriod(sec, pid); window.dispatchEvent(new Event("ra-period-changed")); } });
           if (st) {
             var lab = document.createElement("p"); lab.className = "mrpg-lab";
             lab.textContent = (reg ? "Who held this ground" + (reg.label ? ": " + reg.label : "") : "Mass-mortality events that reached here") + (evs.length ? ", with " + evs.length + " mass-mortality event" + (evs.length === 1 ? "" : "s") + " above" : "") + ". Press one to show only the books for those years.";
@@ -1195,18 +1223,22 @@ const BASE_ = u("/");
             if (b) b.addEventListener("click", function () { planPlace(b); mrMap.closePopup(); });
           });
           mrMap.on("popupclose", function () { mrMap._raPop = false; drawDots(); });
-          /* The same quiet ground as the main map: Esri's light grey canvas, with
-             its place names in a separate pane above the tiles and below the pins. */
-          L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
-            attribution: "Esri, HERE, Garmin &middot; &copy; OpenStreetMap contributors",
-            maxNativeZoom: 16, maxZoom: 18
-          }).addTo(mrMap);
+          /* THE SAME LOOK AS THE ATLAS MAP. This map used to draw Esri's light grey only, while the main map opens on Satellite and lets the
+             reader pick a look; David: «why does the map not look/feel like our regular map style?». The light grey is now just the "Map"
+             look, and js/basemaps.js (shared with the Atlas, History and Compass maps) chooses the opening look, adds the same switcher and
+             remembers the reader's pick in the same key, so a look chosen on one map holds on this one. Place names go in a pane above the
+             tiles and below the pins. */
           mrMap.createPane("baseLabels");
           mrMap.getPane("baseLabels").style.zIndex = 250;
           mrMap.getPane("baseLabels").style.pointerEvents = "none";
-          L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}", {
-            pane: "baseLabels", maxNativeZoom: 16, maxZoom: 18
-          }).addTo(mrMap);
+          var lightGround = [
+            L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+              attribution: "Esri, HERE, Garmin &middot; &copy; OpenStreetMap contributors", maxNativeZoom: 16, maxZoom: 18 }),
+            L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}", {
+              pane: "baseLabels", maxNativeZoom: 16, maxZoom: 18 })
+          ];
+          if (window.raBasemaps) window.raBasemaps.attach(L, mrMap, { light: lightGround, labelsPane: "baseLabels" });
+          else lightGround.forEach(function (l) { l.addTo(mrMap); });
         }
         if (mrMap._raPins) mrMap.removeLayer(mrMap._raPins);
         var g = L.layerGroup();
@@ -1255,9 +1287,69 @@ const BASE_ = u("/");
         }
       }
 
+      /* ---- SHARE THIS VIEW: the address bar carries the view ----------------------------------------------------------------------
+         ?f=blazevic,boras (who is read together; f=all for every family) and ?per=liznjan~1797-1805 (a period pressed on a place's strip).
+         Opening such a link ticks those families here and sets those periods; the tab stays in the #hash as before. The families are named by
+         their slug, which the research sessions' published families share on every device; a slug this browser does not have is said so and
+         left out. Nothing private is in the link, and opening it never changes which family your own marks go under.
+         The address is not rewritten until a link has been applied, or the first draw would replace it with the default view. */
+      var VIEW = { want: null, applied: false, t0: Date.now() };
+      (function () {
+        var q = new URLSearchParams(location.search), f = q.get("f"), per = q.get("per");
+        if (f || per) VIEW.want = { f: f ? (f === "all" ? "all" : f.split(",").filter(Boolean)) : null, per: {} };
+        if (VIEW.want && per) per.split(",").forEach(function (x) {
+          var m = /^([a-z0-9-]+)~(\d{3,4})-(\d{3,4})$/.exec(x); if (m) VIEW.want.per[m[1]] = [+m[2], +m[3]];
+        });
+      })();
+      function viewSlugs() {
+        var lines = P.lines(), me = lines.filter(function (l) { return l.active; })[0], stored = null;
+        try { stored = JSON.parse(localStorage.getItem("ra-synopsis-scope") || "null"); } catch (e) { /* none */ }
+        return { lines: lines, slugs: window.raSynopsis.scopeOf(lines, me && me.slug, stored) };
+      }
+      function viewUrl() {
+        var v = viewSlugs(), q = new URLSearchParams(), all = v.lines.length > 1 && v.slugs.length === v.lines.length;
+        if (v.slugs.length) q.set("f", all ? "all" : v.slugs.join(","));
+        var per = Object.keys(PERIOD).filter(function (k) { return PERIOD[k]; }).map(function (k) { return k + "~" + PERIOD[k][0] + "-" + PERIOD[k][1]; });
+        if (per.length) q.set("per", per.join(","));
+        var qs = q.toString().replace(/%2C/gi, ",").replace(/%7E/gi, "~");
+        return location.pathname + (qs ? "?" + qs : "") + location.hash;
+      }
+      function writeView() {
+        if (VIEW.want && !VIEW.applied) return;
+        if (!window.raProgress) return;
+        var rel = viewUrl();
+        try { history.replaceState(null, "", rel); } catch (e) { /* no history */ }
+      }
+      function applyView() {
+        if (!VIEW.want || VIEW.applied) return;
+        var lines = P.lines(), have = {}; lines.forEach(function (l) { have[l.slug] = 1; });
+        var want = VIEW.want.f, missing = [];
+        if (want && want !== "all") want.forEach(function (s2) { if (!have[s2]) missing.push(s2); });
+        var late = Date.now() - VIEW.t0 > 5000;
+        if (missing.length && !late) { setTimeout(applyView, 600); return; }   /* the published families may still be arriving */
+        VIEW.applied = true;
+        if (want === "all") { try { localStorage.setItem("ra-synopsis-scope", JSON.stringify({ all: true, slugs: [] })); } catch (e) { /* blocked */ } }
+        else if (want) {
+          var ok = want.filter(function (s2) { return have[s2]; });
+          if (ok.length) { try { localStorage.setItem("ra-synopsis-scope", JSON.stringify({ all: ok.length === lines.length, slugs: ok })); } catch (e) { /* blocked */ } }
+        }
+        Object.keys(VIEW.want.per).forEach(function (k) { PERIOD[k] = VIEW.want.per[k]; });
+        var note = document.getElementById("mr-share-note");
+        if (note && missing.length) {
+          note.hidden = false;
+          note.textContent = missing.length + " of the families in this link " + (missing.length === 1 ? "is" : "are") + " not in this browser (" + missing.join(", ") + "), so " + (missing.length === 1 ? "it is" : "they are") + " left out.";
+        }
+        document.dispatchEvent(new CustomEvent("ra-scope-changed"));
+        writeView();
+      }
+      /* the address follows the view, whoever changed it: the picker, a period pressed on a strip, a family chosen */
+      ["ra-scope-changed", "ra-progress-changed"].forEach(function (ev) { document.addEventListener(ev, function () { applyView(); writeView(); }); });
+      window.addEventListener("ra-period-changed", writeView);
+
       draw();
       document.addEventListener("ra-progress-changed", draw);
       document.addEventListener("ra-scope-changed", draw);   /* ticking or clearing families in the picker changes who is read */
+      setTimeout(function () { applyView(); writeView(); }, 0);
       /* one line of the same story the header dot tells (window.raConn is defined in Base.astro) */
       function connLine() {
         var el = document.getElementById("mr-conn"), c = window.raConn && window.raConn.get();
@@ -1340,6 +1432,8 @@ const BASE_ = u("/");
     })();
   </script>
   </div>
+<p slot="footnote" class="mr-where"><b>Where this lives:</b> in this browser, and nowhere else, unless you back it up. <span id="mr-conn"></span>
+    <a href={BASE_ + "backup/"}>Connection &amp; Backup</a> is where you save a file, keep a copy online, or share what you found.</p>
 </Base>
 
 <style>
@@ -1490,6 +1584,7 @@ const BASE_ = u("/");
     background: transparent; color: var(--accent); cursor: pointer; flex: 0 0 auto; }
   :global(.mradd:hover), :global(.mraddall:hover) { background: var(--accent);
     color: var(--panel); }
+  :global(.mr-share-note) { margin: 0 0 12px; padding: 8px 14px; border-left: 3px solid var(--brass, var(--accent)); background: var(--panel); font: 500 13px/1.5 var(--sans); color: var(--ink); }
   :global(.mrcc) { font: 500 13px/1.2 var(--sans); color: var(--ink-2); letter-spacing: .02em; }
   :global(.mrpg) { padding: 12px 18px 6px; border-bottom: 1px solid var(--rule); background: var(--panel-2); }
   :global(.mrpg-links) { list-style: none; margin: 0 0 12px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
@@ -1644,6 +1739,8 @@ const BASE_ = u("/");
   .mra-wnote { margin: 3px 0 0; font: 13px/1.45 var(--sans); color: var(--ink-3); max-width: 80ch; }
   @media print { .mra-chips, .mra-acts, .mra-tools, .mra-pre { display: none; } }
 
+  .mr-where { margin: 0 0 14px; font: 13px/1.5 var(--sans); color: var(--ink-3); max-width: 80ch; }
+  .mr-where b { color: var(--ink-2, var(--ink)); }
   .mr-tabs { margin-top: 18px; }
   .mr-panel { margin-bottom: 28px; min-width: 0; }
   .mr-panel .mrext { margin-top: 0; }

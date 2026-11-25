@@ -482,6 +482,9 @@ import { volumes as invVolumes } from "../lib/inventory.js";
         <script is:inline set:html={"(adsbygoogle = window.adsbygoogle || []).push({});"}></script>
       </aside>
     )}
+    {/* A PAGE MAY ADD ONE SMALL NOTE ABOVE THE FOOTER LINKS (slot "footnote"): My research puts «where this lives» here, because it is a thing to
+        know and not the thing to do. */}
+    {Astro.slots.has("footnote") && <div class="foot-page-note"><slot name="footnote" /></div>}
     <nav class="foot-links" aria-label="More">{footLinks.map(([h, l]) => <a href={u(h)}>{l}</a>)}
       {site.contact && site.contact.email && (
         <a class="at-note" href={`mailto:${site.contact.email}?subject=${encodeURIComponent("Record Atlas: a note")}`}

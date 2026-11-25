@@ -98,7 +98,7 @@
     root.append(sum);
     if (!m.found) {
       sum.append(el("h2", "ni-h", "About the name" + (m.name ? " " + m.name : "")));
-      root.append(el("p", "ni-p", "The registers held here have no entry for this surname yet. That is a gap in our data, not a finding about the name."));
+      root.append(el("p", "ni-p", m.failed ? "This card could not be loaded just now. Reload the page to try again. That says nothing about the name." : "The registers held here have no entry for this surname yet. That is a gap in our data, not a finding about the name."));
       return root;
     }
     sum.append(el("h2", "ni-h", "About the name " + m.name));

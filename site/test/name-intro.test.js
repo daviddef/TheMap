@@ -64,9 +64,10 @@ test("My research reads every ticked family: one name card each, and the bar nam
   const page = fs.readFileSync(path.join(here, "../src/pages/my-research.astro"), "utf8");
   const bar = fs.readFileSync(path.join(here, "../public/js/line-switcher.js"), "utf8");
   assert.match(page, /SY\.scopeOf\(lines, me && me\.slug, stored\)/, "the cards read the same set as the map and the lists");
-  assert.match(page, /Promise\.all\(list\.map\(cardFor\)\)/, "one card per family");
+  assert.match(page, /list\.forEach\(function \(name, i\)/, "one card per family, each drawn as it arrives");
+  assert.doesNotMatch(page, /Promise\.all\(list\.map\(cardFor\)\)/, "no card waits for the others: a slow shard must not keep the previous cards on the page");
   assert.match(page, /addEventListener\("ra-scope-changed", draw\)/, "ticking a family redraws the cards");
-  assert.match(bar, /Reading " \+ set\.length \+ " families together/, "the bar says several families are being read");
+  assert.match(bar, /Reading " \+ \(set\.length > 1 \? set\.length \+ " families together" : "this family only"\)/, "the bar says which families are being read, even when it is one that is not the family you mark under");
   assert.match(bar, /Your marks go under/, "and which one the marks go under");
   assert.match(fs.readFileSync(path.join(here, "../public/js/name-intro.js"), "utf8"), /"About the name" \+ \(m\.name \? " " \+ m\.name : ""\)/, "a card for a name with no entry still says whose it is");
 });
@@ -88,6 +89,35 @@ test("My research place cards say which book was found in and for whom, a next s
   assert.match(page, /a === "onsite"[\s\S]{0,120}"In person"/, "an archive whose paper is in the building is an in-person visit");
   assert.match(page, /else out\.push\(\["unknown", "Not checked yet"/, "an archive nobody has surveyed says so and is not guessed at");
   assert.match(page, /howHtml\("volume:" \+ id\)/, "the unmarked books carry the tag too");
+});
+
+test("My research can be shared: the address carries who is read and any period, and a link opens the same view", () => {
+  const page = fs.readFileSync(path.join(here, "../src/pages/my-research.astro"), "utf8");
+  assert.doesNotMatch(page, /id="mr-share-url"|Share this view/, "no wordy panel: the link is copied by the icon in the bar");
+  assert.match(fs.readFileSync(path.join(here, "../public/js/line-switcher.js"), "utf8"), /tool\("Copy a link to this view"/, "a copy icon in the bar's round buttons");
+  assert.match(page, /q\.set\("f", all \? "all" : v\.slugs\.join\(","\)\)/, "who is read goes in f");
+  assert.match(page, /k \+ "~" \+ PERIOD\[k\]\[0\] \+ "-" \+ PERIOD\[k\]\[1\]/, "a pressed period goes in per");
+  assert.match(page, /if \(VIEW\.want && !VIEW\.applied\) return;/, "the address is not overwritten before a link has been applied");
+  assert.match(page, /is not in this browser|not in this browser \(/, "a family the browser does not have is said so");
+  assert.doesNotMatch(page.slice(page.indexOf("function applyView"), page.indexOf("/* the address follows the view")), /setActive/, "opening a link never changes the family your marks go under");
+  assert.match(page, /location\.pathname \+ location\.search \+ \(n === "families"/, "changing tab keeps the query");
+});
+
+test("My research draws the Atlas map's looks, and a card whose shard failed to load is still drawn, not dropped", () => {
+  const page = fs.readFileSync(path.join(here, "../src/pages/my-research.astro"), "utf8");
+  assert.match(page, /js\/basemaps\.js/, "the shared basemaps script is loaded");
+  assert.match(page, /raBasemaps\.attach\(L, mrMap, \{ light: lightGround, labelsPane: "baseLabels" \}\)/, "the map takes its looks and switcher from the Atlas's module");
+  assert.match(page, /delete cache\[u\]/, "a failed fetch is not cached");
+  assert.match(page, /f\.failed = true/, "a family whose shard did not load still gets a card");
+  assert.match(fs.readFileSync(path.join(here, "../public/js/name-intro.js"), "utf8"), /m\.failed \?/, "and the card says it could not load");
+});
+
+test("My research keeps where-this-lives in the page footer, not above the work", () => {
+  const page = fs.readFileSync(path.join(here, "../src/pages/my-research.astro"), "utf8");
+  const base = fs.readFileSync(path.join(here, "../src/layouts/Base.astro"), "utf8");
+  assert.match(page, /<p slot="footnote" class="mr-where">/);
+  assert.doesNotMatch(page, /<div class="lab">Where this lives<\/div>/);
+  assert.match(base, /Astro\.slots\.has\("footnote"\)/);
 });
 
 test("the family you mark under is shown with a pencil, not a tick that looks like the read-together box", () => {

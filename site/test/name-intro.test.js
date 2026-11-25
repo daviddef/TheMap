@@ -89,3 +89,9 @@ test("My research place cards say which book was found in and for whom, a next s
   assert.match(page, /else out\.push\(\["unknown", "Not checked yet"/, "an archive nobody has surveyed says so and is not guessed at");
   assert.match(page, /howHtml\("volume:" \+ id\)/, "the unmarked books carry the tag too");
 });
+
+test("the family you mark under is shown with a pencil, not a tick that looks like the read-together box", () => {
+  const bar = fs.readFileSync(path.join(here, "../public/js/line-switcher.js"), "utf8");
+  assert.match(bar, /l\.active \? "\\u270E" : ""/);
+  assert.match(bar, /Your marks go under this family\. Click a family's name to change it/);
+});

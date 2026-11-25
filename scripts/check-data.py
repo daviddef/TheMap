@@ -919,7 +919,30 @@ def provider_emails_gate():
                 err(f"{w}: provider {pid!r} does not exist")
         if not e.get("providers") and not e.get("institution"):
             err(f"{w}: belongs to no provider and names no institution")
-    print(f"provider e-mails: {len(seen)} addresses")
+    homes = set()
+    for o in d.get("offices", []):
+        ids = o.get("providers") or []
+        w = f"provider office {', '.join(ids) or '(no provider)'}"
+        if not ids:
+            err(f"{w}: belongs to no provider")
+        for pid in ids:
+            if pid not in known:
+                err(f"{w}: provider {pid!r} does not exist")
+            if pid in homes:
+                err(f"{w}: {pid!r} has two office records")
+            homes.add(pid)
+        if not str(o.get("via") or "").startswith("web:") or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(o.get("read") or "")) or not o.get("note"):
+            err(f"{w}: needs via (web:host), the date read and a note")
+        if o.get("form") and not str(o["form"]).startswith("https://"):
+            err(f"{w}: the contact form must be an https address")
+        for t in [o.get("tel")] + [b.get("tel") for b in o.get("branches", [])]:
+            if t is not None and not re.fullmatch(r"\+\d[\d ]{6,18}", t):
+                err(f"{w}: telephone {t!r} is not +country number")
+        if any(not b.get("name") or not b.get("tel") for b in o.get("branches", [])):
+            err(f"{w}: a branch needs a name and a telephone")
+        if not (o.get("post") or o.get("tel") or o.get("form")):
+            err(f"{w}: holds no post, telephone or form")
+    print(f"provider e-mails: {len(seen)} addresses, {len(homes)} offices")
 
 
 def mortality_gate():

@@ -174,6 +174,18 @@
     return gr;
   }
 
+  /* How far an address is checked, said beside it. */
+  var STATE_SAY = { answered: "has replied before", delivered: "a letter has reached it", listed: "published by the institution", unverified: "unconfirmed: check its own page first", wikidata: "from Wikidata: check it is current" };
+  function contactLinks(a) {
+    var l = [];
+    if (/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(a.email || "")) l.push({ t: "Email", href: "mailto:" + a.email });
+    if (/^https?:\/\//.test(a.form || "")) l.push({ t: "Contact form", href: a.form });
+    var tel = String(a.tel || "").replace(/\(0\)/, "").replace(/[^\d+]/g, "");
+    if (/^\+\d{7,}$/.test(tel)) l.push({ t: "Call", href: "tel:" + tel });
+    return l;
+  }
+  function fold(s) { return String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
+
   /* ---- build ------------------------------------------------------------------------------------------------------------------------------- */
   function build(g, deps) {
     deps = deps || {};
@@ -235,8 +247,20 @@
 
     /* 3 · WRITE TO */
     var wr = [], ar = deps.archives || [], seen = Object.create(null);
-    function contactLine(a) { var bits = []; if (a.email) bits.push(a.email); if (a.tel) bits.push(a.tel); if (a.post) bits.push(a.post); return bits.length ? "The Atlas holds: " + bits.join(" · ") : "The Atlas holds no address or email for it: use the website to find the contact."; }
-    function addArch(a, why, km) { if (!a || seen[a.id]) return; seen[a.id] = 1; var it = item(a.name, why, { detail: contactLine(a) + (km != null ? " · " + km + " km away" : ""), href: a.url, tag: a.email ? "has an email" : "", draft: null, _a: a }); it._km = km; wr.push(it); }
+    function contactLine(a) {
+      var bits = [];
+      if (a.email) bits.push(a.email + (STATE_SAY[a.state] ? " (" + STATE_SAY[a.state] + ")" : ""));
+      if (a.form) bits.push("contact form on its website");
+      if (a.tel) bits.push(a.tel);
+      if (a.post) bits.push(a.post);
+      (a.branches || []).forEach(function (b) { bits.push(b.name + " " + b.tel); });
+      return bits.length ? "The Atlas holds: " + bits.join(" · ") : "The Atlas holds no address or email for it: use the website to find the contact.";
+    }
+    function addArch(a, why, km) {
+      if (!a || seen[a.id]) return; seen[a.id] = 1;
+      var it = item(a.name, why, { detail: (km != null ? km + " km away. " : "") + contactLine(a), href: a.url, tag: a.email ? "has an email" : a.form ? "has a contact form" : "", draft: null, _a: a });
+      it.links = contactLinks(a); it._km = km; wr.push(it);
+    }
     var eraIds = {}; eras.forEach(function (e) { (e.filedUnder || []).forEach(function (id) { eraIds[id] = 1; }); });
     var byId = {}; ar.forEach(function (a) { byId[a.id] = a; });
     Object.keys(eraIds).forEach(function (id) { var a = byId[id]; if (a && a.cc === info.cc) addArch(a, "The Atlas files " + info.name + "'s records under this archive for the years of your story.", info.lat != null && a.lat != null ? Math.round(hav(info.lat, info.lon, a.lat, a.lon)) : null); });
@@ -301,12 +325,18 @@
     var d0 = out.sections.filter(function (s) { return s.key === "desk"; })[0], w0 = out.sections.filter(function (s) { return s.key === "write"; })[0], g0 = out.sections.filter(function (s) { return s.key === "ground"; })[0];
     var firstOpen = d0 && d0.items.filter(function (i) { return (i.tag === "free" || i.tag === "free account"); })[0] || d0 && d0.items[0];
     out.today.push({ n: 1, title: "At your desk", text: firstOpen ? firstOpen.title : "Open the Atlas's page for " + info.name, href: firstOpen && firstOpen.href || "" });
-    var mailTo = w0 && (w0.items.filter(function (i) { return i._a && i._a.email; })[0] || w0.items.filter(function (i) { return i._a && /regional|diocesan/.test(i._a.kind); })[0] || w0.items.filter(function (i) { return !i.gap; })[0]);
-    if (mailTo) out.today.push({ n: 2, title: mailTo._a && mailTo._a.email ? "Email" : "Write", text: mailTo.title + (mailTo._a && mailTo._a.email ? " (" + mailTo._a.email + ")" : " (the Atlas holds no address: use its site)"), href: mailTo.href });
+    var drafted = w0 && w0.items.filter(function (i) { return i.draft && i._a && (i._a.email || i._a.form); })[0]; /* the nearest regional archive leads over a capital's inbox */
+    var mailTo = w0 && (drafted || w0.items.filter(function (i) { return i._a && i._a.email; })[0] || w0.items.filter(function (i) { return i._a && /regional|diocesan/.test(i._a.kind); })[0] || w0.items.filter(function (i) { return !i.gap; })[0]);
+    if (mailTo) {
+      var to = mailTo._a || {};
+      out.today.push({ n: 2, title: to.email ? "Email" : "Write", text: mailTo.title + (to.email ? " (" + to.email + ")" : to.form ? " (use its contact form" + (to.tel ? ", or call " + to.tel : "") + ")" : to.tel ? " (call " + to.tel + ")" : " (the Atlas holds no address: use its site)"), href: !to.email && to.form ? to.form : mailTo.href });
+    }
     var vol = (deps.archives || []).filter(function (a) { return a.kind === "volunteer" && a.cc === info.cc; })[0];
     out.today.push({ n: 3, title: "Ask people", text: vol ? "A volunteer group for " + (cname || "the country") + ": " + vol.name : "Ask the older relatives who still have the photographs, letters and documents: a name or a village on the back of a photo is a lead.", href: vol ? vol.url : "" });
     var near = w0 && w0.items.filter(function (i) { return i._a && i._km != null; }).sort(function (a, b) { return a._km - b._km; })[0];
-    out.today.push({ n: 4, title: "If you can go", text: near ? "Visit or call " + near.title + (" (" + near._km + " km away)") : "Visit the parish office in " + info.name + ".", href: near ? near.href : "" });
+    /* a branch in the very town beats the head office down the road; what it holds is not stated, so the plan says to ask */
+    var local = null; (w0 ? w0.items : []).forEach(function (i) { ((i._a && i._a.branches) || []).forEach(function (b) { if (!local && fold(b.name).indexOf(fold(info.name)) > -1) local = { b: b, i: i }; }); });
+    out.today.push({ n: 4, title: "If you can go", text: local ? "Call the " + local.b.name.replace(/^./, function (c) { return c.toLowerCase(); }) + " (" + local.b.tel + "), a branch of " + local.i.title + ", and ask what it holds before you visit." : near ? "Visit or call " + near.title + " (" + near._km + " km away" + (near._a.tel ? ", " + near._a.tel : "") + ")" : "Visit the parish office in " + info.name + ".", href: local ? local.i.href : near ? near.href : "" });
     out.sections.forEach(function (s) { s.items.forEach(function (i) { delete i._a; delete i._km; }); });
     return out;
   }
@@ -340,7 +370,15 @@
         li.append(t);
         if (i.why) li.append(el("span", i.why, "sp-todo-why"));
         if (i.detail) li.append(el("span", i.detail, "sp-todo-det"));
-        if (i.draft) { var d = el("details", null, "sp-todo-draft"), sm = el("summary", "A draft in " + i.draft.language + " — check the wording before you send"); var pre = el("p", i.draft.text, "sp-todo-draft-t"); pre.lang = ({ Croatian: "hr", Slovenian: "sl", Italian: "it", German: "de", Spanish: "es", Polish: "pl", Czech: "cs", Hungarian: "hu", French: "fr", Portuguese: "pt" })[i.draft.language] || "en"; d.append(sm, pre); li.append(d); }
+        if (i.links && i.links.length) {
+          var row = el("span", null, "sp-todo-links");
+          i.links.forEach(function (l) { var a = el("a", l.t, "k-pill sp-todo-link"); a.href = l.href; if (/^https?:/.test(l.href)) { a.target = "_blank"; a.rel = "noopener"; } row.append(a); });
+          li.append(row);
+        }
+        if (i.draft) { var d = el("details", null, "sp-todo-draft"), sm = el("summary", "A draft in " + i.draft.language + " — check the wording before you send"); var pre = el("p", i.draft.text, "sp-todo-draft-t"); pre.lang = ({ Croatian: "hr", Slovenian: "sl", Italian: "it", German: "de", Spanish: "es", Polish: "pl", Czech: "cs", Hungarian: "hu", French: "fr", Portuguese: "pt" })[i.draft.language] || "en"; d.append(sm, pre);
+          var mail = (i.links || []).filter(function (l) { return /^mailto:/.test(l.href); })[0];
+          if (mail) { var send = el("a", "Open this draft in your email", "k-pill sp-todo-link"); send.href = mail.href + "?subject=" + encodeURIComponent((plan.anchor && plan.anchor.name) || "") + "&body=" + encodeURIComponent(i.draft.text); d.append(send); }
+          li.append(d); }
         ul.append(li);
       });
       card.append(ul); grid.append(card);

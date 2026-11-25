@@ -206,7 +206,7 @@ test("the plan as text keeps the note, the four first moves and every why", () =
   assert.match(t, /1\. At your desk/);
 });
 
-test("archives-near: every row has a position and a url; a contact appears only where Wikidata states one", async () => {
+test("archives-near: every row has a position and a url; a contact appears only where a file holds one", async () => {
   const { buildArchivesNear } = await import("../src/lib/archives-near.js");
   const providers = [
     { id: "a", name: "A", kind: "regional-archive", access: "free", countries: ["HR"], url: "https://a", at: { lat: 45.1, lon: 18.0 }, wikidata: "Q1" },
@@ -239,3 +239,21 @@ test("the pasted Ivan and Lucija story: Nova Gradiška, the right era, a letter,
   assert.match(mv, /Slovenia → Bosnia and Herz\. → North Macedonia/);
   for (const s of plan.sections) for (const i of s.items) assert.ok(i.why, s.key + ": " + i.title);
 });
+
+test("the contacts read off an archive's own page reach the plan: how to write, how to ring, and the branch in town", () => {
+  const arch = ARCH.map((a) => a.id !== "dasb" ? a : Object.assign({}, a, { form: "https://dasb.hr/kontakt/", tel: "+385 35 446 573", post: "Augusta Cesarca 1, HR-35000 Slavonski Brod", branches: [{ name: "Collection centre in Nova Gradiška", tel: "+385 35 361 053" }] }))
+    .map((a) => a.id !== "arhinet" ? a : Object.assign({}, a, { email: "info@arhiv.hr", state: "listed" }));
+  const p = T.build(story(), deps({ archives: arch }));
+  const w = p.sections.find((s) => s.key === "write");
+  const dasb = w.items.find((i) => /Slavonski Brod/.test(i.title));
+  assert.match(dasb.detail, /\+385 35 446 573/);
+  assert.match(dasb.detail, /Collection centre in Nova Gradiška \+385 35 361 053/);
+  assert.deepEqual(dasb.links.map((l) => l.href), ["https://dasb.hr/kontakt/", "tel:+38535446573"]);
+  const hda = w.items.find((i) => /ARHiNET/.test(i.title));
+  assert.match(hda.detail, /info@arhiv\.hr \(published by the institution\)/);
+  assert.equal(hda.links[0].href, "mailto:info@arhiv.hr");
+  /* the regional archive the draft is for leads «write», even though only the capital's has an email */
+  assert.match(p.today[1].text, /Slavonski Brod \(use its contact form, or call \+385 35 446 573\)/);
+  assert.match(p.today[3].text, /collection centre in Nova Gradiška \(\+385 35 361 053\).*ask what it holds/);
+});
+

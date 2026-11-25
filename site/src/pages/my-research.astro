@@ -92,11 +92,30 @@ const BASE_ = u("/");
         var list = readNames();
         if (!list.length) { token++; show(null); return; }
         var my = ++token;
-        Promise.all(list.map(cardFor)).then(function (cards) {
-          if (my !== token) return;
-          var got = cards.filter(Boolean);
-          if (!got.length) { show(null); return; }
-          host.textContent = ""; got.forEach(function (c) { host.append(c); }); host.hidden = false;
+        /* EVERY TICKED FAMILY GETS ITS PLACE AT ONCE, AND ITS CARD WHEN IT ARRIVES. This used to wait for all the cards together
+           (Promise.all) and draw nothing until the last one came: one slow or hung shard request kept the PREVIOUS cards on the page, so
+           David ticked five families and the page still showed the two cards from before (Blažević and Boraś, with the other three missing).
+           Now each family has a shut stub in the picker's order the moment the set changes, each is replaced by its card as it loads, and a card
+           that throws or takes too long is replaced by a plain line saying so. */
+        host.textContent = ""; host.hidden = false;
+        var slots = list.map(function (name) {
+          var d = document.createElement("details"); d.className = "ni";
+          var sm = document.createElement("summary"); sm.className = "ni-sum";
+          var h = document.createElement("h2"); h.className = "ni-h"; h.textContent = "About the name " + name;
+          sm.append(h); d.append(sm); host.append(d); return d;
+        });
+        function failed(name) { var f = N.build(null); f.name = name; f.failed = true; return N.render(f, base); }
+        list.forEach(function (name, i) {
+          var cur = slots[i], real = false;
+          function put(card, isReal) {
+            if (real || my !== token || !card || cur.parentNode !== host) return;
+            host.replaceChild(card, cur); cur = card; real = !!isReal;
+          }
+          /* a family that is not a surname has no card: its stub goes */
+          cardFor(name).then(function (c) { if (c) put(c, true); else if (my === token && cur.parentNode === host) host.removeChild(cur); },
+            function () { put(failed(name), false); });
+          /* a late real card still replaces the "could not load" line */
+          setTimeout(function () { put(failed(name), false); }, 12000);
         });
       }
       document.addEventListener("ra-progress-changed", draw);
@@ -119,12 +138,8 @@ const BASE_ = u("/");
 
   {/* WHERE THE BACKUP WENT. The "where this lives" note, the back-up / import / share buttons and the six-word online copy were
       all here, and David asked for them to have a page of their own: /backup/ (Connection & Backup), which the pulsing dot in
-      the header opens. What stays is one line saying where this page's data lives, and the way there. */}
-  <div class="one" style="border-left-color:var(--brick)">
-    <div class="lab">Where this lives</div>
-    <p class="cap"><b>In this browser, and nowhere else</b> unless you back it up. <span id="mr-conn"></span>
-    <a href={BASE_ + "backup/"}>Connection &amp; Backup</a> is where you save a file, keep a copy online, or share what you found.</p>
-  </div>
+      the header opens. What stays is one line saying where this page's data lives, and the way there; it now sits in the page footer (slot
+      "footnote"), at the end of the page, because it is something to know and not the thing to do. */}
 
   {/* THE DOSSIER ON A MAP. David: «can the dossier include a map with a marker
       to places?» The page lists where a family has been worked as text, which
@@ -1417,6 +1432,8 @@ const BASE_ = u("/");
     })();
   </script>
   </div>
+<p slot="footnote" class="mr-where"><b>Where this lives:</b> in this browser, and nowhere else, unless you back it up. <span id="mr-conn"></span>
+    <a href={BASE_ + "backup/"}>Connection &amp; Backup</a> is where you save a file, keep a copy online, or share what you found.</p>
 </Base>
 
 <style>
@@ -1722,6 +1739,8 @@ const BASE_ = u("/");
   .mra-wnote { margin: 3px 0 0; font: 13px/1.45 var(--sans); color: var(--ink-3); max-width: 80ch; }
   @media print { .mra-chips, .mra-acts, .mra-tools, .mra-pre { display: none; } }
 
+  .mr-where { margin: 0 0 14px; font: 13px/1.5 var(--sans); color: var(--ink-3); max-width: 80ch; }
+  .mr-where b { color: var(--ink-2, var(--ink)); }
   .mr-tabs { margin-top: 18px; }
   .mr-panel { margin-bottom: 28px; min-width: 0; }
   .mr-panel .mrext { margin-top: 0; }

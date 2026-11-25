@@ -64,7 +64,8 @@ test("My research reads every ticked family: one name card each, and the bar nam
   const page = fs.readFileSync(path.join(here, "../src/pages/my-research.astro"), "utf8");
   const bar = fs.readFileSync(path.join(here, "../public/js/line-switcher.js"), "utf8");
   assert.match(page, /SY\.scopeOf\(lines, me && me\.slug, stored\)/, "the cards read the same set as the map and the lists");
-  assert.match(page, /Promise\.all\(list\.map\(cardFor\)\)/, "one card per family");
+  assert.match(page, /list\.forEach\(function \(name, i\)/, "one card per family, each drawn as it arrives");
+  assert.doesNotMatch(page, /Promise\.all\(list\.map\(cardFor\)\)/, "no card waits for the others: a slow shard must not keep the previous cards on the page");
   assert.match(page, /addEventListener\("ra-scope-changed", draw\)/, "ticking a family redraws the cards");
   assert.match(bar, /Reading " \+ \(set\.length > 1 \? set\.length \+ " families together" : "this family only"\)/, "the bar says which families are being read, even when it is one that is not the family you mark under");
   assert.match(bar, /Your marks go under/, "and which one the marks go under");
@@ -107,6 +108,14 @@ test("My research draws the Atlas map's looks, and a card whose shard failed to 
   assert.match(page, /js\/basemaps\.js/, "the shared basemaps script is loaded");
   assert.match(page, /raBasemaps\.attach\(L, mrMap, \{ light: lightGround, labelsPane: "baseLabels" \}\)/, "the map takes its looks and switcher from the Atlas's module");
   assert.match(page, /delete cache\[u\]/, "a failed fetch is not cached");
-  assert.match(page, /fail\.failed = true/, "a family whose shard did not load still gets a card");
+  assert.match(page, /f\.failed = true/, "a family whose shard did not load still gets a card");
   assert.match(fs.readFileSync(path.join(here, "../public/js/name-intro.js"), "utf8"), /m\.failed \?/, "and the card says it could not load");
+});
+
+test("My research keeps where-this-lives in the page footer, not above the work", () => {
+  const page = fs.readFileSync(path.join(here, "../src/pages/my-research.astro"), "utf8");
+  const base = fs.readFileSync(path.join(here, "../src/layouts/Base.astro"), "utf8");
+  assert.match(page, /<p slot="footnote" class="mr-where">/);
+  assert.doesNotMatch(page, /<div class="lab">Where this lives<\/div>/);
+  assert.match(base, /Astro\.slots\.has\("footnote"\)/);
 });

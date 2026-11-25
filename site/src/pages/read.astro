@@ -48,6 +48,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
           <p class="sp-lede" id="sp-lede">Who, from where, to where, when: in your own words. The page fills in as you write, and asks for what is missing.</p>
         </header>
 
+        <div class="sp-doubt" id="sp-doubt" role="status" aria-live="polite" hidden></div>
         <div class="sp-drop" id="sp-drop">
           <div class="sp-edit" id="sp-edit"><div class="sp-mirror" id="sp-mirror" aria-hidden="true"></div>
           <textarea id="sp-text" rows="4" maxlength="8000" spellcheck="false" aria-label="What you know" placeholder="My great-grandfather Ivan Kosina came from Gallignana to Hamilton around 1905. All I have is this photo."></textarea></div>
@@ -130,15 +131,19 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
           <div class="sp-plan-h">
             <div>
               <h2 id="sp-plan-h">Your research plan</h2>
-              <p class="sp-sublede">Who to contact, what to read, where to look. Built from your story and the Atlas&rsquo;s own records of archives and registers.</p>
+              <p class="sp-sublede">Where to start, who to write to, what is next door. Worked out here, on this device, from the Atlas&rsquo;s own records.</p>
             </div>
             <button type="button" class="sp-btn sp-btn-ai" id="sp-ai-btn"><svg class="sp-spark" viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M10 3l1.9 5.1L17 10l-5.1 1.9L10 17l-1.9-5.1L3 10l5.1-1.9z" fill="currentColor"/><path d="M18 14l.9 2.1L21 17l-2.1.9L18 20l-.9-2.1L15 17l2.1-.9z" fill="currentColor"/><path d="M18.5 3l.6 1.4L20.5 5l-1.4.6-.6 1.4-.6-1.4L16.5 5l1.4-.6z" fill="currentColor"/></svg> Build my research plan</button>
           </div>
           <p class="sp-ai-note" id="sp-ai-note">Nothing is sent until you press the button. Then only what the story says (places, relationships, years and the Atlas records matched to them) goes to Claude Haiku. Not the picture, not the full text, and no name.</p>
           <p class="sp-status" id="sp-ai-status" role="status" aria-live="polite"></p>
           <div id="sp-ai-out" hidden></div>
-          <h3 class="sp-steps-h">What to do first</h3>
-          <div class="sp-plan" id="sp-steps"></div>
+          <div class="sp-todo" id="sp-todo" aria-live="polite"></div>
+          <details class="sp-method">
+            <summary>The method, step by step</summary>
+            <h3 class="sp-steps-h">What to do first</h3>
+            <div class="sp-plan" id="sp-steps"></div>
+          </details>
         </section>
 
         <section class="sp-sec" id="sp-keep" aria-labelledby="sp-keep-h" hidden>
@@ -291,6 +296,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   <script is:inline src={u("/js/atlas-summary.js")} defer></script>
   <script is:inline src={u("/js/shard-key.js")} defer></script>
   <script is:inline src={u("/js/story-engine.js")} defer></script>
+  <script is:inline src={u("/js/story-check.js")} defer></script>
   <script is:inline src={u("/js/story-plan.js")} defer></script>
   <script is:inline src={u("/js/story-link.js")} defer></script>
   <script is:inline src={u("/js/story-gaps.js")} defer></script>
@@ -450,6 +456,10 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .rr-chips .k-pill { cursor: pointer; font-size: 13.5px; letter-spacing: 0; text-transform: none; }
   .sp-head .sp-title { font: 800 clamp(26px, 3.2vw, 34px)/1.15 var(--serif); letter-spacing: -.02em; margin: 0; text-wrap: balance; }
   .sp-lede { color: var(--ink-2); margin: 6px 0 0; }
+  .sp-doubt { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 0 0 10px; padding: 10px 14px; border: 1px solid var(--accent); border-radius: 12px; background: var(--accent-wash); }
+  .sp-doubt[hidden] { display: none; }
+  .sp-doubt-t { margin: 0; flex: 1 1 280px; color: var(--ink); }
+  .sp-doubt-b { font: inherit; font-weight: 600; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--accent); background: var(--accent); color: var(--on-accent, #fff); cursor: pointer; }
   .sp-sublede { color: var(--ink-2); font-size: 15px; margin: 0; }
   .sp-cont { font-size: 14px; line-height: 1.5; color: var(--ink-2); margin: 0 0 8px; background: var(--panel); border-left: 3px solid var(--accent); padding: 8px 12px; border-radius: 0 6px 6px 0; }
   .sp-linkbtn { background: none; border: 0; padding: 0 2px; font: inherit; color: var(--accent); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
@@ -736,4 +746,28 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp button:focus-visible, .sp summary:focus-visible, .sp textarea:focus-visible { outline: 3px solid var(--accent-2); outline-offset: 2px; }
   @media (prefers-reduced-motion: reduce) { .sp-step, .sp-stage, .sp-chip.pop, .sp-pstep, .sp-family, .sp-shot img { animation: none; transition: none; } }
 
+
+  /* the plan, place by place: today's four moves, then a card each for the desk, the letter, the neighbours, the ground, the times and the moves */
+  .sp-todo { margin: 6px 0 14px; }
+  .sp-todo-h { font: 800 17px/1.2 var(--sans); margin: 14px 0 8px; }
+  .sp-todo-note { margin: 8px 0; padding: 10px 14px; border-left: 4px solid var(--hue); background: var(--hue-wash); border-radius: 0 12px 12px 0; font-size: 14px; }
+  .sp-today { list-style: none; margin: 0 0 16px; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+  .sp-today li { background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; padding: 12px 14px; font-size: 14px; line-height: 1.4; display: grid; gap: 4px; align-content: start; min-width: 0; overflow-wrap: anywhere; }
+  .sp-today li b { font-weight: 800; }
+  .sp-today-n { width: 24px; height: 24px; border-radius: 50%; background: var(--hue-solid); color: var(--on-hue); font: 800 13px/24px var(--sans); text-align: center; }
+  .sp-todo-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 14px; }
+  .sp-todo-card { min-width: 0; padding: 16px 18px; }
+  .sp-todo-card h3 { font: 800 16px/1.2 var(--sans); margin: 0 0 12px; padding-left: 10px; border-left: 4px solid var(--hue); }
+  .sp-todo-card ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+  .sp-todo-card li { display: grid; gap: 3px; font-size: 14px; line-height: 1.4; overflow-wrap: anywhere; }
+  .sp-todo-card li.is-gap { border-left: 2px dashed var(--rule-strong, var(--rule)); padding-left: 10px; color: var(--ink-2); }
+  .sp-todo-t b { font-weight: 800; }
+  .sp-todo-tag { font-size: 11px; padding: 2px 8px; margin-left: 4px; }
+  .sp-todo-why { color: var(--ink-2); font-size: 13px; }
+  .sp-todo-det { color: var(--ink-2); font-size: 12.5px; }
+  .sp-todo-draft { margin-top: 4px; }
+  .sp-todo-draft summary { cursor: pointer; font-size: 13px; font-weight: 700; color: var(--hue-ink); }
+  .sp-todo-draft-t { margin: 6px 0 0; padding: 10px 12px; background: var(--panel-2, var(--panel)); border-radius: 10px; font-size: 13.5px; user-select: all; }
+  .sp-method { margin-top: 14px; }
+  .sp-method > summary { cursor: pointer; font-weight: 700; color: var(--hue-ink); }
 </style>

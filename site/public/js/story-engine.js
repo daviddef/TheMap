@@ -1370,7 +1370,7 @@
     /* «they lived in Dreznik near Nova Gradiska»: a place after «near» that stands right after another place says where THAT place is; it is not a stop on the way */
     for (var ni = stops.length - 1; ni > 0; ni--) {
       var ns = stops[ni], np = stops[ni - 1];
-      if (tokens[ns.at - 1] === "near" && !ns.isCountry && !np.isCountry && ns.at - (np.at + np.len) <= 1) stops.splice(ni, 1);
+      if (tokens[ns.at - 1] === "near" && !ns.isCountry && !np.isCountry && ns.at - (np.at + np.len) <= 1) { np.nearTo = ns; stops.splice(ni, 1); }   /* kept as np.nearTo: the plan anchors on the place the story pins the first one to */
     }
     /* a place told backwards ("He ended up in Perth. Before that he lived in Cork.") goes before the one told just ahead of it */
     for (var bi = 1; bi < stops.length; bi++) if (stops[bi].before && !stops[bi - 1].before) { var tmp = stops[bi]; stops[bi] = stops[bi - 1]; stops[bi - 1] = tmp; }
@@ -2406,7 +2406,7 @@
         var facts = { rel: parsed.rel, name: parsed.name, siblings: parsed.siblings || [], holds: parsed.holds, holdsAll: parsed.holdsAll, left: parsed.left, born: parsed.born, from: from, to: to, base: BASE,
           providers: to ? provs.filter(function (p) { return (p.countries || []).indexOf(to.cc) > -1; }) : (from ? provs.filter(function (p) { return (p.countries || []).indexOf(from.cc) > -1; }) : []),
           given: parsed.given && data.given ? S.givenIn(parsed.givenWord || parsed.given, data.given, null) : [],
-          route: route.map(function (x) { return { info: infos[x.row.i], age: x.age, year: x.year, approx: x.approx, yearTold: x.yearTold, role: x.role, country: x.country, ev: x.ev }; }),
+          route: route.map(function (x) { return { info: infos[x.row.i], age: x.age, year: x.year, approx: x.approx, yearTold: x.yearTold, role: x.role, country: x.country, ev: x.ev, nearInfo: x.nearTo && x.nearTo.row ? infos[x.nearTo.row.i] : undefined, alts: (x.alts || []).slice(0, 3).map(function (r) { return { n: r.n, cc: r.cc }; }) }; }),
           bornApprox: !!parsed.bornApprox, endYear: parsed.endYear != null ? parsed.endYear : null,
           kin: (parsed.kin || []).map(function (k) { return { key: k.key, name: k.name, label: k.label, stops: k.stops.filter(function (x) { return infos[x.row.i]; }).map(function (x) { return { info: infos[x.row.i], year: x.year, role: x.role, ev: x.ev }; }) }; }).filter(function (k) { return k.stops.length; }),
           ancestors: anc.map(function (x) { return { info: infos[x.row.i], who: x.role === "mother-from" ? "mother" : "father" }; }) };

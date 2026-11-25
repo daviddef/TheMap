@@ -2872,7 +2872,7 @@
         r[0].forEach(function (i) { i.provs = provs.filter(function (x) { return (x.countries || []).indexOf(i.cc) > -1; }).sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); }); i.pname = pname; i.world = provs.filter(function (x) { return (x.countries || []).indexOf("*") > -1; }); i.flagRows = fm ? fm[String(i.cc || "").toUpperCase()] : null; i.leaders = lead ? lead[String(i.cc || "").toUpperCase()] : null; });
         r[0].forEach(function (i) { i.near = i.p && (i.cols || []).length ? [] : nearbyVolumes(i); });
         var from = parsed.from ? infos[parsed.from.row.i] : null, to = parsed.to ? infos[parsed.to.row.i] : null;
-        var facts = { rel: parsed.rel, name: parsed.name, siblings: parsed.siblings || [], holds: parsed.holds, holdsAll: parsed.holdsAll, left: parsed.left, born: parsed.born, from: from, to: to, base: BASE,
+        var facts = { told: toldYears(parsed), rel: parsed.rel, name: parsed.name, siblings: parsed.siblings || [], holds: parsed.holds, holdsAll: parsed.holdsAll, left: parsed.left, born: parsed.born, from: from, to: to, base: BASE,
           providers: to ? provs.filter(function (p) { return (p.countries || []).indexOf(to.cc) > -1; }) : (from ? provs.filter(function (p) { return (p.countries || []).indexOf(from.cc) > -1; }) : []),
           given: parsed.given && data.given ? S.givenIn(parsed.givenWord || parsed.given, data.given, null) : [],
           route: route.map(function (x) { return { info: infos[x.row.i], age: x.age, year: x.year, approx: x.approx, yearTold: x.yearTold, role: x.role, said: x.said, country: x.country, ev: x.ev, nearInfo: x.nearTo && x.nearTo.row ? infos[x.nearTo.row.i] : undefined, alts: (x.alts || []).slice(0, 3).map(function (r) { return { n: r.n, cc: r.cc }; }) }; }),
@@ -3435,8 +3435,12 @@
          there in marked, then the epidemics, famines, wars and mass deaths whose area covers the place. Shown on every card, dated or not. */
       function ground(info, years, span, ends) {
         var wrap = el("div", null, "lf-ground"), eras = info.eras || [];
+        /* A STOP WITH NO YEAR OF ITS OWN IS READ OVER THE STORY'S YEARS. David: «why am i still seeing all eras expanded, e.g. croatia? when were talking about early 1900's? collapse
+           the ones not relevant». From the first year told to a generation after the last (never under 40 years); the other eras stay one tap away. */
+        var story = !years.length && storyYears() || null, inStory = story && eras.some(function (e) { return e.to > story[0] && e.from <= story[1]; });
+        if (story && !span) span = story;
         if (eras.length) {
-          wrap.append(el("h5", (eras.length && years.length ? "Who held this ground while they were there" : "Who held this ground, era by era")));
+          wrap.append(el("h5", years.length ? "Who held this ground while they were there" : inStory ? "Who held this ground in your story's years, " + story[0] + "\u2013" + story[1] : "Who held this ground, era by era"));
           var ul = el("ul", null, "lf-eras"), now = new Date().getFullYear(), hiddenN = 0;
           /* ONLY THE ERAS THEY WERE THERE FOR. David: «he was born 1951 and left in 1954, no need to show a 1200-1469 era». The stay runs from the first year told here to the year
              the next place begins (the year they left); with no year told, every era is shown, as before, and the rest can always be opened. */
@@ -3446,7 +3450,7 @@
             if (f.left != null && f.left >= lo && f.left - lo < 80 && f.route && f.route[0] && f.route[0].info && f.route[0].info.name === info.name && f.route[0].info.cc === info.cc) hi = Math.max(hi, f.left);
             if (ends && ends.length) hi = Math.max(hi, Math.max.apply(null, ends));   /* a stay with its own end year (the place they came from) ends there, not at the next place in the order told */
             else (f.route || []).forEach(function (r, i, all) { if (r.info === info || (r.info && r.info.name === info.name && r.info.cc === info.cc)) { var nx = all.slice(i + 1).filter(function (z) { return yearOf(z) != null; })[0], ny = nx ? yearOf(nx) : null; if (ny != null && ny > hi && ny - hi < 80) hi = ny; } });
-          }
+          } else if (inStory) { lo = story[0]; hi = story[1]; }
           eras.forEach(function (e) {
             var li = el("li", null, years.some(function (y) { return y >= e.from && y < e.to; }) ? "on" : ""), fl = flagFor(info, e.from);
             if (lo != null && !(e.to > lo && e.from <= hi)) { li.hidden = true; li.setAttribute("data-extra", "1"); hiddenN++; }
@@ -3467,8 +3471,9 @@
           });
           wrap.append(ul);
           if (hiddenN) {
+            var back = years.length ? "Show only the years they were there" : "Show only your story's years";
             var more = el("button", "Show the other " + hiddenN + " era" + (hiddenN === 1 ? "" : "s") + " of " + info.name, "lf-eras-more"); more.type = "button"; more.setAttribute("aria-expanded", "false");
-            more.addEventListener("click", function () { var open = more.getAttribute("aria-expanded") === "true"; [].forEach.call(ul.querySelectorAll("li[data-extra]"), function (x) { x.hidden = open; }); more.setAttribute("aria-expanded", open ? "false" : "true"); more.textContent = open ? "Show the other " + hiddenN + " era" + (hiddenN === 1 ? "" : "s") + " of " + info.name : "Show only the years they were there"; });
+            more.addEventListener("click", function () { var open = more.getAttribute("aria-expanded") === "true"; [].forEach.call(ul.querySelectorAll("li[data-extra]"), function (x) { x.hidden = open; }); more.setAttribute("aria-expanded", open ? "false" : "true"); more.textContent = open ? "Show the other " + hiddenN + " era" + (hiddenN === 1 ? "" : "s") + " of " + info.name : back; });
             wrap.append(more);
           }
         } else wrap.append(el("p", "The Atlas has no era table for this area, so there is no era-by-era list here: it is " + (info.countryName || "today's country") + " as it is now.", "lf-filed"));
@@ -3496,6 +3501,7 @@
         if (g && !own) { g.es.push(e); return; }
         g = { info: info, es: [e] }; groups.push(g); if (!byKey[key]) byKey[key] = g;
       }
+      function storyYears() { var t = f.told; return t ? [t[0], Math.min(Math.max(t[1] + 20, t[0] + 40), new Date().getFullYear())] : null; }
       /* The years a person there could have lived through: a birth year opens a life (their parents' time before it, 70 years after), anything
          else a few years either side. Not told: their own life from the birth year in the story, or no limit at all. */
       function spanOf(y, role, wide) {
@@ -3569,7 +3575,7 @@
         if (!years.length) {
           var nowFlag = flagFor(info, new Date().getFullYear());
           if (nowFlag) { var fr = el("div", null, "lf-capline"), fi = el("img", null, "lf-flag"); fi.src = base + "fl/" + encodeURIComponent(nowFlag) + ".svg"; fi.alt = ""; fi.width = 36; fi.height = 24; fi.loading = "lazy"; fr.append(fi, el("div", "Today's flag of " + info.countryName + ". Give a year, even a rough one, and the flag and ruler of that time are shown.", "lf-caphead")); then.append(fr); }
-          else then.append(el("p", "Give a year, even a rough one, and the one that applies is marked below.", "lf-filed"));
+          else then.append(el("p", storyYears() ? "No year is told for this stop. Add one, even a rough one, and the era that applies is marked below." : "Give a year, even a rough one, and the one that applies is marked below.", "lf-filed"));
         }
         else es.forEach(function (e) { if (e.year != null) then.append(line(info, e.year, evHere(mort, info, e.year - 5, e.year + 5), e.prefix || "", e.ageText || "")); });
         then.append(ground(info, years, span, ends));
@@ -3701,6 +3707,17 @@
     if (last(pe.maiden)) return base;
     if (pe.married && last(pe.married)) base = base.slice(0, -pe.married.length).trim();
     return base ? base + " " + pe.maiden : pe.name;
+  }
+
+  /* [first, last] year the story tells of anyone, a decade told in words («born likely in the 1910s») included; null when it tells none */
+  function toldYears(p) {
+    var ys = [];
+    function add(y) { if (typeof y === "number" && y > 1000 && y < 2100) ys.push(y); }
+    add(p.born); add(p.left); add(p.endYear);
+    (p.route || []).forEach(function (r) { add(r.year); });
+    (p.kin || []).forEach(function (k) { (k.stops || []).forEach(function (x) { add(x.year); }); });
+    (p.people || []).forEach(function (pe) { add(pe.born); (pe.events || []).forEach(function (e) { add(e.year); var d = e.type === "told" && /\b(\d{3}0)s\b/.exec(e.text); if (d) add(Number(d[1])); }); });
+    return ys.length ? [Math.min.apply(null, ys), Math.max.apply(null, ys)] : null;
   }
 
   /* The names panel: how each person's names were written, in the languages of the clerks. A node for the page to place.

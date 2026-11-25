@@ -156,22 +156,28 @@ main .wl-pill { border-radius: 999px; }
 :root {
   --h-teal: #1F7A8C;  --h-terra: #C4572F;  --h-rose: #C23A5A;  --h-gold: #B9810F;
   --h-plum: #7A4FA0;  --h-green: #3E8A55;  --h-blue: #2F6FBF;
+  /* A FILL THAT CARRIES TEXT (the selected tab, the active sort) is the hue pulled toward black with white on it: raw terracotta or gold under
+     the page ground is 3 to 4:1, below the 4.5 the e2e audit asks. In dark the hue is already light and takes the dark ground. */
+  --hue-pct: 70%; --on-hue: #fff;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --h-teal: #5FC0D3; --h-terra: #F08A62; --h-rose: #F07C96; --h-gold: #E8B94A;
     --h-plum: #B58FDB; --h-green: #6CC389; --h-blue: #7FAEF0;
+    --hue-pct: 100%; --on-hue: #101820;
   }
 }
 :root[data-theme="dark"] {
   --h-teal: #5FC0D3; --h-terra: #F08A62; --h-rose: #F07C96; --h-gold: #E8B94A;
   --h-plum: #B58FDB; --h-green: #6CC389; --h-blue: #7FAEF0;
+  --hue-pct: 100%; --on-hue: #101820;
 }
 main.hue-teal  { --hue: var(--h-teal); }  main.hue-terra { --hue: var(--h-terra); }
 main.hue-rose  { --hue: var(--h-rose); }  main.hue-gold  { --hue: var(--h-gold); }
 main.hue-plum  { --hue: var(--h-plum); }  main.hue-green { --hue: var(--h-green); }
 main.hue-blue  { --hue: var(--h-blue); }
-main { --hue-ink: color-mix(in srgb, var(--hue, var(--accent)) 58%, var(--ink));
+main { --hue-solid: color-mix(in srgb, var(--hue, var(--accent)) var(--hue-pct), #000);
+       --hue-ink: color-mix(in srgb, var(--hue, var(--accent)) 58%, var(--ink));
        --hue-wash: color-mix(in srgb, var(--hue, var(--accent)) 13%, var(--panel)); }
 
 /* The header: a rounded card with the part's colour washed in from the corner and a ring of it behind the title. */
@@ -220,7 +226,9 @@ a.k-card:hover, .k-card.is-link:hover { transform: translateY(-3px); border-colo
   background: color-mix(in srgb, var(--c, var(--hue, var(--accent))) 15%, var(--panel));
   border: 1px solid color-mix(in srgb, var(--c, var(--hue, var(--accent))) 28%, transparent); text-decoration: none; white-space: nowrap; }
 a.k-pill:hover { background: color-mix(in srgb, var(--c, var(--hue, var(--accent))) 26%, var(--panel)); }
-.k-pill.is-solid { background: var(--c, var(--hue, var(--accent))); color: #fff; border-color: transparent; }
+.k-pill.is-plain { color: var(--ink-2); background: var(--panel); border-color: var(--rule-strong); font-weight: 500; }
+a.k-pill.is-plain:hover { color: var(--hue-ink); border-color: var(--hue); background: var(--hue-wash); }
+.k-pill.is-solid { background: color-mix(in srgb, var(--c, var(--hue, var(--accent))) var(--hue-pct), #000); color: var(--on-hue); border-color: transparent; }
 .k-pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
 
 /* THE ONE SEARCH BOX: big, round, the colour of the part when it is in use. Every page that searches wears this. */

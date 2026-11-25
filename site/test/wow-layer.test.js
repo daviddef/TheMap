@@ -59,9 +59,9 @@ test("Names is ONE search: the whole-name box is first and visible, the one-at-a
   assert.match(comp, /is-given/);
 });
 
-test("Places and the country cards: a flag-coloured edge, pills for the numbers, one search", () => {
+test("Places and the country cards: one-colour edge, pills for the numbers, one search", () => {
   const cc = read("src/components/CountryCards.astro");
-  assert.match(cc, /--cc:\$\{c\.flag\.color\}/);
+  assert.doesNotMatch(cc, /--cc:\$\{c\.flag\.color\}/, "calm: one colour on the edge, the flag carries its own");
   assert.match(cc, /<b>\{c\.places/);
   assert.match(cc, /border-top: 6px solid var\(--cc\)/);
   const pl = read("src/pages/places/[...page].astro");
@@ -89,7 +89,8 @@ test("A to Z names, dated place names and the sources page: a filter or search i
   assert.match(nm, /class="k-pill"/);
   const pn = read("src/pages/place-names.astro");
   assert.match(pn, /id="pn-q"/);
-  assert.match(pn, /border-top: 5px solid var\(--c\)/);
+  assert.match(pn, /border-top: 5px solid var\(--hue\)/);
+  assert.doesNotMatch(pn + nm + read("src/components/CountryCards.astro") + read("src/pages/your-name.astro"), /--c:var\(--h-/, "no rotating rainbow of pill colours: one hue per page");
   assert.match(read("src/pages/providers.astro"), /title="Sources"/);
   assert.match(read("src/pages/coverage.astro"), /title="Gaps"/);
 });

@@ -21,7 +21,7 @@ const letters = Object.keys(groups).sort();
       <div class="nm-g" data-l={l}>
         <div class="k-bar"><h2 class="nm-l" id={`l-${l}`}>{l}</h2><span class="k-count">{groups[l].length}</span></div>
         <ul class="nm-names">
-          {groups[l].map((r) => <li data-n={r.canon.toLowerCase()}><a class="k-pill" style={`--c:var(--h-${["teal", "terra", "gold", "plum", "rose", "green"][l.charCodeAt(0) % 6]})`} href={u(`/name/${r.id}/`)}>{r.canon}<span class="nm-f">{r.forms}</span></a></li>)}
+          {groups[l].map((r) => <li data-n={r.canon.toLowerCase()}><a class="k-pill" href={u(`/name/${r.id}/`)}>{r.canon}<span class="nm-f">{r.forms}</span></a></li>)}
         </ul>
       </div>
     ))}

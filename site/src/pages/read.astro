@@ -165,7 +165,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
       <p class="rr-say">Type a word, a date or a whole line from a register. It stays in your browser.</p>
       <div class="k-search"><span class="k-ico" aria-hidden="true">🔎</span>
         <input type="search" id="rr-q" autocomplete="off" spellcheck="false" aria-label="A word, a date or a line from the register" placeholder="uxoris · die 30 7bris 1671 · natus est Joannes filius" /></div>
-      <p class="rr-chips">Try {chips.concat(dateChips.slice(0, 2)).map((c, i) => <button type="button" class="k-pill rr-chip" style={`--c:var(--h-${["gold", "teal", "terra", "plum", "rose", "green"][i % 6]})`} data-q={c}>{c}</button>)}</p>
+      <p class="rr-chips">Try {chips.concat(dateChips.slice(0, 2)).map((c, i) => <button type="button" class="k-pill rr-chip" data-q={c}>{c}</button>)}</p>
       <details class="rr-narrow"><summary>Narrow the words by kind of record or language</summary>
       <p class="rr-filters" role="group" aria-label="Kind of record">
         {Object.entries(eventNames).map(([k, v]) => <label><input type="checkbox" class="rr-ev" value={k} /> {v}</label>)}

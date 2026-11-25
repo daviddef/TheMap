@@ -355,7 +355,7 @@ const WRAPPER = `
 .flagpage p{max-width:100ch}
 .flagpage footer{display:none}
 .flagpage .flagmaplink{margin:0 0 22px;padding:12px 18px;border:1px solid var(--rule);
-  border-left:6px solid var(--h-rose,var(--accent));border-radius:16px;background:var(--panel);
+  border-left:6px solid var(--hue,var(--accent));border-radius:16px;background:var(--panel);
   font-family:var(--sans);font-size:13.5px;line-height:1.5}
 .flagpage .flagmaplink a{font-weight:600;text-decoration:none}
 .flagpage .flagmaplink a:hover{text-decoration:underline}

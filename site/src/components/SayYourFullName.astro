@@ -20,7 +20,7 @@ const { chips = [] } = Astro.props;
   <label class="fn-lab" for="fn-q">Type your whole name</label>
   <div class="k-search"><span class="k-ico" aria-hidden="true">✎</span>
     <input id="fn-q" class="fn-q" type="search" autocomplete="off" spellcheck="false" placeholder="Ivan Matija Blažević" /></div>
-  {chips.length > 0 && <div class="fn-chips"><span class="fn-try">Try</span>{chips.map((c, i) => <button type="button" class="fn-chip k-pill" style={`--c:var(--h-${["teal", "terra", "gold", "plum", "rose", "green"][i % 6]})`} data-n={c}>{c}</button>)}</div>}
+  {chips.length > 0 && <div class="fn-chips"><span class="fn-try">Try</span>{chips.map((c, i) => <button type="button" class="fn-chip k-pill" data-n={c}>{c}</button>)}</div>}
   <p class="fn-share" hidden><button type="button" class="fn-copy-link">Copy link</button> <span class="fn-url mono"></span>
     <span class="fn-priv">The link contains the name you typed.</span></p>
   <div class="fn-out" aria-live="polite"></div>
@@ -39,8 +39,7 @@ const { chips = [] } = Astro.props;
   .fn-copy-link { font: inherit; font-size: .82rem; font-weight: 600; padding: .3rem .85rem; cursor: pointer; border: 1px solid var(--rule-strong); border-radius: 999px; background: var(--panel); color: inherit; }
   .fn-url { color: var(--ink-3); overflow-wrap: anywhere; }
   .fn-priv { color: var(--ink-3); font-size: .8rem; }
-  .fn-unit { --c: var(--h-teal); background: var(--panel); border: 1px solid var(--rule); border-top: 6px solid var(--c); border-radius: 20px; padding: 16px 22px 16px; margin-top: 16px; }
-  .fn-unit.is-surname { --c: var(--h-terra); } .fn-unit.is-either { --c: var(--h-gold); }
+  .fn-unit { --c: var(--hue); background: var(--panel); border: 1px solid var(--rule); border-top: 6px solid var(--c); border-radius: 20px; padding: 16px 22px 16px; margin-top: 16px; }
   .fn-unit .fn-h { margin: 0; font-size: 30px; font-weight: 800; letter-spacing: -.02em; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
   .fn-role { font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 4px 11px; border-radius: 999px; color: color-mix(in srgb, var(--c) 60%, var(--ink)); background: color-mix(in srgb, var(--c) 16%, var(--panel)); }
   .fn-p { margin: 6px 0 0; font-size: .95rem; color: var(--ink-2); }
@@ -49,10 +48,8 @@ const { chips = [] } = Astro.props;
   .fn-sub { margin: 30px 0 4px; font-size: 1.5rem; font-weight: 800; }
   .fn-cap { margin: 0 0 10px; font-size: .88rem; color: var(--ink-3); }
   .fn-lines { border: 1px solid var(--rule); border-radius: 20px; background: var(--panel); overflow: hidden; }
-  .fn-line { --c: var(--h-teal); border-left: 6px solid var(--c); display: grid; grid-template-columns: 9em 1fr; gap: 2px 14px; padding: 8px 18px; align-items: baseline; font-family: var(--serif); font-size: 1.25rem; }
+  .fn-line { --c: var(--hue); border-left: 6px solid var(--c); display: grid; grid-template-columns: 9em 1fr; gap: 2px 14px; padding: 8px 18px; align-items: baseline; font-family: var(--serif); font-size: 1.25rem; }
   .fn-line + .fn-line { border-top: 1px solid var(--rule); }
-  .fn-line:nth-child(6n+2) { --c: var(--h-terra); } .fn-line:nth-child(6n+3) { --c: var(--h-gold); } .fn-line:nth-child(6n+4) { --c: var(--h-plum); }
-  .fn-line:nth-child(6n+5) { --c: var(--h-rose); } .fn-line:nth-child(6n+6) { --c: var(--h-green); }
   .fn-lang { justify-self: start; font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 4px 11px; border-radius: 999px; color: color-mix(in srgb, var(--c) 60%, var(--ink)); background: color-mix(in srgb, var(--c) 16%, var(--panel)); }
   .fn-dot { color: var(--ink-3); padding: 0 .8em; }
   .fn-more, .fn-none { color: var(--ink-3); font-size: .85em; }

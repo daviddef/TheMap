@@ -50,7 +50,7 @@ const { list, totals, showFind = true } = Astro.props;
   {list.map((c) => (
     <li class="cccard" data-name={c.name} data-places={c.places}
         data-arch={c.arch} data-cols={c.cols} data-reg={c.reg} data-walked={c.walked}
-        data-state={c.names} style={c.flag && c.flag.color ? `--cc:${c.flag.color}` : undefined}>
+        data-state={c.names}>
       <a class="cchead" href={u(`/country/${c.cc.toLowerCase()}/`)}>
         {c.flag ? (
           <svg class="ccflag" viewBox="0 0 300 200" role="img"
@@ -59,25 +59,25 @@ const { list, totals, showFind = true } = Astro.props;
         <span class="ccname">{c.name}</span>
       </a>
       <ul class="ccpills">
-        <li class="k-pill" style="--c:var(--h-teal)"><b>{c.places ? c.places.toLocaleString() : "0"}</b> places</li>
-        <li class="k-pill" style="--c:var(--h-terra)"><b>{c.arch ? c.arch.toLocaleString() : "0"}</b> archives</li>
-        <li class="k-pill" style="--c:var(--h-gold)"><b>{c.cols ? c.cols.toLocaleString() : "0"}</b> collections</li>
+        <li class="k-pill"><b>{c.places ? c.places.toLocaleString() : "0"}</b> places</li>
+        <li class="k-pill is-plain"><b>{c.arch ? c.arch.toLocaleString() : "0"}</b> archives</li>
+        <li class="k-pill is-plain"><b>{c.cols ? c.cols.toLocaleString() : "0"}</b> collections</li>
       </ul>
       {/* WHICH OF THE THREE STATES THIS IS, because the number alone would be read as a fact about the country. Croatia's 141 against
           Denmark's 290,156 is a fact about our harvest. A country with nothing is the point of the page, so it is marked, not left empty. */}
       <p class="ccnames">
-        {c.names === "register" && <span class="k-pill" style="--c:var(--h-green)"><b>{c.reg.toLocaleString()}</b> {c.reg === 1 ? "name" : "names"} in its register</span>}
-        {c.names === "archive" && <span class="k-pill" style="--c:var(--h-gold)">{c.arc.toLocaleString()} {c.arc === 1 ? "name" : "names"} from a family archive</span>}
-        {c.names === "none" && <span class="k-pill" style="--c:var(--h-rose)">no names yet</span>}
+        {c.names === "register" && <span class="k-pill is-plain"><b>{c.reg.toLocaleString()}</b> {c.reg === 1 ? "name" : "names"} in its register</span>}
+        {c.names === "archive" && <span class="k-pill is-plain">{c.arc.toLocaleString()} {c.arc === 1 ? "name" : "names"} from a family archive</span>}
+        {c.names === "none" && <span class="k-pill is-plain">no names yet</span>}
       </p>
       <p class="cccov">
         {c.cols ? <span title="Share of this country's collections catalogued under a town, county or province, not the country as a whole">{c.reach}% reach a place</span> : <span class="ccnil">no collections</span>}
         {" · "}{c.walked ? <span>{c.walked.toLocaleString()} walked</span> : <span class="ccnil">none walked</span>}
         {c.nat ? <>{" · "}<span>national archive named</span></> : null}
       </p>
-      <p class="ccgo"><a class="k-pill" href={u(`/country/${c.cc.toLowerCase()}/`)}>Places</a>
-        <a class="k-pill" style="--c:var(--h-terra)" href={u(`/providers/?q=${encodeURIComponent(c.name)}`)}>{c.arch ? `${c.arch.toLocaleString()} ${c.arch === 1 ? "source" : "sources"}` : "Sources"}</a>
-        {c.flag && <a class="k-pill" style="--c:var(--h-rose)" href={u("/" + c.flag.url)} title={`${c.name} in the flags atlas: who held this ground, and when`}>Flags</a>}</p>
+      <p class="ccgo"><a class="k-pill is-plain" href={u(`/country/${c.cc.toLowerCase()}/`)}>Places</a>
+        <a class="k-pill is-plain" href={u(`/providers/?q=${encodeURIComponent(c.name)}`)}>{c.arch ? `${c.arch.toLocaleString()} ${c.arch === 1 ? "source" : "sources"}` : "Sources"}</a>
+        {c.flag && <a class="k-pill is-plain" href={u("/" + c.flag.url)} title={`${c.name} in the flags atlas: who held this ground, and when`}>Flags</a>}</p>
     </li>
   ))}
 </ul>
@@ -186,13 +186,13 @@ const { list, totals, showFind = true } = Astro.props;
     border: 1px solid var(--rule-strong); background: var(--panel); color: var(--ink-2); transition: background .15s, border-color .15s; }
   button.sortby::after { content: " \2195"; opacity: .4; }
   button.sortby:hover { border-color: var(--hue, var(--accent)); color: var(--ink); }
-  button.sortby.on { background: var(--hue, var(--accent)); border-color: transparent; color: var(--ground); }
+  button.sortby.on { background: var(--hue-solid, var(--accent)); border-color: transparent; color: var(--on-hue); }
 
   .ccgrid { list-style: none; padding: 0; margin: 16px 0 0; display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 16px; }
   .ccgrid [hidden] { display: none; }
-  /* THE COUNTRY'S OWN COLOUR ALONG THE TOP, taken from the flags atlas (flag-index.json carries one per country), the way each
-     card on that page is drawn. */
+  /* ONE COLOUR ALONG THE TOP, the page's. The flag itself carries each country's colours; edging 150 cards in 150 colours read as a rainbow
+     (David: «way too rainbow, keep it calm»). */
   .cccard { --cc: var(--hue, var(--accent)); display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--rule); border-top: 6px solid var(--cc);
     border-radius: 20px; padding: 16px 18px 16px; background: var(--panel); transition: transform .16s, box-shadow .16s; }
   .cccard:hover { transform: translateY(-3px); box-shadow: 0 18px 32px -20px color-mix(in srgb, var(--cc) 75%, #000); }

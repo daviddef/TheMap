@@ -34,15 +34,15 @@ const nNames = (cat.places || []).reduce((a, p) => a + p.names.length, 0);
     <input type="search" id="pn-q" autocomplete="off" spellcheck="false" aria-label="Find a place or an old name" placeholder="Find a place or an old name: Salisbury, Fiume, Danzig" />
     <span class="pn-n" id="pn-n" role="status" aria-live="polite"></span></div>
   <div class="k-stats pn-stats">
-    <span class="k-pill" style="--c:var(--h-terra)"><b>{(cat.places || []).length}</b> places</span>
-    <span class="k-pill" style="--c:var(--h-gold)"><b>{nNames}</b> names</span>
-    <span class="k-pill" style="--c:var(--h-teal)"><b>{groups.length}</b> countries</span>
+    <span class="k-pill"><b>{(cat.places || []).length}</b> places</span>
+    <span class="k-pill"><b>{nNames}</b> names</span>
+    <span class="k-pill"><b>{groups.length}</b> countries</span>
   </div>
 
   <p class="pn-jump">{groups.map(([cc, name]) => <a class="k-pill" href={`#c-${cc}`}>{name}</a>)}</p>
 
   {groups.map(([cc, name, list], gi) => (
-    <section id={`c-${cc}`} class="pn-sec" style={`--c:var(--h-${["terra", "teal", "gold", "plum", "rose", "green"][gi % 6]})`}>
+    <section id={`c-${cc}`} class="pn-sec">
       <div class="k-bar"><h2>{name}</h2><span class="k-count">{list.length}</span></div>
       <ul class="pn-list">
         {list.map((p) => (
@@ -72,12 +72,12 @@ const nNames = (cat.places || []).reduce((a, p) => a + p.names.length, 0);
   .pn-jump { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 8px; }
   .pn-sec[hidden], .pn-list > li[hidden] { display: none; }
   .pn-list { list-style: none; padding: 0; margin: 0 0 8px; display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); }
-  .pn-list > li { background: var(--panel); border: 1px solid var(--rule); border-top: 5px solid var(--c); border-radius: 18px; padding: 14px 18px; }
+  .pn-list > li { background: var(--panel); border: 1px solid var(--rule); border-top: 5px solid var(--hue); border-radius: 18px; padding: 14px 18px; }
   .pn-place { font-family: var(--serif); font-size: 21px; font-weight: 800; letter-spacing: -.015em; color: var(--ink); text-decoration: none; }
   .pn-place:hover { color: var(--hue-ink, var(--accent)); }
   .pn-names { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 6px; }
   .pn-names li { font-size: 15px; display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: baseline; }
-  .pn-yrs { font: 700 12px var(--mono); padding: 2px 8px; border-radius: 999px; background: color-mix(in srgb, var(--c) 16%, var(--panel)); color: color-mix(in srgb, var(--c) 60%, var(--ink)); }
+  .pn-yrs { font: 700 12px var(--mono); padding: 2px 8px; border-radius: 999px; background: color-mix(in srgb, var(--hue) 16%, var(--panel)); color: var(--hue-ink); }
   .pn-meta { font-size: 12.5px; color: var(--ink-3); }
 </style>
 

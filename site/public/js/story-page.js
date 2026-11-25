@@ -298,7 +298,7 @@
   function lede(f) {
     var bits = (f.route || []).filter(function (x) { return x.info; }).map(function (x, i) {
       var a = x.age > 0 ? (x.approx ? " at about age " : " at age ") + x.age : "";   /* an age of 0 is "no age told", not a newborn */
-      return (i === 0 ? (x.role === "born" ? "born in " : "from ") : i === f.route.length - 1 ? "arriving in " : "then ") + x.info.name + (i ? a : "");
+      return (i === 0 ? (x.said === "born" ? "born in " : x.said === "from" ? "from " : x.said === "lived" ? "lived in " : "in ") : i === f.route.length - 1 ? "arriving in " : "then ") + x.info.name + (i ? a : "");
     });
     return bits.length ? bits.join(", ") + ". Change the words below and everything on this page follows." : "";
   }

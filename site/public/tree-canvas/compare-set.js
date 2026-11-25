@@ -7,6 +7,26 @@
 
 export const ARCHIVE_KEYS = ['defranceski', 'booyzen', 'luwinski', 'lerena', 'falco', 'blazevic', 'darcy', 'mazza'];
 
+/* WHERE AN ARCHIVE KEEPS ITS TREE. The tree and the Atlas extract the canvas draws are two script blocks (`const TREE=`, `const ATLAS=`). They were on each archive's own
+   /roots/ page; on 23 Nov 2026 that page was removed (it is a redirect to /tree/ or /trees/ now), and the same two blocks stay in /roots/view.html, the viewer the person pages
+   frame. So read the viewer first and the old page second, and take a page only if it really carries both blocks: a redirect stub answers 200 and carries neither, which
+   is how "Open the canvas" from an archive fell back to the empty opening screen with no tree.
+   doFetch(url, signal) → Promise<Response>. An aborted request stays an abort (the caller asked for it); anything else moves on to the next page. */
+export const ARCHIVE_PAGES = ['/roots/view.html', '/roots/'];
+export async function readArchiveHtml(host, doFetch, signal, pages = ARCHIVE_PAGES) {
+  let why = 'no page carried the tree';
+  for (const p of pages) {
+    let r;
+    try { r = await doFetch('https://' + host + p, signal); }
+    catch (e) { if (e && e.name === 'AbortError') throw e; why = (e && e.message) || 'could not be read'; continue; }
+    if (!r.ok) { why = 'HTTP ' + r.status; continue; }
+    const html = await r.text();
+    if (html.includes('const TREE=') && html.includes('const ATLAS=')) return html;
+    why = 'no tree on ' + p;
+  }
+  throw new Error(why);
+}
+
 /* keys: what the canvas asked for → the valid ones, once each, in the archives' own order. */
 export function cleanKeys(keys, allowed = ARCHIVE_KEYS) {
   const want = new Set((Array.isArray(keys) ? keys : []).filter(k => typeof k === 'string'));

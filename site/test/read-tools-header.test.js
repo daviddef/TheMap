@@ -55,3 +55,9 @@ test("a menu row may open in a new tab, in the bar and in the drawer", () => {
     assert.match(s, /href=\{u\(h\)\}[^>]*target=\{o\?\.newTab/);
   }
 });
+
+test("with the reader open the one header button says «Tell a story» and goes back; with the story open it says «Interpret a record»", () => {
+  assert.match(page, /<span class="rd-lbl">Interpret a record<\/span>/);
+  assert.match(page, /lbl\.textContent = on \? "Tell a story" : "Interpret a record"/);
+  assert.match(page, /t\.classList\.remove\("is-on"\)/, "it is where you go next, not where you are");
+});

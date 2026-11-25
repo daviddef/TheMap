@@ -76,7 +76,8 @@ jobs:
       - name: What changed
         id: diff
         run: |
-          git diff --stat -- data/frequencies data/belgium-by-municipality.json > changed.txt || true
+          # not `git diff --stat`: every run changes the `harvested` date line, which is not an answer
+          python3 scripts/registers-changed.py > changed.txt || true
           if [ -s changed.txt ]; then echo "any=yes" >> "$GITHUB_OUTPUT";
           else echo "any=no" >> "$GITHUB_OUTPUT"; fi
           cat changed.txt

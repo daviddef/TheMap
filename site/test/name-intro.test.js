@@ -92,11 +92,12 @@ test("My research place cards say which book was found in and for whom, a next s
 
 test("My research can be shared: the address carries who is read and any period, and a link opens the same view", () => {
   const page = fs.readFileSync(path.join(here, "../src/pages/my-research.astro"), "utf8");
-  assert.match(page, /id="mr-share-url"/);
+  assert.doesNotMatch(page, /id="mr-share-url"|Share this view/, "no wordy panel: the link is copied by the icon in the bar");
+  assert.match(fs.readFileSync(path.join(here, "../public/js/line-switcher.js"), "utf8"), /tool\("Copy a link to this view"/, "a copy icon in the bar's round buttons");
   assert.match(page, /q\.set\("f", all \? "all" : v\.slugs\.join\(","\)\)/, "who is read goes in f");
   assert.match(page, /k \+ "~" \+ PERIOD\[k\]\[0\] \+ "-" \+ PERIOD\[k\]\[1\]/, "a pressed period goes in per");
   assert.match(page, /if \(VIEW\.want && !VIEW\.applied\) return;/, "the address is not overwritten before a link has been applied");
   assert.match(page, /is not in this browser|not in this browser \(/, "a family the browser does not have is said so");
-  assert.doesNotMatch(page.slice(page.indexOf("function applyView"), page.indexOf("var shareBtn")), /setActive/, "opening a link never changes the family your marks go under");
+  assert.doesNotMatch(page.slice(page.indexOf("function applyView"), page.indexOf("/* the address follows the view")), /setActive/, "opening a link never changes the family your marks go under");
   assert.match(page, /location\.pathname \+ location\.search \+ \(n === "families"/, "changing tab keeps the query");
 });

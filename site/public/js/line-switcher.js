@@ -199,7 +199,7 @@
       fam.panel.hidden = true;
       /* round icon buttons, the same make as the header's Save, Read and Contrast; the words are the tooltip and the screen-reader name */
       var ICO = { pen: '<path d="M4 20h4L19 9l-4-4L4 16z M13.5 6.5l4 4" />', bin: '<path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13M10 11v6M14 11v6" />', print: '<path d="M7 9V3h10v6M7 17H4v-7h16v7h-3M7 14h10v7H7z" />',
-               merge: '<path d="M5 4c0 6 7 6 7 11v5M19 4c0 6-7 6-7 11" />', dup: '<path d="M9 9h10v11H9zM15 9V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h4" />' };
+               link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" />', ok: '<path d="M5 12.5l4.5 4.5L19 7.5" />', merge: '<path d="M5 4c0 6 7 6 7 11v5M19 4c0 6-7 6-7 11" />', dup: '<path d="M9 9h10v11H9zM15 9V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h4" />' };
       function tool(label, cls, fn, ico) {
         var b = mk("button", "ra-fam-b ra-fam-i" + (cls ? " " + cls : "")); b.type = "button"; b.title = label; b.setAttribute("aria-label", label);
         b.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + ICO[ico] + "</svg>";
@@ -327,8 +327,27 @@
       tool("Look for duplicate families", "ra-fam-dupbtn", function () { openPanel("dups"); }, "dup");
       tool("Remove this family", "danger", function () { openPanel("remove"); }, "bin");
       tool("Print or save as PDF", "", function () { window.print(); }, "print");
+      /* COPY LINK: the address bar already follows the view (the families read together and any period pressed on a place), so the button
+         copies it. The icon turns into a tick for a moment. Nothing private is in the link: family names and years only. */
+      var cpy = tool("Copy a link to this view", "", function () {
+        function done(ok) {
+          var svg = cpy.querySelector("svg"); if (!svg) return;
+          svg.innerHTML = ok ? ICO.ok : ICO.link; cpy.title = ok ? "Link copied" : "Copy a link to this view";
+          if (ok) setTimeout(function () { svg.innerHTML = ICO.link; cpy.title = "Copy a link to this view"; }, 1600);
+        }
+        /* the clipboard API where it is allowed, else the older select-and-copy, which some app views still need */
+        function older() {
+          var ta = document.createElement("textarea"), ok = false; ta.value = location.href; ta.setAttribute("readonly", ""); ta.style.cssText = "position:fixed;left:-9999px;top:0";
+          document.body.appendChild(ta); ta.select();
+          try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+          ta.remove(); done(ok);
+        }
+        try { navigator.clipboard.writeText(location.href).then(function () { done(true); }, older); } catch (e) { older(); }
+      }, "link");
+      /* it lives beside the family tools, not in them: those hide when no family is chosen, which is exactly the state of someone opening a link */
+      var cpWrap = mk("span", "ra-fam-tools ra-fam-share"); cpWrap.append(cpy);
       var after = bar.querySelector(".ra-lines-n");
-      bar.insertBefore(fam.who, sel); bar.insertBefore(fam.sess, sel); bar.insertBefore(fam.tools, sel);
+      bar.insertBefore(fam.who, sel); bar.insertBefore(fam.sess, sel); bar.insertBefore(fam.tools, sel); bar.insertBefore(cpWrap, sel);
       bar.append(fam.panel);
       if (after) bar.insertBefore(after, fam.panel);
     }

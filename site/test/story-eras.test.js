@@ -17,7 +17,23 @@ test("the story's years take in a decade told in words", { skip: !BUILT && "need
 
 test("a stop with no year hides the eras outside the story's years, behind a button that opens them", () => {
   const eng = fs.readFileSync(path.join(SITE, "public/js/story-engine.js"), "utf8");
-  assert.match(eng, /story = !years\.length && storyYears\(\) \|\| null/);
+  assert.match(eng, /story = !years\.length && \(dated \? datedSpan\(dated\) : storyYears\(\)\) \|\| null/);
   assert.match(eng, /else if \(inStory\) \{ lo = story\[0\]; hi = story\[1\]; \}/);
   assert.match(eng, /Show only your story's years/);
 });
+
+test("the home with no year of its own is dated by the birth, the wedding and the child the story tells", { skip: !BUILT && "needs the built public/ data" }, async () => {
+  const { read } = await import("./plan/harness.mjs");
+  const { g } = await read(fs.readFileSync(path.join(SITE, "test/plan/drezhik-story.txt"), "utf8").trim());
+  assert.deepEqual(g.facts.dated.map((d) => [d.kind, d.from, d.to]), [["b", 1910, 1919], ["m", 1936, 1939], ["c", 1942, 1942]]);
+});
+
+test("a decade said of a birth or a wedding is kept as told, never read as the year someone left", { skip: !BUILT && "needs the built public/ data" }, async () => {
+  const { read } = await import("./plan/harness.mjs");
+  for (const [text, label] of [["My grandfather Ivan Horvat was born in the 1890s. He lived in Senj.", "Born in the 1890s"], ["My grandfather Ivan Horvat lived in Senj. He married in the late 1920s.", "Married in the late 1920s"]]) {
+    const { g } = await read(text);
+    assert.equal(g.facts.left, null, text);
+    assert.deepEqual(g.facts.dated.map((d) => d.label), [label]);
+  }
+});
+

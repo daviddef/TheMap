@@ -350,12 +350,12 @@ const WRAPPER = `
    sat in a strip while Names and the rest ran the full width. The site's own wrapper already pads and caps the page (--maxw), so the
    flag page fills it. */
 .flagpage{max-width:none;margin:0;padding:0 0 48px}
-.flagpage .wrap{max-width:none}
+.flagpage .wrap{max-width:none;padding:0}
 /* the page is wide; a line of text is not: prose stays at a readable measure, boxes, cards and maps take the full width */
 .flagpage p{max-width:100ch}
 .flagpage footer{display:none}
-.flagpage .flagmaplink{margin:0 0 22px;padding:10px 14px;border:1px solid var(--rule);
-  border-left:3px solid var(--accent);border-radius:3px;background:var(--panel);
+.flagpage .flagmaplink{margin:0 0 22px;padding:12px 18px;border:1px solid var(--rule);
+  border-left:6px solid var(--hue,var(--accent));border-radius:16px;background:var(--panel);
   font-family:var(--sans);font-size:13.5px;line-height:1.5}
 .flagpage .flagmaplink a{font-weight:600;text-decoration:none}
 .flagpage .flagmaplink a:hover{text-decoration:underline}
@@ -380,6 +380,33 @@ const WRAPPER = `
 .flagpage .evidence-sum{margin:0 0 18px;padding:10px 14px;border:1px solid var(--rule);border-radius:3px;
   background:var(--panel);font-family:var(--sans);font-size:13px;line-height:1.5}
 .flagpage .evidence-sum span{display:block;color:var(--ink-3);font-size:12px;margin-top:2px}
+
+/* THE FLAGS ATLAS, MADE TO MATCH THE REST OF THE WOW LAYER (kit.css): rounder cards, the country's own colour along the top, big
+   soft headings, pills for the badges, and the search box every other search now wears. Only the index and the hubs have these classes. */
+.flagpage h1,.flagpage h2,.flagpage h3,.flagpage .display{font-family:var(--serif)}
+.flagpage .hub-card,.flagpage .country-card{border-radius:20px;padding:18px 20px;transition:transform .16s,box-shadow .16s,border-color .16s}
+.flagpage .hub-card:hover,.flagpage .country-card:not(.no-link):hover{transform:translateY(-3px);box-shadow:0 18px 32px -20px rgba(0,0,0,.5)}
+.flagpage .hub-card .swatch-strip{height:8px}
+.flagpage .country-card .swatch-strip{height:7px}
+.flagpage .hub-card b{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;margin-bottom:6px}
+.flagpage .country-card b{font-size:1.3rem;font-weight:800;letter-spacing:-.02em}
+.flagpage .hub-card span:not(.swatch-strip):not(.meta){font-size:.92rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.flagpage .hub-card .meta{display:inline-block;font-family:var(--sans);font-weight:700;font-size:11px;letter-spacing:.06em;color:var(--ink-2);background:var(--ground);border-radius:12px;padding:4px 10px;margin-bottom:10px}
+.flagpage .country-card .atlas-stats{font-size:.82rem;border-top-style:dashed}
+.flagpage .country-card .atlas-stats b{display:inline;margin:0;font-family:var(--sans);font-size:1em;font-weight:800;letter-spacing:0}
+.flagpage .country-card .flag-box{width:54px}
+.flagpage .country-card .flag-box svg{border-radius:6px;border:0;box-shadow:0 0 0 1px var(--card-border),0 6px 14px -8px rgba(0,0,0,.4)}
+.flagpage .country-card .status,.flagpage .country-card .crown-tag{font-family:var(--sans);font-weight:600;font-size:11px;letter-spacing:.03em;border-radius:999px;padding:3px 10px}
+.flagpage .country-card .crown-tag{font-size:11.5px;color:var(--ink-2)}
+.flagpage .search-box{font-family:var(--sans);font-size:clamp(18px,2.3vw,22px);font-weight:500;padding:16px 22px;border:2px solid color-mix(in srgb,var(--hue,var(--brick)) 40%,var(--card-border));border-radius:22px;box-shadow:0 14px 30px -20px color-mix(in srgb,var(--hue,var(--brick)) 60%,#000)}
+.flagpage .search-box:focus{border-color:var(--hue,var(--brick));box-shadow:0 0 0 4px color-mix(in srgb,var(--hue,var(--brick)) 22%,transparent)}
+.flagpage .hubs-section,.flagpage .countries-section{border-top:0;padding-top:0;margin-top:34px}
+.flagpage .hubs-section h2,.flagpage .countries-section h2{display:flex;align-items:center;gap:12px;font-size:clamp(22px,3vw,30px);font-weight:800;letter-spacing:-.02em;margin:0 0 16px}
+.flagpage .hubs-section h2::before,.flagpage .countries-section h2::before{content:"";flex:none;width:8px;height:30px;border-radius:6px;background:var(--hue,var(--brick))}
+.flagpage .hub-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:16px}
+.flagpage .country-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));gap:16px}
+.flagpage details.about{margin-top:44px;border:1px solid var(--rule);border-radius:20px;background:var(--panel);padding:8px 22px}
+.flagpage details.about summary{cursor:pointer;font:600 16px/1.3 var(--sans);padding:10px 0}
 `;
 
 /* AND THE SAME ADDRESSES INSIDE THE SCRIPTS. The index does not write its 210
@@ -407,7 +434,9 @@ export function page(slug) {
      down the body — so they are collected from the whole file and hoisted,
      and the body keeps only its markup and its scripts. */
   const css = [...raw.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)]
-    .map((m) => m[1]).join("\n");
+    .map((m) => m[1]).join("\n")
+    /* The lifted sheets name the body face outright; the site's is Figtree now (--sans), so they follow it. */
+    .replace(/"Source Sans 3"/g, "var(--sans)");
   const title = ((raw.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [, slug])[1] || "")
     .replace(/\s+/g, " ").trim();
   const h1 = ((body.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i) || [, ""])[1] || "")

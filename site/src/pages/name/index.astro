@@ -11,17 +11,51 @@ for (const r of rows) (groups[r.canon[0].toUpperCase()] ||= []).push(r);
 const letters = Object.keys(groups).sort();
 ---
 <Base title="Given names, A to Z" eyebrow={`${rows.length} names`}
-      dek="Every given name in the catalogue, with each form by language and the page that carries it. Ivan, Johann, Giovanni and Joannes are one name.">
+      dek="Every given name in the catalogue. Ivan, Johann, Giovanni and Joannes are one name.">
   <section>
-    <p class="cap" style="margin-top:0">Looking for one form you have met on a record? <a href={u("/your-name/")}>Type it into the name finder</a>.</p>
-    <p class="nm-az">{letters.map((l) => <a href={`#l-${l}`}>{l}</a>)}</p>
+    <div class="k-search"><span class="k-ico" aria-hidden="true">🔎</span>
+      <input type="search" id="nm-q" autocomplete="off" spellcheck="false" aria-label="Filter the names" placeholder="Filter the names: Ivan, Giovanni, Katarina" />
+      <span class="nm-n" id="nm-n" role="status" aria-live="polite"></span></div>
+    <p class="nm-az">{letters.map((l) => <a class="k-pill" href={`#l-${l}`}>{l}</a>)}</p>
     {letters.map((l) => (
-      <>
-        <h2 class="nm-l" id={`l-${l}`}>{l}</h2>
+      <div class="nm-g" data-l={l}>
+        <div class="k-bar"><h2 class="nm-l" id={`l-${l}`}>{l}</h2><span class="k-count">{groups[l].length}</span></div>
         <ul class="nm-names">
-          {groups[l].map((r) => <li><a href={u(`/name/${r.id}/`)}>{r.canon}</a> <span class="cap">{r.forms} forms</span></li>)}
+          {groups[l].map((r) => <li data-n={r.canon.toLowerCase()}><a class="k-pill" href={u(`/name/${r.id}/`)}>{r.canon}<span class="nm-f">{r.forms}</span></a></li>)}
         </ul>
-      </>
+      </div>
     ))}
+    <p class="cap">Looking for one form you have met on a record? <a href={u("/your-name/")}>Type it into the name finder</a>.</p>
   </section>
 </Base>
+
+<style is:global>
+  .nm-az { display: flex; flex-wrap: wrap; gap: 6px; margin: 18px 0 0; }
+  .nm-az a { font-size: 14px; min-width: 34px; justify-content: center; }
+  .nm-names { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .nm-names .k-pill { font-size: 15px; padding: 6px 8px 6px 14px; }
+  .nm-f { font: 700 11px/1 var(--mono); padding: 3px 7px; border-radius: 999px; background: color-mix(in srgb, var(--c) 22%, var(--panel)); }
+  .nm-n { font: 12px var(--mono); color: var(--ink-3); padding-right: 14px; }
+  .nm-g[hidden], .nm-names li[hidden] { display: none; }
+</style>
+
+<script is:inline>
+  (function () {
+    var q = document.getElementById("nm-q"), out = document.getElementById("nm-n");
+    if (!q) return;
+    var gs = [].slice.call(document.querySelectorAll(".nm-g"));
+    function fold(s) { return (s || "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim(); }
+    q.addEventListener("input", function () {
+      var v = fold(q.value), n = 0;
+      gs.forEach(function (g) {
+        var any = false;
+        [].forEach.call(g.querySelectorAll("li"), function (li) {
+          var hit = !v || fold(li.getAttribute("data-n")).indexOf(v) >= 0;
+          li.hidden = !hit; if (hit) { any = true; n++; }
+        });
+        g.hidden = !any;
+      });
+      out.textContent = v ? n + " found" : "";
+    });
+  })();
+</script>

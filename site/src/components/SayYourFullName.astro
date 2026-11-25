@@ -18,47 +18,50 @@ const { chips = [] } = Astro.props;
 ---
 <div class="fn">
   <label class="fn-lab" for="fn-q">Type your whole name</label>
-  <input id="fn-q" class="fn-q" type="search" autocomplete="off" spellcheck="false" placeholder="Ivan Matija Blažević" />
-  {chips.length > 0 && <div class="fn-chips">{chips.map((c) => <button type="button" class="fn-chip" data-n={c}>{c}</button>)}</div>}
+  <div class="k-search"><span class="k-ico" aria-hidden="true">✎</span>
+    <input id="fn-q" class="fn-q" type="search" autocomplete="off" spellcheck="false" placeholder="Ivan Matija Blažević" /></div>
+  {chips.length > 0 && <div class="fn-chips"><span class="fn-try">Try</span>{chips.map((c, i) => <button type="button" class="fn-chip k-pill" data-n={c}>{c}</button>)}</div>}
   <p class="fn-share" hidden><button type="button" class="fn-copy-link">Copy link</button> <span class="fn-url mono"></span>
     <span class="fn-priv">The link contains the name you typed.</span></p>
   <div class="fn-out" aria-live="polite"></div>
 </div>
 
 <style is:global>
-  .fn-lab { display: block; font-size: 11px; font-weight: 600; letter-spacing: .11em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 .4rem; }
-  .fn-q { width: 100%; box-sizing: border-box; font: inherit; font-size: 1.5rem; padding: .7rem .9rem; border: 1px solid var(--rule); border-radius: 3px; background: var(--panel); color: inherit; }
+  .fn-lab { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .fn-q { width: 100%; box-sizing: border-box; }
+  .fn-try { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); align-self: center; margin-right: 2px; }
   .fn-chips { display: flex; flex-wrap: wrap; gap: .4rem; margin: .7rem 0 0; }
-  .fn-chip, .fn-btn { font: inherit; font-size: .85rem; padding: .3rem .75rem; cursor: pointer; border: 1px solid var(--rule); border-radius: 2px; background: transparent; color: inherit; }
-  .fn-chip:hover, .fn-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .fn-chip { cursor: pointer; font-size: 13.5px; padding: 6px 13px; }
+  .fn-chip:hover { background: color-mix(in srgb, var(--c) 26%, var(--panel)); }
+  .fn-btn { font: inherit; font-size: .85rem; font-weight: 600; padding: .4rem .9rem; cursor: pointer; border: 1px solid var(--rule-strong); border-radius: 999px; background: var(--panel); color: inherit; }
+  .fn-btn:hover { border-color: var(--hue, var(--accent)); color: var(--hue-ink, var(--accent)); }
   .fn-share { display: flex; flex-wrap: wrap; gap: .3rem .7rem; align-items: baseline; margin: .8rem 0 0; font-size: .85rem; }
-  .fn-copy-link { font: inherit; font-size: .82rem; padding: .25rem .7rem; cursor: pointer; border: 1px solid var(--rule); border-radius: 2px; background: transparent; color: inherit; }
+  .fn-copy-link { font: inherit; font-size: .82rem; font-weight: 600; padding: .3rem .85rem; cursor: pointer; border: 1px solid var(--rule-strong); border-radius: 999px; background: var(--panel); color: inherit; }
   .fn-url { color: var(--ink-3); overflow-wrap: anywhere; }
   .fn-priv { color: var(--ink-3); font-size: .8rem; }
-  .fn-unit { background: var(--panel); border: 1px solid var(--rule); border-radius: 3px; padding: 14px 20px 14px; margin-top: 14px; }
-  .fn-unit .fn-h { margin: 0; font-size: 22px; font-weight: 500; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
-  .fn-role { font-family: var(--sans); font-size: 10.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); }
+  .fn-unit { --c: var(--hue); background: var(--panel); border: 1px solid var(--rule); border-top: 6px solid var(--c); border-radius: 20px; padding: 16px 22px 16px; margin-top: 16px; }
+  .fn-unit .fn-h { margin: 0; font-size: 30px; font-weight: 800; letter-spacing: -.02em; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+  .fn-role { font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 4px 11px; border-radius: 999px; color: color-mix(in srgb, var(--c) 60%, var(--ink)); background: color-mix(in srgb, var(--c) 16%, var(--panel)); }
   .fn-p { margin: 6px 0 0; font-size: .95rem; color: var(--ink-2); }
   .fn-p a { color: var(--accent); }
   .fn-nil { margin: 6px 0 0; font-size: .92rem; color: var(--ink-3); }
-  .fn-sub { margin: 26px 0 4px; font-size: 1.15rem; font-weight: 500; }
+  .fn-sub { margin: 30px 0 4px; font-size: 1.5rem; font-weight: 800; }
   .fn-cap { margin: 0 0 10px; font-size: .88rem; color: var(--ink-3); }
-  .fn-lines { border: 1px solid var(--rule); border-radius: 3px; background: var(--panel); }
-  .fn-line { display: grid; grid-template-columns: 9em 1fr; gap: 2px 14px; padding: 8px 18px; align-items: baseline; font-family: var(--serif); font-size: 1.25rem; }
+  .fn-lines { border: 1px solid var(--rule); border-radius: 20px; background: var(--panel); overflow: hidden; }
+  .fn-line { --c: var(--hue); border-left: 6px solid var(--c); display: grid; grid-template-columns: 9em 1fr; gap: 2px 14px; padding: 8px 18px; align-items: baseline; font-family: var(--serif); font-size: 1.25rem; }
   .fn-line + .fn-line { border-top: 1px solid var(--rule); }
-  .fn-line:nth-child(even) { background: color-mix(in srgb, var(--ground) 55%, transparent); }
-  .fn-lang { font-family: var(--sans); font-size: 10.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); }
+  .fn-lang { justify-self: start; font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 4px 11px; border-radius: 999px; color: color-mix(in srgb, var(--c) 60%, var(--ink)); background: color-mix(in srgb, var(--c) 16%, var(--panel)); }
   .fn-dot { color: var(--ink-3); padding: 0 .8em; }
   .fn-more, .fn-none { color: var(--ink-3); font-size: .85em; }
   .fn-part { margin-top: 12px; }
   .fn-part summary { cursor: pointer; font-size: .9rem; color: var(--ink-2); margin-bottom: 8px; }
   .fn-out .famcard { margin-top: 10px; }
-  .fn-out .famcard { background: var(--ground); border: 1px solid var(--rule); border-radius: 3px; padding: 12px 16px 10px; }
-  .fn-out .famcard h2 { margin: 0; font-size: 20px; font-weight: 500; }
+  .fn-out .famcard { background: var(--ground); border: 1px solid var(--rule); border-radius: 16px; padding: 14px 18px 12px; }
+  .fn-out .famcard h2 { margin: 0; font-size: 22px; font-weight: 800; }
   .fn-out .famcard h2 a { text-decoration: none; }
   .fn-out .famrow { display: grid; grid-template-columns: 15em 1fr; gap: 4px 12px; align-items: start; margin: 8px 0 0; font-family: var(--serif); font-size: 17px; }
   .fn-out .famforms { display: flex; flex-wrap: wrap; gap: 6px 8px; }
-  .fn-out .famforms a, .fn-out .famforms span { padding: 1px 10px; background: var(--panel); border: 1px solid var(--rule); border-radius: 999px; line-height: 1.5; text-decoration: none; }
+  .fn-out .famforms a, .fn-out .famforms span { padding: 2px 12px; background: var(--panel); border: 1px solid var(--rule); border-radius: 999px; line-height: 1.5; text-decoration: none; }
   .fn-out .famforms a { color: var(--accent); }
   .fn-out .famst { padding-top: 6px; white-space: nowrap; font-family: var(--sans); font-size: 10.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); }
   .fn-out .famno .famforms span { color: var(--ink-3); }
@@ -172,14 +175,14 @@ const { chips = [] } = Astro.props;
       const gr = gLook(u.text), sr = sLook(u.text);
       const head = (role: string) => `<h3 class="fn-h">${esc(u.text)}<span class="fn-role">${role}</span></h3>`;
       if (u.role === "either") {
-        if (!gr && !sr) return `<section class="fn-unit">${head("Given name or surname")}${givenNil}${surNil(u.text)}</section>`;
-        return (gr ? `<section class="fn-unit">${head("Given name")}${givenBlock(gr, u.text)}</section>` : "")
-          + (sr ? `<section class="fn-unit">${head("Surname")}${surBlock(sr)}</section>` : "");
+        if (!gr && !sr) return `<section class="fn-unit is-either">${head("Given name or surname")}${givenNil}${surNil(u.text)}</section>`;
+        return (gr ? `<section class="fn-unit is-given">${head("Given name")}${givenBlock(gr, u.text)}</section>` : "")
+          + (sr ? `<section class="fn-unit is-surname">${head("Surname")}${surBlock(sr)}</section>` : "");
       }
       if (u.role === "given") {
-        return `<section class="fn-unit">${head("Given name")}${gr ? givenBlock(gr, u.text) : givenNil}${sr ? flipBtn(u.text, "surname") : ""}</section>`;
+        return `<section class="fn-unit is-given">${head("Given name")}${gr ? givenBlock(gr, u.text) : givenNil}${sr ? flipBtn(u.text, "surname") : ""}</section>`;
       }
-      return `<section class="fn-unit">${head("Surname")}${sr ? surBlock(sr) : surNil(u.text)}${gr && !/\s/.test(u.text) ? flipBtn(u.text, "given") : ""}</section>`;
+      return `<section class="fn-unit is-surname">${head("Surname")}${sr ? surBlock(sr) : surNil(u.text)}${gr && !/\s/.test(u.text) ? flipBtn(u.text, "given") : ""}</section>`;
     };
 
     // Forms a record has shown come first, then the other right forms, and a case ending or a diminutive after its plain name.

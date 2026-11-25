@@ -27,18 +27,18 @@ const { list, totals, showFind = true } = Astro.props;
 ---
 
 {showFind && (
-  <form class="ccfind" role="search" onsubmit="return false">
+  <form class="ccfind k-search" role="search" onsubmit="return false">
     <label class="vh" for="ccq">Find a country</label>
     <input id="ccq" type="search" autocomplete="off"
-           placeholder="Find a country — Uruguay · Eswatini · Cabo Verde" />
+           placeholder="Find a country: Uruguay, Eswatini, Cabo Verde" />
     <span class="ccn" id="ccq-n" role="status" aria-live="polite"></span>
   </form>
 )}
 
-<div class="ccsort">
-  <span class="cclab">Sort</span>
+<div class="ccsort" role="group" aria-label="Sort the countries">
+  <span class="cclab">Sort by</span>
   <button type="button" class="sortby on" data-k="name" data-kind="text"
-          aria-sort="ascending">Country</button>
+          aria-sort="ascending">A to Z</button>
   <button type="button" class="sortby" data-k="places">Places</button>
   <button type="button" class="sortby" data-k="arch">Archives</button>
   <button type="button" class="sortby" data-k="cols">Collections</button>
@@ -51,57 +51,41 @@ const { list, totals, showFind = true } = Astro.props;
     <li class="cccard" data-name={c.name} data-places={c.places}
         data-arch={c.arch} data-cols={c.cols} data-reg={c.reg} data-walked={c.walked}
         data-state={c.names}>
-      <div class="cchead">
-        {c.flag && (
+      <a class="cchead" href={u(`/country/${c.cc.toLowerCase()}/`)}>
+        {c.flag ? (
           <svg class="ccflag" viewBox="0 0 300 200" role="img"
                aria-label={`Flag of ${c.name}`} set:html={c.flag.flag} />
-        )}
-        <a class="ccname" href={u(`/country/${c.cc.toLowerCase()}/`)}>{c.name}</a>
-        {c.flag && (
-          <a class="ccflags-l" href={u("/" + c.flag.url)}
-             title={`${c.name} in the flags atlas — who held this ground, and when`}
-          >flags &rarr;</a>
-        )}
-      </div>
-      <dl class="ccm">
-        <div><dt>Places</dt><dd>{c.places ? c.places.toLocaleString() : "0"}</dd></div>
-        <div><dt>Archives</dt><dd>{c.arch ? c.arch.toLocaleString() : "0"}</dd></div>
-        <div><dt>Collections</dt><dd>{c.cols ? c.cols.toLocaleString() : "0"}</dd></div>
-      </dl>
-      {/* WHAT /coverage/ USED TO SAY IN A TABLE, ONE LINE PER CARD: how far down to a named place the collections reach, how many places
-          somebody has walked volume by volume, and whether a national archive is named at all. The same rule, from lib/country-metrics.js. */}
+        ) : <span class="ccflag ccflag-ph" aria-hidden="true">{c.cc}</span>}
+        <span class="ccname">{c.name}</span>
+      </a>
+      <ul class="ccpills">
+        <li class="k-pill"><b>{c.places ? c.places.toLocaleString() : "0"}</b> places</li>
+        <li class="k-pill is-plain"><b>{c.arch ? c.arch.toLocaleString() : "0"}</b> archives</li>
+        <li class="k-pill is-plain"><b>{c.cols ? c.cols.toLocaleString() : "0"}</b> collections</li>
+      </ul>
+      {/* WHICH OF THE THREE STATES THIS IS, because the number alone would be read as a fact about the country. Croatia's 141 against
+          Denmark's 290,156 is a fact about our harvest. A country with nothing is the point of the page, so it is marked, not left empty. */}
+      <p class="ccnames">
+        {c.names === "register" && <span class="k-pill is-plain"><b>{c.reg.toLocaleString()}</b> {c.reg === 1 ? "name" : "names"} in its register</span>}
+        {c.names === "archive" && <span class="k-pill is-plain">{c.arc.toLocaleString()} {c.arc === 1 ? "name" : "names"} from a family archive</span>}
+        {c.names === "none" && <span class="k-pill is-plain">no names yet</span>}
+      </p>
       <p class="cccov">
         {c.cols ? <span title="Share of this country's collections catalogued under a town, county or province, not the country as a whole">{c.reach}% reach a place</span> : <span class="ccnil">no collections</span>}
         {" · "}{c.walked ? <span>{c.walked.toLocaleString()} walked</span> : <span class="ccnil">none walked</span>}
-        {" · "}{c.nat ? <span>national archive named</span> : <span class="ccnil">no national archive named</span>}
+        {c.nat ? <>{" · "}<span>national archive named</span></> : null}
       </p>
-      {/* THE NAMES LINE SAYS WHICH OF THE THREE STATES THIS IS, because the
-          number alone would be read as a fact about the country. Croatia's
-          141 against Denmark's 290,156 is a fact about our harvest. */}
-      {c.names === "register" && (
-        <p class="ccnames"><b>{c.reg.toLocaleString()}</b>
-        {" "}{c.reg === 1 ? "name" : "names"} in its national register</p>
-      )}
-      {c.names === "archive" && (
-        <p class="ccnames ccnames-thin">no register harvested — {c.arc.toLocaleString()}
-        {" "}{c.arc === 1 ? "name" : "names"} known only from a family archive</p>
-      )}
-      {c.names === "none" && (
-        <p class="ccnames ccnames-none"><b>0</b> names — no register harvested, and no archive names one</p>
-      )}
-      {/* THE TWO DOORS OUT OF A CARD: the country's own page (its places and what covers them) and the directory of who holds its paper,
-          already narrowed to it, which is what the Sources tab is for. */}
-      <p class="ccgo"><a href={u(`/country/${c.cc.toLowerCase()}/`)}>Places</a>
-        {" · "}<a href={u(`/providers/?q=${encodeURIComponent(c.name)}`)}>{c.arch ? `${c.arch.toLocaleString()} ${c.arch === 1 ? "source" : "sources"}` : "Sources"}</a></p>
+      <p class="ccgo"><a class="k-pill is-plain" href={u(`/country/${c.cc.toLowerCase()}/`)}>Places</a>
+        <a class="k-pill is-plain" href={u(`/providers/?q=${encodeURIComponent(c.name)}`)}>{c.arch ? `${c.arch.toLocaleString()} ${c.arch === 1 ? "source" : "sources"}` : "Sources"}</a>
+        {c.flag && <a class="k-pill is-plain" href={u("/" + c.flag.url)} title={`${c.name} in the flags atlas: who held this ground, and when`}>Flags</a>}</p>
     </li>
   ))}
 </ul>
 
 <p class="cap ccfoot">{totals.withRegister} countries have a national register
   harvested, {totals.archiveOnly} are named only by a family archive, and
-  <b>{totals.noNames} have no names at all</b> — which is a gap in this map,
-  not a gap in the record. Sorting by <b>Names in a register</b> puts them
-  together.</p>
+  <b>{totals.noNames} have no names at all</b>, which is a gap in this map,
+  not a gap in the record.</p>
 
 <script is:inline>
   /* Sort and filter the cards in place. No fetch: everything is already in
@@ -193,48 +177,36 @@ const { list, totals, showFind = true } = Astro.props;
 </script>
 
 <style>
-  .ccfind { margin: 14px 0 0; display: flex; align-items: baseline; gap: 10px; }
-  .ccfind input { flex: 1 1 auto; font-family: var(--sans); font-size: 15px;
-    padding: 11px 13px; border: 1px solid var(--rule); border-radius: 4px;
-    background: var(--panel); color: var(--ink); }
-  .ccn { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
-  .ccsort { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px;
-    margin: 12px 0 0; }
-  .cclab { font-family: var(--mono); font-size: 10px; letter-spacing: .08em;
-    text-transform: uppercase; color: var(--ink-3); }
-  button.sortby { background: none; border: 0; padding: 2px 0; cursor: pointer;
-    font-family: var(--sans); font-size: 12.5px; color: var(--ink-2); }
-  button.sortby::after { content: " \2195"; opacity: .35; }
-  button.sortby:hover { color: var(--accent); }
-  button.sortby.on { color: var(--accent); font-weight: 600; }
+  .ccfind { margin: 14px 0 0; }
+  .ccfind input { flex: 1 1 auto; }
+  .ccn { font-family: var(--mono); font-size: 12px; color: var(--ink-3); padding-right: 14px; }
+  .ccsort { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 18px 0 0; }
+  .cclab { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); margin-right: 4px; }
+  button.sortby { cursor: pointer; font: 600 13.5px/1 var(--sans); padding: 8px 14px; border-radius: 999px;
+    border: 1px solid var(--rule-strong); background: var(--panel); color: var(--ink-2); transition: background .15s, border-color .15s; }
+  button.sortby::after { content: " \2195"; opacity: .4; }
+  button.sortby:hover { border-color: var(--hue, var(--accent)); color: var(--ink); }
+  button.sortby.on { background: var(--hue-solid, var(--accent)); border-color: transparent; color: var(--on-hue); }
 
-  .ccgrid { list-style: none; padding: 0; margin: 14px 0 0; display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(255px, 1fr)); gap: 12px; }
+  .ccgrid { list-style: none; padding: 0; margin: 16px 0 0; display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 16px; }
   .ccgrid [hidden] { display: none; }
-  .cccard { border: 1px solid var(--rule); border-radius: 5px;
-    padding: 11px 13px 12px; background: var(--panel); }
-  /* A country with nothing is the point of the page, so it is marked rather
-     than merely empty — see the note in country-metrics.js. */
-  .cccard[data-state="none"] { border-left: 3px solid var(--brick); }
-  .cccard[data-state="register"] { border-left: 3px solid var(--accent); }
-  .cccard[data-state="archive"] { border-left: 3px solid var(--brass); }
-  .cchead { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .ccflag { flex: none; width: 26px; height: 17px; border: 1px solid var(--rule);
-    border-radius: 1px; display: block; }
-  .ccname { font-family: var(--serif); font-size: 17px; font-weight: 600; }
-  .ccflags-l { font-family: var(--mono); font-size: 10px; color: var(--ink-3);
-    text-decoration: none; }
-  .ccflags-l:hover { color: var(--accent); }
-  .ccm { display: flex; gap: 16px; margin: 9px 0 0; }
-  .ccm div { display: flex; flex-direction: column; }
-  .ccm dt { font-family: var(--mono); font-size: 9.5px; letter-spacing: .06em;
-    text-transform: uppercase; color: var(--ink-3); }
-  .ccm dd { margin: 0; font-family: var(--sans); font-size: 15px; }
-  .ccnames { margin: 9px 0 0; font-family: var(--sans); font-size: 12px;
-    line-height: 1.45; color: var(--ink-2); }
-  .ccnames-thin, .ccnames-none { color: var(--ink-3); }
-  .cccov { margin: 8px 0 0; font-family: var(--sans); font-size: 12px; line-height: 1.5; color: var(--ink-2); }
+  /* ONE COLOUR ALONG THE TOP, the page's. The flag itself carries each country's colours; edging 150 cards in 150 colours read as a rainbow
+     (David: «way too rainbow, keep it calm»). */
+  .cccard { --cc: var(--hue, var(--accent)); display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--rule); border-top: 6px solid var(--cc);
+    border-radius: 20px; padding: 16px 18px 16px; background: var(--panel); transition: transform .16s, box-shadow .16s; }
+  .cccard:hover { transform: translateY(-3px); box-shadow: 0 18px 32px -20px color-mix(in srgb, var(--cc) 75%, #000); }
+  .cchead { display: flex; align-items: center; gap: 14px; text-decoration: none; color: var(--ink); }
+  .ccflag { flex: none; width: 56px; height: 37px; border-radius: 7px; display: block; box-shadow: 0 0 0 1px var(--rule), 0 6px 14px -8px rgba(0,0,0,.4); }
+  .ccflag-ph { display: grid; place-items: center; font: 700 14px/1 var(--mono); letter-spacing: .04em; color: var(--ink-3); background: var(--ground); }
+  .ccname { font-family: var(--serif); font-size: 24px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
+  .cchead:hover .ccname { color: var(--hue-ink, var(--accent)); }
+  .ccpills { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; padding: 0; margin: 0; }
+  .ccpills .k-pill { font-weight: 500; } .ccpills b { font-weight: 800; }
+  .ccnames { margin: 0; } .ccnames:empty { display: none; }
+  .cccov { margin: 0; font-size: 13px; line-height: 1.5; color: var(--ink-2); }
   .cccov .ccnil { color: var(--ink-3); }
-  .ccgo { margin: 8px 0 0; font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
-  .ccfoot { margin: 14px 0 0; }
+  .ccgo { margin: auto 0 0; padding-top: 4px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .ccfoot { margin: 18px 0 0; }
+  @media (prefers-reduced-motion: reduce) { .cccard:hover { transform: none; } }
 </style>

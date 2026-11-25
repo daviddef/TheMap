@@ -247,9 +247,7 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
   }}
   title={titleName}
   flag={flagFor(place.country)}
-  eyebrow={[adm.adm2, adm.adm1, where,
-            `${volN} volume${volN === 1 ? "" : "s"}`,
-            span ? `${span[0]}–${span[1]}` : null].filter(Boolean).join(" · ")}
+  eyebrow={[adm.adm1, where, `${volN} volume${volN === 1 ? "" : "s"}`].filter(Boolean).join(" · ")}
   dek={dek}>
 
   {/* THIS PAGE IS A LIST OF THINGS TO GO AND DO, and the people doing them
@@ -291,9 +289,9 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
   </p>
 
   {place.filedUnder && (
-    <div class="one" style="border-left-color:#C0392B">
-      <div class="lab">Filed under a country that no longer holds it</div>
-      <p class="cap"><b>{place.name} is in {where} today.</b>{" "}
+    <div class="k-hi">
+      <p><b>Filed under a country that no longer holds it.</b></p>
+      <p><b>{place.name} is in {where} today.</b>{" "}
       FamilySearch catalogues it under <b>{filedName}</b>, because that is who held the ground
       when the records were made. Searching {where} alone will not find them — look under{" "}
       <a href={u(`/country/${(place.filedUnder||"").toLowerCase()}/`)}>{filedName}</a> as well.</p>
@@ -343,10 +341,10 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
     u={u} />
 
   {older.length > 0 && (
-    <div class="one" style="border-left-color:var(--accent)">
-      <div class="lab">Also written</div>
+    <div class="k-hi is-plain">
+      <p><b>Also written</b></p>
       <p class="names">{older.map((n) => <b>{n}</b>)}</p>
-      <p class="cap">If the document in your hand says one of these, this is the place it means.</p>
+      <p>If the document in your hand says one of these, this is the place it means.</p>
     </div>
   )}
 
@@ -363,12 +361,12 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
   )}
 
   {region ? (
-    <section style="margin-top:30px" id="held">
+    <section id="held">
       <h2>Whose archive this ground was</h2>
       <p class="cap">{place.name} sits in <a href={u(`/region/${region.id}/`)}>{region.label}</a>.
       Which empire held it decides which archive holds its records — and for some of these
       years that is not the archive you would guess.</p>
-      <table style="margin-top:14px">
+      <div style="overflow-x:auto"><table class="k-table">
         <thead><tr><th class="m">Years</th><th>Who held it</th><th>Whose archive that means</th></tr></thead>
         <tbody>
           {region.eras.map((e) => (
@@ -384,19 +382,19 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
     </section>
   ) : (
-    <div class="one" style="margin-top:30px;border-left-color:var(--rule-strong)">
-      <div class="lab">Whose archive this ground was</div>
-      <p class="cap">Not yet mapped. The record regions cover Istria, the Kvarner, Carnia and
+    <div class="k-hi is-plain" style="margin-top:30px">
+      <p><b>Whose archive this ground was</b></p>
+      <p>Not yet mapped. The record regions cover Istria, the Kvarner, Carnia and
       Dalmatia so far, and {place.name} is outside them. That is a gap in this map rather than
       a gap in the record — <a href={u("/add/")}>and the most useful thing anyone could fill in</a>.</p>
     </div>
   )}
 
   {(cs.length > 0 || volumes.length > 0) ? (
-    <section style="margin-top:34px" id="ra-vols">
+    <section id="ra-vols">
       <h2>{volTotal > rows.length + extraVols.length
         ? `${volTotal.toLocaleString()} volumes, the first ${(rows.length + extraVols.length).toLocaleString()} listed`
         : volTotal === 1 ? "The volume" : "The volumes"}</h2>
@@ -460,13 +458,10 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
   <Neighbourhood place={place} />
 
   {(place.parishes || []).length > 0 && (
-    <section style="margin-top:34px">
+    <section>
       <h2>The nearest parishes</h2>
-      <p class="cap">A church is a parish and a parish is where a register is kept — the
-      register of a hamlet with no church of its own is kept at the church it walked to, so
-      the distance is the useful part. <b>Wikidata's coverage is very uneven</b>: 34,612
-      churches in England against 105 in central Istria, so a short list here means thin
-      data and not an empty landscape. Unchecked, and only inside a mapped record region.</p>
+      <p class="cap">A register belongs to the parish, so the church up the road may hold this family's entries; the distance is the useful part.
+      <b>Wikidata's coverage is very uneven</b> (34,612 churches in England, 105 in central Istria), so a short list means thin data, not an empty landscape. Unchecked, and only inside a mapped record region.</p>
       {/* A PARISH IS THE ONE THING IN THIS WHOLE ATLAS YOU COULD NOT MARK,
           which is close to absurd: the register belongs to the parish, and
           «write to the parish» or «visit the church» is the commonest next
@@ -488,18 +483,11 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
   )}
 
   {(place.graves || []).length > 0 && (
-    <section style="margin-top:34px">
+    <section>
       <h2>Where the burials are</h2>
-      <p class="cap">The other end of a parish: the register records the burial and the
-      ground holds it, and a family that left no other trace very often left a stone.
-      <b>These are points on a map, not record collections</b> — from Wikidata and
-      OpenStreetMap, nobody here has visited one, and whether the burial register
-      survives is a question for the parish or the municipality above.
-      <b>Grounds OpenStreetMap has not named are here too.</b> They used to be left
-      out, on the reasoning that a shape with no name is not a place anyone can ask
-      about — which cost Senj its own graveyard, 2 km away and unnamed, while a named
-      one 7 km off was all this page would show. Being unnamed is a fact about the map
-      data, not about the ground. Only inside a mapped record region.</p>
+      <p class="cap">The other end of a parish: a family that left no other trace very often left a stone.
+      <b>These are points on a map, not record collections</b>, from Wikidata and OpenStreetMap; nobody here has visited one, and whether the burial register
+      survives is a question for the parish or municipality. <b>Grounds OpenStreetMap has not named are here too</b>: being unnamed is a fact about the map data, not the ground. Only inside a mapped record region.</p>
       <ul class="vols">
         {place.graves.map((c) => (
           <li data-src={"source:grave-" + c.id}
@@ -520,7 +508,7 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
   )}
 
   {national.length > 0 && !nationalShared && (
-    <section style="margin-top:38px">
+    <section>
       <h2>The sources for {countryName}</h2>
       <p class="cap">National and regional sources that cover this ground <b>whether or not
       anybody has walked it here</b> — which makes them the answer, not the consolation, for
@@ -550,7 +538,7 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
       They were printed here, 19 KB of them, on all 55,771 place pages. A plain
       link, not a script, so nothing depends on JavaScript. */}
   {sourcesMoved && (
-    <section style="margin-top:34px">
+    <section>
       <h2>Sources for {countryName}</h2>
       <p class="cap">{nationalShared && national.length > 0 && <>The national and regional archives that cover {countryName}, </>}
       {worldNat.length > 0 && <>the national archive and library from Wikidata, </>}
@@ -562,7 +550,7 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
   )}
 
   {fs.length > 0 && (
-    <section style="margin-top:38px">
+    <section>
       <h2>FamilySearch collections that reach here</h2>
       <p class="cap">A collection is a claim over an area, not a book standing in this town —
       so these are ranked by how specifically they reach {place.name}. A free account is
@@ -621,9 +609,9 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
   <p class="ra-rollup-page" hidden></p>
 
   <p style="margin-top:22px"><a class="bigl" href={mapLink}>See {place.name} on the map →</a></p>
-  <p class="cap"><a href={u(`/country/${(place.country||"").toLowerCase()}/`)}>Everything in {where}</a> ·
-    <a href={u("/places/")}>All {full.places.length} places</a> ·
-    <a href={u("/add/")}>Correct something on this page</a></p>
+  <p class="k-pills" style="margin-top:14px"><a class="k-pill is-plain" href={u(`/country/${(place.country||"").toLowerCase()}/`)}>Everything in {where}</a>
+    <a class="k-pill is-plain" href={u("/places/")}>All {full.places.length} places</a>
+    <a class="k-pill is-plain" href={u("/add/")}>Correct something on this page</a></p>
   <VolumeMarks />
 </Base>
 
@@ -639,11 +627,12 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
   .ra-print .cap { margin: 0; flex: 1 1 24ch; }
   @media print { .ra-print { display: none !important; } }
 
-  h2 { font-family: var(--serif); font-size: 26px; font-weight: 500; margin: 0 0 6px; }
+  section > h2 { display: flex; align-items: center; gap: 12px; font-size: clamp(22px, 3vw, 30px); font-weight: 800; letter-spacing: -.02em; margin: 34px 0 12px; }
+  section > h2::before { content: ""; flex: none; width: 8px; height: 30px; border-radius: 6px; background: var(--hue, var(--accent)); }
   .names { font-family: var(--serif); font-size: 21px; line-height: 1.5; margin: 8px 0 6px; }
-  .names b { font-weight: 500; margin-right: 14px; }
+  .names b { font-weight: 800; margin: 0 6px 6px 0; display: inline-block; padding: 2px 14px; border-radius: 999px; background: var(--panel); border: 1px solid var(--rule-strong); font-size: 18px; }
   .vols { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 6px; }
-  .vols li { font-family: var(--sans); font-size: 13px; line-height: 1.5; }
+  .vols li { font-family: var(--sans); font-size: 13px; line-height: 1.5; padding: 8px 14px; background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; }
   .y { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); margin-left: 8px; }
   .who { font-size: 11px; color: var(--ink-3); margin-left: 8px; }
   .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 7px; }
@@ -656,11 +645,13 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
   .d-paid { background: var(--acc-paid) } .d-catalogue { background: var(--acc-catalogue) }
   .d-onsite { background: var(--acc-onsite) }
   .reg { display: inline-flex; align-items: baseline; gap: 7px; }
-  .reg i { width: 9px; height: 9px; border-radius: 2px; background: var(--c); display: inline-block; flex: 0 0 auto; }
+  .reg i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); display: inline-block; flex: 0 0 auto; }
   .none { color: var(--ink-3); font-style: italic; }
   .enote { font-family: var(--sans); font-size: 11.5px; line-height: 1.55; color: var(--ink-3);
            margin: 6px 0 0; max-width:var(--measure); }
   .enote.trap { color: var(--ink-2); border-left: 2px solid #C0392B; padding-left: 9px; }
   td { vertical-align: top; }
-  .bigl { font-family: var(--serif); font-size: 19px; }
+  .bigl { display: inline-flex; align-items: center; padding: 12px 22px; border-radius: 999px; background: var(--hue-solid, var(--accent));
+          color: var(--on-hue, #fff); font: 700 16px/1.2 var(--sans); text-decoration: none; }
+  .bigl:hover { filter: brightness(1.1); }
 </style>

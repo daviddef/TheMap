@@ -7,11 +7,23 @@ const iss = site.repo + "/issues/new";
 <Base
   title="Add or correct a source"
   eyebrow="Everything here is a file in a public repository"
-  dek="There is no login and no moderation queue. The data is JSON on GitHub, and a change to it is an issue or a pull request.">
+  dek="No login and no queue. Tell us by mail, or send a change to the public data files.">
 
-  <div class="prose k-prose" style="max-width:var(--measure)">
-    <p>Three things are worth more than anything else you could send:</p>
-  </div>
+  <div class="k-bar"><h2>What helps most</h2></div>
+  <ul class="k-grid ways">
+    <li><a class="k-card is-link way" href={`${iss}?template=add-source.yml`}>
+      <span class="k-ico" aria-hidden="true">📚</span><span class="k-pill">Most useful</span>
+      <h3>A provider this map does not have</h3>
+      <p>Especially a national or regional archive outside western Europe, where the map is thinnest.</p></a></li>
+    <li><a class="k-card is-link way" href={`${iss}?template=jurisdiction.yml`}>
+      <span class="k-ico" aria-hidden="true">🗺</span><span class="k-pill is-plain">Rarest</span>
+      <h3>A region's filing history</h3>
+      <p>Which archive holds a piece of ground's records, for which years, under which regime.</p></a></li>
+    <li><a class="k-card is-link way" href={`${iss}?template=dead-link.yml`}>
+      <span class="k-ico" aria-hidden="true">🔗</span><span class="k-pill is-plain">Always welcome</span>
+      <h3>Something that has changed</h3>
+      <p>A dead link, a portal that moved, a collection that went from free to paid.</p></a></li>
+  </ul>
 
   {/* A ROUTE FOR PEOPLE WHO DO NOT HAVE A GITHUB ACCOUNT.
       Every path on this page was an issue or a pull request, which is a
@@ -22,12 +34,9 @@ const iss = site.repo + "/issues/new";
       so. Rendered only when an address exists, because a contact link
       that goes nowhere is worse than none. */}
   {site.contact && site.contact.email && (
-    <div class="one addform" style="margin:22px 0 0;border-left-color:var(--accent)">
-      <div class="lab">No account needed</div>
-      <p class="addlead">Fill in what you know and leave the rest blank. This writes
-      the message for you. <b>Nothing is sent from this page and there is no server
-      behind it</b>: the button opens your own mail app with the text already in it,
-      or you can copy it and send it however you like.</p>
+    <div class="k-bar"><h2>Send a source, no account</h2></div>
+    <div class="k-card addform">
+      <p class="addlead">Fill in what you know and leave the rest blank. <b>Nothing is sent from this page</b>: the button opens your own mail app with the message written, or you can copy it.</p>
 
       <div class="addgrid">
         <label>What is it called
@@ -58,10 +67,7 @@ const iss = site.repo + "/issues/new";
         <button type="button" id="af-copy">Copy the message</button>
         <span id="af-said" role="status" aria-live="polite"></span>
       </p>
-      <p class="cap addto">It goes to <b>{site.contact.email}</b>. It will be
-      checked against the source before anything changes — that is the whole
-      method here, and it applies to a message from a stranger exactly as it
-      applies to everything else.</p>
+      <p class="cap addto">It goes to <b>{site.contact.email}</b>, and is checked against the source before anything changes.</p>
     </div>
   )}
 
@@ -127,13 +133,11 @@ const iss = site.repo + "/issues/new";
   )}
 
   {site.contact && site.contact.email && (
-    <div class="one addform" style="margin:22px 0 0;border-left-color:var(--accent)">
-      <div class="lab">Several at once</div>
-      <p class="addlead">Have a list, or an AI assistant that has made one? Paste it here as
-      blocks of <code>Name:</code>, <code>Web address:</code>, <code>Country:</code>,
-      <code>What it holds:</code>, <code>What it costs to look:</code> and <code>Notes:</code>,
-      a blank line between sources. This makes <b>one</b> message. As with the form above,
-      nothing is sent from this page. An assistant can read the exact format at
+    <details class="add-fold">
+    <summary class="k-bar"><h2>Several at once</h2><span class="k-pill is-plain">paste a list</span></summary>
+    <div class="k-card addform">
+      <p class="addlead">Paste blocks of <code>Name:</code>, <code>Web address:</code>, <code>Country:</code>,
+      <code>What it holds:</code>, <code>What it costs to look:</code> and <code>Notes:</code>, a blank line between sources. This makes <b>one</b> message, and nothing is sent from this page. An assistant can read the format at
       <a href={u("/add-sources.txt")}>add-sources.txt</a>.</p>
       <div class="addgrid">
         <label class="addwide">Your list
@@ -145,6 +149,7 @@ const iss = site.repo + "/issues/new";
         <span id="bf-said" role="status" aria-live="polite"></span>
       </p>
     </div>
+    </details>
   )}
 
   {site.contact && site.contact.email && (
@@ -175,29 +180,9 @@ const iss = site.repo + "/issues/new";
     </script>
   )}
 
-  <div class="ways">
-    <a class="way" href={`${iss}?template=add-source.yml`}>
-      <div class="lab">Most useful</div>
-      <b>A provider this map does not have</b>
-      <span>Especially a national or regional archive outside western Europe. The spine is
-      thin wherever this project has not personally researched.</span>
-    </a>
-    <a class="way" href={`${iss}?template=jurisdiction.yml`}>
-      <div class="lab">Rarest</div>
-      <b>A region's filing history</b>
-      <span>Which archive holds a piece of ground's records, for which years, under which
-      regime. This is the hardest thing to find and the thing this map is for.</span>
-    </a>
-    <a class="way" href={`${iss}?template=dead-link.yml`}>
-      <div class="lab">Always welcome</div>
-      <b>Something that has changed</b>
-      <span>A dead link, a portal that moved, a collection that went from free to paid. A
-      directory that lies is worse than no directory.</span>
-    </a>
-  </div>
-
-  <div class="prose k-prose" style="max-width:var(--measure);margin-top:34px">
-    <h3>Or send a pull request</h3>
+  <details class="add-fold">
+  <summary class="k-bar"><h2>Or send a pull request</h2><span class="k-pill is-plain">for editors</span></summary>
+  <div class="k-prose">
     <p>The files are small and hand-editable:</p>
     <ul>
       <li><code>data/providers.json</code> — who holds records, and what access costs</li>
@@ -210,6 +195,7 @@ const iss = site.repo + "/issues/new";
     tidy, but because a link with no date is a claim about the present made out of a memory
     of the past.</p>
   </div>
+  </details>
 </Base>
 
 <style>
@@ -258,16 +244,12 @@ const iss = site.repo + "/issues/new";
     .addgrid { grid-template-columns: 1fr; }
     .addbtns #af-send, .addbtns #af-copy, .addbtns #bf-send, .addbtns #bf-copy { flex: 1 1 100%; text-align: center; padding: 13px 18px; }
   }
-  .ways { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-          gap: 14px; margin-top: 22px; }
-  .way { display: block; padding: 16px 18px; border: 1px solid var(--rule);
-         border-left: 2px solid var(--accent); border-radius: 3px;
-         background: var(--panel); text-decoration: none; color: var(--ink); }
-  .way:hover { border-color: var(--accent); }
-  .way b { display: block; font-family: var(--serif); font-size: 18px;
-           font-weight: 500; margin: 6px 0 8px; }
-  .way span { font-family: var(--sans); font-size: 12.5px; line-height: 1.55;
-              color: var(--ink-3); }
+  .add-fold > summary { cursor: pointer; list-style: none; }
+  .add-fold > summary::-webkit-details-marker { display: none; }
+  .add-fold > summary h2::after { content: " ▾"; font-size: .6em; color: var(--ink-3); }
+  .add-fold[open] > summary h2::after { content: " ▴"; }
+  .way .k-ico { margin-bottom: 2px; }
+  .way .k-pill { align-self: flex-start; }
   code { font-family: var(--mono); font-size: 12.5px; background: var(--panel-2);
          padding: 1px 5px; border-radius: 2px; }
 </style>

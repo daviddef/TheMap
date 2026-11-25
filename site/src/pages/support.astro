@@ -19,55 +19,43 @@ const url = site.support?.url || "";
   eyebrow="Free to use, and free to keep"
   dek="What this project is, what it takes to keep it going, and what a gift does. Nothing on the atlas is locked, whether or not you give.">
 
-  <div class="k-hi">
-    <p>Record Atlas is free. It has no paywall, no account and no subscription, and that will not change.</p>
-    <p>It is kept going by one person. If it has saved you an evening, a gift of any size helps keep it going.</p>
+  <div class="sp-hero">
+    <div>
+      <p class="sp-big">Record Atlas is free. No paywall, no account, no subscription, and that will not change.</p>
+      <p class="sp-small">It is kept going by one person. If it has saved you an evening, a gift of any size helps.</p>
+    </div>
+    <p class="sp-cta"><a class="sp-btn" href={url} rel="noopener">Give a gift</a>
+      <span>You choose the amount. Paid on Stripe's own page; this site never sees your card.</span></p>
   </div>
 
-  <p class="sp-cta"><a class="sp-btn" href={url} rel="noopener">Give a gift</a>
-  <span>You choose the amount. Paid on Stripe's own page; this site never sees your card.</span></p>
+  <ul class="k-grid sp-stats" aria-label="The atlas in numbers">
+    <li class="k-card"><b>{dots.toLocaleString()}</b><span>places</span></li>
+    <li class="k-card"><b>{countries}</b><span>countries</span></li>
+    <li class="k-card"><b>{sources.toLocaleString()}</b><span>sources</span></li>
+    <li class="k-card"><b>Sept 2026</b><span>started</span></li>
+  </ul>
+  <p class="k-lede sp-lede">Each source is read, placed on the map, checked against the place's name in the year of the record, and marked with what it costs to look. Every figure is counted from the data, never typed, and a build that finds a gap stops rather than publishing it.</p>
 
-  <h2 class="k-h">How much work it is</h2>
-  <div class="k-stats" aria-label="The atlas in numbers">
-    <span><b>{dots.toLocaleString()}</b> places</span>
-    <span><b>{countries}</b> countries</span>
-    <span><b>{sources.toLocaleString()}</b> sources</span>
-    <span class="k-tag">started September 2026</span>
-  </div>
-  <div class="k-hi is-plain">
-    <p>Each source is read, placed on the map, checked against the place's name in the year of the record, and marked with what it costs to look.
-    Every figure on the atlas is counted from its data, never typed, and a build that finds a gap stops rather than publishing it.</p>
-    <p>Most of it is slow, careful reading: which archive holds a register, whether the images are free, what a place was called in 1890.</p>
-  </div>
-
-  <h2 class="k-h">About me</h2>
-  <div class="k-hi is-plain">
-    <p>I am David Defranceski. I research family history, mostly my own: the Defranceschi name, which runs from Istria and Dalmatia through Friuli to the Americas, and a few other families I have been asked to help with. I do it on my own, with no institution behind me.</p>
-  </div>
-
-  <h2 class="k-h">Why I built it</h2>
-  <div class="k-hi is-plain">
-    <p>Every family I worked on ran into the same wall: which archive holds the register for a village, whether its images are free to read, and what the place was called in the year of the record. I would spend an evening in a book and find that it had already been read, or that it was not the book its catalogue title claimed. I built the atlas so that what one search learns is kept for the next, whoever makes it.</p>
-  </div>
-
-  <h2 class="k-h">Why it is free</h2>
-  <div class="k-hi is-plain">
-    <p>Research that only people who can pay can find is research that gets repeated. A paywall would have broken the one thing the atlas is for: a stranger can find, on any evening, the register a family needs, and add what they learned back. I would rather it was used than earned from.</p>
-  </div>
-
-  <h2 class="k-h">What it costs to run</h2>
-  <ul class="k-tiles sp-tiles">
-    <li><b>Hosting</b><span>US$5 a month for Cloudflare's paid plan, which serves every page. It is billed per request once the site passes 10 million a month, so it grows as more people use it.</span></li>
-    <li><b>Records</b><span>Some sources sit behind a subscription. When a question cannot be answered from free records I take one out for a month, rather than keep it running.</span></li>
+  <div class="k-bar"><h2>About this</h2></div>
+  <ul class="k-grid sp-three">
+    <li class="k-card"><h3>About me</h3><p>I am David Defranceski. I research family history, mostly my own: the Defranceschi name, which runs from Istria and Dalmatia through Friuli to the Americas, and a few families I have been asked to help with. I do it on my own, with no institution behind me.</p></li>
+    <li class="k-card"><h3>Why I built it</h3><p>Every family I worked on hit the same wall: which archive holds the register for a village, whether its images are free, and what the place was called in the year of the record. I built the atlas so that what one search learns is kept for the next.</p></li>
+    <li class="k-card"><h3>Why it is free</h3><p>Research that only people who can pay can find is research that gets repeated. A paywall would have broken the one thing the atlas is for. I would rather it was used than earned from.</p></li>
   </ul>
 
-  <h2 class="k-h">What a gift does</h2>
+  <div class="k-bar"><h2>What it costs to run</h2></div>
+  <ul class="k-grid sp-two">
+    <li class="k-card"><h3>Hosting</h3><p>US$5 a month for Cloudflare's paid plan, which serves every page. It is billed per request once the site passes 10 million a month, so it grows as more people use it.</p></li>
+    <li class="k-card"><h3>Records</h3><p>Some sources sit behind a subscription. When a question cannot be answered from free records I take one out for a month, rather than keep it running.</p></li>
+  </ul>
+
+  <div class="k-bar"><h2>What a gift does</h2></div>
   <div class="k-hi is-plain">
-    <p>A gift goes first to the hosting bill, which grows if the atlas gets busy, and then to the occasional month of a records subscription when a question needs one.</p>
+    <p>A gift goes first to the hosting bill, then to the occasional month of a records subscription when a question needs one.</p>
     <p>A gift does not buy a feature, early access or a place in the queue. It keeps the atlas running and lets the work go on.</p>
   </div>
 
-  <p class="sp-cta"><a class="sp-btn" href={url} rel="noopener">Give a gift</a>
+  <p class="sp-cta sp-end"><a class="sp-btn" href={url} rel="noopener">Give a gift</a>
   <span>You choose the amount. Stripe handles the payment.</span></p>
 
   <div class="k-foot">
@@ -78,12 +66,26 @@ const url = site.support?.url || "";
 </Base>
 
 <style>
-  .sp-cta { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 4px 0 26px; }
-  .sp-cta span { font-size: 13px; color: var(--ink-3); }
-  .sp-btn { display: inline-block; background: var(--accent); color: #fff; font-weight: 600; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-size: 16px; }
-  .sp-btn:hover, .sp-btn:focus-visible { background: var(--accent-2); }
-  .sp-tiles { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); max-width: 980px; }
-  .sp-tiles li > span { display: block; }
-  .sp-tiles li b { font-family: var(--serif); font-size: 17px; font-weight: 500; color: var(--ink); }
-  .k-stats > span { white-space: nowrap; }
+  .sp-hero { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px 32px; align-items: center; padding: 26px 30px; border-radius: 24px; margin: 0 0 22px;
+    background: linear-gradient(135deg, var(--hue-wash), var(--panel)); border: 1px solid color-mix(in srgb, var(--hue) 28%, var(--rule)); }
+  .sp-big { font: 800 clamp(22px, 3vw, 32px)/1.2 var(--serif); letter-spacing: -.02em; max-width: 26ch; margin: 0; }
+  .sp-small { margin: 10px 0 0; font-size: 15px; color: var(--ink-2); max-width: 46ch; }
+  .sp-cta { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin: 0; }
+  .sp-cta span { font-size: 13px; color: var(--ink-2); max-width: 26ch; line-height: 1.4; }
+  .sp-btn { display: inline-block; background: var(--hue-solid); color: var(--on-hue); font-weight: 800; text-decoration: none; padding: 14px 30px; border-radius: 999px; font-size: 17px; box-shadow: 0 12px 24px -12px var(--hue-solid); }
+  .sp-btn:hover, .sp-btn:focus-visible { filter: brightness(1.1); }
+  .sp-end { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 14px; margin: 22px 0 6px; }
+  .sp-end span { max-width: none; }
+  .sp-stats { grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr)); }
+  .sp-stats .k-card { padding: 12px 14px; gap: 2px; border-radius: 16px; }
+  .sp-stats b { font: 800 clamp(22px, 2.6vw, 30px)/1.1 var(--serif); letter-spacing: -.02em; color: var(--hue-ink); }
+  .sp-stats span { font: 600 11px/1.3 var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
+  .sp-lede { margin: 14px 0 0; }
+  .sp-three, .sp-two { margin-bottom: 6px; }
+  .sp-three { grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
+  .sp-two { grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
+  .sp-three h3, .sp-two h3 { font-size: 20px; }
+  main .k-hi { max-width: none; border-radius: 18px; }
+  main .k-foot { max-width: none; border-radius: 18px; }
+  @media (max-width: 640px) { .sp-hero { grid-template-columns: 1fr; padding: 20px; } }
 </style>

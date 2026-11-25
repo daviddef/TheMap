@@ -14,15 +14,20 @@ const days = Object.entries(byDay).sort((a, b) => b[0].localeCompare(a[0]));
 <Base
   noindex
   title="What changed"
-  eyebrow={`${log.commits.length} commits · ${days.length} days`}
-  dek="Generated from the git history, not kept by hand — so it records what happened rather than what somebody remembered to write down. Every entry that names a bug names one of mine.">
+  eyebrow={`${log.commits.length} commits · ${days.length} ${days.length === 1 ? "day" : "days"}`}
+  dek="Generated from the git history, not kept by hand, so it records what happened. Every entry that names a bug names one of mine.">
+
+  <div class="k-search"><span class="k-ico" aria-hidden="true">🔎</span>
+    <label class="vh" for="cl-q">Filter the changes</label>
+    <input type="search" id="cl-q" autocomplete="off" spellcheck="false" placeholder="Filter the changes: a page, a word, a bug" />
+    <span class="cl-n" id="cl-n" role="status" aria-live="polite"></span></div>
 
   {days.map(([day, cs]) => (
-    <section style="margin-top:26px">
-      <h2>{day}</h2>
-      <ul class="log">
+    <section class="cl-day">
+      <div class="k-bar"><h2>{day}</h2><span class="k-count">{cs.length}</span></div>
+      <ul class="k-grid cl-log">
         {cs.map((c) => (
-          <li>
+          <li class="k-card cl-item">
             <a href={`${site.repo}/commit/${c.sha}`}><b>{c.subject}</b></a>
             {c.lead && <p>{c.lead}</p>}
           </li>
@@ -33,10 +38,32 @@ const days = Object.entries(byDay).sort((a, b) => b[0].localeCompare(a[0]));
 </Base>
 
 <style>
-  h2 { font-family: var(--mono); font-size: 13px; color: var(--ink-3); margin: 0;
-       border-bottom: 1px solid var(--rule); padding-bottom: 5px; }
-  .log { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 14px; }
-  .log > li > a { font-family: var(--serif); font-size: 17px; text-decoration: none; }
-  .log p { font-family: var(--sans); font-size: 12.5px; line-height: 1.6;
-           color: var(--ink-2); margin: 4px 0 0; max-width:var(--measure); }
+  .cl-n { font: 12px var(--mono); color: var(--ink-3); padding-right: 14px; white-space: nowrap; }
+  .cl-day[hidden], .cl-item[hidden] { display: none; }
+  .cl-day .k-bar h2 { font: 800 clamp(18px, 2.4vw, 22px)/1.2 var(--mono); letter-spacing: 0; }
+  .cl-log { grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); }
+  .cl-item { gap: 4px; border-radius: 16px; padding: 14px 16px; }
+  .cl-item > a { font: 800 17px/1.3 var(--serif); text-decoration: none; color: var(--ink); letter-spacing: -.01em; }
+  .cl-item > a:hover { color: var(--hue-ink); }
+  .cl-item p { font-size: 13px; }
 </style>
+
+<script is:inline>
+  (function () {
+    var q = document.getElementById("cl-q"), out = document.getElementById("cl-n");
+    if (!q) return;
+    var days = [].slice.call(document.querySelectorAll(".cl-day"));
+    q.addEventListener("input", function () {
+      var v = q.value.toLowerCase().trim(), n = 0;
+      days.forEach(function (d) {
+        var any = false;
+        [].forEach.call(d.querySelectorAll(".cl-item"), function (li) {
+          var hit = !v || li.textContent.toLowerCase().indexOf(v) >= 0;
+          li.hidden = !hit; if (hit) { any = true; n++; }
+        });
+        d.hidden = !any;
+      });
+      out.textContent = v ? n + " found" : "";
+    });
+  })();
+</script>

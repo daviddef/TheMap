@@ -30,7 +30,7 @@ const BASE_ = u("/");
   noindex
   title="My research"
   eyebrow="Kept in this browser · never sent anywhere"
-  dek="The volumes you have marked, the pages you did, and where to start again. This lives in this browser only — export it to keep it.">
+  dek="The volumes you have marked, the pages you did, and where to start again. Export it from Backup to keep it.">
 
   <link rel="stylesheet" href={u("/vendor/leaflet/leaflet.min.css")} />
   <script src={u("/vendor/leaflet/leaflet.min.js")} defer></script>
@@ -187,9 +187,8 @@ const BASE_ = u("/");
 
   <div class="rs-panel mr-panel" id="mr-p-fixes" role="tabpanel" aria-labelledby="mr-t-fixes" hidden>
     <h2 class="mr-h">GEDCOM research still to fix</h2>
-    <p class="cap">What the fix list in the <a href={BASE_ + "tree-canvas/"}>Tree Canvas</a> found in your family tree file, kept here so the work is part of your research.
-    It is kept automatically each time you open a tree in the Tree Canvas and its Fix list (switch <b>Remember my decisions on this device</b> off on the Fix list to stop). Places are listed as typed in your file; people are only counted,
-    and nothing leaves this browser. Open the file in the Tree Canvas to see who.</p>
+    <p class="cap">What the Fix list in the <a href={BASE_ + "tree-canvas/"}>Tree Canvas</a> found in your tree file, kept here as part of your research. Places are listed as typed; people are only counted, and nothing leaves this browser.
+    <details class="mr-more"><summary>How it is kept</summary>It is saved each time you open a tree and its Fix list. Switch <b>Remember my decisions on this device</b> off on the Fix list to stop.</details></p>
     <div id="mr-fixes"></div>
   </div>
 
@@ -1652,8 +1651,8 @@ const BASE_ = u("/");
   :global(.mrs-row) { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 12px 0 0; }
   :global(.mrs-btn) { display: inline-flex; align-items: center; padding: 6px 14px; border: 1px solid var(--rule-strong); border-radius: 999px; background: var(--bg); color: var(--ink-2); font: 600 13px var(--sans); text-decoration: none; cursor: pointer; }
   :global(.mrs-btn:hover) { border-color: var(--accent); color: var(--accent); }
-  :global(.mrs-pri) { background: var(--accent); border-color: var(--accent); color: #fff; }
-  :global(.mrs-pri:hover) { color: #fff; filter: brightness(1.08); }
+  :global(.mrs-pri) { background: var(--accent); border-color: var(--accent); color: var(--on-hue); }
+  :global(.mrs-pri:hover) { color: var(--on-hue); filter: brightness(1.08); }
   :global(.mrs-danger) { background: var(--brick, #b3452e); border-color: var(--brick, #b3452e); color: #fff; }
   :global(.mrs-link) { background: none; border: 0; padding: 0; font: 400 12.5px var(--sans); color: var(--ink-3); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
   :global(.mrs-link:hover) { color: var(--brick, #b3452e); }
@@ -1679,7 +1678,7 @@ const BASE_ = u("/");
   :global(.mre-steps) { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; }
   :global(.mre-step) { padding: 4px 12px; border: 1px solid var(--rule-strong); border-radius: 999px; background: var(--bg); color: var(--ink-2); font: 500 12.5px var(--sans); cursor: pointer; }
   :global(.mre-step:hover) { border-color: var(--accent); color: var(--accent); }
-  :global(.mre-on), :global(.mre-on:hover) { background: var(--accent); border-color: var(--accent); color: #fff; }
+  :global(.mre-on), :global(.mre-on:hover) { background: var(--accent); border-color: var(--accent); color: var(--on-hue); }
   :global(.mre-letter) { margin: 12px 0 0; }
   :global(.mre-letter > summary) { cursor: pointer; font: 600 13px var(--sans); color: var(--ink-2); }
   :global(.mre-lab) { display: grid; gap: 4px; margin: 10px 0 0; font: 600 12px var(--sans); color: var(--ink-3); }
@@ -1757,4 +1756,32 @@ const BASE_ = u("/");
   .mr-fx-foot { margin: 14px 0 0; } .mr-fx-foot .link { background: none; border: 0; padding: 0; margin-left: 4px; font: inherit; color: var(--accent, #245565); text-decoration: underline; cursor: pointer; }
   .mr-fx-empty { padding: 10px 0; } .mr-fx-go { display: inline-block; padding: 9px 16px; border-radius: 8px; background: var(--accent, #245565); color: #fff; font: 600 14px var(--sans); text-decoration: none; }
   @media (max-width: 560px) { .mr-fx-row { grid-template-columns: 1fr auto; } .mr-fx-bar { display: none; } }
+
+  /* ---- THE WOW LAYER: one gold hue, pill tabs, round cards (CSS only; the panels are drawn by scripts that keep their class names) ---- */
+  main .mr-tabs { gap: 8px; border: 0; margin: 20px 0 14px; padding: 0; flex-wrap: wrap; overflow: visible; }
+  main .mr-tabs .rs-tab { border: 1px solid var(--rule-strong); border-radius: 999px; padding: 10px 18px; margin: 0; font: 700 14.5px/1 var(--sans);
+    background: var(--panel); color: var(--ink-2); }
+  main .mr-tabs .rs-tab:hover { border-color: var(--hue); color: var(--hue-ink); background: var(--hue-wash); }
+  main .mr-tabs .rs-tab[aria-selected="true"] { background: var(--hue-solid); border-color: var(--hue-solid); color: var(--on-hue); }
+  main .mr-panel.rs-panel { grid-template-columns: minmax(0, 1fr); border-radius: 22px; border-top: 5px solid var(--hue); padding: 24px 26px; }
+  main .mr-panel .mr-h, main .mr-panel .mra-h3 { font-weight: 800; letter-spacing: -.02em; }
+  main .mr-panel .cap { color: var(--ink-2); }
+  main .mra-fig { gap: 12px; }
+  main .mra-fig li { border-radius: 16px; padding: 14px 16px; border-top: 4px solid var(--hue); box-shadow: 0 12px 24px -20px color-mix(in srgb, var(--hue) 70%, #000); }
+  main .mra-fig b { font: 800 34px/1 var(--serif); color: var(--ink); }
+  main .mra-chip { border-radius: 999px; }
+  main .mra-chip.is-on { border-color: var(--hue); background: var(--hue-wash); }
+  main .mra-link, main .mr-fx-foot .link { color: var(--hue-ink); }
+  main .mra-btn { border-radius: 999px; padding: 9px 16px; }
+  main .mra-btn:hover { border-color: var(--hue); color: var(--hue-ink); }
+  main .mra-place { border-left-color: var(--hue); }
+  main .mra-b.mra-once { border-color: var(--hue); color: var(--hue-ink); }
+  main .mr-fx { border-radius: 16px; border-left-width: 1px; border-top: 5px solid var(--hue); }
+  main .mr-fx-bar i { background: var(--hue); }
+  main .mr-fx-c.ok { color: var(--hue-ink); }
+  main .mr-fx-go { background: var(--hue-solid); color: var(--on-hue); border-radius: 999px; }
+  main .one.mrhow { display: block; max-width: 100%; box-sizing: border-box; border-radius: 16px; }
+  main .mrhowl { overflow-wrap: anywhere; }
+  .mr-more { display: block; margin-top: 8px; color: var(--ink-3); }
+  .mr-more > summary { cursor: pointer; font: 600 12.5px var(--mono); color: var(--hue-ink); }
 </style>

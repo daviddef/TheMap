@@ -252,7 +252,7 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
     inDefinedTermSet: { "@type": "DefinedTermSet", name: "Record Atlas surname dataset",
                         license: "https://creativecommons.org/publicdomain/zero/1.0/" },
   }}
-  title={r.n} eyebrow={ccs.map((c) => CN[c.cc] || c.cc).join(" · ")} dek={dek}>
+  title={r.n} eyebrow={ccs.length ? `${ccs.length} ${ccs.length === 1 ? "country" : "countries"}` : "A surname"} dek={dek}>
 
   {famNot && (
     <section style="margin-top:24px" class="fam famnotice">
@@ -264,9 +264,10 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
   {fam && (
     <section style="margin-top:8px" class="fam" id="spellings">
       <h2>The spellings of {fam.name}</h2>
-      <p class="cap">{fam.note} This is the one list the atlas keeps of which spellings are the same name, and what
+      <p class="cap">{fam.note}</p>
+      <details class="k-more"><summary><span class="k-mt">How this list works</span></summary><div><p class="cap">This is the one list the atlas keeps of which spellings are the same name, and what
       each rests on. Case, spacing, hyphens and apostrophes are not counted as separate spellings, so
-      <i> De Franceschi</i> and <i>Defranceschi</i> are one form. An accent is: a priest's Lereña is not a clerk's Lerena.</p>
+      <i> De Franceschi</i> and <i>Defranceschi</i> are one form. An accent is: a priest's Lereña is not a clerk's Lerena.</p></div></details>
       {famSearch.length > 1 && (
         <p class="famsearch"><b>Searching for this name?</b> Try every one of: {famSearch.join(" · ")}</p>
       )}
@@ -335,8 +336,8 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
       of the language, then one systematic substitution with both forms
       attested, then an algorithm's guess. */}
   {["curated", "grammar", "spelling"].map((how) => by[how] && (
-    <section style="margin-top:24px">
-      <h2>{TIER[how][0]}</h2>
+    <section>
+      <div class="k-bar"><h2>{TIER[how][0]}</h2></div>
       <p class="cap">{TIER[how][1]}</p>
       <p class="vars">{by[how].slice(0, 40).map((n) => (
         pageFor.has(slugify(n))
@@ -354,7 +355,7 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
       shut, counted, and labelled as unverified so that nobody takes one for a
       fact about the family. */}
   {by.sounds && (
-    <section style="margin-top:24px">
+    <section>
       <details class="soundsalike">
         <summary><b>{by.sounds.length.toLocaleString()} possible variants, unverified</b>
         <span class="cap" style="display:inline"> — names that only sound alike</span></summary>
@@ -369,8 +370,8 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
   )}
 
   {wd && (wd.lang || wd.kind || wd.after || wd.wiki) && (
-    <section style="margin-top:30px">
-      <h2>What Wikidata says this name is</h2>
+    <section>
+      <div class="k-bar"><h2>What Wikidata says this name is</h2></div>
       {/* ATTRIBUTED IN THE HEADING, NOT IN A FOOTNOTE.
           Every genealogy site on the web will tell you a surname's
           meaning and almost none will say who says so — «from the Latin
@@ -421,8 +422,8 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
   )}
 
   {wk && (wk.langs || wk.from || wk.etymon) && (
-    <section style="margin-top:30px">
-      <h2>What Wiktionary says this name is</h2>
+    <section>
+      <div class="k-bar"><h2>What Wiktionary says this name is</h2></div>
       {/* A SECOND SOURCE, SHOWN SEPARATELY ON PURPOSE.
           Wikidata's structured fields reach about a tenth of the names
           here and that is its ceiling; the Oxford Dictionary of Family
@@ -498,8 +499,8 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
     </section>
   )}
 
-  <section style="margin-top:30px">
-    <h2>On the map</h2>
+  <section>
+    <div class="k-bar"><h2>On the map</h2></div>
     {(mapCountries.length > 0 || placeMap || bemap) && (
       <SurnameMap
         label={`Map of ${r.n}: countries where it is attested${placePins.length ? ", and places of that name" : ""}`}
@@ -555,9 +556,9 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
   </section>
 
   {r.places && r.places.length > 0 ? (
-    <section style="margin-top:30px">
-      <h2>It is also the name of a place</h2>
-      <p class="cap">The places are drawn on the map above. A dot there is a settlement whose name is
+    <section>
+      <div class="k-bar"><h2>It is also the name of a place</h2></div>
+      <details class="k-more"><summary><span class="k-mt">What a place of this name does and does not say</span></summary><div><p class="cap">The places are drawn on the map above. A dot there is a settlement whose name is
       this surname, sized by its population — <b>not</b> a claim that anybody of the name lives there.
       Phonetic neighbours are listed below but not drawn: putting a machine's guess on the ground would
       dress it up as geography.</p>
@@ -565,7 +566,7 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
       is also a place name often came from it — and often did not: plenty are occupations or
       patronymics that happen to collide with a place, and plenty of places are named after a
       family rather than the other way round. It is a fact with a source, which is more than
-      an etymology page offers.</p>
+      an etymology page offers.</p></div></details>
       <ul class="vols" style="margin-top:12px">
         {r.places.map((pl) => (
           <li>
@@ -579,8 +580,8 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
       </ul>
     </section>
   ) : (
-    <section style="margin-top:30px">
-      <h2>Where it came from</h2>
+    <section>
+      <div class="k-bar"><h2>Where it came from</h2></div>
       <p class="cap">No place of this name is in the gazetteer, so <b>this map says nothing
       about where the name came from</b>. Search a surname anywhere else and you will be told
       an origin — that it is Latin, or Italian, or means «joyful». That is etymology, it is
@@ -595,15 +596,15 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
       name is attested in Croatia wants to know it in one place: how the
       atlas knows, who holds the paper, and which of that paper is worth a
       Saturday. */}
-  <section style="margin-top:34px">
-    <h2>Country by country</h2>
-    <p class="cap">Each country below can carry up to three different kinds of evidence, and
+  <section>
+    <div class="k-bar"><h2>Country by country</h2></div>
+    <details class="k-more"><summary><span class="k-mt">How to read the three kinds of evidence</span></summary><div><p class="cap">Each country below can carry up to three different kinds of evidence, and
     none of them is the same claim. A <b>register</b> is a head-count — a state counted these
     people. A <b>record</b> is one document naming the surname on that ground, narrower
     evidence and often much older. And a <b>volume overlapping these dates</b> is a document
     from the right place and years — never a document known to name this surname. None of the
     three ever means the name exists in that country and nowhere else, or that it exists
-    nowhere but here.</p>
+    nowhere but here.</p></div></details>
 
     {countryBlocks.map(({ c, flag, src, decades, vol, enumerableSrc }) => (
       <div class="cblock">
@@ -702,8 +703,8 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
   </section>
 
   {frCurve && (
-    <section style="margin-top:34px">
-      <h2>When it was being born, in France</h2>
+    <section>
+      <div class="k-bar"><h2>When it was being born, in France</h2></div>
       <p class="cap">INSEE counts <b>births</b> by surname and decade from the état civil,
       1891 to 2000 — the only dated evidence in this dataset. A name that starts at zero and
       climbs arrived; a name that falls to nothing left, died out, or emigrated, and the
@@ -725,9 +726,9 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
   )}
 
   {jurShown.length > 0 && (
-    <section style="margin-top:34px">
-      <h2>Whose archive held that ground, and when</h2>
-      <p class="cap">Every surname site can tell you a name is common somewhere. This one
+    <section>
+      <div class="k-bar"><h2>Whose archive held that ground, and when</h2></div>
+      <details class="k-more"><summary><span class="k-mt">About this ground, and what it is not</span></summary><div><p class="cap">Every surname site can tell you a name is common somewhere. This one
       also knows <b>which filing system held that ground in which years</b> — and those are
       the two halves of one question: my people were called this, they were there, so who
       has the paper, and for which century. A name in Croatia before 1881 may sit in a
@@ -738,7 +739,7 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
       pieces of a country this atlas has drawn, which in a large one may be a corner of
       it — Acadia reaches into Maine and is not a statement about the United States,
       and Bohemia's ground crosses into Poland. Each region's own page says which ground
-      it covers. Where a country is missing below, nothing covers it yet.</p>
+      it covers. Where a country is missing below, nothing covers it yet.</p></div></details>
       {jurShown.map((g) => (
         <div style="margin-top:16px">
           <div class="lab"><a href={u(`/country/${g.cc.toLowerCase()}/`)}>{CN[g.cc] || g.cc}</a></div>
@@ -780,25 +781,25 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
 <style>
   /* The catalogue of spellings. Ordered by what the evidence is worth, and
      quiet: a list of forms with a disclosure under each, not a table. */
-  .fam { background: var(--panel); border: 1px solid var(--rule); border-radius: 3px;
+  .fam { background: var(--panel); border: 1px solid var(--rule); border-top: 6px solid var(--hue, var(--accent)); border-radius: 22px;
          padding: 24px 26px 22px; }
   .fam > h2 { font-size: clamp(22px, 2.6vw, 28px); margin: 0; }
   .fam > .cap { font-size: 13.5px; line-height: 1.6; color: var(--ink-2); max-width:var(--measure); margin-top: 8px; }
-  .fam h3 { font-family: var(--sans); font-size: 10.5px; font-weight: 600; letter-spacing: .14em;
-            text-transform: uppercase; margin: 0; color: var(--brass); }
+  .fam h3 { display: inline-flex; font-family: var(--sans); font-size: 11.5px; font-weight: 700; letter-spacing: .08em;
+            text-transform: uppercase; margin: 0; padding: 5px 12px; border-radius: 999px; color: var(--hue-ink); background: var(--hue-wash); }
   .famgroup { margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--rule); }
   .famgroup > .cap { margin-top: 4px; }
   .famsearch { font-family: var(--sans); font-size: 13.5px; line-height: 1.6; margin: 16px 0 0;
                padding: 10px 14px; background: var(--accent-wash); color: var(--ink);
-               border-left: 3px solid var(--accent); border-radius: 0 3px 3px 0; }
+               border-left: 5px solid var(--hue, var(--accent)); border-radius: 14px; }
   .famlist, .fev { list-style: none; padding: 0; margin: 12px 0 0; }
   .famlist { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
   .famlist > li { padding: 12px 14px; background: var(--ground); border: 1px solid var(--rule);
-                  border-radius: 3px; transition: border-color .15s; }
+                  border-radius: 16px; transition: border-color .15s; }
   .famlist > li:hover { border-color: var(--rule-strong); }
-  .famlist > li.here { border-color: var(--accent); background: var(--accent-wash); }
+  .famlist > li.here { border-color: var(--hue, var(--accent)); background: var(--hue-wash); }
   .famlist > li:has(details[open]) { grid-column: 1 / -1; }
-  .famlist > li > b { font-family: var(--serif); font-size: 20px; font-weight: 500; line-height: 1.2; }
+  .famlist > li > b { font-family: var(--serif); font-size: 21px; font-weight: 800; letter-spacing: -.01em; line-height: 1.2; }
   .famlist a { text-decoration: none; color: var(--accent); }
   .famlist a:hover { text-decoration: underline; }
   .famlist .typed { display: block; font-family: var(--sans); font-size: 12px; line-height: 1.45;
@@ -814,8 +815,8 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
   .fev { margin: 6px 0 2px; }
   .fev li { padding: 4px 0; line-height: 1.55; max-width:var(--measure); color: var(--ink-2); }
   .fev .who { color: var(--ink-3); }
-  .famnot, .famlead { margin-top: 18px; padding: 10px 14px; background: var(--ground);
-                      border: 1px solid var(--rule); border-radius: 3px; }
+  .famnot, .famlead { margin-top: 18px; padding: 10px 16px; background: var(--ground);
+                      border: 1px solid var(--rule); border-radius: 16px; }
   .famlead > .cap, .famnot > .cap { margin-top: 6px; }
   .famlead summary b, .famnot summary b { color: var(--ink); }
   .famlead summary .cap, .famnot summary .cap { margin: 0; color: var(--ink-3); }
@@ -842,35 +843,36 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
      twice the way styles.css does it: once for the media query and once
      for an explicit [data-theme="dark"], because this site has a toggle
      as well as a system preference. */
-  h2 { font-family: var(--serif); font-size: 24px; font-weight: 500; margin: 0 0 4px; }
   .vars { display: flex; flex-wrap: wrap; gap: 6px 8px; font-family: var(--serif); font-size: 17px; margin: 12px 0 0; }
-  .vars b { font-weight: 500; white-space: nowrap; padding: 2px 12px; background: var(--panel);
-            border: 1px solid var(--rule); border-radius: 999px; }
+  .vars b { font-weight: 600; white-space: nowrap; padding: 3px 14px; background: var(--hue-wash);
+            border: 1px solid color-mix(in srgb, var(--hue, var(--accent)) 28%, transparent); border-radius: 999px; }
   .vars a { display: flex; text-decoration: none; color: var(--accent); }
   .vars b { line-height: 1.5; }
-  .vars a:hover b { border-color: var(--accent); }
-  .soundsalike { padding: 10px 14px; background: var(--panel); border: 1px solid var(--rule); border-radius: 3px; }
+  .vars a:hover b { border-color: var(--hue, var(--accent)); }
+  .soundsalike { padding: 10px 16px; background: var(--panel); border: 1px solid var(--rule); border-radius: 16px; }
   .soundsalike summary { cursor: pointer; font-family: var(--sans); font-size: 13.5px; }
-  .bigl { font-family: var(--serif); font-size: 19px; }
+  .bigl { display: inline-flex; align-items: center; padding: 13px 24px; border-radius: 999px; background: var(--hue-solid, var(--accent));
+          color: var(--on-hue, #fff); font: 700 17px/1.2 var(--sans); text-decoration: none; }
+  .bigl:hover { filter: brightness(1.1); }
   td { vertical-align: top; }
   .curve { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 4px; }
   .curve li { display: grid; grid-template-columns: 92px 1fr 68px; align-items: center;
               gap: 10px; font-family: var(--mono); font-size: 12px; }
   .curve .d { color: var(--ink-3); }
-  .curve .bar { height: 11px; background: var(--accent); opacity: .72; min-width: 1px;
-                border-radius: 1px; }
+  .curve .bar { height: 11px; background: var(--hue, var(--accent)); opacity: .8; min-width: 1px;
+                border-radius: 6px; }
   .curve .n { text-align: right; color: var(--ink-2); }
   /* One block per attested country — same flag treatment as surnames.astro's
      own country list, so a flag beside a name means the same thing on both
      pages. */
-  .cblock { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--rule); }
-  .cblock:first-of-type { margin-top: 18px; padding-top: 0; border-top: 0; }
-  .cblock h3 { font-family: var(--serif); font-size: 21px; font-weight: 500;
+  .cblock { margin-top: 14px; padding: 16px 20px 18px; background: var(--panel); border: 1px solid var(--rule);
+            border-top: 5px solid var(--hue, var(--accent)); border-radius: 18px; }
+  .cblock h3 { font-family: var(--serif); font-size: 24px; font-weight: 800; letter-spacing: -.015em;
                margin: 0 0 6px; }
   .cblock h3 a { text-decoration: none; }
   .cblock h3 a:hover { text-decoration: underline; }
   .ctop { margin-top: 0; }
   .ccflag { width: 22px; height: auto; vertical-align: -4px; margin-right: 8px;
-    border: 1px solid var(--rule); border-radius: 1px; }
-  .cflag-l:hover .ccflag { border-color: var(--accent); }
+    border-radius: 4px; box-shadow: 0 0 0 1px var(--rule); }
+  .cflag-l:hover .ccflag { box-shadow: 0 0 0 2px var(--hue, var(--accent)); }
 </style>

@@ -407,6 +407,25 @@ const WRAPPER = `
 .flagpage .country-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));gap:16px}
 .flagpage details.about{margin-top:44px;border:1px solid var(--rule);border-radius:20px;background:var(--panel);padding:8px 22px}
 .flagpage details.about summary{cursor:pointer;font:600 16px/1.3 var(--sans);padding:10px 0}
+/* THE COUNTRY AND HUB PAGES, THE SAME WAY: the breadcrumb a pill, the era cards rounded with the part's colour along the top, the tags
+   as pills, the headings with the same bar as every other page, the buttons solid in the one hue. Calm: one hue, plain pills. */
+.flagpage .breadcrumb{margin:0 0 18px;text-transform:none;letter-spacing:0;font-family:var(--sans)}
+.flagpage .breadcrumb a{display:inline-flex;align-items:center;padding:6px 14px;border-radius:999px;border:1px solid var(--rule-strong);background:var(--panel);color:var(--ink-2);font:500 13px/1.2 var(--sans);text-decoration:none}
+.flagpage .breadcrumb a:hover{color:var(--hue-ink);border-color:var(--hue,var(--brick));background:var(--hue-wash)}
+.flagpage .scope-note,.flagpage .imap-section .rule-box,.flagpage .record-links,.flagpage .record-region,.flagpage .link-card,.flagpage .evidence-sum{border-radius:18px;background:var(--panel);border-color:var(--rule)}
+.flagpage .card{border-radius:22px;border:1px solid var(--rule);border-top:6px solid var(--hue,var(--brick));background:var(--panel)}
+.flagpage .card-dates{font:700 12px/1.2 var(--mono);letter-spacing:.04em;color:var(--hue-ink)}
+.flagpage .card-title{font-weight:800;letter-spacing:-.02em}
+.flagpage .entry::before{background:var(--hue-solid,var(--brick));outline-color:var(--hue,var(--brick))}
+.flagpage .tag{font:600 12px/1.25 var(--sans);letter-spacing:0;text-transform:none;padding:4px 11px;border-radius:999px;background:var(--ground);color:var(--ink-2);border-color:var(--rule-strong)}
+.flagpage .tag:hover,.flagpage .tag:focus-visible,.flagpage .tag.tip-open{border-color:var(--hue,var(--brick));color:var(--ink)}
+.flagpage .flag-box svg{border-radius:8px}
+.flagpage details.paint{border-radius:0 0 22px 22px}
+.flagpage details.paint>summary{font:600 13px/1.3 var(--sans);letter-spacing:0;text-transform:none;color:var(--hue-ink)}
+.flagpage .imap-section h2,.flagpage .legend h2,.flagpage .roadmap h2,.flagpage .record-links h2{display:flex;align-items:center;gap:12px;font-size:clamp(20px,2.6vw,26px);font-weight:800;letter-spacing:-.02em}
+.flagpage .imap-section h2::before,.flagpage .legend h2::before,.flagpage .roadmap h2::before,.flagpage .record-links h2::before{content:"";flex:none;width:8px;height:26px;border-radius:6px;background:var(--hue,var(--brick))}
+.flagpage .record-cta{font:700 13px/1.2 var(--sans);letter-spacing:0;text-transform:none;border-radius:999px;border:0;background:var(--hue-solid,var(--brick));color:var(--on-hue,#fff);padding:9px 16px}
+.flagpage .record-cta:hover{background:var(--hue-solid,var(--brick));color:var(--on-hue,#fff);filter:brightness(1.1)}
 `;
 
 /* AND THE SAME ADDRESSES INSIDE THE SCRIPTS. The index does not write its 210

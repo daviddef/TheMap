@@ -80,11 +80,16 @@ const itemHref = (it) => it.q === "s" ? (pageFor.has(slugForSurname(it.t)) ? u(`
 <Base
   title="What's new"
   eyebrow="Fresh from the workbench"
-  dek="Thanks for stopping by. Here is what I have been tinkering with lately: new sources, fixes, and small things that make the atlas nicer to use. Open a line to see what changed and where it came from. Newest first."
+  dek="New sources, fixes and small things that make the atlas nicer to use. Open a line to see what changed. Newest first."
   description="Recent improvements to Record Atlas: new sources, new pages and fixes, newest first.">
 
+  <div class="k-search wn-search"><span class="k-ico" aria-hidden="true">🔎</span>
+    <label class="vh" for="wn-q">Search what is new</label>
+    <input type="search" id="wn-q" autocomplete="off" spellcheck="false" placeholder="Search what is new: a place, a page, a word" />
+    <span class="wn-n" id="wn-n" role="status" aria-live="polite"></span></div>
+
   <p class="tally" aria-label="Summary and filters">
-    <span><b>{entries.length}</b> things since {part(days[days.length - 1][0], { day: "numeric", month: "long" })}</span>
+    <span class="wn-total"><b>{entries.length}</b> things since {part(days[days.length - 1][0], { day: "numeric", month: "long" })}</span>
     {["new", "better", "fixed", "research"].map((k) => count(k) > 0 && (
       <button type="button" class={`chip ${k}`} data-f={k} aria-pressed="false"><i aria-hidden="true">{KINDS[k].glyph}</i> {count(k)} {KINDS[k].label.toLowerCase()}</button>
     ))}
@@ -203,17 +208,23 @@ const itemHref = (it) => it.q === "s" ? (pageFor.has(slugForSurname(it.t)) ? u(`
     (function () {
       var pills = [].slice.call(document.querySelectorAll(".tally [data-f]")), clear = document.getElementById("wn-clear");
       var items = [].slice.call(document.querySelectorAll(".item")), daysEl = [].slice.call(document.querySelectorAll(".day"));
-      var on = null;
+      var on = null, qEl = document.getElementById("wn-q"), nEl = document.getElementById("wn-n"), text = "";
+      var hay = items.map(function (i) { return i.textContent.toLowerCase(); });
       function apply() {
-        items.forEach(function (i) {
-          i.hidden = !!on && !(on === "src" ? i.getAttribute("data-src") === "1" : i.getAttribute("data-kind") === on);
+        var shown = 0;
+        items.forEach(function (i, ix) {
+          var kindOk = !on || (on === "src" ? i.getAttribute("data-src") === "1" : i.getAttribute("data-kind") === on);
+          i.hidden = !(kindOk && (!text || hay[ix].indexOf(text) >= 0));
+          if (!i.hidden) shown++;
         });
+        if (nEl) nEl.textContent = text || on ? shown + " shown" : "";
         daysEl.forEach(function (d) { d.hidden = !d.querySelector(".item:not([hidden])"); });
         pills.forEach(function (p) { p.setAttribute("aria-pressed", p.getAttribute("data-f") === on ? "true" : "false"); });
-        clear.hidden = !on;
+        clear.hidden = !on && !text;
       }
+      if (qEl) qEl.addEventListener("input", function () { text = qEl.value.toLowerCase().trim(); apply(); });
       pills.forEach(function (p) { p.addEventListener("click", function () { var f = p.getAttribute("data-f"); on = on === f ? null : f; apply(); }); });
-      clear.addEventListener("click", function () { on = null; apply(); });
+      clear.addEventListener("click", function () { on = null; text = ""; if (qEl) qEl.value = ""; apply(); });
       if (location.hash === "#sources") { on = "src"; apply(); }
     })();
   </script>
@@ -231,19 +242,20 @@ const itemHref = (it) => it.q === "s" ? (pageFor.has(slugForSurname(it.t)) ? u(`
 </Base>
 
 <style>
-  .tally { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 0 0 26px;
+  .tally { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 0 0 28px;
            font-size: 14px; color: var(--ink-2); }
   .tally b { color: var(--ink); }
 
-  .chip { display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono);
-          font-size: 11px; letter-spacing: .06em; text-transform: uppercase; line-height: 1;
-          padding: 4px 8px 4px 7px; border-radius: 999px; border: 1px solid var(--rule-strong);
+  .wn-n { font: 12px var(--mono); color: var(--ink-3); padding-right: 14px; white-space: nowrap; }
+  .wn-total { font-weight: 500; }
+  .chip { display: inline-flex; align-items: center; gap: 5px; font-family: var(--sans);
+          font-size: 12.5px; font-weight: 600; line-height: 1.2;
+          padding: 5px 12px 5px 10px; border-radius: 999px; border: 1px solid var(--rule-strong);
           color: var(--ink-2); background: var(--panel, transparent); white-space: nowrap; }
   .chip i { font-style: normal; font-size: 12px; }
-  .chip.new { color: var(--accent); border-color: var(--accent); background: var(--accent-wash); }
+  .chip.new { color: var(--hue-ink); border-color: color-mix(in srgb, var(--hue) 40%, transparent); background: var(--hue-wash); }
   .chip.fixed { color: var(--ink); }
   .chip.src { color: var(--ink); }
-  .chip.research { color: #1E6B3C; border-color: #1E6B3C; }
   .rday { min-width: 0; flex: 1; } .rday summary { cursor: pointer; }
   /* a line you can open: what changed, the items, and where it came from */
   .wn-d > summary { cursor: pointer; list-style: none; } .wn-d > summary::-webkit-details-marker { display: none; }
@@ -280,7 +292,7 @@ const itemHref = (it) => it.q === "s" ? (pageFor.has(slugForSurname(it.t)) ? u(`
   .xfoot { margin: 8px 0 0; font: 12.5px var(--sans); color: var(--ink-3); }
   @media (max-width: 640px) { .xrow { grid-template-columns: minmax(0, 1fr) auto; } .xp { grid-column: 1; } .xn { grid-column: 2; grid-row: 2; } }
   .rtally { font: 500 13px var(--sans); color: var(--ink-2); white-space: nowrap; }
-  .rpanel { margin: 0 0 24px; padding: 14px 18px; border: 1px solid var(--rule); border-radius: 10px; background: var(--panel, transparent); }
+  .rpanel { margin: 0 0 24px; padding: 14px 18px; border: 1px solid var(--rule); border-radius: 18px; background: var(--panel, transparent); }
   .rpanel summary { cursor: pointer; display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; font-family: var(--serif); font-size: 17px; }
   .rpanel summary span { font: 13px var(--sans); color: var(--ink-2); }
   .rfam { list-style: none; margin: 12px 0 0; padding: 0 8px 0 0; display: grid; gap: 0; max-height: 26rem; overflow-y: auto; }
@@ -290,39 +302,40 @@ const itemHref = (it) => it.q === "s" ? (pageFor.has(slugForSurname(it.t)) ? u(`
   .rfam .rs { grid-column: 1 / -1; color: var(--ink-2); font-size: 12.5px; }
   @media (max-width: 640px) { .rfam li { grid-template-columns: 1fr; } .rfam .rp { grid-column: 1; grid-row: auto; } }
 
-  button.chip { cursor: pointer; font: inherit; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
-  button.chip:hover { border-color: var(--accent); }
-  button.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .clear { background: none; border: 0; padding: 0; font: 13px var(--sans); color: var(--accent); text-decoration: underline; cursor: pointer; }
+  button.chip { cursor: pointer; font-family: var(--sans); font-size: 12.5px; }
+  button.chip:hover { border-color: var(--hue); color: var(--hue-ink); }
+  button.chip[aria-pressed="true"] { background: var(--hue-solid); border-color: transparent; color: var(--on-hue); }
+  .clear { background: none; border: 0; padding: 0; font: 13px var(--sans); color: var(--hue-ink); text-decoration: underline; cursor: pointer; }
+  .wn-search { margin: 0 0 14px; }
   .item[hidden], .day[hidden], .clear[hidden] { display: none !important; }
 
   /* The timeline: a rule down the left, a date on it, a card per change. */
   .line { list-style: none; margin: 0; padding: 0; position: relative; }
   .line::before { content: ""; position: absolute; left: 41px; top: 6px; bottom: 6px;
-                  width: 2px; background: var(--rule); }
+                  width: 3px; border-radius: 3px; background: color-mix(in srgb, var(--hue) 30%, var(--rule)); }
   .day { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 0 18px; padding-bottom: 22px; }
   .when { position: relative; display: flex; flex-direction: column; align-items: center;
           line-height: 1.05; padding-top: 2px; background: var(--ground, var(--bg, transparent)); align-self: start; }
-  .when b { font-family: var(--serif); font-size: 30px; font-weight: 700; color: var(--ink); }
-  .when span { font-family: var(--mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-top: 2px; }
+  .when b { font-family: var(--serif); font-size: 32px; font-weight: 800; color: var(--ink); }
+  .when span { font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--hue-ink); margin-top: 2px; }
   .when em { font-style: normal; font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin-top: 2px; }
 
   .items { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-  .item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px;
-          background: var(--panel, transparent); border: 1px solid var(--rule); border-radius: 10px;
+  .item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px;
+          background: var(--panel, transparent); border: 1px solid var(--rule); border-left: 5px solid color-mix(in srgb, var(--hue) 55%, var(--rule)); border-radius: 16px;
           transition: border-color .15s, transform .15s; }
-  .item:hover { border-color: var(--accent); transform: translateX(2px); }
+  .item:hover { border-color: var(--hue); transform: translateX(2px); box-shadow: 0 12px 26px -20px var(--hue); }
   .item .chip { flex: none; margin-top: 3px; min-width: 76px; justify-content: center; }
-  .head { font-family: var(--serif); font-size: 17px; line-height: 1.45; color: var(--ink);
+  .head { font-family: var(--serif); font-size: 17.5px; font-weight: 600; line-height: 1.45; color: var(--ink);
           text-decoration: none; max-width:var(--measure); }
   a.head { color: var(--ink); }
-  a.head:hover { color: var(--accent); }
-  .go { color: var(--accent); white-space: nowrap; }
+  a.head:hover { color: var(--hue-ink); }
+  .go { color: var(--hue-ink); white-space: nowrap; }
 
-  .foot { margin-top: 10px; padding: 18px 20px; border-radius: 12px; background: var(--accent-wash);
+  .foot { margin-top: 10px; padding: 18px 20px; border-radius: 18px; background: var(--hue-wash);
           border: 1px solid var(--rule); max-width:var(--measure); }
   .warm { margin: 0 0 6px; font-family: var(--serif); font-size: 18px; line-height: 1.45; color: var(--ink); }
-  .foot .cap { margin: 0; }
+  .foot .cap { margin: 0; color: var(--ink-2); }
 
   @media (prefers-reduced-motion: reduce) { .item { transition: none; } .item:hover { transform: none; } }
 

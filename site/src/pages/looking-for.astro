@@ -10,9 +10,9 @@ const target = u("/read/#story");
 <Base
   title="Tell us who you're looking for"
   eyebrow="This page has moved"
-  dek="It is part of the story page now: say who, from where, to where and when, and the page asks for what is missing."
+  dek="It is part of the story page now. Say who you are looking for, and the page asks for what is missing."
   noindex>
-  <p><a href={target}><b>Go to the story page →</b></a></p>
+  <a class="k-card lf-go" href={target}><span class="k-ico" aria-hidden="true">✎</span><h3>Go to the story page →</h3><p>Say who, from where, to where and when.</p></a>
   <script is:inline src={u("/js/story-link.js")}></script>
   <script is:inline define:vars={{ target }}>
     (function () {
@@ -22,3 +22,8 @@ const target = u("/read/#story");
     })();
   </script>
 </Base>
+
+<style>
+  .lf-go { max-width: 420px; align-items: flex-start; }
+  .lf-go h3 { font-size: 22px; }
+</style>

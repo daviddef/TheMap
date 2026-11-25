@@ -27,16 +27,16 @@ const c = errands.counts;
   noindex
   title="Errands"
   eyebrow={`${c.letters} letters · ${c.drafted} drafted and unsent`}
-  dek="Some gaps in this atlas cannot be closed by reading. The data is not published, or the server that published it has gone down, or the archive has told crawlers no — and the honest remaining move is to ask a person."
+  dek="Some gaps cannot be closed by reading: the data is not published, the server is down, or the archive has told crawlers no. The honest move is to ask a person."
   description="Letters this atlas has drafted to close the gaps reading cannot: the exact words, and which of them have gone.">
   {/* The count is in the eyebrow; repeating it here was the same sentence twice. */}
-  <p class="k-stats" aria-label="Summary">
-    <span><b>{c.letters}</b> letters</span>
-    <span class="k-tag is-new">{c.drafted} drafted, unsent</span>
-  </p>
-  <div class="k-hi">
-    <p>Some questions can only be answered by asking a person. Here are the letters, written out in full.</p>
-    <p>Sending one is David's decision, always, and the date it went is recorded beside it afterwards. The text is read from <code>requests/</code> in the repository and never retyped here, so what you read is what was sent.</p>
+  <ul class="k-pills er-pills" aria-label="Summary">
+    <li><span class="k-pill"><b>{c.letters}</b> letters</span></li>
+    <li><span class="k-pill is-solid">{c.drafted} drafted, unsent</span></li>
+  </ul>
+  <div class="k-hi er-hi">
+    <p>Sending one is David's decision, always, and the date it went is recorded beside it afterwards.</p>
+    <p>The text is read from <code>requests/</code> in the repository and never retyped here, so what you read is what was sent.</p>
   </div>
   <Errands groups={errands.groups} u={u} />
   <aside class="k-foot">
@@ -44,3 +44,19 @@ const c = errands.counts;
     <p>This atlas does not work around a bot gate, and it does not read a sibling host to get what a named host refused. Where that leaves a question unanswered, the question goes here instead of quietly disappearing. See <a href={u("/worklist/")}>what is still missing</a>.</p>
   </aside>
 </Base>
+
+<style is:global>
+  .er-pills { margin: 0 0 18px; }
+  .er-pills .k-pill { font-size: 14px; padding: 6px 14px; }
+  main .er-hi { max-width: none; border-radius: 18px; }
+  main .er .er-g { margin-top: 26px; }
+  main .er .er-lab { font: 800 clamp(22px, 3vw, 28px)/1.2 var(--serif); letter-spacing: -.02em; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+  main .er .er-lab::before { content: ""; flex: none; width: 8px; height: 28px; border-radius: 6px; background: var(--hue); }
+  main .er .er-row { max-width: none; border-radius: 18px; border-top: 5px solid var(--hue); }
+  main .er .er-row h3 { font-weight: 800; letter-spacing: -.01em; }
+  main .er .er-n { font-weight: 700; }
+  main .er .er-draft summary { color: var(--hue-ink); }
+  /* the tag's colour comes from the row as an inline style (a state colour that is 2.6:1 on the dark panel); the words say the state, so it takes the page's own ink */
+  main .er .er-tag { color: var(--hue-ink) !important; border-color: color-mix(in srgb, var(--hue) 55%, transparent) !important; }
+  main .k-foot { max-width: none; border-radius: 18px; }
+</style>

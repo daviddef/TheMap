@@ -36,25 +36,21 @@ const shardBase = u("/s/");
 const CN = idx.countries || {};
 ---
 <Base
-  title="Look up any surname"
-  eyebrow={`${total.toLocaleString()} names in the register · ${withPage.toLocaleString()} have a page of their own`}
-  dek="Type a name. This answers for every surname the registers here have counted, not only the ones with a page — and says plainly when it has never seen one.">
+  title="Look up a surname"
+  eyebrow={`${total.toLocaleString()} names · ${withPage.toLocaleString()} with a page`}
+  dek="Type a name. It answers for every surname a register here has counted, not only the ones with a page.">
 
-  <div class="one" style="margin-top:20px">
-    <label class="lab" for="ra-sq">The name, however it is spelled</label>
+  <label class="vh" for="ra-sq">The name, however it is spelled</label>
+  <div class="k-search"><span class="k-ico" aria-hidden="true">🔎</span>
     <input id="ra-sq" type="search" autocomplete="off" spellcheck="false"
            placeholder="Blažević · Peeters · Defranceski · Kosina"
-           aria-describedby="ra-sq-note" />
-    <p class="cap" id="ra-sq-note">Accents and case do not matter. The register is
-    sharded on the first three letters, so nothing is downloaded until you have
-    typed three.</p>
-  </div>
+           aria-describedby="ra-sq-note" /></div>
+  <p class="cap" id="ra-sq-note" style="margin:10px 4px 0">Accents and case do not matter. Type three letters and it answers.
+  Looking for spellings of one name? <a href={u("/your-name/?kind=surname")}>Names finds them all</a>.</p>
 
   <div id="ra-sout" aria-live="polite"></div>
 
-  <div class="one" style="margin-top:22px;border-left-color:var(--rule-strong)">
-    <div class="lab">Why most names have no page</div>
-    <p class="cap">A page is built for a name when this atlas knows something a
+  <details class="k-more" style="margin-top:22px"><summary><span class="k-mt">Why most names have no page of their own</span></summary><div><p class="cap">A page is built for a name when this atlas knows something a
     phone book does not — a spelling somebody linked by hand, a family archive
     that placed it in a country from documents, or three national registers
     agreeing. <b>{(total - withPage).toLocaleString()} names meet none of those</b>,
@@ -62,8 +58,7 @@ const CN = idx.countries || {};
     would be {Math.round(total / 1000).toLocaleString()},000 pages of one line,
     which is what a search engine calls a doorway and what a reader calls a
     waste of a click. They are answered here instead, from the same data, with
-    nothing invented to fill the space.</p>
-  </div>
+    nothing invented to fill the space.</p></div></details>
 </Base>
 
 <script is:inline define:vars={{ SHARD: shardBase, CN, BASE: u("/") }}>
@@ -103,8 +98,8 @@ const CN = idx.countries || {};
     function render(rows, term) {
       if (!rows.length) {
         out.innerHTML =
-          '<div class="one" style="margin-top:18px;border-left-color:#E8792B">' +
-          '<div class="lab">No register here has counted ' + esc(term) + "</div>" +
+          '<div class="k-card" style="margin-top:18px">' +
+          '<h3>No register here has counted ' + esc(term) + "</h3>" +
           '<p class="cap"><b>That is a statement about this atlas, not about the ' +
           "name.</b> The registers here cover some countries and not others — " +
           "several states publish no surname table at all, and a few that do " +
@@ -121,10 +116,10 @@ const CN = idx.countries || {};
           return (b.n || 0) - (a.n || 0); });
         var counted = ccs.filter(function (c) { return c.n != null; });
         var people = counted.reduce(function (a, c) { return a + c.n; }, 0);
-        h.push('<div class="one" style="margin-top:18px">');
-        h.push('<div class="lab">' + esc(r.n) +
-               (r.pg ? ' · <a href="' + BASE + "surname/" + slug(r.n) +
-                       '/">it has a page of its own →</a>' : "") + "</div>");
+        h.push('<div class="k-card" style="margin-top:18px">');
+        h.push("<h3>" + esc(r.n) + "</h3>" +
+               (r.pg ? '<p><a class="k-pill" href="' + BASE + "surname/" + slug(r.n) +
+                       '/">it has a page of its own →</a></p>' : ""));
         h.push("<p>" + (ccs.length
           ? "<b>Attested in " + ccs.length + (ccs.length === 1 ? " country" : " countries") +
             "</b>" + (people ? ", counting about " + people.toLocaleString() +

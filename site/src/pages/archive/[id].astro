@@ -18,6 +18,7 @@ export async function getStaticPaths() {
 }
 
 const { prov } = Astro.props;
+const host = (() => { try { return new URL(prov.url).hostname.replace(/^www\./, ""); } catch { return prov.url; } })();
 const ACC = {
   free: "Images, free, no account", account: "Images, free, account needed",
   index: "An index only — no images", mixed: "Partly free, partly paid",
@@ -69,21 +70,25 @@ const KIND = {
                      longitude: prov.at.lon } : undefined,
   }}
   title={prov.name}
-  eyebrow={[KIND[prov.kind], prov.at?.place, ACC[prov.access]].filter(Boolean).join(" · ")}
+  eyebrow={KIND[prov.kind] || "A source"}
   dek={brief(prov.what, 360)}>
 
-  <p style="margin-top:6px"><a class="bigl" href={prov.url} target="_blank" rel="noopener">{prov.url} ↗</a></p>
+  <ul class="k-pills" style="margin-top:6px">
+    <li><a class="bigl" href={prov.url} target="_blank" rel="noopener" title={prov.url}>Visit {host} ↗</a></li>
+    {prov.at?.place && <li class="k-pill is-plain">{prov.at.place}</li>}
+    {ACC[prov.access] && <li class="k-pill">{ACC[prov.access]}</li>}
+  </ul>
   {String(prov.what || "").length > 360 && (
-    <details class="more" style="margin-top:14px">
-      <summary>Everything recorded about this archive</summary>
-      <p class="what-full" style="max-width:78ch;line-height:1.6">{prov.what}</p>
+    <details class="k-more" style="margin-top:14px">
+      <summary><span class="k-mt">Everything recorded about this archive</span></summary>
+      <div><p class="what-full" style="line-height:1.6">{prov.what}</p></div>
     </details>
   )}
   <p class="cap">Last checked {prov.checked}. <a href={u("/add/")}>Tell us if this has changed.</a></p>
 
   {prov.holdings && prov.holdings.length > 0 && (
-    <section style="margin-top:32px">
-      <h2>What it holds</h2>
+    <section>
+      <div class="k-bar"><h2>What it holds</h2></div>
       {prov.holdingsNote && <p class="cap">{prov.holdingsNote}</p>}
       <ul class="vols" style="margin-top:12px">
         {prov.holdings.map((r) => (
@@ -98,8 +103,8 @@ const KIND = {
   )}
 
   {cited.length > 0 && (
-    <section style="margin-top:32px">
-      <h2>The ground it holds</h2>
+    <section>
+      <div class="k-bar"><h2>The ground it holds</h2></div>
       <p class="cap">Record regions whose registers are filed here, and for which years.</p>
       {cited.map(({ r, eras }) => (
         <div style="margin-top:16px">
@@ -116,8 +121,8 @@ const KIND = {
   )}
 
   {holds.length > 0 ? (
-    <section style="margin-top:34px">
-      <h2>{vols} volumes across {holds.length} places</h2>
+    <section>
+      <div class="k-bar"><h2>{vols} volumes across {holds.length} places</h2></div>
       <p class="cap">Places in this map that carry at least one volume from {prov.name}.</p>
       <ul class="places">
         {holds.slice(0, 400).map(({ p, n }) => (
@@ -127,33 +132,34 @@ const KIND = {
       {holds.length > 400 && <p class="cap">…and {holds.length - 400} more.</p>}
     </section>
   ) : (
-    <div class="one" style="margin-top:32px;border-left-color:var(--rule-strong)">
-      <div class="lab">What this map knows so far</div>
-      <p class="cap">{prov.name} is listed as covering
+    <div class="k-hi is-plain" style="margin-top:32px">
+      <p><b>What this map knows so far</b></p>
+      <p>{prov.name} is listed as covering
       {world ? " the world" : covers.map((cc, i) => (
         <>{i ? (i === covers.length - 1 ? " and " : ", ") : " "}<a href={u(`/country/${cc}/`)}>{CN[cc] || cc}</a></>
       ))}.
       No volume from it is placed on a map place yet. <b>That is a gap in this map, not a gap in the record.</b>
       Know a series or register it holds for a place? <a href={u("/add/")}>Tell us →</a></p>
       {near.length > 0 && (
-        <p class="cap">On this map near the archive's address (where it is, not a list of what it holds):
+        <p>On this map near the archive's address (where it is, not a list of what it holds):
           {near.map((p, i) => <>{i ? ", " : " "}<a href={u(`/place/${p.id}/`)}>{p.name}</a></>)}.</p>
       )}
     </div>
   )}
 
-  <p class="cap" style="margin-top:30px"><a href={u("/providers/")}>All sources</a> ·
-    <a href={u("/")}>The map</a></p>
+  <p class="k-pills" style="margin-top:30px"><a class="k-pill is-plain" href={u("/providers/")}>All sources</a>
+    <a class="k-pill is-plain" href={u("/")}>The map</a></p>
 </Base>
 
 <style>
-  h2 { font-family: var(--serif); font-size: 26px; font-weight: 500; margin: 0 0 6px; }
-  .bigl { font-family: var(--mono); font-size: 14px; word-break: break-all; }
+  .bigl { display: inline-flex; align-items: center; padding: 11px 20px; border-radius: 999px; background: var(--hue-solid, var(--accent));
+          color: var(--on-hue, #fff); font: 700 15px/1.2 var(--sans); text-decoration: none; }
+  .bigl:hover { filter: brightness(1.1); }
   .eras { list-style: none; padding: 0; margin: 6px 0 0; display: grid; gap: 4px; }
   .eras li { font-family: var(--sans); font-size: 12.5px; color: var(--ink-2); }
   .y { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); }
   .trap { color: #C0392B; font-style: normal; font-size: 11.5px; }
-  .places { list-style: none; padding: 0; margin: 12px 0 0;
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 3px; }
-  .places li { font-family: var(--sans); font-size: 13px; }
+  .places { list-style: none; padding: 0; margin: 12px 0 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .places li { font-family: var(--sans); font-size: 13px; padding: 5px 6px 5px 13px; background: var(--hue-wash); border: 1px solid color-mix(in srgb, var(--hue, var(--accent)) 26%, transparent); border-radius: 999px; }
+  .places li a { text-decoration: none; font-weight: 600; }
 </style>

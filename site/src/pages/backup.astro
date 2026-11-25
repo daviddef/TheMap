@@ -79,6 +79,7 @@ import ResearchSync from "../components/ResearchSync.astro";
     <section class="bk-card" id="canvas">
       <h2>Your Tree Canvas <small>saved in this browser, and carried by the same six words</small></h2>
       <p class="cap" data-th>The <a href={u("/tree-canvas/")}>Tree Canvas</a> keeps your work by itself. Each tree you open, whether from a link, a file on your device or one of the family archives, gets its own saved canvas in this browser, and it comes back when you open the same tree again. There is nothing to press.</p>
+      <details class="bk-fold"><summary>What is kept, and what is not</summary>
       <div class="bk-two">
         <div>
           <h3>What is kept</h3>
@@ -98,10 +99,13 @@ import ResearchSync from "../components/ResearchSync.astro";
           </ul>
         </div>
       </div>
+      </details>
+      <details class="bk-fold"><summary>On your other devices, and start fresh</summary>
       <h3>On your other devices</h3>
       <p class="cap" data-th>Turn on <a href="#online">Keep a copy online</a> above and your canvases ride along in the same encrypted copy, with the <b>same six words</b> as your research: no email, no account. It is encrypted in this browser before it leaves, our server cannot read it, and <b>whoever has the six words can open it</b>. On a new device, restore with the six words, then open the Tree Canvas: your saved canvases are listed on its first page. A link reopens by itself; a file asks you to open it again. If another device saved a newer canvas for the tree you have open, the canvas says so and asks before it changes anything. The newest twelve are kept; if your canvases are too large for the online copy, they stay in this browser and the canvas tells you.</p>
       <h3>Start fresh</h3>
       <p class="cap" data-th>When a saved canvas comes back, the Tree Canvas shows a <b>Start fresh</b> button. It removes that tree&rsquo;s saved canvas here and, if the six words are on, from the online copy. Clearing this browser&rsquo;s site data removes everything saved here.</p>
+      </details>
       <p class="bk-go"><a href={u("/tree-canvas/")}>Open the Tree Canvas</a></p>
     </section>
 
@@ -457,6 +461,13 @@ import ResearchSync from "../components/ResearchSync.astro";
   .bk-card :global(#sy > .cap:first-of-type) { margin-top: 4px; }
 
   /* Your Tree Canvas */
+  .bk-fold { margin: 12px 0 0; }
+  .bk-fold > summary { cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 999px;
+    border: 1px solid var(--rule-strong); background: var(--panel); color: var(--ink-2); font: 600 13px var(--sans); list-style: none; }
+  .bk-fold > summary::-webkit-details-marker { display: none; }
+  .bk-fold > summary::after { content: "▾"; }
+  .bk-fold[open] > summary::after { content: "▴"; }
+  .bk-fold > summary:hover { border-color: var(--hue); color: var(--hue-ink); }
   .bk-two { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 0 28px; }
   .bk-card h3 { margin: 14px 0 2px; font: 700 14px/1.3 var(--sans); }
   .bk-two ul { margin: 4px 0 0; padding-left: 1.2em; }

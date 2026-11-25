@@ -1,9 +1,13 @@
 ---
 /* One flags page — a country or a regional hub — inside the atlas's own shell.
-   See src/lib/flag-pages.js for why the body is lifted rather than rebuilt. */
+   See src/lib/flag-pages.js for why the body is lifted rather than rebuilt.
+
+   It wears the same header as every other page now, as the flags index does: the title, one line, a pill with the number of eras and the
+   country's flag. The lifted page's own kicker, h1 and lede are taken out of the body and its long intro (the ledes and the scope
+   note) is folded into «About this page», not deleted. */
 import Base from "../../layouts/Base.astro";
 import { slugs, page } from "../../lib/flag-pages.js";
-import { ccForFlagSlug } from "../../lib/flags.js";
+import { ccForFlagSlug, flagFor } from "../../lib/flags.js";
 import { atlas as idx } from "../../lib/atlas.js";
 import { u } from "../../lib/url.js";
 
@@ -15,16 +19,32 @@ const { slug } = Astro.params;
 const f = page(slug);
 const cc = ccForFlagSlug(slug);
 const NAME = cc ? ((idx.countries || {})[cc] || cc) : "";
-/* The page prints its own <h1>, so Base must not print a second one above it.
-   `bare` is the prop the other full-bleed pages use for exactly this. */
+const flag = cc ? flagFor(cc) : null;
+const text = (s) => s.replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/&middot;/g, "·").replace(/&mdash;/g, "—")
+  .replace(/&ndash;/g, "–").replace(/&#x27;|&rsquo;/g, "’").replace(/&scaron;/g, "š").replace(/\s+/g, " ").trim();
+
+/* kicker, h1, the ledes, then the scope note. If a page does not have a kicker, an h1 and a lede in that order it is left whole. */
+const HEAD = /<p class="kicker">[\s\S]*?<\/p>\s*<h1[^>]*>([\s\S]*?)<\/h1>\s*((?:<p class="lede"[^>]*>[\s\S]*?<\/p>\s*)+)(<div class="scope-note">[\s\S]*?<\/div>)?/;
+let html = f.html;
+let title = f.title;
+const m = html.match(HEAD);
+if (m) {
+  title = text(m[1]) || f.title;
+  html = html.replace(HEAD, `<details class="about"><summary>About this page</summary>${m[2]}${m[3] || ""}</details>`);
+}
+const eras = (f.html.match(/<div class="entry"/g) || []).length;
+const eyebrow = eras ? `${eras} ${eras === 1 ? "era" : "eras"} of flags` : "Flags";
+const dek = cc
+  ? `Every flag that flew over ${NAME}, newest first, with the colours to paint each one.`
+  : "Every flag that flew over this region, newest first, with the colours to paint each one.";
+/* Where the page could not be lifted into the header it prints its own <h1>, so Base must not print a second one. */
 ---
-<Base title={f.title} bare wide>
+<Base title={title} wide bare={!m} eyebrow={m ? eyebrow : undefined} dek={m ? dek : undefined} flag={m ? flag : undefined}>
   <style is:inline set:html={f.css}></style>
   {cc && (
-    <p class="flag-xlinks"><span>Records for {NAME}:</span>
-      <a href={u(`/country/${cc.toLowerCase()}/`)}>Country page</a>
-      <a href={u(`/?q=${encodeURIComponent(NAME)}`)}>On the map</a></p>
+    <p class="k-pills" style="margin:0 0 20px"><span class="vh">Records for {NAME}</span>
+      <a class="k-pill is-plain" href={u(`/country/${cc.toLowerCase()}/`)}>Records for {NAME}</a>
+      <a class="k-pill is-plain" href={u(`/?q=${encodeURIComponent(NAME)}`)}>On the map</a></p>
   )}
-  <div class="flagpage" set:html={f.html}></div>
+  <div class="flagpage" set:html={html}></div>
 </Base>
-

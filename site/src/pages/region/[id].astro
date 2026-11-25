@@ -51,11 +51,11 @@ const centre = [
   og="region"
   title={region.label}
   eyebrow={`${region.eras.length} eras · ${span[0]}–${span[1]} · ${hereAll.length.toLocaleString()} places`}
-  dek={`${region.sub}. Which empire held this ground in which years — and, the part that matters, which archive that means.`}>
+  dek={`${region.sub}. Who held this ground in which years, and whose archive that means.`}>
 
   {traps.length > 0 && (
-    <div class="one" style="border-left-color:#C0392B">
-      <div class="lab">Where researchers lose records here</div>
+    <div class="k-hi">
+      <p><b>Where researchers lose records here</b></p>
       {traps.map((e) => (
         <p class="trap">
           <b><a href={u(`/?layers=shelf,jurisdiction&years=${e.from},${e.to}&view=${centre[0]},${centre[1]},8`)}>{e.from}–{e.to}</a></b>
@@ -64,9 +64,9 @@ const centre = [
     </div>
   )}
 
-  <section style="margin-top:30px">
-    <h2>Whose archive this ground was</h2>
-    <table style="margin-top:12px">
+  <section>
+    <div class="k-bar"><h2>Whose archive this ground was</h2></div>
+    <div style="overflow-x:auto"><table class="k-table">
       <thead><tr><th class="m">Years</th><th>Who held it</th><th>Whose archive that means</th></tr></thead>
       <tbody>
         {region.eras.map((e) => (
@@ -89,19 +89,19 @@ const centre = [
           </tr>
         ))}
       </tbody>
-    </table>
-    <p class="cap" style="margin-top:12px">{regions.precision}</p>
+    </table></div>
+    <p class="cap" style="margin-top:6px">{regions.precision}</p>
     <p style="margin-top:14px"><a class="bigl"
       href={u(`/?layers=shelf,jurisdiction&years=${span[0]},${span[1]}&view=${centre[0]},${centre[1]},7`)}>
       See the whole span, {span[0]}–{span[1]}, on the map →</a></p>
-    <p class="cap">The map takes a <b>range</b>, and a range that crosses one of the rows
+    <details class="k-more"><summary><span class="k-mt">Why the range matters</span></summary><div><p class="cap">The map takes a <b>range</b>, and a range that crosses one of the rows
     above is where records get lost: the family never moved, and the archive on the far side
-    of the handover will tell you it holds nothing.</p>
+    of the handover will tell you it holds nothing.</p></div></details>
   </section>
 
   {hereAll.length > 0 && (
-    <section style="margin-top:34px">
-      <h2>{hereAll.length.toLocaleString()} places on this ground</h2>
+    <section>
+      <div class="k-bar"><h2>{hereAll.length.toLocaleString()} places on this ground</h2></div>
       {hereHidden > 0 && (
         <p class="cap">The {here.length} carrying the most collections are listed;
         <b> {hereHidden.toLocaleString()} more</b> stand on this ground.
@@ -115,8 +115,8 @@ const centre = [
   )}
 
   {cols.length > 0 && (
-    <section style="margin-top:38px">
-      <h2>{cols.length} FamilySearch collections reach this ground</h2>
+    <section>
+      <div class="k-bar"><h2>{cols.length} FamilySearch collections reach this ground</h2></div>
       <p class="cap">Ranked with the regional ones first — a collection for a province is
       usually a better lead than a national index, though the national index is often where
       a name is actually written down. A free account opens the images.</p>
@@ -134,25 +134,28 @@ const centre = [
     </section>
   )}
 
-  <p class="cap" style="margin-top:30px"><a href={u("/providers/#regions")}>All record regions</a> ·
-    <a href={u("/")}>The map</a></p>
+  <p class="k-pills" style="margin-top:30px"><a class="k-pill is-plain" href={u("/providers/#regions")}>All record regions</a>
+    <a class="k-pill is-plain" href={u("/")}>The map</a></p>
 </Base>
 
 <style>
-  h2 { font-family: var(--serif); font-size: 26px; font-weight: 500; margin: 0 0 6px; }
   .trap { font-family: var(--sans); font-size: 13px; line-height: 1.6; margin: 8px 0 0; }
   .reg { display: inline-flex; align-items: baseline; gap: 7px; }
-  .reg i { width: 9px; height: 9px; border-radius: 2px; background: var(--c); display: inline-block; flex: 0 0 auto; }
+  .reg i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); display: inline-block; flex: 0 0 auto; }
+  .bigl { display: inline-flex; align-items: center; padding: 13px 24px; border-radius: 999px; background: var(--hue-solid, var(--accent));
+          color: var(--on-hue, #fff); font: 700 16px/1.2 var(--sans); text-decoration: none; }
+  .bigl:hover { filter: brightness(1.1); }
   .none { color: var(--ink-3); font-style: italic; }
   .enote { font-family: var(--sans); font-size: 11.5px; line-height: 1.55; color: var(--ink-3); margin: 6px 0 0; max-width:var(--measure); }
   .enote.tr { color: var(--ink-2); border-left: 2px solid #C0392B; padding-left: 9px; }
   td { vertical-align: top; }
-  .places { list-style: none; padding: 0; margin: 12px 0 0;
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 3px; }
-  .places li { font-family: var(--sans); font-size: 13px; }
+  .places { list-style: none; padding: 0; margin: 12px 0 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .places li { font-family: var(--sans); font-size: 13px; padding: 5px 6px 5px 13px; background: var(--hue-wash); border: 1px solid color-mix(in srgb, var(--hue, var(--accent)) 26%, transparent); border-radius: 999px; }
+  .places li a { text-decoration: none; font-weight: 600; }
+  .places .y { margin-left: 6px; color: var(--ink-2); }
   .y { font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin-left: 8px; }
   .cols { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 5px; }
-  .cols li { font-family: var(--sans); font-size: 13px; line-height: 1.5; }
+  .cols li { font-family: var(--sans); font-size: 13px; line-height: 1.5; padding: 8px 14px; background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; }
   .loc { font-family: var(--sans); font-size: 10px; color: var(--accent);
          border: 1px solid var(--accent); border-radius: 999px; padding: 1px 6px; margin-left: 8px; }
 </style>

@@ -8,7 +8,7 @@ the build rather than warning into a log nobody reads.
 import json, os, re, sys, datetime, io
 import glob as _g
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from geo import country_of, km_to
+from geo import country_of, km_to, region_for
 
 import os as _os
 import gazetteer as _gazetteer
@@ -1959,6 +1959,14 @@ def main():
             for f in e["filedUnder"]:
                 if f not in pids:
                     err(f"region {r['id']} {e['from']}: filedUnder '{f}' is not a provider")
+
+    # Witnesses for the rule that a rough ring may not claim a neighbour's ground: two Croatian towns and one Bosnian.
+    for town, lat, lon, cc, in_bosnia in (("Nova Gradiska", 45.25876, 17.37984, "HR", False),
+                                          ("Korcula", 42.9622, 17.1350, "HR", False),
+                                          ("Banja Luka", 44.7722, 17.1910, "BA", True)):
+        got = region_for(regions["regions"], lat, lon, cc)
+        if (got == "bosnia") != in_bosnia:
+            err(f"region rule: {town} ({cc}) is filed under '{got}'")
 
     seen = set()
     for p in places:

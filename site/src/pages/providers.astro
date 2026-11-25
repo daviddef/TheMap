@@ -116,9 +116,9 @@ const conf = {
 };
 ---
 <Base
-  title="Records by country — sources"
+  title="Sources"
   eyebrow="Who holds the paper, and what it costs to look"
-  dek="Every archive, library, index and portal this map can point at, what it actually costs to look, and whose archive holds the paper for a given ground and year. The access class is the ordinary visitor's experience, not the best case: FamilySearch is filed as needing an account because it does.">
+  dek="Every archive, library, index and portal this map points at, what it costs to look, and whose archive holds the paper for a place and year.">
 
   <RecordsTabs current="sources" />
 
@@ -323,17 +323,19 @@ const conf = {
   .pv-lab { display: block; font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
   .pv-q { flex: 1 1 420px; }
   .pv-row { flex-wrap: nowrap; }
-  .pv-q input { width: 100%; box-sizing: border-box; font: 16px var(--sans); color: var(--ink); background: var(--panel);
-    border: 1px solid var(--rule-strong, var(--rule)); border-radius: 10px; padding: 11px 14px; }
-  .pv-q input:focus { outline: 3px solid var(--accent); outline-offset: 1px; }
+  .pv-q input { width: 100%; box-sizing: border-box; font: 500 clamp(17px, 2vw, 20px) var(--sans); color: var(--ink); background: var(--panel);
+    border: 2px solid color-mix(in srgb, var(--hue, var(--accent)) 40%, var(--rule)); border-radius: 22px; padding: 14px 22px;
+    box-shadow: 0 14px 30px -20px color-mix(in srgb, var(--hue, var(--accent)) 60%, #000); }
+  .pv-q input::placeholder { font-weight: 400; }
+  .pv-q input:focus { outline: 0; border-color: var(--hue, var(--accent)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--hue, var(--accent)) 22%, transparent); }
     .pv-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
-  .pv-tab { font: 600 14px var(--sans); color: var(--ink-2); background: var(--panel); border: 1px solid var(--rule-strong, var(--rule)); border-radius: 10px; padding: 9px 16px; cursor: pointer; }
+  .pv-tab { font: 600 14px var(--sans); color: var(--ink-2); background: var(--panel); border: 1px solid var(--rule-strong, var(--rule)); border-radius: 999px; padding: 9px 18px; cursor: pointer; }
   .pv-tab span { font: 11px var(--mono); margin-left: 8px; }
-  .pv-tab[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); background: var(--accent-wash); }
+  .pv-tab[aria-pressed="true"] { color: var(--ground); border-color: transparent; background: var(--hue, var(--accent)); }
   /* THE FILTERS ARE THE HOME SCREEN'S: one funnel that opens a panel of pill options with their counts, and fills when something is narrowed. */
   .pv-drop { position: relative; align-self: end; }
-  .pv-drop > summary { list-style: none; cursor: pointer; box-sizing: border-box; height: 46px; min-width: 46px; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    color: var(--ink-2); background: var(--panel); border: 1px solid var(--rule-strong, var(--rule)); border-radius: 10px; }
+  .pv-drop > summary { list-style: none; cursor: pointer; box-sizing: border-box; height: 56px; min-width: 56px; padding: 0 14px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    color: var(--ink-2); background: var(--panel); border: 1px solid var(--rule-strong, var(--rule)); border-radius: 18px; }
   .pv-drop > summary::-webkit-details-marker { display: none; }
   .pv-drop > summary:hover { border-color: var(--accent); color: var(--accent); }
   .pv-drop > summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }

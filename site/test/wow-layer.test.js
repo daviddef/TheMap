@@ -82,3 +82,14 @@ test("/read/ says which job the header is doing and the story box wears the sear
   assert.match(r, /class="k-search"/);
   assert.match(r, /\.sp-drop \{ border: 2px solid/);
 });
+
+test("A to Z names, dated place names and the sources page: a filter or search in the shared look, and short titles", () => {
+  const nm = read("src/pages/name/index.astro");
+  assert.match(nm, /id="nm-q"/);
+  assert.match(nm, /class="k-pill"/);
+  const pn = read("src/pages/place-names.astro");
+  assert.match(pn, /id="pn-q"/);
+  assert.match(pn, /border-top: 5px solid var\(--c\)/);
+  assert.match(read("src/pages/providers.astro"), /title="Sources"/);
+  assert.match(read("src/pages/coverage.astro"), /title="Gaps"/);
+});

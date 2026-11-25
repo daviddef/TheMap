@@ -1316,11 +1316,28 @@
     var route = stops.filter(function (x) { return x.role !== "father-from" && x.role !== "mother-from" && x.of !== "spouse"; });
     /* ages: "when he was 3 years old he moved to Harare" gives Harare age 3; a stop with no age sits between its neighbours */
     var AGE = /(?:(?:when|by the time) (?:he|she|they|i|we) (?:was|were|turned)|aged?|at the age of|at age|by the age of|at) (\d{1,2})(?: years?(?: old)?)?(?= |$)/g, am2, ages = [];
-    while ((am2 = AGE.exec(ft))) { if (/^at \d/.test(am2[0]) && /^ (?:\S+ )?(?:street|st|road|rd|avenue|ave|lane|ln|square|drive|court|terrace|place|way|park|row|hill|crescent|gardens|close)\b/.test(ft.slice(am2.index + am2[0].length))) continue; ages.push({ age: Number(am2[1]), tok: ft.slice(0, am2.index).split(" ").length - 1 }); }
+    while ((am2 = AGE.exec(ft))) { if (/^at \d/.test(am2[0]) && /^ (?:\S+ )?(?:street|st|road|rd|avenue|ave|lane|ln|square|drive|court|terrace|place|way|park|row|hill|crescent|gardens|close)\b/.test(ft.slice(am2.index + am2[0].length))) continue; ages.push({ age: Number(am2[1]), tok: ft.slice(0, am2.index).split(" ").length - 1, end: ft.slice(0, am2.index).split(" ").length - 1 + am2[0].split(" ").length }); }
+    /* AN AGE TOLD AFTER THE PLACE BELONGS TO THAT PLACE. «My dad moved to Botswana when he was 3 years old, then he moved to Salisbury»: the 3 is the age at Botswana, and the old
+       rule (an age belongs to the next place after it) gave it to Salisbury, so Botswana had no age and no years, and showed every era. An age that starts within two words of a place and is
+       followed by «then», «and», «but» or nothing is that place's; one followed by «he moved…», «they went…» (the «when he was 3 he moved to Harare» order) stays with the next place. */
+    var AGE_AFTER_OK = /^(?:then|and|but|later|so|until|before|after|where|there|whereupon)$/, AGE_NEXT_MOVES = /^(?:he|she|they|i|we|his|her|their|moved|went|came|left|emigrated|travelled|traveled|sailed|arrived|settled|returned)$/, agesTaken = Object.create(null);
+    route.forEach(function (st) {
+      if (st.role === "born" || st.at == null) return;
+      var endTok = st.at + String(st.word || "").split(" ").length;
+      for (var k = 0; k < ages.length; k++) {
+        if (agesTaken[k]) continue;
+        var d = ages[k].tok - endTok; if (d < 0 || d > 2) continue;
+        var nxt = tokens[ages[k].end] || "";
+        if (nxt && !AGE_AFTER_OK.test(nxt) && AGE_NEXT_MOVES.test(nxt)) continue;
+        if (route.some(function (o) { return o !== st && o.at >= endTok && o.at <= ages[k].tok; })) continue;
+        st.age = ages[k].age; st.ageTold = true; agesTaken[k] = true; break;
+      }
+    });
     var au = 0, lastAt = -1;
     route.forEach(function (st) {
       if (st.role === "born") st.age = 0;
-      else for (var k = au; k < ages.length; k++) if (ages[k].tok >= lastAt && ages[k].tok < st.at) { st.age = ages[k].age; au = k + 1; break; }
+      else if (st.ageTold) { /* already read from the words just after it */ }
+      else for (var k = au; k < ages.length; k++) if (!agesTaken[k] && ages[k].tok >= lastAt && ages[k].tok < st.at) { st.age = ages[k].age; au = k + 1; break; }
       lastAt = st.at;
     });
     for (var i0 = 0; i0 < route.length; i0++) {
@@ -2821,7 +2838,7 @@
       }
       /* The place over the whole of its history, as a place search shows it: every era with its flag and who held the ground, the one they were
          there in marked, then the epidemics, famines, wars and mass deaths whose area covers the place. Shown on every card, dated or not. */
-      function ground(info, years, span) {
+      function ground(info, years, span, ends) {
         var wrap = el("div", null, "lf-ground"), eras = info.eras || [];
         if (eras.length) {
           wrap.append(el("h5", (eras.length && years.length ? "Who held this ground while they were there" : "Who held this ground, era by era")));
@@ -2832,7 +2849,8 @@
           if (years.length) {
             lo = Math.min.apply(null, years); hi = Math.max.apply(null, years);
             if (f.left != null && f.left >= lo && f.left - lo < 80 && f.route && f.route[0] && f.route[0].info && f.route[0].info.name === info.name && f.route[0].info.cc === info.cc) hi = Math.max(hi, f.left);
-            (f.route || []).forEach(function (r, i, all) { if (r.info === info || (r.info && r.info.name === info.name && r.info.cc === info.cc)) { var nx = all.slice(i + 1).filter(function (z) { return yearOf(z) != null; })[0], ny = nx ? yearOf(nx) : null; if (ny != null && ny > hi && ny - hi < 80) hi = ny; } });
+            if (ends && ends.length) hi = Math.max(hi, Math.max.apply(null, ends));   /* a stay with its own end year (the place they came from) ends there, not at the next place in the order told */
+            else (f.route || []).forEach(function (r, i, all) { if (r.info === info || (r.info && r.info.name === info.name && r.info.cc === info.cc)) { var nx = all.slice(i + 1).filter(function (z) { return yearOf(z) != null; })[0], ny = nx ? yearOf(nx) : null; if (ny != null && ny > hi && ny - hi < 80) hi = ny; } });
           }
           eras.forEach(function (e) {
             var li = el("li", null, years.some(function (y) { return y >= e.from && y < e.to; }) ? "on" : ""), fl = flagFor(info, e.from);
@@ -2932,12 +2950,13 @@
         return box;
       }
       function renderGroup(g) {
-        var info = g.info, es = g.es, kicks = [], whens = [], years = [], look = [], kinds = [], win = null, span = null, unbounded = false, withSources = false;
+        var info = g.info, es = g.es, kicks = [], whens = [], years = [], ends = [], look = [], kinds = [], win = null, span = null, unbounded = false, withSources = false;
         n++;
         es.forEach(function (e) {
           if (kicks.indexOf(e.kicker) < 0) kicks.push(e.kicker);
           if (e.whenText && whens.indexOf(e.whenText) < 0) whens.push(e.whenText);
           if (e.year != null) years.push(e.year);
+          if (e.end != null) ends.push(e.end);
           e.look.forEach(function (x) { if (look.indexOf(x) < 0) look.push(x); });
           e.kinds.forEach(function (k) { if (kinds.indexOf(k) < 0) kinds.push(k); });
           if (e.win) win = win ? [Math.min(win[0], e.win[0]), Math.max(win[1], e.win[1])] : e.win.slice();
@@ -2958,7 +2977,7 @@
           else then.append(el("p", "Give a year, even a rough one, and the one that applies is marked below.", "lf-filed"));
         }
         else es.forEach(function (e) { if (e.year != null) then.append(line(info, e.year, evHere(mort, info, e.year - 5, e.year + 5), e.prefix || "", e.ageText || "")); });
-        then.append(ground(info, years, span));
+        then.append(ground(info, years, span, ends));
         where.append(el("h4", "Where to search"));
         var ul = el("ul", null, "lf-look"); look.forEach(function (x) { ul.append(el("li", x)); }); where.append(ul);
         var fl = fsList(info, kinds, win); if (fl) where.append(fl);
@@ -2980,7 +2999,15 @@
       }
       route.forEach(function (x, i) {
         var info = x.info, first = i === 0, last = i === route.length - 1 && route.length > 1, y = yearOf(x), look = [], kinds = [], win = null;
-        var kicker = first ? (x.role === "born" ? "Born here" : "Where it starts") : last ? "Where they arrived" : "On the way";
+        /* THE PLACE THEY CAME FROM, FROM THE BIRTH YEAR TO THE YEAR THEY LEFT. David: «croatia he left when he was 3, but we don't see who held the ground at the time he was born until
+           the time he leaves.» A place the story says they came from, with a birth year told, is held from that year until the earliest year they are known to be somewhere else. The
+           story does not say they were born there, so the card says «from birth» only as the years it is read over, never as a birthplace. */
+        var fromBirth = false, endYear = null;
+        if (x.role === "origin" && y == null && f.born != null) {
+          route.forEach(function (o, j) { if (j === i) return; var oy = yearOf(o); if (oy != null && oy >= f.born && oy - f.born < 80 && (endYear == null || oy < endYear)) endYear = oy; });
+          y = f.born; fromBirth = true;
+        }
+        var kicker = first ? (x.role === "born" ? "Born here" : "Where it starts") : x.role === "origin" ? "Where it starts" : last ? "Where they arrived" : "On the way";
         if (first) {
           look.push("Look for the baptism or birth entry: it names the parents, and the godparents are often relatives.");
           kinds = ["b", "m"]; win = y != null && x.role === "born" ? [y - 1, y + 1] : (w ? w.birth : null);
@@ -2997,7 +3024,7 @@
           if (e.type === "died") { look.push("He died here" + (e.year != null ? " in " + e.year : "") + (e.cause ? " (" + e.cause + ")" : "") + ": look for the death notice, the death certificate, probate, the burial or cremation record and an obituary. The certificate names the parents."); if (kinds.indexOf("d") < 0) kinds.push("d"); if (!win) win = win2; }
         });
         var tags = (x.ev || []).map(function (e) { return e.type === "married" ? "married here" + (e.year != null ? " in " + e.year : "") : "died here" + (e.year != null ? " in " + e.year : ""); }).join(", ");
-        put(info, { kicker: kicker + (tags ? " · " + tags : ""), whenText: when(x, y), year: y, ageText: x.age != null ? (x.approx ? "about age " : "age ") + x.age : "", look: look, kinds: kinds, win: win, withSources: true, prefix: "", span: stay(y, i) || spanOf(y, x.role) }, true);
+        put(info, { kicker: kicker + (tags ? " · " + tags : ""), whenText: fromBirth ? "from birth, " + y + (endYear != null ? ", until " + endYear : "") : when(x, y), year: y, end: endYear, ageText: x.age != null ? (x.approx ? "about age " : "age ") + x.age : "", look: look, kinds: kinds, win: win, withSources: true, prefix: "", span: (fromBirth && endYear != null ? [y - 1, endYear + 1] : null) || stay(y, i) || spanOf(y, x.role) }, true);
       });
       (f.kin || []).forEach(function (k) {
         var who = ((k.label ? k.label + " " : "") + (k.name || "")).trim() || "Family";

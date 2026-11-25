@@ -199,3 +199,25 @@ test("with a name or a place in the story the page shows only the pills in the w
   for (const id of ["born", "died", "faith", "travelled", "siblings"]) assert.ok(ids.includes(id), id);
   assert.equal(G.sentence("person", "my father", "faith", "Catholic"), "My father was Catholic.");
 });
+
+test("the About pills tick what the story already tells, and ask nothing twice", () => {
+  const t = "my fathers name was ivan, he came from croatia via johannesburg and then moved to Pittsburgh in 2019. my dad was born in 1951, moved to botswana when he was 3 years old, then he moved to Salisbury, rhodesia,. I was married in 1990.";
+  const p = F.parseStory(t, ctx);
+  const tk = G.tokens(t, p).filter((k) => k.kind === "person")[0];
+  const kn = G.known("person", tk, p, t);
+  assert.equal(kn.born, "1951", "his year of birth is told, and shown");
+  assert.ok("moved" in kn, "moving is told");
+  for (const open of ["died", "married", "children", "job", "faith", "father", "mother", "siblings"]) assert.ok(!(open in kn), open + " is not told: the teller's own marriage is not his");
+  const pl = G.tokens(t, p).filter((k) => k.kind === "place");
+  const bris = pl.filter((k) => /pittsburgh/i.test(k.name))[0];
+  assert.ok(bris && "when" in G.known("place", bris, p, t), "a year beside a place ticks When");
+  const none = G.known("person", tk, F.parseStory("my fathers name was ivan.", ctx), "my fathers name was ivan.");
+  assert.deepEqual(Object.keys(none), [], "a bare name has nothing told");
+});
+
+test("a sibling is ticked only by the sentences that name them", () => {
+  const t = "My father Ivan was born in 1951. His brother Marko died young in 1960.";
+  const p = F.parseStory(t, ctx);
+  const toks = G.tokens(t, p), mk = toks.filter((k) => /marko/i.test(k.name))[0];
+  if (mk) { const kn = G.known("person", mk, p, t); assert.ok("died" in kn && !("born" in kn), "Marko died; his brother's birth year is not his"); }
+});

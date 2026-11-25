@@ -567,6 +567,11 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp-tok:hover, .sp-tok.is-on { background: var(--accent); color: var(--panel); transform: translateY(-1px); }
   .sp-tok-place { border-style: dashed; }
   .sp-pill-sm { padding: 6px 11px; font-size: 13px; }
+  /* a clue the story already tells: ticked and green, so what is still unknown stands out. Still a button, to add more. */
+  .sp-pill.is-told { border-color: var(--sp-ok); background: var(--sp-ok-wash); color: var(--sp-ok); }
+  .sp-pill.is-told:hover { background: var(--sp-ok); color: var(--panel); }
+  .sp-pill.is-told.is-on { background: var(--sp-ok); color: var(--panel); }
+  .sp-pill-ck { font-size: 12px; line-height: 1; font-weight: 800; }
   .sp-pill-more { padding: 7px 12px; background: none; border-style: dashed; font-weight: 500; }
   .sp-gap { display: grid; gap: 6px; padding: 10px 12px; border: 1.5px solid var(--accent); border-radius: 14px; background: var(--panel); color: var(--ink); animation: sp-pop .25s ease-out; }
   .sp-gap-q { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; }
@@ -603,9 +608,9 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp-mirror, .sp-drop textarea { font: 400 18px/1.55 var(--sans); padding: 0; margin: 0; letter-spacing: normal; word-spacing: normal; text-indent: 0; text-transform: none; }
   .sp-mirror { position: absolute; inset: 0; overflow: hidden; white-space: pre-wrap; overflow-wrap: break-word; word-break: normal; color: transparent; pointer-events: none; box-sizing: border-box; tab-size: 8; }
   .sp-edit textarea { position: relative; z-index: 1; display: block; }
-  :root { --hl-person: #ffd84d; --hl-place: #6fe0c8; }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --hl-person: #8a6a00; --hl-place: #12705f; } }
-  :root[data-theme="dark"] { --hl-person: #8a6a00; --hl-place: #12705f; }
+  :root { --hl-person: #ffd84d; --hl-place: #6fe0c8; --sp-ok: #2a6b45; --sp-ok-wash: #e3f0e8; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --hl-person: #8a6a00; --hl-place: #12705f; --sp-ok: #7fd1a0; --sp-ok-wash: #173a28; } }
+  :root[data-theme="dark"] { --hl-person: #8a6a00; --hl-place: #12705f; --sp-ok: #7fd1a0; --sp-ok-wash: #173a28; }
   /* the marker pen: a bright highlight behind the word, swept on when the word is first recognised. A person's name is yellow, a place is mint. */
   .sp-mirror mark { color: transparent; border-radius: 5px; background: var(--hl-person); box-shadow: 0 0 0 2px var(--hl-person); }
   .sp-mirror mark.sp-mk-place { background: var(--hl-place); box-shadow: 0 0 0 2px var(--hl-place); }

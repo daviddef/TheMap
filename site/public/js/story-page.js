@@ -182,10 +182,19 @@
       var tk = toks.filter(function (k) { return gapTok === keyOf(k); })[0];
       if (tk) {
         var panel = el("div", null, "sp-gap sp-about"), ttl = el("div", null, "sp-gap-q");
-        ttl.append(el("b", "About " + tk.name + (tk.label ? " \u00b7 " + tk.label : "")), el("span", tk.kind === "person" ? "Tap what you know; the words go into the story." : "What do you know about it?", "sp-gap-why"));
+        ttl.append(el("b", "About " + tk.name + (tk.label ? " \u00b7 " + tk.label : "")), el("span", tk.kind === "person" ? "Tap what you know; the words go into the story. A tick means the story already says it." : "What do you know about it?", "sp-gap-why"));
         var opts = el("div", null, "sp-pills");
+        /* WHAT THE STORY ALREADY TELLS is shown as told: a tick, another colour, and the year where there is one. It stays tappable, to add more. */
+        var told = G.known ? G.known(tk.kind, tk, p, raw) : {}, nTold = 0;
         G.about(tk.kind).forEach(function (o) {
-          var ob = el("button", o.label, "sp-pill sp-pill-sm" + (gapOpt === o.id ? " is-on" : "")); ob.type = "button";
+          var isTold = Object.prototype.hasOwnProperty.call(told, o.id); if (isTold) nTold++;
+          var ob = el("button", null, "sp-pill sp-pill-sm" + (isTold ? " is-told" : "") + (gapOpt === o.id ? " is-on" : "")); ob.type = "button";
+          if (isTold) {
+            var ck = el("span", "\u2713", "sp-pill-ck"); ck.setAttribute("aria-hidden", "true");
+            ob.append(ck, el("span", o.label + (told[o.id] ? " " + told[o.id] : "")));
+            ob.title = "Already in your story" + (told[o.id] ? ": " + told[o.id] : "") + ". Tap to add more.";
+            ob.setAttribute("aria-label", o.label + ", already in your story" + (told[o.id] ? " (" + told[o.id] + ")" : ""));
+          } else ob.append(el("span", o.label));
           ob.addEventListener("click", function () { gapOpt = gapOpt === o.id ? "" : o.id; drawGaps(p); var i2 = box.querySelector(".sp-about .sp-gap-in"); if (i2) i2.focus(); });
           opts.append(ob);
         });

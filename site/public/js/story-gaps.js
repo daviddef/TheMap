@@ -137,6 +137,43 @@
     ["father", "His father", "'s father was ", "a name, and where from"], ["mother", "His mother", "'s mother was ", "a name, and where from"], ["siblings", "Brothers, sisters", "had brothers and sisters: ", "names, or how many"]
   ];
   var ABOUT_PLACE = [["when", "When", "{}: they were there in ", "a year or a decade"], ["what", "What happened", "In {}, ", "what they did, or what happened"], ["who", "Who else", "{}: others from the family there were ", "a name, then how they are related: Hedviga, cousin"]];
+  /* WHAT THE STORY ALREADY SAYS ABOUT A PERSON OR A PLACE. David, looking at «Ivan · your father» with a Born pill after the story had said «my dad was born in 1951»: «if we already
+     have his date of birth, etc, it should be checked off on the pill list / differently coloured.» Returns {optionId: detail} for each thing the words (and what the reader found in
+     them) already tell, so the pill can be shown as told and the reader is not asked again. Rules on the words, never a guess: a pill is ticked only where the story says it.
+     The person the story follows is read from the whole telling; anybody else (a sibling, another relative) only from the sentences that name them. */
+  var K_BORN = /\b(?:born|birth|birthday|baptis\w*|christen\w*|b\.)\b/i, K_MARRIED = /\b(?:married|marry|wife|husband|spouse|wedding|wed|widow(?:er)?|partner|divorced)\b/i,
+      K_CHILD = /\b(?:children|child|kids?|sons?|daughters?)\b/i, K_JOB = /\b(?:worked|works|working|job|occupation|trade|career|profession|farmer|fisherman|miner|carpenter|teacher|baker|blacksmith|sailor|soldier|priest|merchant|shopkeeper|nurse|doctor|engineer|labourer|laborer|clerk|tailor|shoemaker|butcher|builder|driver|mechanic|policeman|miller|weaver)\b/i,
+      K_MOVED = /\b(?:moved|move|emigrated|migrated|immigrated|settled|relocated|came to|went to|left for|fled|arrived|returned)\b/i, K_FATHER = /\b(?:his|her|their)\s+(?:father|dad|papa)\b|\b(?:grandfather|grandpa)\b/i,
+      K_MOTHER = /\b(?:his|her|their)\s+(?:mother|mum|mom|mama)\b|\b(?:grandmother|grandma|nana)\b/i, K_SIBS = /\b(?:brothers?|sisters?|siblings?)\b/i, K_YEAR = /\b(?:1[0-9]{3}|20[0-2][0-9])s?\b|\b(?:age|aged|years old|year old)\b/i;
+  function sentencesOf(text) { return String(text || "").split(/(?<=[.!?])\s+|\n+/).filter(function (x) { return x.trim(); }); }
+  function known(kind, tk, p, text) {
+    p = p || {}; text = String(text || ""); tk = tk || {};
+    var out = {}, name = String(tk.name || tk.word || "").toLowerCase(), all = sentencesOf(text);
+    var named = name ? all.filter(function (x) { return x.toLowerCase().indexOf(name) > -1; }) : [];
+    if (kind === "place") {
+      /* a year, a decade or an age in a sentence that names the place */
+      if (named.some(function (x) { return K_YEAR.test(x); })) out.when = "";
+      return out;
+    }
+    var subject = !(p.people || []).length || (p.people || []).some(function (pe) { return pe && pe.role === "self" && String(pe.name || "").split(/\s+/)[0].toLowerCase() === name; });
+    /* the teller's own sentences («I was born in …») are not the person's */
+    var scope = subject ? all.filter(function (x) { return !/^\s*(?:i|we|i'm|i've|me)\b/i.test(x); }).join(" ") : named.join(" ");
+    function yearNear(re) { var m = re.exec(scope); if (!m) return ""; var tail = scope.slice(m.index, m.index + 70).match(/\b(1[0-9]{3}|20[0-2][0-9])\b/); return tail ? tail[1] : ""; }
+    if (K_BORN.test(scope) || (subject && p.born != null)) out.born = subject && p.born != null ? String(p.born) : yearNear(K_BORN);
+    if (DEATH.test(scope) || (subject && p.life && p.life.died)) out.died = yearNear(DEATH);
+    if (K_MARRIED.test(scope) || (subject && p.life && p.life.married > 0)) out.married = "";
+    /* what a sentence says OF someone else's family («His brother Ante died») is that they are a relative, not that their own parents, children or siblings are told */
+    if (subject && (K_CHILD.test(scope) || (p.kids || []).length)) out.children = "";
+    if (K_JOB.test(scope) || (subject && ((p.life && (p.life.occupations || []).length) || (p.people || []).some(function (pe) { return pe && pe.role === "self" && pe.occupation; })))) out.job = "";
+    if (K_MOVED.test(scope) || (subject && (p.route || []).length > 1)) out.moved = "";
+    if (FAITH.test(scope)) out.faith = "";
+    if (SHIP.test(scope)) out.travelled = "";
+    if (subject && K_FATHER.test(scope)) out.father = "";
+    if (subject && K_MOTHER.test(scope)) out.mother = "";
+    if (subject && (K_SIBS.test(scope) || (p.siblings || []).length)) out.siblings = "";
+    return out;
+  }
+
   function about(kind) { return (kind === "place" ? ABOUT_PLACE : ABOUT_PERSON).map(function (x) { return { id: x[0], label: x[1], stub: x[2], ph: x[3] }; }); }
   /* the sentence one answer adds: «Ivan was born in 1951, Senj.» */
   function sentence(kind, name, opt, value) {
@@ -153,7 +190,7 @@
     return who + (/^'s /.test(o.stub) ? "" : " ") + o.stub + value + ".";
   }
 
-  var api = { gaps: gaps, append: append, clue: gaps.clue, answer: answer, tokens: tokens, about: about, sentence: sentence };
+  var api = { gaps: gaps, append: append, clue: gaps.clue, answer: answer, tokens: tokens, about: about, known: known, sentence: sentence };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (root) root.raStoryGaps = api;
 })(typeof window !== "undefined" ? window : (typeof globalThis !== "undefined" ? globalThis : this));

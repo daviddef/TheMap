@@ -265,8 +265,18 @@
     var totalChild = 0;
     claims.forEach(function (cl) { if (cl.kind === "child" && !cl.subset) totalChild = Math.max(totalChild, cl.n); });
     claims.forEach(function (cl) {
+      /* «one of four children» counts that person among them: it is a claim about brothers and sisters, one fewer, kept where the reading keeps them */
+      if (/\bone\s+of\s+(?:the\s+)?$/i.test(text.slice(Math.max(0, cl.at - 14), cl.at))) {
+        var got = Math.max(arr(p.siblings).length, people.filter(function (x) { return x.role === "psib"; }).length, arr(p.others).filter(function (o) { return /brother|sister|sibling/.test(String(o.kin || "")); }).length);
+        if (got > cl.n - 1) add("count-over", "high", [String(cl.n)], [cl.at, cl.end], "Your words say one of " + cl.n + " and the page lists " + got + " brothers and sisters");
+        return;
+      }
       var sx = /brother/.test(cl.word) ? /brother/ : /sister/.test(cl.word) ? /sister/ : null;   /* brothers are counted against brothers, sisters against sisters */
-      var listed = cl.kind === "child" ? childRows.length : sibRows.length + arr(p.siblings).filter(function (x) { return !sx || !x.rel || sx.test(x.rel) || /sibling/.test(x.rel); }).length;
+      /* the children under «also named», named or not, are listed too: sons against sons, daughters against daughters */
+      var kk = /^(?:sons|boys)$/.test(cl.word) ? /^son$/ : /^(?:daughters|girls)$/.test(cl.word) ? /^daughter$/ : /^(?:child|son|daughter|twin)$/;
+      var listed = cl.kind === "child" ? childRows.length || arr(p.others).filter(function (o) { return kk.test(String(o.kin || "")); }).length : sibRows.length + arr(p.siblings).filter(function (x) { return !sx || !x.rel || sx.test(x.rel) || /sibling/.test(x.rel); }).length;
+      /* «…Paolo and my mother Anna»: the teller's own parent is one of those counted, and stands in the parents' row instead */
+      if (cl.kind === "child" && listed && listed < cl.n && /^[^.!?\n]*\bmy\s+(?:mother|mum|mom|father|dad)\b/i.test(text.slice(cl.end, cl.end + 160))) listed++;
       var said2 = new RegExp("\\b" + cl.n + "\\s+(?:of the\\s+)?(?:other\\s+)?" + cl.word.replace(/s$/, "") , "i").test(readBlob) || new RegExp("\\b" + cl.n + "\\s+(?:children|kids)", "i").test(readBlob);
       if (cl.subset) { if (totalChild && cl.n > totalChild) add("count-over", "high", [String(cl.n)], [cl.at, cl.end], "Your words say " + totalChild + " children and then " + cl.n + " of them; the numbers disagree"); return; }
       if (listed > cl.n) add("count-over", "high", [String(cl.n)], [cl.at, cl.end], "Your words say " + cl.n + " " + cl.word + " and the page lists " + listed);
@@ -334,7 +344,7 @@
       mark(x.rel); mark(x.label); mark(x.role === "line" ? "" : x.role);
       if (x.role === "spouse") { present.wife = present.husband = present.spouse = 1; }
       if (x.role === "child") { present.child = 1; present.son = present.son || x.sex !== "F"; present.daughter = present.daughter || x.sex !== "M"; if (x.sex === "") { present.son = present.daughter = 1; } }
-      if (x.role === "sibling") { present.brother = present.sister = 1; }
+      if (x.role === "sibling" || x.role === "psib") { present.brother = present.sister = 1; }
     });
     arr(p.kin).forEach(function (k) { mark(k.label); });
     arr(p.others).forEach(function (o) { mark(o.kin); });

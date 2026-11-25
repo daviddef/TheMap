@@ -33,5 +33,14 @@ export const C = [
  { id:"post-step-huber", t:"My dad's stepfather Franz Huber came from Graz. Dad's real father died in the war in 1944. Dad's mum Anna remarried in 1947 and they moved to Vienna.", e:{stops:["Vienna"], rel:"father", people:["father","mother","inlaw"]} },
  { id:"post-slovenia", t:"My mum's side is from Slovenia. Her mother, Marija Kos, was born in Idrija in 1930 and her father Jože Kos was a miner. Mum was born in 1955 in Ljubljana and moved to Melbourne in 1975.", e:{stops:["Ljubljana","Slovenia","Melbourne"], rel:"mother", people:["mother","father"]} },
  { id:"post-ovaro", t:"My nonna Giuseppina was born in a small village near Udine called Ovaro in 1899. Her husband Luigi emigrated to Buenos Aires in 1923 and she followed in 1925 with their two sons Pietro and Mario.", e:{stops:["Ovaro","Buenos Aires"], name:"Giuseppina", people:["spouse"]} },
+ { id:"post-near-in-village", t:"My grandmother Anna was born near Udine in a village called Ovaro. She married Giovanni de la Cruz and they had three daughters.", e:{stops:["Ovaro"], name:"Anna", rel:"grandmother", people:["spouse"]} },
+ { id:"post-village-of", t:"My grandmother Anna was born in the village of Ovaro near Udine. She married a man called Giovanni de la Cruz.", e:{stops:["Ovaro"], name:"Anna", rel:"grandmother", people:["spouse"]} },
+ { id:"post-husband-particles", t:"My nonna Anna was born in a village called Ovaro, near Udine, in 1921. Her husband was Giovanni de la Cruz and they had 2 sons.", e:{stops:["Ovaro"], years:[1921], rel:"grandmother", people:["spouse"]} },
+ { id:"post-wed-woman", t:"My grandfather was born in a town called Ovaro in Friuli. He wed a woman named Rosa van Dyk and they had four daughters: Ada and Bruna.", e:{rel:"grandfather", people:["spouse"]} },
+ { id:"post-mum-one-of-four", t:"My dad's stepfather Franz Huber came from Bavaria to Chicago in 1952. My mum was Peg Murphy, one of four children: Tom, Peg, Mary and Paddy, born near Cork.", e:{people:["father","mother","inlaw","psib"]} },
+ { id:"post-one-of-six", t:"My grandmother was Anna de Luca. She was one of 6, with brothers Marco and Luigi.", e:{name:"Anna de Luca", rel:"grandmother"} },
+ { id:"post-one-of-daughters", t:"My dad is from Cork. My mum was one of five daughters.", e:{stops:["Cork"], people:["father","mother","psib"]} },
+ { id:"post-one-of-eight", t:"My grandfather Antonio was born in Fiume, one of eight children.", e:{name:"Antonio", rel:"grandfather"} },
+ { id:"post-man-named", t:"My grandmother was born in Galway. Her husband was a man named Sean O'Brien and they had five children.", e:{stops:["Galway"], rel:"grandmother", people:["spouse"]} },
  { id:"post-pula", t:"My grandmother was born in Pula in 1928 when it was Italy, grew up in Zadar, fled to Italy after the war, then went to Chicago in 1956.", e:{stops:["Pula","Zadar","Italy","Chicago"], rel:"grandmother"} }
 ];

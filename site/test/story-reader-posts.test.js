@@ -87,3 +87,40 @@ test("a name several places share is the usual one unless the story says otherwi
 test("a hyphenated name is kept as written", () => {
   assert.equal(read("My great grandmother Mary-Jane Kelly was born in Cork.").name, "Mary-Jane Kelly");
 });
+test("born near X in a village called Y is born in Y, near X", () => {
+  for (const t of ["My grandmother Anna was born near Udine in a village called Ovaro.", "My grandmother Anna was born in the village of Ovaro near Udine.", "My grandmother Anna was born near Udine, in the village of Ovaro."]) {
+    const p = read(t); assert.deepEqual(stops(p), ["Ovaro"], t); assert.equal(p.people[0].place.row.n, "Ovaro", t);
+  }
+});
+test("a husband or wife keeps the whole surname and stands in one box", () => {
+  for (const t of ["My grandmother Anna was born in Ovaro. She married Giovanni de la Cruz and they had three daughters.",
+    "My grandmother Anna was born in Ovaro. She married a man called Giovanni de la Cruz.", "My grandmother Anna was born in Ovaro. Her husband was Giovanni de la Cruz.",
+    "My grandmother Anna was born in Ovaro. She wed a man named Giovanni de la Cruz."]) {
+    const p = read(t), sp = p.people.filter((x) => x.role === "spouse"); assert.deepEqual(names(sp), ["Giovanni de la Cruz"], t);
+    assert.ok(!(p.others || []).some((o) => o.kin === "spouse"), t); assert.ok(!allStops(p).includes("Cruz"), t);
+  }
+});
+test("children counted and not named stand there unnamed, as sons or daughters where said", () => {
+  const kids = (t) => (read(t).others || []).map((o) => o.kin + ":" + o.name);
+  assert.deepEqual(kids("My grandmother Anna was born in Ovaro. She married Giovanni de la Cruz and they had three daughters."), ["daughter:", "daughter:", "daughter:"]);
+  assert.deepEqual(kids("My grandmother Anna was born in Ovaro and had 2 sons."), ["son:", "son:"]);
+  assert.deepEqual(kids("My great grandmother Anna had four daughters: Maria and Luisa."), ["daughter:Maria", "daughter:Luisa", "daughter:", "daughter:"]);
+  assert.deepEqual(kids("My grandfather Ivan was born in Senj. His brother had five children."), []);
+});
+test("one of N: the others are brothers and sisters of that person, beside them", () => {
+  const p = read("My dad's stepfather Franz Huber came from Bavaria to Chicago in 1952. My mum was Peg Murphy, one of four children: Tom, Peg, Mary and Paddy, born near Cork.");
+  const sib = p.people.filter((x) => x.role === "psib");
+  assert.deepEqual(names(sib), ["Tom", "Mary", "Paddy"]); assert.ok(sib.every((x) => x.side === "mother" && x.label === "your mother's brother or sister"));
+  assert.ok(!(p.others || []).some((o) => o.kin === "child"));
+  const step = p.people.find((x) => x.role === "inlaw"); assert.deepEqual([step.name, step.up, step.side], ["Franz Huber", true, "father"]);
+  const q = read("My grandmother was Anna de Luca. She was one of 6, with brothers Mario and Pietro.");
+  assert.deepEqual(q.siblings.map((x) => x.rel + ":" + x.name), ["brother:Mario", "brother:Pietro", "sibling:", "sibling:", "sibling:"]);
+  const r = read("My grandfather was one of 8 children."); assert.equal(r.siblings.length, 7); assert.ok(!r.people[0].counts, "not a count of his own children");
+  const s = read("My dad is from Cork. My mum was one of five daughters."); assert.equal(s.people.filter((x) => x.role === "psib" && x.kin === "sister").length, 4);
+  assert.notEqual(s.people.find((x) => x.role === "mother").name, "One");
+  assert.ok(read("My grandmother Mary was born in Cork. Her mother was one of three.").others.every((o) => o.poss === "her mother's"));
+});
+test("the page keeps what the tree needs to place a person: the born word, the near place, and a step-parent's row", () => {
+  const js = src("story-engine.js");
+  for (const k of ["placeRole:", "placeNear:", "side: pe.side", "up: !!pe.up"]) assert.ok(js.includes(k), k);
+});

@@ -23,8 +23,8 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   description="A searchable guide to the words of old registers, in Latin and in the languages of their catalogue titles, with how often each turns up in the Atlas's own records, and a decoder for dates such as 'die 30 7bris 1671'.">
 
   <div slot="headtools" class="rd-tools" role="tablist" aria-label="Tools">
-    <button type="button" role="tab" id="tab-read" class="rd-tab" aria-selected="false" aria-controls="tool-read" data-tool="read" title="A word, a date or a whole line from a register: type it and see what it means. Claude can draft a reading of a line or a photo when you ask.">
-      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M7 3.5h7l4 4V20H7z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.5 12h6M9.5 15.5h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Interpret a record</button>
+    <button type="button" role="tab" id="tab-read" class="rd-tab" data-title-read="A word, a date or a whole line from a register: type it and see what it means. Claude can draft a reading of a line or a photo when you ask." aria-selected="false" aria-controls="tool-read" data-tool="read" title="A word, a date or a whole line from a register: type it and see what it means. Claude can draft a reading of a line or a photo when you ask.">
+      <svg class="rd-ico-read" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M7 3.5h7l4 4V20H7z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.5 12h6M9.5 15.5h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><svg class="rd-ico-story" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" hidden><path d="M4 20l1-4L16.5 4.5a2 2 0 013 3L8 19z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 7l3 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="rd-lbl">Interpret a record</span></button>
   </div>
 
   <section id="tool-story" class="rd-panel" aria-label="Your story">
@@ -246,8 +246,14 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
         now = name;
         tabs.forEach(function (t) {
           var on = t.dataset.tool === name;
-          t.classList.toggle("is-on", on); t.setAttribute("aria-selected", on ? "true" : "false"); t.tabIndex = 0;
           document.getElementById("tool-" + t.dataset.tool).hidden = !on;
+          /* THE ONE BUTTON LEADS TO THE OTHER PLACE. With the story open it says «Interpret a record»; with the reader open it says «Tell a story» and goes back. David: «both show an
+             "interpret a record" button? surely #read should say "tell a story"?» It is not shown as selected either way: it is where you go next, not where you are. */
+          t.classList.remove("is-on"); t.setAttribute("aria-selected", "false"); t.tabIndex = 0;
+          var lbl = t.querySelector(".rd-lbl"), ir = t.querySelector(".rd-ico-read"), is = t.querySelector(".rd-ico-story");
+          if (lbl) lbl.textContent = on ? "Tell a story" : "Interpret a record";
+          if (ir) ir.hidden = on; if (is) is.hidden = !on;
+          t.title = on ? "Back to your story: tell us what you know and the page fills in as you write." : t.getAttribute("data-title-read");
           if (on && focus) t.focus();
         });
         document.getElementById("tool-story").hidden = name !== "story";

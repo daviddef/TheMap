@@ -56,8 +56,8 @@
 
   /* ---- the relations ---- */
   var KINDS = [
-    ["great-grandfather", /\bgreat[- ]?(?:great[- ]?)*grand(?:father|dad|pa|parent)s?\b/i], ["great-grandmother", /\bgreat[- ]?(?:great[- ]?)*grand(?:mother|mum|mom|ma)s?\b/i],
-    ["grandfather", /\b(?:grand(?:father|dad|ad|da|pa)|gramps|grampa|nonno|opa|djed|dida)s?\b/i], ["grandmother", /\b(?:grand(?:mother|mum|mom|ma)|granny|gran|nan|nana|nanna|nonna|oma|baka)s?\b/i],
+    ["great-grandfather", /\bgreat[- ]?(?:great[- ]?)*(?:grand(?:father|dad|ad|pa|parent)|gramps|nonno)s?\b/i], ["great-grandmother", /\bgreat[- ]?(?:great[- ]?)*(?:grand(?:mother|mum|mom|ma)|granny|gran|nana?|nanna|nonna)s?\b/i],
+    ["grandfather", /\b(?:grand(?:father|dad|ad|da|pa)|gramps|grampa|nonno|opa|djed|dida|abuelo|dziadek|zayde)s?\b/i], ["grandmother", /\b(?:grand(?:mother|mum|mom|ma)|granny|gran|nan|nana|nanna|nonna|oma|baka|abuela|babcia|bubbe)s?\b/i],
     ["father", /\b(?:father|dad|daddy|papa|tata|otac)s?\b/i], ["mother", /\b(?:mother|mum|mom|mummy|mama|mamma|majka|mati)s?\b/i],
     ["uncle", /\buncles?\b/i], ["aunt", /\b(?:aunt|aunty|auntie)s?\b/i], ["brother", /\bbrothers?\b/i], ["sister", /\bsisters?\b/i],
     ["husband", /\bhusbands?\b/i], ["wife", /\bwives\b|\bwife\b/i], ["son", /\bsons?\b/i], ["daughter", /\bdaughters?\b/i], ["cousin", /\bcousins?\b/i], ["child", /\b(?:children|kids?|child)\b/i]
@@ -265,7 +265,8 @@
     var totalChild = 0;
     claims.forEach(function (cl) { if (cl.kind === "child" && !cl.subset) totalChild = Math.max(totalChild, cl.n); });
     claims.forEach(function (cl) {
-      var listed = cl.kind === "child" ? childRows.length : sibRows.length + arr(p.siblings).length;
+      var sx = /brother/.test(cl.word) ? /brother/ : /sister/.test(cl.word) ? /sister/ : null;   /* brothers are counted against brothers, sisters against sisters */
+      var listed = cl.kind === "child" ? childRows.length : sibRows.length + arr(p.siblings).filter(function (x) { return !sx || !x.rel || sx.test(x.rel) || /sibling/.test(x.rel); }).length;
       var said2 = new RegExp("\\b" + cl.n + "\\s+(?:of the\\s+)?(?:other\\s+)?" + cl.word.replace(/s$/, "") , "i").test(readBlob) || new RegExp("\\b" + cl.n + "\\s+(?:children|kids)", "i").test(readBlob);
       if (cl.subset) { if (totalChild && cl.n > totalChild) add("count-over", "high", [String(cl.n)], [cl.at, cl.end], "Your words say " + totalChild + " children and then " + cl.n + " of them; the numbers disagree"); return; }
       if (listed > cl.n) add("count-over", "high", [String(cl.n)], [cl.at, cl.end], "Your words say " + cl.n + " " + cl.word + " and the page lists " + listed);

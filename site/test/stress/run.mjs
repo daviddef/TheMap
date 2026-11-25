@@ -1,7 +1,8 @@
 import { F, ctx, parse } from "./ctx.mjs";
 import { C as C1 } from "./corpus.mjs";
 import { C as C2 } from "./corpus-adversarial.mjs";
-const C = C1.concat(C2);
+import { C as C3 } from "./corpus-posts.mjs";
+const C = C1.concat(C2, C3);
 const only = process.argv[2];
 const fold = (s) => String(s||"").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g,"");
 let pass=0, fail=0, known=0; const bad=[], gapsSeen=[];

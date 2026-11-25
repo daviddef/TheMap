@@ -11,6 +11,7 @@ import { fileURLToPath } from "node:url";
 import { A, ctx, parse } from "./ctx.mjs";
 import { C as C1 } from "./corpus.mjs";
 import { C as C2 } from "./corpus-adversarial.mjs";
+import { C as C3 } from "./corpus-posts.mjs";
 import { L } from "./life-corpus.mjs";
 
 const SITE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -49,7 +50,7 @@ function main() {
   const arg = process.argv.slice(2), verbose = arg.includes("v"), asJson = arg.includes("json");
   const only = ["corpus", "fuzz", "life"].find((x) => arg.includes(x));
   const sets = [];
-  if (!only || only === "corpus") sets.push(["corpus", C1.concat(C2)]);
+  if (!only || only === "corpus") sets.push(["corpus", C1.concat(C2, C3)]);
   if (!only || only === "life") sets.push(["life", L.map((x) => ({ id: x.id, t: x.t }))]);
   if (!only || only === "fuzz") sets.push(["fuzz", fuzzStories()]);
 

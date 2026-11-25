@@ -1,6 +1,6 @@
 Made-up stories run through the story reader against the real gazetteer (not part of `npm test`; the fixture-based `test/story-stress.test.js` is).
 
-    node test/stress/run.mjs            # corpus.mjs + corpus-adversarial.mjs (about 340 stories, 150 of them one famous city each, with expectations; `gap:` lists a known hole and says so the day it passes); prints the ones that fail
+    node test/stress/run.mjs            # corpus.mjs + corpus-adversarial.mjs + corpus-posts.mjs (about 375 stories, 150 of them one famous city each, with expectations; `gap:` lists a known hole and says so the day it passes); prints the ones that fail
     node test/stress/run.mjs occ        # only stories whose id contains "occ"
     node test/stress/brief.mjs "text"   # what one story is read as
     node test/stress/invariants.mjs    # THE CONSISTENCY CHECK (public/js/story-check.js) over every corpus story and the fuzz stories: nothing lost, nothing invented, consistent.

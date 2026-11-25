@@ -109,11 +109,35 @@ def hidden(body):
         r'<input type="hidden" name="(__[A-Z]+)" id="\1" value="([^"]*)"', body)}
 
 
+def already_asked():
+    """What DZS has already been asked, from two places.
+
+    The committed data/frequencies/hr.json is the durable memory: every name it
+    lists was answered by DZS ({n, c} found, `gone` below the floor). The scan
+    cache is only a faster copy. The workflow keeps that cache in a GitHub
+    Actions cache, which GitHub deletes after seven days unused, and the job runs
+    a little over seven days apart, so for weeks every run started with
+    «0 already asked», re-asked the same first 40 names and wrote a file smaller
+    than the committed one. Seeding from the committed file means a lost cache
+    costs nothing, and the file can only grow."""
+    cache = {}
+    if os.path.exists(OUT):
+        try:
+            prev = json.load(open(OUT, encoding="utf-8"))
+        except (OSError, ValueError):
+            prev = {}
+        for r in prev.get("surnames", []):
+            cache[r["n"]] = r["c"]
+        for n in prev.get("gone", []):
+            cache[n] = 0
+    if os.path.exists(CACHE):
+        cache.update(json.load(open(CACHE)))
+    return cache
+
+
 def main():
     names = candidates()
-    cache = {}
-    if os.path.exists(CACHE):
-        cache = json.load(open(CACHE))
+    cache = already_asked()
     todo = [n for n in names if n not in cache]
     backlog = len(todo)
     if MAX and len(todo) > MAX:

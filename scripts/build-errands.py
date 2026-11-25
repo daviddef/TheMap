@@ -79,6 +79,36 @@ ROWS = [
      "familienamenbank is plainly the authoritative Dutch source. It has not been "
      "scraped and will not be.",
      [["The surname data", "/data/"]]),
+
+    ("hr-slavonski-brod-archive.md", "draft",
+     "State Archives in Slavonski Brod",
+     "How a family researcher should ask, reading-room hours and booking, written requests and fees, and which parish and civil registers it holds, including at its Nova Gradiška collection centre",
+     "When a story places a family around Nova Gradiška, the plan tells the reader to write to this archive, and the Atlas holds no address, hours or holdings for it. Its own site lists a <b>collection centre in Nova Gradiška</b>.",
+     [["The sources", "/providers/"]]),
+
+    ("hr-state-archives-zagreb.md", "draft",
+     "Croatian State Archives, Zagreb",
+     "How a family researcher should ask, reading-room hours and booking, written requests and fees, and which parish and civil registers it holds",
+     "The national archive holds the microfilmed register collection the Croatian story plans point to. One answer would say how to ask and what it holds.",
+     [["The sources", "/providers/"]]),
+
+    ("hr-osijek-archive.md", "draft",
+     "State Archives in Osijek",
+     "How a family researcher should ask, reading-room hours and booking, written requests and fees, and which parish and civil registers it holds",
+     "The archive for eastern Slavonia. The Atlas can name it but cannot say how to book, ask or see its holdings.",
+     [["The sources", "/providers/"]]),
+
+    ("hr-sisak-archive.md", "draft",
+     "State Archives in Sisak",
+     "How a family researcher should ask, reading-room hours and booking, written requests and fees, and which parish and civil registers it holds",
+     "The archive for the Banija and Sisak side of the old Military Frontier. The Atlas can name it but cannot say how to book, ask or see its holdings.",
+     [["The sources", "/providers/"]]),
+
+    ("si-ljubljana-archive.md", "draft",
+     "Historical Archives Ljubljana",
+     "How a family researcher should ask, reading-room hours and booking, written requests and fees, and which parish and civil registers it holds",
+     "A Slovenian leg of a family story ends at this archive. Its site asks AI crawlers to stay away, so a letter is the honest way to learn how to ask.",
+     [["The sources", "/providers/"]]),
 ]
 
 

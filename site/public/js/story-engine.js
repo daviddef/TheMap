@@ -68,6 +68,52 @@
       .sort(function (x, y) { return x.from - y.from || x.to - y.to || String(x.title).localeCompare(String(y.title)); });
   }
 
+  /* WHICH BOOKS TO OPEN FIRST. David: «this whole "every volume the atlas lists"… cant we suggest some key ones for the periods were looking at». */
+  var BOOK_WORD = { b: "Births", m: "Marriages", d: "Deaths" };
+  /* The years a book holds records of one kind. A bundle («Births (Rođeni) 1887-1890 Marriages (Vjenčani) 1878-1907») is filed under one span, which would
+     claim its births back to 1878, so the years written after the kind in its title are read first; only a title without them falls back to the span. */
+  function spansOf(c, kind) {
+    var out = [], one = "\\d{4}(?:\\s*[-\u2013]\\s*\\d{4})?", re = new RegExp(BOOK_WORD[kind] + "(?:\\s*\\([^)]*\\))?\\s+(" + one + "(?:\\s*[,;]\\s*" + one + ")*)", "g"), m, t = String(c.title || "");
+    while ((m = re.exec(t))) m[1].split(/\s*[,;]\s*/).forEach(function (p) { var y = p.match(/\d{4}/g); out.push([+y[0], +(y[1] || y[0])]); });
+    if (out.length) return out;
+    return (c.kinds || []).indexOf(kind) > -1 && typeof c.from === "number" ? [[c.from, c.to || c.from]] : [];
+  }
+  /* What the story needs a book for: each date it tells, or else the kinds and years of this stop. */
+  function bookNeeds(dated, kinds, win) {
+    function years(a, b) { return a === b ? String(a) : a + "\u2013" + b; }
+    if (dated && dated.length) return dated.map(function (d) {
+      return { kind: d.kind === "c" ? "b" : d.kind, from: d.from, to: d.to, back: d.kind === "b", say: d.kind === "c" ? "the child\u2019s birth in " + years(d.from, d.to) : (d.kind === "m" ? "marriages " : "births ") + years(d.from, d.to) };
+    });
+    if (!win) return [];
+    return (kinds && kinds.length ? kinds : ["b", "m", "d"]).map(function (k) { return { kind: k, from: win[0], to: win[1], back: k === "b" && win[1] - win[0] <= 12, say: BOOK_WORD[k].toLowerCase() + " " + years(win[0], win[1]) }; });
+  }
+  /* For each need the book that covers most of it (then the narrowest); the needs nothing reaches; and for a birth nothing reaches, the generation before. */
+  function keyBooks(cols, needs) {
+    var picks = [], gaps = [], latest = {};
+    cols = (cols || []).filter(Boolean);
+    ["b", "m", "d"].forEach(function (k) { cols.forEach(function (c) { spansOf(c, k).forEach(function (s) { if (!(latest[k] >= s[1])) latest[k] = s[1]; }); }); });
+    function best(kind, a, b) {
+      return cols.map(function (c) {
+        var over = 0, size = 0, lo = null, hi = null;
+        spansOf(c, kind).forEach(function (s) { size += s[1] - s[0] + 1; var x = Math.max(a, s[0]), y = Math.min(b, s[1]); if (y >= x) { over += y - x + 1; lo = lo == null ? x : Math.min(lo, x); hi = hi == null ? y : Math.max(hi, y); } });
+        return { c: c, over: over, size: size, lo: lo, hi: hi };
+      }).filter(function (x) { return x.over > 0; }).sort(function (x, y) { return y.over - x.over || x.size - y.size || x.c.from - y.c.from; })[0];
+    }
+    function add(x, why) { var p = picks.filter(function (q) { return q.c === x.c; })[0]; if (!p) picks.push(p = { c: x.c, why: [] }); if (p.why.indexOf(why) < 0) p.why.push(why); }
+    needs.forEach(function (n) {
+      var x = best(n.kind, n.from, n.to);
+      if (!x) gaps.push(n); else add(x, n.say + (x.lo > n.from || x.hi < n.to ? " (it has " + (x.lo === x.hi ? x.lo : x.lo + "\u2013" + x.hi) + ")" : ""));
+    });
+    gaps.forEach(function (n) {
+      if (!n.back) return;
+      var p = best("b", n.from - 45, n.to - 18), m = best("m", n.from - 25, n.to);
+      var why = "a generation back: their parents\u2019 births, about " + (n.from - 45) + "\u2013" + (n.to - 18), rest = p && p.hi < n.to - 18 ? best("b", p.hi + 1, n.to - 18) : null;
+      if (p) add(p, why); if (rest) add(rest, why);   /* one book rarely holds a whole generation: the one that carries on from it comes too */
+      if (m) add(m, "a generation back: their parents\u2019 marriage, about " + (n.from - 25) + "\u2013" + n.to);
+    });
+    return { picks: picks.slice(0, 5), gaps: gaps, latest: latest };
+  }
+
   /* Who held a place in a year, from an info object {name, countryName, eras, regimes}: {polity, regime, filedUnder, note, tracked}.
      `tracked` is false when the Atlas has no era table for the area, so the line says the country as it is today and nothing more. */
   function captionAt(info, year) {
@@ -2767,6 +2813,15 @@
       countries: row && row.countries ? row.countries.map(function (c) { return c.cc; }).slice(0, 8) : [] };
   }
 
+  /* SITES THAT KEEP A PAGE FOR EACH SURNAME, asked for by David («maybe we add a link to acta on last names?»): any directory row whose address takes the
+     name ({surname}, or {SURNAME} where the site wants capitals) and whose countries touch `ccs` (on the story page, the countries of the story's places).
+     A link only: the atlas reads nothing from them, and the name goes to that site when the reader clicks. lib/name-links.js is the surname page's copy of this rule and a test holds the two together. */
+  function nameLinks(providers, name, ccs) {
+    if (!name) return [];
+    return (providers || []).filter(function (p) { return /\{(surname|SURNAME)\}/.test(p.deepLink || "") && (p.countries || []).some(function (c) { return (ccs || []).indexOf(c) > -1; }); })
+      .map(function (p) { return { id: p.id, name: String(p.name).split(" \u2014 ")[0], url: p.deepLink.replace("{surname}", encodeURIComponent(name)).replace("{SURNAME}", encodeURIComponent(name.toUpperCase().replace(/\s+/g, "_"))) }; });
+  }
+
   /* WHICH LANGUAGES A CLERK WOULD HAVE USED, from where a person lived and when. David: «we can deduce which alternate spellings he would have based on who held the ground / the country
      of the time of his life, rather than throwing all languages up». A person born in Senj in 1951 was written in Croatian (Yugoslavia) and, in Sydney, in English; not in Latin, Italian or
      Hungarian, which Senj's registers used under other rulers. The language of the country as it is now is always included; the polity of each era the person was there adds the language its
@@ -2796,8 +2851,8 @@
     return any ? { keys: keys, notes: notes } : null;
   }
 
-  var api = { toYear: toYear, suggest: suggest, windows: windows, volumesFor: volumesFor, captionAt: captionAt, progress: progress, between: between,
-              readFamily: readFamily, readMe: readMe, readEvents: readEvents, repairCase: repairCase, givenForms: givenForms, volLabel: volLabel, buildPlan: buildPlan, parseStory: parseStory, startFamily: startFamily, familyName: familyName, flagFor: flagFor, leaderAt: leaderAt, leadersBetween: leadersBetween, givenGroups: givenGroups, otherForms: otherForms, numberPeople: numberPeople, surnameBlock: surnameBlock, short: short, yearsIn: yearsIn,
+  var api = { toYear: toYear, suggest: suggest, windows: windows, volumesFor: volumesFor, spansOf: spansOf, bookNeeds: bookNeeds, keyBooks: keyBooks, captionAt: captionAt, progress: progress, between: between,
+              readFamily: readFamily, readMe: readMe, readEvents: readEvents, repairCase: repairCase, givenForms: givenForms, volLabel: volLabel, buildPlan: buildPlan, parseStory: parseStory, startFamily: startFamily, familyName: familyName, flagFor: flagFor, leaderAt: leaderAt, leadersBetween: leadersBetween, givenGroups: givenGroups, otherForms: otherForms, numberPeople: numberPeople, surnameBlock: surnameBlock, nameLinks: nameLinks, short: short, yearsIn: yearsIn,
               HOLDS: HOLDS, YEAR_MIN: YEAR_MIN, YEAR_MAX: YEAR_MAX, readLife: readLife, gazWants: gazWants, gazMerge: gazMerge, didYouMean: didYouMean, aliasMerge: aliasMerge, countryPoints: countryPoints, repairCase: repairCase, clerkLanguages: clerkLanguages };
   if (typeof module !== "undefined" && module.exports) { module.exports = api; return; }
   window.raStory = api;
@@ -2913,7 +2968,12 @@
         var slugOf = Object.create(null); if (r[3] && r[3].slug) Object.keys(r[3].slug).forEach(function (sl) { slugOf[r[3].slug[sl]] = sl; });
         r[0].forEach(function (i) { i.flagSlug = slugOf[i.cc] || ""; });
         r[0].forEach(function (i) { i.provs = provs.filter(function (x) { return (x.countries || []).indexOf(i.cc) > -1; }).sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); }); i.pname = pname; i.world = provs.filter(function (x) { return (x.countries || []).indexOf("*") > -1; }); i.flagRows = fm ? fm[String(i.cc || "").toUpperCase()] : null; i.leaders = lead ? lead[String(i.cc || "").toUpperCase()] : null; });
-        r[0].forEach(function (i) { i.near = i.p && (i.cols || []).length ? [] : nearbyVolumes(i); });
+        r[0].forEach(function (i) {
+          i.isCountry = !!i.row.country || (!!i.countryName && S.fold(i.name) === S.fold(i.countryName));
+          /* a country has no neighbourhood: what is near its middle says nothing. It carries the places in it that hold books, with their years. */
+          i.near = i.isCountry || (i.p && (i.cols || []).length) ? [] : nearbyVolumes(i);
+          if (i.isCountry) i.holds = data.rows.filter(function (x) { return x.cc === i.cc && !x.country && x.c > 0 && x.s; });
+        });
         var from = parsed.from ? infos[parsed.from.row.i] : null, to = parsed.to ? infos[parsed.to.row.i] : null;
         var facts = { told: toldYears(parsed), dated: datedFacts(parsed), rel: parsed.rel, name: parsed.name, siblings: parsed.siblings || [], holds: parsed.holds, holdsAll: parsed.holdsAll, left: parsed.left, born: parsed.born, from: from, to: to, base: BASE,
           providers: to ? provs.filter(function (p) { return (p.countries || []).indexOf(to.cc) > -1; }) : (from ? provs.filter(function (p) { return (p.countries || []).indexOf(from.cc) > -1; }) : []),
@@ -2936,7 +2996,7 @@
         var out = r[6].map(function (pe, i) {
           var gr = pe.given && data.given ? S.givenIn(pe.given, data.given, null) : [];
           return { role: pe.role, rel: pe.rel, name: pe.name, given: gr.length ? { canon: gr[0].row.canon, typed: pe.given, groups: givenGroups(gr[0].row, labels) } : (pe.given ? { canon: "", typed: pe.given, groups: [] } : null),
-            langs: clerkLanguages(staysOf(pe)), surname: r[5][i], surnameTyped: pe.surname, maiden: pe.maiden || "", married: pe.married || "", occupation: pe.occupation || "", counts: pe.counts || null, told: !!pe.told, presumed: !!pe.presumed, me: !!pe.me, sought: !!pe.sought, key: pe.key, ofSubject: !!pe.ofSubject, nameNote: pe.nameNote || "", place: pe.place && infos[pe.place.row.i] ? infos[pe.place.row.i].name : "", placeSaid: pe.place && pe.place.said || "", placeNear: pe.place && pe.place.nearTo && pe.place.nearTo.row && infos[pe.place.nearTo.row.i] ? infos[pe.place.nearTo.row.i].name.replace(/\s*\(area\)$/, "") : "", label: pe.label || "", side: pe.side || "", up: !!pe.up,
+            langs: clerkLanguages(staysOf(pe)), surname: r[5][i] && Object.assign(r[5][i], { links: nameLinks(provs, pe.surname, r[0].map(function (x) { return x.cc; })) }), surnameTyped: pe.surname, maiden: pe.maiden || "", married: pe.married || "", occupation: pe.occupation || "", counts: pe.counts || null, told: !!pe.told, presumed: !!pe.presumed, me: !!pe.me, sought: !!pe.sought, key: pe.key, ofSubject: !!pe.ofSubject, nameNote: pe.nameNote || "", place: pe.place && infos[pe.place.row.i] ? infos[pe.place.row.i].name : "", placeSaid: pe.place && pe.place.said || "", placeNear: pe.place && pe.place.nearTo && pe.place.nearTo.row && infos[pe.place.nearTo.row.i] ? infos[pe.place.nearTo.row.i].name.replace(/\s*\(area\)$/, "") : "", label: pe.label || "", side: pe.side || "", up: !!pe.up,
             events: (pe.events || []).map(function (e) { var inf = e.place && infos[e.place.row.i]; if (e.type === "told") return { type: "told", text: e.text }; return { type: e.type, said: e.said || "", year: e.year, place: inf ? inf.name : (e.place ? e.place.word : e.text ? e.text + " (not among the Atlas's places)" : ""), country: inf ? inf.countryName : "", cause: e.cause || "" }; }) };
         });
         return { facts: facts, plan: buildPlan(facts), mort: r[2], names: { people: out }, people: out, others: parsed.others || [], life: parsed.life || null };
@@ -3420,13 +3480,54 @@
         });
         return any ? wrap : null;
       }
+      function upper(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+      function orList(a) { return a.length < 2 ? a.join("") : a.slice(0, -1).join(", ") + " or " + a[a.length - 1]; }
+      /* the few books to open first for the story's dates, each with the reason; what none of them reaches is said, never padded */
+      function keyList(info, needs) {
+        var k = keyBooks(info.cols, needs), wrap = el("div", null, "lf-key");
+        wrap.append(el("h5", k.picks.length ? "Books to open first" : "Books for your years"));
+        if (k.gaps.length) {
+          var ends = []; ["b", "m", "d"].forEach(function (x) { if (k.latest[x] != null && k.gaps.some(function (n) { return n.kind === x && n.from > k.latest[x]; })) ends.push(BOOK_WORD[x].toLowerCase() + " in " + k.latest[x]); });
+          var late = k.gaps.some(function (n) { return n.from >= 1895; });
+          wrap.append(el("p", "No book the Atlas lists for " + info.name + " has " + orList(k.gaps.map(function (n) { return n.say; })) + "." + (ends.length ? " Its books stop: " + ends.join(", ") + "." : "") + (late ? " Entries that late are usually still with the civil registry office." : ""), "lf-filed"));
+        }
+        if (k.picks.length) {
+          var ul = el("ul", null, "lf-vols lf-srcs");
+          k.picks.forEach(function (x) {
+            var li = el("li", null, "lf-src lf-keyrow"), a = el("a", volLabel(x.c)); a.href = x.c.url || info.href; if (x.c.url) a.rel = "noopener";
+            li.append(a, el("span", upper(x.why.join("; ")) + (x.c.access ? " \u00b7 " + (x.c.access === "account" ? "free with an account" : x.c.access) : ""), "lf-filed")); ul.append(li); items.push({ vol: x.c, href: a.href });
+          });
+          wrap.append(ul);
+        }
+        return wrap;
+      }
+      /* for a country: which of its places have books reaching the years, or that none does; and who to ask */
+      function countryList(info, w) {
+        if (!w) return null;
+        var all = info.holds || [], hit = all.filter(function (r) { return r.s[0] <= w[1] && r.s[1] >= w[0]; }), wrap = el("div", null, "lf-key");
+        var span = w[0] === w[1] ? String(w[0]) : w[0] + "\u2013" + w[1];
+        wrap.append(el("h5", "For " + span + " in " + info.name));
+        if (!all.length) wrap.append(el("p", "The Atlas lists no register book for any place in " + info.name + ".", "lf-filed"));
+        else if (!hit.length) wrap.append(el("p", (all.length === 1 ? "The one place in " + info.name + " with books does not reach " : "None of the " + all.length + " places in " + info.name + " with books reaches ") + span + ": the latest stops in " + Math.max.apply(null, all.map(function (r) { return r.s[1]; })) + ".", "lf-filed"));
+        else if (hit.length > 5) wrap.append(el("p", hit.length + " places in " + info.name + " have books reaching those years. They help once you know the town, so ask the family which one.", "lf-filed"));
+        else {
+          var ul = el("ul", null, "lf-vols lf-srcs");
+          hit.forEach(function (r) { var li = el("li", null, "lf-src"), a = el("a", r.n); a.href = base + "place/" + encodeURIComponent(r.i) + "/"; li.append(a, el("span", "books " + r.s[0] + "\u2013" + r.s[1], "lf-filed")); ul.append(li); items.push({ href: a.href }); });
+          wrap.append(ul);
+        }
+        var na = (info.provs || []).filter(function (p) { return p.kind === "national-archive" && p.url && p.access !== "dead"; })
+          .sort(function (a, b) { return (a.countries || []).length - (b.countries || []).length; })[0];
+        if (na) { var q = el("p", "Ask first: ", "lf-filed"), l = el("a", na.name); l.href = na.url; l.rel = "noopener"; q.append(l); wrap.append(q); items.push({ src: na, href: na.url }); }
+        if (w[0] >= 1920) wrap.append(el("p", "Births, marriages and deaths that recent are usually still at the civil registry office of the town where they happened.", "lf-filed"));
+        return wrap;
+      }
       /* FamilySearch for this place and these years: its collections, and the register images the Atlas has the address of */
       var KIND_RE = { b: /birth|baptis/i, m: /marri/i, d: /death|burial|buri/i };
-      function fsList(info, kinds, win) {
+      function fsList(info, kinds, win, keyed) {
         var p = info.p || {}, wrap = el("div"), any = false;
         var vols = (p.volumes || []).filter(function (v) { return v.url && (!win || (v.from <= win[1] && v.to >= win[0])) && (!kinds.length || kinds.some(function (k) { return KIND_RE[k] && KIND_RE[k].test((v.kinds || []).join(" ") + " " + v.t); })); }).slice(0, 3);
         var cols = (p.fs || []).filter(function (c) { return c.url && (!win || (c.from <= win[1] && c.to >= win[0])); }).sort(function (a, b) { return (b.rank || 0) - (a.rank || 0); }).slice(0, 3);
-        if (vols.length) {
+        if (vols.length && !keyed) {   /* where the books to open first are listed, the same images are not listed again */
           any = true; wrap.append(el("h5", "Register images on FamilySearch"));
           var ul = el("ul", null, "lf-vols lf-srcs"); vols.forEach(function (v) { var li = el("li", null, "lf-src"), a = el("a", v.t); a.href = v.url; a.rel = "noopener"; li.append(a); ul.append(li); items.push({ vol: v, href: v.url }); }); wrap.append(ul);
         }
@@ -3647,11 +3748,19 @@
         then.append(ground(info, years, span, ends, dated));
         where.append(el("h4", "Where to search"));
         var ul = el("ul", null, "lf-look"); look.forEach(function (x) { ul.append(el("li", x)); }); where.append(ul);
-        var fl = fsList(info, kinds, win); if (fl) where.append(fl);
-        var vl = volumeList(info, kinds, win); if (vl) where.append(vl); else if (kinds.length) { where.append(el("p", "The Atlas lists no " + (kinds.length > 1 ? "birth, baptism or marriage" : kinds[0] === "b" ? "birth or baptism" : kinds[0] === "m" ? "marriage" : "burial") + " volume for " + info.name + (win ? " in those years" : "") + ". That is a gap in the Atlas, not proof the records do not exist.", "lf-filed")); var nl = nearList(info, kinds); if (nl) where.append(nl); }
+        var needs = !info.isCountry && (info.cols || []).length ? bookNeeds(dated, kinds, win || span || storyYears()) : [], keyed = needs.length > 0;
+        if (keyed) where.append(keyList(info, needs));
+        if (info.isCountry) { var told = storyYears(), cl = countryList(info, win || span || (told ? [f.told[1], told[1]] : null)); if (cl) where.append(cl); }
+        var fl = fsList(info, kinds, win, keyed); if (fl) where.append(fl);
+        var vl = keyed || info.isCountry ? null : volumeList(info, kinds, win); if (vl) where.append(vl); else if (!keyed && !info.isCountry && kinds.length) { where.append(el("p", "The Atlas lists no " + (kinds.length > 1 ? "birth, baptism or marriage" : kinds[0] === "b" ? "birth or baptism" : kinds[0] === "m" ? "marriage" : "burial") + " volume for " + info.name + (win ? " in those years" : "") + ". That is a gap in the Atlas, not proof the records do not exist.", "lf-filed")); var nl = nearList(info, kinds); if (nl) where.append(nl); }
         if (withSources) where.append(sources(info));
         var wl = worldList(info); if (wl) where.append(wl);
-        var pl = el("p"), pa = el("a", "Every volume the Atlas lists for " + info.name + " \u2192"); pa.href = info.href; pl.append(pa); where.append(pl);
+        /* the rest, only where there is a rest: how many, and where */
+        var nb = info.isCountry ? (info.holds || []).length : (info.cols || []).length;
+        if (nb) {
+          var pl = el("p", null, "lf-all"), pa = el("a", (info.isCountry ? (nb === 1 ? "The one place in " + info.name + " with books" : "All " + nb + " places in " + info.name + " with books") : (nb === 1 ? "The one book listed for " + info.name : "All " + nb + " books listed for " + info.name)) + " \u2192");
+          pa.href = info.isCountry ? base + "country/" + String(info.cc).toLowerCase() + "/" : info.href; pl.append(pa); where.append(pl);
+        }
         grid.append(then, where); sec.append(grid);
         var fp = fullPanel(info); if (fp) sec.append(fp);
         box.append(sec);
@@ -3755,10 +3864,11 @@
       }
     }
     if (sn) {
-      var f = sn.family, pos = f ? f.by.same.concat(f.by.attested, f.by.rule) : [];
-      if (f || sn.spelling.length || sn.sounds.length) {
+      var f = sn.family, pos = (f ? f.by.same.concat(f.by.attested, f.by.rule) : []).filter(function (x) { return x.toLowerCase() !== String(sn.name).toLowerCase(); });   /* the name itself is not another spelling of it */
+      var links = sn.links || [], spelt = pos.length || (f && (f.by.lead.length || f.by["case-by-case"].length || f.notSame.length)) || sn.spelling.length || sn.sounds.length;
+      if (spelt || links.length) {
         any = true;
-        box.append(el("h4", "Surname: " + sn.name + " may be written"));
+        box.append(el("h4", "Surname: " + sn.name + (spelt ? " may be written" : "")));
         var u2 = el("ul", null, "lf-forms");
         function row(b, t) { var l = el("li"); l.append(el("b", b), document.createTextNode(t)); u2.append(l); }
         if (pos.length) row("Recorded spellings of the same name: ", pos.join(", "));
@@ -3767,7 +3877,12 @@
         if (sn.spelling.length) row("Close spellings in the Atlas's name lists (leads): ", sn.spelling.join(", "));
         if (sn.sounds.length) row("Names that sound alike (leads): ", sn.sounds.join(", "));
         if (f && f.notSame.length) row("Look alike, but a different name: ", f.notSame.slice(0, 6).map(function (x) { return x[0]; }).join(", "));
-        box.append(u2);
+        if (u2.firstChild) box.append(u2);
+        links.forEach(function (x) {
+          var p = el("p", null, "lf-namelink"), a = el("a", "Look up " + sn.name + " on " + x.name + " \u2197");
+          a.href = x.url; a.target = "_blank"; a.rel = "noopener"; a.title = "Your browser sends the name to " + x.name + " when you click.";
+          p.append(a); box.append(p);
+        });
       }
     }
     return any ? box : null;

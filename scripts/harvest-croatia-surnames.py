@@ -33,6 +33,9 @@ atlas of historical records it is often the more interesting answer: it
 says an Istrian name that fills a nineteenth-century parish register —
 Bellinich, Alacevich — has gone from modern Croatia, which is the shape of
 the exodus written into a census.
+
+    python3 scripts/harvest-croatia-surnames.py                  # the candidates not yet asked
+    python3 scripts/harvest-croatia-surnames.py Fratrović        # only the names given
 """
 import html, http.cookiejar, json, os, re, sys, time
 import urllib.error, urllib.parse, urllib.request
@@ -135,14 +138,18 @@ def already_asked():
     return cache
 
 
-def main():
-    names = candidates()
+def main(argv=()):
+    # NAMES ON THE COMMAND LINE are asked instead of the candidate list: a reader looked one up and the atlas had never had a
+    # reason to ask about it (Fratrović, 13 people, in no family archive). One question per name typed, kept like any other answer.
+    asked_for = [" ".join(n.split()) for n in argv if n.strip()]
+    names = asked_for or candidates()
     cache = already_asked()
     todo = [n for n in names if n not in cache]
     backlog = len(todo)
     if MAX and len(todo) > MAX:
         todo = todo[:MAX]
-    print(f"{len(names)} surnames attested in Croatian archives, "
+    which = "named on the command line" if asked_for else "surnames attested in Croatian archives"
+    print(f"{len(names)} {which}, "
           f"{len(cache)} already asked, {backlog} to ask"
           + (f" — asking {len(todo)} this run, {backlog - len(todo)} left for "
              f"the next one" if MAX and backlog > len(todo) else ""))
@@ -203,8 +210,8 @@ def main():
         "enumerable": False,
         "note": ("NOT A NATIONAL CORPUS. The DZS application answers one "
                  "name at a time and has no listing endpoint, so this holds "
-                 "only the surnames the atlas already attests in archives "
-                 "whose declared country is Croatia. `asked` is the whole "
+                 "only the surnames the atlas already attests in Croatia, and "
+                 "ones asked about by name. `asked` is the whole "
                  "question put; `found` carried ten or more people in 2011; "
                  "`gone` is the application's «less than 10 or does not "
                  "occur», which for a name that fills a nineteenth-century "
@@ -225,4 +232,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])

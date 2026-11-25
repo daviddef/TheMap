@@ -516,6 +516,61 @@ def place_evidence(places, OVR, PIN):
               f"{name_tested:,} settlements confirmed by name, {name_untestable} untestable")
 
 
+def district_gate(places):
+    """«X (Y)» is drawn in Y's district, and lists only that parish's books.
+
+    Sixteen Croatian parishes stood on a namesake up to 380 km from the town in
+    their own name, and four rows listed a second parish's books. Every one
+    passed the gates above: right country, and a same-name gazetteer row right
+    under the point. See scripts/district_names.py.
+    """
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__))))
+    import district_names as dn
+    seen = json.load(open("data/geocode-checked.json", encoding="utf-8"))
+    checked, two = seen["checked"], seen.get("twoParishes", {})
+    districts = dn.Districts(places)
+    far = dn.too_far(places, districts, checked)
+    for p, d in far:
+        err(f"place {p['id']}: «{p['name']}» is drawn {d:.0f} km from the district in its name. It is probably a "
+            f"namesake: move it on positive evidence, or record the point in data/geocode-checked.json "
+            f"(verdict «correct», lat, lon, why)")
+
+    # The shelf and the walked volumes are matched to a row by two different
+    # routes. When «X (Y)» shares no book between them, one of the two is
+    # another parish's.
+    walked = json.load(open("data/fs-volumes.json", encoding="utf-8"))["byPlace"]
+    mixed = set()
+    for p in places:
+        if not dn.split(p["name"]):
+            continue
+        a = dn.shelf_waypoints(p)
+        b = {v.get("waypoint", "").split(":")[0] for v in walked.get(p["id"], [])}
+        if a and b and not a & b:
+            mixed.add(p["id"])
+            if p["id"] not in two:
+                err(f"place {p['id']}: the shelf of «{p['name']}» and its walked volumes share no book — two parishes "
+                    f"are on one row. Separate them (data/parish-places.json), or record why under «twoParishes» in "
+                    f"data/geocode-checked.json")
+    for pid in sorted(set(two) - mixed):
+        err(f"geocode-checked twoParishes {pid}: no longer mixed (or gone); take the entry out")
+
+    # A parish that has been given its own row stays on it.
+    homes = json.load(open("data/parish-places.json", encoding="utf-8"))["parishes"]
+    ids = {p["id"] for p in places}
+    for number, v in homes.items():
+        if v["place"] not in ids:
+            err(f"parish-places {number}: {v['place']!r} is not a place id in data/places.json")
+    for p in places:
+        for number in sorted(dn.shelf_parishes(p) & set(homes)):
+            if homes[number]["place"] != p["id"]:
+                err(f"place {p['id']}: lists books of FamilySearch parish «{homes[number]['parish']}», which belongs "
+                    f"on {homes[number]['place']} (data/parish-places.json)")
+    if not far:
+        n = sum(1 for p in places if districts.distance(p["name"], p.get("country"), p["lat"], p["lon"]) is not None)
+        print(f"district names: {n} places named «X (Y)» whose Y is a place, none unexplained beyond {dn.LIMIT_KM} km; "
+              f"{len(two)} rows still known to hold two parishes")
+
+
 def place_ids_valid(places):
     """data/place-ids.json: an id attached to a place has to be the right shape and the right place.
 
@@ -2020,6 +2075,7 @@ def main():
     licence_gate()
     access_colours_agree()
     place_evidence(places, OVR, PIN)
+    district_gate(places)
     place_ids_valid(places)
 
     for w in WARN[:12]:

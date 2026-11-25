@@ -441,7 +441,39 @@ function relinkScripts(html, all) {
     html = html.split(`"${slug}.html"`).join(`"${u("/flags/" + slug + "/")}"`)
                .split(`'${slug}.html'`).join(`'${u("/flags/" + slug + "/")}'`);
   }
-  return html;
+  return relinkErasScript(html);
+}
+
+/* THE «GENEALOGICAL RECORDS FOR THIS GROUND» SCRIPT, WHICH HAS NEVER RUN HERE.
+   About 198 of these pages end with one script (identical on 197 of them)
+   that fetches eras.json and adds a fold to each era card. It was written for
+   /flags/wales-flags.html, and at that depth three things in it were right
+   that are wrong at /flags/wales-flags/:
+
+     1. fetch("../eras.json") is /flags/eras.json, a 404. The file is /eras.json.
+        The script's .then does `if (!data) return`, so it quit without a word,
+        which is why nobody saw it: the page looks finished without the fold.
+     2. `here` was the last path segment, "wales-flags.html". With the trailing
+        slash it is "", so the key it matches against eras.json's `flags` column
+        was ".../Flag-History/" and no row could ever match, even with 1 fixed.
+     3. The links the fold writes are `../archive/…`, `../` and the
+        `../region/…` that eras.json itself holds, all relative to the old depth.
+
+   Exact strings, as above, and only these five: a script that does not hold
+   one of them is left exactly as it was. */
+function relinkErasScript(html) {
+  const root = u("/");
+  return html
+    .split('var here = window.location.pathname.split("/").pop();')
+    .join('var here = window.location.pathname.replace(/\\/$/, "").split("/").pop() + ".html";')
+    .split('fetch("../eras.json")')
+    .join(`fetch("${u("/eras.json")}")`)
+    .split(`'<a href="../archive/' + f`)
+    .join(`'<a href="${u("/archive/")}' + f`)
+    .split(`<a href="' + row.region_page + '"`)
+    .join(`<a href="' + String(row.region_page).replace(/^\\.\\.\\//, "${root}") + '"`)
+    .split('<a href="../" target="_blank"')
+    .join(`<a href="${root}" target="_blank"`);
 }
 
 /** Title, stylesheet and body markup for one page, ready to put inside Base. */

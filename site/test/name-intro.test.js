@@ -119,3 +119,9 @@ test("My research keeps where-this-lives in the page footer, not above the work"
   assert.doesNotMatch(page, /<div class="lab">Where this lives<\/div>/);
   assert.match(base, /Astro\.slots\.has\("footnote"\)/);
 });
+
+test("the family you mark under is shown with a pencil, not a tick that looks like the read-together box", () => {
+  const bar = fs.readFileSync(path.join(here, "../public/js/line-switcher.js"), "utf8");
+  assert.match(bar, /l\.active \? "\\u270E" : ""/);
+  assert.match(bar, /Your marks go under this family\. Click a family's name to change it/);
+});

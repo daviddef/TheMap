@@ -144,7 +144,9 @@
         tog.addEventListener("mousedown", function (e) { e.stopPropagation(); e.preventDefault(); toggleScope(l.slug); syncTicks(); });
         tog.addEventListener("click", function (e) { e.stopPropagation(); e.preventDefault(); });
         tog.addEventListener("keydown", function (e) { if (e.key === " " || e.key === "Enter") { e.stopPropagation(); e.preventDefault(); toggleScope(l.slug); syncTicks(); } });
-        li.append(tog, mk("span", "ra-cb-tick", l.active ? "\u2713" : ""), main, arc, mk("span", "ra-cb-n", l.marks + (l.marks === 1 ? " mark" : " marks")));
+        var tk = mk("span", "ra-cb-tick", l.active ? "\u270E" : "");   /* a pencil, not a tick: it marks where your marks go, and the boxes are a separate choice */
+        if (l.active) { tk.title = "Your marks go under this family. Click a family's name to change it. The boxes only choose which families are read together."; tk.setAttribute("aria-label", "Your marks go under this family"); }
+        li.append(tog, tk, main, arc, mk("span", "ra-cb-n", l.marks + (l.marks === 1 ? " mark" : " marks")));
         li.addEventListener("mousedown", function (e) { e.preventDefault(); choose(l); });
         list.append(li);
       });

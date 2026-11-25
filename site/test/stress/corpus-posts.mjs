@@ -42,5 +42,6 @@ export const C = [
  { id:"post-one-of-daughters", t:"My dad is from Cork. My mum was one of five daughters.", e:{stops:["Cork"], people:["father","mother","psib"]} },
  { id:"post-one-of-eight", t:"My grandfather Antonio was born in Fiume, one of eight children.", e:{name:"Antonio", rel:"grandfather"} },
  { id:"post-man-named", t:"My grandmother was born in Galway. Her husband was a man named Sean O'Brien and they had five children.", e:{stops:["Galway"], rel:"grandmother", people:["spouse"]} },
+ { id:"post-lived-near", t:"My great grandfather is Ivan Mihaljevic and his wife, my great grandmother is Lucija, born Fratrovic. They had 5 children. They lived in Dreznik near Nova Gradiska.", e:{name:"Ivan Mihaljevic", rel:"great-grandfather", people:["spouse"]} },
  { id:"post-pula", t:"My grandmother was born in Pula in 1928 when it was Italy, grew up in Zadar, fled to Italy after the war, then went to Chicago in 1956.", e:{stops:["Pula","Zadar","Italy","Chicago"], rel:"grandmother"} }
 ];

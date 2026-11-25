@@ -119,6 +119,7 @@
     "relation-missing": function (p) { return "your " + p.words[0] + " is not on the tree"; },
     "teller-assigned": function () { return "facts about someone else were given to you"; },
     "role-unsupported": function (p) { return q(p.words[0]) + " is shown as a " + p.words[1] + " place and your words do not say that"; },
+    "label-unsupported": function (p) { return "a box says " + q(p.words[1]) + " " + q(p.words[0]) + " and your words do not say that"; },
     "route-order": function (p) { return "the places are not in the order you told them"; },
     "subject-mismatch": function (p) { return "the story starts with " + p.words[0] + " and the page reads it as being about " + (p.words[1] || "someone else"); }
   };
@@ -274,7 +275,10 @@
       var sx = /brother/.test(cl.word) ? /brother/ : /sister/.test(cl.word) ? /sister/ : null;   /* brothers are counted against brothers, sisters against sisters */
       /* the children under «also named», named or not, are listed too: sons against sons, daughters against daughters */
       var kk = /^(?:sons|boys)$/.test(cl.word) ? /^son$/ : /^(?:daughters|girls)$/.test(cl.word) ? /^daughter$/ : /^(?:child|son|daughter|twin)$/;
-      var listed = cl.kind === "child" ? childRows.length || arr(p.others).filter(function (o) { return kk.test(String(o.kin || "")); }).length : sibRows.length + arr(p.siblings).filter(function (x) { return !sx || !x.rel || sx.test(x.rel) || /sibling/.test(x.rel); }).length;
+      /* «three boys and four girls»: only rows that say a boy or a girl are held to that; seven children with no sex said are the count, not too many boys */
+      var csx = /^(?:sons|boys)$/.test(cl.word) ? "M" : /^(?:daughters|girls)$/.test(cl.word) ? "F" : "";
+      if (cl.kind === "child" && csx && childRows.length && !childRows.some(function (x) { return x.sex === csx; })) return;
+      var listed = cl.kind === "child" ? (csx ? childRows.filter(function (x) { return x.sex === csx; }) : childRows).length || arr(p.others).filter(function (o) { return kk.test(String(o.kin || "")); }).length : sibRows.length + arr(p.siblings).filter(function (x) { return !sx || !x.rel || sx.test(x.rel) || /sibling/.test(x.rel); }).length;
       /* «…Paolo and my mother Anna»: the teller's own parent is one of those counted, and stands in the parents' row instead */
       if (cl.kind === "child" && listed && listed < cl.n && /^[^.!?\n]*\bmy\s+(?:mother|mum|mom|father|dad)\b/i.test(text.slice(cl.end, cl.end + 160))) listed++;
       var said2 = new RegExp("\\b" + cl.n + "\\s+(?:of the\\s+)?(?:other\\s+)?" + cl.word.replace(/s$/, "") , "i").test(readBlob) || new RegExp("\\b" + cl.n + "\\s+(?:children|kids)", "i").test(readBlob);
@@ -381,6 +385,37 @@
       var win = text.slice(Math.max(0, at - 110), at + 40);
       if (!/\b(?:born|birth|b\.|native|nee|née|baptis\w*|christened|from|grew up|raised|came from|comes from|originat\w+|hails?|come from)\b/i.test(win)) add("role-unsupported", "medium", [s.row.n, "birth"], [at, at + 1]);
     });
+    /* C3a: EVERY «Born in», «From», «Lived in», «Died in» and «Married in» a box can show has its own word in a sentence that names the place. A birth also needs that
+       word to be the one that governs the place: «born in 1920, later lived in X» does not make X the birthplace. */
+    (function () {
+      var SUP = { born: /^(?:born|b|birth|birthplace|nee)$/, from: /^(?:from|native|hails|hailed|originally|originated)$/, lived: /^(?:lived|lives|live|living|grew|raised|resided|settled|stayed|home|dwelt)$/,
+        died: /^(?:died|d|dies|dying|death|buried|killed|murdered|executed|drowned|perished|passed)$/, married: /^(?:married|marry|wed|wedded|wedding)$/ }, OTHERV = /^(?:lived|lives|living|resided|settled|died|buried|moved|went|emigrated|migrated|came|sailed|worked|married)$/;
+      var SAY = { born: "Born in", from: "From", lived: "Lived in", died: "Died in", married: "Married in" };
+      var ss = text.replace(/\b(b|d|m|c|ca|st|mt|dr|fr|sr|jr|mr|mrs|ms)\./gi, "$1 ").split(/(?<=[.!?;])\s+|\n+/).map(function (x) { return fold(x).replace(/[^\p{L}\p{N}]+/gu, " ").trim().split(" "); }), done = {};
+      function tagOf(st) { if (st.said !== undefined) return st.said; var r = String(st.role || ""); return r === "born" ? "born" : r === "lived" ? "lived" : /origin|-from$/.test(r) ? "from" : ""; }
+      function claim(tag, pl) {
+        if (!SUP[tag] || !pl) return;
+        var word = String(pl.word || (pl.row && pl.row.n) || (typeof pl === "string" ? pl : "")), ws = fold(word).replace(/[^\p{L}\p{N}]+/gu, " ").trim().split(" "); if (!ws[0] || done[tag + "|" + word]) return;
+        var seen = false, ok = ss.some(function (tk) {
+          for (var i = 0; i + ws.length <= tk.length; i++) {
+            if (!ws.every(function (w, j) { return tk[i + j] === w; })) continue;
+            seen = true;
+            var at = -1; tk.forEach(function (w, k) { if (SUP[tag].test(w) && (k < i || at < 0)) at = k; });
+            if (at < 0) continue;
+            if (tag === "born" && at < i && tk.slice(at + 1, i).some(function (w) { return OTHERV.test(w); }) && !/^(?:and )?(?:bred|raised|brought|grew|lived|died)\b/.test(tk.slice(at + 1, i).join(" "))) continue;
+            return true;
+          }
+          return false;
+        });
+        if (seen && !ok) { done[tag + "|" + word] = 1; add("label-unsupported", tag === "from" || tag === "lived" ? "medium" : "high", [word, SAY[tag]], null); }
+      }
+      people.forEach(function (x) {
+        if (x.place) claim(tagOf(x.place), x.place);
+        (x.events || []).forEach(function (e) { if (e.type === "lived") claim(e.said === "lived" ? "lived" : e.said === undefined ? "lived" : "", e.place); else if (e.type !== "told") claim(e.type, e.place); });
+      });
+      arr(p.kin).forEach(function (k) { var st = (k.stops || [])[0]; if (st && k.label !== "also named in the story") claim(tagOf(st), st); });
+      arr(p.stops).forEach(function (st) { if (st && (st.role === "born" || st.said === "born")) claim("born", st); });
+    })();
     /* C4: the route runs in the order told (unless the reading says a place was before or is where another is) */
     var prevAt = -1;
     arr(p.stops).forEach(function (s) {

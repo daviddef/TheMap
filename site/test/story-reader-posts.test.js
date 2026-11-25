@@ -101,7 +101,8 @@ test("a husband or wife keeps the whole surname and stands in one box", () => {
   }
 });
 test("children counted and not named stand there unnamed, as sons or daughters where said", () => {
-  const kids = (t) => (read(t).others || []).map((o) => o.kin + ":" + o.name);
+  /* a grandparent's children stand under them in the tree; anyone else's are listed under «also named» */
+  const kids = (t) => { const p = read(t); return (p.people || []).filter((x) => x.role === "child").map((x) => x.label + ":" + x.name).concat((p.others || []).map((o) => o.kin + ":" + o.name)); };
   assert.deepEqual(kids("My grandmother Anna was born in Ovaro. She married Giovanni de la Cruz and they had three daughters."), ["daughter:", "daughter:", "daughter:"]);
   assert.deepEqual(kids("My grandmother Anna was born in Ovaro and had 2 sons."), ["son:", "son:"]);
   assert.deepEqual(kids("My great grandmother Anna had four daughters: Maria and Luisa."), ["daughter:Maria", "daughter:Luisa", "daughter:", "daughter:"]);
@@ -122,5 +123,23 @@ test("one of N: the others are brothers and sisters of that person, beside them"
 });
 test("the page keeps what the tree needs to place a person: the born word, the near place, and a step-parent's row", () => {
   const js = src("story-engine.js");
-  for (const k of ["placeRole:", "placeNear:", "side: pe.side", "up: !!pe.up"]) assert.ok(js.includes(k), k);
+  for (const k of ["placeSaid:", "placeNear:", "side: pe.side", "up: !!pe.up"]) assert.ok(js.includes(k), k);
+});
+test("a box says born, lived or from only where the words do; near only places the village", () => {
+  const said = (t) => read(t).people.filter((x) => x.place).map((x) => x.role + ":" + x.place.said);
+  const d = "My great grandfather is Ivan Horvat and his wife, my great grandmother is Lucija, born FRATROVIC. They had 5 children. They lived in Ovaro near Udine.";
+  assert.deepEqual(said(d), ["self:lived", "spouse:lived"]);
+  assert.deepEqual(said("My grandfather Ivan was born in 1920 and lived in Senj."), ["self:lived"]);
+  assert.deepEqual(said("My grandfather Ivan came from Senj."), ["self:from"]);
+  assert.deepEqual(said("My grandfather Ivan was born near Udine in a village called Ovaro."), ["self:born"]);
+  assert.deepEqual(said("My grandfather Ivan was a mason in Senj."), ["self:"]);
+  assert.equal(read("His father Josip was born in Senj.").stops.concat((read("His father Josip was born in Senj.").kin || []).flatMap((k) => k.stops))[0].said, "born");
+});
+test("the story check flags a box label the words do not hold", () => {
+  const m = { exports: {} }; new Function("module", src("story-check.js"))(m);
+  const t = "Lucija was born in 1910. They lived in Senj.";
+  const bad = m.exports.check(t, { people: [{ role: "self", name: "Lucija", place: { word: "senj", said: "born" } }] }, { isPlace: (w) => w === "senj" });
+  assert.ok(bad.problems.some((x) => x.code === "label-unsupported" && x.severity === "high"), JSON.stringify(bad.problems));
+  const ok = m.exports.check(t, { people: [{ role: "self", name: "Lucija", place: { word: "senj", said: "lived" } }] }, { isPlace: (w) => w === "senj" });
+  assert.ok(!ok.problems.some((x) => x.code === "label-unsupported"));
 });

@@ -1,0 +1,303 @@
+/* THE STORY, AS A PLAN YOU CAN ACT ON. David (25 Nov 2026): «Dreznik near Nova Gradiska: where would she start as a desktop activity, who could she email, what are
+   the neighbouring towns, which cemeteries… are we really narrating an actionable story, or just reading?» The numbered method on the story page (story-engine.js `plan`)
+   says HOW to research. This says WHERE and WHO, for THIS story: the registers to open first with what each costs, the archives to write to with the address the Atlas holds
+   (and a draft in their language), the places next door, the cemeteries on the ground, what the place went through while the people were alive, and what each move left behind.
+
+   WHAT IT WILL NOT DO. Everything here is computed on the device from files the Atlas already holds; nothing is sent anywhere. A line appears only when a file says it: an
+   address only if Wikidata states one (data/provider-contacts.json), a cemetery only if OpenStreetMap or Wikidata lists one within reach, an event only if the place lies inside
+   its mapped area in the years the story's people were alive. Where the Atlas holds nothing it SAYS SO (a "gap" line), because a silence we left unmarked reads as a silence
+   in the record. Every item carries a one-line "why this one".
+
+   THE ANCHOR. «They lived in Dreznik near Nova Gradiska» names a village the gazetteer knows only as Drežnik Brezovički, 119 km from Nova Gradiška. When the story pins a place
+   to another and the two are more than 40 km apart, the plan starts from the place the story pins it to, and says so, rather than build a plan on the wrong village.
+   THE REGION. A place can sit inside several rough region rings (Nova Gradiška is inside both Bosnia's and the Military Frontier's). The ring that names ANOTHER country is passed
+   over when one that fits exists, because its era table would file a Slavonian family under the Bosnian state archive.
+
+   Pure helpers, exported for the tests (module.exports); the page draws the result with textContent only. */
+(function (root) {
+  "use strict";
+  var ACC = { free: 0, account: 1, index: 2, mixed: 3, paid: 4, catalogue: 5, onsite: 6, unsurveyed: 7 };
+  var ACC_SAY = { free: "images you can read now, free", account: "images, free, once you have an account", index: "an index: it shows a record exists, not the page", mixed: "partly free, partly paid",
+    paid: "behind a paywall", catalogue: "a catalogue card: you write for the paper", onsite: "on paper, in the building", unsurveyed: "what it costs has not been checked" };
+  var TRAP = /filed under|trap|another|not (in|the)|elsewhere|nothing |no (parish |civil )?regist|destroyed|lost|never |instead of|rather than|registry|matični|gathered/i;
+  var VICTIMS = /zrtv|žrtv|genocid|yadvashem|arolsen|jewishgen|shoah|victim/i;
+  var BIRTHISH = /^(born|origin|lived|father-from|mother-from|family)$/;
+
+  function hav(a, b, c, d) { var r = Math.PI / 180, dl = (c - a) * r, dn = (d - b) * r, x = Math.sin(dl / 2) * Math.sin(dl / 2) + Math.cos(a * r) * Math.cos(c * r) * Math.sin(dn / 2) * Math.sin(dn / 2); return 12742 * Math.asin(Math.sqrt(x)); }
+  function clip(s, n) { s = String(s == null ? "" : s).replace(/\s+/g, " ").trim(); return s.length > n ? s.slice(0, n - 1) + "…" : s; }
+  function has(v) { return v != null && v !== ""; }
+  function inRing(pt, ring) { var c = false; for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) { var yi = ring[i][0], xi = ring[i][1], yj = ring[j][0], xj = ring[j][1]; if ((yi > pt[0]) !== (yj > pt[0]) && pt[1] < (xj - xi) * (pt[0] - yi) / (yj - yi) + xi) c = !c; } return c; }
+
+  /* ---- the years the story's people were alive ----------------------------------------------------------------------------------------------- */
+  function yearsOf(g) {
+    var f = (g && g.facts) || {}, ys = [];
+    function add(y) { if (typeof y === "number" && y > 1000 && y < 2100) ys.push(y); }
+    add(f.born); add(f.endYear);
+    (f.route || []).forEach(function (r) { add(r.year); });
+    (f.kin || []).forEach(function (k) { (k.stops || []).forEach(function (s) { add(s.year); }); });
+    ((g && g.people) || []).forEach(function (p) { (p.events || []).forEach(function (e) { add(e.year); }); add(p.born); });
+    if (!ys.length) return null;
+    var lo = Math.min.apply(null, ys), hi = Math.max.apply(null, ys);
+    if (hi - lo < 1 && typeof f.born === "number") hi = lo + 75;
+    return { lo: lo, hi: hi, from: lo - 30 };   /* a generation before the earliest year: the parents' marriage, the grandparents' births */
+  }
+
+  /* ---- which place the plan starts from ------------------------------------------------------------------------------------------------------ */
+  function anchorOf(g) {
+    var f = (g && g.facts) || {}, route = (f.route || []).filter(function (x) { return x && x.info; }), home = null;
+    for (var i = 0; i < route.length; i++) if (BIRTHISH.test(route[i].role || "")) { home = route[i]; break; }
+    if (!home) home = route[0] || null;
+    if (!home) { (f.kin || []).forEach(function (k) { if (!home) (k.stops || []).forEach(function (s) { if (!home && s.info && BIRTHISH.test(s.role || "")) home = s; }); }); }
+    if (!home) { (f.kin || []).forEach(function (k) { if (!home) (k.stops || []).forEach(function (s) { if (!home && s.info) home = s; }); }); }
+    if (!home) return null;
+    var info = home.info, note = null, told = null;
+    if (home.nearInfo && home.nearInfo.lat != null && info.lat != null) {
+      var d = hav(info.lat, info.lon, home.nearInfo.lat, home.nearInfo.lon);
+      if (d > 40) { told = info; info = home.nearInfo; note = "The story puts " + told.name + " near " + info.name + ". The Atlas knows only “" + told.name + (told.countryName ? "”, " + told.countryName : "”") + ", " + Math.round(d) + " km away, so the plan starts from " + info.name + ". Check the parish before you trust either."; }
+    }
+    return { info: info, stop: home, note: note, told: told, alts: (home.alts || []).filter(function (a) { return a && a.n; }) };
+  }
+
+  function pickRegion(info, regionsDoc, countries) {
+    var cur = info && info.region || null;
+    if (!info || info.lat == null || !regionsDoc || !regionsDoc.regions) return cur;
+    var cn = String((countries || {})[info.cc] || info.countryName || "").toLowerCase(), others = Object.keys(countries || {}).filter(function (k) { return k !== info.cc; })
+      .map(function (k) { return String(countries[k]).toLowerCase().replace(/\./g, ""); }).filter(function (n) { return n.length > 3 && n !== cn; });
+    function score(r) { var l = (r.label + " " + (r.sub || "")).toLowerCase(); return cn && l.indexOf(cn) > -1 ? 2 : others.some(function (o) { return l.indexOf(o) > -1; }) ? -3 : 0; }
+    var cands = regionsDoc.regions.filter(function (r) { return r.ring && inRing([info.lat, info.lon], r.ring); });
+    if (cur && cands.every(function (r) { return r.id !== cur.id; })) cands.push(regionsDoc.regions.filter(function (r) { return r.id === cur.id; })[0] || cur);
+    if (!cands.length) return cur;
+    var best = cands.slice().sort(function (a, b) { return score(b) - score(a) || (cur && b.id === cur.id ? 1 : 0) - (cur && a.id === cur.id ? 1 : 0); })[0];
+    return cur && score(cur) >= score(best) ? cur : best;
+  }
+
+  /* ---- who held the paper, in the year ------------------------------------------------------------------------------------------------------- */
+  function erasFor(region, win) {
+    if (!region || !region.eras) return [];
+    return region.eras.filter(function (e) { return win ? (e.to > win.from && e.from <= win.hi) : false; });
+  }
+
+  var LANG = { HR: "hr", BA: "hr", SI: "sl", IT: "it", AT: "de", DE: "de", CH: "de", ES: "es", AR: "es", UY: "es", CL: "es", MX: "es", PL: "pl", CZ: "cs", HU: "hu", FR: "fr", PT: "pt", BR: "pt" };
+  var LNAME = { en: "English", hr: "Croatian", sl: "Slovenian", it: "Italian", de: "German", es: "Spanish", pl: "Polish", cs: "Czech", hu: "Hungarian", fr: "French", pt: "Portuguese" };
+  /* One plain request, in the archive's language: what the writer is looking for, the place and the years, and the two questions an archive can answer in a line. */
+  var DRAFT = {
+    en: function (p, s, y) { return "Dear Sir or Madam, I am researching my family from " + p + ". I am looking for records of the " + (s || "family") + " family" + (y ? " around " + y : "") + ". Could you tell me whether you hold the parish or civil registers for " + p + " for those years, and how I can consult them or ask for a search? Thank you."; },
+    hr: function (p, s, y) { return "Poštovani, istražujem svoju obitelj iz mjesta " + p + ". Tražim zapise o obitelji " + (s || "") + (y ? " oko " + y + ". godine" : "") + ". Možete li mi reći čuvate li matične knjige za " + p + " za te godine i kako ih mogu pregledati ili zatražiti pretragu? Hvala unaprijed."; },
+    sl: function (p, s, y) { return "Spoštovani, raziskujem svojo družino iz kraja " + p + ". Iščem zapise o družini " + (s || "") + (y ? " okoli leta " + y : "") + ". Ali hranite matične knjige za " + p + " za ta leta in kako jih lahko pregledam ali naročim iskanje? Hvala."; },
+    it: function (p, s, y) { return "Gentili Signori, sto ricostruendo la storia della mia famiglia di " + p + ". Cerco atti della famiglia " + (s || "") + (y ? " intorno al " + y : "") + ". Potete dirmi se conservate i registri parrocchiali o di stato civile di " + p + " per quegli anni e come posso consultarli o richiedere una ricerca? Grazie."; },
+    de: function (p, s, y) { return "Sehr geehrte Damen und Herren, ich erforsche meine Familie aus " + p + ". Ich suche Einträge zur Familie " + (s || "") + (y ? " um das Jahr " + y : "") + ". Können Sie mir mitteilen, ob Sie die Kirchenbücher oder Standesregister für " + p + " aus diesen Jahren verwahren und wie ich sie einsehen oder eine Recherche beauftragen kann? Vielen Dank."; },
+    es: function (p, s, y) { return "Estimados señores: estoy investigando a mi familia de " + p + ". Busco registros de la familia " + (s || "") + (y ? " hacia el año " + y : "") + ". ¿Podrían decirme si conservan los registros parroquiales o civiles de " + p + " de esos años y cómo puedo consultarlos o solicitar una búsqueda? Muchas gracias."; },
+    pl: function (p, s, y) { return "Szanowni Państwo, badam historię mojej rodziny z miejscowości " + p + ". Szukam zapisów dotyczących rodziny " + (s || "") + (y ? " około roku " + y : "") + ". Czy przechowują Państwo księgi metrykalne dla " + p + " z tych lat i jak mogę je przejrzeć lub zlecić kwerendę? Dziękuję."; },
+    cs: function (p, s, y) { return "Vážení, zkoumám historii své rodiny z obce " + p + ". Hledám zápisy o rodině " + (s || "") + (y ? " kolem roku " + y : "") + ". Uchováváte matriky obce " + p + " z těchto let a jak do nich mohu nahlédnout nebo požádat o rešerši? Děkuji."; },
+    hu: function (p, s, y) { return "Tisztelt Hölgyem/Uram! A családom történetét kutatom, " + p + " településről. A " + (s || "") + " család bejegyzéseit keresem" + (y ? " " + y + " körül" : "") + ". Meg tudják mondani, őrzik-e " + p + " anyakönyveit ezekből az évekből, és hogyan tekinthetem meg őket, vagy kérhetek kutatást? Köszönöm."; },
+    fr: function (p, s, y) { return "Madame, Monsieur, je recherche l'histoire de ma famille de " + p + ". Je cherche des actes de la famille " + (s || "") + (y ? " vers " + y : "") + ". Pourriez-vous m'indiquer si vous conservez les registres paroissiaux ou d'état civil de " + p + " pour ces années et comment les consulter ou demander une recherche ? Merci."; },
+    pt: function (p, s, y) { return "Prezados senhores, estou pesquisando a história da minha família de " + p + ". Procuro registros da família " + (s || "") + (y ? " por volta de " + y : "") + ". Poderiam informar se guardam os registros paroquiais ou civis de " + p + " desses anos e como posso consultá-los ou solicitar uma busca? Obrigado(a)."; }
+  };
+  function draft(cc, place, surname, year) { var l = LANG[cc] || "en"; return { lang: l, language: LNAME[l], text: DRAFT[l](place, surname, year) }; }
+
+  /* What each kind of move leaves on paper, by where it ends. General knowledge of the kinds of record, never a claim that one exists for this family. */
+  var MOVE_RECORDS = {
+    US: ["a ship or border arrival record", "naturalisation papers", "the US census (every ten years)"], CA: ["an arrival or border-crossing record", "naturalisation papers", "the Canadian census"],
+    AU: ["an inward passenger list", "naturalisation papers (National Archives of Australia)"], NZ: ["an inward passenger list", "naturalisation papers"],
+    AR: ["an arrival register at the port (Buenos Aires)", "the civil registry where they settled"], UY: ["an arrival register at the port", "the civil registry where they settled"],
+    BR: ["an immigrant hostel or arrival register", "the civil registry where they settled"], CL: ["an arrival record", "the civil registry where they settled"],
+    GB: ["an alien registration or naturalisation file", "the census"], IE: ["the census", "civil registration"], ZA: ["an arrival record", "the civil registry"]
+  };
+  var MOVE_DEFAULT = ["a marriage or birth record in the new place, which usually names birthplace and parents", "residence registration, where the country kept one"];
+
+  /* the archive or index to open first for a country: a national archive before a catalogue before an index; never a memorial or a victims' database */
+  var KINDRANK = { "national-archive": 0, catalogue: 1, index: 2, "regional-archive": 3 };
+  function destSource(info) {
+    return (info.provs || []).filter(function (p) { return p && p.url && KINDRANK[p.kind] != null && !VICTIMS.test(p.id + " " + p.name); })
+      .sort(function (a, b) { return KINDRANK[a.kind] - KINDRANK[b.kind] || (ACC[a.access] != null ? ACC[a.access] : 8) - (ACC[b.access] != null ? ACC[b.access] : 8); })[0] || null;
+  }
+
+  /* ---- build ------------------------------------------------------------------------------------------------------------------------------- */
+  function build(g, deps) {
+    deps = deps || {};
+    var base = deps.base || "/", countries = {}, f = (g && g.facts) || {}, win = yearsOf(g), an = anchorOf(g);
+    Object.keys(deps.countries || {}).forEach(function (k) { var v = deps.countries[k]; countries[k] = typeof v === "string" ? v : (v && (v.name || v.n)) || k; });
+    deps.countries = countries;
+    var out = { anchor: null, notes: [], sections: [], today: [], gaps: [] };
+    if (!an) { out.notes.push("The plan needs a place the Atlas knows. Add where it happened, with the country (for example “Gallignana, Croatia”)."); return out; }
+    var info = an.info, cname = countries[info.cc] || info.countryName || "", where = info.name + (cname ? ", " + cname : "");
+    var region = pickRegion(info, deps.regions, countries), eras = erasFor(region, win);
+    var surname = (function () { var n = String(f.name || "").trim().split(/\s+/); return n.length > 1 ? n[n.length - 1] : ""; })();
+    var mid = win ? Math.round((win.lo + win.hi) / 2) : null;
+    out.anchor = { name: info.name, cc: info.cc, where: where, href: info.href || (base + "place/" + (info.row && info.row.i) + "/"), lat: info.lat, lon: info.lon, region: region ? region.label : "", years: win };
+    if (an.note) out.notes.push(an.note);
+    var altSay = []; (an.alts || []).forEach(function (a) { var t = a.n + (countries[a.cc] ? ", " + countries[a.cc] : ""); if (t !== where && altSay.indexOf(t) < 0) altSay.push(t); });
+    if (altSay.length) out.notes.push("“" + info.name + "” could also be " + altSay.slice(0, 2).join(" or ") + ". If you meant one of those, change the place in your story.");
+
+    function item(title, why, o) { o = o || {}; return { title: clip(title, 140), why: clip(why, 220), detail: o.detail ? clip(o.detail, 360) : "", href: o.href || "", tag: o.tag || "", gap: !!o.gap, draft: o.draft || null, _a: o._a }; }
+    function section(key, title, items) { if (items.length) out.sections.push({ key: key, title: title, items: items }); }
+
+    /* 1 · AT YOUR DESK */
+    var desk = [];
+    desk.push(item("The Atlas's page for " + info.name, "Every register the Atlas lists for it, who holds it and what it costs, in one place.", { href: out.anchor.href, tag: "start here" }));
+    var cols = (info.cols || []).filter(function (c) { return c; });
+    var scored = cols.map(function (c) { var known = typeof c.from === "number", ov = win && known ? (Math.min(c.to || c.from, win.hi) - Math.max(c.from, win.from)) : win ? -0.5 : 0; return { c: c, ov: ov, known: known }; })
+      .filter(function (x) { return !win || x.ov >= 0 || !x.known; })
+      .sort(function (a, b) { return (a.known ? 0 : 1) - (b.known ? 0 : 1) || (ACC[a.c.access] != null ? ACC[a.c.access] : 8) - (ACC[b.c.access] != null ? ACC[b.c.access] : 8) || b.ov - a.ov; });
+    scored.slice(0, 4).forEach(function (x) {
+      var c = x.c, kinds = (c.kinds || []).map(function (k) { return k === "b" ? "births" : k === "m" ? "marriages" : k === "d" ? "deaths" : k; }).join(", ");
+      var vt = (c.title || "Register").replace(/\s+/g, " ").trim(), vr = c.from ? c.from + (c.to && c.to !== c.from ? "–" + c.to : "") : "";
+      desk.push(item(clip(vt, 80) + (vr && vt.indexOf(String(c.from)) < 0 ? " (" + vr + ")" : ""),
+        !x.known ? "The Atlas does not state this volume's years: open it to see if it holds yours." : win ? "Covers " + Math.max(c.from, win.from) + (Math.min(c.to || c.from, win.hi) > Math.max(c.from, win.from) ? "–" + Math.min(c.to || c.from, win.hi) : "") + ", inside the years of your story." : "A register the Atlas lists for this place.",
+        { detail: (kinds ? kinds + ": " : "") + (ACC_SAY[c.access] || ACC_SAY.unsurveyed) + (c.provider ? ", at " + ((deps.provById && deps.provById[c.provider] && deps.provById[c.provider].name) || c.provider) : ""), href: c.url || "", tag: c.access === "free" ? "free" : c.access === "account" ? "free account" : "" }));
+    });
+    if (!cols.length) {
+      desk.push(item("The Atlas lists no register volume for " + info.name, "That is a gap in the Atlas, not proof the books do not exist: the place's own page names the region's archive.", { gap: true, href: out.anchor.href }));
+    } else if (win && !scored.length && cols.some(function (c) { return typeof c.from === "number"; })) {
+      var known = cols.filter(function (c) { return typeof c.from === "number"; }), lastTo = Math.max.apply(null, known.map(function (c) { return c.to || c.from; })), firstFrom = Math.min.apply(null, known.map(function (c) { return c.from; }));
+      desk.push(item("None of the listed volumes cover your years", "The volumes the Atlas lists for " + info.name + " run " + firstFrom + "–" + lastTo + "; your story's years are " + win.lo + (win.hi > win.lo ? "–" + win.hi : "") + ". Records after that are on paper: see Write to.", { gap: true, href: out.anchor.href }));
+    } else if (win && scored.length && (function () { var k = cols.filter(function (c) { return typeof c.from === "number"; }); return k.length && Math.max.apply(null, k.map(function (c) { return c.to || c.from; })) < win.hi; })()) {
+      desk.push(item("The listed volumes stop at " + Math.max.apply(null, cols.filter(function (c) { return typeof c.from === "number"; }).map(function (c) { return c.to || c.from; })), "Later records exist on paper, at the registry office or the archive, not online: see Write to.", { gap: true }));
+    }
+    var idx = (info.provs || []).filter(function (p) { return p && /index|aggregator|catalogue/.test(p.kind || "") && ACC[p.access] != null && ACC[p.access] <= 3 && p.url && !VICTIMS.test(p.id + " " + p.name); })
+      .sort(function (a, b) { return ACC[a.access] - ACC[b.access]; }).slice(0, 2);
+    idx.forEach(function (p) { desk.push(item(p.name, "A searchable " + (p.kind === "catalogue" ? "catalogue" : "index") + " for " + (cname || "the country") + ": it can show a record exists before you write anywhere.", { detail: (ACC_SAY[p.access] || ""), href: p.url })); });
+    section("desk", "Start at your desk", desk);
+
+    /* 2 · THE PAPER AND THE ERA: whose archive held it, in which years */
+    if (win && eras.length) {
+      var ev = eras.slice(0, 4).map(function (e) {
+        var names = (e.filedUnder || []).map(function (id) { return (deps.provById && deps.provById[id] && deps.provById[id].name) || (info.pname && info.pname[id]) || id; });
+        return item(e.from + "–" + e.to + ": " + e.polity, "Records follow the state of the year, so these are the years to look for in " + (names[0] || "its archive") + ", not today's country.",
+          { detail: (names.length ? "Filed under " + names.join(", ") + ". " : "") + (e.note && TRAP.test(e.note) ? clip(e.note, 240) : ""), tag: e.note && /THE TRAP/.test(e.note) ? "the trap" : "" });
+      });
+      section("era", "Whose paper it was, and when", ev);
+    } else if (!win) {
+      section("era", "Whose paper it was, and when", [item("Give a year, even a rough one", "The plan can then say who held " + info.name + " then and where its records are filed. A decade is enough: “born in the 1910s”.", { gap: true })]);
+    }
+
+    /* 3 · WRITE TO */
+    var wr = [], ar = deps.archives || [], seen = Object.create(null);
+    function contactLine(a) { var bits = []; if (a.email) bits.push(a.email); if (a.tel) bits.push(a.tel); if (a.post) bits.push(a.post); return bits.length ? "The Atlas holds: " + bits.join(" · ") : "The Atlas holds no address or email for it: use the website to find the contact."; }
+    function addArch(a, why, km) { if (!a || seen[a.id]) return; seen[a.id] = 1; var it = item(a.name, why, { detail: contactLine(a) + (km != null ? " · " + km + " km away" : ""), href: a.url, tag: a.email ? "has an email" : "", draft: null, _a: a }); it._km = km; wr.push(it); }
+    var eraIds = {}; eras.forEach(function (e) { (e.filedUnder || []).forEach(function (id) { eraIds[id] = 1; }); });
+    var byId = {}; ar.forEach(function (a) { byId[a.id] = a; });
+    Object.keys(eraIds).forEach(function (id) { var a = byId[id]; if (a && a.cc === info.cc) addArch(a, "The Atlas files " + info.name + "'s records under this archive for the years of your story.", info.lat != null && a.lat != null ? Math.round(hav(info.lat, info.lon, a.lat, a.lon)) : null); });
+    if (info.lat != null) ar.map(function (a) { return { a: a, km: hav(info.lat, info.lon, a.lat, a.lon) }; })
+      .filter(function (x) { return x.km <= 120 && x.a.cc === info.cc && /archive|diocesan/.test(x.a.kind); }).sort(function (x, y) { return x.km - y.km; }).slice(0, 3)
+      .forEach(function (x) { addArch(x.a, x.a.kind === "diocesan" ? "The diocese keeps its parishes' registers, and often copies from the year before the state took over." : "The nearest " + (x.a.kind === "national-archive" ? "national" : "state/regional") + " archive: it holds or can say who holds the registers.", Math.round(x.km)); });
+    wr = wr.slice(0, 4);
+    var dTo = wr.filter(function (i) { return i._a && i._a.kind === "regional-archive"; })[0] || wr[0];
+    if (dTo) dTo.draft = draft(info.cc, info.name, surname, mid);
+    if (wr.length) wr.push(item("The registry office (matični ured / registrar / comune) of today's municipality", "Civil registers from the 1800s on are usually kept by the office of the municipality where the event happened, until they pass to an archive.", { gap: true, detail: "The Atlas does not list municipal registry offices: search for the name of the municipality with the word for registry office." }));
+    section("write", "Write to", wr);
+
+    /* 4 · LOOK NEARBY */
+    var nb = [], rows = deps.rows || [];
+    if (info.lat != null && rows.length) {
+      var rad = Math.PI / 180, own = info.row && info.row.i;
+      rows.filter(function (r) { return r.i !== own && r.y != null && r.x != null && r.cc === info.cc && r.n !== info.name; }).map(function (r) {
+        var dy = (r.y - info.lat) * 111.2, dx = (r.x - info.lon) * 111.2 * Math.cos(info.lat * rad); return { r: r, km: Math.sqrt(dx * dx + dy * dy) };
+      }).filter(function (x) { return x.km <= 25; }).sort(function (a, b) { return a.km - b.km; }).slice(0, 7).forEach(function (x) {
+        nb.push(item(x.r.n, "A place " + Math.max(1, Math.round(x.km)) + " km away" + (x.r.c ? " with " + x.r.c + " volume" + (x.r.c === 1 ? "" : "s") + " in the Atlas" : " (the Atlas lists no volumes for it)") + ": families often married, baptised or were buried in the next parish.", { href: base + "place/" + encodeURIComponent(x.r.i) + "/", tag: Math.max(1, Math.round(x.km)) + " km" }));
+      });
+    }
+    if (info.row && (info.row.a || (info.p && info.p.admin))) { /* today's administrative home, only where the Atlas holds it */
+      var ad = (info.p && info.p.admin) || null; if (ad && (ad.adm1 || ad.adm2)) nb.unshift(item("Today it is in " + [ad.adm2, ad.adm1].filter(Boolean).join(", "), "The modern district and county: the offices and local archives that exist now are named for these.", {}));
+    }
+    nb.push(item("The district and court seats of the time, and the parish next door", "The Atlas does not hold the district (kotar / Bezirk / contea) or court seats of past states, nor a list of parishes.", { gap: true, detail: "Ask the archive in Write to which parish the village belonged to in your years: it is usually one line." }));
+    section("near", "Look nearby", nb);
+
+    /* 5 · ON THE GROUND: cemeteries */
+    var gr = [], cem = deps.cemeteries;
+    if (cem && info.lat != null) {
+      var seenC = []; var all = (cem.osm || []).map(function (c) { return { n: c.n, y: c.y, x: c.x, src: "OpenStreetMap", href: "https://www.openstreetmap.org/" + (String(c.id).charAt(0) === "w" ? "way/" : String(c.id).charAt(0) === "r" ? "relation/" : "node/") + String(c.id).slice(1) }; })
+        .concat((cem.wd || []).map(function (c) { return { n: c.n, y: c.y, x: c.x, src: "Wikidata", href: "https://www.wikidata.org/wiki/" + c.q }; }));
+      all.map(function (c) { return { c: c, km: hav(info.lat, info.lon, c.y, c.x) }; }).filter(function (x) { return x.km <= 15 && x.c.n; }).sort(function (a, b) { return a.km - b.km; }).forEach(function (x) {
+        if (gr.length >= 6) return; if (seenC.some(function (s) { return s.n.toLowerCase() === x.c.n.toLowerCase() && hav(s.y, s.x, x.c.y, x.c.x) < 1; })) return; seenC.push(x.c);
+        gr.push(item(x.c.n, "A named cemetery " + (x.km < 1 ? "less than 1" : Math.round(x.km)) + " km from " + info.name + ", listed by " + x.c.src + ". To find a grave you still ask the parish or the municipality that runs it.", { href: x.c.href, tag: (x.km < 1 ? "<1" : Math.round(x.km)) + " km" }));
+      });
+    }
+    if (!gr.length) gr.push(item("The Atlas has no cemetery list near " + info.name, cem ? "No named cemetery within 15 km is listed in the Atlas's OpenStreetMap or Wikidata data, which cover only the regions it has mapped." : "The cemetery lists were not loaded.", { gap: true, detail: "Graves are found through the parish and the municipality that runs the cemetery; volunteer indexes such as Find a Grave and BillionGraves may list names.", href: "https://www.findagrave.com/cemetery" }));
+    else gr.push(item("The Atlas's cemetery positions are unchecked", "OpenStreetMap and Wikidata name these places; neither says whose graves are there or whether a burial index exists.", { gap: true }));
+    section("ground", "Where it would be on the ground", gr);
+
+    /* 6 · WHAT WAS HAPPENING: events whose mapped area holds the place, in the years the people were alive */
+    var hp = [], evs = (deps.mort && deps.mort.events) || [];
+    if (win && info.lat != null) {
+      var stops = [{ n: info.name, y: info.lat, x: info.lon }]; (f.kin || []).concat([{ stops: f.route || [] }]).forEach(function (k) { (k.stops || []).forEach(function (s) { if (s.info && s.info.lat != null && s.info !== info && stops.length < 6 && s.info.cc === info.cc) stops.push({ n: s.info.name, y: s.info.lat, x: s.info.lon }); }); });
+      evs.filter(function (e) { return e.poly && e.t >= win.lo && e.f <= win.hi; }).forEach(function (e) {
+        var s = stops.filter(function (p) { return (e.poly || []).some(function (ring) { return inRing([p.y, p.x], ring); }); })[0];
+        if (s && hp.length < 5) hp.push(item(e.n + " (" + e.f + (e.t !== e.f ? "–" + e.t : "") + ")", s.n + " lies inside the area mapped for this event, in years your story's people were alive.", { href: base + "history/", detail: "The atlas can say the place was in the area; it cannot say anyone in your family was harmed." }));
+      });
+    }
+    if (!hp.length) hp.push(item(win ? "No mapped mass-mortality event covers " + info.name + " in your years" : "Give a year to see what the place went through", win ? "The Atlas maps 75 such events; none has " + info.name + " inside its area while the people in your story were alive. That says nothing about ordinary hard years." : "Events are matched to the years of the story.", { gap: true }));
+    section("happening", "What was happening", hp);
+
+    /* 7 · THEIR MOVES */
+    var mv = [], lines = [];
+    var main = (f.route || []).filter(function (r) { return r && r.info; });
+    if (main.length > 1) lines.push({ label: "The person in the story", stops: main });
+    (f.kin || []).forEach(function (k) { var ss = (k.stops || []).filter(function (s) { return s.info && s.role !== "mention"; }); if (ss.length && k.label !== "also named in the story") lines.push({ label: k.label.replace(/^./, function (c) { return c.toUpperCase(); }), stops: ss }); });
+    var homeCc = info.cc;
+    lines = lines.filter(function (ln) { return ln.stops.some(function (s) { return s.info.cc !== homeCc; }); });
+    lines.forEach(function (ln) {
+      var st = ln.stops.slice(); if (st[0].info.cc !== homeCc) st.unshift({ info: info, role: "origin" });
+      var desc = st.map(function (s) { return s.info.name + (s.year ? " " + s.year : ""); }).join(" → ");
+      var dest = st[st.length - 1].info, dcc = dest.cc, recs = MOVE_RECORDS[dcc] || MOVE_DEFAULT;
+      var legs = st.slice(1).map(function (s) { var p = destSource(s.info); return p ? s.info.name + ": " + p.name : ""; }).filter(Boolean), last = destSource(dest);
+      mv.push(item(ln.label + ": " + desc, "Each move leaves paper in the place they arrived: " + recs.join("; ") + ".", { detail: legs.length ? "Start with " + legs.join(" · ") + "." : "", href: last ? last.url : "", tag: st.length - 1 + (st.length - 1 === 1 ? " move" : " moves") }));
+    });
+    section("moves", "Their moves, and the paper each leaves", mv);
+
+    /* TODAY */
+    var d0 = out.sections.filter(function (s) { return s.key === "desk"; })[0], w0 = out.sections.filter(function (s) { return s.key === "write"; })[0], g0 = out.sections.filter(function (s) { return s.key === "ground"; })[0];
+    var firstOpen = d0 && d0.items.filter(function (i) { return (i.tag === "free" || i.tag === "free account"); })[0] || d0 && d0.items[0];
+    out.today.push({ n: 1, title: "At your desk", text: firstOpen ? firstOpen.title : "Open the Atlas's page for " + info.name, href: firstOpen && firstOpen.href || "" });
+    var mailTo = w0 && (w0.items.filter(function (i) { return i._a && i._a.email; })[0] || w0.items.filter(function (i) { return i._a && /regional|diocesan/.test(i._a.kind); })[0] || w0.items.filter(function (i) { return !i.gap; })[0]);
+    if (mailTo) out.today.push({ n: 2, title: mailTo._a && mailTo._a.email ? "Email" : "Write", text: mailTo.title + (mailTo._a && mailTo._a.email ? " (" + mailTo._a.email + ")" : " (the Atlas holds no address: use its site)"), href: mailTo.href });
+    var vol = (deps.archives || []).filter(function (a) { return a.kind === "volunteer" && a.cc === info.cc; })[0];
+    out.today.push({ n: 3, title: "Ask people", text: vol ? "A volunteer group for " + (cname || "the country") + ": " + vol.name : "Ask the older relatives who still have the photographs, letters and documents: a name or a village on the back of a photo is a lead.", href: vol ? vol.url : "" });
+    var near = w0 && w0.items.filter(function (i) { return i._a && i._km != null; }).sort(function (a, b) { return a._km - b._km; })[0];
+    out.today.push({ n: 4, title: "If you can go", text: near ? "Visit or call " + near.title + (" (" + near._km + " km away)") : "Visit the parish office in " + info.name + ".", href: near ? near.href : "" });
+    out.sections.forEach(function (s) { s.items.forEach(function (i) { delete i._a; delete i._km; }); });
+    return out;
+  }
+
+  function asText(plan) {
+    if (!plan || !plan.sections) return "";
+    var L = ["PLAN FOR " + ((plan.anchor && plan.anchor.where) || "")];
+    (plan.notes || []).forEach(function (n) { L.push("Note: " + n); });
+    (plan.today || []).forEach(function (t) { L.push(t.n + ". " + t.title + ": " + t.text); });
+    plan.sections.forEach(function (s) { L.push("", s.title.toUpperCase()); s.items.forEach(function (i) { L.push("- " + i.title + (i.why ? " — " + i.why : "") + (i.detail ? " [" + i.detail + "]" : "") + (i.href ? " (" + i.href + ")" : "")); if (i.draft) L.push("  Draft (" + i.draft.language + "): " + i.draft.text); }); });
+    return L.join("\n").slice(0, 9000);
+  }
+
+  /* ---- draw ---------------------------------------------------------------------------------------------------------------------------------- */
+  function el(tag, text, cls) { var e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; }
+  function render(plan, mount) {
+    mount.textContent = "";
+    if (!plan || !plan.sections || !plan.sections.length) { mount.append(el("p", (plan && plan.notes && plan.notes[0]) || "Add a place to the story and the plan fills in.", "sp-fine")); return; }
+    (plan.notes || []).forEach(function (n) { mount.append(el("p", n, "sp-todo-note")); });
+    var ol = el("ol", null, "sp-today");
+    plan.today.forEach(function (t) { var li = el("li"), b = el("b", t.title); li.append(el("span", String(t.n), "sp-today-n"), b, document.createTextNode(" ")); if (t.href && /^(https?:\/\/|\/)/.test(t.href)) { var a = el("a", t.text); a.href = t.href; if (/^https?:/.test(t.href)) { a.target = "_blank"; a.rel = "noopener"; } li.append(a); } else li.append(document.createTextNode(t.text)); ol.append(li); });
+    mount.append(el("h3", "Do these first", "sp-todo-h"), ol);
+    var grid = el("div", null, "sp-todo-grid k-grid");
+    plan.sections.forEach(function (s) {
+      var card = el("section", null, "sp-todo-card k-card"); card.append(el("h3", s.title));
+      var ul = el("ul");
+      s.items.forEach(function (i) {
+        var li = el("li", null, i.gap ? "is-gap" : ""), t = el("span", null, "sp-todo-t");
+        if (i.href && /^(https?:\/\/|\/)/.test(i.href)) { var a = el("a", i.title); a.href = i.href; if (/^https?:/.test(i.href)) { a.target = "_blank"; a.rel = "noopener"; } var b = el("b"); b.append(a); t.append(b); } else t.append(el("b", i.title));
+        if (i.tag) t.append(document.createTextNode(" "), el("span", i.tag, "k-pill is-plain sp-todo-tag"));
+        li.append(t);
+        if (i.why) li.append(el("span", i.why, "sp-todo-why"));
+        if (i.detail) li.append(el("span", i.detail, "sp-todo-det"));
+        if (i.draft) { var d = el("details", null, "sp-todo-draft"), sm = el("summary", "A draft in " + i.draft.language + " — check the wording before you send"); var pre = el("p", i.draft.text, "sp-todo-draft-t"); pre.lang = ({ Croatian: "hr", Slovenian: "sl", Italian: "it", German: "de", Spanish: "es", Polish: "pl", Czech: "cs", Hungarian: "hu", French: "fr", Portuguese: "pt" })[i.draft.language] || "en"; d.append(sm, pre); li.append(d); }
+        ul.append(li);
+      });
+      card.append(ul); grid.append(card);
+    });
+    mount.append(grid);
+    mount.append(el("p", "Worked out on this device from the Atlas's own files; nothing is sent anywhere. A line only appears where a file says it. Grey lines say what the Atlas does not hold. Cemetery positions: OpenStreetMap contributors (ODbL) and Wikidata (CC0).", "sp-fine"));
+  }
+
+  var api = { build: build, render: render, asText: asText, anchorOf: anchorOf, pickRegion: pickRegion, yearsOf: yearsOf, erasFor: erasFor, draft: draft, hav: hav, inRing: inRing };
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+  if (root) root.raStoryTodo = api;
+})(typeof window !== "undefined" ? window : (typeof globalThis !== "undefined" ? globalThis : this));

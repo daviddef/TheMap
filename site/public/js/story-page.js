@@ -132,6 +132,8 @@
   var mirrorToks = [], mirrorKnown = Object.create(null), mirrorEl = $("sp-mirror"), editEl = $("sp-edit");
   function mirrorDraw() {
     if (!mirrorEl) return;
+    /* a long story gives the textarea a scrollbar, which narrows its lines: the layer behind it takes the same width, or every mark slides off its word */
+    mirrorEl.style.paddingRight = Math.max(0, text.offsetWidth - text.clientWidth) + "px";
     var raw = text.value, pos = 0, frag = document.createDocumentFragment(), now = Object.create(null);
     mirrorToks.slice().sort(function (a, b) { return a.start - b.start; }).forEach(function (k) {
       if (k.start < pos || k.end > raw.length) return;
@@ -656,6 +658,7 @@
     clearTimeout(tm); tm = setTimeout(run, 650);
   });
   text.addEventListener("scroll", function () { if (mirrorEl) mirrorEl.scrollTop = text.scrollTop; });
+  if (window.ResizeObserver && mirrorEl) new ResizeObserver(function () { mirrorDraw(); }).observe(text);   /* the box was resized, or a scrollbar came or went */
   /* a tap (or click) with the caret inside a marked word opens that word's panel; a tap elsewhere in the words closes it. Typing never opens anything. */
   text.addEventListener("click", function () {
     if (text.selectionStart !== text.selectionEnd || !parsed || !mirrorToks.length) return;

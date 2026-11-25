@@ -102,13 +102,21 @@
      Nothing here reads anything new: the names and places are the ones the reader already found. */
   var ROLE = { father: "your father", mother: "your mother", grandfather: "your grandfather", grandmother: "your grandmother", uncle: "your uncle", aunt: "your aunt", brother: "your brother", sister: "your sister", husband: "your husband", wife: "your wife", son: "your son", daughter: "your daughter" };
   function esc(w) { return String(w).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+  /* a place the reader holds as «dreznik» is «Drežnik» in the words as typed: match the letter with or without its mark */
+  var DIA = { a: "a\u00e0\u00e1\u00e2\u00e3\u00e4\u00e5\u0101\u0103\u0105", c: "c\u00e7\u0107\u010d", d: "d\u0111\u010f", e: "e\u00e8\u00e9\u00ea\u00eb\u0113\u011b\u0119", g: "g\u011f", i: "i\u00ec\u00ed\u00ee\u00ef\u0131", l: "l\u0142\u013a\u013e", n: "n\u00f1\u0144\u0148", o: "o\u00f2\u00f3\u00f4\u00f5\u00f6\u0151", r: "r\u0159\u0155", s: "s\u015b\u0161\u015f", t: "t\u0163\u0165", u: "u\u00f9\u00fa\u00fb\u00fc\u016f\u0171", y: "y\u00fd\u00ff", z: "z\u017a\u017c\u017e" };
+  function loose(w) {
+    return String(w).replace(/./gu, function (ch) {
+      var b = ch === "\u0111" || ch === "\u0110" ? "d" : ch.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(), cls = DIA[b];
+      return cls && /\p{L}/u.test(ch) ? "[" + cls + cls.toUpperCase() + "]" : esc(ch);
+    });
+  }
   function tokens(text, p) {
     text = String(text || ""); p = p || {};
     var out = [], taken = [];
     function free(a, b) { return !taken.some(function (t) { return a < t[1] && b > t[0]; }); }
     function put(word, kind, name, label, ref) {
       word = String(word || "").trim(); if (word.length < 2) return;
-      var m = new RegExp("(^|[^\\p{L}])(" + esc(word) + ")(?![\\p{L}])", "iu"), at = -1, hit;
+      var m = new RegExp("(^|[^\\p{L}])(" + loose(word) + ")(?![\\p{L}])", "iu"), at = -1, hit;
       var re = new RegExp(m.source, "giu");
       while ((hit = re.exec(text))) { var st = hit.index + hit[1].length; if (free(st, st + word.length)) { at = st; break; } }
       if (at < 0) return;
@@ -122,10 +130,14 @@
       var ref = pe.role === "self" && p.rel && !pe.me ? "my " + String(p.rel).replace(/-/g, " ") : (pe.role === "father" || pe.role === "mother") && !p.rel ? "my " + pe.role : "";
       if (ref) rel = "your " + ref.slice(3);
       put(pe.name, "person", given, rel, ref); if (!out.some(function (t) { return t.name === given && t.kind === "person"; })) put(given, "person", given, rel, ref);
+      /* a surname the story gives apart from the name («Lucija, born FRATROVIĆ») is the same person */
+      if (pe.surname && String(pe.name).toLowerCase().indexOf(String(pe.surname).toLowerCase()) < 0) put(pe.surname, "person", given, rel, ref);
     });
     (p.siblings || []).forEach(function (sb) { put(sb.name, "person", sb.name, (sb.label || sb.rel || "").replace(/^(?:his|her|their)\b/, "their")); });
     (p.others || []).forEach(function (o) { if (o && o.name) put(o.name, "person", String(o.name).split(/\s+/)[0], (o.poss ? o.poss.replace(/^(?:my|our)$/, "your") + " " : "") + (o.kin || "")); });
     (p.stops || []).forEach(function (st) { if (st.word && !st.isCountry) put(st.word, "place", st.word, ""); });
+    /* the places on anyone's own line (a child, the grandmother) and the ones named in passing, countries too: each is where somebody went */
+    (p.kin || []).forEach(function (k) { (k.stops || []).forEach(function (st) { if (st.word) for (var guard = 0, n0 = -1; guard < 8 && out.length !== n0; guard++) { n0 = out.length; put(st.word, "place", st.word, ""); } }); });
     out.sort(function (a, b) { return a.start - b.start; });
     return out;
   }

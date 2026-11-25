@@ -97,21 +97,68 @@ test("a draft letter is in the archive's language and names the place and the su
   assert.equal(T.draft("XX", "Place", "", null).language, "English");
 });
 
-test("no cemetery is invented: with none listed the plan says the Atlas has none", () => {
-  const p = T.build(story(), deps());
-  const g = p.sections.find((s) => s.key === "ground");
-  assert.equal(g.items.length, 1);
-  assert.ok(g.items[0].gap);
-  assert.match(g.items[0].title, /no cemetery list near Nova Gradiška/);
+const ground = (cem) => T.build(story(), deps({ cemeteries: cem })).sections.find((s) => s.key === "ground").items;
+
+test("no burial ground is invented: with none listed the plan says so, and that this is not proof", () => {
+  const g = ground({ osm: [], wd: [], missing: 0, regions: 41 });
+  assert.equal(g.length, 1);
+  assert.ok(g[0].gap);
+  assert.match(g[0].title, /lists no burial ground within 15 km of Nova Gradiška/);
+  assert.match(g[0].why, /41 of its record regions.*not proof/);
 });
 
-test("cemeteries listed within 15 km are shown, nearest first, once each, with their source", () => {
-  const cem = { osm: [{ id: "w1", n: "Gradsko groblje", y: NG.lat + 0.02, x: NG.lon }, { id: "w2", n: "Far", y: NG.lat + 0.5, x: NG.lon }], wd: [{ q: "Q9", n: "Gradsko groblje", y: NG.lat + 0.0201, x: NG.lon }] };
-  const g = T.build(story(), deps({ cemeteries: cem })).sections.find((s) => s.key === "ground");
-  const named = g.items.filter((i) => !i.gap);
-  assert.equal(named.length, 1, "the duplicate and the far one are not listed");
-  assert.match(named[0].why, /OpenStreetMap/);
-  assert.match(named[0].href, /openstreetmap\.org\/way\/1/);
+test("lists that are loading, did not load, or partly arrived are never reported as «there is none»", () => {
+  for (const cem of [null, { pending: true }, { failed: true }, { osm: [], wd: [], missing: 1, regions: 41 }]) {
+    const g = ground(cem), all = JSON.stringify(g);
+    assert.ok(g.every((i) => i.gap));
+    assert.ok(!/lists no burial ground/.test(all), all);
+  }
+  assert.match(ground({ failed: true })[0].title, /not loaded/);
+  const part = ground({ osm: [{ id: "w1", n: "Gradsko groblje", y: NG.lat + 0.02, x: NG.lon }], wd: [], missing: 1, regions: 41 });
+  assert.ok(part.some((i) => i.gap && /did not load/.test(i.title) && /may be short/.test(i.why)));
+});
+
+test("burial grounds within 15 km are shown, named first by distance, once each, with their source", () => {
+  const cem = { osm: [{ id: "n3", n: "Staro groblje", y: NG.lat + 0.09, x: NG.lon }, { id: "w1", n: "Gradsko groblje", y: NG.lat + 0.02, x: NG.lon }, { id: "w2", n: "Far", y: NG.lat + 0.5, x: NG.lon }], wd: [{ q: "Q9", n: "Gradsko groblje", y: NG.lat + 0.0201, x: NG.lon }], missing: 0, regions: 41 };
+  const g = ground(cem), named = g.filter((i) => !i.gap);
+  assert.deepEqual(named.map((i) => i.title), ["Gradsko groblje", "Staro groblje"], "the duplicate and the far one are not listed");
+  assert.match(named[0].why, /2 km from Nova Gradiška, listed by OpenStreetMap/);
+  assert.match(named[0].href, /openstreetmap\.org\/way\/1$/);
+  const last = g[g.length - 1];
+  assert.match(last.why, /positions are unchecked, and nothing here says who is buried where/);
+});
+
+test("grounds with no name get one line: how many, how near, and a link to the nearest", () => {
+  const cem = { osm: [{ id: "w1", n: "Gradsko groblje", y: NG.lat + 0.01, x: NG.lon }, { id: "n5", n: "", y: NG.lat + 0.045, x: NG.lon }, { id: "w6", n: "", y: NG.lat + 0.1, x: NG.lon }, { id: "n7", n: "", y: NG.lat + 0.4, x: NG.lon }],
+    wd: [{ q: "Q5", n: "", y: NG.lat + 0.0451, x: NG.lon }], missing: 0, regions: 41 };
+  const line = ground(cem).find((i) => /no name/.test(i.title));
+  assert.equal(line.title, "2 more burial grounds with no name on the map, nearest 5 km", "the far one is out; Wikidata's point on the same spot is not counted twice");
+  assert.match(line.href, /openstreetmap\.org\/node\/5$/);
+  const only = ground({ osm: [{ id: "n5", n: "", y: NG.lat + 0.045, x: NG.lon }], wd: [], missing: 0, regions: 41 });
+  assert.equal(only[0].title, "1 burial ground with no name on the map, nearest 5 km");
+});
+
+test("more named grounds than the list holds are counted, not dropped in silence", () => {
+  const osm = Array.from({ length: 13 }, (_, i) => ({ id: "n" + i, n: "Groblje " + i, y: NG.lat + 0.008 * i, x: NG.lon }));
+  const g = ground({ osm, wd: [], missing: 0, regions: 41 });
+  assert.equal(g.filter((i) => !i.gap && /^Groblje/.test(i.title)).length, 10);
+  assert.ok(g.some((i) => i.title === "3 more named burial grounds within 15 km"));
+});
+
+test("only the squares around the place are asked for, across a border and in parts", async () => {
+  const index = { sources: { osm: { regions: 41, cells: { "45_17": 2, "44_17": 1, "45_16": 1, "10_10": 4 }, parts: { "45_17": 2 } }, wd: { cells: { "45_18": 1 } } } };
+  const mid = T.cellsFor(45.5, 17.5, index).map((f) => f.path);
+  assert.deepEqual(mid, ["cem/osm/45_17.json", "cem/osm/45_17-1.json"], "mid-square: one square");
+  const corner = T.cellsFor(45.01, 17.01, index).map((f) => f.path).sort();
+  assert.deepEqual(corner, ["cem/osm/44_17.json", "cem/osm/45_16.json", "cem/osm/45_17-1.json", "cem/osm/45_17.json"], "the 15 km circle crosses two borders");
+  assert.ok(T.cellsFor(45.5, 17.95, index).some((f) => f.path === "cem/wd/45_18.json"));
+  assert.deepEqual(T.cellsFor(-16.5, 179.95, { sources: { osm: { cells: { "-17_-180": 1 } } } }).map((f) => f.path), ["cem/osm/-17_-180.json"], "across the date line");
+  const asked = [], files = { "cem/index.json": index, "cem/osm/45_17.json": { rows: [[45.5, 17.5, "A", "n1"]] } };
+  const got = await T.loadCemeteries(45.5, 17.5, async (f) => { asked.push(f); return files[f] || null; });
+  assert.deepEqual(asked, ["cem/index.json", "cem/osm/45_17.json", "cem/osm/45_17-1.json"]);
+  assert.equal(got.missing, 1);
+  assert.deepEqual(got.osm, [{ y: 45.5, x: 17.5, n: "A", id: "n1" }]);
+  assert.deepEqual(await T.loadCemeteries(45.5, 17.5, async () => null), { failed: true });
 });
 
 test("an event is shown only when the place lies inside its mapped area in the years the people were alive", () => {
@@ -172,8 +219,8 @@ test("archives-near: every row has a position and a url; a contact appears only 
   assert.equal(out.rows.find((r) => r[0] === "b")[8], "", "no contact inferred for B");
 });
 
-const BUILT = fs.existsSync(path.join(SITE, "public/index.json")) && fs.existsSync(path.join(SITE, "public/regions.json")) && fs.existsSync(path.join(SITE, "public/cemeteries-osm.json"));
-test("the pasted Ivan and Lucija story: Nova Gradiška, the right era, a letter, neighbours, no invented cemetery", { skip: !BUILT && "needs the built public/ data" }, async () => {
+const BUILT = fs.existsSync(path.join(SITE, "public/index.json")) && fs.existsSync(path.join(SITE, "public/regions.json")) && fs.existsSync(path.join(SITE, "public/cem/index.json"));
+test("the pasted Ivan and Lucija story: Nova Gradiška, the right era, a letter, neighbours, named burial grounds", { skip: !BUILT && "needs the built public/ data" }, async () => {
   const { read } = await import("./plan/harness.mjs"), { deps: realDeps, todo } = await import("./plan/deps.mjs");
   const text = fs.readFileSync(path.join(__dirname, "plan/drezhik-story.txt"), "utf8").trim();
   const { g } = await read(text), plan = todo.build(g, realDeps(g));
@@ -184,7 +231,10 @@ test("the pasted Ivan and Lucija story: Nova Gradiška, the right era, a letter,
   const w = plan.sections.find((s) => s.key === "write");
   assert.ok(w.items.some((i) => /Slavonski Brod/.test(i.title) && i.draft && i.draft.language === "Croatian"));
   assert.ok(plan.sections.find((s) => s.key === "near").items.filter((i) => /km/.test(i.tag || "")).length >= 3, "neighbouring places");
-  assert.ok(plan.sections.find((s) => s.key === "ground").items[0].gap, "the Atlas lists no cemetery near Nova Gradiška, and says so");
+  const gr = plan.sections.find((s) => s.key === "ground").items;
+  assert.ok(gr.some((i) => i.title === "Gradsko groblje" && /less than 1 km from Nova Gradiška/.test(i.why) && /openstreetmap\.org\/way\//.test(i.href)), "a named ground near Nova Gradiška");
+  assert.ok(gr.some((i) => /more burial grounds with no name on the map/.test(i.title)));
+  assert.ok(!/lists no burial ground|not loaded/.test(JSON.stringify(gr)));
   const mv = plan.sections.find((s) => s.key === "moves").items.map((i) => i.title).join("|");
   assert.match(mv, /Slovenia → Bosnia and Herz\. → North Macedonia/);
   for (const s of plan.sections) for (const i of s.items) assert.ok(i.why, s.key + ": " + i.title);

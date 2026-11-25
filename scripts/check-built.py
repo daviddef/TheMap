@@ -17,7 +17,7 @@ had already worked and for one that had never been broken that way.
 
 A check that looks in one of the two places a thing can be is not a check.
 """
-import glob, json, os, re, sys
+import glob, gzip, json, os, re, sys
 
 # npm runs this from site/, so every relative path below would resolve one
 # directory too deep. Anchor on the repository root the way the other scripts
@@ -526,11 +526,59 @@ def page_weight_within_budget(pages):
                 "Find the section that grew (scripts/check-built.py has the method: split pages into blocks and count the ones other pages repeat).")
 
 
+# ---------------------------------------------------------------------------
+# THE BURIAL-GROUND SQUARES (scripts/build-cemetery-cells.py). The story plan
+# once told a family there was no named cemetery near them because it read a
+# file holding an eighth of the rows. So the squares are counted against the
+# source: every row of data/cemeteries-* is in exactly one listed file, every
+# listed file arrived, and none is heavier than a phone should fetch for one
+# part of one page.
+CEM_LIMIT = 80 * 1024
+def cemetery_cells_gate(dist=None):
+    root = os.path.join(dist or DIST, "cem")
+    try:
+        index = json.load(open(os.path.join(root, "index.json"), encoding="utf-8"))
+    except (OSError, ValueError):
+        err("cem/index.json is missing from the build — the story plan cannot list any burial ground")
+        return
+    listed = set()
+    for src, stem in (("osm", "data/cemeteries-osm.json"), ("wd", "data/cemeteries-wikidata.json")):
+        if os.path.exists(stem + ".gz"):
+            fh = gzip.open(stem + ".gz", "rt", encoding="utf-8")
+        else:
+            fh = open(stem, encoding="utf-8")
+        with fh:
+            want = len(json.load(fh)["features"])
+        entry = (index.get("sources") or {}).get(src) or {}
+        total = 0
+        for key, n in (entry.get("cells") or {}).items():
+            have = 0
+            for i in range((entry.get("parts") or {}).get(key, 1)):
+                rel = f"{src}/{key}" + (f"-{i}" if i else "") + ".json"
+                listed.add(rel)
+                f = os.path.join(root, rel)
+                if not os.path.exists(f):
+                    err(f"cem/index.json lists cem/{rel} and the build does not hold it")
+                    continue
+                if os.path.getsize(f) > CEM_LIMIT:
+                    err(f"cem/{rel} is {os.path.getsize(f):,} bytes, over the {CEM_LIMIT:,} limit")
+                have += len(json.load(open(f, encoding="utf-8"))["rows"])
+            if have != n:
+                err(f"cem/{src}/{key} holds {have} rows and the index says {n}")
+            total += have
+        if total != want:
+            err(f"cem/{src} holds {total:,} burial grounds and {stem} holds {want:,}")
+    stray = {os.path.relpath(f, root).replace(os.sep, "/") for f in glob.glob(os.path.join(root, "*", "*.json"))} - listed
+    if stray:
+        err(f"{len(stray)} files under cem/ are not in its index, such as {sorted(stray)[0]}")
+
+
 def main():
     if not os.path.isdir(DIST):
         sys.exit(f"{DIST} is not there — run this after astro build.")
 
     quiet_count_gate()
+    cemetery_cells_gate()
     context_urls_land()
     art_tags_reach_pages()
     history_page_built()

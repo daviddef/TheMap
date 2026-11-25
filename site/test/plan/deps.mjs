@@ -15,7 +15,15 @@ export function deps(g) {
     let allRows = idx.places.slice(); const td = idx.tail && idx.tail.dir; if (idx.tail && idx.tail.cells) for (const k of Object.keys(idx.tail.cells)) { try { allRows = allRows.concat(rd(td + k + ".json").places || []); } catch (e) {} } try { allRows = allRows.concat(rd("index-quiet.json").places || []); } catch (e) {}
     const prov = rd("providers.json"), pl = prov.providers || prov;
     cache = { archives, regions: rd("regions.json"), rows: allRows, countries: Object.fromEntries(Object.entries(idx.countries || {}).map(([k, v]) => [k, typeof v === "string" ? v : v.name || v.n || k])),
-      provById: Object.fromEntries(archives.map((a) => [a.id, a]).concat(pl.map((p) => [p.id, p]))), cemeteries: { osm: rd("cemeteries-osm.json").features, wd: rd("cemeteries-wikidata.json").features }, base: "/" };
+      provById: Object.fromEntries(archives.map((a) => [a.id, a]).concat(pl.map((p) => [p.id, p]))), base: "/" };
   }
-  return Object.assign({}, cache, { mort: g.mort });
+  const at = todo.anchorOf(g);
+  return Object.assign({}, cache, { mort: g.mort, cemeteries: at && at.info.lat != null ? cemeteries(at.info.lat, at.info.lon) : null });
+}
+/* the burial-ground squares around a place, read from public/cem/ the way the page fetches them */
+export function cemeteries(lat, lon) {
+  const get = (f) => (fs.existsSync(path.join(PUB, f)) ? rd(f) : null), index = get("cem/index.json");
+  if (!index) return { failed: true };
+  const files = todo.cellsFor(lat, lon, index);
+  return todo.cemeteriesFrom(index, files, files.map((f) => get(f.path)));
 }

@@ -384,7 +384,8 @@
 
   /* ---- the plan, place by place: computed here from the Atlas's own files (story-todo.js); nothing is sent anywhere ----------------------------------- */
   var todoOut = $("sp-todo"), todoTok = 0, fileMemo = Object.create(null);
-  function fetchFile(name) { return fileMemo[name] || (fileMemo[name] = fetch(BASE + name).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })); }
+  /* a file that did not arrive is forgotten, so the next draw asks for it again */
+  function fetchFile(name) { return fileMemo[name] || (fileMemo[name] = fetch(BASE + name).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }).then(function (v) { if (v === null) delete fileMemo[name]; return v; })); }
   function drawTodo(g) {
     if (!todoOut) return;
     var tok = ++todoTok; todoOut.textContent = ""; todoOut.append(el("p", "Working out where to start…", "sp-fine"));
@@ -392,12 +393,13 @@
       if (tok !== todoTok) return;
       var an = r[1] && r[1].rows ? r[1].rows.map(function (x) { return { id: x[0], name: x[1], kind: x[2], access: x[3], cc: x[4], lat: x[5], lon: x[6], url: x[7], email: x[8], post: x[9], tel: x[10] }; }) : [];
       var pv = r[3] && (r[3].providers || r[3]) || [], byId = Object.create(null); an.forEach(function (a) { byId[a.id] = a; }); pv.forEach(function (p) { byId[p.id] = byId[p.id] || p; });
-      var deps = { base: BASE, countries: data && data.countries, rows: data && data.rows, archives: an, regions: r[2], provById: byId, mort: g.mort, cemeteries: null };
-      var T = window.raStoryTodo; T.render(T.build(g, deps), todoOut);
-      /* the cemetery files are large (about 5 MB between them), so they come after the plan is already on the page */
-      return Promise.all([fetchFile("cemeteries-osm.json"), fetchFile("cemeteries-wikidata.json")]).then(function (c) {
+      var deps = { base: BASE, countries: data && data.countries, rows: data && data.rows, archives: an, regions: r[2], provById: byId, mort: g.mort, cemeteries: { pending: true } };
+      var T = window.raStoryTodo, plan = T.build(g, deps), at = plan.anchor; T.render(plan, todoOut);
+      if (!at || at.lat == null) return;
+      /* burial grounds come after the plan is on the page: only the map squares around its starting place */
+      return T.loadCemeteries(at.lat, at.lon, fetchFile).then(function (c) {
         if (tok !== todoTok) return;
-        deps.cemeteries = { osm: (c[0] && c[0].features) || [], wd: (c[1] && c[1].features) || [] };
+        deps.cemeteries = c;
         T.render(T.build(g, deps), todoOut);
       });
     }).then(null, function () { if (tok === todoTok) { todoOut.textContent = ""; todoOut.append(el("p", "The plan could not be worked out just now. The steps below still apply.", "sp-fine")); } });

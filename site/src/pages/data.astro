@@ -259,19 +259,22 @@ const FILES = [
 <Base
   title="Use the data"
   eyebrow={`${FILES.length} public files · no key, no rate limit, no account`}
-  dek="Everything this map draws is a plain JSON file on a public URL, and the map is only the first client. Take any of it, for anything, without asking.">
+  dek="Everything this map draws is a plain JSON file on a public URL. Take any of it, for anything, without asking.">
 
-  <div class="one" style="margin-top:20px">
-    <p><b>New to this?</b> <a href={u("/connect/#files")}>Connect to the Atlas</a> says in plain words which file answers which question, with a command that fetches each one.</p>
-  </div>
+  <ul class="k-grid dt-quick">
+    <li><a class="k-card" href={u("/connect/#files")}><span class="k-ico" aria-hidden="true">☺</span><h3>New to this?</h3><p>Connect to the Atlas says which file answers which question, with a command that fetches each one.</p></a></li>
+    <li><a class="k-card" href="#licences"><span class="k-ico" aria-hidden="true">©</span><h3>Check the licence</h3><p>More than one applies. Read the <code>licence</code> field of the file you take.</p></a></li>
+    <li><a class="k-card" href="#fetch"><span class="k-ico" aria-hidden="true">⇩</span><h3>Fetch it</h3><p>No key, no rate limit, no account. Readable from any origin.</p></a></li>
+    <li><a class="k-card" href="#files"><span class="k-ico" aria-hidden="true">▤</span><h3>Every file</h3><p>{FILES.length} files, each with its size and what it says about its own licence.</p></a></li>
+  </ul>
 
-  <div class="one" style="margin-top:20px">
+  <div class="dt-sec" id="licences">
     {/* A COUNT HERE GOES STALE THE NEXT TIME A SOURCE IS ADDED, and this
         page has already been wrong twice about how many there are. The list
         below is the thing to keep right; check-data.py now refuses a build
         whose data declares a licence this page does not name. */}
-    <div class="lab">The licences — there is more than one, and the difference matters</div>
-    <p><b>Read the <code>licence</code> field of the file you are taking.</b> Every
+    <div class="k-bar"><h2>The licences</h2><span class="k-count">there is more than one, and the difference matters</span></div>
+    <p class="dt-lede"><b>Read the <code>licence</code> field of the file you are taking.</b> Every
     file derived from somebody else's work declares whose and on what terms, and
     the table below prints what each one actually says rather than one blanket
     claim over all of them.</p>
@@ -385,8 +388,8 @@ const FILES = [
     other end of those links, and those terms are theirs.</p>
   </div>
 
-  <div class="one" style="margin-top:18px">
-    <div class="lab">How to fetch it</div>
+  <div class="dt-sec" id="fetch">
+    <div class="k-bar"><h2>How to fetch it</h2></div>
     <pre class="ra-code" tabindex="0" aria-label="Example commands: fetch the index and the per-place files with curl"><code>{`# the first paint only — the twelve biggest places per 5-degree cell
 curl -s https://recordatlas.org/index.json | jq '.places | length'
 
@@ -407,8 +410,8 @@ curl -s https://recordatlas.org/regions.json | jq '.regions[0]'`}</code></pre>
     and every place is that plus the {nTailCells.toLocaleString()} cells under <code>/pi/</code>.</p>
   </div>
 
-  <div class="one" id="context" style="margin-top:18px">
-    <div class="lab">The context contract</div>
+  <details class="dt-sec dt-fold" id="context">
+    <summary><h2>The context contract</h2><span class="k-count">version 1.13.0 · what held this ground in this year</span></summary>
     <p>{`/context.json`} answers «what held this ground in this year?» for the sites that quote the atlas beside a dated event. It is versioned: the <code>contract.version</code> field follows semantic versioning, and anything a consumer could notice — a renamed field, a changed id, a different lookup rule — raises it. Version <b>1.13.0</b>.</p>
     <ul>
       <li><b>Ids are permanent.</b> A region era is <code>&lt;region&gt;--era-&lt;from&gt;</code> (<code>calabria--era-1815</code>); a country era is <code>&lt;page slug&gt;--&lt;era id&gt;</code> (<code>croatia-flags--era-1991</code>), the id the flag layer already uses. Each carries a <code>url</code> that lands on the era.</li>
@@ -425,10 +428,10 @@ curl -s https://recordatlas.org/regions.json | jq '.regions[0]'`}</code></pre>
     <p class="cap">Not in this version, and not to be inferred: a language of administration, a ruler per year, sources on region eras, and events (wars, famines, epidemics). Ten country eras with no id on their page are left out because they cannot be cited.</p>
     <pre class="ra-code" tabindex="0" aria-label="Example command: fetch context.json and list the Calabria eras covering 1860"><code>{`curl -s https://recordatlas.org/context.json \
   | jq '.regions[] | select(.id=="calabria") | .eras[] | select(.from<=1860 and (.to==null or .to>1860))'`}</code></pre>
-  </div>
+  </details>
 
-  <div class="one" style="margin-top:18px">
-    <div class="lab">The files</div>
+  <div class="dt-sec" id="files">
+    <div class="k-bar"><h2>The files</h2><span class="k-count">{FILES.length}</span></div>
     <table class="ra-files">
       <thead><tr><th>Path</th><th>Size</th><th>What it is</th><th>Licence</th></tr></thead>
       <tbody>
@@ -444,8 +447,8 @@ curl -s https://recordatlas.org/regions.json | jq '.regions[0]'`}</code></pre>
     </table>
   </div>
 
-  <div class="one" style="margin-top:18px">
-    <div class="lab">What the numbers are today</div>
+  <div class="dt-sec dt-now">
+    <div class="k-bar"><h2>What the numbers are today</h2></div>
     <p>{nPlaces.toLocaleString()} places, {nVolumes.toLocaleString()} record volumes,
     {" "}{provs.providers.length} providers, {regions.regions.length} jurisdiction regions.
     Rebuilt whenever anything lands, so these files move under you — there is no
@@ -459,7 +462,29 @@ curl -s https://recordatlas.org/regions.json | jq '.regions[0]'`}</code></pre>
   </div>
 </Base>
 
+<script is:inline>
+  (function () { var c = document.getElementById("context"); if (c && location.hash === "#context") c.open = true; })();
+</script>
+
 <style>
+  .dt-quick .k-card { align-items: flex-start; } .dt-quick h3 { font-size: 20px; } .dt-quick p { font-size: 13.5px; }
+  .dt-sec { margin-top: 12px; }
+  .dt-lede { max-width: var(--measure); font-size: 15px; line-height: 1.6; color: var(--ink-2); margin: 0 0 8px; }
+  .dt-sec > p, .dt-sec > .cap { max-width: var(--measure); }
+  .dt-fold { margin-top: 34px; background: var(--panel); border: 1px solid var(--rule); border-radius: 18px; padding: 4px 22px 16px; }
+  .dt-fold > summary { list-style: none; cursor: pointer; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; padding: 12px 0 8px; }
+  .dt-fold > summary::-webkit-details-marker { display: none; }
+  .dt-fold > summary::before { content: ""; flex: none; width: 8px; height: 30px; border-radius: 6px; background: var(--hue); }
+  .dt-fold > summary::after { content: "▾"; margin-left: auto; color: var(--hue-ink); }
+  .dt-fold[open] > summary::after { content: "▴"; }
+  .dt-fold > summary h2 { margin: 0; font: 800 clamp(22px, 3vw, 30px)/1.2 var(--serif); letter-spacing: -.02em; }
+  .dt-fold > summary .k-count { font: 12px var(--mono); color: var(--ink-3); }
+  .dt-fold > p, .dt-fold > ul, .dt-fold > pre { max-width: var(--measure); }
+  .dt-fold ul { padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.65; }
+  .dt-now > p { font-size: 15px; line-height: 1.65; }
+  .ra-lic { grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); align-items: start; }
+  .ra-lic li { border-radius: 16px; border-top: 4px solid var(--hue); }
+  .ra-files tbody tr:hover td { background: var(--hue-wash); }
   /* One card per licence, the licence's name first, so a reuser finds theirs without reading all of them. */
   .ra-lic { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 10px; }
   .ra-lic li { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 15px;

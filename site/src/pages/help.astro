@@ -41,27 +41,27 @@ const access = idx.access || {};
 ---
 <Base
   title="Help"
-  eyebrow="How to search it · what the colours mean · what to do when it finds nothing"
+  eyebrow="Searching · the colours · when it finds nothing"
   dek="Find a place whose name has changed, read the colour of a dot, and know what to do when the answer is nothing.">
 
-  <h2 class="k-h">Four ways to search</h2>
-  <ul class="k-tiles hp-tiles">
-    <li><b>A surname</b><span>The map lights the countries where a register or archive records it. That is where to start, not proof your family lived there.</span></li>
-    <li><b>A village, by any name</b><span>Gallignana goes to Gračišće, Breslau to Wrocław, Memel to Klaipėda. It works worldwide, not only where the shelf is deep.</span></li>
-    <li><b>A name and a place</b><span><em>Blazevic Gracisce</em> narrows to that name on that ground.</span></li>
-    <li><b>Click a country</b><span>Every country answers with something: whose national archive, what research guide exists.</span></li>
+  <div class="k-bar"><h2>Four ways to search</h2></div>
+  <ul class="k-grid hp-grid">
+    <li class="k-card"><span class="k-ico" aria-hidden="true">Aa</span><h3>A surname</h3><p>The map lights the countries where a register or archive records it. That is where to start, not proof your family lived there.</p></li>
+    <li class="k-card"><span class="k-ico" aria-hidden="true">⌂</span><h3>A village, by any name</h3><p>Gallignana goes to Gračišće, Breslau to Wrocław, Memel to Klaipėda. It works worldwide, not only where the shelf is deep.</p></li>
+    <li class="k-card"><span class="k-ico" aria-hidden="true">+</span><h3>A name and a place</h3><p><em>Blazevic Gracisce</em> narrows to that name on that ground.</p></li>
+    <li class="k-card"><span class="k-ico" aria-hidden="true">◎</span><h3>Click a country</h3><p>Every country answers with something: whose national archive, what research guide exists.</p></li>
   </ul>
 
-  <h2 class="k-h">What the colour of a dot means <span class="k-count">what it costs to look</span></h2>
-  <ul class="k-tiles hp-tiles hp-key">
+  <div class="k-bar"><h2>What the colour of a dot means</h2><span class="k-count">what it costs to look</span></div>
+  <ul class="k-grid hp-key">
     {Object.entries(access).map(([k, v]) => (
-      <li><b>{k}</b><span>{v}</span></li>
+      <li class="k-card" style={`--dot: var(--acc-${k}, var(--acc-unsurveyed))`}><h3><i aria-hidden="true"></i>{k}</h3><p>{v}</p></li>
     ))}
   </ul>
-  <p class="k-lede">“Online” is eight different things, not one. The last of these is the commonest colour on the map.
+  <p class="k-lede hp-lede">“Online” is eight different things, not one, and the last of these is the commonest colour on the map.
     Set a year and the map also says whose archive held that ground: <a href={u("/providers/#regions")}>the table behind that</a>.</p>
 
-  <h2 class="k-h">When it finds nothing</h2>
+  <div class="k-bar"><h2>When it finds nothing</h2></div>
   <div class="k-hi"><p><b>A grey dot means nobody has surveyed it, not that nothing is there.</b></p></div>
   <ol class="k-steps">
     <li><b>Set the year.</b> See whose archive held that ground. The records may be filed under a country you were not searching.</li>
@@ -70,29 +70,36 @@ const access = idx.access || {};
     <li><b>Found it?</b> <a href={u("/add/")}>Send it back.</a> A grey dot you turned into an answer is the most valuable thing a stranger can give this map.</li>
   </ol>
 
-  <h2 class="k-h">What it does not know yet</h2>
-  <div class="k-stats">
-    <span class="k-tag is-new">{unsurveyedPct}% never surveyed</span>
-    <span><b>{archives.length}</b> archives in <b>{archiveCountries}</b> countries</span>
-    <span><b>{places.toLocaleString()}</b> places</span>
-    <span><b>{volumes.toLocaleString()}</b> volumes</span>
-    <span><b>{regions.regions.length}</b> jurisdiction regions</span>
-  </div>
-  <p class="k-lede">The shelf is deep in one corner: Croatia, Istria and Carnia are far ahead. The jurisdiction layer covers
+  <div class="k-bar"><h2>What it does not know yet</h2></div>
+  <ul class="k-pills hp-stats">
+    <li><span class="k-pill is-solid">{unsurveyedPct}% never surveyed</span></li>
+    <li><span class="k-pill"><b>{archives.length}</b> archives in <b>{archiveCountries}</b> countries</span></li>
+    <li><span class="k-pill"><b>{places.toLocaleString()}</b> places</span></li>
+    <li><span class="k-pill"><b>{volumes.toLocaleString()}</b> volumes</span></li>
+    <li><span class="k-pill"><b>{regions.regions.length}</b> jurisdiction regions</span></li>
+  </ul>
+  <p class="k-lede hp-lede">The shelf is deep in one corner: Croatia, Istria and Carnia are far ahead. The jurisdiction layer covers
     {regions.regions.length} pieces of ground, not the planet, and a place outside them says so rather than guessing. A confident wrong answer about which archive to write to costs somebody a month.</p>
 
   {/* WHAT THE ATLAS IS, IN WORDS: it sat under the map on the home page until 23 Nov 2026, when David asked for the map to have the room. */}
   <HomeAbout />
 
-  <div class="k-foot">
-    <p>Still stuck?</p>
-    <p><a href={u("/start/")}>Start here</a> · <a href={u("/coverage/")}>What’s missing</a></p>
-  </div>
+  <div class="k-bar"><h2>Still stuck?</h2></div>
+  <ul class="k-pills">
+    <li><a class="k-pill" href={u("/start/")}>Start here</a></li>
+    <li><a class="k-pill is-plain" href={u("/coverage/")}>What’s missing</a></li>
+  </ul>
 </Base>
 
 <style>
-  .hp-tiles { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); max-width: 980px; }
-  .hp-tiles li > span { display: block; }
-  .hp-tiles li b { font-family: var(--serif); font-size: 17px; font-weight: 500; color: var(--ink); }
-  .hp-key li b { font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; letter-spacing: .04em; }
+  .hp-grid .k-card { align-items: flex-start; }
+  .hp-grid h3 { font-size: 20px; }
+  .hp-key { grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); }
+  .hp-key .k-card { border-top-color: var(--dot); border-radius: 14px; padding: 12px 14px; }
+  .hp-key h3 { display: flex; align-items: center; gap: 8px; font: 700 12px/1.2 var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--ink); }
+  .hp-key h3 i { width: 14px; height: 14px; border-radius: 50%; background: var(--dot); border: 2px solid var(--ink-2); box-sizing: border-box; flex: none; }
+  .hp-lede { margin: 14px 0 6px; }
+  .hp-stats { margin: 0 0 6px; }
+  .hp-stats .k-pill { font-size: 14px; padding: 6px 14px; }
+  main .k-steps > li::before { background: var(--hue-wash); color: var(--hue-ink); border-color: var(--hue); }
 </style>

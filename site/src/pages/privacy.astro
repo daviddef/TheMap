@@ -8,14 +8,27 @@ import { u } from "../lib/url.js";
   eyebrow="What this site collects, and what it does not"
   dek="A static site with no account, no login and no database.">
 
-  <div class="prose k-prose" style="max-width:var(--measure)">
-    <h3>What Record Atlas itself collects</h3>
+  <ul class="k-grid pv-short" aria-label="The short version">
+    <li class="k-card"><span class="k-ico" aria-hidden="true">∅</span><h3>No account, no database</h3><p>What you type in the find box stays in your browser's address bar and is never sent anywhere.</p></li>
+    <li class="k-card"><span class="k-ico" aria-hidden="true">✦</span><h3>One exception</h3><p>Text leaves your browser only when you press a button on the Reading page, and only to get a draft from Claude.</p></li>
+    <li class="k-card"><span class="k-ico" aria-hidden="true">◫</span><h3>Maps and fonts</h3><p>The hosts that serve map tiles and fonts see your IP address, as for any map on the web.</p></li>
+    <li class="k-card"><span class="k-ico" aria-hidden="true">☺</span><h3>No people</h3><p>The atlas holds records and the institutions that keep them, not individuals.</p></li>
+  </ul>
+
+  <div class="k-bar"><h2>The full account</h2><span class="k-count">open any part</span></div>
+  <div class="prose pv-list">
+  <details class="pv" open>
+    <summary><h2>What Record Atlas itself collects</h2></summary>
+    <div class="pv-body">
     <p><b>Nothing.</b> There is no account, no sign-in, no form and no database. The site is
     static files served by GitHub Pages. What you type into the find box, which layers you
     switch on and which year you set stay in your browser's address bar and are never sent
     anywhere.</p>
-
-    <h3>If you choose to keep a copy online</h3>
+    </div>
+  </details>
+  <details class="pv">
+    <summary><h2>If you choose to keep a copy online</h2></summary>
+    <div class="pv-body">
     <p>On <a href={u("/my-research/")}>My research</a> you can keep an encrypted copy of your
     research online, with no account. The six words it gives you are made in your browser and
     are never sent to us. Your research is encrypted in your browser, and only that scrambled
@@ -28,8 +41,11 @@ import { u } from "../lib/url.js";
     tree came from, and a short code for each card, never the tree file or a name, date or place from it (<a href={u("/backup/#canvas")}>what is kept</a>).
     This is off unless you switch
     it on, and the rest of the site works exactly the same without it.</p>
-
-    <h3>If you ask Claude to read a line</h3>
+    </div>
+  </details>
+  <details class="pv" open>
+    <summary><h2>If you ask Claude to read a line</h2></summary>
+    <div class="pv-body">
     <p>On <a href={u("/read/")}>Reading the record</a> you can paste a line of a register, or photograph one, and ask Claude to draft a reading.
     <b>This is the one place where something you type leaves your browser.</b> It happens only when you press a button. The text (or the picture,
     shrunk and stripped of its hidden data in your browser) goes to our small service at <code>ai.recordatlas.org</code>, which sends it to Claude, an
@@ -52,8 +68,11 @@ import { u } from "../lib/url.js";
     click in the box, and Cloudflare sees your address and browser as it does for any site that uses it. If you have set up sync, your six words give the
     service a separate identity for your allowance; the service cannot open your saved research with it. Everything else on that page, the word finder
     and the date decoder, runs in your browser and sends nothing.</p>
-
-    <h3>What your browser fetches from elsewhere</h3>
+    </div>
+  </details>
+  <details class="pv">
+    <summary><h2>What your browser fetches from elsewhere</h2></summary>
+    <div class="pv-body">
     <ul>
       <li><b>Map tiles</b>, from a different host for each look, and only for the look you are using. The maps (the Atlas map, the Compass and the
       History map) offer the same looks, and each one contacts:
@@ -80,8 +99,11 @@ import { u } from "../lib/url.js";
     </ul>
     <p>Following a link to a provider takes you to that provider's site, under their terms
     and not these.</p>
-
-    <h3>Advertising</h3>
+    </div>
+  </details>
+  <details class="pv">
+    <summary><h2>Advertising</h2></summary>
+    <div class="pv-body">
     {site.ads.enabled ? (
       <>
         <p>This site carries a single advertisement in its footer, served by Google AdSense.
@@ -106,13 +128,19 @@ import { u } from "../lib/url.js";
       Switzerland nothing will load until you have consented through a banner. This page will
       say so before it happens.</p>
     )}
-
-    <h3>Gifts</h3>
+    </div>
+  </details>
+  <details class="pv">
+    <summary><h2>Gifts</h2></summary>
+    <div class="pv-body">
     <p>The <a href={u("/support/")}>Support page</a> links to a payment page that Stripe hosts. The payment happens
     there, under Stripe's terms and privacy policy: this site never sees your card, your name or your email, and
     stores nothing about a gift. Nothing is loaded from Stripe until you follow the link.</p>
-
-    <h3>Counting visits</h3>
+    </div>
+  </details>
+  <details class="pv">
+    <summary><h2>Counting visits</h2></summary>
+    <div class="pv-body">
     {site.analytics?.goatcounter ? (
       <>
         <p>This site counts page views with
@@ -128,17 +156,40 @@ import { u } from "../lib/url.js";
     ) : (
       <p>This site does not count visits.</p>
     )}
-
-    <h3>Living people</h3>
+    </div>
+  </details>
+  <details class="pv">
+    <summary><h2>Living people</h2></summary>
+    <div class="pv-body">
     <p>This map is about <b>records and the institutions that hold them</b>, not about people.
     It carries no names of individuals, living or dead. The one-family archive it grew out of
     keeps a strict rule about living people; this site sidesteps the question by never holding
     a person in the first place.</p>
-
-    <h3>Getting in touch</h3>
+    </div>
+  </details>
+  <details class="pv">
+    <summary><h2>Getting in touch</h2></summary>
+    <div class="pv-body">
     <p>Corrections, including anything you want removed, go through
     <a href={site.repo + "/issues"}>the public issue tracker</a>.</p>
+    </div>
+  </details>
   </div>
 </Base>
 
-<style>.prose h3 { margin-top: 28px; } .prose ul { font-size: 14px; line-height: 1.7; }</style>
+<style>
+  .pv-short .k-card { align-items: flex-start; }
+  .pv-short h3 { font-size: 19px; }
+  .pv-list { display: grid; gap: 10px; max-width: var(--measure); }
+  .pv { background: var(--panel); border: 1px solid var(--rule); border-radius: 18px; overflow: hidden; }
+  .pv[open] { border-color: color-mix(in srgb, var(--hue) 35%, var(--rule)); }
+  .pv > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 14px 20px; }
+  .pv > summary::-webkit-details-marker { display: none; }
+  .pv > summary::after { content: "▾"; margin-left: auto; color: var(--hue-ink); font-size: 16px; }
+  .pv[open] > summary::after { content: "▴"; }
+  .pv > summary h2 { margin: 0; font: 800 clamp(18px, 2.4vw, 22px)/1.25 var(--serif); letter-spacing: -.01em; }
+  .pv > summary:hover h2 { color: var(--hue-ink); }
+  .pv-body { padding: 2px 20px 18px; }
+  .pv-body p { font-size: 15px; line-height: 1.68; margin: 0 0 12px; }
+  .pv-body ul { font-size: 14px; line-height: 1.7; padding-left: 20px; margin: 0 0 12px; }
+</style>

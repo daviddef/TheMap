@@ -94,119 +94,52 @@ function dlSize(name) {
       { "@type": "DataDownload", encodingFormat: "application/json", contentUrl: u("/surnames.json.gz") },
     ],
   }}
-  title="Surname dataset"
-  eyebrow={`${c.surnames} surnames · ${c.curatedLinks} curated variant links · ${c.withCountries} with a country`}
-  dek="The data behind the surname lookup: every spelling a surname takes, the countries it is attested in, and the evidence on each claim. To look a name up, use Names.">
+  title="Surnames"
+  eyebrow={`${c.surnames.toLocaleString()} surnames · ${c.withCountries.toLocaleString()} with a country`}
+  dek="Every spelling a surname takes, where it is attested, and the evidence for each. To look one up, use Names.">
 
-  {/* A PAGE CALLED «LOOK UP A SURNAME» THAT COULD NOT LOOK ONE UP. David: «i
-      feel the surname page has nothing to do with Looking up a surname? you
-      cant look them up at all, it just a download spot», and then: «i want the
-      surname finder to look like the place finder! the country list should
-      also be counting the surnames... summarise by country first and then by
-      last names below, with a working search box. everything else below that.»
+  {/* THE PAGE HAD NOWHERE TO TYPE A NAME, then it had a paragraph about it. Now the first thing is a door to the one search, then the
+      countries (counted by their national registers), then what is in the data, and the downloads. The long explanations are folded,
+      not removed. */}
+  <a class="k-search k-door" href={u("/your-name/?kind=surname")} aria-label="Look up a surname">
+    <span class="k-ico" aria-hidden="true">🔎</span>
+    <span class="k-door-t">Look up a surname, a country or a place</span>
+    <span class="k-pill is-solid">Names &rarr;</span>
+  </a>
 
-      So: the place finder's own furniture, in that order. The box searches
-      NAMES and countries and places together, because somebody holding only a
-      name does not always know which of the three they are holding. */}
-  <p class="go" style="margin:0 0 6px"><a href={u("/your-name/?kind=surname")}><b>Look up a name</b> &rarr;</a>
-  Type a surname, a country or a place, and see every spelling, where it is attested and whose archives to write to.</p>
-
-  <details class="cdir" open>
-    <summary><b>By country</b> — where the names come from</summary>
-    <p class="cap">A count here is how many surnames that country's <b>national
-    register</b> names. It measures which registers have been harvested, not
-    where a name is borne: {ccT.withRegister} countries have one,
-    {ccT.archiveOnly} are named only by a family archive, and <b>{ccT.noNames}
-    have nothing at all</b> — which is the list worth shortening.</p>
+  <section class="cdir">
+    <div class="k-bar"><h2>By country</h2><span class="k-count">{ccT.withRegister} have a national register · {ccT.archiveOnly} only a family archive · {ccT.noNames} nothing</span></div>
     <CountryCards list={ccList} totals={ccT} showFind={false} />
-  </details>
-
-  <div class="one" style="border-left-color:#7A5CA8">
-    <div class="lab">Three kinds of fact, never mixed</div>
-    <ul class="kinds">
-      <li><b>curated</b> — a person linked two spellings. Wikidata's <em>said to be the same
-        as</em>, and the variant clusters seven family archives worked out from documents.</li>
-      <li><b>archive</b> — the name appears in one of those archives, whose ground is known.</li>
-      <li><b>sounds</b> — an algorithm thinks they sound alike. Useful for casting a net,
-        worthless as evidence, and labelled so nobody mistakes it for one.</li>
-    </ul>
-    <p class="cap" style="margin-top:10px"><b>«Attested in Spain» means the name appears in a
-    dataset held here.</b> It never means the name exists in Spain, and never that it exists
-    nowhere else. This map's blanks are gaps in the map.</p>
-  </div>
-
-  <section style="margin-top:30px">
-    <h2>Take it away</h2>
-    <p class="cap">CC0. No attribution required, no licence travels with it — the sources are
-    Wikidata (CC0) and David Defranceski's own research, and nothing under CC BY was folded
-    in so that this could stay true.</p>
-    {/* SIZES MEASURED, NOT TYPED. These read 21 MB and 64 MB while the files
-        were 58 and 107 — written once when they were true and never touched
-        again, so the page quietly understated a download by a factor of two.
-        A number a reader might act on has to come from the file. */}
-    <p class="dl">
-      <a href={u("/surnames.csv.gz")}>surnames.csv.gz</a> — <b>{dlSize("surnames.csv.gz")}</b>,
-      one row per surname × variant × country. The practical one.<br />
-      <a href={u("/surnames.json.gz")}>surnames.json.gz</a> — <b>{dlSize("surnames.json.gz")}</b>,
-      the same thing structured, with the evidence tier on every claim.
-    </p>
-    <p class="cap">Both are gzipped: uncompressed they are a sixth of this whole
-    site, which has a gigabyte to live in. Every browser and every data tool
-    reads a .gz without being asked.</p>
-    <p class="cap">Both are large because most of the rows are a national register. If you
-    want one country's raw frequencies, take it straight from the source instead — they are
-    in <code>data/frequencies/</code> in the repository, one file per country, each carrying
-    its own licence and harvest date.</p>
-    <p class="cap">Sources: {surn.sources.map((s) => <span>{s}<br /></span>)}</p>
+    <details class="about" style="margin-top:14px"><summary>How these counts work</summary>
+      <p class="cap">A count here is how many surnames that country's <b>national register</b> names. It measures which registers have been
+      harvested, not where a name is borne: {ccT.withRegister} countries have one, {ccT.archiveOnly} are named only by a family archive,
+      and <b>{ccT.noNames} have nothing at all</b> — which is the list worth shortening.</p></details>
   </section>
 
-  {/* THE ONE THING THIS PAGE DID NOT DO WAS SHOW YOU A NAME.
-      It listed what the corpus contains, how to download it and which
-      countries are missing — a dataset page, and a good one, for a
-      project whose whole argument is that a question about people is a
-      question about ground. A reader who came here after seeing a
-      surname drawn somewhere else found a table. */}
-  {/* THE PAGE HAD NOWHERE TO TYPE A NAME.
-      It described a corpus, offered it as a download, drew one example
-      and listed the countries that refuse — everything except the thing
-      a person arriving with a surname in their head wants to do with
-      it. The box goes to the map, which is where the real answer is:
-      the countries lit by evidence, and for Belgian names the actual
-      towns. A plain GET form, so it works before any script does. */}
-  <section style="margin-top:30px">
-    {/* THE BOX MOVED TO THE TOP OF THE PAGE, where a finder's box belongs;
-        what was here was a form that bounced to the map rather than answering
-        anything. What is left is the pointer to where a name IS answered. */}
-    <h2>The map answers in full</h2>
-    <p class="cap">The <a href={u("/your-name/?kind=surname")}>Names page</a> finds a name. The map's own
-    panel is where one is <em>answered</em> — the countries a register or an
-    archive attests it in, when it was there, whose archives to write to, and
-    how much paper stands in each.
-    {demo && <> A made page reads like this: <a href={u(`/surname/${demo.slug}/`)}>{demo.r.n}</a>.</>}</p>
-  </section>
+  <div class="k-bar"><h2>Three kinds of fact, never mixed</h2></div>
+  <ul class="k-grid kinds">
+    <li class="k-card"><span class="k-pill">curated</span><p>A person linked two spellings: Wikidata's <em>said to be the same as</em>, and the clusters seven family archives worked out from documents.</p></li>
+    <li class="k-card"><span class="k-pill">archive</span><p>The name appears in one of those archives, whose ground is known.</p></li>
+    <li class="k-card"><span class="k-pill is-plain">sounds</span><p>An algorithm thinks they sound alike. Good for casting a net, worthless as evidence, and labelled so.</p></li>
+  </ul>
+  <p class="cap" style="margin-top:12px"><b>«Attested in Spain» means the name appears in a dataset held here.</b> It never means the name exists in Spain, and never that it exists nowhere else. This map's blanks are gaps in the map.</p>
 
   {demo && demo.map && (
-    <section style="margin-top:30px">
-      <h2>A name is a place, so it is drawn</h2>
-      <p class="cap">Every surname page carries this: the countries where
-      the registers and archives behind this atlas attest the name, sized
-      by how many people a state counted. Below is
-      {" "}<a href={u(`/surname/${demo.slug}/`)}>{demo.r.n}</a>.</p>
+    <section>
+      <div class="k-bar"><h2>A name is a place, so it is drawn</h2><a class="k-pill" href={u(`/surname/${demo.slug}/`)}>{demo.r.n} &rarr;</a></div>
       <figure class="smap">
         <Fragment set:html={demo.map.svg} />
       </figure>
-      <p class="cap"><b>A dot is a country, not a place</b>, and a hollow
-      ring is a name attested without being counted. Neither says anything
-      about the countries not drawn — most of the world has no surname
-      register this project can read, and the
-      {" "}{refused.refused.length} that do and will not are below.</p>
+      <p class="cap"><b>A dot is a country, not a place</b>, and a hollow ring is a name attested without being counted. Neither says anything
+      about the countries not drawn: most of the world has no register this project can read, and the {refused.refused.length} that do and will not are below.
+      The <a href={u("/your-name/?kind=surname")}>Names page</a> finds a name; each surname page answers it.</p>
     </section>
   )}
 
   {examples.length > 0 && (
-    <section style="margin-top:30px">
-      <h2>What it looks like</h2>
-      <table style="margin-top:12px">
+    <section>
+      <div class="k-bar"><h2>What it looks like</h2></div>
+      <div style="overflow-x:auto"><table class="k-table">
         <thead><tr><th>Surname</th><th>Also written</th><th class="m">Attested in</th></tr></thead>
         <tbody>
           {examples.map((r) => (
@@ -217,171 +150,123 @@ function dlSize(name) {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
     </section>
   )}
 
-  <section style="margin-top:30px">
-    <h2>Where the names are attested</h2>
-    <ul class="ccs">
-      {/* THE FLAG OF EVERY COUNTRY A NAME IS ATTESTED IN. This list names
-          countries and this atlas has drawn 194 of their flags, and the two
-          had never met. The arrow opens that country's flag history, which is
-          the same question a surname raises — whose ground was this when the
-          register was written, and therefore whose archive holds it. */}
+  <section>
+    <div class="k-bar"><h2>Where the names are attested</h2><span class="k-count">{top.length} countries</span></div>
+    <ul class="k-pills ccs">
+      {/* THE FLAG OF EVERY COUNTRY A NAME IS ATTESTED IN, and the arrow opens that country's flag history. */}
       {top.map(([cc, n]) => {
         const f = flagFor(cc);
         return (
           <li>
-            {f && (
-              <svg class="ccflag" viewBox="0 0 300 200" role="img"
-                   aria-label={`Flag of ${CN[cc] || cc}`} set:html={f.flag} />
-            )}
-            <a href={u(`/country/${cc.toLowerCase()}/`)}>{CN[cc] || cc}</a>
-            {f && (
-              <a class="ccflag-l" href={u("/" + f.url)}
-                 title={`${CN[cc] || cc} in the flags atlas — who held this ground, and when`}
-              >&#8599;</a>
-            )}
-            <span class="y">{n}</span>
+            <a class="k-pill is-plain" href={u(`/country/${cc.toLowerCase()}/`)}>
+              {f && <svg class="ccflag" viewBox="0 0 300 200" role="img" aria-label={`Flag of ${CN[cc] || cc}`} set:html={f.flag} />}
+              {CN[cc] || cc} <span class="y">{n}</span></a>
+            {f && <a class="ccflag-l" href={u("/" + f.url)} aria-label={`${CN[cc] || cc} in the flags atlas`}
+              title={`${CN[cc] || cc} in the flags atlas — who held this ground, and when`}>&#8599;</a>}
           </li>
         );
       })}
     </ul>
   </section>
 
-  <div class="one" style="margin-top:30px;border-left-color:var(--rule-strong)">
-    <div class="lab">How thin this still is</div>
-    <p class="cap">{c.surnames.toLocaleString()} surnames is not every surname in the world,
-    and there is no open dataset that is — the one commercial database claiming twenty-seven
-    million is not redistributable and is not used here.</p>
-    <p class="cap"><b>And it is lopsided, because it is the shape of which governments make
-    it easy.</b> Five national registers are in: Poland's PESEL list of 270,887 — including
-    the deceased, which is what makes it genealogical rather than a directory — the United
-    States' 162,253 from the 2010 Census <b>and 151,671 from 2000</b>, Spain's 86,512 from
-    the population censuses, and Norway's 3,620, which is only names borne by two hundred
-    people or more.</p>
-    <p class="cap"><b>Both American censuses, and the older one earns its place.</b> 5,155
-    surnames appear in the 2000 list and not in 2010 — a name borne by a hundred people in
-    2000 and ninety-nine a decade later drops out of the later file entirely. Vanishing names
-    are exactly the ones a researcher is chasing, and a dataset that carried only the most
-    recent snapshot would lose them at the moment they became interesting.</p>
+  <section>
+    <div class="k-bar"><h2>Take it away</h2><span class="k-count">CC0 · no attribution</span></div>
+    {/* SIZES MEASURED, NOT TYPED: a number a reader might act on has to come from the file. */}
+    <ul class="k-grid">
+      <li><a class="k-card" href={u("/surnames.csv.gz")}><h3>surnames.csv.gz</h3><span class="k-pill">{dlSize("surnames.csv.gz")}</span>
+        <p>One row per surname × variant × country. The practical one.</p></a></li>
+      <li><a class="k-card" href={u("/surnames.json.gz")}><h3>surnames.json.gz</h3><span class="k-pill">{dlSize("surnames.json.gz")}</span>
+        <p>The same thing structured, with the evidence tier on every claim.</p></a></li>
+    </ul>
+    <details class="about" style="margin-top:14px"><summary>Licence, size and sources</summary>
+      <p class="cap">CC0. No attribution required, no licence travels with it — the sources are Wikidata (CC0) and David Defranceski's own
+      research, and nothing under CC BY was folded in so that this could stay true.</p>
+      <p class="cap">Both are gzipped: uncompressed they are a sixth of this whole site, which has a gigabyte to live in. Every browser and every
+      data tool reads a .gz without being asked. Both are large because most of the rows are a national register. If you want one country's raw
+      frequencies, take it straight from the source — they are in <code>data/frequencies/</code> in the repository, one file per country, each
+      carrying its own licence and harvest date.</p>
+      <p class="cap">Sources: {surn.sources.map((s) => <span>{s}<br /></span>)}</p></details>
   </section>
 
-  <section style="margin-top:30px">
-    {/* COUNTED, NOT TYPED. It said «Four» and listed eight — written when there
-    were four and never looked at again, on the one page whose whole purpose
-    is to be accurate about what is missing. */}
-    {/* «NOT HERE» WAS TOO BLUNT FOR CROATIA, and a reader caught it.
-        Croatia's 141 surnames are in the corpus, with real 2011 census
-        counts, harvested one name at a time from the Bureau's own
-        application — and the heading still filed it under countries that
-        are not here. «No complete register» had been rendered as
-        «nothing», which is the same collapsing of two claims this page
-        spends the rest of its length warning about. A country with some
-        of its names here is a different animal from one with none, and
-        the list now separates them. */}
-    <h2>{absent.length} countries that are not here, and exactly why</h2>
-    <p class="cap">Sought and not obtained. Without this list the next person spends the same
-    afternoon finding the same walls. {rechecked} were re-tested on {refused.checked} against
+  <details class="about">
+    <summary>How thin this still is</summary>
+    <p class="cap">{c.surnames.toLocaleString()} surnames is not every surname in the world, and there is no open dataset that is — the one
+    commercial database claiming twenty-seven million is not redistributable and is not used here.</p>
+    <p class="cap"><b>And it is lopsided, because it is the shape of which governments make it easy.</b> Five national registers are in: Poland's
+    PESEL list of 270,887 — including the deceased, which is what makes it genealogical rather than a directory — the United States' 162,253
+    from the 2010 Census <b>and 151,671 from 2000</b>, Spain's 86,512 from the population censuses, and Norway's 3,620, which is only names
+    borne by two hundred people or more.</p>
+    <p class="cap"><b>Both American censuses, and the older one earns its place.</b> 5,155 surnames appear in the 2000 list and not in 2010 — a
+    name borne by a hundred people in 2000 and ninety-nine a decade later drops out of the later file entirely. Vanishing names are exactly the
+    ones a researcher is chasing, and a dataset that carried only the most recent snapshot would lose them at the moment they became interesting.</p>
+  </details>
+
+  <section>
+    {/* COUNTED, NOT TYPED. «NOT HERE» WAS TOO BLUNT FOR CROATIA: a country with some of its names here is a different animal from one with
+        none, and the list separates them. */}
+    <div class="k-bar"><h2>{absent.length} countries that are not here</h2><span class="k-count">and exactly why</span></div>
+    <p class="cap">Sought and not obtained. Without this list the next person spends the same afternoon finding the same walls. {rechecked} were re-tested on {refused.checked} against
     live endpoints rather than remembered ones, and every refusal held.
     {(refused.resolved || []).length > 0 && <> But retrying is also what closed
     <b>{(refused.resolved || []).map((r) => r.name).join(", ")}</b>, which had been the
     weakest verdict here — «not found», meaning only that somebody looked once.</>}</p>
     {partial.length > 0 && (
-      <div class="one" style="margin:0 0 18px;border-left-color:var(--accent)">
-        <div class="lab">Partly here, which is not the same as missing</div>
+      <div class="k-hi is-plain" style="margin:12px 0 0">
+        <p><b>Partly here, which is not the same as missing</b></p>
         {partial.map((r) => (
-          <p class="cap"><b>{r.name}</b> — {r.verdict}. Some of its names
-          are in the corpus and the rest are not obtainable; the entry
-          below says exactly how far it goes.</p>
+          <p><b>{r.name}</b> — {r.verdict}. Some of its names are in the corpus and the rest are not obtainable; the entry below says exactly how far it goes.</p>
         ))}
       </div>
     )}
-    <ul class="refused">
+    <ul class="k-grid refused">
       {refused.refused.map((r) => (
-        <li>
-          <b>{r.name}</b> <span class="verdict">{r.verdict}</span>
-          {r.rechecked && <span class="verdict re">re-tested {r.rechecked}</span>}
+        <li class="k-card">
+          <h3>{r.name}</h3>
+          <p><span class="k-pill is-plain">{r.verdict}</span>
+          {r.rechecked && <span class="k-pill">re-tested {r.rechecked}</span>}</p>
           <p>{r.why}</p>
-          <ul class="tried">{r.tried.map((t) => <li>{t}</li>)}</ul>
+          <details class="tried"><summary>What was tried</summary><ul>{r.tried.map((t) => <li>{t}</li>)}</ul></details>
         </li>
       ))}
     </ul>
-  </div>
+  </section>
 </Base>
 
 <style>
-  /* Same map, same rules, same reason for :global — the SVG arrives
-     through set:html and carries none of Astro's scoping attributes.
-     See src/pages/surname/[name].astro, where this was learnt by
-     shipping a black continent. */
-  /* DARK MODE WAS HALF-APPLIED, WHICH IS WORSE THAN NOT AT ALL.
-     The background was written as var(--paper, #EDEAE3) and there is no
-     --paper token in this stylesheet, so it always fell back to the
-     light parchment — while the land, which did have a dark rule, went
-     near-black. The result was a black continent on a white sea, in a
-     dark page. Half a theme looks like a bug because it is one.
-     The site's own tokens now carry it, and the dark rules are written
-     twice the way styles.css does it: once for the media query and once
-     for an explicit [data-theme="dark"], because this site has a toggle
-     as well as a system preference. */
-  .snfind { display: flex; gap: 8px; margin: 12px 0 10px; flex-wrap: wrap; }
-  .snfind input { flex: 1 1 22rem; min-width: 0; font: inherit;
-    padding: 10px 12px; border: 1px solid var(--rule-strong);
-    border-radius: 3px; background: var(--panel); color: var(--ink); }
-  .snfind button { font: inherit; padding: 10px 16px; cursor: pointer;
-    border: 1px solid var(--accent); border-radius: 3px;
-    background: var(--accent); color: var(--band-label, #fff); }
-  .vh { position: absolute; width: 1px; height: 1px; overflow: hidden;
-        clip: rect(0 0 0 0); white-space: nowrap; }
-  .smap { margin: 14px 0 6px; }
-  .smap :global(svg.sm) { display: block; width: 100%; height: auto;
-              /* True aspect in the viewBox, height capped here — see
-                 lib/surname-map.js, where clamping it squashed Belgium. */
-              max-height: 460px;
-              background: var(--panel, #EDEAE3);
-              border: 1px solid var(--rule, #D8D3C8); border-radius: 2px; }
+  /* The map comes through set:html and carries none of Astro's scoping attributes, so its rules are :global.
+     Dark mode is written twice, once for the media query and once for the explicit toggle. */
+  .smap { margin: 0 0 8px; }
+  .smap :global(svg.sm) { display: block; width: 100%; height: auto; max-height: 460px;
+    background: var(--panel, #EDEAE3); border: 1px solid var(--rule, #D8D3C8); border-radius: 18px; }
   .smap :global(.sm-land) { fill: #D5CFC2; stroke: #BDB6A6; stroke-width: .5; }
-  .smap :global(.sm-c circle) { fill: var(--accent, #2F6F4E); fill-opacity: .78;
-                       stroke: var(--panel, #fff); stroke-width: 1; }
-  .smap :global(.sm-u circle) { fill: none; stroke: var(--ink-3, #7C8A91);
-                       stroke-width: 1.6; stroke-dasharray: 2 2; }
-  .smap figcaption { margin-top: 8px; }
+  .smap :global(.sm-c circle) { fill: var(--hue, var(--accent)); fill-opacity: .78; stroke: var(--panel, #fff); stroke-width: 1; }
+  .smap :global(.sm-u circle) { fill: none; stroke: var(--ink-3, #7C8A91); stroke-width: 1.6; stroke-dasharray: 2 2; }
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .smap :global(.sm-land) {
-      fill: #2A3841; stroke: #3F515C; }
+    :root:not([data-theme="light"]) .smap :global(.sm-land) { fill: #2A3841; stroke: #3F515C; }
   }
-  :root[data-theme="dark"] .smap :global(.sm-land) {
-    fill: #2A3841; stroke: #3F515C; }
+  :root[data-theme="dark"] .smap :global(.sm-land) { fill: #2A3841; stroke: #3F515C; }
 
-  h2 { font-family: var(--serif); font-size: 26px; font-weight: 500; margin: 0 0 6px; }
-  .verdict.re { background: var(--accent-wash); color: var(--accent);
-                border-color: var(--rule); }
-  .kinds { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 7px; }
-  .kinds li { font-family: var(--sans); font-size: 13px; line-height: 1.55; color: var(--ink-2); }
-  .kinds b { font-family: var(--mono); font-size: 12px; color: var(--accent); }
-  .dl { font-family: var(--mono); font-size: 14px; line-height: 2; margin-top: 10px; }
-  .refused { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 16px; }
-  .refused > li > b { font-family: var(--serif); font-size: 18px; }
-  .refused p { font-family: var(--sans); font-size: 12.5px; line-height: 1.6;
-               color: var(--ink-2); margin: 5px 0 0; max-width:var(--measure); }
-  .verdict { font-family: var(--sans); font-size: 10px; text-transform: uppercase;
-             letter-spacing: .07em; color: #C0392B; border: 1px solid #C0392B;
-             border-radius: 999px; padding: 1px 7px; margin-left: 8px; }
-  .tried { margin: 6px 0 0 0; padding-left: 18px; }
-  .tried li { font-family: var(--mono); font-size: 11px; color: var(--ink-3); line-height: 1.6; }
-  code { font-family: var(--mono); font-size: 12.5px; background: var(--panel-2);
-         padding: 1px 5px; border-radius: 2px; }
-  .ccs { list-style: none; padding: 0; margin: 12px 0 0;
-         display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 4px; }
-  .ccs li { font-family: var(--sans); font-size: 13px; }
-  .y { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+  .about { margin-top: 28px; border: 1px solid var(--rule); border-radius: 18px; background: var(--panel); padding: 6px 20px; }
+  .about summary { cursor: pointer; font: 600 15px/1.3 var(--sans); padding: 10px 0; }
+  .k-door { text-decoration: none; color: inherit; cursor: pointer; margin-top: 6px; }
+  .k-door-t { flex: 1; min-width: 0; font: 500 clamp(17px, 2.2vw, 22px)/1.3 var(--sans); color: var(--ink-3); }
+  .k-door:hover { border-color: var(--hue, var(--accent)); }
+  .kinds .k-card p { margin: 0; }
+  code { font-family: var(--mono); font-size: 12.5px; background: var(--panel-2); padding: 1px 5px; border-radius: 6px; }
+  .ccs { align-items: center; }
+  .ccs li { display: inline-flex; align-items: center; gap: 4px; }
+  .ccs .y { font: 11px var(--mono); color: var(--ink-3); }
+  .ccflag { width: 20px; height: auto; border-radius: 3px; box-shadow: 0 0 0 1px var(--rule); }
+  .ccflag-l { color: var(--ink-3); text-decoration: none; font-size: .9em; }
+  .ccflag-l:hover { color: var(--hue-ink); }
   td { vertical-align: top; }
-  .ccflag { width: 20px; height: auto; vertical-align: -2px; margin-right: 6px;
-    border: 1px solid var(--rule); border-radius: 1px; }
-  .ccflag-l { margin-left: 4px; color: var(--ink-3); text-decoration: none;
-    font-size: .9em; }
-  .ccflag-l:hover { color: var(--accent); }
-  .ccs li:hover .ccflag-l { color: var(--accent); }
+  .refused .k-pill { white-space: normal; }
+  .refused .tried { margin-top: 4px; }
+  .refused .tried summary { cursor: pointer; font: 500 12px var(--mono); color: var(--hue-ink); }
+  .refused .tried ul { margin: 6px 0 0; padding-left: 18px; }
+  .refused .tried li { font: 11px/1.6 var(--mono); color: var(--ink-3); }
 </style>

@@ -152,42 +152,39 @@ const nf = (n) => n.toLocaleString();
             who.length ? `${who.length} archive${who.length === 1 ? "" : "s"}` : null,
             hereAll.length ? `${hereAll.length.toLocaleString()} place${hereAll.length === 1 ? "" : "s"}` : null,
             span ? `${span[0]}–${span[1]}` : null].filter(Boolean).join(" · ")}
-  dek={`Where the records of ${NAME} are, who holds them, and what it costs to look. ${records.toLocaleString()} indexed records reachable through FamilySearch alone.`}>
+  dek={`Where the records of ${NAME} are, who holds them, and what it costs to look.${records ? ` ${records.toLocaleString()} indexed records through FamilySearch alone.` : ""}`}>
 
   {/* ONE COUNTRY, SEVERAL FACES. This page, the flag history, its regional hub and
       the map are the same country in four directories that did not know about each
       other; a search for Croatia reached one and never mentioned the rest. */}
   {(flagPage(cc) || hubFor(cc)) && (
-    <p class="xlinks">
-      <span>Also for {NAME}:</span>
-      {flagPage(cc) && <a href={u(flagPage(cc))}>Flag history</a>}
-      {hubFor(cc) && <a href={u(hubFor(cc).href)}>{hubFor(cc).name} hub</a>}
-      <a href={u(`/?q=${encodeURIComponent(NAME)}`)}>On the map</a>
+    <p class="k-pills" style="margin:0 0 6px">
+      <span class="vh">Also for {NAME}:</span>
+      {flagPage(cc) && <a class="k-pill is-plain" href={u(flagPage(cc))}>Flag history</a>}
+      {hubFor(cc) && <a class="k-pill is-plain" href={u(hubFor(cc).href)}>{hubFor(cc).name} hub</a>}
+      <a class="k-pill is-plain" href={u(`/?q=${encodeURIComponent(NAME)}`)}>On the map</a>
     </p>
   )}
 
-  <div class="one" style="margin-top:20px">
-    <div class="lab">Where to start in {NAME}</div>
+  <div class="k-hi" style="margin-top:20px">
     <p><b>{!who.length
         ? `This atlas holds no source of its own for ${NAME} yet`
         : openable > 0
           ? `${nf(openable)} of the ${nf(graded.length)} checked ${graded.length === 1 ? "source" : "sources"} here can be opened tonight`
           : graded.length
             ? `None of the ${nf(graded.length)} checked ${graded.length === 1 ? "source" : "sources"} here can be opened from a keyboard`
-            : `Nothing here has been checked for what it costs to look`}.</b>{" "}
-      {freeNow.length > 0 && <>{nf(freeNow.length)} {freeNow.length === 1 ? "is" : "are"} free
-        images with no account. </>}
-      {acctNow.length > 0 && <>{nf(acctNow.length)} need{acctNow.length === 1 ? "s" : ""} a
-        free account. </>}
-      {idxOnly.length > 0 && <>{nf(idxOnly.length)} {idxOnly.length === 1 ? "is" : "are"} an
-        index with no images. </>}
-      {paidish.length > 0 && <>{nf(paidish.length)} {paidish.length === 1 ? "is" : "are"} paid
-        or part-paid. </>}
-      {onsite.length > 0 && <>{nf(onsite.length)} {onsite.length === 1 ? "is a catalogue card or paper in a building" : "are catalogue cards or paper in a building"} —
-        a letter, not a click. </>}
-      {worldFree.length > 0 && <>On top of that, {nf(worldFree.length)} worldwide services
-        reach {NAME} without a subscription.</>}</p>
-
+            : `Nothing here has been checked for what it costs to look`}.</b></p>
+    <ul class="k-pills" style="margin-top:12px">
+      {freeNow.length > 0 && <li class="k-pill">{nf(freeNow.length)} free, no account</li>}
+      {acctNow.length > 0 && <li class="k-pill">{nf(acctNow.length)} need a free account</li>}
+      {idxOnly.length > 0 && <li class="k-pill is-plain">{nf(idxOnly.length)} index only, no images</li>}
+      {paidish.length > 0 && <li class="k-pill is-plain">{nf(paidish.length)} paid or part-paid</li>}
+      {onsite.length > 0 && <li class="k-pill is-plain">{nf(onsite.length)} on paper, in a building</li>}
+      {unsurv.length > 0 && <li class="k-pill is-plain">{nf(unsurv.length)} never checked</li>}
+      {worldFree.length > 0 && <li class="k-pill is-plain">{nf(worldFree.length)} worldwide services, free</li>}
+    </ul>
+  </div>
+  <details class="k-more" style="margin-top:12px"><summary><span class="k-mt">What these counts mean, and where to write</span></summary><div>
     {unsurv.length > 0 && (
       <p class="cap"><b>{nf(unsurv.length)} more {unsurv.length === 1 ? "institution is" : "institutions are"} listed
         here and {unsurv.length === 1 ? "has" : "have"} never been checked</b> — nobody has
@@ -222,11 +219,11 @@ const nf = (n) => n.toLocaleString();
         none.</>}
       {" "}<a href={u(`/?q=${encodeURIComponent(NAME)}`)}>Open {NAME} on the map</a>, or{" "}
       <a href={u("/add/")}>tell us what is missing</a>.</p>
-  </div>
+  </div></details>
 
   {regs.length > 0 && (
-    <section style="margin-top:26px">
-      <h2>Whose archive this ground was</h2>
+    <section>
+      <div class="k-bar"><h2>Whose archive this ground was</h2></div>
       <p class="cap">Record regions mapped in {NAME} — which empire held the ground, and
       therefore which archive holds its paper.</p>
       <ul class="regcards">
@@ -252,8 +249,8 @@ const nf = (n) => n.toLocaleString();
   )}
 
   {who.length > 0 && (
-    <section style="margin-top:30px">
-      <h2>The archives</h2>
+    <section>
+      <div class="k-bar"><h2>The archives</h2></div>
       <ul class="rows">
         {who.map((p) => (
           <li><a href={u(`/archive/${p.id}/`)}>{p.name}</a>
@@ -269,13 +266,13 @@ const nf = (n) => n.toLocaleString();
   )}
 
   {who.length === 0 && (
-    <p class="cap" style="margin-top:30px">The archives and services that cover {NAME}:
+    <p class="cap">The archives and services that cover {NAME}:
     <a href={u(`/country/${cc.toLowerCase()}/sources/`)}>everything on one page</a>.</p>
   )}
 
   {mine.length > 0 && (
-    <section style="margin-top:34px">
-      <h2>{mine.length} FamilySearch collections</h2>
+    <section>
+      <div class="k-bar"><h2>{mine.length} FamilySearch collections</h2></div>
       <p class="cap">Grouped by the ground each one covers, {byRegion.filter(g => !g.national).length > 0
         ? "province by province, with the nationwide indexes last" : "nationwide"}.
       A free account opens the images; some are restricted to a Family History Centre.</p>
@@ -297,8 +294,8 @@ const nf = (n) => n.toLocaleString();
   )}
 
   {contributed.length > 0 && (
-    <section style="margin-top:34px">
-      <h2>{contributed.length} more collections, contributed</h2>
+    <section>
+      <div class="k-bar"><h2>{contributed.length} more collections, contributed</h2></div>
       <p class="cap">A directory David assembled, sorted by what kind of record each
       one is. <b>Read this differently from the rest of the page.</b> The descriptions
       are his, not an archive's catalogue, and nobody here has opened the volumes
@@ -337,8 +334,8 @@ const nf = (n) => n.toLocaleString();
   )}
 
   {hereAll.length > 0 ? (
-    <section style="margin-top:34px">
-      <h2>{hereAll.length.toLocaleString()} places, {vols} volumes</h2>
+    <section>
+      <div class="k-bar"><h2>{hereAll.length.toLocaleString()} places, {vols} volumes</h2></div>
       {hereHidden > 0 && (
         <p class="cap">The {here.length} carrying the most collections are listed;
         <b> {hereHidden.toLocaleString()} more</b> are in {NAME} and on the map.
@@ -350,40 +347,34 @@ const nf = (n) => n.toLocaleString();
       </ul>
     </section>
   ) : (
-    <div class="one" style="margin-top:34px;border-left-color:var(--rule-strong)">
-      <div class="lab">No places walked here yet</div>
-      <p class="cap">The shelf — the volume-by-volume layer — has not been walked in {NAME}.
+    <div class="k-hi is-plain" style="margin-top:34px">
+      <p><b>No places walked here yet</b></p>
+      <p>The shelf — the volume-by-volume layer — has not been walked in {NAME}.
       <b>That is a gap in this map, not a gap in the record</b>: the collections above reach
       this ground and are worth opening. <a href={u("/add/")}>Help fill it →</a></p>
     </div>
   )}
 
-  <p class="cap" style="margin-top:30px"><a href={u("/countries/")}>Every country</a> ·
-    <a href={u("/")}>The map</a></p>
+  <p class="k-pills" style="margin-top:30px"><a class="k-pill is-plain" href={u("/countries/")}>Every country</a>
+    <a class="k-pill is-plain" href={u("/")}>The map</a></p>
 </Base>
 
 <style>
-  h2 { font-family: var(--serif); font-size: 26px; font-weight: 500; margin: 0 0 6px; }
   .regcards { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 10px;
               grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
   .regcards li { margin: 0; }
   .regcards a { display: flex; flex-direction: column; gap: 4px; height: 100%; box-sizing: border-box; padding: 11px 13px;
-                background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; text-decoration: none; color: var(--ink); }
-  .regcards a:hover, .regcards a:focus-visible { border-color: var(--accent); background: var(--accent-wash); }
-  .regcards b { font-family: var(--serif); font-size: 16px; font-weight: 500; line-height: 1.25; }
+                background: var(--panel); border: 1px solid var(--rule); border-top: 5px solid var(--hue, var(--accent)); border-radius: 18px; text-decoration: none; color: var(--ink);
+                transition: transform .16s, box-shadow .16s; }
+  .regcards a:hover, .regcards a:focus-visible { transform: translateY(-3px); border-color: var(--hue, var(--accent)); box-shadow: 0 16px 30px -18px color-mix(in srgb, var(--hue, var(--accent)) 70%, #000); }
+  .regcards b { font-family: var(--serif); font-size: 19px; font-weight: 800; letter-spacing: -.01em; line-height: 1.2; }
   .regcards .rsub { font-size: 12px; line-height: 1.45; color: var(--ink-3);
                     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .regcards .rn { margin-top: auto; padding-top: 2px; font-family: var(--mono); font-size: 11px; color: var(--accent); }
+  .regcards .rn { margin-top: auto; align-self: flex-start; font: 600 11.5px/1 var(--sans); color: var(--hue-ink); background: var(--hue-wash); border-radius: 999px; padding: 4px 10px; }
   .regmore { margin-top: 12px; }
   .regmore summary { cursor: pointer; font-size: 14px; color: var(--accent); }
   .rows, .regs { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 7px; }
-  .rows li, .regs li { font-family: var(--sans); font-size: 13px; line-height: 1.5; }
-  .xlinks { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 4px 0 22px; }
-  .xlinks span { font-size: 12px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .06em; margin-right: 4px; }
-  .xlinks a { display: inline-flex; align-items: center; padding: 6px 14px; font-size: 14px; line-height: 1.2;
-              color: var(--accent); background: var(--panel); border: 1px solid var(--rule); border-radius: 999px;
-              text-decoration: none; }
-  .xlinks a:hover, .xlinks a:focus-visible { background: var(--accent-wash); border-color: var(--accent); }
+  .rows li, .regs li { font-family: var(--sans); font-size: 13px; line-height: 1.5; padding: 9px 14px; background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; }
   .what { font-size: 11.5px; color: var(--ink-3); margin: 3px 0 0; max-width:var(--measure); }
   .sub { display: block; font-size: 11.5px; color: var(--ink-3); }
   .y { font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin-left: 8px; }
@@ -393,12 +384,14 @@ const nf = (n) => n.toLocaleString();
   .cgrp .lab { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
   .cgrp .lab .n { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3);
                   letter-spacing: 0; font-weight: 400; }
-  .places { list-style: none; padding: 0; margin: 12px 0 0;
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 3px; }
-  .places li { font-family: var(--sans); font-size: 13px; }
+  .places { list-style: none; padding: 0; margin: 12px 0 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .places li { font-family: var(--sans); font-size: 13px; padding: 5px 6px 5px 13px; background: var(--hue-wash); border: 1px solid color-mix(in srgb, var(--hue, var(--accent)) 26%, transparent); border-radius: 999px; }
+  .places li a { text-decoration: none; font-weight: 600; }
+  .places .y { margin-left: 6px; color: var(--ink-2); }
   .chip { margin-left: 8px; }
-  .chip.acc-free { background:#1E844922; color:#1E8449 } .chip.acc-account { background:#6FA82E22; color:#5C8C26 }
-  .chip.acc-index { background:#EFC03B33; color:#8A6B10 } .chip.acc-mixed { background:#E8792B22; color:#B45A17 }
-  .chip.acc-paid { background:#C0392B22; color:#C0392B } .chip.acc-catalogue { background:#8E6FA822; color:#7A5CA8 }
-  .chip.acc-onsite { background:#7C8A9122; color:#5E6C73 }
+  /* text mixed toward the ink so it holds 4.5:1 on the row's panel in both themes; the tint behind it is the access colour */
+  .chip.acc-free { background:#1E844922; color:color-mix(in srgb,#1E8449 55%,var(--ink)) } .chip.acc-account { background:#6FA82E22; color:color-mix(in srgb,#5C8C26 55%,var(--ink)) }
+  .chip.acc-index { background:#EFC03B33; color:color-mix(in srgb,#8A6B10 30%,var(--ink)) } .chip.acc-mixed { background:#E8792B22; color:color-mix(in srgb,#B45A17 55%,var(--ink)) }
+  .chip.acc-paid { background:#C0392B22; color:color-mix(in srgb,#C0392B 55%,var(--ink)) } .chip.acc-catalogue { background:#8E6FA822; color:color-mix(in srgb,#7A5CA8 55%,var(--ink)) }
+  .chip.acc-onsite { background:#7C8A9122; color:color-mix(in srgb,#5E6C73 55%,var(--ink)) }
 </style>

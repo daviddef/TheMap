@@ -16,38 +16,55 @@ import { u } from "../lib/url.js";
 ---
 <Base
   title="Shared research"
-  eyebrow="Read-only · reported by the sender, not checked · nothing is sent anywhere"
-  dek="Research someone sent you: what they searched, what they found and where they stopped. Look first, then merge it into your own and carry on.">
+  hue="gold"
+  eyebrow="Read-only · reported by the sender, not checked"
+  dek="Research someone sent you: what they searched, what they found and where they stopped. Look first, then merge it into your own.">
 
   <ProgressKit />
   <script is:inline src={u("/js/research-file.js")}></script>
 
-  <div id="sh-start" class="one">
-    <div class="lab">Open a pack</div>
-    <p class="cap">A pack arrives as a link (the whole pack is inside the link, and a link like that is never sent to our server) or as a
-    file. If you were sent a link, open it and the pack appears here. If you were sent a file, choose it:</p>
-    <p><button type="button" id="sh-choose">Choose a pack file</button> <input type="file" id="sh-file" accept="application/json,.json" hidden />
-    <span id="sh-said" role="status" aria-live="polite"></span></p>
-    <p class="cap">Want to make one? It is on <a href={u("/my-research/")}>My research</a>.</p>
+  <div id="sh-start" class="sh-open">
+    <span class="k-ico" aria-hidden="true">⇩</span>
+    <div class="sh-open-text">
+      <h2>Open a pack</h2>
+      <p>A pack arrives as a link or as a file. A link holds the whole pack inside it and is never sent to our server: open it and the pack appears here. Nothing is sent anywhere.</p>
+      <p class="sh-act"><button type="button" id="sh-choose" class="sh-btn">Choose a pack file</button> <input type="file" id="sh-file" accept="application/json,.json" hidden />
+      <span id="sh-said" role="status" aria-live="polite"></span></p>
+      <p class="sh-make">Want to make one? It is on <a href={u("/my-research/")}>My research</a>.</p>
+    </div>
   </div>
 
   <div id="sh-view" hidden>
     <p id="sh-head" class="shhead"></p>
-    <p class="mrbtns"><button type="button" id="sh-merge">Merge into my research</button>
-      <a href={u("/my-research/")} id="sh-mine" hidden>Open My research</a> <span id="sh-merged" role="status"></span></p>
+    <p class="mrbtns"><button type="button" id="sh-merge" class="sh-btn">Merge into my research</button>
+      <a href={u("/my-research/")} id="sh-mine" class="k-pill is-plain" hidden>Open My research</a> <span id="sh-merged" role="status"></span></p>
     <div id="sh-body"></div>
   </div>
 </Base>
 
 <style>
-  .shhead { font-family: var(--sans); font-size: 14px; border-left: 3px solid var(--brass, #b08d3c); padding-left: 10px; margin: 0 0 12px; }
-  #sh-body h2 { margin: 22px 0 4px; }
-  #sh-body table { border-collapse: collapse; width: 100%; font-family: var(--sans); font-size: 13.5px; }
-  #sh-body th, #sh-body td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
-  #sh-body th { color: var(--ink-3); font-weight: 600; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
-  #sh-body tr:nth-child(even) td { background: color-mix(in srgb, var(--ground) 55%, transparent); }
+  .sh-open { display: flex; gap: 18px; align-items: flex-start; padding: 24px 26px; border-radius: 24px; border: 1px solid color-mix(in srgb, var(--hue) 28%, var(--rule)); border-top: 5px solid var(--hue);
+    background: linear-gradient(135deg, var(--hue-wash), var(--panel)); }
+  .sh-open .k-ico { width: 52px; height: 52px; font-size: 26px; }
+  .sh-open h2 { font: 800 clamp(22px, 3vw, 28px)/1.2 var(--serif); letter-spacing: -.02em; margin: 0 0 6px; }
+  .sh-open p { margin: 0 0 10px; font-size: 15px; line-height: 1.6; color: var(--ink-2); max-width: 60ch; }
+  .sh-open .sh-make { font-size: 13.5px; margin: 6px 0 0; }
+  .sh-open[hidden] { display: none; }
+  .sh-btn { font: 700 15px/1 var(--sans); background: var(--hue-solid); color: var(--on-hue); border: 0; border-radius: 999px; padding: 12px 22px; min-height: 44px; cursor: pointer; }
+  .sh-btn:hover { filter: brightness(1.1); }
+  #sh-said { margin-left: 10px; font-size: 13.5px; color: var(--ink-2); }
+  .shhead { font: 500 15px/1.5 var(--sans); background: var(--hue-wash); border: 1px solid color-mix(in srgb, var(--hue) 25%, var(--rule)); border-radius: 18px; padding: 14px 18px; margin: 0 0 14px; }
+  .mrbtns { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  #sh-body h2 { margin: 28px 0 8px; font: 800 clamp(20px, 2.6vw, 26px)/1.2 var(--serif); letter-spacing: -.02em; display: flex; align-items: center; gap: 12px; }
+  #sh-body h2::before { content: ""; flex: none; width: 8px; height: 26px; border-radius: 6px; background: var(--hue); }
+  #sh-body table { border-collapse: separate; border-spacing: 0 8px; width: 100%; font-family: var(--sans); font-size: 13.5px; }
+  #sh-body th, #sh-body td { text-align: left; padding: 10px 12px; vertical-align: top; }
+  #sh-body th { color: var(--ink-3); font-weight: 600; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; padding-top: 0; padding-bottom: 0; }
+  #sh-body td { background: var(--panel); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+  #sh-body td:first-child { border-left: 1px solid var(--rule); border-radius: 14px 0 0 14px; }
+  #sh-body td:last-child { border-right: 1px solid var(--rule); border-radius: 0 14px 14px 0; }
   .shnote { font-style: italic; color: var(--ink-2); }
-  @media (max-width: 640px) { #sh-body table { display: block; overflow-x: auto; } }
+  @media (max-width: 640px) { .sh-open { flex-direction: column; padding: 18px; } #sh-body table { display: block; overflow-x: auto; } }
 </style>
 
 <script define:vars={{ base: u("/") }}>

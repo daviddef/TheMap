@@ -37,110 +37,53 @@ const eras = regions.regions.reduce((a, r) => a + r.eras.length, 0);
 <Base
   title="My Work"
   eyebrow={`${all.length} family archives · ${names.length} surnames followed`}
-  dek="Interactive family histories — the records found and cited, the claims tested, and the whole thing published as something a family can explore rather than a folder nobody opens.">
+  dek="Family histories where every claim carries its record, and the whole thing is a site a family can walk through.">
 
-  <div class="prose k-prose" style="max-width:var(--measure)">
-    <h3>What I actually build</h3>
-    <p>Not a tree. A tree is a shape, and a shape is the last thing you produce,
-    not the thing you produce. What I build is an <b>archive</b>: every claim
-    about a person carries the record it rests on and how sure that record makes
-    it, and the whole thing is published as a site a family can walk through.</p>
+  <div class="k-bar"><h2>How it is done</h2></div>
+  <ul class="k-grid mw-how">
+    <li class="k-card"><span class="k-ico" aria-hidden="true">🏛</span><h3>An archive, not a tree</h3>
+      <p>A tree says <em>Giovanni was born in 1861</em>. An archive says which register, book and folio, and how sure that makes it. The first is a position, the second an argument someone can check.</p></li>
+    <li class="k-card"><span class="k-ico" aria-hidden="true">📍</span><h3>Start from the ground</h3>
+      <p>Surnames move and mutate; ground does not. Each archive is anchored on a place first (Arienzo, Senj, Piedimonte Etneo, Schubin) and the people hang off it.</p></li>
+    <li class="k-card"><span class="k-ico" aria-hidden="true">🗺</span><h3>Whose archive was it?</h3>
+      <p>A 1930 baptism in a Croatian village is filed under <em>Italy</em>, because the village was Italian then. The atlas carries {eras} eras across {regions.regions.length} regions for this: <a href={u("/providers/#regions")}>whose archive held this ground, and when</a>.</p></li>
+    <li class="k-card"><span class="k-ico" aria-hidden="true">🧪</span><h3>Test the family stories</h3>
+      <p>Some are true, some half true, and the wrong half usually points at the record. The Lerena archive tests four traditions against the record, one at a time.</p></li>
+    <li class="k-card"><span class="k-ico" aria-hidden="true">📝</span><h3>Write down what you did not find</h3>
+      <p>A search that returned nothing is a result. Every archive records its negative searches so nobody repeats them.</p></li>
+    <li class="k-card"><span class="k-ico" aria-hidden="true">⚖️</span><h3>Grade every claim</h3>
+      <p>Proven, probable, a candidate, or a family story, and it says which. A candidate quietly promoted to fact is how a wrong ancestor gets inherited.</p></li>
+  </ul>
 
-    <p>The difference shows up the first time somebody disagrees with you. A tree
-    says <em>Giovanni was born in 1861</em>. An archive says <em>Giovanni was born
-    in 1861 — parish register of Arienzo, book 4, folio 22, which names his
-    father and mother and is in his own parish's hand</em>. The first is a
-    position. The second is an argument, and an argument can be checked, inherited
-    and corrected by somebody who comes after you.</p>
-
-    <h3>How it is done</h3>
-    <p><b>Start from the ground, not the name.</b> Surnames move, mutate and
-    repeat; ground does not. Every one of the archives below is anchored on a
-    place first — Arienzo, Senj, Piedimonte Etneo, Schubin — and the people are
-    hung off it. That is also why the tool on this site is a map rather than a
-    search box.</p>
-
-    <p><b>Find out whose archive it is before looking for the record.</b> This is
-    the step almost everybody skips and it is the commonest reason a record that
-    exists cannot be found. A 1930 baptism from a Croatian village is filed under
-    <em>Italy</em>, because between the wars the village was Italian. This atlas
-    carries {eras} researched eras across {regions.regions.length} regions for
-    precisely that reason — <a href={u("/providers/#regions")}>whose archive held this
-    ground, and when</a>.</p>
-
-    <p><b>Test the family stories rather than repeating them.</b> Every family has
-    four or five. Some are true, some are half true, and the half-true ones are
-    the most useful because the half that is wrong usually tells you where the
-    record actually is. The Lerena archive exists largely to do this: four
-    traditions, tested against the record one at a time.</p>
-
-    <p><b>Write down what you did not find.</b> A search that returned nothing is
-    a result, and it is the result most often thrown away — so the next person
-    repeats it. Every archive here records the negative searches alongside the
-    positive ones. It is the least glamorous discipline in the work and the one
-    that compounds.</p>
-
-    <p><b>Grade the claims.</b> Nothing is stated flat. A thing is proven,
-    probable, a candidate, or a family story — and it says which. A candidate
-    promoted quietly to a fact is how a wrong ancestor gets inherited by
-    everybody who copies your tree.</p>
-
-    <h3>Nine archives, and what each one had to solve</h3>
-    <p>These follow different families on four continents, and each ran into a
-    different wall. That is why there are nine of them rather than one: the
-    method was worked out against problems that did not resemble each other.</p>
-  </div>
-
-  <ul class="works">
+  <div class="k-bar"><h2>{all.length} archives, each with its own wall</h2><span class="k-count">four continents</span></div>
+  <ul class="k-grid mw-works">
     {all.map((a) => (
-      <li style={`--edge:${a.accent}`}>
-        <a href={a.url} class="wn">{a.name}</a>
-        <span class="ww">{a.where}</span>
-        <p class="wt">{a.what}</p>
-        {a.names && a.names.length > 1 && (
-          <p class="ws">{a.names.join(" · ")}</p>
-        )}
+      <li>
+        <a href={a.url} class="k-card is-link">
+          <h3>{a.name}</h3>
+          <p class="mw-where">{a.where}</p>
+          <p>{a.what}</p>
+          {a.names && a.names.length > 1 && (
+            <span class="k-pills">{a.names.map((n) => <span class="k-pill is-plain">{n}</span>)}</span>
+          )}
+        </a>
       </li>
     ))}
   </ul>
 
-  <div class="prose k-prose" style="max-width:var(--measure)">
-    <h3>Why this atlas exists at all</h3>
-    <p>Eight of those archives kept hitting the same three walls, and all three
-    were geographic: the place had changed its name, the border had moved so the
-    records were in another country's archive, and "online" turned out to mean
-    four or five quite different things. Solving that eight times over for eight
-    families is how <a href={u("/")}>Record Atlas</a> came to exist — it is the
-    part of this work that generalises, taken out and pointed at the world.</p>
-    <p>The family facts stayed in the archives, where they belong. What came out
-    was the geography.</p>
-
-    <h3>If you want this done for your family</h3>
-    <p>The nine sites above are what finished work looks like. <a href={u("/add/")}>
-    Add a source</a> if you know a record set this map is missing — that is the
-    most useful thing a stranger can do for it, and it costs nothing.</p>
+  <div class="k-bar"><h2>Why this atlas exists</h2></div>
+  <div class="k-prose">
+    <p>Eight of those archives hit the same three geographic walls: the place had changed its name, the border had moved so the records sat in another country's archive, and "online" meant four or five different things. <a href={u("/")}>Record Atlas</a> is that part of the work, taken out and pointed at the world. The family facts stayed in the archives; what came out was the geography.</p>
+    <p>Know a record set this map is missing? <a href={u("/add/")}>Add a source</a>. It is the most useful thing a stranger can do for it, and it costs nothing.</p>
   </div>
 </Base>
 
-<style>
-  /* The archives carry their own colour, as they do everywhere else on this
-     site. A left edge rather than a top border, because these are read as a
-     list of paragraphs rather than scanned as a grid of cards. */
-  .works { list-style: none; padding: 0; margin: 26px 0 30px;
-           display: grid; gap: 14px; }
-  .works li { border-left: 3px solid var(--edge, var(--rule-strong));
-              background: var(--panel); border-radius: 0 6px 6px 0;
-              padding: 13px 16px 14px; }
-  .wn { font-family: var(--serif); font-size: 17.5px; color: var(--edge);
-        text-decoration: none; }
-  .wn:hover { text-decoration: underline; }
-  .ww { font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em;
-        text-transform: uppercase; color: var(--ink-3); margin-left: 10px; }
-  .wt { font-family: var(--sans); font-size: 13.5px; line-height: 1.6;
-        color: var(--ink-2); margin: 7px 0 0; max-width:var(--measure); }
-  .ws { font-family: var(--mono); font-size: 11px; color: var(--ink-3);
-        margin: 6px 0 0; }
-  @media (max-width: 640px) {
-    .ww { display: block; margin: 3px 0 0; }
-  }
+<style is:global>
+  .mw-how .k-card .k-ico { margin-bottom: 4px; }
+  .mw-works { grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+  .mw-works > li { display: flex; }
+  .mw-works .k-card { flex: 1; }
+  .mw-where { font: 600 11px/1.3 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3) !important; }
+  .mw-works .k-pills { margin-top: 6px; gap: 6px; }
+  .mw-works .k-pill { font-size: 12px; padding: 3px 9px; }
 </style>

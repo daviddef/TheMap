@@ -38,7 +38,7 @@ const num = Object.fromEntries(order.map((k, i) => [k, i + 1]));
       ))}
     </ol>
 
-    <p class="cap">{s.related.map((r, i) => (<>{i > 0 && " · "}<a href={u(r.href)}>{r.label}</a></>))} · <a href={u("/story/")}>All stories</a></p>
+    <p class="k-pills" style="margin-top:22px">{s.related.map((r) => (<a class="k-pill is-plain" href={u(r.href)}>{r.label}</a>))}<a class="k-pill" href={u("/story/")}>All stories</a></p>
   </article>
 </Base>
 <style>

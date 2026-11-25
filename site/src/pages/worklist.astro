@@ -18,46 +18,43 @@ const asOf = new Date(archives.exported + "T00:00:00Z")
   .toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 ---
 
-<Base noindex title="The Atlas work list"
-      eyebrow="What is being done to the Atlas, as opposed to what is known"
-      dek={`${open} items open on the Atlas itself, ${waiting} of them waiting on somebody outside it. This is the Atlas's own list: each family archive keeps its own, summarised just below.`}>
+<Base noindex title="Work list"
+      eyebrow={`${open} open · ${waiting} waiting on someone else`}
+      dek="What is being done to the Atlas itself. Each family archive keeps its own list, counted below.">
 
-  <p class="k-stats" aria-label="Summary">
-    <span><b>{open}</b> open on the Atlas</span>
-    <span class="k-tag is-new">{famOpen} open across {fam.length} family archives</span>
-  </p>
-
-  <h2 class="k-h" id="archives">The family archives keep their own <span class="k-count">{fam.length}</span></h2>
-  <p class="k-lede">Each archive's list is the live one and lives on its own site. These are counts taken on {asOf}, so a
-  number here can be a little behind the page it links to. Open means running, next or blocked.</p>
-  <ul class="k-tiles fam">
+  <div class="k-bar" id="archives"><h2>Family archives</h2><span class="k-count">{fam.length} · counts as of {asOf}</span></div>
+  <ul class="k-grid wl-fam">
     {fam.map((a) => (
       <li>
-        <a href={a.url}>{a.name}</a>
-        <span class="n"><b>{a.open}</b> open</span>
-        <span class="pills">
-          {a.counts.running > 0 && <span class="k-tag">{a.counts.running} running</span>}
-          <span class="k-tag">{a.counts.next} next</span>
-          {a.counts.blocked > 0 && <span class="k-tag">{a.counts.blocked} blocked</span>}
-          <span class="k-tag">{a.counts.done} done</span>
-        </span>
+        <a href={a.url} class="k-card is-link">
+          <h3>{a.name}</h3>
+          <p class="wl-n"><b>{a.open}</b> open</p>
+          <span class="k-pills">
+            {a.counts.running > 0 && <span class="k-pill">{a.counts.running} running</span>}
+            <span class="k-pill is-plain">{a.counts.next} next</span>
+            {a.counts.blocked > 0 && <span class="k-pill is-plain">{a.counts.blocked} blocked</span>}
+            <span class="k-pill is-plain">{a.counts.done} done</span>
+          </span>
+        </a>
       </li>
     ))}
   </ul>
+  <p class="cap">Open means running, next or blocked. Each archive's own page is the live one, so a count here can lag it.</p>
 
-  <h2 class="k-h" style="margin-top:34px">The Atlas's own list</h2>
+  <div class="k-bar"><h2>The Atlas's own list</h2><span class="k-count">{open} open</span></div>
 
   <WorkList work={work} u={u} />
 
-  <p class="cap" style="margin-top:26px">The pages that answer <em>what is known</em> are
+  <p class="cap" style="margin-top:26px">What is known lives on
   <a href={u("/")}>the map</a>, <a href={u("/countries/")}>Countries</a>,
-  <a href={u("/coverage/")}>What's missing</a> and
+  <a href={u("/coverage/")}>Gaps</a> and
   <a href={u("/changelog/")}>What changed</a>.</p>
 </Base>
 
-<style>
-  .fam .n { font-family: var(--sans); font-size: 13px; color: var(--ink-2); }
-  .fam .n b { font-family: var(--serif); font-size: 26px; color: var(--ink); margin-right: 4px; }
-  .fam .pills { display: flex; flex-wrap: wrap; gap: 5px; }
-  .fam .k-tag { font-size: 10px; padding: 3px 7px; }
+<style is:global>
+  .wl-fam .k-card { gap: 8px; }
+  .wl-n { font-size: 14px; color: var(--ink-2); }
+  .wl-n b { font: 800 34px/1 var(--serif); color: var(--ink); margin-right: 4px; }
+  .wl-fam .k-pills { gap: 6px; }
+  .wl-fam .k-pill { font-size: 11.5px; padding: 3px 9px; }
 </style>

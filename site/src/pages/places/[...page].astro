@@ -110,9 +110,9 @@ const rows = page.data.map((p) => {
 });
 ---
 <Base
-  title={page.currentPage === 1 ? "Records by country" : `Every place — ${page.currentPage} of ${page.lastPage}`}
+  title={page.currentPage === 1 ? "Places" : `Every place — ${page.currentPage} of ${page.lastPage}`}
   eyebrow={`${ccTotals.countries} countries · ${full.places.length.toLocaleString()} places · ${ccTotals.withWalked} with a place walked`}
-  dek={`Pick a country to see where this atlas reaches, how deep, and who holds its records. The number beside a place name is how many collections cover it — ${covers.toLocaleString()} such coverings in all. Page ${page.currentPage} of ${page.lastPage}.`}>
+  dek={page.currentPage === 1 ? "Pick a country, or search for a place. Each shows how far the records reach and who holds them." : `Every place, A to Z. Page ${page.currentPage} of ${page.lastPage}.`}>
 
   <RecordsTabs current="countries" />
 
@@ -138,19 +138,10 @@ const rows = page.data.map((p) => {
       sortable table of flag + name + three counts, and they were the same
       hundred and fifty rows counted twice in two files. One component, one
       set of numbers, from lib/country-metrics.js. */}
-  <details class="cdir" id="cdir" open={page.currentPage === 1}>
-    <summary><b>Jump to a country</b> — {ccTotals.countries} of them</summary>
-    {/* TWO TRUE COUNTS, AND THE DIFFERENCE IS THE POINT. The line above this
-        page says 101 countries, because that is how many have a place somebody
-        has walked. The directory holds 152, because that is how many this
-        atlas knows anything at all about. Printed together rather than left
-        to look like one of them is wrong. */}
-    <p class="cap">Almost nobody wants every place at once. Each country page lists
-    its own places and what covers them. <b>{countries} of these {ccTotals.countries}
-    have a place walked volume by volume</b>; the rest are known by their
-    collections or their archives alone.</p>
+  <section class="cdir" id="cdir">
+    <div class="k-bar"><h2>{ccTotals.countries} countries</h2><span class="k-count">{countries} with a place walked volume by volume</span></div>
     <CountryCards list={ccList} totals={ccTotals} showFind={false} />
-  </details>
+  </section>
 
   {/* The alphabetical pages below cannot be filtered (this is one of 93 of them,
       mostly Italy), so while a search is active they are hidden: a search for
@@ -161,13 +152,8 @@ const rows = page.data.map((p) => {
       Italy was there. It is folded away on the first page (the links stay in the HTML, so nothing becomes an orphan) and open on the
       later pages, which a reader only reaches by choosing to walk the list. */}
   <details class="azlist" open={page.currentPage > 1}>
-    <summary><b>Browse every place, A to Z</b> — page {page.currentPage} of {page.lastPage}</summary>
-  <p class="cap">This index exists so that no place page is an orphan — everything here
-  is reachable by walking from the front of the site. It is split across
-  <b>{page.lastPage} pages</b> because listing all {full.places.length.toLocaleString()} at once
-  came to 2.58 MB at a smaller count than today's, which is no use to a reader
-  or to a crawler.
-  To find one place, search above or use <a href={u("/")}>the map</a>.</p>
+    <summary><span class="k-pill" style="--c:var(--h-terra)">A to Z</span> Browse every place · page {page.currentPage} of {page.lastPage}</summary>
+  <p class="cap">Every place is listed here so that none is an orphan. To find one, search above or use <a href={u("/")}>the map</a>.</p>
 
   <ul class="places">
     {rows.map(({ p, head }) => (
@@ -211,8 +197,8 @@ const rows = page.data.map((p) => {
 </Base>
 
 <style>
-  h2 { font-family: var(--serif); font-size: 24px; font-weight: 500; margin: 22px 0 4px;
-       border-bottom: 1px solid var(--rule); padding-bottom: 6px; }
+  .places h2 { font-family: var(--serif); font-size: 26px; font-weight: 800; margin: 26px 0 4px;
+       border-bottom: 3px solid color-mix(in srgb, var(--hue) 35%, var(--rule)); padding-bottom: 6px; }
 
   /* ---- search ----------------------------------------------------------- */
   .vh { position: absolute; width: 1px; height: 1px; overflow: hidden;
@@ -233,11 +219,10 @@ const rows = page.data.map((p) => {
     margin-left: 6px; }
 
   /* ---- the country directory -------------------------------------------- */
-  .azlist { margin: 16px 0 6px; border: 1px solid var(--rule); border-radius: 6px; padding: 10px 14px; background: var(--panel); }
-  .azlist > summary { font-family: var(--sans); font-size: 14px; cursor: pointer; }
-  .cdir { margin: 16px 0 6px; border: 1px solid var(--rule);
-    border-radius: 6px; padding: 12px 14px; background: var(--panel); }
-  .cdir summary { font-family: var(--sans); font-size: 14px; cursor: pointer; }
+  .azlist { margin: 34px 0 6px; border: 1px solid var(--rule); border-radius: 20px; padding: 8px 22px; background: var(--panel); }
+  .azlist > summary { font-family: var(--sans); font-size: 16px; font-weight: 600; cursor: pointer; padding: 10px 0; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; list-style: none; }
+  .azlist > summary::-webkit-details-marker { display: none; }
+  .cdir { margin: 28px 0 6px; }
   .cgrid { list-style: none; padding: 0; margin: 10px 0 2px;
     display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
     gap: 1px 18px; }

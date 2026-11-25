@@ -18,7 +18,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
 ---
 <Base
   title="Reading the record"
-  eyebrow={`${terms.length} terms in ${Object.values(langCount).filter(Boolean).length} languages · every one sourced · the finder and date decoder keep everything in your browser`}
+  eyebrow={`${terms.length} terms · ${Object.values(langCount).filter(Boolean).length} languages · every one sourced`}
   dek="Type a word, a date or a whole line as you see it in the register, and see what it is, what it does not tell you, and where it comes from."
   description="A searchable guide to the words of old registers, in Latin and in the languages of their catalogue titles, with how often each turns up in the Atlas's own records, and a decoder for dates such as 'die 30 7bris 1671'.">
 
@@ -161,10 +161,11 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   </section>
 
   <section id="tool-read" class="rd-panel" role="tabpanel" aria-labelledby="tab-read" hidden>
-    <div class="one" id="rr-find">
-      <div class="lab">Interpret a record</div>
-      <p class="cap" style="margin-top:6px">Type or paste anything from a register: a word (<i>uxoris</i>), a date (<i>die 30 7bris 1671</i>) or a whole line. The page works out which it is and shows what each part means. Everything you type stays in your browser; for a whole line or a photo, Claude can draft a reading when you ask.</p>
-      <p><input type="search" id="rr-q" autocomplete="off" spellcheck="false" aria-label="A word, a date or a line from the register" placeholder="uxoris · die 30 7bris 1671 · natus est Joannes filius" /></p>
+    <div class="rr-find" id="rr-find">
+      <p class="rr-say">Type a word, a date or a whole line from a register. It stays in your browser.</p>
+      <div class="k-search"><span class="k-ico" aria-hidden="true">🔎</span>
+        <input type="search" id="rr-q" autocomplete="off" spellcheck="false" aria-label="A word, a date or a line from the register" placeholder="uxoris · die 30 7bris 1671 · natus est Joannes filius" /></div>
+      <p class="rr-chips">Try {chips.concat(dateChips.slice(0, 2)).map((c, i) => <button type="button" class="k-pill rr-chip" style={`--c:var(--h-${["gold", "teal", "terra", "plum", "rose", "green"][i % 6]})`} data-q={c}>{c}</button>)}</p>
       <details class="rr-narrow"><summary>Narrow the words by kind of record or language</summary>
       <p class="rr-filters" role="group" aria-label="Kind of record">
         {Object.entries(eventNames).map(([k, v]) => <label><input type="checkbox" class="rr-ev" value={k} /> {v}</label>)}
@@ -172,7 +173,6 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
       </p>
       <div id="rr-out" role="status" aria-live="polite"></div>
       </details>
-      <p class="cap rr-chips">Try: {chips.concat(dateChips.slice(0, 2)).map((c) => <button type="button" class="chip rr-chip" data-q={c}>{c}</button>)}</p>
       <div id="rr-dout" role="status" aria-live="polite"></div>
       <div id="rr-out" role="status" aria-live="polite"></div>
       <div id="rr-claude" class="rr-claude" hidden>
@@ -188,7 +188,6 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
       </ul>
     </details>
     </div>
-    <p class="rd-lead">The part that uses Claude: paste one register entry, or drop up to four pictures of the page, and press the button for a draft reading and what the Atlas knows about that place and year.</p>
     <div class="one ask-card" id="ask" hidden>
       <div class="ask-head">
         <span class="ask-spark" aria-hidden="true"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4z" fill="currentColor"/><path d="M18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z" fill="currentColor"/></svg></span>
@@ -239,7 +238,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   <script type="application/json" id="rr-data" set:html={JSON.stringify({ terms, seen, langs: langNames, sources: Object.fromEntries(Object.entries(sources).map(([k, s]) => [k, s.title])) })}></script>
   <script is:inline>
     (function () {
-      var tabs = [].slice.call(document.querySelectorAll(".rd-tab")), now = "story";
+      var tabs = [].slice.call(document.querySelectorAll(".rd-tab")), now = "story", HEAD0 = null;
       /* The story is the page; the three tools open over it and a second press (or the story link) goes back to it. */
       function pick(name, focus) {
         if (name === now && name !== "story") name = "story";
@@ -257,6 +256,15 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
           if (on && focus) t.focus();
         });
         document.getElementById("tool-story").hidden = name !== "story";
+        /* THE PAGE'S OWN HEADER FOLLOWS THE VIEW. It said «Reading the record» above a box that says «Tell us what you know»: two titles for one screen. */
+        var ph = document.querySelector(".pagehead");
+        if (ph) {
+          var h1 = ph.querySelector("h1"), dk = ph.querySelector(".dek"), lb = ph.querySelector(":scope > .lab");
+          if (!HEAD0) HEAD0 = { h1: h1 && h1.textContent, dek: dk && dk.textContent, lab: lb && lb.textContent };
+          if (h1) h1.textContent = name === "story" ? "Tell a story" : HEAD0.h1;
+          if (dk) { dk.textContent = name === "story" ? "" : HEAD0.dek; }
+          if (lb) lb.textContent = name === "story" ? "Your story · nothing leaves your browser until you ask" : HEAD0.lab;
+        }
         if (!/^#story=/.test(location.hash) && !/^#[a-z]+=/.test(location.hash)) { try { history.replaceState(null, "", "#" + name); } catch (e) {} }   /* words or an old link in the address are read by the story page first, which then tidies it */
       }
       window.raReadPick = pick;
@@ -436,7 +444,11 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp-grp { font: 600 11px/1 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); padding: 14px 10px 5px; }
   .sp-grp:first-child { padding-top: 2px; }
   .sp-main { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
-  .sp-head .sp-title { font: 600 clamp(26px, 3.2vw, 34px)/1.15 var(--serif); margin: 0; text-wrap: balance; }
+  .rr-find { margin: 0 0 8px; }
+  .rr-say { font-size: 16px; line-height: 1.5; color: var(--ink-2); margin: 0 0 14px; }
+  .rr-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 14px 0 0; font-weight: 700; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+  .rr-chips .k-pill { cursor: pointer; font-size: 13.5px; letter-spacing: 0; text-transform: none; }
+  .sp-head .sp-title { font: 800 clamp(26px, 3.2vw, 34px)/1.15 var(--serif); letter-spacing: -.02em; margin: 0; text-wrap: balance; }
   .sp-lede { color: var(--ink-2); margin: 6px 0 0; }
   .sp-sublede { color: var(--ink-2); font-size: 15px; margin: 0; }
   .sp-cont { font-size: 14px; line-height: 1.5; color: var(--ink-2); margin: 0 0 8px; background: var(--panel); border-left: 3px solid var(--accent); padding: 8px 12px; border-radius: 0 6px 6px 0; }
@@ -486,8 +498,10 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
     .sp-ai-cols { grid-template-columns: minmax(0, 1fr); }
     .sp-btn { white-space: normal; }
   }
-  .sp-drop { border: 2px dashed var(--rule-strong); border-radius: 16px; padding: 14px 16px 8px; background: var(--ground); transition: border-color .2s, background .2s; }
-  .sp-drop.hot { border-color: var(--accent); background: var(--accent-wash); }
+  .sp-drop { border: 2px solid color-mix(in srgb, var(--hue, var(--accent)) 40%, var(--rule)); border-radius: 24px; padding: 20px 24px 12px; background: var(--panel); transition: border-color .2s, background .2s, box-shadow .2s;
+    box-shadow: 0 14px 30px -20px color-mix(in srgb, var(--hue, var(--accent)) 60%, #000); }
+  .sp-drop:focus-within { border-color: var(--hue, var(--accent)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--hue, var(--accent)) 22%, transparent); }
+  .sp-drop.hot { border-style: dashed; border-color: var(--hue, var(--accent)); background: var(--hue-wash, var(--accent-wash)); }
   .sp-drop textarea { width: 100%; box-sizing: border-box; border: 0; background: transparent; font: 400 18px/1.55 var(--sans); color: var(--ink); resize: vertical; min-height: 96px; outline: none; }
   .sp-drop textarea::placeholder { color: var(--ink-3); }
   .sp-shots { display: flex; gap: 10px; flex-wrap: wrap; margin: 6px 0; padding: 0; list-style: none; }

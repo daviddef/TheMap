@@ -144,3 +144,103 @@ main .wl-one { background: var(--panel); border-top: 1px solid var(--rule); bord
                border-bottom: 1px solid var(--rule); border-radius: 12px; padding: 14px 18px; margin-bottom: 12px; }
 main .wl-one:hover { border-top-color: var(--rule-strong); border-right-color: var(--rule-strong); border-bottom-color: var(--rule-strong); }
 main .wl-pill { border-radius: 999px; }
+
+/* ---- THE WOW LAYER: colour by part of the atlas, a header that is a place to arrive, rounder cards ----------
+   David, 25 Nov 2026: «recordatlas is starting to look more fun. more colour, better fonts, pills, cards, etc. And then the
+   rest of its pages, really dull, boring. no colour, too wordy, searches that should be unified... they need to be way more wow.»
+   The home page got coloured icon chips and rounded glass; the other 40 templates still had a beige header and one grey rule.
+   Base sets class hue-<part> on <main>, so every page below picks up its colour here without writing one of its own:
+   names teal, places terracotta, flags rose, reading gold, history plum, sources green, the project blue.
+   TEXT IS NEVER THE RAW HUE. A hue is a fill or an edge; text takes --hue-ink (the hue pulled toward the ink) so it keeps 4.5:1
+   on a tinted card in both themes. */
+:root {
+  --h-teal: #1F7A8C;  --h-terra: #C4572F;  --h-rose: #C23A5A;  --h-gold: #B9810F;
+  --h-plum: #7A4FA0;  --h-green: #3E8A55;  --h-blue: #2F6FBF;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --h-teal: #5FC0D3; --h-terra: #F08A62; --h-rose: #F07C96; --h-gold: #E8B94A;
+    --h-plum: #B58FDB; --h-green: #6CC389; --h-blue: #7FAEF0;
+  }
+}
+:root[data-theme="dark"] {
+  --h-teal: #5FC0D3; --h-terra: #F08A62; --h-rose: #F07C96; --h-gold: #E8B94A;
+  --h-plum: #B58FDB; --h-green: #6CC389; --h-blue: #7FAEF0;
+}
+main.hue-teal  { --hue: var(--h-teal); }  main.hue-terra { --hue: var(--h-terra); }
+main.hue-rose  { --hue: var(--h-rose); }  main.hue-gold  { --hue: var(--h-gold); }
+main.hue-plum  { --hue: var(--h-plum); }  main.hue-green { --hue: var(--h-green); }
+main.hue-blue  { --hue: var(--h-blue); }
+main { --hue-ink: color-mix(in srgb, var(--hue, var(--accent)) 58%, var(--ink));
+       --hue-wash: color-mix(in srgb, var(--hue, var(--accent)) 13%, var(--panel)); }
+
+/* The header: a rounded card with the part's colour washed in from the corner and a ring of it behind the title. */
+main .pagehead { --ph: var(--edge, var(--hue, var(--accent))); position: relative; overflow: hidden; isolation: isolate;
+  margin: 26px 0 30px; padding: clamp(26px, 4vw, 46px) clamp(22px, 4vw, 52px) clamp(24px, 3.4vw, 40px);
+  border: 1px solid color-mix(in srgb, var(--ph) 32%, var(--rule)); border-radius: 28px;
+  background:
+    radial-gradient(120% 150% at 100% 0%, color-mix(in srgb, var(--ph) 24%, transparent) 0, transparent 58%),
+    radial-gradient(80% 110% at 0% 110%, color-mix(in srgb, var(--ph) 11%, transparent) 0, transparent 62%),
+    var(--panel); }
+main .pagehead::after { content: ""; position: absolute; z-index: -1; right: -70px; top: -90px; width: 290px; height: 290px;
+  border-radius: 50%; border: 44px solid color-mix(in srgb, var(--ph) 13%, transparent); pointer-events: none; }
+main .pagehead-flagged { border-bottom-width: 1px; }
+main .pagehead h1 { font-weight: 800; letter-spacing: -.028em; font-size: clamp(38px, 6vw, 66px); line-height: 1.02; margin-top: 16px; }
+main .pagehead-title h1 { margin-top: 0; }
+main .pagehead > .lab { display: inline-flex; align-items: center; gap: 6px; padding: 6px 13px; border-radius: 999px;
+  font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; font-weight: 700;
+  color: color-mix(in srgb, var(--ph) 58%, var(--ink)); background: color-mix(in srgb, var(--ph) 16%, var(--panel));
+  border: 1px solid color-mix(in srgb, var(--ph) 30%, transparent); }
+main .pagehead .dek { font-size: clamp(16px, 1.6vw, 18.5px); line-height: 1.55; color: var(--ink-2); margin-top: 14px; max-width: 64ch; }
+main .pagehead-flag { border-radius: 8px; box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--ph) 70%, transparent); }
+
+/* Section headings carry a short bar of the part's colour, so the page reads as parts rather than as a long list. */
+.k-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 34px 0 14px; }
+.k-bar::before { content: ""; flex: none; width: 8px; height: 30px; border-radius: 6px; background: var(--hue, var(--accent)); }
+.k-bar h2 { font-size: clamp(22px, 3vw, 30px); font-weight: 800; letter-spacing: -.02em; }
+.k-bar .k-count { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--ink-3); }
+
+/* A card with the part's colour along its top, the way the Flags Atlas draws each country; it lifts when pointed at. */
+.k-card { position: relative; display: flex; flex-direction: column; gap: 6px; text-decoration: none; color: inherit;
+  background: var(--panel); border: 1px solid var(--rule); border-top: 5px solid var(--c, var(--hue, var(--accent))); border-radius: 18px;
+  padding: 16px 18px 16px; transition: transform .16s, box-shadow .16s, border-color .16s; }
+a.k-card:hover, .k-card.is-link:hover { transform: translateY(-3px); border-color: var(--c, var(--hue, var(--accent)));
+  box-shadow: 0 16px 30px -18px color-mix(in srgb, var(--c, var(--hue, var(--accent))) 70%, #000); }
+.k-card h3 { font-family: var(--serif); font-size: 22px; font-weight: 800; letter-spacing: -.015em; line-height: 1.15; }
+.k-card p { font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+.k-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); list-style: none; margin: 0; padding: 0; }
+
+/* A coloured square for an icon or a flag or one big glyph, the same chip the home page uses. */
+.k-ico { flex: none; display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; font-size: 22px;
+  color: var(--hue-ink); background: color-mix(in srgb, var(--c, var(--hue, var(--accent))) 16%, var(--panel)); }
+
+/* Pills in a palette: one per kind of thing, never one grey. */
+.k-pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 11px; border-radius: 999px; font: 600 12.5px/1.2 var(--sans);
+  color: color-mix(in srgb, var(--c, var(--hue, var(--accent))) 60%, var(--ink));
+  background: color-mix(in srgb, var(--c, var(--hue, var(--accent))) 15%, var(--panel));
+  border: 1px solid color-mix(in srgb, var(--c, var(--hue, var(--accent))) 28%, transparent); text-decoration: none; white-space: nowrap; }
+a.k-pill:hover { background: color-mix(in srgb, var(--c, var(--hue, var(--accent))) 26%, var(--panel)); }
+.k-pill.is-solid { background: var(--c, var(--hue, var(--accent))); color: #fff; border-color: transparent; }
+.k-pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+
+/* THE ONE SEARCH BOX: big, round, the colour of the part when it is in use. Every page that searches wears this. */
+.k-search { display: flex; align-items: center; gap: 10px; background: var(--panel); border: 2px solid color-mix(in srgb, var(--hue, var(--accent)) 40%, var(--rule));
+  border-radius: 22px; padding: 6px 8px 6px 20px; box-shadow: 0 14px 30px -20px color-mix(in srgb, var(--hue, var(--accent)) 60%, #000); }
+.k-search:focus-within { border-color: var(--hue, var(--accent)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--hue, var(--accent)) 22%, transparent); }
+.k-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--ink); font: 500 clamp(18px, 2.4vw, 24px)/1.3 var(--sans); padding: 12px 0; }
+.k-search input::placeholder { color: var(--ink-3); font-weight: 400; }
+.k-search .k-ico { width: 40px; height: 40px; border-radius: 12px; font-size: 18px; }
+
+/* Cards and panels already on pages, made rounder and lifted: one rule changes all of them. */
+main .panel, main .cardlink { border-radius: 18px; }
+main .cardlink { transition: transform .16s, box-shadow .16s, border-color .16s; }
+main .cardlink:hover { transform: translateY(-2px); border-color: var(--hue, var(--accent)); }
+main section.blk { border-bottom: 0; }
+main .chip { border-radius: 999px; }
+@media (max-width: 640px) { main .pagehead { margin-top: 14px; border-radius: 22px; } main .pagehead::after { width: 190px; height: 190px; right: -70px; top: -70px; border-width: 30px; } }
+@media (prefers-reduced-motion: reduce) { a.k-card:hover, .k-card.is-link:hover, main .cardlink:hover { transform: none; } }
+
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+main .pagehead .dek:empty { display: none; }
+/* a page's own «input[type=search]{width:100%;border:…}» must not win inside the shared search box */
+main .k-search input[type="search"], main .k-search input[type="text"] { width: auto; flex: 1; min-width: 0; border: 0; border-radius: 0; padding: 12px 0; background: transparent; box-shadow: none; outline: 0; }

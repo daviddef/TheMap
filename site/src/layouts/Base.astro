@@ -17,7 +17,17 @@ import "../styles/kit.css"; // the friendly style (cards, pills, step lists), fo
 /* Counted, not typed. This line is on all 6,000 pages and it is a licence
    attribution — the one kind of number that must not quietly go stale. */
 
-const { title, dek, eyebrow, bare, jsonld, og = "default", wide, flag, noindex } = Astro.props;
+const { title, dek, eyebrow, bare, jsonld, og = "default", wide, flag, noindex, hue: hueProp } = Astro.props;
+/* ONE COLOUR PER PART OF THE ATLAS. Names are teal, places terracotta, flags rose, reading gold, history plum, sources green, the
+   project blue. Every page header, card edge, pill and tile reads --hue, which kit.css sets from this key, so a page is coloured
+   by where it lives without writing a colour of its own. A page can say hue="plum" to choose another. */
+const HUE_OF = { "your-name": "teal", name: "teal", surname: "teal", surnames: "teal", "surname-families": "teal",
+  places: "terra", place: "terra", country: "terra", countries: "terra", region: "terra", "place-names": "terra", jurisdictions: "terra",
+  flags: "rose", read: "gold", story: "gold", "my-research": "gold", "my-work": "gold", "looking-for": "gold",
+  history: "plum", "whats-new": "plum", changelog: "plum", "tree-canvas": "plum", roots: "plum", classic: "plum",
+  providers: "green", coverage: "green", data: "green", survey: "green", add: "green", errands: "green", worklist: "green", archive: "green",
+  about: "blue", help: "blue", privacy: "blue", support: "blue", connect: "blue", start: "blue", backup: "blue", shared: "blue" };
+const hueKey = hueProp || HUE_OF[(Astro.url.pathname.split("/").filter(Boolean)[0]) || ""] || "teal";
 /* GROUPED, BECAUSE THE STYLESHEET ONLY EVER STYLED GROUPS. styles.css came
    across whole from the family archive and it carries a complete navigation
    design: dropdown groups, a menu button, a drawer. This file rendered eleven
@@ -129,7 +139,7 @@ import { volumes as invVolumes } from "../lib/inventory.js";
 <meta name="theme-color" content="#1F5C6B" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Source+Sans+3:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..900,100;1,9..144,400,100&family=Figtree:wght@400..800&family=IBM+Plex+Mono:wght@400;500&display=swap" />
 <link rel="stylesheet" href={u("/styles.css")} />
 {/* GoatCounter, as on every sibling archive. No cookies and no personal
     data, so it needs no consent gate of its own — which is also why it is
@@ -371,7 +381,7 @@ import { volumes as invVolumes } from "../lib/inventory.js";
   </div>
 </header>
 
-<main id="main" tabindex="-1">
+<main id="main" tabindex="-1" class={"hue-" + hueKey}>
   <div class="wrap">
     {/* THE FLAG ATLAS DOES NOT LOOK LIGHTER BECAUSE OF ITS PALETTE.
         David kept asking why the rest of the site would not read like the

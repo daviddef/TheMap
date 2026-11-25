@@ -24,66 +24,71 @@ const fullChips = ["Ivan Blažević", "Katarina Marija Kosina", "Giuseppe De Fra
 const chips = ["Ivan", "Giuseppe", "Antonio", "Franciscus", "Matija", "Katarina", "Zdravko", "Maria"];
 ---
 <Base
-  title="Names"
+  title="Say your name"
   eyebrow={`${data.rows.length} given names · ${data.totalForms} forms · ${nFam} surname families`}
-  dek="Type your whole name and every part of it is looked up at once. Ivan, Johann, Giovanni, Zuane, John and Joannes are one name, and a surname is spelt by the clerk, not the family. Or look up one given name or one surname on its own, further down."
-  description="Given names and surnames across languages: the Latin of the register, the Italian, Venetian, Croatian, German, Hungarian and English forms, which spellings are one name, and which of them a record has actually shown.">
-
-  <section>
+  dek="Type a name, or your whole name. See every way a clerk wrote it."
+  description="Given names and surnames across languages: the Latin of the register, the Italian, Venetian, Croatian, German, Hungarian and English forms, which spellings are one name, and which of them a record has actually shown. Free to use, nothing you type leaves your browser."
+>
+  <section class="yn-find">
     <SayYourFullName chips={fullChips} />
-    <p class="cap">Each word is searched on its own, so a word the catalogue does not hold never stops the others. We guess which word is a
-    given name and which is the surname (the last word, unless a run of words is a surname we hold, or you put a comma after it) and you can
-    overrule the guess. Nothing you type leaves your browser.</p>
   </section>
 
-  <section id="yn-one">
-    <h2 class="yn-h">One name at a time</h2>
+  <ul class="k-grid yn-why">
+    <li class="k-card" style="--c:var(--h-teal)"><span class="k-ico" aria-hidden="true">🗣️</span><h3>Every language</h3>
+      <p>Ivan, Johann, Giovanni, Zuane, John and Joannes are one name.</p></li>
+    <li class="k-card" style="--c:var(--h-terra)"><span class="k-ico" aria-hidden="true">✍️</span><h3>Every spelling</h3>
+      <p>The clerk spelt it, not the family: Defranceschi is De Franceschi.</p></li>
+    <li class="k-card" style="--c:var(--h-gold)"><span class="k-ico" aria-hidden="true">🔒</span><h3>Yours alone</h3>
+      <p>The lookup runs in your browser. Nothing you type is sent.</p></li>
+  </ul>
+
+  <div class="k-bar"><h2>Browse instead</h2></div>
+  <ul class="k-grid yn-go">
+    <li><a class="k-card is-link" style="--c:var(--h-teal)" href={u("/name/")}><h3>Given names, A to Z</h3><p>{data.rows.length} names, each with a page of its own.</p></a></li>
+    <li><a class="k-card is-link" style="--c:var(--h-terra)" href={u("/surname-families/")}><h3>Surname spellings</h3><p>{nFam} families, with the evidence for each form.</p></a></li>
+    <li><a class="k-card is-link" style="--c:var(--h-gold)" href={u("/story/")}><h3>Stories of names</h3><p>How names changed on the way, with sources.</p></a></li>
+    <li><a class="k-card is-link" style="--c:var(--h-green)" href={u("/surnames/")}><h3>The data</h3><p>Free to reuse: given-names.json and the surname files.</p></a></li>
+  </ul>
+
+  <details id="yn-one" class="yn-more">
+    <summary><span class="k-pill">More ways to look</span> One name at a time, and where a surname is found</summary>
     <div class="ynsw" role="tablist" aria-label="What are you looking up?">
       <button type="button" role="tab" id="yn-tab-given" aria-controls="yn-given" aria-selected="true">Given name</button>
       <button type="button" role="tab" id="yn-tab-sur" aria-controls="yn-sur" aria-selected="false">Surname</button>
     </div>
 
     <div id="yn-given" role="tabpanel" aria-labelledby="yn-tab-given">
-      <p class="cap" style="margin-top:0">A search that tries only the form on the family tree misses the register: the same man is
-      Joannes in the baptism, Zuane to the neighbours, Giovanni to the civil clerk and John on the ship's list. Forms in
-      plain type have been met on a record by one of the family archives; forms marked <sup>°</sup> are the right form in that
-      language and a thing to search, never yet seen. A slip, written once by mistake, is listed apart and is not a spelling.</p>
       <SayYourName rows={data.rows} langs={data.languages} chips={chips} u={u} nameHref={u("/name/{id}/")} />
-      <p class="cap">The forms come from the family archives' own registers, and each carries the evidence behind it in the
-      catalogue, <code>data/given-name-families.json</code>. Nothing about a person is kept. The data is free to reuse:
-      <a href={u("/given-names.json")}>given-names.json</a>. Every name has a page of its own: <a href={u("/name/")}>all given names, A to Z</a>. How names changed on the way, with sources: <a href={u("/story/")}>stories of names</a>.</p>
+      <p class="cap">A form marked <sup>°</sup> is the right form in that language and a thing to search, never yet seen on a record. A slip, written once by mistake, is listed apart and is not a spelling.</p>
     </div>
 
     <div id="yn-sur" role="tabpanel" aria-labelledby="yn-tab-sur">
-      <h2 class="yn-h" style="margin-top:0">Is it spelt another way?</h2>
-      <p class="cap" style="margin-top:0">Surnames are spelt by the clerk, not the family: Defranceschi in one register is De Franceschi
-      in the next. Each form below carries one of five claims and says what it rests on. Case, spacing, hyphens and apostrophes are never
-      counted as spellings; an accent is, because a priest's Lereña is not a clerk's Lerena.</p>
       <SayYourSurname u={u} chips={surChips} />
-      <p class="cap">The whole list, with each family's evidence, is on <a href={u("/surname-families/")}>the spellings of a name</a>.
-      Nothing about a person is kept in either catalogue.</p>
-
-      <h2 class="yn-h">Where is it found?</h2>
-      <p class="cap" style="margin-top:0">A surname, a country or a place. A name takes you to the map, which lights the countries
-      whose registers and archives attest it and says whose archives to write to. <em>Attested</em> means a dataset held here has it,
-      never that it exists nowhere else.</p>
+      <p class="cap">Case, spacing, hyphens and apostrophes are never counted as spellings; an accent is, because a priest's Lereña is not a clerk's Lerena.</p>
+      <h3 class="yn-h">Where is a surname found?</h3>
       <SmartFind base={u("/")}
                  placesIndex={u("/index.json")} quietIndex={u("/index-quiet.json")}
                  surnameShards={u("/s/")} gazShards={u("/g/")}
                  label="Find a surname, a country or a place"
                  hint="A surname, a country or a place: Blažević · Peeters · Croatia" />
-      <p class="cap">The files behind this, free to reuse (CC0), and the countries whose registers could not be read, are on
-      <a href={u("/surnames/")}>the surname dataset</a>.</p>
     </div>
-  </section>
+  </details>
 </Base>
 
 <style is:global>
-  .ynsw { display: inline-flex; border: 1px solid var(--rule); border-radius: 999px; overflow: hidden; margin: 0 0 18px; background: var(--panel); }
-  .ynsw button { font: inherit; font-family: var(--sans); font-size: 13px; letter-spacing: .04em; padding: 8px 22px; border: 0; background: none; color: var(--ink-2); cursor: pointer; }
+  .yn-find { margin: 0 0 22px; }
+  .yn-why, .yn-go { margin: 0 0 8px; }
+  .yn-why .k-card { gap: 8px; } .yn-why .k-ico { margin-bottom: 2px; }
+  .yn-go a.k-card { height: 100%; } .yn-go li { display: flex; } .yn-go li > a { flex: 1; }
+  .yn-more { margin: 30px 0 0; background: var(--panel); border: 1px solid var(--rule); border-radius: 20px; padding: 6px 22px; }
+  .yn-more > summary { cursor: pointer; padding: 14px 0; font: 600 16px/1.3 var(--sans); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; list-style: none; }
+  .yn-more > summary::-webkit-details-marker { display: none; }
+  .yn-more[open] > summary { border-bottom: 1px solid var(--rule); margin-bottom: 18px; }
+  .ynsw { display: inline-flex; border: 1px solid var(--rule); border-radius: 999px; overflow: hidden; margin: 0 0 18px; background: var(--ground); }
+  .ynsw button { font: inherit; font-family: var(--sans); font-size: 14px; font-weight: 600; padding: 9px 24px; border: 0; background: none; color: var(--ink-2); cursor: pointer; }
   .ynsw button + button { border-left: 1px solid var(--rule); }
-  .ynsw button[aria-selected="true"] { background: var(--accent); color: var(--ground, #fff); }
-  .yn-h { margin: 34px 0 8px; }
+  .ynsw button[aria-selected="true"] { background: var(--hue); color: var(--ground, #fff); }
+  .yn-h { margin: 28px 0 8px; font-size: 22px; font-weight: 800; }
   #yn-sur label.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .ynsw button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 </style>
@@ -112,7 +117,7 @@ const chips = ["Ivan", "Giuseppe", "Antonio", "Franciscus", "Matija", "Katarina"
     const wantSur = sp.get("kind") === "surname" || (sp.has("s") && !sp.has("n"));
     given.hidden = wantSur; sur.hidden = !wantSur;
     // A link that was made for one of the single-name boxes opens on it, not on the whole-name box above.
-    if (sp.has("n") || sp.has("s") || sp.has("kind")) document.getElementById("yn-one")?.scrollIntoView();
+    if (sp.has("n") || sp.has("s") || sp.has("kind")) { const d = document.getElementById("yn-one") as HTMLDetailsElement | null; if (d) { d.open = true; d.scrollIntoView(); } }
     tg.setAttribute("aria-selected", String(!wantSur)); ts.setAttribute("aria-selected", String(wantSur));
   }
 </script>

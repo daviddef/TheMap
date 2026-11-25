@@ -381,16 +381,20 @@ try {
 
 <style>
   .sfind { position: relative; margin: 14px 0 0; }
-  .sfind input { width: 100%; box-sizing: border-box; font-family: var(--sans);
-    font-size: 16px; padding: 13px 15px; border: 1px solid var(--rule);
-    border-radius: 4px; background: var(--panel); color: var(--ink); }
-  .sfind input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  /* THE ONE SEARCH LOOK (see .k-search in kit.css): big, round, in the part's colour. */
+  .sfind input { width: 100%; box-sizing: border-box; font-family: var(--sans); font-weight: 500;
+    font-size: clamp(18px, 2.3vw, 22px); padding: 16px 22px; border: 2px solid color-mix(in srgb, var(--hue, var(--accent)) 40%, var(--rule));
+    border-radius: 22px; background: var(--panel); color: var(--ink);
+    box-shadow: 0 14px 30px -20px color-mix(in srgb, var(--hue, var(--accent)) 60%, #000); }
+  .sfind input::placeholder { color: var(--ink-3); font-weight: 400; }
+  .sfind input:focus { outline: 0; border-color: var(--hue, var(--accent));
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--hue, var(--accent)) 22%, transparent); }
   /* ABOVE EVERYTHING ON THE PAGE, which the map's own popover had to learn
      twice — see the z-index note in RecordMap.astro. */
   .sfdrop { position: absolute; top: calc(100% + 5px); left: 0; right: 0;
     z-index: 1400; max-height: 58vh; overflow-y: auto; padding: 6px;
     background: var(--panel); border: 1px solid var(--rule-strong);
-    border-radius: 5px; box-shadow: 0 10px 30px rgba(0,0,0,.28); }
+    border-radius: 18px; box-shadow: 0 18px 40px -14px rgba(0,0,0,.4); }
   .sfdrop[hidden] { display: none; }
   /* :global() ON EVERYTHING THE SCRIPT WRITES. Astro scopes a component's
      styles by stamping an attribute on the markup IT renders; these rows are
@@ -399,23 +403,23 @@ try {
      run printed «South Koreacountry17 placesSouth Africa…» as one line of
      inline text. RecordMap.astro has a note about paying for this once
      already, twenty-six rule heads at a time. */
-  :global(.sfh) { margin: 6px 0 3px; padding: 0 8px; font-family: var(--mono);
-    font-size: 9.5px; letter-spacing: .07em; text-transform: uppercase;
+  :global(.sfh) { margin: 8px 0 3px; padding: 0 12px; font-family: var(--sans); font-weight: 700;
+    font-size: 11px; letter-spacing: .07em; text-transform: uppercase;
     color: var(--brass); }
-  :global(.sfr) { display: flex; align-items: baseline; gap: 9px; padding: 7px 9px;
-    border-radius: 4px; text-decoration: none; color: var(--ink);
+  :global(.sfr) { display: flex; align-items: center; gap: 9px; padding: 9px 12px;
+    border-radius: 12px; text-decoration: none; color: var(--ink);
     font-family: var(--sans); font-size: 14px; }
   :global(.sfr.on), :global(.sfr:hover) { background: var(--accent-wash); }
   :global(.sfn) { font-weight: 500; }
   /* THE KIND, SAID ON EVERY ROW. «South Africa» and «South Carolina» look
      identical in a list and are a country and a state; the label is the
      whole difference. */
-  :global(.sfk) { flex: none; font-family: var(--mono); font-size: 9.5px;
-    letter-spacing: .06em; text-transform: uppercase; padding: 1px 5px;
-    border-radius: 2px; border: 1px solid var(--rule); color: var(--ink-3); }
-  :global(.sfk-country) { color: var(--accent); border-color: var(--accent); }
-  :global(.sfk-flags), :global(.sfk-hub) { color: var(--brass, var(--accent)); border-color: var(--brass, var(--accent)); }
-  :global(.sfk-surname) { color: var(--brick); border-color: var(--brick); }
+  :global(.sfk) { --c: var(--h-green); flex: none; font-family: var(--sans); font-size: 11px; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase; padding: 3px 9px;
+    border-radius: 999px; color: color-mix(in srgb, var(--c) 60%, var(--ink)); background: color-mix(in srgb, var(--c) 16%, var(--panel)); }
+  :global(.sfk-country) { --c: var(--h-teal); }
+  :global(.sfk-flags), :global(.sfk-hub) { --c: var(--h-rose); }
+  :global(.sfk-surname) { --c: var(--h-terra); }
   :global(.sfm) { margin-left: auto; font-family: var(--mono); font-size: 10.5px;
     color: var(--ink-3); }
   .sfhint { margin: 6px 0 0; font-family: var(--mono); font-size: 11px;

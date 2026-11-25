@@ -66,7 +66,7 @@ test("My research reads every ticked family: one name card each, and the bar nam
   assert.match(page, /SY\.scopeOf\(lines, me && me\.slug, stored\)/, "the cards read the same set as the map and the lists");
   assert.match(page, /Promise\.all\(list\.map\(cardFor\)\)/, "one card per family");
   assert.match(page, /addEventListener\("ra-scope-changed", draw\)/, "ticking a family redraws the cards");
-  assert.match(bar, /Reading " \+ set\.length \+ " families together/, "the bar says several families are being read");
+  assert.match(bar, /Reading " \+ \(set\.length > 1 \? set\.length \+ " families together" : "this family only"\)/, "the bar says which families are being read, even when it is one that is not the family you mark under");
   assert.match(bar, /Your marks go under/, "and which one the marks go under");
   assert.match(fs.readFileSync(path.join(here, "../public/js/name-intro.js"), "utf8"), /"About the name" \+ \(m\.name \? " " \+ m\.name : ""\)/, "a card for a name with no entry still says whose it is");
 });
@@ -88,4 +88,15 @@ test("My research place cards say which book was found in and for whom, a next s
   assert.match(page, /a === "onsite"[\s\S]{0,120}"In person"/, "an archive whose paper is in the building is an in-person visit");
   assert.match(page, /else out\.push\(\["unknown", "Not checked yet"/, "an archive nobody has surveyed says so and is not guessed at");
   assert.match(page, /howHtml\("volume:" \+ id\)/, "the unmarked books carry the tag too");
+});
+
+test("My research can be shared: the address carries who is read and any period, and a link opens the same view", () => {
+  const page = fs.readFileSync(path.join(here, "../src/pages/my-research.astro"), "utf8");
+  assert.match(page, /id="mr-share-url"/);
+  assert.match(page, /q\.set\("f", all \? "all" : v\.slugs\.join\(","\)\)/, "who is read goes in f");
+  assert.match(page, /k \+ "~" \+ PERIOD\[k\]\[0\] \+ "-" \+ PERIOD\[k\]\[1\]/, "a pressed period goes in per");
+  assert.match(page, /if \(VIEW\.want && !VIEW\.applied\) return;/, "the address is not overwritten before a link has been applied");
+  assert.match(page, /is not in this browser|not in this browser \(/, "a family the browser does not have is said so");
+  assert.doesNotMatch(page.slice(page.indexOf("function applyView"), page.indexOf("var shareBtn")), /setActive/, "opening a link never changes the family your marks go under");
+  assert.match(page, /location\.pathname \+ location\.search \+ \(n === "families"/, "changing tab keeps the query");
 });

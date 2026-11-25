@@ -341,12 +341,12 @@
     function joinNames(a) { return a.length < 2 ? a.join("") : a.slice(0, -1).join(", ") + " and " + a[a.length - 1]; }
     function drawAdmin(me) {
       if (!fam) return;
-      var set = readSet(), many = set.length > 1;
+      var set = readSet(), many = set.length > 1 || (set.length === 1 && !!me && set[0].slug !== me.slug);   /* reading someone other than the family you mark under counts too */
       bar.classList.toggle("ra-lines-many", many);
       fam.who.textContent = many ? joinNames(set.map(labelOf)) : me ? labelOf(me) : "No family chosen";
       fam.sess.textContent = "";
       if (many) {
-        fam.sess.append("Reading " + set.length + " families together" + (me ? ". Your marks go under " + labelOf(me) + "." : "."));
+        fam.sess.append("Reading " + (set.length > 1 ? set.length + " families together" : "this family only") + (me ? ". Your marks go under " + labelOf(me) + "." : "."));
       } else if (me) {
         var ar = me.archives || [];
         if (ar.length) {

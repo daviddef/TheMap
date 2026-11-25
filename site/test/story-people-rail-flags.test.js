@@ -11,7 +11,7 @@ test("the rail lists each named person under The family, and the places list is 
   assert.match(page, /querySelectorAll\("a\.sub:not\(\.psub\)"\)/, "redrawing the places leaves the people alone");
   assert.match(page, /\.lf-card\[data-person\]/);
   assert.match(page, /tbox\.append\(tr\);[^\n]*peopleRail\(\)/, "drawn with the tree, so an edit redraws it");
-  assert.match(eng, /c\.setAttribute\("data-person", pe\.name\)/);
+  assert.match(eng, /c\.setAttribute\("data-person", shownName\(pe\)\)/);
 });
 
 test("a box shows the flag of the year told at birth and at death, and today's flag, faint and said so, when no year is told", () => {

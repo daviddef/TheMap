@@ -109,7 +109,7 @@
     var stopsShown = p.stops && p.stops.length ? p.stops : [p.from && Object.assign({ role: "origin" }, p.from), p.to && Object.assign({ role: "move" }, p.to)].filter(Boolean);
     stopsShown.forEach(function (st) {
       var more = st.alts && st.alts.length, lab = placeLabel(st.row);
-      if (!more) return;
+      if (!more || (p.near || []).some(function (n) { return n.word === st.word; })) return;   /* an «X near Y» choice has its own box on the place card, with the distances */
       chips.append(chip(lab + (st.yearTold ? ", " + st.year : "") + "  ▾  (not this one? tap to try " + placeLabel(st.alts[0]) + ")", "to", "s:" + st.row.i + st.role, function () {
         ov[st.word] = { row: st.alts[0], alts: st.alts.slice(1).concat([st.row]) }; lastSig = ""; run();
       }));
@@ -393,7 +393,7 @@
       if (tok !== todoTok) return;
       var an = r[1] && r[1].rows ? r[1].rows.map(function (x) { return { id: x[0], name: x[1], kind: x[2], access: x[3], cc: x[4], lat: x[5], lon: x[6], url: x[7], email: x[8], post: x[9], tel: x[10], state: x[11], form: x[12], branches: (x[13] || []).map(function (b) { return { name: b[0], tel: b[1] }; }) }; }) : [];
       var pv = r[3] && (r[3].providers || r[3]) || [], byId = Object.create(null); an.forEach(function (a) { byId[a.id] = a; }); pv.forEach(function (p) { byId[p.id] = byId[p.id] || p; });
-      var deps = { base: BASE, countries: data && data.countries, rows: data && data.rows, archives: an, regions: r[2], provById: byId, mort: g.mort, cemeteries: { pending: true } };
+      var deps = { base: BASE, countries: data && data.countries, rows: data && data.rows, pickVolumes: window.raAtlasSummary && window.raAtlasSummary.pickVolumes, archives: an, regions: r[2], provById: byId, mort: g.mort, cemeteries: { pending: true } };
       var T = window.raStoryTodo, plan = T.build(g, deps), at = plan.anchor; T.render(plan, todoOut);
       if (!at || at.lat == null) return;
       /* burial grounds come after the plan is on the page: only the map squares around its starting place */
@@ -539,7 +539,7 @@
 
   /* ---- reading the words ----------------------------------------------------------------------------------------------------- */
   function signature(p) {
-    return JSON.stringify([(p.route || []).map(function (x) { return x.row.i + ":" + x.age; }), p.left, p.born, p.name, (p.people || []).map(function (x) { return x.role + x.name + (x.occupation || "") + JSON.stringify((x.events || []).map(function (e) { return [e.type, e.year, e.place]; })) + (x.place && x.place.word || ""); }), p.holds,
+    return JSON.stringify([(p.near || []).map(function (n) { return n.word + n.pick + n.level + n.options.length; }), (p.route || []).map(function (x) { return x.row.i + ":" + x.age; }), p.left, p.born, p.name, (p.people || []).map(function (x) { return x.role + x.name + (x.occupation || "") + JSON.stringify((x.events || []).map(function (e) { return [e.type, e.year, e.place]; })) + (x.place && x.place.word || ""); }), p.holds,
       p.life && p.life.groups.map(function (g) { return g.items; }), p.life && p.life.illness, p.life && p.life.died, (p.siblings || []).map(function (x) { return x.name; }), (p.kin || []).length]);
   }
   /* ---- A STORY IN ANOTHER LANGUAGE (story-lang.js) --------------------------------------------------------------------------------
@@ -630,6 +630,10 @@
     box.append(own);
   }
 
+  /* «X near Y»: the X the reader tapped on the card or the map, by the word typed; the story is read again with it */
+  var nearPicks = {};
+  document.addEventListener("ra-near-pick", function (e) { if (!e.detail) return; nearPicks[e.detail.word] = e.detail.id; lastSig = ""; run(); });
+
   function run() {
     var raw = text.value, t = readingText(raw), rw = null; checkLang(raw);
     $("sp-clear").hidden = !t.trim() && !files.length; $("sp-link").hidden = !t.trim();
@@ -643,8 +647,8 @@
     }).catch(function () { return LD.load(); }).then(function (d) {
       data = d;
       var attached = files.length ? "photo" : null;
-      var p = E.parseStory(t, { map: d.map, given: d.given, skip: d.skip, countries: d.countries }, attached);
-      (p.stops || []).forEach(function (st) { var o2 = ov[st.word]; if (o2) { st.row = o2.row; st.alts = o2.alts; } });
+      var p = E.parseStory(t, { map: d.map, given: d.given, skip: d.skip, countries: d.countries, pick: nearPicks }, attached);
+      (p.stops || []).forEach(function (st) { var o2 = !(p.near || []).some(function (n) { return n.word === st.word; }) && ov[st.word]; if (o2) { st.row = o2.row; st.alts = o2.alts; } });
       if (p.route && p.route.length) {
         var r0 = p.route[0], rl = p.route[p.route.length - 1];
         p.from = { row: r0.row, alts: r0.alts, word: r0.word }; p.to = p.route.length > 1 ? { row: rl.row, alts: rl.alts, word: rl.word } : null;

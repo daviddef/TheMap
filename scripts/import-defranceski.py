@@ -180,6 +180,8 @@ def main():
             rec["denoms"] = p["layers"]
         places.append(rec)
 
+    import place_fixes      # data/place-fixes.json: corrections a re-import must not undo
+    place_fixes.apply(places)
     places.sort(key=lambda x: x["name"])
     out = {
         "note": "Snapshot of the Croatian shelf, imported from the Defranceski archive "

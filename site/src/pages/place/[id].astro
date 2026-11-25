@@ -288,6 +288,12 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
     who holds it, and every link written out in full.</span>
   </p>
 
+  {place.question && (
+    <div class="k-hi">
+      <p><b>Open question.</b> {place.question}</p>
+    </div>
+  )}
+
   {place.filedUnder && (
     <div class="k-hi">
       <p><b>Filed under a country that no longer holds it.</b></p>

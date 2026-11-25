@@ -525,6 +525,14 @@
     return c.filter(function (x, i) { return x.length >= 4 && c.indexOf(x) === i; });
   }
   var SLAV_PREP = /(^|[\s(,;])((?:[Uu]|[Ii]z|[Oo]d|[Dd]o|[Kk]od|[Bb]lizu|[Ww]e?|[Vv]|[Zz]e?))\s+(\p{Lu}[\p{L}'\u2019-]{3,})(?![\p{L}])/gu;
+  /* The two ways of telling «X near Y» backwards, put the right way round. Used by the reader and by the gazetteer lookup, so both see the same words. */
+  function nearFirst(t) {
+    /* «born near Udine in a village called Ovaro»: the same, told the other way round */
+    t = t.replace(/\bnear\s+(\p{Lu}[\p{L}'’-]+(?:\s+\p{Lu}[\p{L}'’-]+)?)\s*,?\s+(?:in|at)\s+(?:an?|the)\s+(?:(?:small|little|tiny|mountain|nearby|poor|farming|fishing)\s+){0,2}(?:village|town|hamlet|place|parish)\s+(?:(?:called|named)\s+|of\s+)(\p{Lu}[\p{L}'’-]+(?:\s+\p{Lu}[\p{L}'’-]+)?)/gu, "in $2 near $1");
+    /* «a small village near Udine called Ovaro»: Ovaro is the place, Udine is where it is */
+    t = t.replace(/\b(?:an?\s+|the\s+)?(?:(?:small|little|tiny|mountain|farming|fishing)\s+){0,2}(?:village|town|hamlet|place|suburb|parish)\s+(?:just\s+)?(?:near|outside(?:\s+of)?|close\s+to)\s+(\p{Lu}[\p{L}'\u2019-]+(?:\s+\p{Lu}[\p{L}'\u2019-]+)?)\s*,?\s+(?:called|named)\s+(\p{Lu}[\p{L}'\u2019-]+(?:\s+\p{Lu}[\p{L}'\u2019-]+)?)/gu, "$2 near $1");
+    return t;
+  }
   function gazWants(text, map, given) {
     var fold = S.fold, want = [], t = cleanInput(text);   /* the same text the reader will read: normalised, no zero-width marks, no address numbers */
     /* «left Ennis for Geelong»: a place after left, and after "for" when the sentence is one of travel */
@@ -550,16 +558,23 @@
          the town's namesakes in the US, and the nearest to the state is chosen */
       else if (ry.every(function (r) { return r.cc === "US"; }) && ry.some(function (r) { return S.fold(r.n) === fy && (r.v || 0) >= 500; }) && !rx.some(function (r) { return r.c > 0; }) && !rx.some(function (r) { return S.fold(String(r.n)).slice(-fy.length - 1) === " " + fy; })) want.push({ ph: fx, ccs: ["US"] });
     }
-    /* «Drežnik near Nova Gradiska»: the Atlas holds a Drežnik with a register 127 km from there, and the gazetteer one 8 km away. A place told as near another
-       is looked up in the gazetteer as well, whatever the index holds, so the namesake beside it can be chosen. */
-    var nr = /(\p{Lu}[\p{L}'\u2019-]+(?:\s+\p{Lu}[\p{L}'\u2019-]+){0,2})\s*,?\s+near\s+(?=\p{Lu})/gu;
-    while ((m = nr.exec(t))) { var nw = m[1].split(/\s+/); for (var s = 0; s < nw.length; s++) { var nph = fold(nw.slice(s).join(" ")); if (map[nph]) { want.push({ ph: nph, ccs: null, more: true, near: true }); break; } } }
+    /* «born in Dreznik near Nova Gradiska»: the Drežnik the Atlas holds may not be that one. The name before «near» is looked up in the worldwide gazetteer
+       whatever the Atlas holds, and its namesakes are kept apart (map["#near"]) for the choice by distance, so no other reading changes. */
+    var nre = /(\p{Lu}[\p{L}'\u2019-]+(?:\s+\p{Lu}[\p{L}'\u2019-]+){0,2})\s*,?\s+near\s+(?=\p{Lu})/gu, nt = nearFirst(t), asked = [];
+    while ((m = nre.exec(nt))) { var nws = m[1].split(/\s+/); for (var k2 = 1; k2 <= nws.length; k2++) asked.push({ ph: fold(nws.slice(-k2).join(" ")), ccs: null, more: true, near: true }); }
     var seen = Object.create(null);
-    return want.filter(function (w) { var k = w.ph + "|" + (w.ccs || []).join() + (w.near ? "|near" : ""); if (w.ph.length < 4 || seen[k] || (given && given[w.ph])) return false; if (!w.ccs && !w.more && map[w.ph]) return false; seen[k] = 1; return true; }).slice(0, 16);
+    return asked.concat(want).filter(function (w) { var k = w.ph + "|" + (w.ccs || []).join() + (w.near ? "|near" : ""); if (w.ph.length < 4 || seen[k] || (given && given[w.ph])) return false; if (!w.near && !w.ccs && !w.more && map[w.ph]) return false; seen[k] = 1; return true; }).slice(0, 16);
   }
+  /* one gazetteer row as a place row; `alt` is how many other names the gazetteer lists for it: a city has many, a village few, and among namesakes that is the importance */
+  function gazRow(ph, r) { return { i: "g-" + ph.replace(/ /g, "-") + "-" + String(r[3]).toLowerCase() + "-" + Math.round(r[1] * 100), n: r[0], y: r[1], x: r[2], cc: r[3], c: 0, gaz: 1, alt: (r[4] || []).length }; }
   /* rows from a gazetteer shard are [name, lat, lon, cc, otherNames]; the ones that are this name are added to the map */
   function gazMerge(map, w, shardRows) {
     var fold = S.fold, hit = (shardRows || []).filter(function (r) { return fold(r[0]) === w.ph || (r[4] || []).some(function (a) { return fold(a) === w.ph; }); });
+    if (w.near) {   /* every namesake, none preferred and none dropped: which is meant is decided by distance (nearResolve) */
+      var box = map["#near"] || (map["#near"] = Object.create(null));
+      box[w.ph] = hit.slice(0, 80).map(function (r) { return gazRow(w.ph, r); });
+      return box[w.ph].length;
+    }
     if (w.ccs) hit = hit.filter(function (r) { return w.ccs.indexOf(r[3]) > -1; });
     /* a place that has the name as its OWN name comes before, and instead of, a place that only lists it among its other names
        (Clifden in Galway, not Rathgarvan in Kilkenny, whose list of names happens to include "Clifden") */
@@ -567,13 +582,8 @@
     var have = map[w.ph] || [], part = partialOnly(have, w.ph);
     if (part) hit = own;   /* the index has the name only inside others (Peoria County, Pozzuolo del Friuli): only a place of that very name counts, and the county's own middle is no duplicate of it */
     hit = hit.filter(function (r) { return part || !have.some(function (h) { return h.cc === r[3] && h.y != null && Math.abs(h.y - r[1]) < 0.25 && Math.abs(h.x - r[2]) < 0.25; }); });
-    if (w.near) {   /* namesakes asked for because the story says «near»: kept apart, so they are only ever read when one stands beside the town told, and change nothing else */
-      var apart = map["#near"] || (map["#near"] = Object.create(null));
-      apart[w.ph] = hit.filter(function (r) { return fold(r[0]) === w.ph; }).map(function (r) { return { i: "g-" + w.ph.replace(/ /g, "-") + "-" + String(r[3]).toLowerCase() + "-" + Math.round(r[1] * 100), n: r[0], y: r[1], x: r[2], cc: r[3], c: 0, gaz: 1 }; });
-      return apart[w.ph].length;
-    }
     hit = hit.slice(0, w.ccs || part ? 20 : 8); if (!hit.length) return 0;
-    var rows = hit.map(function (r) { return { i: "g-" + w.ph.replace(/ /g, "-") + "-" + String(r[3]).toLowerCase() + "-" + Math.round(r[1] * 100), n: r[0], y: r[1], x: r[2], cc: r[3], c: 0, gaz: 1, alt: (r[4] || []).length }; });   /* how many other names the gazetteer lists for it: a city has many, a village few, and among namesakes that is the importance */
+    var rows = hit.map(function (r) { return gazRow(w.ph, r); });
     /* THE GAZETTEER'S ORDER IS ITS IMPORTANCE (Dresden in Germany before the Dresdens of Ohio and Ontario), and an index that holds the name only as bare rows (no
        volumes, no count) has no evidence to put one of its own first. David, on Dresden: «isnt dresden in germany?». Where the index has a row with books or a count,
        it still comes first, as before. */
@@ -905,6 +915,67 @@
     return usualPlaces(cands, ctx.hintTokens || [], ctx);
   }
 
+
+  /* «X NEAR Y». David (26 Nov 2026): «the story said Drežnik near Nova Gradiska. why arent we picking up the right one on that basis?» … «show this deduction on the
+     map and in words, and if any ambiguity highlight it». Among the places called X (the Atlas's own and the gazetteer's), the Atlas's usual reading stays when it is within
+     NEAR_KM of Y; when it is not, the nearest one that is takes its place; when none is, nothing moves and the page says so. The reader's own tap (ctx.pick) wins.
+     Distances are straight lines between the points the Atlas holds. The record of the choice is returned with the reading, so the page can show it. */
+  var NEAR_KM = 40, NEAR_FIRM_KM = 25;
+  function kmBetween(a, b) { var r = Math.PI / 180, dl = (b.y - a.y) * r, dn = (b.x - a.x) * r, h = Math.sin(dl / 2) * Math.sin(dl / 2) + Math.cos(a.y * r) * Math.cos(b.y * r) * Math.sin(dn / 2) * Math.sin(dn / 2); return 12742 * Math.asin(Math.sqrt(h)); }
+  function compass(from, to) {
+    var r = Math.PI / 180, dn = (to.x - from.x) * r, y = Math.sin(dn) * Math.cos(to.y * r), x = Math.cos(from.y * r) * Math.sin(to.y * r) - Math.sin(from.y * r) * Math.cos(to.y * r) * Math.cos(dn);
+    return ["north", "north-east", "east", "south-east", "south", "south-west", "west", "north-west"][Math.round(((Math.atan2(y, x) / r + 360) % 360) / 45) % 8];
+  }
+  function nearResolve(cands, tokens, ctx) {
+    var made = [];
+    cands.forEach(function (b) {
+      if (b.country || tokens[b.at - 1] !== "near") return;
+      var a = cands.filter(function (c) { return c !== b && !c.country && c.at + c.word.split(" ").length === b.at - 1; })[0], y = b.rows[0];
+      if (!a || !y || y.x == null || y.y == null) return;
+      var box = ctx.map && ctx.map["#near"], pool = [], first = null;
+      a.rows.concat(box && box[a.word] || []).forEach(function (r, i) {
+        if (r.x == null || r.y == null || r.i === y.i) return;
+        if (pool.some(function (o) { return o.row.i === r.i || (o.row.cc === r.cc && kmBetween(o.row, r) < 3); })) return;   /* the same village from two sources: the Atlas's own row is kept */
+        var o = { row: r, km: kmBetween(r, y), dir: compass(y, r) }; pool.push(o); if (i === 0) first = o;
+      });
+      if (!pool.length) return;
+      var byKm = pool.slice().sort(function (p, q) { return p.km - q.km; }), close = byKm.filter(function (o) { return o.km <= NEAR_KM; });
+      var auto = first && first.km <= NEAR_KM ? first : close.length ? byKm[0] : first || byKm[0];
+      var asked = ctx.pick && ctx.pick[a.word], mine = asked ? pool.filter(function (o) { return o.row.i === asked; })[0] : null, pick = mine || auto;
+      var level = !close.length ? "far" : close.length > 1 ? "two" : close[0].km > NEAR_FIRM_KM || (byKm[1] && byKm[1].km <= 2 * NEAR_KM) ? "weak" : "clear";
+      if (pool.length < 2 && level !== "far") return;   /* one place of that name, and it is near: there was no choice to explain */
+      var row = Object.assign({}, pick.row, { nearPick: 1 });
+      a.rows = [row].concat(byKm.filter(function (o) { return o !== pick; }).map(function (o) { return o.row; }));
+      made.push({ word: a.word, anchor: y, pick: row.i, auto: auto.row.i, level: level, byReader: !!mine && mine !== auto, searched: !!(box && box[a.word]),
+        options: byKm.map(function (o) { return { row: o === pick ? row : o.row, km: o.km, dir: o.dir }; }) });
+    });
+    return made;
+  }
+  /* The choice in plain words. `n` is the gathered record: {word, anchor: info, pick, auto, level, byReader, searched, options: [{info, km, dir}]}. */
+  function kmText(km) { return km < 1 ? "under 1 km" : Math.round(km) + " km"; }
+  function nearWords(n, countries) {
+    var at = n.anchor.name, chosen = n.options.filter(function (o) { return o.info.row.i === n.pick; })[0] || n.options[0], rest = n.options.filter(function (o) { return o !== chosen; });
+    var bare = function (o) { return String(o.info.name).replace(/\s*\([^)]*\)/g, ""); };
+    var plain = n.options.filter(function (o) { return S.fold(bare(o)) === n.word; })[0], word = plain ? bare(plain) : n.word.replace(/(^|[ -])(\p{Ll})/gu, function (m, a, c) { return a + c.toUpperCase(); });
+    function label(o) { var c = countries && countries[o.info.cc] || o.info.countryName || "", nm = String(o.info.name).replace(" (" + at + ")", "");   /* «Drežnik (Nova Gradiška), … of Nova Gradiška» says it twice */
+      return nm + (c ? ", " + c : ""); }
+    function where(o) { return kmText(o.km) + (o.km < 1 ? " from " : " " + o.dir + " of ") + at; }
+    function held(o) { var v = (o.info.cols || []).length; return v ? v + " volume" + (v === 1 ? "" : "s") + " in the Atlas" : "no records listed in the Atlas"; }
+    var close = n.options.filter(function (o) { return o.km <= NEAR_KM; }).length, unsure = n.byReader ? chosen.km > NEAR_KM : n.level !== "clear", head, say;
+    if (n.byReader) { head = "Your choice of " + word; say = "You chose " + label(chosen) + ", " + where(chosen) + "."; }
+    else if (n.level === "far") {
+      head = "Check this: no " + word + " close to " + at;
+      say = (n.options.length > 1 ? "None of the " + n.options.length + " places called " + word + " that were found is within " + NEAR_KM + " km of " + at + ". The one shown is " : "The one " + word + " found is ") + where(chosen) + ", further than “near” usually means. The research plan starts from " + at + ".";
+    } else if (n.level === "two") {
+      head = "Not certain: more than one " + word + " fits";
+      say = close + " places called " + word + " are within " + NEAR_KM + " km of " + at + ". We show " + label(chosen) + ", " + where(chosen) + (chosen === n.options[0] ? ", the nearest" : ", the Atlas's usual reading of the name") + ". Tap another to switch.";
+    } else if (n.level === "weak") {
+      head = "Check this choice of " + word;
+      say = "We took " + label(chosen) + ", " + where(chosen) + ". Only the word “near” points to it" + (rest.length ? ", and another is not much farther off" : "") + ".";
+    } else { head = "Which " + word + "? The one near " + at; say = "We took " + label(chosen) + ", " + where(chosen) + ", because the story says it is near " + at + "."; }
+    if (!n.searched) say += " The worldwide gazetteer could not be read, so only the Atlas's own list was compared.";
+    return { word: word, head: head, say: say, unsure: unsure, chosen: chosen, others: rest.map(function (o) { return { id: o.info.row.i, name: label(o), where: where(o), held: held(o), close: o.km <= NEAR_KM, o: o }; }) };
+  }
 
   /* people named right after the word for what they are to someone, with the birth and death years the same sentence gives them */
   function apposed(t, ctx) {
@@ -1334,13 +1405,10 @@
       if (side) { var who = side[1].toLowerCase(), pro = /^m/.test(who) ? "[Hh]er" : "[Hh]is"; t = t.slice(0, side.index) + t.slice(side.index).replace(new RegExp("\\b" + pro + "\\s+(?=(?:mum|mom|mother|dad|father)\\b)", "g"), "my " + who + "'s "); } }
     /* «my father, Marija Kos, was born» and «her mother, Anna, who» name the person in passing: the commas are not a list */
     t = t.replace(/\b((?:mother|father|mum|mom|dad|grandmother|grandfather|grandma|grandpa|nan|nana|nonna|nonno),)\s+(\p{Lu}[\p{L}'\u2019-]+(?:\s+\p{Lu}[\p{L}'\u2019-]+)?)\s*,(?=\s+(?:was|is|who|came|had|moved|left|lived|died|married)\b)/gu, function (m, kin, nm) { var f = S.fold(nm.split(" ")[0]); return STOP[f] || MONTHS[f] ? m : kin.slice(0, -1) + " " + nm; });
-    /* «born near Udine in a village called Ovaro»: the same, told the other way round */
-    t = t.replace(/\bnear\s+(\p{Lu}[\p{L}'’-]+(?:\s+\p{Lu}[\p{L}'’-]+)?)\s*,?\s+(?:in|at)\s+(?:an?|the)\s+(?:(?:small|little|tiny|mountain|nearby|poor|farming|fishing)\s+){0,2}(?:village|town|hamlet|place|parish)\s+(?:(?:called|named)\s+|of\s+)(\p{Lu}[\p{L}'’-]+(?:\s+\p{Lu}[\p{L}'’-]+)?)/gu, "in $2 near $1");
+    t = nearFirst(t);   /* «near Udine, in a village called Ovaro» and «a village near Udine called Ovaro» become «in Ovaro near Udine» */
     /* «married a man called Giovanni», «wed a woman named Rosa»: the name is the husband's or wife's */
     t = t.replace(/\b(?:married|wed)\s+(?:to\s+)?an?\s+(?:(?:young|local|nice|widowed|second)\s+)?(?:man|woman|girl|lady|boy|fellow|chap|widower|widow|local)\s+(?:(?:called|named)|by\s+the\s+name\s+of)\s+(?=\p{Lu})/gu, "married ").replace(/\bwed\s+(?=\p{Lu}\p{Ll})/gu, "married ");
     t = t.replace(/\b((?:[Hh]usband|[Ww]ife)\s+(?:was|is))\s+an?\s+(?:(?:young|local|nice)\s+)?(?:man|woman|girl|lady|fellow|chap|local)\s+(?:called|named)\s+(?=\p{Lu})/gu, "$1 ");
-    /* «a small village near Udine called Ovaro»: Ovaro is the place, Udine is where it is */
-    t = t.replace(/\b(?:an?\s+|the\s+)?(?:(?:small|little|tiny|mountain|farming|fishing)\s+){0,2}(?:village|town|hamlet|place|suburb|parish)\s+(?:just\s+)?(?:near|outside(?:\s+of)?|close\s+to)\s+(\p{Lu}[\p{L}'\u2019-]+(?:\s+\p{Lu}[\p{L}'\u2019-]+)?)\s*,?\s+(?:called|named)\s+(\p{Lu}[\p{L}'\u2019-]+(?:\s+\p{Lu}[\p{L}'\u2019-]+)?)/gu, "$2 near $1");
     /* «born in Pula when it was Italy»: who ruled it then is an aside, not a place anyone went */
     t = t.replace(/,?\s*\(?\b(?:back\s+)?(?:when|while)\s+(?:it|that|this|the\s+(?:town|city|area|region|place))\s+(?:was\s+|belonged\s+to\s+|still\s+belonged\s+to\s+)(?:still\s+)?(?:(?:a\s+)?part\s+of\s+|under\s+|in\s+)?(?:the\s+)?\p{Lu}[\p{L}'\u2019-]+(?:[ -](?:\p{Lu}[\p{L}'\u2019-]+|rule|empire|Empire))*\)?/gu, "");
     /* «my great grandad», «great-great nan»: the great- belongs to the word for a grandparent, whichever it is */
@@ -1510,6 +1578,7 @@
     ctx.__typed = Object.create(null); String(t).normalize("NFC").split(/[\s,;.!?()"]+/).forEach(function (w) { var lw = w.toLowerCase(); if (/[^\u0000-\u007f]/.test(lw)) ctx.__typed[S.fold(lw)] = lw; });   /* a place typed with its own accents (Kraków) is that place, not its accentless namesakes */
     var ci0 = capInfo(t, tokens);
     cands = withContext(cands, ctx, function (c) { return notPlace(c, tokens, ci0, ctx); });
+    out.near = nearResolve(cands, tokens, ctx);   /* «X near Y»: which X, before any person or stop takes the first reading */
     ctx.__rank = Object.create(null); cands.forEach(function (c) { ctx.__rank[c.word] = c.rows; });   /* the readings, in the story's own order, for the readings of each person */
     /* a word that is no place's own name but sits inside the names of several ("Friuli" in Pozzuolo del Friuli) is not a place: it is offered, not used */
     var suggest = [];
@@ -1664,26 +1733,18 @@
         if (st.isCountry || typeof st.country === "string" || !st.pool || st.pool.length < 2) return;
         cur0 = st;
         var cur = st.row, best = cur;
-        var withSuffix = !cur.usual && S.fold(String(cur.n)).indexOf(st.word + " ") === 0;   /* "Austin County" for the word "austin" */
+        var withSuffix = !cur.usual && !cur.nearPick && S.fold(String(cur.n)).indexOf(st.word + " ") === 0;   /* "Austin County" for the word "austin" */
         var exact = withSuffix ? st.pool.filter(function (r) { return r.cc === cur.cc && S.fold(String(r.n)) === st.word; })[0] : null;
         if (exact) best = exact;
-        var tw = (ctx.__typed || {})[st.word], strong = (cur.v || 0) >= 50 || cur.c > 0 || cur.al || cur.exo || cur.fam || cur.usual || (tw && String(cur.n).normalize("NFC").toLowerCase() === tw);   /* a place the shelf holds well, or that came by an older name (Fiume), is not moved by its neighbours */
+        var tw = (ctx.__typed || {})[st.word], strong = (cur.v || 0) >= 50 || cur.c > 0 || cur.al || cur.exo || cur.fam || cur.usual || cur.nearPick || (tw && String(cur.n).normalize("NFC").toLowerCase() === tw);   /* a place the shelf holds well, or that came by an older name (Fiume), is not moved by its neighbours */
         if (!strong) st.pool.forEach(function (r) {
           if (r.cc !== best.cc && others(r.cc) >= 1 && beats(r.cc, best.cc)) { var ex2 = st.pool.filter(function (q) { return q.cc === r.cc && S.fold(String(q.n)) === st.word; })[0]; best = ex2 || r; }
         });
         if (best !== cur) { st.alts = st.pool.filter(function (r) { return r !== best; }).slice(0, 5); st.row = best; }
       });
     })();
-    /* …AND «NEAR» SETTLES IT LAST: of the places with that name, the one within 40 km of the town the story pins it to. One already that close is left as it is;
-       with none that close, nothing moves (the plan then says how far off the only one is). */
-    stops.forEach(function (st) {
-      var to = st.nearTo && st.nearTo.row; if (!to || to.y == null) return;
-      var all = (st.pool || [st.row]).concat((ctx.map && ctx.map["#near"] && ctx.map["#near"][st.word]) || []);
-      function km(r) { if (!r || r.y == null || r.x == null) return Infinity; var dy = (r.y - to.y) * 111.2, dx = (r.x - to.x) * 111.2 * Math.cos(to.y * Math.PI / 180); return Math.sqrt(dx * dx + dy * dy); }
-      if (km(st.row) <= 40) return;
-      var best = all.slice().sort(function (a, b) { return km(a) - km(b); })[0];
-      if (km(best) <= 40) { st.alts = []; st.row = best; st.pool = all; }   /* the story itself says which one: no «did you mean» for the namesakes */
-    });
+    /* the story itself says which namesake («near»): no «did you mean» for the others, which the place card lists with their distances */
+    stops.forEach(function (st) { if (st.nearTo && st.row && st.row.nearPick) st.alts = []; });
     var route = stops.filter(function (x) { return x.role !== "father-from" && x.role !== "mother-from" && x.of !== "spouse"; });
     /* ages: "when he was 3 years old he moved to Harare" gives Harare age 3; a stop with no age sits between its neighbours */
     var AGE = /(?:(?:when|by the time) (?:he|she|they|i|we) (?:was|were|turned)|aged?|at the age of|at age|by the age of|at) (\d{1,2})(?: years?(?: old)?)?(?= |$)/g, am2, ages = [];
@@ -2798,7 +2859,7 @@
 
   var api = { toYear: toYear, suggest: suggest, windows: windows, volumesFor: volumesFor, captionAt: captionAt, progress: progress, between: between,
               readFamily: readFamily, readMe: readMe, readEvents: readEvents, repairCase: repairCase, givenForms: givenForms, volLabel: volLabel, buildPlan: buildPlan, parseStory: parseStory, startFamily: startFamily, familyName: familyName, flagFor: flagFor, leaderAt: leaderAt, leadersBetween: leadersBetween, givenGroups: givenGroups, surnameBlock: surnameBlock, short: short, yearsIn: yearsIn,
-              HOLDS: HOLDS, YEAR_MIN: YEAR_MIN, YEAR_MAX: YEAR_MAX, readLife: readLife, gazWants: gazWants, gazMerge: gazMerge, didYouMean: didYouMean, aliasMerge: aliasMerge, countryPoints: countryPoints, repairCase: repairCase, clerkLanguages: clerkLanguages };
+              HOLDS: HOLDS, YEAR_MIN: YEAR_MIN, YEAR_MAX: YEAR_MAX, readLife: readLife, gazWants: gazWants, gazMerge: gazMerge, nearWords: nearWords, NEAR_KM: NEAR_KM, didYouMean: didYouMean, aliasMerge: aliasMerge, countryPoints: countryPoints, repairCase: repairCase, clerkLanguages: clerkLanguages };
   if (typeof module !== "undefined" && module.exports) { module.exports = api; return; }
   window.raStory = api;
 
@@ -2808,6 +2869,9 @@
 
   /* The Atlas's own files, fetched once: the place rows (as the search box loads them), the given-name catalogue, and per place its own
      file and region. `BASE` is the site root. */
+  /* the reader's tap on another «X near Y»: the page that holds the card or the map hears it, remembers it and reads the story again */
+  function nearPick(from, word, id) { if (from && from.dispatchEvent) from.dispatchEvent(new CustomEvent("ra-near-pick", { bubbles: true, detail: { word: word, id: id } })); }
+
   function createLoader(BASE) {
     var data = null, loading = null, cache = Object.create(null);
     function getJSON(path) { if (cache[path]) return cache[path]; return (cache[path] = fetch(BASE + path).then(function (r) { if (!r.ok) throw new Error(path); return r.json(); }).catch(function (e) { delete cache[path]; throw e; })); }
@@ -2843,22 +2907,10 @@
           return Promise.all(want.map(function (w) {
             var key = window.raShardKey(w.ph, info.g || {});
             if (!key) return null;
-            return getJSON("g/" + encodeURIComponent(key) + ".json").then(function (rows) { gazMerge(d.map, w, rows); }).catch(function () { return null; });
+            return getJSON("g/" + encodeURIComponent(key) + ".json").then(function (rows) { gazMerge(d.map, w, rows); }).catch(function () { delete gazDone[w.ph + "|" + (w.ccs || []).join() + (w.near ? "|near" : "")]; return null; });
           }));
         }).then(function () { return d; });
       });
-    }
-    /* The Atlas places within 15 km that hold books, nearest first: a village's records are often in the next parish. */
-    function nearbyVolumes(info) {
-      if (!data || info.lat == null) return [];
-      var rad = Math.PI / 180, out = [];
-      data.rows.forEach(function (r) {
-        if (!r.c || r.i === info.row.i || r.y == null || r.x == null) return;
-        var dy = (r.y - info.lat) * 111.2; if (Math.abs(dy) > 15) return;
-        var dx = (r.x - info.lon) * 111.2 * Math.cos(info.lat * rad); if (Math.abs(dx) > 15) return;
-        var km = Math.sqrt(dx * dx + dy * dy); if (km <= 15) out.push({ i: r.i, n: r.n, c: r.c, km: Math.max(1, Math.round(km)) });
-      });
-      return out.sort(function (a, b) { return a.km - b.km || b.c - a.c; }).slice(0, 5);
     }
     /* the first region whose outline holds the point and whose countries include the place's own: an outline is rough, so a neighbour's region is never taken */
     function regionAt(regions, lat, lon, cc) {
@@ -2871,7 +2923,7 @@
     }
     function placeInfo(row) {
       var regionsP = getJSON("regions.json").catch(function () { return null; });
-      return Promise.all([row.country ? Promise.resolve(null) : getJSON("p/" + encodeURIComponent(row.i) + ".json").catch(function () { return null; }), regionsP]).then(function (r) {
+      return Promise.all([row.country || row.gaz ? Promise.resolve(null) : getJSON("p/" + encodeURIComponent(row.i) + ".json").catch(function () { return null; }), regionsP]).then(function (r) {
         var p = r[0], regs = r[1], region = p && regs ? regs.regions.filter(function (x) { return x.id === p.region; })[0] : null;
         if (!region && row.gaz && regs) region = regionAt(regs.regions, row.y, row.x, row.cc);
         return { row: row, p: p, name: row.n.replace(/\s*\(([^)]*)\)/, function (m, x) { return S.fold(x) === S.fold(row.n.replace(/\s*\([^)]*\)/, "")) ? "" : m; }), lat: p ? p.lat : row.y, lon: p ? p.lon : row.x, cc: row.cc, countryName: (data.countries[row.cc] || row.cc || ""),
@@ -2900,6 +2952,10 @@
       route.forEach(function (x) { need(x.row); }); anc.forEach(function (x) { need(x.row); });
       (parsed.kin || []).forEach(function (k) { k.stops.forEach(function (x) { need(x.row); }); });
       (parsed.people || []).forEach(function (pe) { (pe.events || []).forEach(function (e) { if (e.place) need(e.place.row); }); });
+      /* the places an «X near Y» choice was made between, and Y itself: only for a choice the reading actually uses */
+      var near = (parsed.near || []).filter(function (n) { return seenRow[n.pick]; });
+      var cardRows = rowsNeeded.slice();   /* the places a card may be drawn for: each gets its neighbours */
+      near.forEach(function (n) { need(n.anchor); cardRows.push(n.anchor); n.options.forEach(function (o) { need(o.row); }); });
       return load().then(function () {
         var people = (parsed.people || []).filter(function (x) { return x.given || x.surname || x.me || x.unnamed; });
         return Promise.all([Promise.all(rowsNeeded.map(function (r) { return placeInfo(r); })),
@@ -2907,13 +2963,18 @@
           getJSON("flag-map.json").catch(function () { return null; }), getJSON("leaders.json").catch(function () { return null; }),
           Promise.all(people.map(function (pe) { return pe.surname ? surname(pe.surname).catch(function () { return null; }) : Promise.resolve(null); })), Promise.resolve(people)]);
       }).then(function (r) {
+        var carded = Object.create(null); cardRows.forEach(function (row) { carded[row.i] = 1; });
+        return Promise.all(r[0].filter(function (i) { return carded[i.row.i]; }).map(function (i) {
+          var keep = Object.create(null); near.forEach(function (n) { if (n.pick === i.row.i) keep[n.anchor.i] = 1; });
+          return Promise.all(S.neighbours(data.rows, i, keep).map(function (x) { return placeInfo(x.row).then(function (ni) { return { info: ni, km: x.km, books: x.books, doubt: x.doubt }; }); })).then(function (list) { i.neigh = list; });
+        })).then(function () { return r; });
+      }).then(function (r) {
         var infos = Object.create(null); r[0].forEach(function (i) { infos[i.row.i] = i; });
         var provs = r[1].providers || [], pname = Object.create(null), fm = r[3] && r[3].f, lead = r[4] && r[4].countries;
         provs.forEach(function (x) { pname[x.id] = x.name; });
         var slugOf = Object.create(null); if (r[3] && r[3].slug) Object.keys(r[3].slug).forEach(function (sl) { slugOf[r[3].slug[sl]] = sl; });
         r[0].forEach(function (i) { i.flagSlug = slugOf[i.cc] || ""; });
         r[0].forEach(function (i) { i.provs = provs.filter(function (x) { return (x.countries || []).indexOf(i.cc) > -1; }).sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); }); i.pname = pname; i.world = provs.filter(function (x) { return (x.countries || []).indexOf("*") > -1; }); i.flagRows = fm ? fm[String(i.cc || "").toUpperCase()] : null; i.leaders = lead ? lead[String(i.cc || "").toUpperCase()] : null; });
-        r[0].forEach(function (i) { i.near = i.p && (i.cols || []).length ? [] : nearbyVolumes(i); });
         var from = parsed.from ? infos[parsed.from.row.i] : null, to = parsed.to ? infos[parsed.to.row.i] : null;
         var facts = { told: toldYears(parsed), dated: datedFacts(parsed), rel: parsed.rel, name: parsed.name, siblings: parsed.siblings || [], holds: parsed.holds, holdsAll: parsed.holdsAll, left: parsed.left, born: parsed.born, from: from, to: to, base: BASE,
           providers: to ? provs.filter(function (p) { return (p.countries || []).indexOf(to.cc) > -1; }) : (from ? provs.filter(function (p) { return (p.countries || []).indexOf(from.cc) > -1; }) : []),
@@ -2921,7 +2982,8 @@
           route: route.map(function (x) { return { info: infos[x.row.i], age: x.age, year: x.year, approx: x.approx, yearTold: x.yearTold, role: x.role, said: x.said, country: x.country, ev: x.ev, nearInfo: x.nearTo && x.nearTo.row ? infos[x.nearTo.row.i] : undefined, alts: (x.alts || []).slice(0, 3).map(function (r) { return { n: r.n, cc: r.cc }; }) }; }),
           bornApprox: !!parsed.bornApprox, endYear: parsed.endYear != null ? parsed.endYear : null,
           kin: (parsed.kin || []).map(function (k) { return { key: k.key, name: k.name, label: k.label, stops: k.stops.filter(function (x) { return infos[x.row.i]; }).map(function (x) { return { info: infos[x.row.i], year: x.year, role: x.role, said: x.said, ev: x.ev }; }) }; }).filter(function (k) { return k.stops.length; }),
-          ancestors: anc.map(function (x) { return { info: infos[x.row.i], who: x.role === "mother-from" ? "mother" : "father" }; }) };
+          ancestors: anc.map(function (x) { return { info: infos[x.row.i], who: x.role === "mother-from" ? "mother" : "father" }; }),
+          near: near.map(function (n) { return { word: n.word, anchor: infos[n.anchor.i], pick: n.pick, auto: n.auto, level: n.level, byReader: n.byReader, searched: n.searched, options: n.options.map(function (o) { return { info: infos[o.row.i], km: o.km, dir: o.dir }; }) }; }) };
         var labels = {}; (data.languages || []).forEach(function (l) { labels[l.key] = l.label; });
         /* where, and when, each person lived: the story's own route for the person asked about; the family's place (or the start of the route) around that person's birth for the rest */
         var bornY = parsed.born != null ? parsed.born : null;
@@ -2977,7 +3039,7 @@
     var st = document.createElement("style"); st.id = "ev-style"; st.textContent = EV_CSS; document.head.appendChild(st);
   }
   function createJourney(o) {
-    var E = o.els, layers = null, stopPlay = null, askEl = null;
+    var E = o.els, layers = null, stopPlay = null, askEl = null, told = null;
     var reduce = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
     var BASE = (o.base || document.documentElement.getAttribute("data-base") || "/").replace(/\/?$/, "/");
     var TYPE = {}; /* event type -> label, from mortality.json `types` */
@@ -2991,7 +3053,7 @@
     function line(info, year, evs, prefix, ageText) {
       var d = el("div", null, "lf-capline");
       if (year == null) {
-        d.append(el("div", (prefix || "") + info.name + (ageText ? ", " + ageText : "") + ": add a birth year to see who held the ground, the flag and what was going on.", "lf-caphead"));
+        d.append(el("div", (prefix || "") + info.name + (ageText ? ", " + ageText : "") + (told ? ": no year is told for living here. The place card shows who held the ground in your story's years." : ": add a birth year to see who held the ground, the flag and what was going on."), "lf-caphead"));
         return d;
       }
       var c = captionAt(info, year), fl = flagFor(info, year);
@@ -3066,6 +3128,7 @@
 
     function draw(f, mort, names) {
       clear();
+      told = f.told || null;
       f = asTraveller(f);
       var tl = timeline(f), stops = tl.stops, anc = (f.ancestors || []).filter(function (x) { return x.info; });
       /* the others in the family who travel too: each pin appears at its year, so the story plays the ancestry first, then the person's own journey */
@@ -3321,7 +3384,7 @@
             });
           });
           if (can) setT(Number(E.slider.value)); else paintEvents(null);
-        } else if (mort && mort.events) E.moments.append(el("p", "Give a year, even a rough one, and the mass-mortality events of those years in these countries are drawn here as black outlines.", "lf-filed"));
+        } else if (mort && mort.events) E.moments.append(el("p", f.told ? "No year is told for living at these places, so no mass-mortality outlines are drawn on this map. Each place card lists the events of the story's years." : "Give a year, even a rough one, and the mass-mortality events of those years in these countries are drawn here as black outlines.", "lf-filed"));
         var rp = stops.filter(function (st) { return st.info.lat != null; }).map(function (st) { return [st.info.lat, st.info.lon]; });
         if (rp.length > 1) {
           L.polyline(rp, { color: "#7a7a7a", weight: 2, dashArray: "4 6", opacity: .7 }).addTo(g);
@@ -3329,6 +3392,23 @@
           layers.dot = L.circleMarker(rp[0], { radius: 6, weight: 2, color: "#fff", fillColor: "#16222a", fillOpacity: 1 }).addTo(g);
           if (can) setT(Number(E.slider.value));
         }
+        /* «X near Y» on the map: a dashed line from the X taken to Y with its length, and each X set aside as a ring that one tap takes instead */
+        var nearOn = false;
+        (f.near || []).forEach(function (n) {
+          var a = n.anchor, w = nearWords(n), c = w.chosen.info; if (!a || a.lat == null || c.lat == null) return;
+          var col = w.unsure ? "#a8741a" : "#1f5c6b"; nearOn = true;
+          L.polyline([[c.lat, c.lon], [a.lat, a.lon]], { color: col, weight: 2.5, dashArray: "7 5", interactive: false }).addTo(g);
+          L.circleMarker([(c.lat + a.lat) / 2, (c.lon + a.lon) / 2], { radius: 0, weight: 0, opacity: 0, fillOpacity: 0, interactive: false })
+            .bindTooltip(tipOf(kmText(w.chosen.km), (w.unsure ? "check: " : "") + "from " + a.name), { permanent: true, direction: "right", offset: [4, 0], className: "lf-tip lf-tip-anc lf-tip-near" }).addTo(g);
+          pts.push([c.lat, c.lon], [a.lat, a.lon]);
+          w.others.forEach(function (x) {
+            var i = x.o.info; if (i.lat == null) return;
+            var loud = w.unsure && x.close, m = L.circleMarker([i.lat, i.lon], { radius: 8, weight: loud ? 3 : 2, color: loud ? "#a8741a" : "#6b7780", fillColor: "#fff", fillOpacity: .85, dashArray: "3 3", bubblingMouseEvents: false })
+              .bindTooltip(tipOf((loud ? "Or this one? " : "Set aside: ") + i.name, x.where + " \u00b7 tap to use"), { permanent: loud, interactive: true, direction: "right", offset: [6, 0], className: "lf-tip lf-tip-anc lf-tip-near" }).addTo(g);
+            m.on("click", function () { nearPick(E.mapBox, n.word, x.id); });
+            if (x.o.km <= 150) pts.push([i.lat, i.lon]);
+          });
+        });
         var pad = o.pad || {};
         /* Tidy the labels: every one sits to the right of its pin (to the left where the pin is near the right edge), then any that
            land on another are moved down a little, and all are kept inside the map and above whatever the page puts along its bottom. */
@@ -3355,7 +3435,7 @@
           items.forEach(function (it) { it.e.style.marginTop = Math.round(it.dy) + "px"; });
         }
         layers.tidy = tidy; layers.map = map; map.on("moveend zoomend", tidy);
-        if (pts.length > 1) map.flyToBounds ? map.flyToBounds(L.latLngBounds(pts), { paddingTopLeft: pad.tl || [70, 50], paddingBottomRight: pad.br || [110, 60], duration: reduce ? 0 : 1.6, maxZoom: 7 }) : map.fitBounds(L.latLngBounds(pts));
+        if (pts.length > 1) map.flyToBounds ? map.flyToBounds(L.latLngBounds(pts), { paddingTopLeft: pad.tl || [70, 50], paddingBottomRight: pad.br || [110, 60], duration: reduce ? 0 : 1.6, maxZoom: nearOn ? 9 : 7 }) : map.fitBounds(L.latLngBounds(pts));
         else if (pts.length) map.setView(pts[0], 8);
         /* the page may have been sliding or hidden when the map was made: measure again, and make the drawn pins project from the final view */
         setTimeout(function () { map.invalidateSize({ animate: false }); }, 60);
@@ -3476,6 +3556,7 @@
       }
       /* The place over the whole of its history, as a place search shows it: every era with its flag and who held the ground, the one they were
          there in marked, then the epidemics, famines, wars and mass deaths whose area covers the place. Shown on every card, dated or not. */
+      function spanText(w) { return w[0] === w[1] ? String(w[0]) : w[0] + "\u2013" + w[1]; }
       function ground(info, years, span, ends, dated) {
         var wrap = el("div", null, "lf-ground"), eras = info.eras || [];
         /* A STOP WITH NO YEAR OF ITS OWN IS READ OVER THE STORY'S YEARS. David: «why am i still seeing all eras expanded, e.g. croatia? when were talking about early 1900's? collapse
@@ -3520,18 +3601,27 @@
             wrap.append(more);
           }
         } else wrap.append(el("p", "The Atlas has no era table for this area, so there is no era-by-era list here: it is " + (info.countryName || "today's country") + " as it is now.", "lf-filed"));
-        /* only the years the people there could have lived through (a war of 306 is no part of a life that began in 1874) */
-        var evs = mort && info.lat != null ? (span ? S.eventsAt(mort.events, info.lat, info.lon, (span[0] + span[1]) / 2, (span[1] - span[0]) / 2) : S.eventsAt(mort.events, info.lat, info.lon, 1500, 1500)) : [];
-        if (!evs.length && span && mort && info.lat != null) wrap.append(el("p", "The Atlas lists no mass-mortality event covering this area in " + span[0] + "\u2013" + span[1] + ".", "lf-filed"));
+        /* only the years the people there could have lived through (a war of 306 is no part of a life that began in 1874); with no year for this place, the story's own years.
+           The events outside them are folded away, still openable. */
+        var win = span || null, all = mort && info.lat != null ? S.eventsAt(mort.events, info.lat, info.lon, 1500, 1500) : [];
+        var evs = mort && info.lat != null && win ? S.eventsAt(mort.events, info.lat, info.lon, (win[0] + win[1]) / 2, (win[1] - win[0]) / 2) : all;
+        var inside = new Set(evs), outside = all.filter(function (e) { return !inside.has(e); });
+        function evItem(e) { var li = el("li", null, "lf-now-" + e.ty), yb = el("b", null), hist = e.f >= 600, ya = el(hist ? "a" : "span", e.f + (e.t !== e.f ? "\u2013" + e.t : "")); yb.append(ya, " "); li.append(yb);
+          if (hist) { ya.href = base + "history/?y=" + e.f; ya.title = "See it on the map, from " + e.f + ", in the History theatre"; var ea = el("a", typeLabel(e.ty) + ": " + e.n, "lf-era-link"); ea.href = base + "history/?y=" + e.f; ea.title = "See where and when it happened, in the History theatre"; li.append(ea); }
+          else li.append(document.createTextNode(typeLabel(e.ty) + ": " + e.n));
+          return li; }
+        if (!evs.length && win && mort && info.lat != null) wrap.append(el("p", "The Atlas lists no mass-mortality event covering this area in " + spanText(win) + ".", "lf-filed"));
         if (evs.length) {
-          wrap.append(el("h5", "Mass mortality whose area covers " + info.name + (span ? ", " + span[0] + "\u2013" + span[1] : "")));
+          wrap.append(el("h5", "Mass mortality whose area covers " + info.name + (win ? ", " + spanText(win) : "")));
           var ue = el("ul", null, "lf-eras lf-mort");
-          evs.slice(0, 8).forEach(function (e) { var li = el("li", null, "lf-now-" + e.ty), yb = el("b", null), hist = e.f >= 600, ya = el(hist ? "a" : "span", e.f + (e.t !== e.f ? "\u2013" + e.t : "")); yb.append(ya, " "); li.append(yb);
-            if (hist) { ya.href = base + "history/?y=" + e.f; ya.title = "See it on the map, from " + e.f + ", in the History theatre"; var ea = el("a", typeLabel(e.ty) + ": " + e.n, "lf-era-link"); ea.href = base + "history/?y=" + e.f; ea.title = "See where and when it happened, in the History theatre"; li.append(ea); }
-            else li.append(document.createTextNode(typeLabel(e.ty) + ": " + e.n));
-            ue.append(li); });
+          evs.slice(0, 8).forEach(function (e) { ue.append(evItem(e)); });
           if (evs.length > 8) ue.append(el("li", "and " + (evs.length - 8) + " more on the place page", "lf-filed"));
           wrap.append(ue);
+        }
+        if (outside.length) {
+          var old = el("details", null, "lf-mort-other"), u3 = el("ul", null, "lf-eras lf-mort");
+          old.append(el("summary", outside.length + " mass-mortality event" + (outside.length === 1 ? "" : "s") + " outside those years"));
+          outside.forEach(function (e) { u3.append(evItem(e)); }); old.append(u3); wrap.append(old);
         }
         return wrap;
       }
@@ -3567,13 +3657,25 @@
         if (wide) return [y - 40, y + 40];
         return role === "born" ? [y - 10, y + 70] : [y - 5, y + 15];
       }
-      /* Places the Atlas does hold books for, close to a place it holds none for */
-      function nearList(info, kinds) {
-        var ns = info.near || []; if (!ns.length || !kinds.length) return null;
-        var wrap = el("div"); wrap.append(el("h5", "Nearby places the Atlas does hold books for"));
-        wrap.append(el("p", "A village's records are often kept in a neighbouring parish or town. These are leads, not findings: open one and check which places its book covers.", "lf-filed"));
-        var ul = el("ul", null, "lf-vols");
-        ns.forEach(function (x) { var li = el("li"), a = el("a", x.n); a.href = base + "place/" + encodeURIComponent(x.i) + "/"; li.append(a, el("span", " " + x.km + " km; " + x.c + " volume" + (x.c === 1 ? "" : "s"), "lf-filed")); ul.append(li); items.push({ href: a.href }); });
+      /* The towns round a place, each with a few of its FamilySearch registers, the ones that meet the story's years first (David, 26 Nov 2026). */
+      function neighbourList(info, win) {
+        var list = info.neigh || []; if (!list.length) return null;
+        var wrap = el("div", null, "lf-neigh"); wrap.append(el("h4", "Neighbouring places and their registers"));
+        wrap.append(el("p", "Within 25 km: the nearest, and those with the most volumes. A village's records are often kept in a neighbouring parish or town. These are leads, not findings: open a book and check which places it covers.", "lf-filed"));
+        var ul = el("ul", null, "lf-neigh-l");
+        list.forEach(function (x) {
+          var li = el("li"), head = el("p"), a = el("a", x.info.name); a.href = x.info.href;
+          head.append(a, el("span", " " + Math.max(1, Math.round(x.km)) + " km \u00b7 " + (x.books ? x.books.toLocaleString("en") + " volume" + (x.books === 1 ? "" : "s") : "no volumes listed"), "lf-filed")); li.append(head); items.push({ href: a.href });
+          if (x.doubt) li.append(el("p", "Position doubtful: the name says " + x.doubt.of + ", which is " + x.doubt.km + " km from this point. It may be a different village of the same name.", "lf-doubt"));
+          var vs = S.pickVolumes(x.info, win, 3);
+          if (vs.length) {
+            if (win && !vs[0].fits) li.append(el("p", "None of its FamilySearch registers meets " + win[0] + "\u2013" + win[1] + "; the nearest in time:", "lf-filed"));
+            var u2 = el("ul", null, "lf-vols");
+            vs.forEach(function (v) { var l2 = el("li"), l = el("a", volLabel({ title: v.t, from: v.from, to: v.to })); l.href = v.url; l.rel = "noopener"; l.target = "_blank"; l2.append(l); u2.append(l2); });
+            li.append(u2);
+          }
+          ul.append(li);
+        });
         wrap.append(ul); return wrap;
       }
       /* What the place page holds, in one strip under the name: the other names it was filed under (with their years where the catalogue has them),
@@ -3586,7 +3688,8 @@
           var yrs = n.f != null || n.t != null ? (n.f != null ? n.f : "") + "\u2013" + (n.t != null ? n.t : "") : "";
           names.push({ n: n.n, note: [yrs, n.k === "exonym" ? "another language" : n.k === "official" ? "official" : n.k === "colonial" ? "colonial" : n.k === "historic" ? "historic" : ""].filter(Boolean).join(", "), s: n.s });
         });
-        (info.older || []).forEach(function (n) { var k = S.fold(n); if (!k || seen[k]) return; seen[k] = 1; names.push({ n: n, note: "older name" }); });
+        var older = Object.create(null); ((info.p && info.p.names) || []).forEach(function (n) { if (n.kind === "older") older[S.fold(n.n)] = 1; });
+        (info.older || []).forEach(function (n) { var k = S.fold(n); if (!k || seen[k]) return; seen[k] = 1; names.push({ n: n, note: older[k] ? "older name" : "" }); });
         if (names.length) {
           var p = el("p", null, "lf-also"); p.append(el("b", "Also known as "));
           names.slice(0, 8).forEach(function (x, i) {
@@ -3607,6 +3710,40 @@
         if (info.named && info.named.length) link("Names by date", base + "place-names/");
         box.append(links);
         return box;
+      }
+      /* How «X near Y» was decided: which X, how far from Y, and the ones set aside, each one tap away. Marked when the choice is doubtful. */
+      function nearBox(n) {
+        var w = nearWords(n), box = el("div", null, "lf-near" + (w.unsure ? " is-unsure" : ""));
+        box.setAttribute("data-near", n.word);
+        box.append(el("h4", w.head), el("p", w.say));
+        if (!w.others.length) return box;
+        function item(x) {
+          var li = el("li"), b = el("button", "Use this one"); b.type = "button"; b.setAttribute("aria-label", "Use " + x.name + ", " + x.where);
+          b.addEventListener("click", function () { nearPick(b, n.word, x.id); });
+          var t = el("span"); t.append(el("b", x.name), document.createTextNode(" \u00b7 " + x.where), el("small", x.held));
+          li.append(t, b); return li;
+        }
+        box.append(el("p", "Set aside (straight-line distance):", "lf-filed"));
+        var show = Math.max(3, w.others.filter(function (x) { return x.close; }).length), ul = el("ul");
+        w.others.slice(0, show).forEach(function (x) { ul.append(item(x)); }); box.append(ul);
+        if (w.others.length > show) { var d = el("details"), u2 = el("ul"); d.append(el("summary", (w.others.length - show) + " more, farther away")); w.others.slice(show).forEach(function (x) { u2.append(item(x)); }); d.append(u2); box.append(d); }
+        return box;
+      }
+      /* When nothing listed is of the kind or years asked for, say what IS held for the place, so the card never reads as if there were nothing. */
+      function heldList(info) {
+        var KIND = { b: "births", m: "marriages", d: "deaths", s: "lists of parishioners", i: "index" };
+        var cols = (info.cols || []).slice().sort(function (a, b) { return (a.from || 0) - (b.from || 0); }), wrap = el("div", null, "lf-held");
+        if (!cols.length) { wrap.append(el("p", "It lists no volume of any kind for " + info.name + ".", "lf-filed")); return wrap; }
+        wrap.append(el("h5", "What the Atlas does hold for " + info.name));
+        var ul = el("ul", null, "lf-vols lf-srcs");
+        cols.slice(0, 6).forEach(function (c) {
+          var li = el("li", null, "lf-src"), a = el("a", volLabel(c)); a.href = info.href; li.append(a);
+          var meta = [(c.kinds || []).map(function (k) { return KIND[k] || ""; }).filter(Boolean).join(", "), c.held ? "held by " + c.held : "", c.access || ""].filter(Boolean).join(" \u00b7 ");
+          if (meta) li.append(el("span", meta, "lf-filed"));
+          ul.append(li); items.push({ vol: c, href: info.href });
+        });
+        if (cols.length > 6) { var more = el("li"), am = el("a", "and " + (cols.length - 6) + " more on the place page"); am.href = info.href; more.append(am); ul.append(more); }
+        wrap.append(ul); return wrap;
       }
       function renderGroup(g) {
         var info = g.info, es = g.es, kicks = [], whens = [], years = [], ends = [], look = [], kinds = [], win = null, span = null, unbounded = false, withSources = false;
@@ -3635,12 +3772,14 @@
         var tt = el("div"); tt.append(el("div", kicks.join("; "), "lf-stop-k"), el("h3", info.name)); var sub = [info.countryName, whens.join(", ")].filter(Boolean).join(" \u00b7 "); if (sub) tt.append(el("div", sub, "lf-stop-s"));
         hd.append(tt); sec.append(hd);
         sec.append(placeStrip(info));
+        (f.near || []).forEach(function (nd) { if (info.row && nd.pick === info.row.i) sec.append(nearBox(nd)); });
+        if (info.p && info.p.question) { var oq = el("div", null, "lf-near is-unsure lf-question"); oq.append(el("h4", "Open question"), el("p", info.p.question)); sec.append(oq); }
         var grid = el("div", null, "lf-stop-grid"), then = el("div", null, "lf-stop-then"), where = el("div", null, "lf-stop-where");
         then.append(el("h4", "Who held the ground"));
         if (dated) then.append(datedRows(info, dated));
         else if (!years.length) {
           var nowFlag = flagFor(info, new Date().getFullYear());
-          if (nowFlag) { var fr = el("div", null, "lf-capline"), fi = el("img", null, "lf-flag"); fi.src = base + "fl/" + encodeURIComponent(nowFlag) + ".svg"; fi.alt = ""; fi.width = 36; fi.height = 24; fi.loading = "lazy"; fr.append(fi, el("div", "Today's flag of " + info.countryName + ". Give a year, even a rough one, and the flag and ruler of that time are shown.", "lf-caphead")); then.append(fr); }
+          if (nowFlag) { var fr = el("div", null, "lf-capline"), fi = el("img", null, "lf-flag"); fi.src = base + "fl/" + encodeURIComponent(nowFlag) + ".svg"; fi.alt = ""; fi.width = 36; fi.height = 24; fi.loading = "lazy"; fr.append(fi, el("div", "Today's flag of " + info.countryName + "." + (f.told ? "" : " Give a year, even a rough one, and the flag and ruler of that time are shown."), "lf-caphead")); then.append(fr); }
           else then.append(el("p", storyYears() ? "No year is told for this stop. Add one, even a rough one, and the era that applies is marked below." : "Give a year, even a rough one, and the one that applies is marked below.", "lf-filed"));
         }
         else es.forEach(function (e) { if (e.year != null) then.append(line(info, e.year, evHere(mort, info, e.year - 5, e.year + 5), e.prefix || "", e.ageText || "")); });
@@ -3648,11 +3787,12 @@
         where.append(el("h4", "Where to search"));
         var ul = el("ul", null, "lf-look"); look.forEach(function (x) { ul.append(el("li", x)); }); where.append(ul);
         var fl = fsList(info, kinds, win); if (fl) where.append(fl);
-        var vl = volumeList(info, kinds, win); if (vl) where.append(vl); else if (kinds.length) { where.append(el("p", "The Atlas lists no " + (kinds.length > 1 ? "birth, baptism or marriage" : kinds[0] === "b" ? "birth or baptism" : kinds[0] === "m" ? "marriage" : "burial") + " volume for " + info.name + (win ? " in those years" : "") + ". That is a gap in the Atlas, not proof the records do not exist.", "lf-filed")); var nl = nearList(info, kinds); if (nl) where.append(nl); }
+        var vl = volumeList(info, kinds, win); if (vl) where.append(vl); else if (kinds.length) { where.append(el("p", "The Atlas lists no " + (kinds.length > 1 ? "birth, baptism or marriage" : kinds[0] === "b" ? "birth or baptism" : kinds[0] === "m" ? "marriage" : "burial") + " volume for " + info.name + (win ? " in those years" : "") + ". That is a gap in the Atlas, not proof the records do not exist.", "lf-filed")); where.append(heldList(info)); }
         if (withSources) where.append(sources(info));
         var wl = worldList(info); if (wl) where.append(wl);
         var pl = el("p"), pa = el("a", "Every volume the Atlas lists for " + info.name + " \u2192"); pa.href = info.href; pl.append(pa); where.append(pl);
         grid.append(then, where); sec.append(grid);
+        var nbl = neighbourList(info, f.told || win); if (nbl) sec.append(nbl);
         var fp = fullPanel(info); if (fp) sec.append(fp);
         box.append(sec);
       }

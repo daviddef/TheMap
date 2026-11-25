@@ -198,11 +198,18 @@ test("every item says why it was chosen", () => {
   assert.equal(p.today.length, 4);
 });
 
-test("neighbours come from the Atlas's own places, nearest first, within 25 km, same country", () => {
+test("look nearby lists the neighbours the place card holds, nearest first, each with registers that meet the story's years", () => {
+  const A = (() => { const m = { exports: {} }; new Function("module", fs.readFileSync(path.join(SITE, "public/js/atlas-summary.js"), "utf8"))(m); return m.exports; })();
   const rows = [{ i: "a", n: "Cernik", y: 45.27, x: 17.38, c: 13, cc: "HR" }, { i: "b", n: "Far", y: 46.5, x: 17.38, c: 3, cc: "HR" }, { i: "c", n: "Abroad", y: 45.26, x: 17.39, c: 2, cc: "BA" }, { i: "d", n: "Medari", y: 45.30, x: 17.42, c: 0, cc: "HR" }];
-  const n = T.build(story(), deps({ rows })).sections.find((s) => s.key === "near").items.filter((i) => !i.gap && /km/.test(i.tag || ""));
+  const url = "https://www.familysearch.org/ark:/61903/3:1:test";
+  /* what the reader's gather() puts on the anchor: the neighbours, each with its own place file */
+  const neigh = A.neighbours(rows, NG).map((x) => ({ km: x.km, books: x.books, info: { name: x.row.n, href: "/place/" + x.row.i + "/", cols: x.row.i === "a" ? [{ title: "Births 1900-1930", url, from: 1900, to: 1930 }] : [] } }));
+  const s = story(); s.facts.route[0].nearInfo = Object.assign({}, NG, { neigh });
+  const n = T.build(s, deps({ rows, pickVolumes: A.pickVolumes })).sections.find((x) => x.key === "near").items.filter((i) => !i.gap && /km/.test(i.tag || ""));
   assert.deepEqual(n.map((i) => i.title), ["Cernik", "Medari"]);
   assert.match(n[1].why, /lists no volumes/);
+  assert.deepEqual(n[0].regs.map((r) => r.href), [url]);
+  assert.ok(T.asText(T.build(s, deps({ rows, pickVolumes: A.pickVolumes }))).includes(url), "the register link is in the copied text");
 });
 
 test("a story with no place says what is missing and builds nothing", () => {
@@ -240,6 +247,10 @@ test("the pasted Ivan and Lucija story: Drežnik by Nova Gradiška, the right er
   assert.match(plan.anchor.region, /Military Frontier/);
   assert.ok(plan.notes.some((n) => /Drežnik is \d km from Nova Gradiška/.test(n)), "the Drežnik beside the town, not the one near Zagreb");
   assert.ok(Math.abs(plan.anchor.ground.lat - 45.29) < 0.02);
+  const near = plan.sections.find((s) => s.key === "near").items;
+  const ng = near.find((i) => i.title === "Nova Gradiška");
+  assert.ok(ng && ng.regs.length && ng.regs.every((r) => /familysearch\.org\/ark:/.test(r.href)), "the town the story names is a neighbour, with register links");
+  assert.ok(near.some((i) => i.title === "Požega"), "and the larger town further out");
   assert.ok(!/Bosnia and Herzegovina|Eyalet/.test(JSON.stringify(plan.sections.find((s) => s.key === "era"))), "no Bosnian era table");
   const w = plan.sections.find((s) => s.key === "write");
   assert.ok(w.items.some((i) => /Slavonski Brod/.test(i.title) && i.draft && i.draft.language === "Croatian"));

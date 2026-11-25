@@ -41,8 +41,20 @@ test("the story pins one place to another, so the plan starts from the place it 
 
 test("a nearby place that is within 40 km does not move the anchor", () => {
   const near = Object.assign({}, NG, { lat: DR.lat + 0.1, lon: DR.lon + 0.1 });
-  const s = story(); s.facts.route[0].nearInfo = near;
+  const s = story(); s.facts.route[0].info = Object.assign({}, DR, { cols: NG.cols }); s.facts.route[0].nearInfo = near;
   assert.equal(T.build(s, deps()).anchor.name, "Drežnik");
+});
+
+test("a village beside the town with no books of its own: desk work starts from the town, burial grounds from the village, the letter names both", () => {
+  const village = Object.assign({}, DR, { lat: NG.lat + 0.03, lon: NG.lon + 0.09 });
+  const s = story(); s.facts.route[0].info = village; s.facts.route[0].alts = [{ n: "Drežnik", cc: "SI" }];
+  const p = T.build(s, deps());
+  assert.equal(p.anchor.name, "Nova Gradiška");
+  assert.equal(p.anchor.ground.name, "Drežnik");
+  assert.match(p.notes[0], /Drežnik is \d+ km from Nova Gradiška/);
+  assert.ok(!p.notes.some((n) => /could also be/.test(n)), p.notes.join(" | "));
+  const drafts = p.sections.flatMap((x) => x.items).filter((i) => i.draft);
+  assert.match(drafts[0].draft.text, /Drežnik \(Nova Gradiška\)/);
 });
 
 test("a region ring that names another country is passed over when one that fits exists", () => {
@@ -220,19 +232,20 @@ test("archives-near: every row has a position and a url; a contact appears only 
 });
 
 const BUILT = fs.existsSync(path.join(SITE, "public/index.json")) && fs.existsSync(path.join(SITE, "public/regions.json")) && fs.existsSync(path.join(SITE, "public/cem/index.json"));
-test("the pasted Ivan and Lucija story: Nova Gradiška, the right era, a letter, neighbours, named burial grounds", { skip: !BUILT && "needs the built public/ data" }, async () => {
+test("the pasted Ivan and Lucija story: Drežnik by Nova Gradiška, the right era, a letter, neighbours, named burial grounds", { skip: !BUILT && "needs the built public/ data" }, async () => {
   const { read } = await import("./plan/harness.mjs"), { deps: realDeps, todo } = await import("./plan/deps.mjs");
   const text = fs.readFileSync(path.join(__dirname, "plan/drezhik-story.txt"), "utf8").trim();
   const { g } = await read(text), plan = todo.build(g, realDeps(g));
   assert.equal(plan.anchor.name, "Nova Gradiška");
   assert.match(plan.anchor.region, /Military Frontier/);
-  assert.ok(plan.notes.some((n) => /near Nova Gradiška/.test(n)));
+  assert.ok(plan.notes.some((n) => /Drežnik is \d km from Nova Gradiška/.test(n)), "the Drežnik beside the town, not the one near Zagreb");
+  assert.ok(Math.abs(plan.anchor.ground.lat - 45.29) < 0.02);
   assert.ok(!/Bosnia and Herzegovina|Eyalet/.test(JSON.stringify(plan.sections.find((s) => s.key === "era"))), "no Bosnian era table");
   const w = plan.sections.find((s) => s.key === "write");
   assert.ok(w.items.some((i) => /Slavonski Brod/.test(i.title) && i.draft && i.draft.language === "Croatian"));
   assert.ok(plan.sections.find((s) => s.key === "near").items.filter((i) => /km/.test(i.tag || "")).length >= 3, "neighbouring places");
   const gr = plan.sections.find((s) => s.key === "ground").items;
-  assert.ok(gr.some((i) => i.title === "Gradsko groblje" && /less than 1 km from Nova Gradiška/.test(i.why) && /openstreetmap\.org\/way\//.test(i.href)), "a named ground near Nova Gradiška");
+  assert.ok(gr.some((i) => i.title === "Gradsko groblje" && /km from Drežnik/.test(i.why) && /openstreetmap\.org\/way\//.test(i.href)), "a named ground near Drežnik");
   assert.ok(gr.some((i) => /more burial grounds with no name on the map/.test(i.title)));
   assert.ok(!/lists no burial ground|not loaded/.test(JSON.stringify(gr)));
   const mv = plan.sections.find((s) => s.key === "moves").items.map((i) => i.title).join("|");

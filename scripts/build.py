@@ -20,7 +20,7 @@ import os as _os
 _ROOT = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
 sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
 _os.chdir(_ROOT)
-from geo import in_ring_latlon
+from geo import in_ring_latlon, region_for
 import time
 import gazetteer as _gazetteer
 THIS_YEAR = time.gmtime().tm_year   # a volume cannot end after today
@@ -341,11 +341,7 @@ def main():
     _moved = 0
     for _p in places:
         _was = _p.get("region")
-        _now = None
-        for _r in _regions:
-            if in_ring_latlon(_p["lat"], _p["lon"], _r["ring"]):
-                _now = _r["id"]
-                break
+        _now = region_for(_regions, _p["lat"], _p["lon"], _p.get("country"))
         if _now:
             _p["region"] = _now
         elif _was:
@@ -1745,8 +1741,16 @@ def main():
     except FileNotFoundError:
         sett = []
     rshards, rsbytes = {}, 0
+    _rg = json.load(open("data/regions.json"))["regions"]
+    _strict = {x["id"]: x.get("countries", []) for x in _rg if x.get("strict")}
     for r in sett:
-        rec = {"n": r["n"], "y": r["y"], "x": r["x"], "k": r["k"], "r": r["r"]}
+        rid = r["r"]
+        if rid in _strict and r["k"] not in _strict[rid]:
+            # The stored file predates the rule in geo.region_for: ask again, and drop what no region holds.
+            rid = region_for(_rg, r["y"], r["x"], r["k"])
+            if not rid:
+                continue
+        rec = {"n": r["n"], "y": r["y"], "x": r["x"], "k": r["k"], "r": rid}
         for form in set(r["q"].split(" ")):
             k = shard_key(form)
             if k:

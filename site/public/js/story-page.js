@@ -397,7 +397,8 @@
       var T = window.raStoryTodo, plan = T.build(g, deps), at = plan.anchor; T.render(plan, todoOut);
       if (!at || at.lat == null) return;
       /* burial grounds come after the plan is on the page: only the map squares around its starting place */
-      return T.loadCemeteries(at.lat, at.lon, fetchFile).then(function (c) {
+      var g0 = at.ground || at;
+      return T.loadCemeteries(g0.lat, g0.lon, fetchFile).then(function (c) {
         if (tok !== todoTok) return;
         deps.cemeteries = c;
         T.render(T.build(g, deps), todoOut);

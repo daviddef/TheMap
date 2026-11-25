@@ -85,12 +85,15 @@
     if (!home) { (f.kin || []).forEach(function (k) { if (!home) (k.stops || []).forEach(function (s) { if (!home && s.info && BIRTHISH.test(s.role || "")) home = s; }); }); }
     if (!home) { (f.kin || []).forEach(function (k) { if (!home) (k.stops || []).forEach(function (s) { if (!home && s.info) home = s; }); }); }
     if (!home) return null;
-    var info = home.info, note = null, told = null;
+    var info = home.info, note = null, told = null, village = null;
     if (home.nearInfo && home.nearInfo.lat != null && info.lat != null) {
       var d = hav(info.lat, info.lon, home.nearInfo.lat, home.nearInfo.lon);
       if (d > 40) { told = info; info = home.nearInfo; note = "The story puts " + told.name + " near " + info.name + ". The Atlas knows only “" + told.name + (told.countryName ? "”, " + told.countryName : "”") + ", " + Math.round(d) + " km away, so the plan starts from " + info.name + ". Check the parish before you trust either."; }
+      /* a village the Atlas places beside the town but holds no books for: the desk work starts from the town, the burial grounds from the village */
+      else if (!(info.cols || []).length && (home.nearInfo.cols || []).length) { village = info; info = home.nearInfo; note = village.name + " is " + Math.max(1, Math.round(d)) + " km from " + info.name + ". The Atlas lists no books for " + village.name + " itself, so the plan starts from " + info.name + ": ask which parish and which registry office served " + village.name + "."; }
     }
-    return { info: info, stop: home, note: note, told: told, alts: (home.alts || []).filter(function (a) { return a && a.n; }) };
+    /* the namesakes are of the place first told: once «near» has settled it, or the plan starts elsewhere, they say nothing about the starting place */
+    return { info: info, stop: home, note: note, told: told, village: village, alts: told || village || home.nearInfo ? [] : (home.alts || []).filter(function (a) { return a && a.n; }) };
   }
 
   function pickRegion(info, regionsDoc, countries) {
@@ -198,7 +201,7 @@
     var region = pickRegion(info, deps.regions, countries), eras = erasFor(region, win);
     var surname = (function () { var n = String(f.name || "").trim().split(/\s+/); return n.length > 1 ? n[n.length - 1] : ""; })();
     var mid = win ? Math.round((win.lo + win.hi) / 2) : null;
-    out.anchor = { name: info.name, cc: info.cc, where: where, href: info.href || (base + "place/" + (info.row && info.row.i) + "/"), lat: info.lat, lon: info.lon, region: region ? region.label : "", years: win };
+    out.anchor = { name: info.name, cc: info.cc, where: where, ground: an.village ? { name: an.village.name, lat: an.village.lat, lon: an.village.lon } : null, href: info.href || (base + "place/" + (info.row && info.row.i) + "/"), lat: info.lat, lon: info.lon, region: region ? region.label : "", years: win };
     if (an.note) out.notes.push(an.note);
     var altSay = []; (an.alts || []).forEach(function (a) { var t = a.n + (countries[a.cc] ? ", " + countries[a.cc] : ""); if (t !== where && altSay.indexOf(t) < 0) altSay.push(t); });
     if (altSay.length) out.notes.push("“" + info.name + "” could also be " + altSay.slice(0, 2).join(" or ") + ". If you meant one of those, change the place in your story.");
@@ -269,7 +272,7 @@
       .forEach(function (x) { addArch(x.a, x.a.kind === "diocesan" ? "The diocese keeps its parishes' registers, and often copies from the year before the state took over." : "The nearest " + (x.a.kind === "national-archive" ? "national" : "state/regional") + " archive: it holds or can say who holds the registers.", Math.round(x.km)); });
     wr = wr.slice(0, 4);
     var dTo = wr.filter(function (i) { return i._a && i._a.kind === "regional-archive"; })[0] || wr[0];
-    if (dTo) dTo.draft = draft(info.cc, info.name, surname, mid);
+    if (dTo) dTo.draft = draft(info.cc, an.village ? an.village.name + " (" + info.name + ")" : info.name, surname, mid);
     if (wr.length) wr.push(item("The registry office (matični ured / registrar / comune) of today's municipality", "Civil registers from the 1800s on are usually kept by the office of the municipality where the event happened, until they pass to an archive.", { gap: true, detail: "The Atlas does not list municipal registry offices: search for the name of the municipality with the word for registry office." }));
     section("write", "Write to", wr);
 
@@ -290,7 +293,7 @@
     section("near", "Look nearby", nb);
 
     /* 5 · ON THE GROUND: burial grounds */
-    var gr = ground(deps.cemeteries, info, item);
+    var gr = ground(deps.cemeteries, an.village || info, item);
     section("ground", "Where it would be on the ground", gr);
 
     /* 6 · WHAT WAS HAPPENING: events whose mapped area holds the place, in the years the people were alive */

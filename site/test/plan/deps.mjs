@@ -17,8 +17,8 @@ export function deps(g) {
     cache = { archives, regions: rd("regions.json"), rows: allRows, countries: Object.fromEntries(Object.entries(idx.countries || {}).map(([k, v]) => [k, typeof v === "string" ? v : v.name || v.n || k])),
       provById: Object.fromEntries(archives.map((a) => [a.id, a]).concat(pl.map((p) => [p.id, p]))), base: "/" };
   }
-  const at = todo.anchorOf(g);
-  return Object.assign({}, cache, { mort: g.mort, cemeteries: at && at.info.lat != null ? cemeteries(at.info.lat, at.info.lon) : null });
+  const at = todo.anchorOf(g), on = at && (at.village || at.info);   /* as the page does: the ground is the village's, where the story names one beside the town */
+  return Object.assign({}, cache, { mort: g.mort, cemeteries: on && on.lat != null ? cemeteries(on.lat, on.lon) : null });
 }
 /* the burial-ground squares around a place, read from public/cem/ the way the page fetches them */
 export function cemeteries(lat, lon) {

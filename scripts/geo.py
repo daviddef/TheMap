@@ -89,3 +89,20 @@ def km_to(lat, lon, cc):
             if best is None or d < best:
                 best = d
     return None if best is None else (best ** 0.5) * 111.0
+
+
+def region_for(regions, lat, lon, cc):
+    """The record region a place stands in, or None: the first ring that holds it.
+
+    A region marked "strict" is skipped for a place outside its listed countries. Its ring is
+    too rough to say anything about a neighbour's ground: Bosnia's four points reach across
+    the Sava into Slavonia and down the Dalmatian coast, and filed Nova Gradiska under
+    Sarajevo's archive.
+    """
+    for r in regions:
+        if r.get("strict") and cc not in r.get("countries", ()):
+            continue
+        if in_ring_latlon(lat, lon, r["ring"]):
+            return r["id"]
+    return None
+

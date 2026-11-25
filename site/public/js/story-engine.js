@@ -550,8 +550,12 @@
          the town's namesakes in the US, and the nearest to the state is chosen */
       else if (ry.every(function (r) { return r.cc === "US"; }) && ry.some(function (r) { return S.fold(r.n) === fy && (r.v || 0) >= 500; }) && !rx.some(function (r) { return r.c > 0; }) && !rx.some(function (r) { return S.fold(String(r.n)).slice(-fy.length - 1) === " " + fy; })) want.push({ ph: fx, ccs: ["US"] });
     }
+    /* «Drežnik near Nova Gradiska»: the Atlas holds a Drežnik with a register 127 km from there, and the gazetteer one 8 km away. A place told as near another
+       is looked up in the gazetteer as well, whatever the index holds, so the namesake beside it can be chosen. */
+    var nr = /(\p{Lu}[\p{L}'\u2019-]+(?:\s+\p{Lu}[\p{L}'\u2019-]+){0,2})\s*,?\s+near\s+(?=\p{Lu})/gu;
+    while ((m = nr.exec(t))) { var nw = m[1].split(/\s+/); for (var s = 0; s < nw.length; s++) { var nph = fold(nw.slice(s).join(" ")); if (map[nph]) { want.push({ ph: nph, ccs: null, more: true, near: true }); break; } } }
     var seen = Object.create(null);
-    return want.filter(function (w) { var k = w.ph + "|" + (w.ccs || []).join(); if (w.ph.length < 4 || seen[k] || (given && given[w.ph])) return false; if (!w.ccs && !w.more && map[w.ph]) return false; seen[k] = 1; return true; }).slice(0, 16);
+    return want.filter(function (w) { var k = w.ph + "|" + (w.ccs || []).join() + (w.near ? "|near" : ""); if (w.ph.length < 4 || seen[k] || (given && given[w.ph])) return false; if (!w.ccs && !w.more && map[w.ph]) return false; seen[k] = 1; return true; }).slice(0, 16);
   }
   /* rows from a gazetteer shard are [name, lat, lon, cc, otherNames]; the ones that are this name are added to the map */
   function gazMerge(map, w, shardRows) {
@@ -563,6 +567,11 @@
     var have = map[w.ph] || [], part = partialOnly(have, w.ph);
     if (part) hit = own;   /* the index has the name only inside others (Peoria County, Pozzuolo del Friuli): only a place of that very name counts, and the county's own middle is no duplicate of it */
     hit = hit.filter(function (r) { return part || !have.some(function (h) { return h.cc === r[3] && h.y != null && Math.abs(h.y - r[1]) < 0.25 && Math.abs(h.x - r[2]) < 0.25; }); });
+    if (w.near) {   /* namesakes asked for because the story says «near»: kept apart, so they are only ever read when one stands beside the town told, and change nothing else */
+      var apart = map["#near"] || (map["#near"] = Object.create(null));
+      apart[w.ph] = hit.filter(function (r) { return fold(r[0]) === w.ph; }).map(function (r) { return { i: "g-" + w.ph.replace(/ /g, "-") + "-" + String(r[3]).toLowerCase() + "-" + Math.round(r[1] * 100), n: r[0], y: r[1], x: r[2], cc: r[3], c: 0, gaz: 1 }; });
+      return apart[w.ph].length;
+    }
     hit = hit.slice(0, w.ccs || part ? 20 : 8); if (!hit.length) return 0;
     var rows = hit.map(function (r) { return { i: "g-" + w.ph.replace(/ /g, "-") + "-" + String(r[3]).toLowerCase() + "-" + Math.round(r[1] * 100), n: r[0], y: r[1], x: r[2], cc: r[3], c: 0, gaz: 1, alt: (r[4] || []).length }; });   /* how many other names the gazetteer lists for it: a city has many, a village few, and among namesakes that is the importance */
     /* THE GAZETTEER'S ORDER IS ITS IMPORTANCE (Dresden in Germany before the Dresdens of Ohio and Ontario), and an index that holds the name only as bare rows (no
@@ -1651,6 +1660,16 @@
         if (best !== cur) { st.alts = st.pool.filter(function (r) { return r !== best; }).slice(0, 5); st.row = best; }
       });
     })();
+    /* …AND «NEAR» SETTLES IT LAST: of the places with that name, the one within 40 km of the town the story pins it to. One already that close is left as it is;
+       with none that close, nothing moves (the plan then says how far off the only one is). */
+    stops.forEach(function (st) {
+      var to = st.nearTo && st.nearTo.row; if (!to || to.y == null) return;
+      var all = (st.pool || [st.row]).concat((ctx.map && ctx.map["#near"] && ctx.map["#near"][st.word]) || []);
+      function km(r) { if (!r || r.y == null || r.x == null) return Infinity; var dy = (r.y - to.y) * 111.2, dx = (r.x - to.x) * 111.2 * Math.cos(to.y * Math.PI / 180); return Math.sqrt(dx * dx + dy * dy); }
+      if (km(st.row) <= 40) return;
+      var best = all.slice().sort(function (a, b) { return km(a) - km(b); })[0];
+      if (km(best) <= 40) { st.alts = []; st.row = best; st.pool = all; }   /* the story itself says which one: no «did you mean» for the namesakes */
+    });
     var route = stops.filter(function (x) { return x.role !== "father-from" && x.role !== "mother-from" && x.of !== "spouse"; });
     /* ages: "when he was 3 years old he moved to Harare" gives Harare age 3; a stop with no age sits between its neighbours */
     var AGE = /(?:(?:when|by the time) (?:he|she|they|i|we) (?:was|were|turned)|aged?|at the age of|at age|by the age of|at) (\d{1,2})(?: years?(?: old)?)?(?= |$)/g, am2, ages = [];
@@ -2804,7 +2823,7 @@
     var gazDone = Object.create(null);
     function resolveMissing(text) {
       return load().then(function (d) {
-        var want = gazWants(text, d.map, d.given).filter(function (w) { var k = w.ph + "|" + (w.ccs || []).join(); if (gazDone[k]) return false; gazDone[k] = 1; return true; });
+        var want = gazWants(text, d.map, d.given).filter(function (w) { var k = w.ph + "|" + (w.ccs || []).join() + (w.near ? "|near" : ""); if (gazDone[k]) return false; gazDone[k] = 1; return true; });
         if (!want.length || !window.raShardKey) return d;
         return getJSON("shards.json").catch(function () { return {}; }).then(function (info) {
           return Promise.all(want.map(function (w) {
@@ -2827,10 +2846,20 @@
       });
       return out.sort(function (a, b) { return a.km - b.km || b.c - a.c; }).slice(0, 5);
     }
+    /* the first region whose outline holds the point and whose countries include the place's own: an outline is rough, so a neighbour's region is never taken */
+    function regionAt(regions, lat, lon, cc) {
+      if (lat == null || lon == null) return null;
+      return (regions || []).filter(function (x) {
+        var ring = x.ring, inside = false; if (!ring || (x.countries || []).indexOf(cc) < 0) return false;
+        for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) if ((ring[i][1] > lon) !== (ring[j][1] > lon) && lat < (ring[j][0] - ring[i][0]) * (lon - ring[i][1]) / (ring[j][1] - ring[i][1]) + ring[i][0]) inside = !inside;
+        return inside;
+      })[0] || null;
+    }
     function placeInfo(row) {
       var regionsP = getJSON("regions.json").catch(function () { return null; });
       return Promise.all([row.country ? Promise.resolve(null) : getJSON("p/" + encodeURIComponent(row.i) + ".json").catch(function () { return null; }), regionsP]).then(function (r) {
         var p = r[0], regs = r[1], region = p && regs ? regs.regions.filter(function (x) { return x.id === p.region; })[0] : null;
+        if (!region && row.gaz && regs) region = regionAt(regs.regions, row.y, row.x, row.cc);
         return { row: row, p: p, name: row.n.replace(/\s*\(([^)]*)\)/, function (m, x) { return S.fold(x) === S.fold(row.n.replace(/\s*\([^)]*\)/, "")) ? "" : m; }), lat: p ? p.lat : row.y, lon: p ? p.lon : row.x, cc: row.cc, countryName: (data.countries[row.cc] || row.cc || ""),
           older: p ? (p.names || []).map(function (n) { return n.n; }) : [], named: p && p.named ? p.named : [], cols: p ? p.collections || [] : [],
           eras: region ? region.eras : null, regimes: regs ? regs.regimes : null, region: region, href: row.gaz ? BASE + "?q=" + encodeURIComponent(row.n) : BASE + "place/" + encodeURIComponent(row.i) + "/" };

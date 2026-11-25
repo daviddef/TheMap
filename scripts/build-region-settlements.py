@@ -52,6 +52,8 @@ def main():
             continue
         lat, lon = float(f[4]), float(f[5])
         for r, s, w, n, e in boxes:
+            if r.get("strict") and f[8] not in r.get("countries", ()):
+                continue
             if s <= lat <= n and w <= lon <= e and in_ring_latlon(lat, lon, r["ring"]):
                 names = {f[1], f[2]} | set(x for x in (f[3].split(",") if f[3] else []) if x)
                 q = " ".join(sorted({fold(x) for x in names if x and len(x) > 2}))

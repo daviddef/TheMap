@@ -2852,7 +2852,7 @@
   }
 
   var api = { toYear: toYear, suggest: suggest, windows: windows, volumesFor: volumesFor, spansOf: spansOf, bookNeeds: bookNeeds, keyBooks: keyBooks, captionAt: captionAt, progress: progress, between: between,
-              readFamily: readFamily, readMe: readMe, readEvents: readEvents, repairCase: repairCase, givenForms: givenForms, volLabel: volLabel, buildPlan: buildPlan, parseStory: parseStory, startFamily: startFamily, familyName: familyName, flagFor: flagFor, leaderAt: leaderAt, leadersBetween: leadersBetween, givenGroups: givenGroups, surnameBlock: surnameBlock, nameLinks: nameLinks, short: short, yearsIn: yearsIn,
+              readFamily: readFamily, readMe: readMe, readEvents: readEvents, repairCase: repairCase, givenForms: givenForms, volLabel: volLabel, buildPlan: buildPlan, parseStory: parseStory, startFamily: startFamily, familyName: familyName, flagFor: flagFor, leaderAt: leaderAt, leadersBetween: leadersBetween, givenGroups: givenGroups, otherForms: otherForms, numberPeople: numberPeople, surnameBlock: surnameBlock, nameLinks: nameLinks, short: short, yearsIn: yearsIn,
               HOLDS: HOLDS, YEAR_MIN: YEAR_MIN, YEAR_MAX: YEAR_MAX, readLife: readLife, gazWants: gazWants, gazMerge: gazMerge, didYouMean: didYouMean, aliasMerge: aliasMerge, countryPoints: countryPoints, repairCase: repairCase, clerkLanguages: clerkLanguages };
   if (typeof module !== "undefined" && module.exports) { module.exports = api; return; }
   window.raStory = api;
@@ -3824,14 +3824,24 @@
   }
 
   /* How one person's first name and surname were written: the catalogue's forms, with leads kept apart. Null when it holds nothing. */
+  /* the name as typed is not a lead for itself («Worth trying: Mila», for Mila): taken out of the leads, and a language left with nothing goes with it. An accent
+     makes a different spelling, so only the case is set aside. */
+  function otherForms(groups, typed) {
+    var t = String(typed || "").toLowerCase();
+    return (groups || []).map(function (x) { return { lang: x.lang, label: x.label, forms: x.forms, leads: x.leads.filter(function (f) { return f.toLowerCase() !== t; }) }; })
+      .filter(function (x) { return x.forms.length || x.leads.length; });
+  }
+
   function personNames(g, sn, base, langs) {
     var box = el("div", null, "lf-pnames"), any = false;
-    if (g && g.groups && g.groups.length) {
+    var others = g && g.groups ? otherForms(g.groups, g.typed) : [];
+    if (g && g.groups && g.groups.length && !others.length) { any = true; box.append(el("h4", "First name: " + g.typed), el("p", "The Atlas has no other form of " + g.typed + " yet.", "lf-filed")); }
+    if (others.length) {
       any = true;
       box.append(el("h4", "First name: " + g.typed + " is also written"));
       /* the languages a clerk would have used where and when this person lived come first; the rest are kept, folded away, because a clerk can surprise */
-      var want = langs && langs.keys, main = g.groups, rest = [];
-      if (want) { main = g.groups.filter(function (x) { return want[x.lang]; }); rest = g.groups.filter(function (x) { return !want[x.lang]; }); if (!main.length) { main = g.groups; rest = []; } }
+      var want = langs && langs.keys, main = others, rest = [];
+      if (want) { main = others.filter(function (x) { return want[x.lang]; }); rest = others.filter(function (x) { return !want[x.lang]; }); if (!main.length) { main = others; rest = []; } }
       if (want && rest.length) {
         var lab = {}; g.groups.forEach(function (x) { lab[x.lang] = x.label; });
         var parts = langs.notes.map(function (n) { return n.langs.map(function (l) { return lab[l] || l.charAt(0).toUpperCase() + l.slice(1); }).join(", ") + " (" + n.place + (n.from != null ? ", " + (n.to != null && n.to !== n.from ? n.from + "\u2013" + n.to : n.from) : "") + ")"; });
@@ -3936,14 +3946,14 @@
       if (!inner) return;
       var key = (pe.given ? pe.given.canon + "|" + pe.given.typed : "") + "|" + (pe.surname ? pe.surnameTyped || pe.surname.name : "") + "|" + inner.textContent;
       var hit = cards.filter(function (c) { return c.key === key; })[0];
-      if (hit) { hit.labels.push(roleLabel(pe, people) + (pe.presumed ? " (surname assumed the same)" : "")); return; }
-      cards.push({ key: key, pe: pe, inner: inner, labels: [roleLabel(pe, people) + (pe.presumed ? " (surname assumed the same)" : "")] });
+      if (hit) { hit.pes.push(pe); hit.labels.push(roleLabel(pe, people) + (pe.presumed ? " (surname assumed the same)" : "")); return; }
+      cards.push({ key: key, pe: pe, pes: [pe], inner: inner, labels: [roleLabel(pe, people) + (pe.presumed ? " (surname assumed the same)" : "")] });
     });
     cards.forEach(function (c, i) {
       any = true;
       var d = el("details", null, "lf-person"); if (i === 0) d.open = true;
       var sm = el("summary"); sm.append(el("b", shownName(c.pe) || roleLabel(c.pe, people)), el("span", " \u00b7 " + c.labels.join(", and "), "lf-filed"));
-      d.append(sm, c.inner); box.append(d);
+      d.append(sm, c.inner); d.raPeople = c.pes; box.append(d);
     });
     if (any) {
       var p = el("p", null, "cap"); p.append("Leads are where to look, not findings. ");
@@ -3973,6 +3983,7 @@
     }
     function card(pe, label, kind) {
       var c = el("div", null, "lf-card lf-card-" + pe.role + (pe.empty ? " lf-card-empty" : ""));
+      c.raPerson = pe;
       c.append(el("div", label, "lf-card-role"), el("div", shownName(pe) || pe.nameNote || (pe.empty ? "Not in the story yet" : pe.me ? "The one telling the story" : "Name not given"), "lf-card-name"));
       if (pe.maiden) c.append(el("div", "maiden name" + (pe.married ? " · married name " + pe.married : ""), "lf-card-maiden"));
       var hasBorn = (pe.events || []).some(function (e) { return e.type === "born" && e.place; });
@@ -4128,6 +4139,36 @@
     return tree;
   }
 
+  /* ONE NUMBER PER PERSON, ON THEIR BOX IN THE FAMILY AND ON THEIR NAMES. David: «could we number the people so e.g. names and spellings can easily be correlated?»
+     Numbered in the order the family is drawn, for the people who have a names box (an unnamed son has none, and gets no number). The names boxes are put in the
+     same order, and each end taps through to the other. `tree` and `names` are the nodes treeBlock and namesBlock made from the same people. */
+  function numberPeople(cardPeople, boxPeople) {
+    var n = 0;
+    return cardPeople.map(function (pe) {
+      for (var b = 0; b < boxPeople.length; b++) if (pe && (boxPeople[b] || []).indexOf(pe) > -1) return { no: ++n, box: b };
+      return null;
+    });
+  }
+  function numberBadge(no) { var b = el("span", String(no), "lf-no"); b.title = "Person " + no + " in this story"; return b; }
+  function linkPeople(tree, names) {
+    if (!tree || !names) return;
+    var cards = [].slice.call(tree.querySelectorAll(".lf-card")), boxes = [].slice.call(names.querySelectorAll("details.lf-person")), last = null;
+    var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    function show(t, where) { t.scrollIntoView({ behavior: still ? "auto" : "smooth", block: where }); t.classList.add("lf-card-hit"); setTimeout(function () { t.classList.remove("lf-card-hit"); }, 1600); }
+    function button(text, go) { var b = el("button", text, "lf-jump"); b.type = "button"; b.addEventListener("click", go); return b; }
+    var foot = names.querySelector(":scope > .cap");
+    numberPeople(cards.map(function (c) { return c.raPerson; }), boxes.map(function (d) { return d.raPeople; })).forEach(function (hit, i) {
+      if (!hit) return;
+      var c = cards[i], d = boxes[hit.box], role = c.querySelector(".lf-card-role"), sum = d.querySelector("summary");
+      c.setAttribute("data-no", hit.no); if (role) role.prepend(numberBadge(hit.no));
+      var down = button("Spellings \u2193", function () { d.open = true; show(d, "start"); }), edit = c.querySelector(".lf-edit");
+      down.setAttribute("aria-label", "How person " + hit.no + "\u2019s name is written"); if (edit) c.insertBefore(down, edit); else c.append(down);
+      var b = numberBadge(hit.no), first = sum.querySelector("b"); sum.insertBefore(b, first);
+      d.append(button("\u2191 " + hit.no + " in the family", function () { show(c, "center"); }));
+      if (d !== last) { names.insertBefore(d, foot); last = d; }
+    });
+  }
+
   /* The others the story names by what they are to someone ("her father Ola, born 1868"): small cards under the tree, as told. */
   function othersBlock(others, siblings) {
     var sibs = Object.create(null); (siblings || []).forEach(function (x) { sibs[x.rel + "|" + S.fold(x.name)] = 1; });
@@ -4139,6 +4180,6 @@
     });
     box.append(row); return box;
   }
-  api.namesBlock = namesBlock; api.othersBlock = othersBlock; api.treeBlock = treeBlock; api.lifeBlock = lifeBlock; api.lifeEvents = lifeEvents; api.aliasMerge = aliasMerge; api.countryPoints = countryPoints; api.gazWants = gazWants; api.gazMerge = gazMerge; api.didYouMean = didYouMean;
+  api.namesBlock = namesBlock; api.linkPeople = linkPeople; api.othersBlock = othersBlock; api.treeBlock = treeBlock; api.lifeBlock = lifeBlock; api.lifeEvents = lifeEvents; api.aliasMerge = aliasMerge; api.countryPoints = countryPoints; api.gazWants = gazWants; api.gazMerge = gazMerge; api.didYouMean = didYouMean;
   api.createLoader = createLoader; api.createJourney = createJourney; api.el = el;
 })();

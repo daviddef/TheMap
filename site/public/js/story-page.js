@@ -64,8 +64,11 @@
     [].forEach.call(cards, function (c, i) {
       c.id = "sp-person-" + (i + 1);
       var role = c.querySelector(".lf-card-role"), a = document.createElement("a"), r = document.createElement("span");
-      a.className = "sub psub"; a.href = "#" + c.id; a.setAttribute("data-go", c.id); a.textContent = c.getAttribute("data-person");
-      r.className = "psub-r"; r.textContent = role ? role.textContent.replace(/^your /i, "").toLowerCase() : ""; if (r.textContent) a.append(r);
+      a.className = "sub psub"; a.href = "#" + c.id; a.setAttribute("data-go", c.id);
+      var nm = document.createElement("span"), no = c.getAttribute("data-no"); nm.className = "psub-n"; nm.textContent = c.getAttribute("data-person");
+      if (no) { var b = document.createElement("span"); b.className = "lf-no"; b.textContent = no; nm.prepend(b); }
+      a.append(nm);
+      r.className = "psub-r"; r.textContent = role ? [].filter.call(role.childNodes, function (n) { return n.nodeType === 3; }).map(function (n) { return n.nodeValue; }).join("").replace(/^your /i, "").toLowerCase() : "";   /* the words, not the number badge */ if (r.textContent) a.append(r);
       prev.after(a); prev = a;
     });
   }
@@ -353,7 +356,7 @@
     var lb = E.lifeBlock(g.life, g.mort), lbox = $("sp-lifebox"); lbox.textContent = ""; secShow("sp-life", !!lb); if (lb) lbox.append(lb);
     var nb = E.namesBlock(g.names, BASE), nbox = $("sp-namesbox"); nbox.textContent = ""; secShow("sp-names", !!nb);
     if (nb) { nbox.append(nb); [].forEach.call(nb.querySelectorAll("details"), function (d) { d.open = true; }); }
-    var tr = E.treeBlock(g.people, f.rel, { onEdit: editBox, kin: f.kin, base: BASE, siblings: f.siblings }), ob = E.othersBlock(g.others, f.siblings), tbox = $("sp-tree"); tbox.textContent = ""; secShow("sp-family", !!(tr || ob)); if (tr) tbox.append(tr); if (ob) tbox.append(ob); peopleRail();
+    var tr = E.treeBlock(g.people, f.rel, { onEdit: editBox, kin: f.kin, base: BASE, siblings: f.siblings }), ob = E.othersBlock(g.others, f.siblings), tbox = $("sp-tree"); tbox.textContent = ""; secShow("sp-family", !!(tr || ob)); if (tr) tbox.append(tr); if (ob) tbox.append(ob); E.linkPeople(tr, nb); peopleRail();
     secShow("sp-setting", true);
     secShow("sp-plan", true); drawSteps(g); drawTodo(g);
     secShow("sp-keep", true); drawKeep(g);

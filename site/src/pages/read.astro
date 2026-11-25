@@ -48,6 +48,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
           <p class="sp-lede" id="sp-lede">Who, from where, to where, when: in your own words. The page fills in as you write, and asks for what is missing.</p>
         </header>
 
+        <div class="sp-doubt" id="sp-doubt" role="status" aria-live="polite" hidden></div>
         <div class="sp-drop" id="sp-drop">
           <div class="sp-edit" id="sp-edit"><div class="sp-mirror" id="sp-mirror" aria-hidden="true"></div>
           <textarea id="sp-text" rows="4" maxlength="8000" spellcheck="false" aria-label="What you know" placeholder="My great-grandfather Ivan Kosina came from Gallignana to Hamilton around 1905. All I have is this photo."></textarea></div>
@@ -295,6 +296,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   <script is:inline src={u("/js/atlas-summary.js")} defer></script>
   <script is:inline src={u("/js/shard-key.js")} defer></script>
   <script is:inline src={u("/js/story-engine.js")} defer></script>
+  <script is:inline src={u("/js/story-check.js")} defer></script>
   <script is:inline src={u("/js/story-plan.js")} defer></script>
   <script is:inline src={u("/js/story-link.js")} defer></script>
   <script is:inline src={u("/js/story-gaps.js")} defer></script>
@@ -454,6 +456,10 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .rr-chips .k-pill { cursor: pointer; font-size: 13.5px; letter-spacing: 0; text-transform: none; }
   .sp-head .sp-title { font: 800 clamp(26px, 3.2vw, 34px)/1.15 var(--serif); letter-spacing: -.02em; margin: 0; text-wrap: balance; }
   .sp-lede { color: var(--ink-2); margin: 6px 0 0; }
+  .sp-doubt { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 0 0 10px; padding: 10px 14px; border: 1px solid var(--accent); border-radius: 12px; background: var(--accent-wash); }
+  .sp-doubt[hidden] { display: none; }
+  .sp-doubt-t { margin: 0; flex: 1 1 280px; color: var(--ink); }
+  .sp-doubt-b { font: inherit; font-weight: 600; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--accent); background: var(--accent); color: var(--on-accent, #fff); cursor: pointer; }
   .sp-sublede { color: var(--ink-2); font-size: 15px; margin: 0; }
   .sp-cont { font-size: 14px; line-height: 1.5; color: var(--ink-2); margin: 0 0 8px; background: var(--panel); border-left: 3px solid var(--accent); padding: 8px 12px; border-radius: 0 6px 6px 0; }
   .sp-linkbtn { background: none; border: 0; padding: 0 2px; font: inherit; color: var(--accent); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }

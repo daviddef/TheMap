@@ -361,6 +361,7 @@
     watch();
   }
   function clearReport() {
+    if ($("sp-doubt")) { $("sp-doubt").hidden = true; $("sp-doubt").textContent = ""; }
     J.clear(); last = null; lastPlan = null; if (todoOut) { todoOut.textContent = ""; todoTok++; } rail.hidden = true; [].forEach.call(rail.querySelectorAll("a.sub:not(.psub)"), function (x) { x.remove(); });
     ["sp-places", "sp-life", "sp-names", "sp-family", "sp-setting", "sp-plan", "sp-keep"].forEach(function (id) { secShow(id, false); });
     $("sp-ai-out").hidden = true; $("sp-ai-out").textContent = ""; $("sp-title").textContent = "Tell us what you know";
@@ -645,7 +646,7 @@
         var r0 = p.route[0], rl = p.route[p.route.length - 1];
         p.from = { row: r0.row, alts: r0.alts, word: r0.word }; p.to = p.route.length > 1 ? { row: rl.row, alts: rl.alts, word: rl.word } : null;
       }
-      parsed = p; drawChips(p);
+      parsed = p; drawChips(p); doubt(t, p, d);
       var sig = signature(p);
       if (sig === lastSig || !tellable(p)) {
         if (status.textContent === "Reading your story…") sayDone();
@@ -660,6 +661,25 @@
         drawAll(g);
       }).catch(function (e) { if (window.console) console.error("story draw", e); say("Some Atlas files did not load. Check your connection.", true); });
     }).catch(function (e) { if (window.console) console.error("story read", e); say("The Atlas files did not load. Check your connection.", true); });
+  }
+  /* IS THE READING TRUSTWORTHY? (story-check.js) Every reading is tested against its own words: is anything the writer said missing, is anything shown that they never said,
+     is it consistent. When it is not sure, one calm line says so, in plain words, and offers the careful reader. Nothing is sent: the button only opens the Tidy panel, where
+     the writer still presses Send. A reading the check is happy with shows nothing at all. */
+  function doubt(t, p, d) {
+    var box = $("sp-doubt"); if (!box) return;
+    var r = null;
+    try {
+      var C = window.raStoryCheck, cn = {}; Object.keys(d.countries || {}).forEach(function (k) { cn[S.fold(d.countries[k])] = 1; });
+      if (C && tellable(p)) r = C.check(t, p, { countries: d.countries, isPlace: function (k) { return !!(d.map[k] && d.map[k].length) || !!cn[k]; }, isGiven: function (k) { return !!(d.given && d.given[k]); } });
+    } catch (e) { r = null; }
+    var first = r && r.confidence === "low" ? r.problems.filter(function (x) { return x.severity !== "info"; })[0] : null;
+    box.textContent = "";
+    if (!first) { box.hidden = true; return; }
+    var m = document.createElement("p"); m.className = "sp-doubt-t";
+    m.textContent = "I’m not sure I read this right: " + first.what.replace(/^./, function (c) { return c.toLowerCase(); }).replace(/[.\s]+$/, "") + ". Check the places and the family below against your words, or let the careful reader have a go.";
+    var b = document.createElement("button"); b.type = "button"; b.className = "sp-doubt-b"; b.textContent = "Tidy with AI";
+    b.addEventListener("click", function () { var t2 = $("sp-tidy"); if (t2) t2.click(); });
+    box.append(m, b); box.hidden = false;
   }
   /* how the words were read, when they were rewritten into plain who-is-whose sentences */
   var readingNow = "";

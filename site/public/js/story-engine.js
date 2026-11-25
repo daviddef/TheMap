@@ -1136,8 +1136,45 @@
       return pick ? a + prep + " " + String(pick.n).replace(/\s*\([^)]*\)/, "") : m;
     });
   }
+  /* A WOMAN'S BIRTH NAME, WHEN THE STORY SAYS IT. David: «can you show the wives maiden names as their last name? currently hidden amongst the text.» Registers file her under it,
+     so it is the surname her box shows and her spellings are looked up under, marked as the maiden name; a married name the story also gave is kept beside it. Read only
+     from words that say so: «née X», «Lucija, born X» (a comma or bracket, and X not a place or a month), «her maiden name was X», «her name before marriage was X». */
+  var MD_CAP = "\\p{Lu}[\\p{L}'\u2019-]+", MD_NAME = "((?:(?:van|von|de|del|della|di|da|dos|das|den|der|le|la)\\s+)*" + MD_CAP + ")(?![\\p{L}'\u2019-])", MD_MALE = /(?:father|grandpa|grandad|husband|son|brother|uncle|nephew)$/i, MD_FEMALE = /(?:mother|grandma|grandmother|wife|daughter|sister|aunt|niece)$/i;
+  var MD_SAYS = "(?:[Mm]aiden\\s+(?:sur)?name|[Nn]ame\\s+before\\s+(?:her\\s+|the\\s+)?marr(?:iage|ying|ied)|[Bb]irth\\s+(?:sur)?name)\\s*(?:was|is|:)?\\s*";
+  function markMaidens(out, text, ctx) {
+    var people = (out && out.people) || [], t = String(text || ""), self = people.filter(function (x) { return x.role === "self"; })[0], selfRel = String((self && self.rel) || "");
+    function sexOf(pe) {
+      if (pe.sex) return pe.sex;
+      var word = pe.role === "self" ? selfRel : pe.role === "spouse" ? "" : String(pe.label || pe.role || "");
+      if (pe.role === "spouse") return MD_MALE.test(selfRel) ? "F" : MD_FEMALE.test(selfRel) ? "M" : /\bwife\b/i.test(String(pe.label || "")) || /\b[Hh]e\s+(?:later\s+)?married\b/.test(t) ? "F" : "";
+      return MD_FEMALE.test(word) ? "F" : MD_MALE.test(word) ? "M" : "";
+    }
+    function fine(name, born) {
+      var f = S.fold(name); if (STOP[f] || MONTHS[f]) return false;
+      return !born || !(COMMON[f] || (ctx && ctx.map && ctx.map[f] && name !== name.toUpperCase()));   /* «born Hobart» is where; «born FRATROVIĆ», written as a family name, is who */
+    }
+    function first(re, born) { var m = new RegExp(re, "u").exec(t); return m && fine(m[1], born) ? m[1] : ""; }
+    people.forEach(function (pe) {
+      var sex = sexOf(pe), given = String(pe.given || "").trim(); if (sex === "M" || !given) return;
+      var g = "(?<![\\p{L}])" + given.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), mid = "(?:\\s+" + MD_CAP + "){0,2}", found = "";
+      var told = (pe.events || []).map(function (e) { var m = e.type === "told" && /^Born (\p{Lu}[\p{L}'\u2019-]+)$/u.exec(e.text); return m ? m[1] : ""; }).filter(Boolean)[0];
+      found = told || first(g + mid + "\\s*[,(]?\\s*[Nn][\u00e9e]e\\s+" + MD_NAME, false)
+        || first(g + "(?:['\u2019]s)?" + mid + "\\s*[,(]?\\s*(?:(?:[Hh]er|with\\s+the)\\s+)?" + MD_SAYS + MD_NAME, false)
+        || (sex === "F" ? first(g + mid + "\\s*[,(]\\s*born\\s+" + MD_NAME + "(?!\\s*\\d)", true) : "");
+      /* «Her name before marriage was X», with only one woman in the story it can be about */
+      if (!found && sex === "F" && people.filter(function (x) { return sexOf(x) === "F"; }).length === 1) found = first("\\b[Hh]er\\s+" + MD_SAYS + MD_NAME, false);
+      if (!found) return;
+      found = surnameCase(found);
+      if (pe.surname && S.fold(pe.surname) !== S.fold(found)) pe.married = pe.surname;
+      pe.maiden = found; pe.surname = found;
+    });
+    return out;
+  }
   function parseStory(text, ctx, attached) {
     text = nominative(cleanInput(text), ctx);
+    return markMaidens(readStory(text, ctx, attached), text, ctx);
+  }
+  function readStory(text, ctx, attached) {
     var lin = ancestorTold(text) ? splitLineage(text) : null;
     if (lin) { var lo = parseStory1(lin.subject, ctx, attached); if (lo) { applyLineage(lo, readLineage(lin.rest, ctx), lin, ctx); lo.life = readLife(lin.subject + " " + lin.rest.join(" "), ctx, lo); } return lo; }
     var out = parseStory1(text, ctx, attached), g = out && out.givenWord;
@@ -2856,7 +2893,7 @@
         var out = r[6].map(function (pe, i) {
           var gr = pe.given && data.given ? S.givenIn(pe.given, data.given, null) : [];
           return { role: pe.role, rel: pe.rel, name: pe.name, given: gr.length ? { canon: gr[0].row.canon, typed: pe.given, groups: givenGroups(gr[0].row, labels) } : (pe.given ? { canon: "", typed: pe.given, groups: [] } : null),
-            langs: clerkLanguages(staysOf(pe)), surname: r[5][i], surnameTyped: pe.surname, occupation: pe.occupation || "", counts: pe.counts || null, told: !!pe.told, presumed: !!pe.presumed, me: !!pe.me, sought: !!pe.sought, key: pe.key, ofSubject: !!pe.ofSubject, nameNote: pe.nameNote || "", place: pe.place && infos[pe.place.row.i] ? infos[pe.place.row.i].name : "", placeSaid: pe.place && pe.place.said || "", placeNear: pe.place && pe.place.nearTo && pe.place.nearTo.row && infos[pe.place.nearTo.row.i] ? infos[pe.place.nearTo.row.i].name.replace(/\s*\(area\)$/, "") : "", label: pe.label || "", side: pe.side || "", up: !!pe.up,
+            langs: clerkLanguages(staysOf(pe)), surname: r[5][i], surnameTyped: pe.surname, maiden: pe.maiden || "", married: pe.married || "", occupation: pe.occupation || "", counts: pe.counts || null, told: !!pe.told, presumed: !!pe.presumed, me: !!pe.me, sought: !!pe.sought, key: pe.key, ofSubject: !!pe.ofSubject, nameNote: pe.nameNote || "", place: pe.place && infos[pe.place.row.i] ? infos[pe.place.row.i].name : "", placeSaid: pe.place && pe.place.said || "", placeNear: pe.place && pe.place.nearTo && pe.place.nearTo.row && infos[pe.place.nearTo.row.i] ? infos[pe.place.nearTo.row.i].name.replace(/\s*\(area\)$/, "") : "", label: pe.label || "", side: pe.side || "", up: !!pe.up,
             events: (pe.events || []).map(function (e) { var inf = e.place && infos[e.place.row.i]; if (e.type === "told") return { type: "told", text: e.text }; return { type: e.type, said: e.said || "", year: e.year, place: inf ? inf.name : (e.place ? e.place.word : e.text ? e.text + " (not among the Atlas's places)" : ""), country: inf ? inf.countryName : "", cause: e.cause || "" }; }) };
         });
         return { facts: facts, plan: buildPlan(facts), mort: r[2], names: { people: out }, people: out, others: parsed.others || [], life: parsed.life || null };
@@ -3657,6 +3694,15 @@
     return who + (pe.label || pe.role);
   }
 
+  /* the name a box is headed by: with a birth name told, her first names and that name; a married name told as well is said under it */
+  function shownName(pe) {
+    if (!pe.maiden) return pe.name;
+    var base = String(pe.name || ""), last = function (s) { return s && S.fold(base).slice(-S.fold(s).length - 1) === " " + S.fold(s); };
+    if (last(pe.maiden)) return base;
+    if (pe.married && last(pe.married)) base = base.slice(0, -pe.married.length).trim();
+    return base ? base + " " + pe.maiden : pe.name;
+  }
+
   /* The names panel: how each person's names were written, in the languages of the clerks. A node for the page to place.
      `names` = {people: [{role, rel, name, given, surname, presumed}]}; nothing about a person is in it but the names the visitor typed. */
   function namesBlock(names, base) {
@@ -3675,7 +3721,7 @@
     cards.forEach(function (c, i) {
       any = true;
       var d = el("details", null, "lf-person"); if (i === 0) d.open = true;
-      var sm = el("summary"); sm.append(el("b", c.pe.name || roleLabel(c.pe, people)), el("span", " \u00b7 " + c.labels.join(", and "), "lf-filed"));
+      var sm = el("summary"); sm.append(el("b", shownName(c.pe) || roleLabel(c.pe, people)), el("span", " \u00b7 " + c.labels.join(", and "), "lf-filed"));
       d.append(sm, c.inner); box.append(d);
     });
     if (any) {
@@ -3706,11 +3752,12 @@
     }
     function card(pe, label, kind) {
       var c = el("div", null, "lf-card lf-card-" + pe.role + (pe.empty ? " lf-card-empty" : ""));
-      c.append(el("div", label, "lf-card-role"), el("div", pe.name || pe.nameNote || (pe.empty ? "Not in the story yet" : pe.me ? "The one telling the story" : "Name not given"), "lf-card-name"));
+      c.append(el("div", label, "lf-card-role"), el("div", shownName(pe) || pe.nameNote || (pe.empty ? "Not in the story yet" : pe.me ? "The one telling the story" : "Name not given"), "lf-card-name"));
+      if (pe.maiden) c.append(el("div", "maiden name" + (pe.married ? " · married name " + pe.married : ""), "lf-card-maiden"));
       var hasBorn = (pe.events || []).some(function (e) { return e.type === "born" && e.place; });
       /* the places told of this person, in order, from the reading of the family (what used to be a row of pills under the story box) */
       var kinRoute = (opts && opts.kin || []).filter(function (k) { return (k.key && pe.key && k.key === pe.key) || (!pe.key && k.label && new RegExp("\\b" + pe.role + "\\b", "i").test(k.label)); })[0], rs = kinRoute ? (kinRoute.stops || []).filter(function (x) { return x.info; }) : [];
-      if (pe.name) c.setAttribute("data-person", pe.name);
+      if (pe.name) c.setAttribute("data-person", shownName(pe));
       /* THE FLAG OF THE TIME, AT BIRTH AND AT DEATH. David: «could we add the flag of the country in here, the flag at the time of that persons birth and death.» The
          flag is the Atlas's flag history of the country the place is in today (flagAt on its era rows), picked for the year told. With no year told it is today's flag,
          drawn faint and said so, because a flag of "now" must not read as a flag of "then". */
@@ -3746,6 +3793,7 @@
       }
       (pe.events || []).forEach(function (e) {
         var t = e.type === "told" ? e.text : (e.type === "born" ? "Born" : e.type === "married" ? "Married" : e.type === "lived" ? (e.said === "lived" ? "Lived" : e.said === "moved" ? "Moved" : "In") : "Died") + (e.year != null ? " " + e.year : "") + (e.place ? (e.year != null ? ", " : " in ") + e.place : "") + (e.cause ? " (" + e.cause + ")" : "");
+        if (pe.maiden && e.type === "told" && S.fold(e.text) === S.fold("Born " + pe.maiden)) return;   /* it heads the box now */
         if (e.type === "born" && rs.length && rs[0].said === "born") return;   /* the route line already begins with where they were born */
         var ev = el("div", t, "lf-card-place lf-card-ev"); if (e.type === "died" && flagOf.died) { ev.append(flagOf.died); flagOf.died = null; } else if (e.type === "born" && flagOf.start && !rs.length) { ev.append(flagOf.start); flagOf.start = null; }
         c.append(ev);

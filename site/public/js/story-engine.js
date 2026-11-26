@@ -3624,7 +3624,7 @@
               .bindTooltip(tipOf(kinTag(k) + (st.role === "born" ? ", born" : st.role === "origin" ? ", from" : ""), info.name + (st.year != null ? " " + st.year : "")), { permanent: true, direction: "right", offset: [4, 0], className: "lf-tip lf-tip-anc" }).addTo(g);
             kinMarks.push({ ly: ly, t: st.year }); kp.push([info.lat, info.lon]); pts.push([info.lat, info.lon]);
           });
-          if (kp.length > 1) L.polyline(kp, { color: "#7a7a7a", weight: 1.5, dashArray: "2 5", opacity: .6 }).addTo(g);
+          if (kp.length > 1) L.polyline(kp, { color: "#7a7a7a", weight: 1.5, dashArray: "2 5", opacity: .6, className: "lf-way" }).addTo(g);
         });
         /* A parent whose only place is where they were born: draw them to where the person starts, between their coming of age and the
            person's own first year, as a dotted straight line, and say in the caption that the route was not told. */
@@ -3634,7 +3634,7 @@
             var st0 = k.stops[0];
             if (k.stops.length !== 1 || st0.role !== "born" || st0.year == null || st0.info === dest.info || st0.info.lat == null || arrive == null || arrive <= st0.year + 1) return;
             var t0 = Math.max(st0.year + 18, arrive - 8), a = [st0.info.lat, st0.info.lon], b = [dest.info.lat, dest.info.lon];
-            var ln = L.polyline([a, b], { color: "#7a7a7a", weight: 1.5, dashArray: "1 6", opacity: .12 }).addTo(g);
+            var ln = L.polyline([a, b], { color: "#7a7a7a", weight: 1.5, dashArray: "1 6", opacity: .12, className: "lf-way" }).addTo(g);
             var dt = L.circleMarker(a, { radius: 5, weight: 2, color: "#7a7a7a", fillColor: "#fff", fillOpacity: 0, opacity: 0 }).addTo(g);
             legs.push({ k: k, a: a, b: b, t0: t0, t1: arrive, to: dest.info, line: ln, dot: dt });
           });
@@ -3674,8 +3674,8 @@
         } else if (mort && mort.events) E.moments.append(el("p", f.told ? "No year is told for living at these places, so no mass-mortality outlines are drawn on this map. Each place card lists the events of the story's years." : "Give a year, even a rough one, and the mass-mortality events of those years in these countries are drawn here as black outlines.", "lf-filed"));
         var rp = stops.filter(function (st) { return st.info.lat != null; }).map(function (st) { return [st.info.lat, st.info.lon]; });
         if (rp.length > 1) {
-          L.polyline(rp, { color: "#7a7a7a", weight: 2, dashArray: "4 6", opacity: .7 }).addTo(g);
-          layers.line = L.polyline([rp[0], rp[0]], { color: "#b3452e", weight: 3 }).addTo(g);
+          L.polyline(rp, { color: "#7a7a7a", weight: 2, dashArray: "4 6", opacity: .7, className: "lf-way" }).addTo(g);
+          layers.line = L.polyline([rp[0], rp[0]], { color: "#b3452e", weight: 3, className: "lf-walked" }).addTo(g);
           layers.dot = L.circleMarker(rp[0], { radius: 6, weight: 2, color: "#fff", fillColor: "#16222a", fillOpacity: 1 }).addTo(g);
           if (can) setT(Number(E.slider.value));
         }
@@ -3684,7 +3684,7 @@
         (f.near || []).forEach(function (n) {
           var a = n.anchor, w = nearWords(n), c = w.chosen.info; if (!a || a.lat == null || c.lat == null) return;
           var col = w.unsure ? "#a8741a" : "#1f5c6b"; nearOn = true;
-          L.polyline([[c.lat, c.lon], [a.lat, a.lon]], { color: col, weight: 2.5, dashArray: "7 5", interactive: false }).addTo(g);
+          L.polyline([[c.lat, c.lon], [a.lat, a.lon]], { color: col, weight: 2.5, dashArray: "7 5", interactive: false, className: w.unsure ? "lf-nearline lf-unsure" : "lf-nearline" }).addTo(g);
           L.circleMarker([(c.lat + a.lat) / 2, (c.lon + a.lon) / 2], { radius: 0, weight: 0, opacity: 0, fillOpacity: 0, interactive: false })
             .bindTooltip(tipOf(kmText(w.chosen.km), (w.unsure ? "check: " : "") + "from " + a.name), { permanent: true, direction: "right", offset: [4, 0], className: "lf-tip lf-tip-anc lf-tip-near" }).addTo(g);
           pts.push([c.lat, c.lon], [a.lat, a.lon]);

@@ -306,6 +306,13 @@ test("a look other than the light map is not run through the pages' own dark-the
   assert.match(css, /\.leaflet-baseLabels-pane/);
 });
 
+test("the story map takes the same looks, and its lines are inked light on a photograph or a dark ground", () => {
+  const page = read("public/js/story-page.js"), html = read("src/pages/read.astro"), styles = read("public/styles.css"), engine = read("public/js/story-engine.js");
+  assert.match(page, /window\.raBasemaps\.attach\(L, map, \{ light: light, labelsPane: "baseLabels" \}\)/);
+  assert.ok(html.indexOf("/js/basemaps.js") > 0 && html.indexOf("/js/basemaps.js") < html.indexOf("/js/story-page.js"), "loaded before the page that attaches it");
+  for (const c of ["lf-way", "lf-walked", "lf-nearline"]) { assert.ok(engine.includes('"' + c), c + " is drawn"); assert.match(styles, new RegExp("ra-look-satellite, \\.ra-dark-look\\) path\\." + c + " \\{ stroke: "), c + " has a light ink"); }
+});
+
 test("the default load carries none of Night dots or MapLibre: no script tag for either, no land file or library named outside basemaps.js", () => {
   assert.doesNotMatch(atlas, /<script[^>]*night-dots\.js/);
   assert.doesNotMatch(atlas, /land-(110|50)m/);

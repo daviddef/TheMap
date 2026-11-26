@@ -269,9 +269,20 @@
 
   /* ---- the journey: map, years, who held the ground ------------------------------------------------------------------------- */
   var map = null;
+  /* THE SAME GROUND AS THE ATLAS MAP (public/js/basemaps.js): what opens, the looks offered and the choice a reader made there are the same here. The light grey and its place
+     names are this page's own layers for the «Map» look, and are all that is drawn if that script did not arrive. */
+  function ground(L, map) {
+    var ESRI = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_";
+    map.createPane("baseLabels").style.zIndex = 250;
+    map.getPane("baseLabels").style.pointerEvents = "none";
+    var light = [L.tileLayer(ESRI + "Base/MapServer/tile/{z}/{y}/{x}", { maxNativeZoom: 16, maxZoom: 18, attribution: "Esri, HERE, Garmin &middot; &copy; OpenStreetMap contributors" }),
+      L.tileLayer(ESRI + "Reference/MapServer/tile/{z}/{y}/{x}", { pane: "baseLabels", maxNativeZoom: 16, maxZoom: 18 })];
+    if (window.raBasemaps) window.raBasemaps.attach(L, map, { light: light, labelsPane: "baseLabels" });
+    else light.forEach(function (l) { l.addTo(map); });
+  }
   function getMap() {
     return S.loadLeaflet().then(function (L) {
-      if (!map) { map = L.map($("sp-map"), { scrollWheelZoom: false }); L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", { maxZoom: 16, attribution: "Tiles © Esri" }).addTo(map); }
+      if (!map) { map = L.map($("sp-map"), { scrollWheelZoom: false }); ground(L, map); }
       map.invalidateSize({ animate: false });
       return { L: L, map: map };
     });

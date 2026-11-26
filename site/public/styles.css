@@ -1657,6 +1657,17 @@ details.ask-priv { margin: 0 0 12px; padding: 0 14px; } details.ask-priv summary
 .lf-tip.leaflet-tooltip::before { display: none; }
 .lf-tip .lf-tipin b { font-weight: 700; margin-right: 5px; }
 .lf-tip-anc.leaflet-tooltip { background: #f4f1ea; color: #4a4a4a; font-style: italic; }
+/* The journey map takes the Atlas map's looks (basemaps.js). On a photograph or a dark ground the grey and deep inks vanish, so the lines and the event outlines are drawn light. */
+:is(.ra-look-satellite, .ra-dark-look) path.lf-way { stroke: #fff; }
+:is(.ra-look-satellite, .ra-dark-look) path.lf-walked { stroke: #ff8a66; }
+:is(.ra-look-satellite, .ra-dark-look) path.lf-nearline { stroke: #8fdcea; }
+:is(.ra-look-satellite, .ra-dark-look) path.lf-nearline.lf-unsure { stroke: #ffc24d; }
+:is(.ra-look-satellite, .ra-dark-look) .ev-t-war { --c: #ff7a59; }
+:is(.ra-look-satellite, .ra-dark-look) :is(.ev-t-genocide, .ev-t-massacre, .ev-t-atrocity) { --c: #ff6b81; }
+:is(.ra-look-satellite, .ra-dark-look) .ev-t-epidemic { --c: #e58bd0; }
+:is(.ra-look-satellite, .ra-dark-look) .ev-t-famine { --c: #ffc24d; }
+:is(.ra-look-satellite, .ra-dark-look) .ev-t-displacement { --c: #9fd0e6; }
+:is(.ra-look-satellite, .ra-dark-look) path.ev-pg { stroke: var(--c); fill: var(--c); }
 /* on a phone a long place name wraps instead of running off the map */
 @media (max-width: 520px) { .lf-tip.leaflet-tooltip { white-space: normal; width: max-content; max-width: 128px; } }
 

@@ -86,9 +86,60 @@
       '<div>' + ways(e) + '</div><span class="who">Source: ' + esc(credit(e.srcs, sources)) + "</span></li>";
   }
 
-  /* The whole section for a place, or "" where the Atlas holds nothing near it: an empty heading would read as «there is nobody to ask». */
-  function section(list, sources) {
-    if (!list.length) return "";
+  /* WHERE THERE IS NO CONTACT, WHO MIGHT KNOW. Only an office whose own area, as a source draws it, holds the spot; never the nearest one,
+     and never written as though the address were the burial ground's or the parish's. */
+  var ASK = { "town-hall": ["burial ground", "The town hall of the municipality may know who looks after one.", "Town hall"],
+    diocese: ["parish", "The diocese may know which parish serves it and where its registers are.", "Diocese office"] };
+  var FOR_KIND = { cemetery: "town-hall", church: "diocese" };
+
+  function inside(rings, x, y) {
+    var hit = false;
+    rings.forEach(function (r) {
+      for (var i = 0; i + 1 < r.length; i++) {
+        var a = r[i], b = r[i + 1];
+        if ((a[1] > y) !== (b[1] > y) && x < a[0] + (y - a[1]) * (b[0] - a[0]) / (b[1] - a[1])) hit = !hit;
+      }
+    });
+    return hit;
+  }
+
+  /* The areas holding a spot: the square's list, then only the outlines whose box holds it. */
+  function covering(base, lat, lon, getter) {
+    var g = getter || get, key = Math.floor(lat) + "_" + Math.floor(lon);
+    return g(base + "contacts/index.json").then(function (index) {
+      var groups = Object.keys(index.areas || {}).filter(function (k) { return index.areas[k].indexOf(key) >= 0; });
+      return Promise.all(groups.map(function (group) {
+        return g(base + "contacts/" + group + "/areas/" + key + ".json").then(function (list) {
+          var near = list.filter(function (a) { return lon >= a[1] && lat >= a[2] && lon <= a[3] && lat <= a[4]; });
+          return Promise.all(near.map(function (a) { return g(base + "contacts/" + group + "/area/" + a[0] + ".json"); }));
+        });
+      })).then(function (found) {
+        return { areas: [].concat.apply([], found).filter(function (a) { return inside(a.rings, lon, lat); }), sources: index.sources };
+      });
+    });
+  }
+
+  /* The suggestions of one kind, as HTML, or "". `what` is what has no contact: «burial ground», «parish». */
+  function suggest(areas, kind, sources) {
+    return areas.filter(function (a) { return a.kind === kind; }).map(function (a) {
+      var offices = entities(a.rows, sources).filter(function (e) { return ways(e); });
+      if (!offices.length) return "";
+      return '<div class="ra-suggest"><p><b>Suggestion for a ' + ASK[kind][0] + " with no contact.</b> This spot lies in " + esc(a.name) + ", as " +
+        esc(credit(offices[0].srcs, sources)) + " draws its boundary. " + ASK[kind][1] + " These are the office's details, not the " + ASK[kind][0] +
+        "'s own.</p><ul class=\"vols\">" + offices.map(function (e) {
+          return "<li>" + (/^https?:\/\//.test(e.url) ? link(e.url, e.name || ASK[kind][2]) : esc(e.name || ASK[kind][2])) + "<div>" + ways(e) +
+            '</div><span class="who">Source: ' + esc(credit(e.srcs, sources)) + "</span></li>";
+        }).join("") + "</ul></div>";
+    }).join("");
+  }
+
+  /* The whole section for a place, or "" where the Atlas holds nothing near it and no office covers it: an empty heading would read as
+     «there is nobody to ask». `areas`: those holding the place. */
+  function section(list, sources, areas) {
+    /* suggested only for the kind nothing near can be written to or rung about */
+    var asks = ["cemetery", "church"].filter(function (k) { return !list.some(function (e) { return e.kind === k && reach(e); }); })
+      .map(function (k) { return suggest(areas || [], FOR_KIND[k], sources); }).join("");
+    if (!list.length && !asks) return "";
     var used = {}, h = '<h2 id="who-to-contact">Who to contact near here</h2><p class="cap">Within ' + RADIUS + " km, as each source states it. <b>Unchecked</b> unless the " +
       "source is Record Atlas: confirm on the institution's own page before sending anything personal. A place missing here is one the Atlas has no contact for yet, " +
       "not one with nobody to ask.</p>";
@@ -99,6 +150,11 @@
       h += "<h3>" + esc(K[1]) + '</h3><ul class="vols">' + of.slice(0, SHOWN).map(function (e) { return item(e, sources); }).join("") + "</ul>";
       if (of.length > SHOWN) h += "<details><summary>" + (of.length - SHOWN) + ' more</summary><ul class="vols">' + of.slice(SHOWN, 60).map(function (e) { return item(e, sources); }).join("") + "</ul></details>";
     });
+    /* after what is held, so a suggestion is never read first as though it were a contact */
+    if (asks) {
+      (areas || []).forEach(function (a) { a.rows.forEach(function (r) { used[r.src] = 1; }); });
+      h += "<h3>Who might know</h3>" + asks;
+    }
     return h + '<p class="cap">Sources: ' + Object.keys(used).map(function (s) { var m = sources[s] || {}; return link(m.url || "#", m.attribution || s) + " (" + esc(m.licence || "") + ")"; }).join(" · ") + ".</p>";
   }
 
@@ -118,13 +174,20 @@
     });
   }
 
-  /* One dot on the map: the institution holding `id` («wd:Q1», «osm:n2») at that spot. */
-  function fill(box, base, lat, lon, id, getter) {
+  /* The suggestion is an extra: if the boundaries cannot be read, the contacts that were read are still shown. */
+  function coveringOrNone(base, lat, lon, getter) { return covering(base, lat, lon, getter).catch(function () { return { areas: [] }; }); }
+
+  /* One dot on the map: the institution holding `id` («wd:Q1», «osm:n2») at that spot. `kind` («cemetery», «church») says what to suggest
+     where it cannot be written to or rung. */
+  function fill(box, base, lat, lon, id, getter, kind) {
     box.innerHTML = '<p class="at-sub">Looking for contacts…</p>';
     return load(base, lat, lon, 2, getter).then(function (r) {
       var e = r.list.filter(function (x) { return x.ids.indexOf(id) >= 0; })[0];
-      box.innerHTML = e && ways(e) ? '<p class="at-sub"><b>Contact</b><br>' + ways(e) + "<br><small>Source: " + esc(credit(e.srcs, r.sources)) + ", unchecked unless Record Atlas</small></p>"
+      var own = e && ways(e) ? '<p class="at-sub"><b>Contact</b><br>' + ways(e) + "<br><small>Source: " + esc(credit(e.srcs, r.sources)) + ", unchecked unless Record Atlas</small></p>"
         : '<p class="at-sub">No contact held for this one yet.</p>';
+      box.innerHTML = own;
+      if (!FOR_KIND[kind] || (e && reach(e))) return;
+      return coveringOrNone(base, lat, lon, getter).then(function (c) { box.innerHTML = own + suggest(c.areas, FOR_KIND[kind], r.sources); });
     }).catch(function () { box.innerHTML = '<p class="at-sub">The contacts did not load.</p>'; });
   }
 
@@ -135,8 +198,9 @@
     var started = false, go = function () {
       if (started) return;
       started = true;
-      load(base, lat, lon, RADIUS).then(function (r) {
-        el.innerHTML = section(r.list, r.sources);
+      Promise.all([load(base, lat, lon, RADIUS), coveringOrNone(base, lat, lon)]).then(function (both) {
+        var r = both[0];
+        el.innerHTML = section(r.list, r.sources, both[1].areas);
         /* a link straight to the section arrives before the section exists */
         if (hashed && el.firstChild) el.scrollIntoView();
       }).catch(function () { el.innerHTML = '<p class="cap">The contacts near here did not load. Reload the page to try again.</p>'; });
@@ -146,7 +210,8 @@
     io.observe(el);
   }
 
-  var api = { filesFor: filesFor, entities: entities, near: near, ways: ways, section: section, load: load, fill: fill, mount: mount };
+  var api = { filesFor: filesFor, entities: entities, near: near, ways: ways, section: section, load: load, covering: covering, suggest: suggest,
+    fill: fill, mount: mount };
   if (typeof module !== "undefined" && module && module.exports !== undefined) module.exports = api;
   else {
     root.RAContacts = api;

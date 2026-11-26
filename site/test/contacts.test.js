@@ -12,7 +12,7 @@ const ROOT = path.join(SITE, "..");
 const mod = { exports: {} };
 new Function("module", fs.readFileSync(path.join(SITE, "public/js/contacts-near.js"), "utf8"))(mod);
 const C = mod.exports;
-const py = (code, input) => JSON.parse(execFileSync("python3", ["-c", `import json, sys\nsys.path.insert(0, "scripts")\nfrom contacts import core, harvest_osm, build\n${code}`],
+const py = (code, input) => JSON.parse(execFileSync("python3", ["-c", `import json, sys\nsys.path.insert(0, "scripts")\nfrom contacts import areas, core, harvest_osm, harvest_osm_areas, build\n${code}`],
   { cwd: ROOT, input: JSON.stringify(input ?? null), encoding: "utf8" }));
 
 const OSM = { elements: [
@@ -113,8 +113,116 @@ test("loading reads the index, then those squares, and a square that fails is a 
   await assert.rejects(C.load("/", 45.1, 17.2, 20, get));
 });
 
+/* A square kilometre or so, as the ways of two boundaries: the second does not close. */
+const pt = (lon, lat) => ({ lat, lon });
+const way = (role, ...p) => ({ type: "way", role, geometry: p });
+const BOUNDS = { elements: [
+  { type: "relation", id: 10, tags: { boundary: "administrative", admin_level: "7", name: "Općina Primjer" }, members: [
+    way("outer", pt(17, 45), pt(17.4, 45), pt(17.4, 45.4)), way("outer", pt(17, 45), pt(17, 45.4), pt(17.4, 45.4)),
+    way("inner", pt(17.3, 45.3), pt(17.35, 45.3), pt(17.35, 45.35), pt(17.3, 45.35), pt(17.3, 45.3))] },
+  { type: "relation", id: 11, tags: { boundary: "administrative", admin_level: "7", name: "Broken" }, members: [way("outer", pt(18, 45), pt(18.4, 45), pt(18.4, 45.4))] },
+  { type: "relation", id: 12, tags: { boundary: "religious_administration", name: "Biskupija Primjer", "contact:email": "biskupija@primjer.example" }, members: [
+    way("outer", pt(17, 45), pt(17.4, 45), pt(17.4, 45.4), pt(17, 45.4), pt(17, 45))] },
+  { type: "relation", id: 13, tags: { boundary: "religious_administration", name: "Silent diocese" }, members: [
+    way("outer", pt(17, 45), pt(17.4, 45), pt(17.4, 45.4), pt(17, 45))] }] };
+
+test("an area suggests only the offices its own outline holds, and an outline that does not close suggests nobody", () => {
+  const out = py(`halls = [r for r in harvest_osm.rows_from(json.load(sys.stdin)["osm"], "HR") if r["kind"] == "town-hall"]
+far = dict(halls[0], id="osm:n50", y=46.5, ids=["osm:n50"])
+found, broken = harvest_osm_areas.areas_from(json.loads(${JSON.stringify(JSON.stringify(BOUNDS))}), "HR", halls + [far])
+import tempfile
+d = tempfile.mkdtemp()
+areas.write("osm", "HR", found, "2026-01-01", d)
+clean = areas.check(d)
+found[0]["rows"][0]["email"] = ["ana.horvat@primjer.example"]
+areas.write("osm", "SI", [dict(found[0], id="osm:r99")], "2026-01-01", d)
+print(json.dumps({"found": found, "broken": broken, "clean": clean, "bad": areas.check(d)}))`, { osm: OSM });
+  assert.deepEqual(out.found.map((a) => [a.id, a.kind, a.rows.map((r) => r.id)]),
+    [["osm:r10", "town-hall", ["osm:n1"]], ["osm:r12", "diocese", ["osm:r12"]]]);
+  assert.equal(out.broken, 1);
+  assert.deepEqual(out.found[0].box, [17, 45, 17.4, 45.4]);
+  assert.deepEqual(out.clean, []);
+  assert.match(out.bad.join("\n"), /areas osm\/SI\.json\.gz osm:r99 osm:n1: not an office/);
+});
+
+const SQUARE = [[17, 45], [17.4, 45], [17.4, 45.4], [17, 45.4], [17, 45]];
+const HOLE = [[17.3, 45.3], [17.35, 45.3], [17.35, 45.35], [17.3, 45.35], [17.3, 45.3]];
+const HALL = { id: "osm:n1", src: "osm", kind: "town-hall", name: "Općina Primjer", y: 45.1, x: 17.2, ids: ["osm:n1"], email: ["info@primjer.example"] };
+const SEE = { id: "osm:r12", src: "osm", kind: "diocese", name: "Biskupija Primjer", y: 45.2, x: 17.2, ids: ["osm:r12"], email: ["biskupija@primjer.example"] };
+const FILES = () => ({ "/contacts/index.json": { groups: { odbl: { "45_17": 1 } }, areas: { odbl: ["45_17"] }, sources: SOURCES },
+  "/contacts/odbl/45_17.json": { rows: [ROWS[2], HALL] },
+  "/contacts/odbl/areas/45_17.json": [["osm-r10", 17, 45, 17.4, 45.4], ["osm-r12", 17, 45, 17.4, 45.4], ["osm-r13", 17.9, 45, 18, 45.4]],
+  "/contacts/odbl/area/osm-r10.json": { kind: "town-hall", name: "Općina Primjer", rings: [SQUARE, HOLE], rows: [HALL] },
+  "/contacts/odbl/area/osm-r12.json": { kind: "diocese", name: "Biskupija <Primjer>", rings: [SQUARE], rows: [SEE] } });
+const from = (files) => (u) => files[u] ? Promise.resolve(files[u]) : Promise.reject(new Error(u));
+
+test("where an office inside carries the area's name, a neighbourhood office beside it is not suggested", () => {
+  const out = py(`B = json.loads(${JSON.stringify(JSON.stringify(BOUNDS))})
+halls = [{"id": "osm:n1", "kind": "town-hall", "name": "OPĆINA PRIMJER", "y": 45.1, "x": 17.2, "tel": ["+385 34 111 222"]},
+         {"id": "osm:n2", "kind": "town-hall", "name": "Mjesni odbor", "y": 45.2, "x": 17.2, "email": ["info@odbor.example"], "tel": ["+385 34 111 333"]}]
+found, _ = harvest_osm_areas.areas_from(B, "HR", halls)
+print(json.dumps([r["id"] for r in found[0]["rows"]]))`);
+  assert.deepEqual(out, ["osm:n1"]);
+});
+
+test("a spot is covered by the areas whose outline holds it, holes left out", async () => {
+  const get = from(FILES());
+  assert.deepEqual((await C.covering("/", 45.1, 17.2, get)).areas.map((a) => a.kind), ["town-hall", "diocese"]);
+  assert.deepEqual((await C.covering("/", 45.32, 17.32, get)).areas.map((a) => a.kind), ["diocese"], "in the hole");
+  assert.deepEqual((await C.covering("/", 44.1, 17.2, get)).areas, [], "a square with no list asks for nothing more");
+});
+
+test("a suggestion is made only where there is no contact, says it is one, and never passes as the ground's own", async () => {
+  const files = FILES(), get = from(files), box = {};
+  await C.fill(box, "/", 45.1, 17.2, "osm:w2", get, "cemetery");
+  assert.match(box.innerHTML, /No contact held for this one yet/);
+  assert.match(box.innerHTML, /Suggestion for a burial ground with no contact/);
+  assert.match(box.innerHTML, /office&#39;s details|office's details, not the burial ground's own/);
+  assert.match(box.innerHTML, /mailto:info@primjer\.example/);
+  assert.doesNotMatch(box.innerHTML, /biskupija@/);
+  await C.fill(box, "/", 45.1, 17.2, "osm:n8", get, "church");
+  assert.match(box.innerHTML, /Suggestion for a parish/);
+  assert.match(box.innerHTML, /Biskupija &lt;Primjer&gt;/);
+  await C.fill(box, "/", 45.1, 17.2, "osm:n1", get, "cemetery");
+  assert.doesNotMatch(box.innerHTML, /Suggestion/, "it has its own contact");
+  await C.fill(box, "/", 45.1, 17.2, "wd:Q404", get, "libraries");
+  assert.doesNotMatch(box.innerHTML, /Suggestion/);
+  delete files["/contacts/odbl/area/osm-r10.json"];
+  await C.fill(box, "/", 45.1, 17.2, "osm:n1", get, "church");
+  assert.match(box.innerHTML, /mailto:info@primjer/, "a boundary that fails to load costs the suggestion, not the contact");
+});
+
+test("the place section suggests for the kinds nothing near answers, and stands on a suggestion alone", async () => {
+  const c = await C.covering("/", 45.1, 17.2, from(FILES()));
+  const alone = C.section([], SOURCES, c.areas);
+  assert.match(alone, /Who might know/);
+  assert.match(alone, /Suggestion for a burial ground/);
+  assert.match(alone, /Suggestion for a parish/);
+  const parish = C.near(C.entities([{ ...ROWS[2], email: ["zupa@primjer.example"] }], SOURCES), 45.1, 17.2, 20);
+  const some = C.section(parish, SOURCES, c.areas);
+  assert.match(some, /Suggestion for a burial ground/);
+  assert.doesNotMatch(some, /Suggestion for a parish/);
+  assert.equal(C.section([], SOURCES, []), "");
+});
+
+test("the build writes a list for every square a boundary reaches, one file an area, and drops a dead address", () => {
+  const out = py(`import tempfile, os
+d = tempfile.mkdtemp()
+a = {"id": "osm:r10", "kind": "town-hall", "name": "P", "box": [16.9, 45.0, 17.1, 45.2], "rings": [[[16.9, 45], [17.1, 45], [17.1, 45.2], [16.9, 45]]],
+     "rows": [{"id": "osm:n1", "kind": "town-hall", "y": 45.1, "x": 17.0, "email": ["old@a.example", "new@a.example"]}]}
+gone = dict(a, id="osm:r11", rows=[{"id": "osm:n2", "kind": "town-hall", "y": 45.1, "x": 17.0, "email": ["old@a.example"]}])
+index = {}
+build.write_areas([("osm", a), ("osm", gone)], core.sources(), d, index, {"old@a.example"})
+print(json.dumps({"index": index["areas"], "list": json.load(open(os.path.join(d, "odbl/areas/45_16.json"))), "files": sorted(os.listdir(os.path.join(d, "odbl/area"))),
+                  "mail": json.load(open(os.path.join(d, "odbl/area/osm-r10.json")))["rows"][0]["email"]}))`);
+  assert.deepEqual(out.index, { odbl: ["45_16", "45_17"] });
+  assert.deepEqual(out.list, [["osm-r10", 16.9, 45, 17.1, 45.2]]);
+  assert.deepEqual(out.files, ["osm-r10.json"]);
+  assert.deepEqual(out.mail, ["new@a.example"]);
+});
+
 test("the committed store is sound", () => {
-  assert.deepEqual(py("print(json.dumps(core.check()))"), []);
+  assert.deepEqual(py("print(json.dumps(core.check() + areas.check()))"), []);
 });
 
 test("the place page carries the section and the script, and no contacts of its own", () => {

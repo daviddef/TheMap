@@ -11,12 +11,19 @@ const data = JSON.parse(readFileSync(root + "data/provider-emails.json", "utf8")
 const map = readFileSync(root + "site/src/components/RecordMap.astro", "utf8");
 const attach = JSON.parse(execFileSync("python3", ["-c", "import sys,json;sys.path.insert(0,'scripts');import provider_emails as p;print(json.dumps(p.em_by_provider()))"], { cwd: root, encoding: "utf8" }));
 
-test("every address is a role mailbox with a state, a source and a note; no free-mail, no duplicates", () => {
+const personal = JSON.parse(execFileSync("python3", ["-c", `import sys, json
+sys.path.insert(0, "scripts")
+import provider_contact_rules as r
+out = [e["email"] for e in json.load(open("data/provider-emails.json"))["emails"]
+       if r.FREE_MAIL.fullmatch(e["email"].lower().split("@")[1]) and not r.names_institution(e["email"].split("@")[0], None)]
+print(json.dumps(out))`], { cwd: root, encoding: "utf8" }));
+
+test("every address is a role mailbox with a state, a source and a note; free-mail only where it names an institution, no duplicates", () => {
+  assert.deepEqual(personal, [], "a free-mail address that names no institution is a person's");
   const seen = new Set();
   for (const e of data.emails) {
     assert.ok(data.states[e.state], e.email + " has a state the file defines");
     assert.ok(e.via && e.note, e.email + " says where it was met and what was done");
-    assert.ok(!/@(gmail|me|icloud|hotmail|outlook|yahoo)\./i.test(e.email), e.email + " is not a person's free-mail");
     assert.ok(!seen.has(e.email.toLowerCase()), e.email + " once");
     seen.add(e.email.toLowerCase());
   }

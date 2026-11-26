@@ -327,13 +327,19 @@
         return p[0] === p[1] ? String(p[0]) : p[0] + "–" + p[1];
       }).join(", ");
     }
-    /* WHERE TO START AGAIN IS THE FIRST GAP, NOT THE HIGHEST PAGE. After
-       1-47 and 60-72 the answer is 48: the reader skipped 48-59 and will
-       want to know it. Reporting 73 would quietly bless the hole. */
-    function resume(ranges) {
-      if (!ranges || !ranges.length) return 1;
-      if (ranges[0][0] > 1) return 1;
-      return ranges[0][1] + 1;
+    /* WHERE TO START AGAIN, FOR A HALF-READ BOOK ONLY: the first page not read after reading began, which is the first gap and not
+       the highest page. After 1-47 and 60-72 the answer is 48, and after 6-669 of 676 it is 670. Pages before the first one recorded
+       are never mentioned: nobody said they were read, or that they are covers. It used to answer 1 whenever reading began after page 1,
+       so nearly every finished book said «start again at 1».
+       NULL when there is nothing to say: nothing recorded, a book read in full (`walked`) or marked «read everything», or no unread page
+       after what was read. `about` is the mark, or {total, walked, state}. */
+    function resume(ranges, about) {
+      if (!ranges || !ranges.length) return null;
+      var o = about || {};
+      if (o.state === "exhausted" || (o.walked && o.walked.length)) return null;
+      var next = merge(ranges)[0][1] + 1;
+      var total = parseInt(o.total, 10) || 0;
+      return total && next > total ? null : next;
     }
     function covered(ranges) {
       return (ranges || []).reduce(function (a, p) { return a + (p[1] - p[0] + 1); }, 0);

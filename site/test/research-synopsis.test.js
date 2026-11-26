@@ -95,3 +95,35 @@ test("the plain-text story links a blocked or waiting source when its address is
   assert.match(out, /- Blocked: \[Geni\]\(https:\/\/www\.geni\.com\/\)/);
   assert.match(out, /- Blocked: A State Archive \(/);
 });
+
+test("a shared place says what each family really has there, and keeps the old sentence only when it is true", () => {
+  const two = [{ slug: "zzaa", name: "Zzaa" }, { slug: "zzbb", name: "Zzbb" }];
+  const here = (extra) => syn.build({ lines: two, places: { p1: { name: "Nowhere" } }, marks: Object.assign({
+    "place:p1": { t: "Nowhere", href: "/place/p1/", by: { zzaa: { state: "planned" }, zzbb: { state: "planned" } } } }, extra) }).places[0];
+
+  const only = here({});
+  assert.equal(only.note, "Each family has the place on its list; no book is marked yet.");
+  assert.equal(only.showHas, false, "the sentence says it all");
+
+  const reg = here({
+    "antenati:R1": { t: "Register one", href: "/place/p1/", by: { zzaa: { state: "found" } } },
+    "antenati:R2": { t: "Register two", href: "/place/p1/", by: { zzaa: { state: "searched" } } },
+    "film:F1": { t: "A film", href: "/place/p1/", by: { zzbb: { state: "searched" } } } });
+  assert.equal(reg.note, "", "registers and films are marked, so the old sentence would be false");
+  assert.equal(reg.showHas, true);
+  assert.deepEqual(reg.has.zzaa, ["2 Antenati registers (1 found something, 1 searched)", "the place itself: to do"]);
+  assert.deepEqual(reg.has.zzbb, ["1 film (searched)", "the place itself: to do"]);
+  const text = syn.story(syn.build({ lines: two, places: { p1: { name: "Nowhere" } }, marks: {
+    "antenati:R1": { t: "Register one", href: "/place/p1/", by: { zzaa: { state: "found" }, zzbb: { state: "planned" } } },
+    "film:F1": { t: "A film", href: "/place/p1/", by: { zzbb: { state: "searched" } } } } }), "en");
+  assert.doesNotMatch(String(text), /no book is marked yet/);
+
+  const searched = here({ "place:p1": { t: "Nowhere", href: "/place/p1/", by: { zzaa: { state: "searched" }, zzbb: { state: "planned" } } } });
+  assert.equal(searched.note, "", "a place already searched is not just «on its list»");
+  assert.deepEqual(searched.has.zzaa, ["the place itself: searched"]);
+
+  const books = here({ "volume:A": { t: "A", href: "/place/p1/", by: { zzaa: { state: "planned" } } }, "volume:B": { t: "B", href: "/place/p1/", by: { zzbb: { state: "planned" } } } });
+  assert.equal(books.note, "No single book is shared; the families have marked different books here.");
+  const shared = here({ "volume:A": { t: "A", href: "/place/p1/", by: { zzaa: { state: "planned" }, zzbb: { state: "planned" } } } });
+  assert.equal(shared.note, "");
+});

@@ -42,6 +42,53 @@
   function kindOf(id) { var i = id.indexOf(":"); return i > 0 ? id.slice(0, i) : "other"; }
   function own(b) { return !!(b && ((b.done && b.done.length) || b.state || b.note)); }
 
+  /* THE BOOK ITSELF, NOT THE TOWN. A volume mark carries the town page as its address (the family sessions' marks and the ones made on this
+     site), so every book title on My research opened the town. The town's own file (p/<id>.json) holds each book's FamilySearch viewer address
+     beside its waypoint (`volumes`, the oldest 60, and `moreBooks`, the later ones the family sessions have marked). The address is looked up by
+     waypoint and never built from it: a book the file does not list has none here, and the page links the town instead. A mark that already
+     holds a FamilySearch address keeps it. */
+  var FS = /^https:\/\/(www\.)?familysearch\.org\//i;
+  function bookUrl(id, href, place) {
+    if (String(id || "").indexOf("volume:") !== 0) return "";
+    var wp = String(id).slice(7).split(":")[0], lists = place ? [place.volumes, place.moreBooks] : [];
+    for (var i = 0; i < lists.length; i++) {
+      var l = lists[i] || [];
+      for (var j = 0; j < l.length; j++) if (l[j] && l[j].waypoint && String(l[j].waypoint).split(":")[0] === wp && FS.test(l[j].url || "")) return l[j].url;
+    }
+    return FS.test(href || "") ? href : "";
+  }
+
+  /* WHAT EACH FAMILY REALLY HAS AT A PLACE. Only a volume mark is a «book», so a place two families share, each with an Antenati register or a
+     film marked there, said «no book is marked yet» and nothing else. `holdings` is one family's marks at one place in words: how many of each
+     kind, with the state of each (found something, searched, to do…), and what is recorded against the place itself. */
+  var KINDS = [["volume", "book", "books"], ["antenati", "Antenati register", "Antenati registers"], ["film", "film", "films"], ["other", "other mark", "other marks"]];
+  var SAY = { planned: "to do", written: "written, no reply", searched: "searched", found: "found something", exhausted: "read everything", blocked: "cannot get access", "": "noted" };
+  var SAY_ORDER = ["found", "exhausted", "searched", "written", "blocked", "planned", ""];
+  function kindWord(k) { return k === "volume" || k === "antenati" || k === "film" || k === "place" ? k : "other"; }
+  function holdings(rows, slug) {
+    var by = {};
+    rows.forEach(function (r) { var x = r.lines[slug]; if (!x) return; var k = kindWord(r.kind); (by[k] = by[k] || []).push(x.state || ""); });
+    var out = [];
+    KINDS.forEach(function (k) {
+      var st = by[k[0]]; if (!st) return;
+      var parts = SAY_ORDER.filter(function (s) { return st.indexOf(s) > -1; }).map(function (s) {
+        var n = st.filter(function (x) { return x === s; }).length;
+        return (st.length > 1 && n < st.length ? n + " " : "") + SAY[s];
+      });
+      out.push(st.length + " " + (st.length === 1 ? k[1] : k[2]) + " (" + parts.join(", ") + ")");
+    });
+    if (by.place) out.push("the place itself: " + by.place.map(function (s) { return SAY[s] || s; }).join(", "));
+    return out;
+  }
+  /* The one sentence about a shared place with no shared book, said only when it is true. */
+  function overlapNote(pl) {
+    if (pl.sharedBooks.length) return "";
+    if (pl.rows.every(function (r) { return r.kind === "place" && Object.keys(r.lines).every(function (s) { var st = r.lines[s].state; return !st || st === "planned"; }); }))
+      return "Each family has the place on its list; no book is marked yet.";
+    if (pl.slugs.every(function (s) { return pl.books.some(function (r) { return r.lines[s]; }); })) return "No single book is shared; the families have marked different books here.";
+    return "";
+  }
+
   function build(input) {
     var lines = input.lines || [], marks = input.marks || {}, placeMeta = input.places || {};
     var scope = (input.scope && input.scope.length) ? input.scope : lines.map(function (l) { return l.slug; });
@@ -108,6 +155,10 @@
       pl.sharedBooks = pl.books.filter(function (r) { return r.sharedBook; });
       pl.sameBookOpen = pl.books.filter(function (r) { return r.open.length > 1; });
       pl.pages = pl.books.reduce(function (n, r) { return n + Object.keys(r.lines).reduce(function (k, s) { return k + r.lines[s].ownPages; }, 0); }, 0);
+      pl.has = {}; pl.slugs.forEach(function (s) { pl.has[s] = holdings(pl.rows, s); });
+      pl.note = overlapNote(pl);
+      /* each family's own list is shown unless the shared books above, or the «on its list» sentence, already say everything there is */
+      pl.showHas = pl.note.indexOf("on its list") < 0 && pl.rows.some(function (r) { return !r.sharedBook; });
       return pl;
     }).sort(function (a, b) { return a.name.localeCompare(b.name); });
 
@@ -164,9 +215,9 @@
       L.push("", "## Where the families overlap", "");
       syn.sharedPlaces.forEach(function (p) {
         L.push("### " + p.name + " (" + and(p.slugs.map(function (s) { return nameOf[s]; })) + ")");
-        if (p.sharedBooks.length) p.sharedBooks.forEach(function (r) { L.push("- " + bookLine(r, nameOf)); });
-        else if (p.books.length) L.push("- No single book is shared; the families have marked different books here.");
-        else L.push("- Each family has the place on its list; no book is marked yet.");
+        p.sharedBooks.forEach(function (r) { L.push("- " + bookLine(r, nameOf)); });
+        if (p.note) L.push("- " + p.note);
+        if (p.showHas) p.slugs.forEach(function (s) { if (p.has[s].length) L.push("- " + nameOf[s] + ": " + p.has[s].join("; ") + "."); });
         L.push("");
       });
     }
@@ -231,7 +282,7 @@
     return mergeRanges(list);
   }
 
-  var api = { build: build, story: story, mergeRanges: mergeRanges, pagesIn: pagesIn, scopeOf: scopeOf, rowBy: rowBy, rowCov: rowCov, own: own };
+  var api = { build: build, story: story, bookUrl: bookUrl, mergeRanges: mergeRanges, pagesIn: pagesIn, scopeOf: scopeOf, rowBy: rowBy, rowCov: rowCov, own: own };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   root.raSynopsis = api;
 })(typeof window !== "undefined" ? window : globalThis);

@@ -1031,8 +1031,8 @@ async function atlasTarget() {
     $('#stGo').focus();
   } else if (new URLSearchParams(location.search).get('resume')) {
     /* THE WAY BACK FROM THE ATLAS (and the Atlas's own Canvas and Compass buttons): the tree you were last on is kept in this browser (the same tcRecent), so a hop from another page
-       opens it again, on the canvas or, with to=compass, on Compass. Nothing is kept when "Keep the last files" is off, and then this says so and shows the front page. */
-    const to = new URLSearchParams(location.search).get('to') === 'compass' ? 'compass' : null;
+       opens it again, on the canvas or, with to=compass, on Compass, or, with to=fix, on its Fix list. Nothing is kept when "Keep the last files" is off, and then this says so and shows the front page. */
+    const to = new URLSearchParams(location.search).get('to') === 'compass' ? 'compass' : new URLSearchParams(location.search).get('to') === 'fix' ? 'fix' : null;   // fix: My research's one line about saved tree fixes
     try { history.replaceState(null, '', location.pathname); } catch (e) { /* ignore */ }
     (async () => { const kept = rememberOn() ? await recentList() : []; if (kept[0]) openKept(kept[0], to); else { await showStart(); say('No tree is kept in this browser yet. Choose your file, or try the invented family.'); } })();
   } else if (new URLSearchParams(location.search).get('demo') === 'compass') {

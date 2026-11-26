@@ -44,10 +44,11 @@ const BASE_ = u("/");
   <script is:inline src={u("/js/name-intro.js")}></script>
   <script is:inline src={u("/js/place-strip.js")}></script>
   <script is:inline src={u("/js/basemaps.js")}></script>
+  <script is:inline src={u("/js/research-map.js")}></script>
   <script is:inline>
     (function () {
       /* this script sits in the head slot, before the container exists: the container is looked up when drawing, not now */
-      var host = null, N = window.raNameIntro;
+      var shown = null, N = window.raNameIntro;
       if (!N) return;
       var base = (document.documentElement.getAttribute("data-base") || "/").replace(/\/?$/, "/"), names = {}, cache = {}, token = 0;
       /* A FAILED FETCH IS NOT KEPT: caching the null meant one slow or dropped request hid a family's card until the page was reloaded (a third
@@ -58,10 +59,10 @@ const BASE_ = u("/");
         cache[u] = p; p.then(function (v) { if (v == null && cache[u] === p) delete cache[u]; });
         return p;
       }
-      function show(node) { if (!host) return; host.textContent = ""; if (node) { host.append(node); host.hidden = false; } else host.hidden = true; }
-      /* ONE CARD FOR EACH FAMILY THE PAGE READS. The map and the lists follow the families ticked in the header picker, so the name card must too:
+      /* ONE CARD FOR EACH FAMILY THE PAGE READS. The map and the lists follow the families ticked in the header picker, so the name cards must too:
          David ticked four families and the page still said «About the name Defranceschi». Nothing ticked (or one) means the family you mark
-         under, as before; several give one shut card each, in the order of the picker. A card is drawn for a surname only. */
+         under, as before: one shut line. Several give one row of name chips with a card open at a time (js/name-intro.js, view), in the order of the
+         picker. A card is drawn for a surname only. */
       function readNames() {
         var P = window.raProgress, SY = window.raSynopsis; if (!P) return [];
         var lines = P.lines(), me = lines.filter(function (l) { return l.active; })[0], stored = null;
@@ -73,49 +74,37 @@ const BASE_ = u("/");
       function cardFor(name) {
         return getJ(base + "shards.json").then(function (sh) {
           var key = window.raShardKey(window.raFold(name), sh && sh.s); if (!key) return null;
-          return getJ(base + "s/" + encodeURIComponent(key) + ".json");
-        }).then(function (rows) {
-          /* a shard that could not be fetched is not a finding about the name, but the family still gets its card, saying so, so that the
-             cards always match the families ticked */
-          if (!rows) { var fail = N.build(null); fail.name = name; fail.failed = true; return N.render(fail, base); }
-          var row = N.pick(rows, name);
-          if (!row) { var gap = N.build(null); gap.name = name; return N.render(gap, base); }
-          return Promise.all([getJ(base + "flag-eras.json"), getJ(base + "flag-map.json")]).then(function (a) {
-            return N.render(N.build(row, { names: names, eras: a[0] && a[0].eras, map: a[1] }), base);
+          return getJ(base + "s/" + encodeURIComponent(key) + ".json").then(function (rows) {
+            /* a shard that could not be fetched is not a finding about the name, but the family still gets its card, saying so, so that the
+               cards always match the families ticked */
+            if (!rows) return failed(name);
+            var row = N.pick(rows, name);
+            if (!row) { var gap = N.build(null); gap.name = name; return gap; }
+            return Promise.all([getJ(base + "flag-eras.json"), getJ(base + "flag-map.json")]).then(function (a) {
+              return N.build(row, { names: names, eras: a[0] && a[0].eras, map: a[1] });
+            });
           });
         });
       }
+      function failed(name) { var f = N.build(null); f.name = name; f.failed = true; return f; }
       function draw() {
         var P = window.raProgress; if (!P) return;
-        host = document.getElementById("mr-intro"); if (!host) return;
+        var host = document.getElementById("mr-intro"); if (!host) return;
         if (!Object.keys(names).length) { try { names = JSON.parse(document.getElementById("mr-cn").textContent) || {}; } catch (e) {} }
-        var list = readNames();
-        if (!list.length) { token++; show(null); return; }
-        var my = ++token;
+        if (!shown) shown = N.view(host, base);
+        var list = readNames(), my = ++token;
         /* EVERY TICKED FAMILY GETS ITS PLACE AT ONCE, AND ITS CARD WHEN IT ARRIVES. This used to wait for all the cards together
            (Promise.all) and draw nothing until the last one came: one slow or hung shard request kept the PREVIOUS cards on the page, so
-           David ticked five families and the page still showed the two cards from before (Blažević and Boraś, with the other three missing).
-           Now each family has a shut stub in the picker's order the moment the set changes, each is replaced by its card as it loads, and a card
-           that throws or takes too long is replaced by a plain line saying so. */
-        host.textContent = ""; host.hidden = false;
-        var slots = list.map(function (name) {
-          var d = document.createElement("details"); d.className = "ni";
-          var sm = document.createElement("summary"); sm.className = "ni-sum";
-          var h = document.createElement("h2"); h.className = "ni-h"; h.textContent = "About the name " + name;
-          sm.append(h); d.append(sm); host.append(d); return d;
-        });
-        function failed(name) { var f = N.build(null); f.name = name; f.failed = true; return N.render(f, base); }
+           David ticked five families and the page still showed the two cards from before, with the other three missing. Now each family
+           has its place in the picker's order the moment the set changes, each card arrives on its own, and one that throws or takes too
+           long says so. */
+        shown.set(list);
         list.forEach(function (name, i) {
-          var cur = slots[i], real = false;
-          function put(card, isReal) {
-            if (real || my !== token || !card || cur.parentNode !== host) return;
-            host.replaceChild(card, cur); cur = card; real = !!isReal;
-          }
-          /* a family that is not a surname has no card: its stub goes */
-          cardFor(name).then(function (c) { if (c) put(c, true); else if (my === token && cur.parentNode === host) host.removeChild(cur); },
-            function () { put(failed(name), false); });
+          if (shown.done(name)) return;
+          function put(model) { if (my === token) shown.put(name, model); }
+          cardFor(name).then(function (m) { if (m) put(m); else if (my === token) shown.drop(name); }, function () { put(failed(name)); });
           /* a late real card still replaces the "could not load" line */
-          setTimeout(function () { put(failed(name), false); }, 12000);
+          setTimeout(function () { put(failed(name)); }, 12000);
         });
       }
       document.addEventListener("ra-progress-changed", draw);
@@ -129,9 +118,6 @@ const BASE_ = u("/");
       bar above (js/line-switcher.js); the address follows the view (the «share» block in the main script). */}
   <p class="mr-share-note" id="mr-share-note" hidden></p>
 
-  {/* AN INTRODUCTION TO THE NAME, between the bar and the tabs: what the surname is, where the registers count it, and whose flag flew
-      there. Drawn by js/name-intro.js from the same shard the map's search reads; empty (and hidden) for a family that is not a surname. */}
-  <div id="mr-intro" hidden></div>
   <script type="application/json" id="mr-cn" set:html={JSON.stringify(CCNAMES)}></script>
 
   <div class="mr-full">
@@ -149,28 +135,26 @@ const BASE_ = u("/");
       number here and a number there mean the same row.
       DRAWN ONLY WHEN THERE IS SOMETHING TO DRAW. An empty map of the world is
       a worse answer than no map. */}
-  {/* TABS, AS ON THE READ PAGE. The page was one long scroll: the family, its places, then two notes about other people's work. Four tabs
-      now, the same ones-and-panels shape as the Journey / Story / People tabs on /read/ (the rs-tab styles). The map and the dossier
-      stay in the first panel, untouched: the script below still finds them by id. */}
-  <div class="rs-tabs mr-tabs" role="tablist" id="mr-tabs">
-    <button type="button" class="rs-tab" role="tab" id="mr-t-families" aria-controls="mr-p-families" aria-selected="true">Research<span id="mr-n-all"></span></button>
-    <button type="button" class="rs-tab" role="tab" id="mr-t-fixes" aria-controls="mr-p-fixes" aria-selected="false" tabindex="-1">GEDCOM to fix <span class="rs-n" id="mr-n-fixes" hidden></span></button>
-    <button type="button" class="rs-tab" role="tab" id="mr-t-sessions" aria-controls="mr-p-sessions" aria-selected="false" tabindex="-1">Other names</button>
-  </div>
-
   {/* ONE RESEARCH VIEW, FOR ONE FAMILY OR SEVERAL. David: «selecting one family or selecting more than 1 can we merge this into a single useable,
       impactful research view?» «Families & places» (one family) and «All families» (the ticked set) were two tabs that answered the same question
       two ways. It is one panel now, read from the families chosen in the header picker (nothing ticked means the one you mark under): who is read
       and the figures, the map of their places, what to do first, where they overlap (only when there are two or more), their stories, and then the
       place-by-place list. */}
-  <div class="rs-panel mr-panel" id="mr-p-families" role="tabpanel" aria-labelledby="mr-t-families">
+  <div class="rs-panel mr-panel" id="mr-p-families">
   {/* THE MAP FIRST. David: «my research used to have a map and be way better laid out». The map is the picture of the research, so it leads the panel; the
       family picker and its tools follow. (They were the other way round after the one view for several families was made, and the map sat 1,500px down.) */}
   <div id="mr-map" hidden></div>
   <p class="cap" id="mr-map-cap" hidden></p>
   <p class="cap" id="mr-dots-hint" hidden></p>
+  {/* ABOUT THE NAME, UNDER THE MAP: what each surname is, where the registers count it, and whose flag flew there. One family is one shut line; several
+      are one row of name chips that open one card at a time. Drawn by js/name-intro.js from the same shard the map's search reads; empty (and hidden)
+      for a family that is not a surname. It sits below the map so that however many families are read, the map stays on the first screen. */}
+  <div id="mr-intro" hidden></div>
   <div id="mr-all" data-base={u("/")}></div>
   <div id="mr-mid"></div>
+  {/* THE SAVED TREE FIXES, ONE LINE. They had a tab of their own; now one line with the number left and the Fix list, and the saved list in a shut fold
+      (research-fixes.js). Hidden when there is nothing to fix. */}
+  <div id="mr-fixes" class="mr-fixes" hidden></div>
   <div id="mr-stories" class="mr-stories" data-base={u("/")}></div>
   <div id="mr-errands" class="mr-errands" data-base={u("/")}></div>
 
@@ -184,161 +168,11 @@ const BASE_ = u("/");
   <script is:inline src={u("/js/research-overview.js")}></script>
   <script is:inline src={u("/js/research-stories.js")}></script>
   <script is:inline src={u("/js/research-errands.js")}></script>
-
-  <div class="rs-panel mr-panel" id="mr-p-fixes" role="tabpanel" aria-labelledby="mr-t-fixes" hidden>
-    <h2 class="mr-h">GEDCOM research still to fix</h2>
-    <p class="cap">What the Fix list in the <a href={BASE_ + "tree-canvas/"}>Tree Canvas</a> found in your tree file, kept here as part of your research. Places are listed as typed; people are only counted, and nothing leaves this browser.
-    <details class="mr-more"><summary>How it is kept</summary>It is saved each time you open a tree and its Fix list. Switch <b>Remember my decisions on this device</b> off on the Fix list to stop.</details></p>
-    <div id="mr-fixes"></div>
-  </div>
-
-  {/* WHERE THE OTHER SESSIONS' WORK IS, AND WHY IT IS NOT HERE YET. The family
-      archives record what they searched — pages, waypoints, the family each
-      row is about — into their own repositories. Nothing watches those, and no
-      script can write to this page: it reads a store in this browser. So the
-      work arrives only when somebody runs the importer and imports the file,
-      and until this said so there was no way to know that from here. */}
-  {/* OTHER NAMES IN THIS SESSION. A research session is one family archive (Defranceschi, Mazza, Falco…); the families it records are the names
-      it researches. This lists, for the family being viewed, every other name filed under the same session, so one click moves to it. Drawn
-      below by the sessions script from raProgress.lines(); it used to be three paragraphs about how the published file is merged. */}
-  <div class="rs-panel mr-panel" id="mr-p-sessions" role="tabpanel" aria-labelledby="mr-t-sessions" hidden>
-    <div id="mr-sess"></div>
-  </div>
-
-
-  <script is:inline>
-    (function () {
-      var P = window.raProgress, host = document.getElementById("mr-sess");
-      if (!P || !host) return;
-      function el(t, c, x) { var e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; }
-      function short(a) { return String(a.name || a.id).replace(/^The /, "").replace(/ Archive$/, ""); }
-      function draw() {
-        var lines = P.lines(), me = lines.filter(function (l) { return l.active; })[0];
-        host.textContent = "";
-        var box = el("section", "mrsess");
-        if (!me) { box.append(el("p", "mrsess-p", "Choose a family above to see the other names researched alongside it.")); host.append(box); return; }
-        var ar = me.archives || [];
-        if (!ar.length) {
-          box.append(el("h2", "mrsess-h", "Other names in this session"));
-          box.append(el("p", "mrsess-p", me.name + " was started by you, so it is not part of a family research session. When a session researches it, the names researched with it will be listed here."));
-          host.append(box); return;
-        }
-        ar.forEach(function (a) {
-          var sec = el("div", "mrsess-g"), h = el("h2", "mrsess-h", "Other names in the " + short(a) + " session");
-          var open = el("a", "mrsess-open", "Open the " + short(a) + " archive \u2197"); open.href = a.url; open.target = "_blank"; open.rel = "noopener";
-          sec.append(h, open);
-          var others = lines.filter(function (l) { return l.slug !== me.slug && (l.archives || []).some(function (x) { return x.id === a.id; }); });
-          if (!others.length) { sec.append(el("p", "mrsess-p", "No other names are filed under this session yet.")); box.append(sec); return; }
-          sec.append(el("p", "mrsess-p", others.length + (others.length === 1 ? " other name" : " other names") + " researched in this session. Choose one to see its research."));
-          var ul = el("ul", "mrsess-l");
-          others.forEach(function (l) {
-            var li = el("li"), b = el("button", "mrsess-b"); b.type = "button";
-            b.append(el("b", "", l.name + (l.where ? " of " + l.where : "")), el("small", "", l.marks ? l.marks + (l.marks === 1 ? " mark" : " marks") : "no marks yet"));
-            b.addEventListener("click", function () { P.setActive(l.slug); document.dispatchEvent(new CustomEvent("ra-progress-changed")); window.scrollTo({ top: 0, behavior: "smooth" }); });
-            li.append(b); ul.append(li);
-          });
-          sec.append(ul); box.append(sec);
-        });
-        host.append(box);
-      }
-      draw(); document.addEventListener("ra-progress-changed", draw); window.addEventListener("storage", draw);
-    })();
-  </script>
-
-  <script is:inline define:vars={{ BASE: u("/") }}>
-    /* TABS AND THE GEDCOM-TO-FIX PANEL. Reads ra-gedcom-fixes-v1 (written by Roots & Routes while "Remember my decisions" is on; see
-       roots/js/decisions.js). Place text is user data, so every node here is built with textContent. */
-    (function () {
-      var NAMES = ["families", "fixes", "sessions"], FKEY = "ra-gedcom-fixes-v1";
-      var curTab = "families", MKEY = "ra-synopsis-scope";
-      /* ONE RESEARCH TAB. It reads the families ticked in the header picker (nothing ticked means the one you mark under), so there is no separate
-         «All families» tab and no banner telling you to go there; the tab only says how many families it is reading. */
-      function ticked() {
-        try {
-          var P = window.raProgress, x = JSON.parse(localStorage.getItem(MKEY) || "null"); if (!P || !x) return [];
-          var ls = P.lines(); return x.all ? ls : ls.filter(function (l) { return (x.slugs || []).indexOf(l.slug) > -1; });
-        } catch (e) { return []; }
-      }
-      function countTab() {
-        var cnt = document.getElementById("mr-n-all"), n = ticked().length;
-        if (cnt) cnt.textContent = n > 1 ? " (" + n + " families)" : "";
-      }
-      function show(n, push) {
-        curTab = n;
-        NAMES.forEach(function (k) {
-          var on = k === n, t = document.getElementById("mr-t-" + k), p = document.getElementById("mr-p-" + k);
-          if (!t || !p) return; t.setAttribute("aria-selected", String(on)); t.tabIndex = on ? 0 : -1; p.hidden = !on;
-        });
-        if (push) { try { history.replaceState(null, "", location.pathname + location.search + (n === "families" ? "" : "#" + n)); } catch (e) { /* no history */ } }
-        if (n === "families") setTimeout(function () { window.dispatchEvent(new Event("resize")); }, 30);   // the map was drawn while hidden
-        document.dispatchEvent(new CustomEvent("ra-tab-shown", { detail: n }));
-      }
-      NAMES.forEach(function (k, i) {
-        var t = document.getElementById("mr-t-" + k); if (!t) return;
-        t.addEventListener("click", function () { show(k, true); });
-        t.addEventListener("keydown", function (e) {
-          var d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0; if (!d) return;
-          var n = NAMES[(i + d + NAMES.length) % NAMES.length]; show(n, true); document.getElementById("mr-t-" + n).focus(); e.preventDefault();
-        });
-      });
-      /* THE OLD ADDRESSES. #all (the All families tab) and #story or #story/<id> (the My story tab) both land in the research view; a story address
-         scrolls to the stories in it. */
-      function landOld() {
-        var g = (location.hash || "").replace("#", "");
-        if (g === "all" || /^story(\/|$)/.test(g)) {
-          show("families", false);
-          if (g !== "all") setTimeout(function () { var st = document.getElementById("mr-stories"); if (st && st.scrollIntoView) st.scrollIntoView({ block: "start" }); }, 400);
-        } else if (NAMES.indexOf(g) > 0) show(g, false);
-      }
-      landOld();
-      document.addEventListener("ra-scope-changed", countTab);
-      document.addEventListener("ra-progress-changed", countTab);
-      window.addEventListener("hashchange", landOld);
-      setTimeout(countTab, 0);
-
-      function el(tag, text, cls) { var e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; }
-      function read() { try { var r = localStorage.getItem(FKEY), d = r && JSON.parse(r); return d && d.trees ? d : { v: 1, trees: {} }; } catch (e) { return { v: 1, trees: {} }; } }
-      function draw() {
-        var box = document.getElementById("mr-fixes"); if (!box) return; box.textContent = "";
-        var d = read(), names = Object.keys(d.trees).sort(function (a, b) { return String(d.trees[b].saved).localeCompare(String(d.trees[a].saved)); }), open = 0;
-        names.forEach(function (n) { (d.trees[n].sections || []).forEach(function (s) { open += Math.max(0, s.total - s.done - s.asis); }); });
-        var badge = document.getElementById("mr-n-fixes"); if (badge) { badge.hidden = !open; badge.textContent = open; }
-        if (!names.length) {
-          var e = el("div", null, "mr-fx-empty"); e.append(el("p", "No fix list is kept here yet."), el("p", "Open your tree in the Tree Canvas once and go to its Fix list. What is left to fix is kept here from then on, and ticks you make there are counted. If you had switched \u201cRemember my decisions on this device\u201d off, switch it back on.", "cap"));
-          var a = el("a", "Open the Tree Canvas", "mr-fx-go"); a.href = BASE + "tree-canvas/"; e.append(a); box.append(e); return;
-        }
-        names.forEach(function (n) {
-          var t = d.trees[n], card = el("article", null, "mr-fx"), head = el("header", null, "mr-fx-head");
-          var left = (t.sections || []).reduce(function (a, s) { return a + Math.max(0, s.total - s.done - s.asis); }, 0);
-          head.append(el("h3", n), el("span", left + " left to fix \u00b7 kept " + t.saved, "mr-fx-meta")); card.append(head);
-          var groups = {}, order = [];
-          (t.sections || []).forEach(function (s) { var g = s.group || "Other"; if (!groups[g]) { groups[g] = []; order.push(g); } groups[g].push(s); });
-          order.forEach(function (g) {
-            var gd = el("div", null, "mr-fx-group"); gd.append(el("h4", g));
-            groups[g].forEach(function (s) {
-              var rest = Math.max(0, s.total - s.done - s.asis), row = el("div", null, "mr-fx-row"), bar = el("span", null, "mr-fx-bar"), fill = el("i"); fill.style.width = Math.round(100 * (s.done + s.asis) / Math.max(1, s.total)) + "%"; bar.append(fill);
-              row.append(el("span", s.title, "mr-fx-t"), bar, el("span", rest ? rest + " of " + s.total + " left" : "all " + s.total + " done", "mr-fx-c" + (rest ? "" : " ok"))); gd.append(row);
-            });
-            card.append(gd);
-          });
-          var pl = (t.places || []).filter(function (p) { return p.s === "o"; });
-          if (pl.length) {
-            var det = el("details", null, "mr-fx-places"), sm = el("summary"); sm.append(el("b", "Places to correct or choose "), el("span", "(" + pl.length + (pl.length >= 150 ? "+" : "") + ")", "muted")); det.append(sm);
-            var ul = el("ul"); pl.slice(0, 60).forEach(function (p) { var li = el("li"); li.append(el("span", p.t, "mr-fx-raw")); if (p.to) li.append(" \u2192 ", el("b", p.to)); ul.append(li); });
-            det.append(ul); if (pl.length > 60) det.append(el("p", "and " + (pl.length - 60) + " more in the Tree Canvas", "cap")); card.append(det);
-          }
-          var foot = el("p", null, "mr-fx-foot"), go = el("a", "Open the Tree Canvas"); go.href = BASE + "tree-canvas/"; foot.append(go, " and load this file again to work down the list. ");
-          var fg = el("button", "Forget this list"); fg.type = "button"; fg.className = "link"; fg.onclick = function () { var x = read(); delete x.trees[n]; try { if (Object.keys(x.trees).length) localStorage.setItem(FKEY, JSON.stringify(x)); else localStorage.removeItem(FKEY); } catch (e) { /* blocked */ } draw(); };
-          foot.append(fg); card.append(foot); box.append(card);
-        });
-      }
-      draw(); window.addEventListener("storage", draw);
-    })();
-  </script>
+  <script is:inline src={u("/js/research-fixes.js")} data-base={u("/")}></script>
 
   <script is:inline define:vars={{ BASE: u("/") }}>
     (function () {
-      var P = window.raProgress;
+      var P = window.raProgress, SYN = window.raSynopsis;
       var body = document.getElementById("mr-body");
       if (!P || !body) return;
 
@@ -704,13 +538,15 @@ const BASE_ = u("/");
                find with none left says so. It is a suggestion from the marks and the years in the titles, not a finding. */
             var fnd = rows.filter(function (r) { return r.b.state === "found"; });
             var who = function (r) { var ns = (r.fams && r.fams.length ? r.fams : slugs).map(function (s2) { return nameOf[s2] || s2; }); return ns.join(", "); };
-            var nx = "", nextTxt = "", part = rows.filter(function (r) { return r.cov.length && r.m.total && P.covered(r.cov) < r.m.total && r.b.state !== "exhausted"; })[0];
+            /* a book to carry on with is a half-read one with an unread page after where reading began (progress-kit resume) */
+            var goOn = function (r) { return P.resume(r.cov, { total: r.m.total, walked: r.m.walked, state: r.b.state }); };
+            var nx = "", nextTxt = "", part = rows.filter(function (r) { return r.m.total && P.covered(r.cov) < r.m.total && goOn(r); })[0];
             if (fnd.length) {
               nx += '<p class="mrfound"><b>Found something in:</b> ' + fnd.map(function (r) {
-                return "<span><b>" + esc(r.m.t || r.id) + "</b> <i>(" + esc(who(r)) + ")</i></span>";
+                return "<span><b>" + bookName(r, pid) + "</b> <i>(" + esc(who(r)) + ")</i></span>";
               }).join(" \u00b7 ") + "</p>";
             }
-            if (part) nextTxt = "Carry on with <b>" + esc(part.m.t || part.id) + "</b> from image " + P.resume(part.cov) + ".";
+            if (part) nextTxt = "Carry on with <b>" + bookName(part, pid) + "</b> from image " + goOn(part) + ".";
             else if (fnd.length && todo.length) {
               var ty = yearsOf(fnd[0].m.t), best = null, bd = 1e9;
               if (ty) todo.forEach(function (v) {
@@ -720,7 +556,8 @@ const BASE_ = u("/");
                 if (d < bd) { bd = d; best = v; }
               });
               nextTxt = best
-                ? "The unmarked book nearest in years to <b>" + esc(fnd[0].m.t || fnd[0].id) + "</b> is <b>" + esc(best.t || best.waypoint) + "</b>" +
+                ? "The unmarked book nearest in years to <b>" + bookName(fnd[0], pid) + "</b> is <b>" +
+                  bookName({ id: "volume:" + String(best.waypoint).split(":")[0], m: { t: best.t || best.waypoint, href: BASE + "place/" + pid + "/" } }, pid) + "</b>" +
                   (bd ? " (" + bd + " year" + (bd === 1 ? "" : "s") + " away)" : " (it overlaps)") + ". Open it, or add it to the to-do list below."
                 : "Read the books either side of what was found, then mark what you read.";
             } else if (fnd.length) nextTxt = "Every book listed here is marked. Open the place for the villages within a day's walk.";
@@ -923,6 +760,18 @@ const BASE_ = u("/");
         var ys = (String(t || "").match(/\b(1[4-9]\d\d|20[0-2]\d)\b/g) || []).map(Number);
         return ys.length ? [Math.min.apply(null, ys), Math.max.apply(null, ys)] : null;
       }
+      /* A NAMED BOOK LINKS TO THE BOOK. FamilySearch's own viewer, in a new tab, when the town's file lists that book (research-synopsis.js
+         bookUrl); otherwise what the mark carries, which for a book is the town page. Before the town's file has arrived a row links the town,
+         says which file it needs (data-book-place, which fill() fetches) and is drawn again with the book. */
+      function bookPlace(r) { return r.m.place || placeIdOf(r.m); }
+      function bookName(r, pid, cls) {
+        var m = r.m, raw = r.id.replace(/^(volume|film|source|collection|antenati):/, ""), title = esc(m.t || raw);
+        pid = pid || bookPlace(r);
+        var fs = SYN.bookUrl(r.id, m.href, pid ? PLACEC[pid] : null), c = cls ? ' class="' + cls + '"' : "";
+        if (fs) return "<a" + c + ' href="' + esc(fs) + '" target="_blank" rel="noopener" title="Open this book on FamilySearch">' + title + " \u2197</a>";
+        var wait = r.id.indexOf("volume:") === 0 && pid && !PLACEC[pid] ? ' data-book-place="' + esc(pid) + '"' : "";
+        return m.href ? "<a" + c + ' href="' + esc(m.href) + '"' + wait + ">" + title + "</a>" : "<span" + c + wait + ">" + title + "</span>";
+      }
       function rowHtml(r) {
         var m = r.m, b = r.b, cov = r.cov;
         var raw = r.id.replace(/^(volume|film|source|collection|antenati):/, "");
@@ -945,7 +794,8 @@ const BASE_ = u("/");
           chips += '<span class="mrn">' +
                    (m.total ? P.covered(cov) + " of " + m.total
                             : P.covered(cov) + " pages") + "</span>";
-          chips += '<span class="mrres">start again at ' + P.resume(cov) + "</span>";
+          var again = P.resume(cov, { total: m.total, walked: m.walked, state: b.state });   /* half-read books only */
+          if (again) chips += '<span class="mrres">start again at ' + again + "</span>";
         }
         if (shared) chips += '<span class="mrwalk">read in full</span>';
         if (b.state) chips += '<span class="mrstate mrstate-' + esc(b.state) + '">' +
@@ -972,8 +822,7 @@ const BASE_ = u("/");
         var ry = window.raPlaceStrip ? window.raPlaceStrip.yearsIn(m.t) : null;
         return '<li class="mrrow"' + (ry ? ' data-yf="' + ry[0] + '" data-yt="' + ry[1] + '"' : "") + '>' +
           '<div class="mrline mrline-t">' +
-            (m.href ? '<a class="mrt" href="' + esc(m.href) + '">' + esc(m.t || raw) + "</a>"
-                    : '<span class="mrt">' + esc(m.t || raw) + "</span>") +
+            bookName(r, null, "mrt") +
             howHtml(r.id) +
             (CUR.several && r.fams && r.fams.length ? '<span class="mrfams">' + r.fams.map(function (s) { return '<span class="mrfam">' + esc(CUR.nameOf[s] || s) + "</span>"; }).join("") + "</span>" : "") +
             (r.mineHere ? '<button type="button" class="mrdel" data-id="' + esc(r.id) + '">forget</button>' : "") +
@@ -1000,8 +849,8 @@ const BASE_ = u("/");
       var filling = false;
       function fill() {
         if (filling) return;
-        var want = [].slice.call(document.querySelectorAll("[data-place],[data-shared-place]"))
-          .map(function (el) { return el.getAttribute("data-place") || el.getAttribute("data-shared-place"); })
+        var want = [].slice.call(document.querySelectorAll("[data-place],[data-shared-place],[data-book-place]"))
+          .map(function (el) { return el.getAttribute("data-place") || el.getAttribute("data-shared-place") || el.getAttribute("data-book-place"); })
           .filter(function (p, i, all) { return !(p in PLACEC) && all.indexOf(p) === i; });
         var needProv = !PROVS, needCon = !CONTACTS;
         if (!want.length && !needProv && !needCon) { drawMap(); return; }
@@ -1186,6 +1035,81 @@ const BASE_ = u("/");
                           "Click a dot to open it or plan its books." : "");
       }
 
+      function pinOf(p) {
+        var cls = "mr-pin " + (p.complete ? "mr-pin-done" : p.flight ? "mr-pin-part" : "mr-pin-plan") + (p.found ? " mr-pin-found" : "");
+        var say = p.complete ? "every book read to the end" : (p.held ? p.done + " of " + p.held + " books read to the end" : "");
+        return L.marker([p.y, p.x], { title: p.num + " \u00b7 " + p.n, icon: L.divIcon({ className: cls, html: p.complete ? "\u2713" : String(p.num), iconSize: [24, 24] }) })
+          .bindPopup('<a href="' + BASE + "place/" + p.id + '/">' + p.num + " \u00b7 " + p.n.replace(/[<>&]/g, "") + '</a>' +
+            (say ? "<br>" + say : "") + (p.found ? "<br>found something here" : "") +
+            '<br><a href="#mrp-' + p.id + '">see it below \u2193</a>');
+      }
+      /* PLACES THAT WOULD SIT ON ONE ANOTHER ARE ONE DISC, the home map's soft translucent disc, with how many it holds; a gold ring if something was
+         found at any of them, and the states in its label. A press zooms in until they come apart. */
+      function discOf(group, top) {
+        var RM = window.raResearchMap, say = RM.summary(group.places), n = group.places.length, size = RM.radius(n, top) * 2;
+        var at = mrMap.unproject([group.x, group.y], mrMap.getZoom());
+        var m = L.marker(at, { icon: L.divIcon({ className: "mr-disc" + (say.found ? " mr-disc-found" : ""), html: "<span>" + n + "</span>", iconSize: [size, size] }) });
+        m.bindTooltip(say.text, { sticky: true });
+        m.on("add", function () { var e = m.getElement(); if (e) e.setAttribute("aria-label", say.text + ". Press to zoom in."); });
+        m.on("click", function () {
+          mrMap._raMoved = true;
+          mrMap.fitBounds(L.latLngBounds(group.places.map(function (p) { return [p.y, p.x]; })).pad(0.3),
+            { maxZoom: Math.max(RM.CLUSTER_TO, mrMap.getZoom() + 3) });
+        });
+        return m;
+      }
+      function nextPin(c, i) {
+        return L.marker([c.y, c.x], { icon: L.divIcon({ className: "mr-pin mr-pin-g", html: String.fromCharCode(65 + i), iconSize: [24, 24] }) })
+          .bindPopup('<a href="' + BASE + "place/" + c.id + '/">' + String.fromCharCode(65 + i) + " \u00b7 " +
+            esc2(c.n) + '</a><br>' + Math.round(c.hop) + " km from " + esc2(c.prev) + ", " + c.v.toLocaleString() + " FamilySearch books");
+      }
+      /* one recommended-next mark far out: a single lettered pin, or a pill with several letters that zooms in until they part; either may sit just below a disc */
+      function nextMark(path, mk) {
+        var one = mk.items.length === 1, w = one ? 24 : 16 + 7 * mk.label.length, anchor = [w / 2, 12 - mk.dy], m;
+        if (one) {
+          m = nextPin(path[mk.items[0]], mk.items[0]);
+          m.options.icon.options.iconAnchor = anchor; m.options.icon.options.popupAnchor = [0, mk.dy - 12];
+          return m;
+        }
+        var here = mk.items.map(function (i) { return path[i]; }), say = "Recommended next: " + mk.label + ". Press to zoom in.";
+        m = L.marker([here[0].y, here[0].x], { icon: L.divIcon({ className: "mr-pin mr-pin-g mr-pin-gs", html: mk.label, iconSize: [w, 24], iconAnchor: anchor }) });
+        m.bindTooltip(say, { sticky: true });
+        m.on("add", function () { var e = m.getElement(); if (e) e.setAttribute("aria-label", say); });
+        m.on("click", function () {
+          mrMap._raMoved = true;
+          mrMap.fitBounds(L.latLngBounds(here.map(function (p) { return [p.y, p.x]; })).pad(0.3),
+            { maxZoom: Math.max(window.raResearchMap.CLUSTER_TO, mrMap.getZoom() + 3) });
+        });
+        return m;
+      }
+      function drawPins() {
+        if (!mrMap || !mrMap._raData) return;
+        var RM = window.raResearchMap, pts = mrMap._raData.pts, ns = mrMap._raData.ns;
+        if (mrMap._raPins) mrMap.removeLayer(mrMap._raPins);
+        var g = L.layerGroup(), z = mrMap.getZoom(), far = RM && z < RM.CLUSTER_TO;
+        var at = function (p) { var q = mrMap.project([p.y, p.x], z); return [q.x, q.y]; };
+        /* the neighbourly path first, so the pins sit on top of the line; a pale edge under the dashes keeps it readable on imagery */
+        if (ns.path.length && ns.start) {
+          var line = [[ns.start.y, ns.start.x]].concat(ns.path.map(function (c) { return [c.y, c.x]; }));
+          L.polyline(line, { color: "#ffffff", weight: 6, opacity: .75, interactive: false }).addTo(g);
+          L.polyline(line, { color: "#6B5B73", weight: 2.5, dashArray: "6 7", opacity: .95, interactive: false }).addTo(g);
+        }
+        var groups = far ? RM.cluster(pts, at, RM.CLUSTER_PX / 2) : pts.map(function (p) { return { places: [p] }; });
+        var top = groups.reduce(function (a, x) { return Math.max(a, x.places.length); }, 1);
+        if (ns.path.length && ns.start) {
+          if (!far) ns.path.forEach(function (c, i) { nextPin(c, i).addTo(g); });
+          else {
+            var under = groups.map(function (x) {
+              if (x.places.length > 1) return { x: x.x, y: x.y, r: RM.radius(x.places.length, top) };
+              var q = at(x.places[0]); return { x: q[0], y: q[1], r: 12 };
+            });
+            RM.nextMarks(ns.path, at, under, 22).forEach(function (mk) { nextMark(ns.path, mk).addTo(g); });
+          }
+        }
+        groups.forEach(function (x) { (x.places.length > 1 ? discOf(x, top) : pinOf(x.places[0])).addTo(g); });
+        g.addTo(mrMap); mrMap._raPins = g;
+      }
+
       function drawMap() {
         var box = document.getElementById("mr-map");
         var cap = document.getElementById("mr-map-cap");
@@ -1211,7 +1135,12 @@ const BASE_ = u("/");
         }
         box.hidden = false;
         if (!mrMap) {
-          mrMap = L.map(box, { scrollWheelZoom: false, preferCanvas: true });
+          /* ONE WORLD, ONCE. A short wide box zoomed out drew the world three times side by side; the map now stops where one copy fills the box. */
+          var RM = window.raResearchMap;
+          mrMap = L.map(box, { scrollWheelZoom: false, preferCanvas: true, zoomSnap: 0.25, maxBounds: [[-85.05, -180], [85.05, 180]], maxBoundsViscosity: 1 });
+          var holdWorld = function () { if (RM) mrMap.setMinZoom(RM.minZoom(box.clientWidth, box.clientHeight)); };
+          holdWorld(); mrMap.on("resize", holdWorld);
+          mrMap.on("zoomend", drawPins);
           /* ONCE THE READER HAS MOVED THE MAP IT STAYS WHERE THEY PUT IT: planning a place redraws the page, and the map must not jump back */
           ["pointerdown", "wheel", "keydown"].forEach(function (ev) { box.addEventListener(ev, function () { mrMap._raMoved = true; }, { passive: true }); });
           mrMap.on("moveend zoomend", function () { viewCells(); drawDots(); });
@@ -1226,7 +1155,7 @@ const BASE_ = u("/");
              reader pick a look; David: «why does the map not look/feel like our regular map style?». The light grey is now just the "Map"
              look, and js/basemaps.js (shared with the Atlas, History and Compass maps) chooses the opening look, adds the same switcher and
              remembers the reader's pick in the same key, so a look chosen on one map holds on this one. Place names go in a pane above the
-             tiles and below the pins. */
+             tiles and below the pins. It opens in whatever look the Atlas home shows (followHome). */
           mrMap.createPane("baseLabels");
           mrMap.getPane("baseLabels").style.zIndex = 250;
           mrMap.getPane("baseLabels").style.pointerEvents = "none";
@@ -1236,42 +1165,24 @@ const BASE_ = u("/");
             L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}", {
               pane: "baseLabels", maxNativeZoom: 16, maxZoom: 18 })
           ];
-          if (window.raBasemaps) window.raBasemaps.attach(L, mrMap, { light: lightGround, labelsPane: "baseLabels" });
+          /* the home map's own Terrain tiles */
+          var terrain = L.tileLayer("https://tile.opentopomap.org/{z}/{x}/{y}.png",
+            { attribution: "&copy; OpenStreetMap contributors, SRTM \u00b7 OpenTopoMap (CC-BY-SA)", maxZoom: 17 });
+          if (window.raBasemaps) window.raBasemaps.attach(L, mrMap, { light: lightGround, labelsPane: "baseLabels", followHome: true, terrain: terrain });
           else lightGround.forEach(function (l) { l.addTo(mrMap); });
         }
-        if (mrMap._raPins) mrMap.removeLayer(mrMap._raPins);
-        var g = L.layerGroup();
-        /* the neighbourly path first, so the pins sit on top of the line */
-        if (ns.path.length && ns.start) {
-          var line = [[ns.start.y, ns.start.x]].concat(ns.path.map(function (c) { return [c.y, c.x]; }));
-          L.polyline(line, { color: "#6B5B73", weight: 2.5, dashArray: "6 7", opacity: .9, interactive: false }).addTo(g);
-          ns.path.forEach(function (c, i) {
-            L.marker([c.y, c.x], {
-              icon: L.divIcon({ className: "mr-pin mr-pin-g", html: String.fromCharCode(65 + i), iconSize: [22, 22] })
-            }).addTo(g).bindPopup('<a href="' + BASE + "place/" + c.id + '/">' + String.fromCharCode(65 + i) + " · " +
-              esc2(c.n) + '</a><br>' + Math.round(c.hop) + " km from " + esc2(c.prev) + ", " + c.v.toLocaleString() + " FamilySearch books");
-          });
-        }
-        pts.forEach(function (p, i) {
-          var cls = "mr-pin " + (p.complete ? "mr-pin-done" : p.flight ? "mr-pin-part" : "mr-pin-plan") +
-                    (p.found ? " mr-pin-found" : "");
-          var say = p.complete ? "every book read to the end" :
-                    (p.held ? p.done + " of " + p.held + " books read to the end" : "");
-          L.marker([p.y, p.x], {
-            icon: L.divIcon({ className: cls, html: p.complete ? "✓" : String(p.num), iconSize: [22, 22] })
-          }).addTo(g).bindPopup('<a href="' + BASE + "place/" + p.id + '/">' +
-                                p.num + " · " + p.n.replace(/[<>&]/g, "") + '</a>' +
-                                (say ? "<br>" + say : "") + (p.found ? "<br>found something here" : "") +
-                                '<br><a href="#mrp-' + p.id + '">see it below ↓</a>');
-        });
-        g.addTo(mrMap); mrMap._raPins = g;
+        mrMap._raData = { pts: pts, ns: ns };
         var all = pts.map(function (p) { return [p.y, p.x]; }).concat(ns.path.map(function (c) { return [c.y, c.x]; }));
         var sig = all.map(function (q) { return q.join(","); }).join(";");
         mrMap._raSkip = {};
         pts.forEach(function (p) { mrMap._raSkip[p.id] = 1; });
         ns.path.forEach(function (c) { mrMap._raSkip[c.id] = 1; });
-        if (mrMap._raSig !== sig && !mrMap._raMoved) mrMap.fitBounds(L.latLngBounds(all).pad(0.2), { maxZoom: 13 });
+        /* the view first: which places share a disc depends on how far out the map is */
+        /* with room at the top for the switcher, which would otherwise cover the northern places (two or three lines of it on a phone) */
+        if (mrMap._raSig !== sig && !mrMap._raMoved) mrMap.fitBounds(L.latLngBounds(all).pad(0.1),
+          { maxZoom: 13, animate: false, paddingTopLeft: [24, box.clientWidth < 500 ? 96 : 48], paddingBottomRight: [24, 24] });
         mrMap._raSig = sig;
+        drawPins();
         viewCells(); drawDots();
         if (cap) {
           var nd = pts.filter(function (p) { return p.complete; }).length;
@@ -1281,6 +1192,7 @@ const BASE_ = u("/");
             '<span class="mrleg"><i class="mr-pin mr-pin-part">•</i> in flight (some books read)</span>' +
             '<span class="mrleg"><i class="mr-pin mr-pin-plan">•</i> planned</span>' +
             '<span class="mrleg"><i class="mr-pin mr-pin-found mr-pin-part">•</i> found something</span>' +
+            '<span class="mrleg"><i class="mr-disc">3</i> places close together (zoom in to part them; gold ring: something found at one)</span>' +
             '<span class="mrleg"><i class="mr-dot"></i> other place with records (zoom in; click one to plan its books)</span>' +
             (ns.path.length ? '<span class="mrleg"><i class="mr-pin mr-pin-g">A</i> recommended next, dashed line is the path</span>' : "");
         }
@@ -1444,25 +1356,42 @@ const BASE_ = u("/");
   .mrcode { margin: 10px 0; font-family: var(--mono); font-size: 12.5px; }
   .mrcode code { background: var(--ground); padding: 7px 10px;
     border-radius: 3px; display: inline-block; }
-  #mr-map { height: 340px; margin: 18px 0 6px; border: 1px solid var(--rule);
-    border-radius: 4px; }
+  /* a map to read, not a strip: most of a screen on a desktop, about a square on a phone */
+  #mr-map { height: clamp(360px, 62vh, 600px); margin: 6px 0; border: 1px solid var(--rule);
+    border-radius: 12px; isolation: isolate; }
+  @media (max-width: 600px) {
+    #mr-map { height: clamp(280px, 86vw, 420px); }
+    /* this map sits well inside the page's margins, so the shared switcher's phone width reached over the zoom buttons: here it stays clear of them */
+    #mr-map :global(.ra-base) { max-width: 196px; }
+  }
   #mr-map[hidden] { display: none; }
+  /* THE HOME MAP'S MARKS: every dot carries a white edge, so it reads on photographs and on a dark ground as well as on a pale map. */
   :global(.mr-pin) { background: var(--accent); color: var(--panel);
-    border-radius: 50%; width: 22px; height: 22px; line-height: 22px;
+    border-radius: 50%; width: 24px; height: 24px; line-height: 21px; box-sizing: border-box; border: 1.5px solid #fff;
     text-align: center; font-family: var(--sans); font-size: 12px;
     font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,.4); }
+  /* and its soft translucent disc where places are too close to draw apart (the same teals the home map inks its discs with) */
+  :global(.mr-disc) { display: grid; place-items: center; box-sizing: border-box; border-radius: 50%; border: 1px solid #fff;
+    background: color-mix(in srgb, var(--accent, #1F5C6B) 62%, transparent); color: #fff; font: 700 12.5px/1 var(--sans); text-shadow: 0 0 3px rgba(0,0,0,.65); cursor: pointer; }
+  :global(.leaflet-marker-icon.mr-disc) { display: grid; }
+  :global(.ra-dark-look .mr-disc) { background: rgba(111, 182, 198, .62); }
+  :global(.mr-disc.mr-disc-found) { border: 3px solid #C9971C; box-shadow: 0 0 0 1px #fff; }
+  :global(.mr-disc:focus-visible), :global(.leaflet-marker-icon.mr-pin:focus-visible) { outline: 3px solid #fff; outline-offset: 2px; }
   /* PIN STATES. Completed = solid green with a tick; some books read = the accent; only planned = hollow; a find rings it gold;
      a suggested next place is a lettered dashed-outline disc. Never colour alone: the tick, the hollow and the letter differ in shape too. */
-  :global(.mr-pin.mr-pin-done) { background: #1E6B3C; }
+  :global(.mr-pin.mr-pin-done) { background: #1E6B3C; color: #fff; }
   :global(.mr-pin.mr-pin-plan) { background: var(--panel); color: var(--brass); box-shadow: inset 0 0 0 2px var(--brass), 0 1px 3px rgba(0,0,0,.3); }
   :global(.mr-pin.mr-pin-found), :global(.mr-pin.mr-pin-found.mr-pin-done), :global(.mr-pin.mr-pin-found.mr-pin-plan) { box-shadow: 0 0 0 3px #C9971C, 0 1px 3px rgba(0,0,0,.4); }
   :global(.mr-pin.mr-pin-g) { background: var(--panel); color: var(--r-hre); box-shadow: inset 0 0 0 2px var(--r-hre); border: 0; }
+  :global(.mr-pin.mr-pin-gs) { border-radius: 12px; line-height: 24px; white-space: nowrap; font-size: 11.5px; }
   #mr-map-cap { line-height: 2; }
   #mr-dots-hint { margin-top: 0; }
   :global(.mr-dot) { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--r-hre); border: 1.5px solid var(--panel); box-shadow: 0 0 0 1px var(--r-hre); }
   :global(.mrs-none) { color: #4C5D66; font-size: 12px; }
   :global(.mrleg) { display: inline-flex; align-items: center; gap: 5px; margin-left: 14px; white-space: nowrap; }
-  :global(.mrleg .mr-pin) { display: inline-block; width: 18px; height: 18px; line-height: 18px; font-size: 11px; font-style: normal; }
+  @media (max-width: 600px) { :global(.mrleg) { white-space: normal; } :global(.mrleg i) { flex: 0 0 auto; } }
+  :global(.mrleg .mr-pin) { display: inline-block; width: 18px; height: 18px; line-height: 15px; font-size: 11px; font-style: normal; }
+  :global(.mrleg .mr-disc) { display: inline-grid; width: 20px; height: 20px; font-size: 10.5px; font-style: normal; }
   /* A PLACE CARD TAKES ITS COLOUR FROM ITS STATE, in the title, the left bar and the header tint; and says it in words as well
      (the label), so colour is never the only signal. green = every book read, teal = in flight (something read or concluded),
      brass = planned (on the to-do list only), mauve dashed = recommended next. Same four colours as the pins on the map. */
@@ -1740,10 +1669,17 @@ const BASE_ = u("/");
 
   .mr-where { margin: 0 0 14px; font: 13px/1.5 var(--sans); color: var(--ink-3); max-width: 80ch; }
   .mr-where b { color: var(--ink-2, var(--ink)); }
-  .mr-tabs { margin-top: 18px; }
   .mr-panel { margin-bottom: 28px; min-width: 0; }
   .mr-panel .mrext { margin-top: 0; }
   .mr-h { margin: 0 0 6px; font-size: 24px; }
+  /* the saved tree fixes: one line, the Fix list link, and the saved list in a shut fold that takes the full width when opened */
+  .mr-fixes { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; margin: 18px 0 0; font: 14.5px/1.5 var(--sans); }
+  .mr-fixes[hidden] { display: none; }
+  /* an old #fixes or #story address lands below the header that stays at the top, not under it */
+  #mr-fixes, #mr-stories { scroll-margin-top: 90px; }
+  .mr-fixline { margin: 0; }
+  .mr-fixsaved > summary { cursor: pointer; font-size: 13px; color: var(--ink-2); }
+  .mr-fixsaved[open] { flex-basis: 100%; min-width: 0; }
   .mr-fx { border: 1px solid var(--rule); border-left: 3px solid var(--accent, #245565); border-radius: 8px; padding: 16px 18px; margin: 16px 0; background: var(--panel); }
   .mr-fx-head { display: flex; gap: 10px 16px; align-items: baseline; flex-wrap: wrap; justify-content: space-between; }
   .mr-fx-head h3 { margin: 0; font-size: 19px; overflow-wrap: anywhere; }
@@ -1754,15 +1690,9 @@ const BASE_ = u("/");
   .mr-fx-c.ok { color: var(--accent, #245565); font-weight: 600; }
   .mr-fx-places { margin: 14px 0 0; font-family: var(--sans); font-size: 14px; } .mr-fx-places ul { margin: 8px 0 0; padding-left: 18px; } .mr-fx-raw { overflow-wrap: anywhere; }
   .mr-fx-foot { margin: 14px 0 0; } .mr-fx-foot .link { background: none; border: 0; padding: 0; margin-left: 4px; font: inherit; color: var(--accent, #245565); text-decoration: underline; cursor: pointer; }
-  .mr-fx-empty { padding: 10px 0; } .mr-fx-go { display: inline-block; padding: 9px 16px; border-radius: 8px; background: var(--accent, #245565); color: #fff; font: 600 14px var(--sans); text-decoration: none; }
   @media (max-width: 560px) { .mr-fx-row { grid-template-columns: 1fr auto; } .mr-fx-bar { display: none; } }
 
-  /* ---- THE WOW LAYER: one gold hue, pill tabs, round cards (CSS only; the panels are drawn by scripts that keep their class names) ---- */
-  main .mr-tabs { gap: 8px; border: 0; margin: 20px 0 14px; padding: 0; flex-wrap: wrap; overflow: visible; }
-  main .mr-tabs .rs-tab { border: 1px solid var(--rule-strong); border-radius: 999px; padding: 10px 18px; margin: 0; font: 700 14.5px/1 var(--sans);
-    background: var(--panel); color: var(--ink-2); }
-  main .mr-tabs .rs-tab:hover { border-color: var(--hue); color: var(--hue-ink); background: var(--hue-wash); }
-  main .mr-tabs .rs-tab[aria-selected="true"] { background: var(--hue-solid); border-color: var(--hue-solid); color: var(--on-hue); }
+  /* ---- THE WOW LAYER: one gold hue, round cards (CSS only; the panels are drawn by scripts that keep their class names) ---- */
   main .mr-panel.rs-panel { grid-template-columns: minmax(0, 1fr); border-radius: 22px; border-top: 5px solid var(--hue); padding: 24px 26px; }
   main .mr-panel .mr-h, main .mr-panel .mra-h3 { font-weight: 800; letter-spacing: -.02em; }
   main .mr-panel .cap { color: var(--ink-2); }
@@ -1771,7 +1701,7 @@ const BASE_ = u("/");
   main .mra-fig b { font: 800 34px/1 var(--serif); color: var(--ink); }
   main .mra-chip { border-radius: 999px; }
   main .mra-chip.is-on { border-color: var(--hue); background: var(--hue-wash); }
-  main .mra-link, main .mr-fx-foot .link { color: var(--hue-ink); }
+  main .mra-link, main .mr-fx-foot .link, main .mr-fixline a { color: var(--hue-ink); }
   main .mra-btn { border-radius: 999px; padding: 9px 16px; }
   main .mra-btn:hover { border-color: var(--hue); color: var(--hue-ink); }
   main .mra-place { border-left-color: var(--hue); }
@@ -1779,9 +1709,6 @@ const BASE_ = u("/");
   main .mr-fx { border-radius: 16px; border-left-width: 1px; border-top: 5px solid var(--hue); }
   main .mr-fx-bar i { background: var(--hue); }
   main .mr-fx-c.ok { color: var(--hue-ink); }
-  main .mr-fx-go { background: var(--hue-solid); color: var(--on-hue); border-radius: 999px; }
   main .one.mrhow { display: block; max-width: 100%; box-sizing: border-box; border-radius: 16px; }
   main .mrhowl { overflow-wrap: anywhere; }
-  .mr-more { display: block; margin-top: 8px; color: var(--ink-3); }
-  .mr-more > summary { cursor: pointer; font: 600 12.5px var(--mono); color: var(--hue-ink); }
 </style>

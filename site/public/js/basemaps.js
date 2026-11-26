@@ -17,7 +17,9 @@
    prefers-color-scheme.
 
    A READER'S OWN CHOICE ALWAYS WINS, in this order: ?base= in the address bar (the Atlas map only), the choice they last made with a
-   switcher (kept in this browser, key ra-basemap), and only then the theme's default. With no choice made, the default is read per theme
+   switcher (kept in this browser, key ra-basemap), and only then the theme's default. My research follows the Atlas home: when the home was
+   last opened in a look named in its address, that look is noted (key ra-basemap-home, forgotten at the next choice or plain visit) and the
+   research map opens in it, so the two never show different looks to one reader. With no choice made, the default is read per theme
    live (today the same look in both, so toggling the theme changes nothing). Once they have chosen, it stays, even if the look was made for the other theme.
 
    THE SWITCHER lists the looks that suit the current theme first, then Terrain and Satellite, then a "More looks" fold with the other
@@ -39,6 +41,7 @@
 
   var DEFAULT_BY_THEME = { light: "satellite", dark: "satellite" };   /* the one constant: Satellite opens in both themes until a reader picks another look */
   var STORE = "ra-basemap";
+  var HOME = "ra-basemap-home";   /* the look the Atlas home opened in from its address, while that differs from nothing: see homeOpened() */
   var MAPLIBRE_VERSION = "5.24.1";                           /* public/vendor/maplibre/NOTICE.txt */
   var HERE = (self && self.src) || "";
   var ROOT = HERE ? HERE.replace(/js\/basemaps\.js(\?.*)?$/, "") : "/";   /* the site's root, with any /TheMap/ prefix */
@@ -86,7 +89,11 @@
   /* A value, if it is on the list; anything else (a typo, "constructor", null) is nothing. */
   function valid(value, keys) { return typeof value === "string" && (keys || ATLAS_KEYS).indexOf(value) >= 0 ? value : ""; }
   function stored(keys) { try { return valid(localStorage.getItem(STORE), keys); } catch (e) { return ""; } }
-  function remember(key) { try { localStorage.setItem(STORE, key); } catch (e) { /* blocked: it lasts until the page closes */ } }
+  function remember(key) { try { localStorage.setItem(STORE, key); localStorage.removeItem(HOME); } catch (e) { /* blocked: it lasts until the page closes */ } }
+  /* The Atlas home says what it opened in. A look from its address (?base=, a bookmark or a shared link) is not a choice and is not saved as one, but a map
+     that follows the home has to know it is what the reader is seeing; a home opened any other way shows the saved choice or the default, so nothing is noted. */
+  function homeOpened(pick) { try { if (pick && pick.from === "url") localStorage.setItem(HOME, pick.key); else localStorage.removeItem(HOME); } catch (e) { /* blocked */ } }
+  function homeLook(keys) { try { return valid(localStorage.getItem(HOME), keys); } catch (e) { return ""; } }
   /* What opens: the address bar, then the saved choice, then the theme's default. `explicit` says a reader chose it. */
   function choose(o) {
     var keys = o.keys || ATLAS_KEYS, u = valid(o.url, keys), s = valid(o.stored, keys);
@@ -369,16 +376,22 @@
     };
   }
 
-  /* The switcher for a map that has the light grey as its own layers and takes the rest from here (Compass and History), with the same
-     rules as the Atlas map: o = { light: [layers drawn for the light map], labelsPane, position, css, onChange(key) }. Returns { key(), set(key) }. */
+  /* The switcher for a map that has the light grey as its own layers and takes the rest from here (Compass, History, the story map and My research), with the
+     same rules as the Atlas map: o = { light: [layers drawn for the light map], labelsPane, position, css, onChange(key), followHome, terrain }. followHome
+     (My research): offer the looks the Atlas home offers and open in the one it shows. Terrain is among them only when the page hands over its layer, as the
+     home map draws its own: this module reaches for no host of its own for it. Returns { key(), set(key) }. */
   function attach(L, map, o) {
     var keys = EMBED_KEYS, built = {}, now = "", explicit = false, sw = null;
-    var first = choose({ keys: keys, stored: stored(keys), theme: themeNow() });
+    if (o.followHome) keys = ATLAS_KEYS;
+    if (!o.terrain) keys = keys.filter(function (k) { return k !== "terrain"; });
+    var first = choose({ keys: keys, url: o.followHome ? homeLook(keys) : "", stored: stored(keys), theme: themeNow() });
     explicit = first.explicit;
     function layerFor(k) {
       if (k === "map") return null;
       if (built[k]) return built[k];
-      if (k === "satellite") {
+      if (k === "terrain") {
+        built[k] = o.terrain;
+      } else if (k === "satellite") {
         built[k] = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { attribution: ESRI_IMAGERY, maxNativeZoom: 17, maxZoom: 18 });
       } else {
         built[k] = lookLayer(L, k, { labelsPane: o.labelsPane, css: o.css, onFail: function (text) { if (now === k) { show("map"); if (sw) sw.note(text); } } });
@@ -393,7 +406,7 @@
       if (key === "map") (o.light || []).forEach(function (l) { l.addTo(map); if (l.bringToBack && l.options && !l.options.pane) l.bringToBack(); });
       else {
         var lay = layerFor(key);
-        if (key === "satellite") mark(map, key, true);   /* the pages' own dark-theme tile filters are for the light grey, not for photographs */
+        if (key === "satellite" || key === "terrain") mark(map, key, true);   /* the pages' own dark-theme tile filters are for the light grey, not for photographs */
         lay.addTo(map); if (lay.bringToBack) lay.bringToBack();
       }
       if (sw) sw.setActive(key);
@@ -410,7 +423,7 @@
   return {
     DEFAULT_BY_THEME: DEFAULT_BY_THEME, ATLAS_KEYS: ATLAS_KEYS, EMBED_KEYS: EMBED_KEYS, VECTOR_KEYS: VECTOR_KEYS, LOOKS: LOOKS, STORE: STORE,
     MAPLIBRE_VERSION: MAPLIBRE_VERSION,
-    themeOf: themeOf, themeNow: themeNow, defaultFor: defaultFor, valid: valid, stored: stored, remember: remember, choose: choose, watchTheme: watchTheme,
+    themeOf: themeOf, themeNow: themeNow, defaultFor: defaultFor, valid: valid, stored: stored, remember: remember, homeOpened: homeOpened, homeLook: homeLook, choose: choose, watchTheme: watchTheme,
     isDark: isDark, isVector: isVector, layout: layout, failMessage: failMessage, styleUrl: styleUrl, webglOk: webglOk,
     nightLayer: nightLayer, imageryNightLayer: imageryNightLayer, vectorLayer: vectorLayer, lookLayer: lookLayer, switcher: switcher, attach: attach
   };

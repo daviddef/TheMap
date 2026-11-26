@@ -100,13 +100,13 @@ test("My research can be shared: the address carries who is read and any period,
   assert.match(page, /if \(VIEW\.want && !VIEW\.applied\) return;/, "the address is not overwritten before a link has been applied");
   assert.match(page, /is not in this browser|not in this browser \(/, "a family the browser does not have is said so");
   assert.doesNotMatch(page.slice(page.indexOf("function applyView"), page.indexOf("/* the address follows the view")), /setActive/, "opening a link never changes the family your marks go under");
-  assert.match(page, /location\.pathname \+ location\.search \+ \(n === "families"/, "changing tab keeps the query");
+  assert.match(page, /return location\.pathname \+ \(qs \? "\?" \+ qs : ""\) \+ location\.hash;/, "rewriting the address keeps the query and the #address");
 });
 
 test("My research draws the Atlas map's looks, and a card whose shard failed to load is still drawn, not dropped", () => {
   const page = fs.readFileSync(path.join(here, "../src/pages/my-research.astro"), "utf8");
   assert.match(page, /js\/basemaps\.js/, "the shared basemaps script is loaded");
-  assert.match(page, /raBasemaps\.attach\(L, mrMap, \{ light: lightGround, labelsPane: "baseLabels" \}\)/, "the map takes its looks and switcher from the Atlas's module");
+  assert.match(page, /raBasemaps\.attach\(L, mrMap, \{ light: lightGround, labelsPane: "baseLabels", followHome: true, terrain: terrain \}\)/, "the map takes its looks and switcher from the Atlas's module, and opens in the home's look");
   assert.match(page, /delete cache\[u\]/, "a failed fetch is not cached");
   assert.match(page, /f\.failed = true/, "a family whose shard did not load still gets a card");
   assert.match(fs.readFileSync(path.join(here, "../public/js/name-intro.js"), "utf8"), /m\.failed \?/, "and the card says it could not load");

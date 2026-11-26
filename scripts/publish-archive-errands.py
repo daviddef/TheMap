@@ -32,15 +32,18 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PUBLIC = "site/public/archive-errands.json"
 PROVIDERS = "data/providers.json"
 
-# archive id, name on the page, folder beside the Atlas, the file on its origin/main, that file's shape, its own public errands page ("" = it has none)
+# archive id, name on the page, folder beside the Atlas, the file on its origin/main, that file's shape, its own public errands page ("" = it has none).
+# An archive that keeps its letters in more than one file has a line for each. LOOK AT WHAT THE ARCHIVE'S OWN errands.astro IMPORTS before adding a line:
+# Luwinski keeps everything in letters.json and Booyzen its sent letters there, and a guess at «errands.json» published neither (26 November 2026).
 ARCHIVES = (
     ("blazevic", "Blažević", "Blazevic Family", "site/src/data/errands.json", "rows", "https://blazevic.defranceski.com/errands/"),
     ("booyzen", "Booyzen", "Booyzen Family", "site/src/data/errands.json", "places", "https://booyzen.defranceski.com/errands/"),
+    ("booyzen", "Booyzen", "Booyzen Family", "site/src/data/letters.json", "post", "https://booyzen.defranceski.com/errands/"),
     ("darcy", "D’Arcy", "D'arcy Family", "site/src/data/errands.json", "rows", "https://darcy.defranceski.com/errands/"),
     ("defranceschi", "Defranceschi", "Defranceski Family", "site/src/data/errands.json", "rows", "https://archive.defranceski.com/errands/"),
     ("falco", "Falco", "Falco Family", "site/src/data/errands.json", "doors", "https://falco.defranceski.com/errands/"),
     ("lerena", "Lerena", "Lerena Family", "data/errands.tsv", "tsv", "https://lerena.defranceski.com/errands/"),
-    ("luwinski", "Luwinski", "Luwinski Family", "", "none", ""),
+    ("luwinski", "Luwinski", "Luwinski Family", "site/src/data/letters.json", "clock", "https://luwinski.defranceski.com/errands/"),
     ("mazza", "Mazza", "Mazza Family", "site/src/data/errands.json", "doors", "https://mazza.defranceski.com/errands/"),
 )
 
@@ -155,6 +158,19 @@ def entries(shape, text):
             out.append((r.get("who"), r.get("what"), st, month_of(r.get("sent_on")) if st == "sent" else "", ""))
         return out
     data = json.loads(text)
+    if shape == "post":         # {rows: [{to, what, d (the day it went), state}]}
+        states = {"sent": "sent", "no answer": "sent", "half delivered": "sent", "drafted": "drafted", "drafted, unsent": "drafted", "not yet written": "to do"}
+        for r in data.get("rows") or []:
+            st = states.get(str(r.get("state") or "").lower(), "")          # answered, or a state this does not know, is not published
+            out.append((r.get("to"), r.get("what"), st, month_of(r.get("d")) if st == "sent" else "", ""))
+        return out
+    if shape == "clock":        # {rows: letters that have gone, each with `sent` and, once replied to, `answered`; drafts: [{who, what, state}]}
+        for r in data.get("rows") or []:
+            st = "" if r.get("answered") else "sent" if r.get("sent") else ""
+            out.append((r.get("who"), r.get("what"), st, month_of(r.get("sent")) if st else "", r.get("addr")))
+        for r in data.get("drafts") or []:
+            out.append((r.get("who"), r.get("what"), "" if r.get("state") else "drafted", "", ""))   # any state on a draft takes it off the list
+        return out
     for r in data.get(shape) or []:
         if shape == "places":
             out.append((r.get("where"), json.dumps(r.get("asks"), ensure_ascii=False), "listed", "", r.get("addr")))
@@ -181,9 +197,10 @@ def entries(shape, text):
 
 def build(sources, providers):
     """sources: [(id, name, page, shape, text or None)] -> (the published object, a report per archive)."""
-    archives, report = [], []
+    by, report = {}, []
     for aid, name, page, shape, text in sources:
-        rows, skipped, closed = [], 0, 0
+        rows = by.setdefault(aid, (name, page, []))[2]
+        before, skipped, closed = len(rows), 0, 0
         if text is None:
             report.append({"id": aid, "published": 0, "skipped": 0, "closed": 0, "note": "no errands data file"})
             continue
@@ -201,10 +218,11 @@ def build(sources, providers):
                 row["sent"] = month
             if row not in rows:          # two asks that read the same once reduced to their shape are one line
                 rows.append(row)
-        if rows:
-            archives.append({"archive": aid, "name": name, "page": page,
-                             "errands": sorted(rows, key=lambda r: (STATUSES.index(r["status"]), r["institution"], r.get("sent", ""), r["kinds"]))})
-        report.append({"id": aid, "published": len(rows), "skipped": skipped, "closed": closed, "merged": len(read) - len(rows) - skipped - closed, "note": ""})
+        added = len(rows) - before
+        report.append({"id": aid, "published": added, "skipped": skipped, "closed": closed, "merged": len(read) - added - skipped - closed, "note": ""})
+    archives = [{"archive": aid, "name": name, "page": page,
+                 "errands": sorted(rows, key=lambda r: (STATUSES.index(r["status"]), r["institution"], r.get("sent", ""), r["kinds"]))}
+                for aid, (name, page, rows) in by.items() if rows]
     return {"v": 1, "archives": archives}, report
 
 
@@ -313,6 +331,22 @@ def selftest():
     assert [a["archive"] for a in doc["archives"]] == ["blazevic", "lerena"]
     assert doc["archives"][0]["errands"] == [{"institution": "State Archives of Nowhere", "kinds": ["births and baptisms"], "status": "sent", "sent": "2026-09"}]
     assert (rep[0]["skipped"], rep[0]["closed"]) == (2, 1) and rep[2]["note"]
+    post = json.dumps({"rows": [
+        {"to": "State Archives of Nowhere", "what": "Invented Person's marriage", "d": "3 Sep 2026", "state": "no answer"},
+        {"to": "Nowhere Parish Library", "what": "a census", "d": "\u2014", "state": "drafted, unsent"},
+        {"to": "State Archives of Nowhere", "what": "a death", "d": "3 Sep 2026", "state": "answered in full"}]})
+    clock = json.dumps({"rows": [
+        {"who": "Reading room", "addr": "desk@library.example", "what": "Invented Person's baptism", "sent": "2026-09-14"},
+        {"who": "State Archives of Nowhere", "what": "a death", "sent": "2026-09-14", "answered": "2026-09-20"}],
+        "drafts": [{"who": "State Archives of Nowhere", "what": "a census, 1801"}, {"who": "State Archives of Nowhere", "what": "a death", "state": "superseded"}]})
+    two = [("booyzen", "Booyzen", "https://e.example/errands/", "places", json.dumps({"places": [{"where": "Nowhere Parish Library", "asks": [["1", "a will and estate, probate"]]}]})),
+           ("booyzen", "Booyzen", "https://e.example/errands/", "post", post), ("luwinski", "Luwinski", "https://e.example/errands/", "clock", clock)]
+    d2, r2 = build(two, P)
+    assert [a["archive"] for a in d2["archives"]] == ["booyzen", "luwinski"], "two files, one archive"
+    assert [(e["status"], e.get("sent", "")) for e in d2["archives"][0]["errands"]] == [("sent", "2026-09"), ("drafted", ""), ("listed", "")]
+    assert [(e["institution"], e["status"]) for e in d2["archives"][1]["errands"]] == [("Nowhere Parish Library", "sent"), ("State Archives of Nowhere", "drafted")]
+    assert (r2[1]["closed"], r2[2]["closed"]) == (1, 2)
+    assert not any(x in json.dumps(d2) for x in ("Invented", "1801", "09-14", "desk@", "Reading room"))
     flat = json.dumps(doc, ensure_ascii=False)
     for leak in ("Invented", "1801", "12/3", "40", "secret", "14 Sept"):
         assert leak not in flat, leak

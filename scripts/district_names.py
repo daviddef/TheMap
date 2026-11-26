@@ -12,8 +12,9 @@ place in the same country, a candidate more than LIMIT_KM from it is not that pl
 checked the exact point (data/geocode-checked.json, verdict «correct», with
 lat and lon).
 
-Used by scripts/check-data.py, scripts/import-defranceski.py and
-scripts/import-fs-catalogue.py, so the three cannot disagree.
+Used by scripts/check-data.py, scripts/import-defranceski.py,
+scripts/import-fs-catalogue.py and scripts/build.py (the map's «position
+doubtful»), so they cannot disagree.
 """
 import math
 import re
@@ -88,6 +89,28 @@ def too_far(places, districts, checked):
         d = districts.distance(p["name"], p.get("country"), p["lat"], p["lon"])
         if d is not None and d > LIMIT_KM and not checked_here(checked, p["id"], p["lat"], p["lon"]):
             out.append((p, d))
+    return out
+
+
+def latin(s):
+    return all("LATIN" in unicodedata.name(c, "") for c in s or "" if c.isalpha())
+
+
+def doubtful(places, checked):
+    """What the story reader calls «position doubtful»: {place id: [Y, km]}.
+
+    The gate's own rule (too_far: LIMIT_KM, a `level` row untested, a checked
+    point accepted) over every place the build draws, many of which the gate
+    never reads: it sees data/places.json only. Two brackets give nothing to
+    measure from. One in another script, «Dobromil (Добромиль)», is the name
+    written again, not a district. And an administrative area's point (`level`)
+    is its middle, which a village of that province can be far from."""
+    districts = Districts([p for p in places if not p.get("level")])
+    out = {}
+    for p, d in too_far(places, districts, checked):
+        y = split(p["name"])[1]
+        if latin(y):
+            out[p["id"]] = [y, round(d)]
     return out
 
 

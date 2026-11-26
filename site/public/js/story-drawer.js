@@ -175,7 +175,7 @@
       var stopsShown = p.stops && p.stops.length ? p.stops : [p.from && Object.assign({ role: "origin" }, p.from), p.to && Object.assign({ role: "move" }, p.to)].filter(Boolean);
       if (!stopsShown.length && !tellable(p) && text.value.trim().length > 12) chips.append(chip("Where did they start? Name the place", "warn", "nof"));
       stopsShown.forEach(function (st) {
-        var more = st.alts && st.alts.length, lab = placeLabel(st.row);
+        var nearly = (p.near || []).some(function (n) { return n.word === st.word; }), more = !nearly && st.alts && st.alts.length, lab = placeLabel(st.row);
         var pre = st.role === "born" ? "born in " : st.role === "origin" ? "from " : st.role === "father-from" ? "his father from " : st.role === "mother-from" ? "his mother from " : st.age != null ? (st.approx ? "about age " : "age ") + st.age + ": " : st.role === "lived" ? "in " : "to ";
         chips.append(chip(pre + lab + (st.yearTold ? ", " + st.year : "") + (more ? "  ▾" : ""), st.role === "born" || st.role === "origin" ? "from" : "to", "s:" + st.row.i + st.role, more ? function () {
           ov[st.word] = { row: st.alts[0], alts: st.alts.slice(1).concat([st.row]) }; lastSig = ""; run();
@@ -230,6 +230,9 @@
       };
     }
 
+    /* «X near Y»: the X the reader tapped on the card or the map, by the word typed; the story is read again with it */
+    var nearPicks = {};
+    document.addEventListener("ra-near-pick", function (e) { if (!e.detail) return; nearPicks[e.detail.word] = e.detail.id; lastSig = ""; run(); });
     function run() {
       var t = text.value;
       var clr = $(".sd-clear"); if (clr) clr.hidden = !t.trim() && !files.length;
@@ -237,15 +240,15 @@
       LD.resolveMissing(t).catch(function () { return LD.load(); }).then(function (d) {
         data = d;
         var attached = files.length ? "photo" : null;
-        var p = E.parseStory(t, { map: d.map, given: d.given, skip: d.skip, countries: d.countries }, attached);
-        (p.stops || []).forEach(function (st) { var o2 = ov[st.word]; if (o2) { st.row = o2.row; st.alts = o2.alts; } });
+        var p = E.parseStory(t, { map: d.map, given: d.given, skip: d.skip, countries: d.countries, pick: nearPicks }, attached);
+        (p.stops || []).forEach(function (st) { var o2 = !(p.near || []).some(function (n) { return n.word === st.word; }) && ov[st.word]; if (o2) { st.row = o2.row; st.alts = o2.alts; } });
         if (p.route && p.route.length) {
           var r0 = p.route[0], rl = p.route[p.route.length - 1];
           p.from = { row: r0.row, alts: r0.alts, word: r0.word }; p.to = p.route.length > 1 ? { row: rl.row, alts: rl.alts, word: rl.word } : null;
         }
         parsedNow = p;
         drawChips(p);
-        var sig = [(p.route || []).map(function (x) { return x.row.i + ":" + x.age; }).join(","), p.left, p.born, p.name, (p.people || []).map(function (x) { return x.name; }).join(","), p.holds].join("|");
+        var sig = [(p.near || []).map(function (n) { return n.word + n.pick + n.level + n.options.length; }).join(","), (p.route || []).map(function (x) { return x.row.i + ":" + x.age; }).join(","), p.left, p.born, p.name, (p.people || []).map(function (x) { return x.name; }).join(","), p.holds].join("|");
         if (sig === lastSig || !tellable(p)) { if (status.textContent === "Reading your story\u2026") status.textContent = ""; if (!tellable(p) && sig !== lastSig) { lastSig = ""; J.clear(); showDock(false); dropKeyPlaces(); report.hidden = true; planBox.hidden = true; fam.hidden = true; addBar.hidden = true; } return; }
         lastSig = sig;
         var my = ++token; status.textContent = "Reading the Atlas…";

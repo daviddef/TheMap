@@ -100,6 +100,44 @@
     return inside;
   }
 
+  /* THE NEIGHBOURS WORTH LOOKING IN. David (26 Nov 2026): «this dreznik probably has loads of records for the family in surrounding towns, and the larger ones probably hold
+     more records». Within 25 km and in the same country: the three nearest, and the four with the most volumes, however far inside that ring; `keep` adds ids that must appear
+     (the town the story pins the place to). Nearest first. */
+  function neighbours(rows, info, keep) {
+    if (!info || info.lat == null) return [];
+    var rad = Math.PI / 180, own = info.row && info.row.i, seen = Object.create(null), all = [];
+    (rows || []).forEach(function (r) {
+      if (r.i === own || seen[r.i] || r.y == null || r.x == null || (info.cc && r.cc !== info.cc) || r.n === info.name) return;
+      var dy = (r.y - info.lat) * 111.2, dx = (r.x - info.lon) * 111.2 * Math.cos(info.lat * rad), km = Math.sqrt(dx * dx + dy * dy);
+      if (km > 25 && !(keep && keep[r.i])) return;
+      seen[r.i] = 1; all.push({ row: r, km: km, books: r.c || r.v || 0, weight: Math.max(r.c || 0, r.v || 0) });
+    });
+    all.sort(function (a, b) { return a.km - b.km; });
+    /* `dq` comes from the build's place-doubt.json, with the data gate's own rule (scripts/district_names.py): «Čista (Skradin)» standing 82 km from Skradin. Nothing is moved or hidden by it: it is said. */
+    all.forEach(function (x) { if (x.row.dq) x.doubt = { of: x.row.dq[0], km: x.row.dq[1] }; });
+    var want = Object.create(null);
+    all.slice(0, 3).forEach(function (x) { want[x.row.i] = 1; });
+    all.filter(function (x) { return x.weight > 0; }).sort(function (a, b) { return b.weight - a.weight || a.km - b.km; }).slice(0, 4).forEach(function (x) { want[x.row.i] = 1; });
+    return all.filter(function (x) { return want[x.row.i] || (keep && keep[x.row.i]); });
+  }
+  /* Up to `cap` FamilySearch register links for a place ({p, cols} as the story reader holds it): the ones whose years meet [lo, hi] first, the most overlap first;
+     when none does, the ones nearest in time, marked `fits: false`. */
+  function pickVolumes(info, win, cap) {
+    var seen = Object.create(null), all = [];
+    /* one book is written two ways (the place file adds the collection and the whole waypoint path), so it is known by its first image and waypoint */
+    function book(url) { var wc = /[?&]wc=([^&%:]+)/.exec(url); return url.split("?")[0] + (wc ? " " + wc[1] : ""); }
+    function add(t, url, from, to) { if (!url || !/familysearch\.org\/ark:/.test(url)) return; var k = book(url); if (seen[k]) return; seen[k] = 1; all.push({ t: t || "Register", url: url, from: from, to: to || from }); }
+    ((info && info.cols) || []).forEach(function (c) { add(c.title, c.url, c.from, c.to); });
+    ((info && info.p && info.p.volumes) || []).forEach(function (v) { add(v.t, v.url, v.from, v.to); });
+    all.forEach(function (v) {
+      v.fits = !win || (v.from != null && v.from <= win[1] && v.to >= win[0]);
+      v.over = win && v.fits ? Math.min(v.to, win[1]) - Math.max(v.from, win[0]) : 0;
+      v.gap = !win || v.fits ? 0 : v.from == null ? 1e9 : v.to < win[0] ? win[0] - v.to : v.from - win[1];
+    });
+    var fit = all.filter(function (v) { return v.fits; });
+    return (fit.length ? fit : all).sort(function (a, b) { return b.over - a.over || a.gap - b.gap || (b.to || 0) - (a.to || 0); }).slice(0, cap || 3);
+  }
+
   /* Events in mortality.json whose area holds the point and whose years come within `span` of the year. Polygons are [lat, lon]. */
   function eventsAt(events, lat, lon, year, span) {
     if (year == null) return [];
@@ -182,7 +220,7 @@
   }
 
   var api = { fold: fold, yearIn: yearIn, buildMap: buildMap, candidates: candidates, eraAt: eraAt, volumesCovering: volumesCovering,
-              eventsAt: eventsAt, buildGiven: buildGiven, givenIn: givenIn, kindsOf: kindsOf, inRing: inRing,
+              neighbours: neighbours, pickVolumes: pickVolumes, eventsAt: eventsAt, buildGiven: buildGiven, givenIn: givenIn, kindsOf: kindsOf, inRing: inRing,
               languageIn: languageIn, flagAt: flagAt, aroundYear: aroundYear, volumeId: volumeId };
   if (typeof module !== "undefined" && module.exports) { module.exports = api; return; }
   window.raAtlasSummary = api;

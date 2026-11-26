@@ -3257,7 +3257,7 @@
         provs.forEach(function (x) { pname[x.id] = x.name; });
         var slugOf = Object.create(null); if (r[3] && r[3].slug) Object.keys(r[3].slug).forEach(function (sl) { slugOf[r[3].slug[sl]] = sl; });
         r[0].forEach(function (i) { i.flagSlug = slugOf[i.cc] || ""; });
-        r[0].forEach(function (i) { i.provs = provs.filter(function (x) { return (x.countries || []).indexOf(i.cc) > -1; }).sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); }); i.pname = pname; i.world = provs.filter(function (x) { return (x.countries || []).indexOf("*") > -1; }); i.flagRows = fm ? fm[String(i.cc || "").toUpperCase()] : null; i.leaders = lead ? lead[String(i.cc || "").toUpperCase()] : null; });
+        r[0].forEach(function (i) { i.provs = provs.filter(function (x) { return (x.countries || []).indexOf(i.cc) > -1 && (!x.serves || !!S.serves && S.serves(x, i)); }).sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); }); i.pname = pname; i.world = provs.filter(function (x) { return (x.countries || []).indexOf("*") > -1; }); i.flagRows = fm ? fm[String(i.cc || "").toUpperCase()] : null; i.leaders = lead ? lead[String(i.cc || "").toUpperCase()] : null; });
         r[0].forEach(function (i) {
           i.isCountry = !!i.row.country || (!!i.countryName && S.fold(i.name) === S.fold(i.countryName));
           /* a country has no neighbourhood: what is near its middle says nothing. It carries the places in it that hold books, with their years. */

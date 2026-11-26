@@ -9,7 +9,7 @@
  * One row per located archive, diocese, volunteer group or memorial site; the columns are listed in `cols`. */
 const KEEP = new Set(["national-archive", "regional-archive", "diocesan", "volunteer", "memorial"]);
 const ORDER = { answered: 0, delivered: 1, listed: 2, unverified: 3 };
-const COLS = ["id", "name", "kind", "access", "cc", "lat", "lon", "url", "email", "post", "tel", "state", "form", "branches"];
+const COLS = ["id", "name", "kind", "access", "cc", "lat", "lon", "url", "email", "post", "tel", "state", "form", "branches", "serves"];
 
 export function buildArchivesNear(providers, contacts, own) {
   const list = Array.isArray(providers) ? providers : (providers && providers.providers) || [];
@@ -28,8 +28,8 @@ export function buildArchivesNear(providers, contacts, own) {
     const wd = k.email && !dead.has(k.email.toLowerCase()) ? k.email : "";
     rows.push([p.id, p.name, p.kind, p.access || "unsurveyed", (p.countries || [])[0] || "", +p.at.lat.toFixed(4), +p.at.lon.toFixed(4), p.url,
       m ? m.email : wd, o.post || k.post || "", o.tel || k.tel || "", m ? m.state : wd ? "wikidata" : "", o.form || "",
-      (o.branches || []).map((b) => [b.name, b.tel])]);
+      (o.branches || []).map((b) => [b.name, b.tel]), p.serves || null]);
   }
   rows.sort((a, b) => (a[4] + a[1]).localeCompare(b[4] + b[1], "en"));
-  return { v: 2, note: "Every located archive, diocese, volunteer group and memorial site in data/providers.json, with the contacts the Atlas holds (data/provider-emails.json first, then what Wikidata states). `state` says how far the email is checked. Columns: " + COLS.join(", ") + ".", cols: COLS, rows };
+  return { v: 2, note: "Every located archive, diocese, volunteer group and memorial site in data/providers.json, with the contacts the Atlas holds (data/provider-emails.json first, then what Wikidata states). `state` says how far the email is checked. `serves`, where set, limits an archive to the ground it names (atlas-summary.js `serves`). Columns: " + COLS.join(", ") + ".", cols: COLS, rows };
 }

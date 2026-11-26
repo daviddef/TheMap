@@ -203,7 +203,8 @@
      David: the page should draw complete recommendations by itself. For each person the story names: the record to look for, the years (estimated from what is told),
      the place, the book the Atlas lists for it or a plain «none», ordered by what is most likely to answer the question. Nothing about access or holdings is said
      beyond what is cited: Croatia's church registers (State Archives in Varaždin), the marriage note in a baptism register (decree Ne temere, 1907, IX), the later
-     notes in Croatia's birth registers (State Registers Act, art. 9). */
+     notes in Croatia's birth registers (State Registers Act, art. 9) and who may inspect them (art. 44, as amended). */
+  var HR_ACT_NOW = "https://www.zakon.hr/z/603/zakon-o-drzavnim-maticama";   /* the consolidated text: art. 44 was amended in 2013 */
   var NE_TEMERE = "https://www.ewtn.com/catholicism/library/decree-on-betrothal-and-marriage-29493", HR_ACT = "https://narodne-novine.nn.hr/clanci/sluzbeni/1993_10_96_1878.html", HR_CHURCH = "https://dav.hr/gradanske-maticne-knjige/";
   var KIND_WORD = { b: "birth or baptism", m: "marriage", d: "death or burial" };
   var NO_LIVING = "Do not post the names or details of anyone who may be alive.";
@@ -402,6 +403,10 @@
       var it = item(a.name, why, { detail: (km != null ? km + " km away. " : "") + contactLine(a), href: a.url, tag: a.email ? "has an email" : a.form ? "has a contact form" : "", draft: null, _a: a });
       it.links = contactLinks(a); it._km = km; wr.push(it);
     }
+    /* an archive that keeps this very ground (the village's, where there is one) comes before the nearest of the rest; one that keeps other ground is left out */
+    var here = an.village || info, keeps = function (a) { return !a.serves || !!deps.serves && deps.serves(a, here); };
+    ar = ar.filter(keeps);
+    ar.filter(function (a) { return a.serves; }).forEach(function (a) { addArch(a, a.serves.say || "The Atlas lists it for this ground.", info.lat != null && a.lat != null ? Math.round(hav(info.lat, info.lon, a.lat, a.lon)) : null); });
     var eraIds = {}; eras.forEach(function (e) { (e.filedUnder || []).forEach(function (id) { eraIds[id] = 1; }); });
     var byId = {}; ar.forEach(function (a) { byId[a.id] = a; });
     Object.keys(eraIds).forEach(function (id) { var a = byId[id]; if (a && a.cc === info.cc) addArch(a, "The Atlas files " + info.name + "'s records under this archive for the years of your story.", info.lat != null && a.lat != null ? Math.round(hav(info.lat, info.lon, a.lat, a.lon)) : null); });
@@ -409,10 +414,30 @@
       .filter(function (x) { return x.km <= 120 && x.a.cc === info.cc && /archive|diocesan/.test(x.a.kind); }).sort(function (x, y) { return x.km - y.km; }).slice(0, 3)
       .forEach(function (x) { addArch(x.a, x.a.kind === "diocesan" ? "The diocese keeps its parishes' registers, and often copies from the year before the state took over." : "The nearest " + (x.a.kind === "national-archive" ? "national" : "state/regional") + " archive: it holds or can say who holds the registers.", Math.round(x.km)); });
     wr = wr.slice(0, 4);
+    var kept = !win || win.lo < 1946 ? wr.filter(function (i) { return i._a && i._a.serves; })[0] : null;   /* church registers: the books asked for were written before state registration */
     var dTo = wr.filter(function (i) { return i._a && i._a.kind === "regional-archive"; })[0] || wr[0];
-    if (dTo) dTo.draft = draft(info.cc, an.village ? bare(an.village.name) + " (" + info.name + ")" : info.name, surname, mid);
+    [kept, dTo].forEach(function (i) { if (i) i.draft = draft(info.cc, an.village ? bare(an.village.name) + " (" + info.name + ")" : info.name, surname, mid); });
     if (wr.length) wr.push(item("The registry office (matični ured / registrar / comune) of today's municipality", "Civil registers from the 1800s on are usually kept by the office of the municipality where the event happened, until they pass to an archive.", { gap: true, detail: "The Atlas does not list municipal registry offices: search for the name of the municipality with the word for registry office." }));
     section("write", "Write to", wr);
+
+    /* 3b · ASK THE VILLAGE, and what the online books cannot show: only where the story's years are within living memory */
+    var vg = [], nowY = deps.year || new Date().getFullYear(), ground2 = an.village || info, adm = (ground2.p && ground2.p.admin) || {}, vn = bare(ground2.name);
+    var townSeat = !an.village && (adm.adm2 === "Grad " + vn || adm.adm1 === vn);
+    if (win && win.hi >= nowY - 100 && !ground2.isCountry) {
+      var q = function (words) { return "https://duckduckgo.com/?q=" + encodeURIComponent(words); }, muni = String(adm.adm2 || "").replace(/^Grad /, ""), ctx = vn + (muni && muni !== vn ? " " + muni : muni ? "" : cname ? " " + cname : ""), hr = ground2.cc === "HR";
+      if (!townSeat) {
+        var add = function (title, why, links) { var it = item(title, why, {}); it.links = links; vg.push(it); };
+        if (hr) add("A folklore and culture society (KUD) for " + vn, "If there is one, its older members may know the families. The Atlas does not know whether there is: search, and check the official register of associations.", [{ t: "Search “KUD " + ctx + "”", href: q("KUD " + ctx) }, { t: "Official registers of associations", href: "https://registri-npo-mpu.gov.hr/" }]);
+        add("Local history and heritage groups for " + vn, "People who collect a place’s history may know which families lived there.", [{ t: "Search for heritage groups", href: q(hr ? ctx + " udruga povijest baština" : ctx + " local history heritage society") }]);
+        add("Village groups on social media", "Ask whether anyone remembers the family. " + NO_LIVING, [{ t: "Search Facebook groups for " + vn, href: "https://www.facebook.com/search/groups/?q=" + encodeURIComponent(vn) }]);
+      }
+      var lastBook = Math.max.apply(null, [0].concat([].concat(info.cols || [], (an.village && an.village.cols) || []).map(function (c) { return c && typeof c.from === "number" ? c.to || c.from : 0; })));
+      var rec2 = item("Recent records and living relatives", (lastBook ? "The books the Atlas lists for " + bare(info.name) + " stop in " + lastBook + ". " : "The Atlas lists no dated books for " + bare(info.name) + ". ") + "FamilySearch does not hold everything: finding nothing there is not proof.",
+        { detail: hr ? "State registers are with the registry office (matični ured). The registrar lets the person concerned, close family, an adoptive parent or guardian inspect them; anyone else needs a legal interest. Local people are often the way to living relatives." : "Recent civil entries are usually with the registry office of the place, which may limit who can see them. Local people are often the way to living relatives." });
+      if (hr) rec2.links = [{ t: "Source: State Registers Act, art. 44", href: HR_ACT_NOW }];
+      vg.push(rec2);
+    }
+    section("village", townSeat ? "Recent records" : "Ask the village", vg);
 
     /* 4 · LOOK NEARBY */
     var nb = [], years = win ? [win.lo, win.hi] : null;
@@ -427,7 +452,10 @@
     /* today's administrative home, only where the Atlas holds it, and always saying WHICH place: a village beside the told town may be in another municipality */
     var adOf = function (i) { var a = i && i.p && i.p.admin; return a && (a.adm1 || a.adm2) ? a : null; }, adPlace = an.village && adOf(an.village) ? an.village : info, ad = adOf(adPlace);
     if (ad) nb.unshift(item("Today " + bare(adPlace.name) + " is in " + [ad.adm2, ad.adm1].filter(Boolean).join(", "), "The modern district and county: the offices and local archives that exist now are named for these." + (an.village && adPlace === info ? " The Atlas holds none for " + bare(an.village.name) + " itself, which may be in another municipality." : ""), {}));
-    nb.push(item("The district and court seats of the time, and the parish next door", "The Atlas does not hold the district (kotar / Bezirk / contea) or court seats of past states, nor a list of parishes.", { gap: true, detail: "Ask the archive in Write to which parish the village belonged to in your years: it is usually one line." }));
+    /* today's parish, only where a diocese's own list names the village: never read back into the story's years */
+    var parish = null; (deps.archives || []).forEach(function (a) { ((a.serves && a.serves.parishes) || []).forEach(function (x) { var g2 = an.village || info, ad2 = g2.p && g2.p.admin; if (!parish && ad2 && ad2.adm1 === x.county && x.villages.indexOf(bare(g2.name)) > -1) parish = x; }); });
+    if (parish) nb.push(item("Today’s parish for " + bare((an.village || info).name) + ": " + parish.name, "The diocese lists the village among this parish’s villages today.", { detail: parish.note, href: parish.url }));
+    nb.push(item("The district and court seats of the time, and the parish next door", parish ? "The Atlas does not hold the district (kotar / Bezirk / contea) or court seats of past states, nor which parish served a village in a past year." : "The Atlas does not hold the district (kotar / Bezirk / contea) or court seats of past states, nor a list of parishes.", { gap: true, detail: "Ask the archive in Write to which parish the village belonged to in your years: it is usually one line." }));
     section("near", "Look nearby", nb);
 
     /* 4b · WHERE THE FAMILY NAMES ARE MOST COMMON (Croatia, 2021 census: ranks only; see censusWhere in story-engine.js) */
@@ -499,14 +527,14 @@
     var d0 = out.sections.filter(function (s) { return s.key === "desk"; })[0], w0 = out.sections.filter(function (s) { return s.key === "write"; })[0], g0 = out.sections.filter(function (s) { return s.key === "ground"; })[0];
     var firstOpen = d0 && d0.items.filter(function (i) { return (i.tag === "free" || i.tag === "free account"); })[0] || d0 && d0.items[0];
     out.today.push({ n: 1, title: "At your desk", text: firstOpen ? firstOpen.title : "Open the Atlas's page for " + info.name, href: firstOpen && firstOpen.href || "" });
-    var drafted = w0 && w0.items.filter(function (i) { return i.draft && i._a && (i._a.email || i._a.form); })[0]; /* the nearest regional archive leads over a capital's inbox */
+    var drafted = w0 && w0.items.filter(function (i) { return i.draft && i._a && (i._a.email || i._a.form || i._a.serves); })[0]; /* the nearest regional archive leads over a capital's inbox */
     var mailTo = w0 && (drafted || w0.items.filter(function (i) { return i._a && i._a.email; })[0] || w0.items.filter(function (i) { return i._a && /regional|diocesan/.test(i._a.kind); })[0] || w0.items.filter(function (i) { return !i.gap; })[0]);
     if (mailTo) {
       var to = mailTo._a || {};
       out.today.push({ n: 2, title: to.email ? "Email" : "Write", text: mailTo.title + (to.email ? " (" + to.email + ")" : to.form ? " (use its contact form" + (to.tel ? ", or call " + to.tel : "") + ")" : to.tel ? " (call " + to.tel + ")" : " (the Atlas holds no address: use its site)"), href: !to.email && to.form ? to.form : mailTo.href });
     }
     var vol = (deps.archives || []).filter(function (a) { return a.kind === "volunteer" && a.cc === info.cc; })[0];
-    out.today.push({ n: 3, title: "Ask people", text: vol ? "A volunteer group for " + (cname || "the country") + ": " + vol.name : "Ask the older relatives who still have the photographs, letters and documents: a name or a village on the back of a photo is a lead.", href: vol ? vol.url : "" });
+    out.today.push({ n: 3, title: "Ask people", text: vol ? "A volunteer group for " + (cname || "the country") + ": " + vol.name : "Ask the older relatives who still have the photographs, letters and documents: a name or a village on the back of a photo is a lead." + (vg.length && !townSeat ? " Then ask people in " + vn + " (see Ask the village)." : ""), href: vol ? vol.url : "" });
     var near = w0 && w0.items.filter(function (i) { return i._a && i._km != null; }).sort(function (a, b) { return a._km - b._km; })[0];
     /* a branch in the very town beats the head office down the road; what it holds is not stated, so the plan says to ask */
     var local = null; (w0 ? w0.items : []).forEach(function (i) { ((i._a && i._a.branches) || []).forEach(function (b) { if (!local && fold(b.name).indexOf(fold(info.name)) > -1) local = { b: b, i: i }; }); });

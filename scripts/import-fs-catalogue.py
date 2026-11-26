@@ -39,6 +39,8 @@ import json, os, re, sys, unicodedata, collections
 
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(_ROOT)
+sys.path.insert(0, os.path.join(_ROOT, "scripts"))
+import district_names as dn
 SRC = os.path.join(os.path.dirname(_ROOT), "Defranceski Family",
                    "data", "fs-catalogue.json")
 if not os.path.exists(SRC):
@@ -95,6 +97,8 @@ def main():
             for n in p.get("names", []):
                 by_fold[fold(n.get("n", ""))].append(p)
 
+    districts = dn.Districts(doc["places"])
+    refused = []  # a bare name found only far from the district in the bracket
     out, matched, unmatched, vols = {}, 0, [], 0
     loose = []  # bracket stripped, bare name taken: a place of that NAME, not necessarily THE place
     for layer, parish, way in parishes:
@@ -107,6 +111,13 @@ def main():
         hit = None
         for cand in (parish, bare):
             for p in by_fold.get(fold(cand), []):
+                # The bare name is any place so called. Where the district is a
+                # place, one far from it is a namesake, not this parish.
+                if cand != parish:
+                    d = districts.distance(parish, "HR", p["lat"], p["lon"])
+                    if d is not None and d > dn.LIMIT_KM:
+                        refused.append((parish, p["id"], round(d)))
+                        continue
                 hit = p
                 break
             if hit:
@@ -171,6 +182,10 @@ def main():
           f"this shelf; {len(unmatched)} did not")
     if unmatched:
         print("  " + ", ".join(sorted(set(unmatched))[:8]) + " …")
+    if refused:
+        print(f"  {len(set(refused))} bare-name matches refused, too far from the district in the bracket:")
+        for parish, pid, d in sorted(set(refused)):
+            print(f"    {parish}  -x->  {pid} ({d} km)")
     if loose:
         # «Bribir (Šibenik)» went onto Bribir in Vinodol this way, and five more
         # parishes onto a same-named place in another county. A bracket that

@@ -113,23 +113,12 @@
       seen[r.i] = 1; all.push({ row: r, km: km, books: r.c || r.v || 0, weight: Math.max(r.c || 0, r.v || 0) });
     });
     all.sort(function (a, b) { return a.km - b.km; });
-    all.forEach(function (x) { var d = elsewhere(rows, x.row); if (d) x.doubt = d; });
+    /* `dq` comes from the build's place-doubt.json, with the data gate's own rule (scripts/district_names.py): «Čista (Skradin)» standing 82 km from Skradin. Nothing is moved or hidden by it: it is said. */
+    all.forEach(function (x) { if (x.row.dq) x.doubt = { of: x.row.dq[0], km: x.row.dq[1] }; });
     var want = Object.create(null);
     all.slice(0, 3).forEach(function (x) { want[x.row.i] = 1; });
     all.filter(function (x) { return x.weight > 0; }).sort(function (a, b) { return b.weight - a.weight || a.km - b.km; }).slice(0, 4).forEach(function (x) { want[x.row.i] = 1; });
     return all.filter(function (x) { return want[x.row.i] || (keep && keep[x.row.i]); });
-  }
-  /* «Dubovac (Karlovac)» standing 135 km from Karlovac: the bracket says which Dubovac the register is, and the dot may be on another one. Returns {of, km} when the
-     place called by the bracket is more than 50 km off, else null. Nothing is moved or hidden by this: it is said. */
-  function elsewhere(rows, r) {
-    var m = /\(([^()]+)\)\s*$/.exec(r.n || ""); if (!m) return null;
-    var q = fold(m[1]), best = null;
-    (rows || []).forEach(function (o) {
-      if (o.i === r.i || o.cc !== r.cc || o.y == null || fold(o.n) !== q) return;
-      var rad = Math.PI / 180, dy = (o.y - r.y) * 111.2, dx = (o.x - r.x) * 111.2 * Math.cos(r.y * rad), km = Math.sqrt(dx * dx + dy * dy);
-      if (best == null || km < best) best = km;
-    });
-    return best != null && best > 50 ? { of: m[1], km: Math.round(best) } : null;
   }
   /* Up to `cap` FamilySearch register links for a place ({p, cols} as the story reader holds it): the ones whose years meet [lo, hi] first, the most overlap first;
      when none does, the ones nearest in time, marked `fits: false`. */

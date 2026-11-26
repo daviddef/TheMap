@@ -2882,7 +2882,8 @@
         var rows = d.places.slice(), tail = d.tail && d.tail.cells ? Object.keys(d.tail.cells) : [];
         return Promise.all(tail.map(function (k) { return getJSON(d.tail.dir + k + ".json").then(function (c) { rows = rows.concat(c.places || []); }).catch(function () {}); }))
           .then(function () { return getJSON("index-quiet.json").then(function (q) { rows = rows.concat(q.places || []); }).catch(function () {}); })
-          .then(function () { return getJSON("given-names.json").catch(function () { return { rows: [] }; }); })
+          .then(function () { return getJSON("place-doubt.json").catch(function () { return {}; }); })
+          .then(function (dq) { rows.forEach(function (r) { if (dq[r.i]) r.dq = dq[r.i]; }); return getJSON("given-names.json").catch(function () { return { rows: [] }; }); })
           .then(function (g) {
             return Promise.all([getJSON("place-aliases.json").catch(function () { return null; }), getJSON("country-points.json").catch(function () { return null; })]).then(function (x) {
               var al = x[0], cp = x[1], givenRows = g.rows || [], given = S.buildGiven(givenRows), map = S.buildMap(rows);

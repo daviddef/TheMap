@@ -870,6 +870,23 @@ def main():
 
     if world:
         _added = 0
+        # A PARISH WITH A ROW OF ITS OWN TAKES ITS BOOKS WITH IT. The walk
+        # joins on the name, so one made before the row existed has «Gorica
+        # (Zadar)» on whichever Gorica it found — and the shelf split would be
+        # undone here on every build. The parish number is in the waypoint:
+        # <book>:<collection tree>,<parish>,<book id>.
+        try:
+            _ph = json.load(open("data/parish-places.json", encoding="utf-8"))
+        except FileNotFoundError:
+            _ph = {"collection": None, "parishes": {}}
+        _by_home = {}
+        for _pid, _rows in world["byPlace"].items():
+            for _r in _rows:
+                _bits = (_r.get("wp") or "").partition(":")[2].split(",")
+                _home = (_ph["parishes"].get(_bits[1])
+                         if _r.get("col") == _ph["collection"] and len(_bits) > 1 else None)
+                _by_home.setdefault(_home["place"] if _home else _pid, []).append(_r)
+        world["byPlace"] = _by_home
         # DEDUPE ON THE BOOK, NOT ON ITS IDENTIFIER. The two walks number
         # waypoints differently — the browser walk has "9R2S-T3N", the API
         # has "32P4-MNG:1051984701,1051984702" — so comparing those never
@@ -1034,6 +1051,14 @@ def main():
             pnames = {x["id"]: x["names"] for x in json.load(_fh).get("places", [])}
     except (OSError, ValueError):
         pass
+    # «POSITION DOUBTFUL» is worked out here, by the gate's own code, so the
+    # browser has no rule of its own. A file of its own, {id: [district, km]},
+    # because only the story reader reads it: not a field on every index row.
+    import district_names
+    with open("data/geocode-checked.json", encoding="utf-8") as _fh:
+        dubious = district_names.doubtful(places, json.load(_fh)["checked"])
+    with open(os.path.join(OUT, "place-doubt.json"), "w", encoding="utf-8") as _fh:
+        json.dump(dubious, _fh, ensure_ascii=False, separators=(",", ":"))
     for p in places:
         cs = p.get("collections", [])
         acc = min((c["access"] for c in cs if c.get("access") in RANK),

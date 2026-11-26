@@ -128,11 +128,11 @@ test("neighbours are the nearest and the ones with the most volumes, the town th
   assert.deepEqual(got.map((x) => x.km), got.map((x) => x.km).slice().sort((a, b) => a - b));
 });
 
-test("a neighbour whose name points somewhere else is said to be doubtful", () => {
-  const rows = [{ i: "dubovac", n: "Dubovac (Karlovac)", y: 45.24111, x: 17.205, cc: "HR", c: 8 }, { i: "karlovac", n: "Karlovac", y: 45.4929, x: 15.5553, cc: "HR", c: 20 }, NG];
+test("a neighbour is doubtful only when its row says so, never by a rule of the browser's own", () => {
+  const rows = [{ i: "cista", n: "Čista (Skradin)", y: 45.30, x: 17.47, cc: "HR", c: 2, dq: ["Skradin", 82] }, { i: "dubovac", n: "Dubovac (Karlovac)", y: 45.24111, x: 17.205, cc: "HR", c: 8 }, { i: "karlovac", n: "Karlovac", y: 45.4929, x: 15.5553, cc: "HR", c: 20 }, NG];
   const got = A.neighbours(rows, { lat: 45.2903, lon: 17.4697, cc: "HR", name: "Drežnik", row: { i: "here" } });
-  const d = got.find((x) => x.row.i === "dubovac").doubt;
-  assert.equal(d.of, "Karlovac"); assert.ok(d.km > 100);
+  assert.deepEqual(got.find((x) => x.row.i === "cista").doubt, { of: "Skradin", km: 82 });
+  assert.equal(got.find((x) => x.row.i === "dubovac").doubt, undefined);
   assert.equal(got.find((x) => x.row.i === "novagradiska").doubt, undefined);
 });
 

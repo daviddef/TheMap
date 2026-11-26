@@ -12,7 +12,7 @@ const BUILT = ["public/index.json", "public/given-names.json", "public/regions.j
 test("the story's years take in a decade told in words", { skip: !BUILT && "needs the built public/ data" }, async () => {
   const { read } = await import("./plan/harness.mjs");
   const { g } = await read(fs.readFileSync(path.join(SITE, "test/plan/drezhik-story.txt"), "utf8").trim());
-  assert.deepEqual(g.facts.told, [1910, 1942]);
+  assert.deepEqual(g.facts.told, [1900, 1944]);
 });
 
 test("a stop with no year hides the eras outside the story's years, behind a button that opens them", () => {
@@ -25,7 +25,7 @@ test("a stop with no year hides the eras outside the story's years, behind a but
 test("the home with no year of its own is dated by the birth, the wedding and the child the story tells", { skip: !BUILT && "needs the built public/ data" }, async () => {
   const { read } = await import("./plan/harness.mjs");
   const { g } = await read(fs.readFileSync(path.join(SITE, "test/plan/drezhik-story.txt"), "utf8").trim());
-  assert.deepEqual(g.facts.dated.map((d) => [d.kind, d.from, d.to]), [["b", 1910, 1919], ["m", 1936, 1939], ["c", 1942, 1942]]);
+  assert.deepEqual(g.facts.dated.map((d) => [d.kind, d.from, d.to]), [["b", 1900, 1909], ["m", 1926, 1929], ["c", 1944, 1944]]);
 });
 
 test("a decade said of a birth or a wedding is kept as told, never read as the year someone left", { skip: !BUILT && "needs the built public/ data" }, async () => {

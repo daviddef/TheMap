@@ -35,7 +35,7 @@ Bellinich, Alacevich — has gone from modern Croatia, which is the shape of
 the exodus written into a census.
 
     python3 scripts/harvest-croatia-surnames.py                  # the candidates not yet asked
-    python3 scripts/harvest-croatia-surnames.py Fratrović        # only the names given
+    python3 scripts/harvest-croatia-surnames.py Pilipić        # only the names given
 """
 import html, http.cookiejar, json, os, re, sys, time
 import urllib.error, urllib.parse, urllib.request
@@ -140,7 +140,7 @@ def already_asked():
 
 def main(argv=()):
     # NAMES ON THE COMMAND LINE are asked instead of the candidate list: a reader looked one up and the atlas had never had a
-    # reason to ask about it (Fratrović, 13 people, in no family archive). One question per name typed, kept like any other answer.
+    # reason to ask about it (Pilipić, 20 people, in no family archive). One question per name typed, kept like any other answer.
     asked_for = [" ".join(n.split()) for n in argv if n.strip()]
     names = asked_for or candidates()
     cache = already_asked()

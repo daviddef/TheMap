@@ -127,7 +127,7 @@ test("the page keeps what the tree needs to place a person: the born word, the n
 });
 test("a box says born, lived or from only where the words do; near only places the village", () => {
   const said = (t) => read(t).people.filter((x) => x.place).map((x) => x.role + ":" + x.place.said);
-  const d = "My great grandfather is Ivan Horvat and his wife, my great grandmother is Lucija, born FRATROVIC. They had 5 children. They lived in Ovaro near Udine.";
+  const d = "My great grandfather is Josip Horvat and his wife, my great grandmother is Barbara, born LONCAR. They had 5 children. They lived in Ovaro near Udine.";
   assert.deepEqual(said(d), ["self:lived", "spouse:lived"]);
   assert.deepEqual(said("My grandfather Ivan was born in 1920 and lived in Senj."), ["self:lived"]);
   assert.deepEqual(said("My grandfather Ivan came from Senj."), ["self:from"]);
@@ -137,9 +137,9 @@ test("a box says born, lived or from only where the words do; near only places t
 });
 test("the story check flags a box label the words do not hold", () => {
   const m = { exports: {} }; new Function("module", src("story-check.js"))(m);
-  const t = "Lucija was born in 1910. They lived in Senj.";
-  const bad = m.exports.check(t, { people: [{ role: "self", name: "Lucija", place: { word: "senj", said: "born" } }] }, { isPlace: (w) => w === "senj" });
+  const t = "Barbara was born in 1910. They lived in Senj.";
+  const bad = m.exports.check(t, { people: [{ role: "self", name: "Barbara", place: { word: "senj", said: "born" } }] }, { isPlace: (w) => w === "senj" });
   assert.ok(bad.problems.some((x) => x.code === "label-unsupported" && x.severity === "high"), JSON.stringify(bad.problems));
-  const ok = m.exports.check(t, { people: [{ role: "self", name: "Lucija", place: { word: "senj", said: "lived" } }] }, { isPlace: (w) => w === "senj" });
+  const ok = m.exports.check(t, { people: [{ role: "self", name: "Barbara", place: { word: "senj", said: "lived" } }] }, { isPlace: (w) => w === "senj" });
   assert.ok(!ok.problems.some((x) => x.code === "label-unsupported"));
 });

@@ -723,7 +723,7 @@
       (groups[key] = groups[key] || []); if (groups[key].length < 6) { groups[key].push(c.charAt(0).toUpperCase() + c.slice(1)); any++; }
     }
     text.split(/(?<=[.!?])\s+/).forEach(function (sent) {
-      /* «Their 5 kids are Jana, Mila, Manda, Franjo, and one unknown brother» is one thing told, not five clauses: the commas in a list of names stay with it */
+      /* «Their 5 kids are Katica, Zora, Anica, Stjepan, and one unknown brother» is one thing told, not five clauses: the commas in a list of names stay with it */
       sent = sent.replace(LIFE_LIST, function (m) { return m.replace(/,/g, "\u0001").replace(/\s+and\s+/g, " \u0002 "); });
       sent.split(/\s*[,;]\s*|\s+(?:and|but|then|so|yet|because|until|after|when|while|before|though|although|that|who|which)\s+/i).forEach(function (cl) {
         if (!cl || !cl.trim()) return;
@@ -1291,7 +1291,7 @@
   }
   /* A WOMAN'S BIRTH NAME, WHEN THE STORY SAYS IT. David: «can you show the wives maiden names as their last name? currently hidden amongst the text.» Registers file her under it,
      so it is the surname her box shows and her spellings are looked up under, marked as the maiden name; a married name the story also gave is kept beside it. Read only
-     from words that say so: «née X», «Lucija, born X» (a comma or bracket, and X not a place or a month), «her maiden name was X», «her name before marriage was X». */
+     from words that say so: «née X», «Barbara, born X» (a comma or bracket, and X not a place or a month), «her maiden name was X», «her name before marriage was X». */
   var MD_CAP = "\\p{Lu}[\\p{L}'\u2019-]+", MD_NAME = "((?:(?:van|von|de|del|della|di|da|dos|das|den|der|le|la)\\s+)*" + MD_CAP + ")(?![\\p{L}'\u2019-])", MD_MALE = /(?:father|grandpa|grandad|husband|son|brother|uncle|nephew)$/i, MD_FEMALE = /(?:mother|grandma|grandmother|wife|daughter|sister|aunt|niece)$/i;
   var MD_SAYS = "(?:[Mm]aiden\\s+(?:sur)?name|[Nn]ame\\s+before\\s+(?:her\\s+|the\\s+)?marr(?:iage|ying|ied)|[Bb]irth\\s+(?:sur)?name)\\s*(?:was|is|:)?\\s*";
   function markMaidens(out, text, ctx) {
@@ -1309,7 +1309,7 @@
     }
     function fine(name, born, after) {
       var f = S.fold(name); if (STOP[f] || MONTHS[f]) return false;
-      return !born || !(COMMON[f] || (name !== name.toUpperCase() && placeCalled(name, after)));   /* «born Hobart» is where; «born FRATROVIĆ», written as a family name, is who */
+      return !born || !(COMMON[f] || (name !== name.toUpperCase() && placeCalled(name, after)));   /* «born Hobart» is where; «born LONČAR», written as a family name, is who */
     }
     function first(re, born) { var m = new RegExp(re, "u").exec(t); return m && fine(m[1], born, t.slice(m.index + m[0].length)) ? m[1] : ""; }
     people.forEach(function (pe) {
@@ -1372,8 +1372,8 @@
     }
     return out;
   }
-  /* THE ANCESTOR'S LINE, TOLD IN PIECES. «My great grandfather is Ivan and his wife, my great grandmother, is Lucija ... They had 5 children and one of them is my grandma born 1942.
-     I think one of their sons, Franjo, moved away to Slovenia while my grandma went to Slovenia too, then Bosnia ... Their 5 kids are Jana, Mila, Manda, Franjo and one unknown
+  /* THE ANCESTOR'S LINE, TOLD IN PIECES. «My great grandfather is Josip and his wife, my great grandmother, is Barbara ... They had 5 children and one of them is my grandma born 1944.
+     I think one of their sons, Stjepan, moved away to Austria while my grandma went to Austria too, then Bosnia ... Their 5 kids are Katica, Zora, Anica, Stjepan and one unknown
      brother.» One reading of it all put the grandmother's year and every place on the great-grandfather. So the story is cut in two before it is read: the sentences about the
      ancestors themselves (read as the one-person story), and the sentences about their children and the grandmother (read here, a person at a time). Nothing is guessed: which child
      is the grandmother is not said, so she is a line of her own beside the five. */
@@ -1403,7 +1403,7 @@
     sents.forEach(function (sn) {
       var m;
       if ((m = /\b(?:had|have|has)\s+(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\s+(?:kids?|children)\b/i.exec(sn))) count = count || lnNum(m[1]);
-      /* «Their 5 kids are Jana, Mila, Manda, Franjo, and one unknown brother» */
+      /* «Their 5 kids are Katica, Zora, Anica, Stjepan, and one unknown brother» */
       if ((m = /\b(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\s+(?:kids?|children)\s+(?:are|were|named|called)\s*:?\s*([^.;!?]+)/i.exec(sn))) {
         count = count || lnNum(m[1]);
         m[2].split(/\s*,\s*(?:and\s+)?|\s+and\s+|\s*&\s*/i).forEach(function (pc) {
@@ -1411,11 +1411,11 @@
           if (un) { var uk = { name: "", sex: lnSex(un[1]), notes: [], ev: null }; kids.push(uk); listed.push(uk); } else if (okGiven(pc)) listed.push(kid(pc, ""));
         });
       }
-      /* «a picture of Lucija with two of her daughters beside her, Jana and Manda» */
+      /* «a picture of Barbara with two of her daughters beside her, Katica and Anica» */
       if ((m = /\b(?:picture|photo|photograph)\s+of\s+(\p{Lu}[\p{L}'’-]+)\s+with\s+(?:\w+\s+of\s+)?(?:her|his|their)\s+(daughters|sons|children)\b[^,.]*,\s*([^.]*?)(?:\s+(?:if|that|so)\b[^.]*)?[.!?]*\s*$/iu.exec(sn))) names(m[3], lnSex(m[2]), "In the photo with " + m[1]);
-      /* «one of their sons, Franjo, moved away to Slovenia» */
+      /* «one of their sons, Stjepan, moved away to Austria» */
       if ((m = /\b(?:one|two)\s+of\s+(?:their|her|his)\s+(sons|daughters),\s*(\p{Lu}[\p{L}'’-]+)\s*,/iu.exec(sn)) && okGiven(m[2])) kid(m[2], lnSex(m[1]));
-      /* «one of them is my grandma born 1942» */
+      /* «one of them is my grandma born 1944» */
       if ((m = /\b(?:grandma|grandmother|nan|nana|nonna|granny|gran)\b[^.]*?\bborn\s+(?:in\s+)?(\d{4})\b/i.exec(sn)) || (m = /\bborn\s+(?:in\s+)?(\d{4})\b[^.]*?\bmy\s+(?:grandma|grandmother|nan|nana|nonna|granny|gran)\b/i.exec(sn))) { grandma = grandma || { born: Number(m[1]), ev: null }; }
       else if (/\bmy\s+(?:grandma|grandmother|nan|nana|nonna|granny|gran)\b/i.test(sn)) grandma = grandma || { born: null, ev: null };
       /* the 3 who stayed */
@@ -1423,7 +1423,7 @@
         var se = readEvents(sn.slice(m.index), ctx), pl = se.origin || (se.moves[0] && se.moves[0].place);
         if (pl) stayed = { n: lnNum(m[1]), place: pl };
       }
-      /* who went where: one clause per person («Franjo moved away to Slovenia while my grandma went to Slovenia too, then Bosnia ...») */
+      /* who went where: one clause per person («Stjepan moved away to Austria while my grandma went to Austria too, then Bosnia ...») */
       if (/\b(?:moved|went|left|settled|settling|emigrated|migrated|came|travelled|traveled|relocated)\b/i.test(sn)) sn.split(/\s+(?:while|whereas|but)\s+|;\s*/i).forEach(function (cl) {
         if (!/\b(?:moved|went|left|settled|settling|emigrated|migrated|came|travelled|traveled|relocated)\b/i.test(cl)) return;
         var ev = null, who = null;
@@ -1443,20 +1443,20 @@
     var people = out.people || (out.people = []), kin = out.kin || (out.kin = []), self = people.filter(function (x) { return x.role === "self"; })[0], T = lin.subject;
     function stop(pl, role) { return { row: pl.row, alts: pl.alts, word: pl.word, role: role || "move", year: null, approx: false }; }
     var male = /father$/.test(out.rel || ""), told = function (pe, text) { (pe.events || (pe.events = [])).push({ type: "told", text: text }); };
-    /* the wife: «his wife, my great grandmother is Lucija, born FRATROVIĆ» */
+    /* the wife: «his wife, my great grandmother is Barbara, born LONČAR» */
     var sp = people.filter(function (x) { return x.role === "spouse"; })[0], gre = /\bmy\s+(?:great|step)[- ]?(?:great[- ]?)*grand(mother|father)\s+(?:name\s+)?(?:is|was|named|called)\s+(\p{Lu}[\p{L}'’-]+)(?:\s*,?\s*(?:born|n[eé]e)\s+(\p{Lu}[\p{L}'’-]+))?/giu, gm, mate = null;
     while ((gm = gre.exec(T))) if ((gm[1].toLowerCase() === "mother") === male) { mate = gm; break; }
     if (!sp && mate) { sp = { role: "spouse", key: "S", name: cased(mate[2]), given: cased(mate[2]), surname: mate[3] ? cased(mate[3]) : "", place: self && self.place && self.place.role === "lived" ? self.place : null, events: [] }; people.push(sp); }
     else if (sp && mate && mate[3] && !sp.surname) { sp.surname = cased(mate[3]); }
     if (sp && mate && mate[3]) told(sp, "Born " + cased(mate[3]));
-    /* «They're born likely 1910s and Married late 1930s»: decades, kept as told */
+    /* «They're born likely 1900s and Married late 1920s»: decades, kept as told */
     var bm = /\bborn\s+(?:(likely|probably|about|around|maybe|perhaps)\s+)?(?:in\s+)?(?:the\s+)?(\d{3}0)s\b/i.exec(T), mm = /\bmarried\s+(?:(early|mid|late)\s+)?(?:in\s+)?(?:the\s+)?(\d{3}0)s\b/i.exec(T);
     [self, sp].forEach(function (pe) {
       if (!pe) return;
       if (bm) told(pe, "Born " + (bm[1] ? bm[1].toLowerCase() + " " : "") + "in the " + bm[2] + "s");
       if (mm) told(pe, "Married " + (mm[1] ? mm[1].toLowerCase() + " " : "in the ") + mm[2] + "s");
     });
-    if (mm && out.left != null && Number(mm[2]) === out.left) out.left = null;   /* «married late 1930s» is not a year they left */
+    if (mm && out.left != null && Number(mm[2]) === out.left) out.left = null;   /* «married late 1920s» is not a year they left */
     if (bm && out.born != null && String(out.born).slice(0, 3) === bm[2].slice(0, 3)) out.born = null;
     /* the children, each with what was told of them */
     L.kids.forEach(function (k, i) {
@@ -1477,7 +1477,7 @@
     out.lineage = { children: L.count, grandmother: !!L.grandma };
     return out;
   }
-  /* A STORY ABOUT A NAMED ANCESTOR ("my great grandfather is Ivan Mihaljević and his wife, my great grandmother, is Lucija"): readMe draws the teller's own
+  /* A STORY ABOUT A NAMED ANCESTOR ("my great grandfather is Josip Perković and his wife, my great grandmother, is Barbara"): readMe draws the teller's own
      parents, grandparents and children and cannot draw a great-grandparent, so "They married in the 1930s" in such a story became the TELLER's parents' wedding.
      The ancestor is the subject, as in the one-person story. */
   function ancestorTold(t) { return /\bmy\s+(?:great|step)[- ]?(?:great[- ]?)*grand(?:father|mother|parent|pa|ma)\s+(?:name\s+)?(?:is|was|named|called)\s+\p{Lu}/u.test(String(t || "")); }
@@ -4241,7 +4241,7 @@
   }
 
   /* How one person's first name and surname were written: the catalogue's forms, with leads kept apart. Null when it holds nothing. */
-  /* the name as typed is not a lead for itself («Worth trying: Mila», for Mila): taken out of the leads, and a language left with nothing goes with it. An accent
+  /* the name as typed is not a lead for itself («Worth trying: Zora», for Zora): taken out of the leads, and a language left with nothing goes with it. An accent
      makes a different spelling, so only the case is set aside. */
   function otherForms(groups, typed) {
     var t = String(typed || "").toLowerCase();
@@ -4320,7 +4320,7 @@
     return base ? base + " " + pe.maiden : pe.name;
   }
 
-  /* [first, last] year the story tells of anyone, a decade told in words («born likely in the 1910s») included; null when it tells none */
+  /* [first, last] year the story tells of anyone, a decade told in words («born likely in the 1900s») included; null when it tells none */
   function toldYears(p) {
     var ys = [];
     function add(y) { if (typeof y === "number" && y > 1000 && y < 2100) ys.push(y); }

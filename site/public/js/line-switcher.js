@@ -52,7 +52,10 @@
     addBtn.type = "button"; form.hidden = true; fGo.type = "submit";
     fName.placeholder = "Surname, e.g. Kosina"; fName.setAttribute("aria-label", "Surname of the family"); fWhere.placeholder = "Where (optional), to tell two apart"; fWhere.setAttribute("aria-label", "Where, optional");
     form.append(fName, fWhere, fGo); add.append(addBtn, form);
-    pop.append(q, list, add); cb.append(btn, pop); sel.hidden = true; sel.parentNode.insertBefore(cb, sel);
+    /* the head holds what acts on several families at once (Select all, Clear, Read together, the archive buttons). It sits outside the scrolling list,
+       so it stays in reach however long the list is and while a search narrows it. */
+    var head = mk("div", "ra-cb-head");
+    pop.append(q, head, list, add); cb.append(btn, pop); sel.hidden = true; sel.parentNode.insertBefore(cb, sel);
     var shownLines = [], at = -1, tgCount = null, SKEY = "ra-synopsis-scope";
     /* NOTHING CHOSEN YET MEANS THE FAMILY YOU ARE ON, which is what the page did before this existed. «All» is a choice, never the default. */
     function readScope() { try { var x = JSON.parse(localStorage.getItem(SKEY) || "null"); if (x && typeof x === "object") return x; } catch (e) { /* none */ } var a = P.active(); return { all: false, slugs: a ? [a] : [] }; }
@@ -95,33 +98,39 @@
       var mine = shownLines.filter(function (l) { return !l.session; }), theirs = shownLines.filter(function (l) { return l.session; });
       shownLines = mine.concat(theirs);
       var heads = mine.length && theirs.length;
-      list.textContent = ""; at = -1;
+      list.textContent = ""; head.textContent = ""; at = -1; tgCount = null; archChips = [];
       /* SEVERAL AT ONCE IS A READING, NOT A FAMILY. Marks are made against ONE family (the one chosen by clicking its name, as always), so ticking
-         families here does not change that one: it chooses which families My research reads together on its All families tab. The tick boxes, «Select
-         all» and «Clear» only edit that set, which is kept in this browser (ra-synopsis-scope, shared with the tab). */
-      if (lines.length > 1 && !f) {
+         families here does not change that one: it chooses which families My research reads together. The tick boxes, «Select
+         all» and «Clear» only edit that set, which is kept in this browser (ra-synopsis-scope, shared with that page). «Select all» means every
+         family, whatever the search box is showing. */
+      if (lines.length > 1) {
         var lbl = bar.querySelector("a.ra-lines-l"), allHref = (lbl && lbl.getAttribute("href") || "/my-research/").split("#")[0] + "#all";
-        var tg = mk("li", "ra-cb-all"), cnt = mk("span", "ra-cb-allcount"); tgCount = cnt;
-        function bt(txt, fn) { var x = mk("button", "ra-cb-allbtn", txt); x.type = "button"; x.addEventListener("mousedown", function (e) { e.preventDefault(); e.stopPropagation(); fn(); syncTicks(); }); return x; }
+        var tg = mk("div", "ra-cb-all"), cnt = mk("span", "ra-cb-allcount"); tgCount = cnt;
+        /* a pointer press keeps the typing cursor in the search box; the act is on click, so Enter and Space work too */
+        function press(x, fn) {
+          x.addEventListener("mousedown", function (e) { e.preventDefault(); e.stopPropagation(); });
+          x.addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); fn(); syncTicks(); });
+        }
+        function bt(txt, fn) { var x = mk("button", "ra-cb-allbtn", txt); x.type = "button"; press(x, fn); return x; }
         var go = mk("a", "ra-cb-allgo", "Read together \u2192"); go.href = allHref;
         go.addEventListener("mousedown", function (e) { e.stopPropagation(); });
+        go.addEventListener("click", function () { closePop(false); });
         /* ONE TOOLBAR LINE: the two edits on the left, how many are ticked and the way through on the right. The caption that used to sit above them is the tooltip. */
         tg.append(bt("Select all", function () { writeScope({ all: true, slugs: [] }); }), bt("Clear", function () { writeScope({ all: false, slugs: [] }); }), cnt, go);
         tg.title = "Read several together: tick families to read them as one on My research. Clicking a family's name still chooses the one you mark under.";
-        list.append(tg);
+        head.append(tg);
         /* THE ARCHIVES, alphabetical: one button each, with how many of its families there are */
-        archChips = [];
         var byArch = {}; lines.forEach(function (l) { (l.archives || []).forEach(function (a) { var k = archName(a); (byArch[k] = byArch[k] || []).push(l.slug); }); });
         var names = Object.keys(byArch).sort(function (a, b) { return a.localeCompare(b); });
         if (names.length) {
-          var ar = mk("li", "ra-cb-arcs"); ar.append(mk("span", "ra-cb-arcs-l", "Tick a whole archive"));
+          var ar = mk("div", "ra-cb-arcs"); ar.setAttribute("role", "group"); ar.setAttribute("aria-label", "Tick a whole archive"); ar.append(mk("span", "ra-cb-arcs-l", "Tick a whole archive"));
           names.forEach(function (k) {
             var slugs = byArch[k], b = mk("button", "ra-cb-arcbtn", k + " \u00b7 " + slugs.length); b.type = "button";
             b.title = "Tick all " + slugs.length + (slugs.length === 1 ? " family" : " families") + " of the " + k + " archive, or untick them if they are all ticked";
-            b.addEventListener("mousedown", function (e) { e.preventDefault(); e.stopPropagation(); setMany(slugs, !slugs.every(inScope)); syncTicks(); });
+            press(b, function () { setMany(slugs, !slugs.every(inScope)); });
             archChips.push({ b: b, slugs: slugs }); ar.append(b);
           });
-          list.append(ar);
+          head.append(ar);
         }
         syncTicks();
       }
@@ -170,6 +179,8 @@
       pop.style.left = "0px";
       var r = pop.getBoundingClientRect(), over = r.right - (document.documentElement.clientWidth - 8);
       if (over > 0) pop.style.left = Math.max(-over, -(r.left - 8)) + "px";
+      /* a short window: the panel ends above the bottom of the screen and the list inside it takes what is left (never less than a few rows) */
+      pop.style.maxHeight = Math.max(300, (window.innerHeight || 700) - Math.max(0, r.top) - 8) + "px";
       if (addMode) openAdd(""); else q.focus();
     }
     function closePop(refocus) { cb.classList.remove("is-open"); pop.hidden = true; btn.setAttribute("aria-expanded", "false"); if (refocus) btn.focus(); }

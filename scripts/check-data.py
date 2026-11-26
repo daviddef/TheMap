@@ -1485,6 +1485,30 @@ def whats_new_gate():
                 err(f"{where}: spot {spot!r} is not an id or data-spot anywhere in site/src, so the link would ring nothing")
 
 
+def archive_errands_gate():
+    """site/public/archive-errands.json carries the family archives' open errands onto a public page. It may hold only who (a name in data/providers.json),
+    what for (fixed record kinds), a fixed status and a send month: the rules live in scripts/publish-archive-errands.py, so the tool that writes the file
+    and the gate that stops the build cannot disagree. A duplicated key is refused too, since json.load would hide whatever the first one held."""
+    import importlib.util
+    p = "site/public/archive-errands.json"
+    def _no_dup_keys(pairs):
+        if len({k for k, _ in pairs}) != len(pairs):
+            raise ValueError("a key written twice in one object")
+        return dict(pairs)
+    try:
+        spec = importlib.util.spec_from_file_location("publish_archive_errands", "scripts/publish-archive-errands.py")
+        pub = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(pub)
+        doc = json.load(open(p, encoding="utf-8"), object_pairs_hook=_no_dup_keys)
+        bad = pub.problems(doc, pub.load_providers("."))
+    except Exception as e:
+        err(f"cannot check {p}: {e}")
+        return
+    for m in bad:
+        err(f"{p}: {m}")
+    print(f"archive errands: {sum(len(a.get('errands') or []) for a in doc.get('archives') or [])} open errands, institutions, kinds, statuses and months only")
+
+
 def support_link_gate():
     """The Support page's donation link must be a LIVE Stripe Payment Link. The sandbox link (buy.stripe.com/test_...) opens
     a page that cannot take money, so a build that carries it is refused rather than shipped."""
@@ -1530,6 +1554,7 @@ def main():
     place_names_gate()
     flag_paths_gate()
     whats_new_gate()
+    archive_errands_gate()
     history_json()
     history_ground()
     voyages_gate()

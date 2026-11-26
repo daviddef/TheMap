@@ -727,6 +727,7 @@ window.addEventListener("load", async function () {
      first thing seen. Their own choice (the address bar or the switcher) still wins, and it is not remembered as a choice. */
   if (!pick.explicit && pick.key === "map" && document.getElementById("fd2-stage") && BASES.lightdots) pick = { key: "lightdots", explicit: false, from: "theme" };
   var baseNow = pick.key, baseExplicit = pick.explicit;
+  if (BM.homeOpened) BM.homeOpened(pick);   /* My research opens its map in the look this one shows, a look from the address included */
   BASES[baseNow].addTo(map);
 
   /* ---- the jurisdiction layer -------------------------------------------

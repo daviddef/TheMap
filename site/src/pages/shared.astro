@@ -110,7 +110,9 @@ import { u } from "../lib/url.js";
           var done = (r.b.done || []).concat(r.m.walked || []);
           tr.append(el("td", done.length ? P.fmt(P.parseRanges(P.fmt(done)) || done) + (r.m.walked && r.m.walked.length ? " (read in full)" : "") : "—"));
           tr.append(el("td", (r.b.state || "") + (r.b.since ? " · " + r.b.since : "")));
-          tr.append(el("td", done.length ? "page " + P.resume(P.parseRanges(P.fmt(done)) || done) : "page 1"));
+          /* a dash for a book there is nowhere to continue in: read in full, or no unread page after what was read */
+          var at = done.length ? P.resume(P.parseRanges(P.fmt(done)) || done, { total: r.m.total, walked: r.m.walked, state: r.b.state }) : 1;
+          tr.append(el("td", at ? "page " + at : "—"));
           tb.append(tr);
         });
         body.append(tb);

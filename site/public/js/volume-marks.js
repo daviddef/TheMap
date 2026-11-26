@@ -60,11 +60,11 @@
          NOT COLOUR ALONE: + for nothing, ✓ outlined for started, ✓ filled for
          finished. Shape and fill carry it too, so it survives a reader who
          cannot tell the two hues apart. */
-      var whole = m.total && done >= m.total;
+      var whole = m.total && done >= m.total, at = P.resume(m.done, m);
       var tip = P.fmt(m.done) + " \u00b7 " + done + " page" +
                 (done === 1 ? "" : "s") +
                 (m.total ? " of " + m.total : "") +
-                " \u00b7 start again at " + P.resume(m.done) +
+                (at ? " \u00b7 start again at " + at : "") +
                 (m.total ? "" : " \u00b7 give a total to mark it finished");
 
       /* THE SUMMARY MOVES INTO THE BUTTON. David: «can that be shown once i
@@ -98,7 +98,8 @@
       } else {
         bits.push('<span class="vm-n">' + done + " page" + (done === 1 ? "" : "s") + "</span>");
       }
-      bits.push('<span class="vm-res">start again at ' + P.resume(m.done) + "</span>");
+      var at = P.resume(m.done, m);
+      if (at) bits.push('<span class="vm-res">start again at ' + at + "</span>");
       if (m.note) bits.push('<span class="vm-note">' + esc(m.note) + "</span>");
       if (m.since) bits.push('<span class="vm-since">' + esc(m.since) + "</span>");
       return bits.join(" ");

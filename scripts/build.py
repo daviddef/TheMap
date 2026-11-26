@@ -95,6 +95,29 @@ def _fs_image_url(col, wp):
             f"{col}/waypoints/{wp}")
 
 
+def marked_waypoints(path="record-atlas-research-import.json"):
+    """The FamilySearch books the family research sessions have marked, by waypoint."""
+    try:
+        with open(path, encoding="utf-8") as fh:
+            marks = json.load(fh).get("marks") or {}
+    except (FileNotFoundError, ValueError):
+        return set()
+    return {k.split(":", 1)[1].split(":")[0] for k in marks if k.startswith("volume:")}
+
+
+def cap_volumes(vols, cap, marked):
+    """(the oldest `cap` books for the place file, and the link of each later book a family session has marked).
+
+    My research links a book's title to its own FamilySearch viewer, looked up by waypoint in the place file. The file carries the oldest
+    books only, so a marked book past the cap would fall back to the town page; its waypoint and address (never the whole row) travel too."""
+    if len(vols) <= cap:
+        return vols, []
+    ordered = sorted(vols, key=lambda r: (r.get("from") or 9999))
+    more = [{"waypoint": r["waypoint"], "url": r["url"]} for r in ordered[cap:]
+            if r.get("url") and str(r.get("waypoint") or "").split(":")[0] in marked]
+    return ordered[:cap], more
+
+
 def fold(s):
     s = (s or "").translate(XLAT)
     s = unicodedata.normalize("NFKD", s)
@@ -1068,6 +1091,7 @@ def main():
         dubious = district_names.doubtful(places, json.load(_fh)["checked"])
     with open(os.path.join(OUT, "place-doubt.json"), "w", encoding="utf-8") as _fh:
         json.dump(dubious, _fh, ensure_ascii=False, separators=(",", ":"))
+    research_books = marked_waypoints()
     for p in places:
         cs = p.get("collections", [])
         acc = min((c["access"] for c in cs if c.get("access") in RANK),
@@ -1235,9 +1259,11 @@ def main():
             # still more than anybody reads in one sitting, and the total
             # is stated so nothing pretends this is all of them.
             _cap = 60
-            if len(_v) > _cap:
-                _v = sorted(_v, key=lambda r: (r.get("from") or 9999))[:_cap]
+            _v, _more = cap_volumes(_v, _cap, research_books)
+            if len(vol_by_place[p["id"]]) > _cap:
                 detail["volumesTotal"] = len(vol_by_place[p["id"]])
+            if _more:
+                detail["moreBooks"] = _more
             detail["volumes"] = _v
         if span:
             detail["span"] = span

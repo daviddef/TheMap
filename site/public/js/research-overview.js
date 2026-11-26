@@ -1,5 +1,5 @@
 /* THE FIGURES, THE FAMILY CHOOSER, THE OVERLAPS AND THE PLAN OF THE RESEARCH VIEW ON /my-research/. This was the «All families» tab; it is now the top
- * and the middle of the one Research tab, for one family or several (the map and the place-by-place list are the dossier's, in the same panel).
+ * and the middle of the one research view, for one family or several (the map and the place-by-place list are the dossier's, in the same panel).
  * What it draws: which families are read (and the chooser), the figures, Copy / Download / Print, where the families overlap (only when there are two
  * or more) and what to do first. The old text follows.
  *
@@ -43,7 +43,7 @@
         (function (pid) {
           running++;
           fetch(BASE + "p/" + pid + ".json").then(function (r) { return r.json(); })
-            .then(function (d) { PLACES[pid] = { name: String(d.name || "").replace(/\s*\([^)]*\)\s*$/, "") || pid }; changed = true; })
+            .then(function (d) { PLACES[pid] = { name: String(d.name || "").replace(/\s*\([^)]*\)\s*$/, "") || pid, volumes: d.volumes, moreBooks: d.moreBooks }; changed = true; })
             .catch(function () { PLACES[pid] = { name: pid }; })
             .then(function () { running--; if (i >= todo.length && !running) { if (changed) draw(); } else next(); });
         })(todo[i++]);
@@ -53,6 +53,14 @@
   }
 
   function badge(name, cls) { return el("span", "mra-b " + (cls || ""), name); }
+  /* A named book opens the book on FamilySearch when the town's file lists it (research-synopsis.js bookUrl), else the town page the mark carries. */
+  function bookEl(r, pid, text) {
+    var fs = S.bookUrl(r.id, r.href, PLACES[pid]), to = fs || (r.kind === "volume" && /^(https?:\/\/|\/(?!\/))/i.test(r.href || "") ? r.href : "");
+    if (!to) return el("span", "", text || r.title);
+    var a = el("a", "mra-book", (text || r.title) + (fs ? " \u2197" : "")); a.href = to;
+    if (fs) { a.target = "_blank"; a.rel = "noopener"; a.title = "Open this book on FamilySearch"; }
+    return a;
+  }
 
   function draw() {
     scope = readScope();
@@ -153,7 +161,7 @@
         if (p.sharedBooks.length) {
           var ul = el("ul", "mra-l");
           p.sharedBooks.forEach(function (r) {
-            var li = el("li"); li.append(el("span", "", r.title + (r.total ? " (" + plural(r.total, "image") + ")" : "")));
+            var li = el("li"); li.append(bookEl(r, p.pid)); if (r.total) li.append(" (" + plural(r.total, "image") + ")");
             Object.keys(r.lines).sort(function (x, y) { return nameOf[x].localeCompare(nameOf[y]); }).forEach(function (sl) {
               var x = r.lines[sl]; li.append(" ", badge(nameOf[sl] + ": " + (x.state || "searched") + (x.ownPages ? ", " + plural(x.ownPages, "page") : ""), x.state ? "st-" + x.state : ""));
             });
@@ -161,7 +169,13 @@
             ul.append(li);
           });
           s.append(ul);
-        } else s.append(el("p", "cap", p.books.length ? "No single book is shared; the families have marked different books here." : "Each family has the place on its list; no book is marked yet."));
+        }
+        if (p.note) s.append(el("p", "cap", p.note));
+        if (p.showHas) {
+          var each = el("ul", "mra-l mra-has");
+          p.slugs.forEach(function (sl) { if (!p.has[sl].length) return; var li = el("li"); li.append(el("b", "", nameOf[sl]), ": " + p.has[sl].join(" \u00b7 ")); each.append(li); });
+          s.append(each);
+        }
         mid.append(s);
       });
     }
@@ -179,9 +193,15 @@
         var li = el("li"), a = el("a", "", p.name); a.href = BASE + "place/" + p.pid + "/"; li.append(el("b", "", ""), a);
         if (several) p.openFamilies.forEach(function (sl) { li.append(" ", badge(nameOf[sl])); });
         var ul = el("ul", "mra-l");
-        p.sameBookOpen.forEach(function (r) { ul.append(el("li", "", "One reading serves " + r.open.map(function (sl) { return nameOf[sl]; }).sort().join(" and ") + ": " + r.title + (r.total ? " (" + plural(r.total, "image") + ")" : ""))); });
+        p.sameBookOpen.forEach(function (r) {
+          var li2 = el("li", "", "One reading serves " + r.open.map(function (sl) { return nameOf[sl]; }).sort().join(" and ") + ": ");
+          li2.append(bookEl(r, p.pid)); if (r.total) li2.append(" (" + plural(r.total, "image") + ")"); ul.append(li2);
+        });
         p.openFamilies.forEach(function (sl) {
-          p.openBy[sl].filter(function (r) { return !(r.open && r.open.length > 1); }).forEach(function (r) { ul.append(el("li", "", (several ? nameOf[sl] + ": " : "") + r.title + (r.kind === "volume" ? "" : " (" + r.kind + ")"))); });
+          p.openBy[sl].filter(function (r) { return !(r.open && r.open.length > 1); }).forEach(function (r) {
+            var li3 = el("li", "", several ? nameOf[sl] + ": " : "");
+            li3.append(r.kind === "volume" ? bookEl(r, p.pid) : el("span", "", r.title + " (" + r.kind + ")")); ul.append(li3);
+          });
         });
         li.append(ul); ol.append(li);
       });
@@ -196,6 +216,5 @@
   document.addEventListener("ra-scope-changed", function () { scope = readScope(); maybe(); });
   window.addEventListener("storage", function () { scope = readScope(); maybe(); });
   window.addEventListener("hashchange", function () { setTimeout(maybe, 0); });
-  document.addEventListener("ra-tab-shown", function () { setTimeout(maybe, 0); });
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { setTimeout(maybe, 0); }); else setTimeout(maybe, 0);
 })();

@@ -123,7 +123,7 @@
     h.append(el("h2", "mr-h", "Errands"));
     h.append(el("p", "cap", "Letters to where the record is. Press the pencil beside an institution in “Where the paper is” and a plain letter is drafted here for you to finish. Nothing is sent from the Atlas: you send it from your own e-mail, then say so here."));
     if (note) { h.append(el("p", "mre-note", note)); }
-    if (!all.length) { h.append(el("p", "cap", "No errands yet.")); host.append(h); return; }
+    if (!all.length) { h.append(el("p", "cap", "No letters of your own yet.")); host.append(h); return; }
     E.STATUS.slice().forEach(function (s) {
       var group = all.filter(function (e) { return e.status === s; }); if (!group.length) return;
       h.append(el("h3", "mrs-sub", E.SAY[s] + " (" + group.length + ")"));

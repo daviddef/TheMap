@@ -110,9 +110,11 @@ jobs:
       # need to keep doing full deploys… why is only that one page not
       # building?»
       #
-      # WHAT site/public/ ACTUALLY DEPENDS ON is data/** and scripts/**, and
-      # nothing else: build.py, build-surnames.py and build-eras.py read from
-      # those two and write into site/public. So the key is a hash of both,
+      # WHAT site/public/ ACTUALLY DEPENDS ON is data/** and scripts/**, which
+      # build.py, build-surnames.py and build-eras.py read from and write into
+      # site/public, and site/package.json, which says which scripts the data step
+      # runs (a script added there and nowhere else made nothing on a cache hit).
+      # So the key is a hash of the three,
       # computed AFTER the harvest artefact lands in data/ so a new artefact
       # counts as a change. An exact hit means the inputs are byte-identical
       # and the output would be byte-identical too.
@@ -125,7 +127,7 @@ jobs:
       # exactly and the cache is used, or the data is rebuilt.
       - name: Key the data cache
         id: datakey
-        run: echo "k=data-${{ hashFiles('data/**', 'scripts/**') }}" >> "$GITHUB_OUTPUT"
+        run: echo "k=data-${{ hashFiles('data/**', 'scripts/**', 'site/package.json') }}" >> "$GITHUB_OUTPUT"
       - name: Restore built data
         id: datacache
         uses: actions/cache@v4
@@ -171,6 +173,7 @@ jobs:
           for f in site/public/index.json \
                    site/public/shards.json \
                    site/public/cem/index.json \
+                   site/public/leaders.json \
                    site/src/data/places-full.json \
                    site/src/data/collections-full.json \
                    site/src/data/surnames.json \

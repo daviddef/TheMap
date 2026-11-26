@@ -542,7 +542,7 @@
 
   /* ---- reading the words ----------------------------------------------------------------------------------------------------- */
   function signature(p) {
-    return JSON.stringify([(p.near || []).map(function (n) { return n.word + n.pick + n.level + n.options.length; }), (p.route || []).map(function (x) { return x.row.i + ":" + x.age; }), p.left, p.born, p.name, (p.people || []).map(function (x) { return x.role + x.name + (x.occupation || "") + JSON.stringify((x.events || []).map(function (e) { return [e.type, e.year, e.place]; })) + (x.place && x.place.word || ""); }), p.holds,
+    return JSON.stringify([(p.near || []).map(function (n) { return n.word + n.pick + n.level + n.options.length; }), (p.route || []).map(function (x) { return x.row.i + ":" + x.age; }), p.left, p.born, p.name, (p.people || []).map(function (x) { return x.role + x.name + (x.occupation || "") + (x.bornText || "") + (x.parentSide || "") + JSON.stringify((x.events || []).map(function (e) { return [e.type, e.year, e.place]; })) + (x.place && x.place.word || ""); }), p.holds,
       p.life && p.life.groups.map(function (g) { return g.items; }), p.life && p.life.illness, p.life && p.life.died, (p.siblings || []).map(function (x) { return x.name; }), (p.kin || []).length]);
   }
   /* ---- A STORY IN ANOTHER LANGUAGE (story-lang.js) --------------------------------------------------------------------------------

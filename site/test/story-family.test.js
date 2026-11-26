@@ -17,11 +17,11 @@ const place = (name, cols, extra) => Object.assign({ name, href: "/place/" + nam
 
 /* ---- the family is the selector ------------------------------------------------------------------------------------------------------ */
 const self = { role: "self", rel: "grandfather", name: "Oren Valdic" }, father = { role: "father", name: "Stip Valdic" }, mother = { role: "mother", name: "Dora Penn" };
-const sib = { role: "sibling", name: "Mila" }, silent = { role: "father", name: "" };
+const sib = { role: "sibling", name: "Petra" }, silent = { role: "father", name: "" };
 const ITEMS = [
   { title: "The parents’ marriage", who: [father, mother], steps: [{ title: "Marriage entry", why: "Both families.", href: "/place/x/", ev: { kind: "m", w: [1890, 1900] } }] },
   { title: "Oren Valdic", who: [self], steps: [{ title: "Birth or baptism entry · 1902", why: "Parents.", href: "/place/x/", ev: { kind: "b", w: [1902, 1902] } }, { title: "Death or burial", why: "Age.", ev: { kind: "d", w: null } }, { title: "Whether they are alive", why: "No search." }] },
-  { title: "The sister", who: [{ rel: "sister", name: "Mila" }], steps: [{ title: "Her baptism", why: "Same books.", href: "/place/x/", ev: { kind: "b", w: [1900, 1910] } }] },
+  { title: "The sister", who: [{ rel: "sister", name: "Petra" }], steps: [{ title: "Her baptism", why: "Same books.", href: "/place/x/", ev: { kind: "b", w: [1900, 1910] } }] },
   { title: "Someone the tree does not draw", who: [], steps: [{ title: "Their papers", why: "At home." }] }
 ];
 

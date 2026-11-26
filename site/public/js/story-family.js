@@ -506,12 +506,12 @@
         }
       });
     }
-    /* the books shelf: the first place is open and the others fold under their own names, so the shelf is read a place at a time */
+    /* the books shelf: every place folds under its own name, so the shelf opens short and is read a place at a time */
     function foldStops(stops) {
       all(stops, ".lf-stop").forEach(function (sec, i) {
         var head = sec.querySelector(".lf-stop-h"), name = (sec.querySelector("h3") || {}).textContent || "";
         if (!head) return;
-        var d = el("details", null, "sp-place-fold"); d.open = i === 0; d.append(el("summary", "Books and where to search: " + name));
+        var d = el("details", null, "sp-place-fold"); d.append(el("summary", "Books and where to search: " + name));
         [].slice.call(sec.children).forEach(function (n) { if (n !== head) d.append(n); });
         sec.append(d);
       });

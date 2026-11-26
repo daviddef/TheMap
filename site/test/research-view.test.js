@@ -43,7 +43,8 @@ test("the Research page has one families panel, and the My story tab and its scr
   assert.match(page, /id="mr-stories"/);
   assert.match(page, /research-stories\.js/);
   assert.equal(fs.existsSync(path.join(here, "../public/js/story-tab.js")), false);
-  assert.match(page, /\^story\(\\\/\|\$\)/, "old #story and #story/<id> addresses still land here");
+  assert.match(page, /research-fixes\.js/);
+  assert.match(fs.readFileSync(path.join(here, "../public/js/research-fixes.js"), "utf8"), /\^story\(\\\/\|\$\)/, "old #story and #story/<id> addresses still land here");
 });
 
 test("a saved story opens in the one story tool, by id, and a first save makes it the current story", () => {

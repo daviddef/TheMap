@@ -87,15 +87,20 @@
 
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
 
-  /* BASE: the site root with its trailing slash, for the links and the flag images. */
-  function render(m, base) {
-    /* A DETAILS, SHUT BY DEFAULT: the card is long (about 500px), and the page's job is the map and the research under it. Opening it is remembered; it
-       is stored only when the reader presses the heading, so the card being drawn does not count as a choice. */
-    var root = el("details", "ni"), sum = el("summary", "ni-sum");
-    var KEY = "ra-name-intro-open";
-    try { root.open = localStorage.getItem(KEY) === "1"; } catch (e) { root.open = false; }
-    sum.addEventListener("click", function () { setTimeout(function () { try { localStorage.setItem(KEY, root.open ? "1" : "0"); } catch (e) {} }, 0); });
-    root.append(sum);
+  /* BASE: the site root with its trailing slash, for the links and the flag images. opts.panel: the card is being shown under its chip in the row of
+     names, so it is already open and has no line of its own to press. */
+  function render(m, base, opts) {
+    var root, sum;
+    if (opts && opts.panel) { root = el("section", "ni"); sum = root; }
+    else {
+      /* A DETAILS, SHUT BY DEFAULT: the card is long (about 500px), and the page's job is the map and the research under it. Opening it is remembered; it
+         is stored only when the reader presses the heading, so the card being drawn does not count as a choice. */
+      root = el("details", "ni"); sum = el("summary", "ni-sum");
+      var KEY = "ra-name-intro-open";
+      try { root.open = localStorage.getItem(KEY) === "1"; } catch (e) { root.open = false; }
+      sum.addEventListener("click", function () { setTimeout(function () { try { localStorage.setItem(KEY, root.open ? "1" : "0"); } catch (e) {} }, 0); });
+      root.append(sum);
+    }
     if (!m.found) {
       sum.append(el("h2", "ni-h", "About the name" + (m.name ? " " + m.name : "")));
       root.append(el("p", "ni-p", m.failed ? "This card could not be loaded just now. Reload the page to try again. That says nothing about the name." : "The registers held here have no entry for this surname yet. That is a gap in our data, not a finding about the name."));
@@ -153,7 +158,106 @@
     return root;
   }
 
-  var api = { fold: fold, pick: pick, build: build, render: render };
+  /* HOW THE CARDS SIT ON THE PAGE. One family: its card as one shut line, as it always was. Several: one slim row of name chips, «About the names», and
+     one card open at a time underneath. A card each, stacked, took the whole first screen with six families and pushed the map off it. With many
+     families the row shows the first few and «Show all»; the chip whose card is open is never folded away.
+     Every family gets its place as soon as the set changes, and says so while its card is still coming or when it could not be loaded; a card that has
+     arrived is kept, so a redraw (every mark causes one) neither flickers nor shuts what the reader opened or moves the keyboard focus. */
+  var FOLD = 12, FOLD_NARROW = 6, SEQ = 0;
+  function view(host, base, opts) {
+    var narrow = (opts && opts.narrow) || function () { try { return window.matchMedia("(max-width: 600px)").matches; } catch (e) { return false; } };
+    var items = {}, order = [], mode = "", open = null, all = false, chips = null, more = null, panel = null;
+    var uid = "ni-row-" + (++SEQ);
+
+    function shown() { return order.filter(function (n) { return items[n].state !== "none"; }); }
+    function stub(name) {
+      var d = el("details", "ni"), sm = el("summary", "ni-sum");
+      sm.append(el("h2", "ni-h", "About the name " + name), el("span", "ni-wait", "loading\u2026")); d.append(sm); return d;
+    }
+    function waiting(name) {
+      var d = el("section", "ni"), p = el("p", "ni-p ni-fine", "Loading the card for " + name + "\u2026"); p.setAttribute("role", "status");
+      d.append(el("h2", "ni-h", "About the name " + name), p); return d;
+    }
+    function cardOf(it) {
+      if (!it.node) it.node = it.model ? render(it.model, base, { panel: mode === "row" }) : mode === "row" ? waiting(it.name) : stub(it.name);
+      return it.node;
+    }
+    function build() {
+      var rowEl = el("div", "ni-row"), lab = el("span", "ni-row-l", "About the names");
+      lab.id = uid + "-l"; rowEl.setAttribute("role", "group"); rowEl.setAttribute("aria-labelledby", lab.id);
+      chips = el("div", "ni-chips"); chips.id = uid + "-chips";
+      more = el("button", "ni-allbtn"); more.type = "button"; more.setAttribute("aria-controls", chips.id);
+      more.addEventListener("click", function () { all = !all; paint(); });
+      panel = el("div", "ni-panel"); panel.id = uid + "-open"; panel.hidden = true;
+      panel.addEventListener("keydown", function (e) {
+        if (e.key !== "Escape" || !open) return;
+        var c = items[open].chip; open = null; paint(); if (c) c.focus();
+      });
+      rowEl.append(lab, chips, more); host.append(rowEl, panel);
+    }
+    function chipOf(it) {
+      if (it.chip) return it.chip;
+      var b = el("button", "ni-chip"); b.type = "button"; b.setAttribute("aria-controls", panel.id);
+      b.addEventListener("click", function () { open = open === it.name ? null : it.name; paint(); });
+      return (it.chip = b);
+    }
+    function paint() {
+      var names = shown();
+      host.hidden = !names.length;
+      if (mode === "one") {
+        var one = names.length ? cardOf(items[names[0]]) : null;
+        if (host.children.length !== 1 || host.children[0] !== one) { host.textContent = ""; if (one) host.append(one); }
+        return;
+      }
+      if (mode !== "row") return;
+      if (open && names.indexOf(open) < 0) open = null;
+      var limit = narrow() ? FOLD_NARROW : FOLD, folds = names.length > limit + 1;
+      [].slice.call(chips.children).forEach(function (c) { if (!names.some(function (n) { return items[n].chip === c; })) c.remove(); });
+      names.forEach(function (n, i) {
+        var it = items[n], b = chipOf(it);
+        if (chips.children[i] !== b) chips.insertBefore(b, chips.children[i] || null);   /* only the new ones are put in, so focus stays where it is */
+        if (b.getAttribute("data-state") !== it.state) {
+          b.setAttribute("data-state", it.state); b.textContent = ""; b.append(el("span", "", n));
+          if (it.state === "failed") b.append(el("span", "ni-chip-s", " (not loaded)"));
+          if (it.state === "loading") b.append(el("span", "ni-vh", " (loading)"));
+          b.className = "ni-chip is-" + it.state;
+        }
+        b.setAttribute("aria-expanded", String(open === n));
+        b.hidden = folds && !all && i >= limit && open !== n;
+      });
+      chips.classList.toggle("is-all", folds && all);
+      more.hidden = !folds; more.textContent = all ? "Show fewer" : "Show all " + names.length; more.setAttribute("aria-expanded", String(folds && all));
+      panel.hidden = !open;
+      var want = open ? cardOf(items[open]) : null;
+      if (panel.children[0] !== want) { panel.textContent = ""; if (want) panel.append(want); }
+    }
+    return {
+      /* the families the page reads, in the picker's order */
+      set: function (list) {
+        var next = list.length > 1 ? "row" : list.length ? "one" : "";
+        if (next !== mode) {
+          host.textContent = ""; mode = next; chips = more = panel = null; open = null; all = false;
+          Object.keys(items).forEach(function (n) { items[n].node = null; items[n].chip = null; });   /* drawn differently in the other mode */
+          if (mode === "row") build();
+        }
+        order = list.slice();
+        Object.keys(items).forEach(function (n) { if (order.indexOf(n) < 0) delete items[n]; });
+        order.forEach(function (n) { if (!items[n]) items[n] = { name: n, state: "loading", model: null, node: null, chip: null }; });
+        paint();
+      },
+      done: function (name) { var it = items[name]; return !!it && (it.state === "ready" || it.state === "none"); },
+      /* a card that has arrived, or the model saying it could not be loaded; a late real card still replaces that line */
+      put: function (name, model) {
+        var it = items[name];
+        if (!it || !model || it.state === "ready" || it.state === "none" || (model.failed && it.state === "failed")) return;
+        it.state = model.failed ? "failed" : "ready"; it.model = model; it.node = null; paint();
+      },
+      /* a family that is not a surname has no card, so its place goes */
+      drop: function (name) { var it = items[name]; if (!it) return; it.state = "none"; it.node = null; paint(); }
+    };
+  }
+
+  var api = { fold: fold, pick: pick, build: build, render: render, view: view, FOLD: FOLD, FOLD_NARROW: FOLD_NARROW };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else window.raNameIntro = api;
 })();

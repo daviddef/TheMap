@@ -2883,6 +2883,66 @@
       .map(function (p) { return { id: p.id, name: String(p.name).split(" \u2014 ")[0], url: p.deepLink.replace("{surname}", encodeURIComponent(name)).replace("{SURNAME}", encodeURIComponent(name.toUpperCase().replace(/\s+/g, "_"))) }; });
   }
 
+  /* WHERE THE FAMILY'S NAMES ARE MOST COMMON, IN CROATIA. David: «in our plans/stories, show where these names feature most». `table` is /hr-surname-towns.json:
+     the ten most common surnames of each town, municipality and county in the 2021 census, in rank order, with no numbers. So a rank is all that is said, and a name
+     in no list is «in no top ten», never «not there». lib/hr-surname-towns.js is the built pages' copy of this lookup and a test holds the two together. */
+  function censusKm(a, b, c, d) { var r = Math.PI / 180, dl = (c - a) * r, dn = (d - b) * r, x = Math.sin(dl / 2) * Math.sin(dl / 2) + Math.cos(a * r) * Math.cos(c * r) * Math.sin(dn / 2) * Math.sin(dn / 2); return 12742 * Math.asin(Math.sqrt(x)); }
+  function censusLow(x) { return String(x || "").normalize("NFC").toLocaleLowerCase("hr"); }
+  /* One name. The spelling typed is looked up first (accents count); only when no list holds it, and exactly one listed name differs from it by accents alone, is
+     that one shown, and `as` says so. `home` = {lat, lon} to measure from, or null. */
+  function censusWhere(table, name, home) {
+    if (!table || !table.areas || !name) return null;
+    var want = censusLow(name), listed = Object.create(null);
+    table.areas.forEach(function (a) { a.s.forEach(function (n) { listed[censusLow(n)] = n; }); });
+    var key = listed[want] ? want : "", as = "";
+    if (!key) { var f = S.fold(name), same = Object.keys(listed).filter(function (k) { return S.fold(listed[k]) === f; }); if (same.length === 1) { key = same[0]; as = listed[key]; } }
+    var out = { name: name, as: as, areas: [], counties: [], country: null, counted: null, below: false };
+    if (key) table.areas.forEach(function (a) {
+      var i = a.s.map(censusLow).indexOf(key); if (i < 0) return;
+      if (a.k === "country") out.country = i + 1;
+      else if (a.k === "county") out.counties.push({ n: a.n, rank: i + 1 });
+      else out.areas.push({ n: a.n, county: a.c, kind: a.k, place: a.p || "", rank: i + 1, km: home && home.lat != null && a.y != null ? Math.max(1, Math.round(censusKm(home.lat, home.lon, a.y, a.x))) : null });
+    });
+    out.areas.sort(function (a, b) { return a.rank - b.rank || (a.km == null ? 1e9 : a.km) - (b.km == null ? 1e9 : b.km) || a.n.localeCompare(b.n, "hr"); });
+    out.counties.sort(function (a, b) { return a.rank - b.rank || a.n.localeCompare(b.n, "hr"); });
+    var spelt = censusLow(as || name), c = table.counted2011 || {}, hit = Object.keys(c).filter(function (k) { return censusLow(k) === spelt; })[0];
+    if (hit) out.counted = c[hit]; else out.below = (table.below2011 || []).some(function (n) { return censusLow(n) === spelt; });
+    return out;
+  }
+  /* The story's family surnames, each once, as typed: everyone's surname, and a wife's birth name. */
+  function storySurnames(people) {
+    var out = [], seen = Object.create(null);
+    (people || []).forEach(function (pe) {
+      [pe.surnameTyped, pe.maiden].forEach(function (n) { var k = censusLow(n); if (n && !seen[k]) { seen[k] = 1; out.push(n); } });
+    });
+    return out.slice(0, 6);
+  }
+  /* The place distances are measured from: where the story says the family was from (or the town it pins a far namesake to), if that is in Croatia; else the first
+     Croatian place of the story; else none. */
+  function censusHome(route, infos) {
+    var stops = (route || []).filter(function (x) { return x && x.info; }), from = stops.filter(function (x) { return /^(born|origin|lived|father-from|mother-from|family)$/.test(x.role || ""); })[0] || stops[0];
+    var pick = null;
+    if (from) { var i = from.info, n = from.nearInfo; pick = n && n.lat != null && i.lat != null && censusKm(i.lat, i.lon, n.lat, n.lon) > 40 ? n : i; }
+    if (!pick || pick.cc !== "HR" || pick.isCountry) pick = stops.map(function (x) { return x.info; }).concat(infos || []).filter(function (i) { return i.cc === "HR" && !i.isCountry && i.lat != null; })[0] || null;
+    return pick && pick.lat != null ? { name: pick.name, lat: pick.lat, lon: pick.lon } : null;
+  }
+  /* Everything the story says about the table: each family name, and the ten commonest surnames of the towns and municipalities nearest the family's place. */
+  function censusFor(table, people, route, infos) {
+    if (!table || !(infos || []).some(function (i) { return i && i.cc === "HR"; })) return null;
+    var home = censusHome(route, infos), rows = storySurnames(people).map(function (n) { return censusWhere(table, n, home); }).filter(Boolean);
+    if (!rows.length) return null;
+    var fam = rows.map(function (r) { return censusLow(r.as || r.name); });
+    var around = !home ? [] : table.areas.filter(function (a) { return (a.k === "town" || a.k === "municipality") && a.y != null; })
+      .map(function (a) { return { n: a.n, county: a.c, place: a.p || "", km: censusKm(home.lat, home.lon, a.y, a.x), names: a.s, family: a.s.filter(function (n) { return fam.indexOf(censusLow(n)) > -1; }) }; })
+      .filter(function (a) { return a.km <= 30; }).sort(function (a, b) { return a.km - b.km; }).slice(0, 3).map(function (a) { a.km = Math.max(1, Math.round(a.km)); return a; });
+    return { home: home, rows: rows, around: around, url: table.url, source: table.source, year: table.year };
+  }
+  function ordinal(n) { return n + (["th", "st", "nd", "rd"][(n % 100 > 10 && n % 100 < 14) ? 0 : n % 10] || "th"); }
+  function censusElsewhere(r) {
+    if (r.counted != null) return "The 2011 census counted " + r.counted.toLocaleString("en-GB") + " people with it in all of Croatia.";
+    return r.below ? "The 2011 census lookup answered that fewer than ten people had it, or none." : "";
+  }
+
   /* WHICH LANGUAGES A CLERK WOULD HAVE USED, from where a person lived and when. David: «we can deduce which alternate spellings he would have based on who held the ground / the country
      of the time of his life, rather than throwing all languages up». A person born in Senj in 1951 was written in Croatian (Yugoslavia) and, in Sydney, in English; not in Latin, Italian or
      Hungarian, which Senj's registers used under other rulers. The language of the country as it is now is always included; the polity of each era the person was there adds the language its
@@ -2913,7 +2973,7 @@
   }
 
   var api = { toYear: toYear, suggest: suggest, windows: windows, volumesFor: volumesFor, spansOf: spansOf, bookNeeds: bookNeeds, keyBooks: keyBooks, captionAt: captionAt, progress: progress, between: between,
-              readFamily: readFamily, readMe: readMe, readEvents: readEvents, repairCase: repairCase, givenForms: givenForms, volLabel: volLabel, buildPlan: buildPlan, parseStory: parseStory, startFamily: startFamily, familyName: familyName, flagFor: flagFor, leaderAt: leaderAt, leadersBetween: leadersBetween, givenGroups: givenGroups, otherForms: otherForms, numberPeople: numberPeople, surnameBlock: surnameBlock, nameLinks: nameLinks, short: short, yearsIn: yearsIn,
+              readFamily: readFamily, readMe: readMe, readEvents: readEvents, repairCase: repairCase, givenForms: givenForms, volLabel: volLabel, buildPlan: buildPlan, parseStory: parseStory, startFamily: startFamily, familyName: familyName, flagFor: flagFor, leaderAt: leaderAt, leadersBetween: leadersBetween, givenGroups: givenGroups, otherForms: otherForms, numberPeople: numberPeople, surnameBlock: surnameBlock, nameLinks: nameLinks, censusWhere: censusWhere, censusFor: censusFor, storySurnames: storySurnames, short: short, yearsIn: yearsIn,
               HOLDS: HOLDS, YEAR_MIN: YEAR_MIN, YEAR_MAX: YEAR_MAX, readLife: readLife, gazWants: gazWants, gazMerge: gazMerge, nearWords: nearWords, NEAR_KM: NEAR_KM, didYouMean: didYouMean, aliasMerge: aliasMerge, countryPoints: countryPoints, repairCase: repairCase, clerkLanguages: clerkLanguages };
   if (typeof module !== "undefined" && module.exports) { module.exports = api; return; }
   window.raStory = api;
@@ -3017,7 +3077,8 @@
         return Promise.all([Promise.all(rowsNeeded.map(function (r) { return placeInfo(r); })),
           getJSON("providers.json").catch(function () { return { providers: [] }; }), getJSON("mortality.json").catch(function () { return null; }),
           getJSON("flag-map.json").catch(function () { return null; }), getJSON("leaders.json").catch(function () { return null; }),
-          Promise.all(people.map(function (pe) { return pe.surname ? surname(pe.surname).catch(function () { return null; }) : Promise.resolve(null); })), Promise.resolve(people)]);
+          Promise.all(people.map(function (pe) { return pe.surname ? surname(pe.surname).catch(function () { return null; }) : Promise.resolve(null); })), Promise.resolve(people),
+          rowsNeeded.some(function (x) { return x.cc === "HR"; }) ? getJSON("hr-surname-towns.json").catch(function () { return null; }) : Promise.resolve(null)]);
       }).then(function (r) {
         var carded = Object.create(null); cardRows.forEach(function (row) { carded[row.i] = 1; });
         return Promise.all(r[0].filter(function (i) { return carded[i.row.i]; }).map(function (i) {
@@ -3062,7 +3123,7 @@
             langs: clerkLanguages(staysOf(pe)), surname: r[5][i] && Object.assign(r[5][i], { links: nameLinks(provs, pe.surname, r[0].map(function (x) { return x.cc; })) }), surnameTyped: pe.surname, maiden: pe.maiden || "", married: pe.married || "", occupation: pe.occupation || "", counts: pe.counts || null, told: !!pe.told, presumed: !!pe.presumed, me: !!pe.me, sought: !!pe.sought, key: pe.key, ofSubject: !!pe.ofSubject, nameNote: pe.nameNote || "", place: pe.place && infos[pe.place.row.i] ? infos[pe.place.row.i].name : "", placeSaid: pe.place && pe.place.said || "", placeNear: pe.place && pe.place.nearTo && pe.place.nearTo.row && infos[pe.place.nearTo.row.i] ? infos[pe.place.nearTo.row.i].name.replace(/\s*\(area\)$/, "") : "", label: pe.label || "", side: pe.side || "", up: !!pe.up,
             events: (pe.events || []).map(function (e) { var inf = e.place && infos[e.place.row.i]; if (e.type === "told") return { type: "told", text: e.text }; return { type: e.type, said: e.said || "", year: e.year, place: inf ? inf.name : (e.place ? e.place.word : e.text ? e.text + " (not among the Atlas's places)" : ""), country: inf ? inf.countryName : "", cause: e.cause || "" }; }) };
         });
-        return { facts: facts, plan: buildPlan(facts), mort: r[2], names: { people: out }, people: out, others: parsed.others || [], life: parsed.life || null };
+        return { facts: facts, plan: buildPlan(facts), mort: r[2], names: { people: out, census: censusFor(r[7], out, facts.route, r[0]) }, people: out, others: parsed.others || [], life: parsed.life || null };
       });
     }
     return { getJSON: getJSON, load: load, resolveMissing: resolveMissing, placeInfo: placeInfo, gather: gather, surname: surname };
@@ -4096,11 +4157,49 @@
       var sm = el("summary"); sm.append(el("b", shownName(c.pe) || roleLabel(c.pe, people)), el("span", " \u00b7 " + c.labels.join(", and "), "lf-filed"));
       d.append(sm, c.inner); d.raPeople = c.pes; box.append(d);
     });
+    var cen = censusBlock(names && names.census, base); if (cen) { any = true; box.append(cen); }
     if (any) {
       var p = el("p", null, "cap"); p.append("Leads are where to look, not findings. ");
       var a = el("a", "Every spelling in the Atlas →"); a.href = base + "your-name/"; p.append(a); box.append(p);
     }
     return any ? box : null;
+  }
+
+  /* «Where the family names are most common»: once for the whole family, under the people's spellings. */
+  function censusBlock(c, base) {
+    if (!c || !c.rows || !c.rows.length) return null;
+    var box = el("div", null, "lf-census"), SHOWN = 8;
+    box.append(el("h4", "Where the family names are most common in Croatia, " + c.year),
+      el("p", "From the census lists of the ten most common surnames in each town and municipality. They give the order only, no numbers, and a name missing from a list may still be borne there.", "lf-filed"));
+    function placed(a) { if (!a.place) return el("b", a.n); var l = el("a", null); l.href = base + "place/" + encodeURIComponent(a.place) + "/"; l.append(el("b", a.n)); return l; }
+    c.rows.forEach(function (r) {
+      var d = el("section", null, "lf-cn"); d.append(el("h5", r.name));
+      if (r.as) d.append(el("p", "The lists spell it " + r.as + ", with different accents from the story.", "lf-filed"));
+      if (r.areas.length) {
+        var ul = el("ol", null, "lf-cn-list");
+        function item(a) {
+          var li = el("li"); li.append(el("span", ordinal(a.rank), "lf-cn-rank"), " ");
+          var where = el("span", null, "lf-cn-where"); where.append(placed(a), document.createTextNode(", " + (a.kind === "district" ? "a district of Zagreb" : a.county + (/county/i.test(a.county) ? "" : " County")) + (a.km != null && c.home ? " \u00b7 " + a.km + " km from " + c.home.name : "")));
+          li.append(where); return li;
+        }
+        r.areas.slice(0, SHOWN).forEach(function (a) { ul.append(item(a)); }); d.append(ul);
+        if (r.areas.length > SHOWN) { var more = el("details", null, "lf-cn-more"), rest = el("ol", null, "lf-cn-list"); r.areas.slice(SHOWN).forEach(function (a) { rest.append(item(a)); }); more.append(el("summary", "And " + (r.areas.length - SHOWN) + " more places"), rest); d.append(more); }
+      } else d.append(el("p", "In no town\u2019s or municipality\u2019s ten most common surnames. " + censusElsewhere(r), "lf-cn-none"));
+      if (r.counties.length) d.append(el("p", "Among the ten most common in a whole county: " + r.counties.slice(0, 6).map(function (x) { return x.n + " (" + ordinal(x.rank) + ")"; }).join(", ") + (r.counties.length > 6 ? " and " + (r.counties.length - 6) + " more" : "") + ".", "lf-filed"));
+      if (r.country) d.append(el("p", "The " + (r.country === 1 ? "" : ordinal(r.country) + " ") + "most common surname in Croatia.", "lf-filed"));
+      box.append(d);
+    });
+    if (c.around.length && c.home) {
+      var det = el("details", null, "lf-cn-around"), held = c.around.some(function (a) { return a.family.length; });
+      det.append(el("summary", "The ten most common surnames around " + c.home.name + " today"));
+      var u = el("ul", null, "lf-forms");
+      c.around.forEach(function (a) { var li = el("li"); li.append(placed(a), document.createTextNode(", " + a.km + " km: " + a.names.join(", "))); u.append(li); });
+      det.append(u, el("p", held ? "Your family\u2019s " + c.around.reduce(function (s, a) { a.family.forEach(function (n) { if (s.indexOf(n) < 0) s.push(n); }); return s; }, []).join(", ") + " is among them." : "None of your family names is among them.", "lf-filed"));
+      box.append(det);
+    }
+    var src = el("p", null, "lf-cn-src"), a = el("a", "Croatian Bureau of Statistics, Census " + c.year + " \u2197"); a.href = c.url; a.target = "_blank"; a.rel = "noopener";
+    src.append("Source: ", a); box.append(src);
+    return box;
   }
 
   /* The family as told: the parents named above the person, and the visitor below. Each card carries the place and the few forms of the name
@@ -4297,7 +4396,7 @@
     var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     function show(t, where) { t.scrollIntoView({ behavior: still ? "auto" : "smooth", block: where }); t.classList.add("lf-card-hit"); setTimeout(function () { t.classList.remove("lf-card-hit"); }, 1600); }
     function button(text, go) { var b = el("button", text, "lf-jump"); b.type = "button"; b.addEventListener("click", go); return b; }
-    var foot = names.querySelector(":scope > .cap");
+    var foot = names.querySelector(":scope > .lf-census, :scope > .cap");
     numberPeople(cards.map(function (c) { return c.raPerson; }), boxes.map(function (d) { return d.raPeople; })).forEach(function (hit, i) {
       if (!hit) return;
       var c = cards[i], d = boxes[hit.box], role = c.querySelector(".lf-card-role"), sum = d.querySelector("summary");

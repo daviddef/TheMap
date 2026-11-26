@@ -2,7 +2,7 @@
 
 Question from David: for «Drežnik near Nova Gradiška», where does she start at her desk, who can she write to, which neighbouring towns, magistrates and cemeteries are worth looking at, and is the story really turned into things to *do*?
 
-Method: 13 realistic stories (`site/test/plan/stories.mjs`: the pasted Drežnik story plus Croatian village → Queensland, Friuli → Buenos Aires, Gorenjska → Cleveland, Burgenland → New York, Galicia → Pittsburgh, Bohemian Jewish → Vienna, Cork → Boston, Glasgow → Nova Scotia/Toronto, Silesia → Canada, Liguria → Buenos Aires, Dubrovnik → Ellis Island → Butte, Imotski → Chile, Tučepi → Melbourne) were run through the real reader with the built data (`node test/plan/audit.mjs [id]`, `dumpplan.mjs`). For each stop we measured what the Atlas holds within reach: volumes, archives with a position and a contact, cemeteries, region/era table, mortality events.
+Method: 13 realistic stories (`site/test/plan/stories.mjs`: an invented Drežnik story plus Croatian village → Queensland, Friuli → Buenos Aires, Gorenjska → Cleveland, Burgenland → New York, Galicia → Pittsburgh, Bohemian Jewish → Vienna, Cork → Boston, Glasgow → Nova Scotia/Toronto, Silesia → Canada, Liguria → Buenos Aires, Dubrovnik → Ellis Island → Butte, Imotski → Chile, Tučepi → Melbourne) were run through the real reader with the built data (`node test/plan/audit.mjs [id]`, `dumpplan.mjs`). For each stop we measured what the Atlas holds within reach: volumes, archives with a position and a contact, cemeteries, region/era table, mortality events.
 
 ## What the old plan did (steps 1–8 in `g.plan`)
 
@@ -47,10 +47,10 @@ Anchor correction: «A near B», when A and B are more than 40 km apart in the g
 
 - Anchor: Nova Gradiška (note: «the story puts Drežnik near Nova Gradiška, 127 km from the Drežnik we hold»).
 - Era table: Military Frontier ring → Kingdom of Serbs, Croats and Slovenes, Independent State of Croatia; filed under ARHiNET / the Slavonski Brod archive, not the Bosnian state archive.
-- Write to: Državni arhiv u Slavonskom Brodu (51 km), Croatian draft letter naming Nova Gradiška and Mihaljević; the Atlas holds no address or email for it and says so.
+- Write to: Državni arhiv u Slavonskom Brodu (51 km), Croatian draft letter naming Nova Gradiška and Perković; the Atlas holds no address or email for it and says so.
 - Nearby: Cernik, Rešetari, Staro Petrovo Selo … from the Atlas's own places, with what each holds.
 - Ground: the Atlas lists no cemetery near Nova Gradiška (OSM 0, Wikidata 0) and says so. It does **not** invent one.
-- Moves: Slovenia → Bosnia and Herz. → North Macedonia for the grandmother.
+- Moves: Austria → Bosnia and Herz. → North Macedonia for the grandmother.
 
 ## Data to gather, in priority order (this is what makes the plan better, not more code)
 
@@ -64,4 +64,4 @@ Anchor correction: «A near B», when A and B are more than 40 km apart in the g
 
 ## Tests
 
-`site/test/story-todo.test.js` (17 tests): anchor correction, region/era choice, volume ranking and gaps, archive contacts and draft letters, no invented cemetery, mortality only when inside the polygon and years, moves, every item carries a why, neighbours, the compact archive endpoint (contacts only where Wikidata states one), and the pasted Ivan/Lucija story end to end. Full suite: 1,062 pass; the 4 failures (`roots.test.js`, «fix list») fail the same way on the untouched code. Stress corpus: 342 pass, 10 known gaps.
+`site/test/story-todo.test.js` (17 tests): anchor correction, region/era choice, volume ranking and gaps, archive contacts and draft letters, no invented cemetery, mortality only when inside the polygon and years, moves, every item carries a why, neighbours, the compact archive endpoint (contacts only where Wikidata states one), and the pasted Josip/Barbara story end to end. Full suite: 1,062 pass; the 4 failures (`roots.test.js`, «fix list») fail the same way on the untouched code. Stress corpus: 342 pass, 10 known gaps.

@@ -1,4 +1,4 @@
-/* THE STORY, CHECKED AGAINST ITS READING: nothing lost, nothing invented. David pasted a real story and the reader got it wrong end to end (the great-grandparents missing from the
+/* THE STORY, CHECKED AGAINST ITS READING: nothing lost, nothing invented. A story pasted into the reader was once read wrong end to end (the great-grandparents missing from the
    tree, Bosnia dropped, a list of names cut at the first comma, Father and Mother boxes the words never mentioned) and every part of the page looked fine on its own. Tests that
    look at one fact at a time never saw it. This looks at the WHOLE: it takes the words as typed and the reading the page built from them, and asks four plain questions of any
    story, with no expected answer written for it:

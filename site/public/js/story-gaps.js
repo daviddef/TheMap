@@ -130,7 +130,7 @@
       var ref = pe.role === "self" && p.rel && !pe.me ? "my " + String(p.rel).replace(/-/g, " ") : (pe.role === "father" || pe.role === "mother") && !p.rel ? "my " + pe.role : "";
       if (ref) rel = "your " + ref.slice(3);
       put(pe.name, "person", given, rel, ref); if (!out.some(function (t) { return t.name === given && t.kind === "person"; })) put(given, "person", given, rel, ref);
-      /* a surname the story gives apart from the name («Lucija, born FRATROVIĆ») is the same person */
+      /* a surname the story gives apart from the name («Barbara, born LONČAR») is the same person */
       if (pe.surname && String(pe.name).toLowerCase().indexOf(String(pe.surname).toLowerCase()) < 0) put(pe.surname, "person", given, rel, ref);
     });
     (p.siblings || []).forEach(function (sb) { put(sb.name, "person", sb.name, (sb.label || sb.rel || "").replace(/^(?:his|her|their)\b/, "their")); });

@@ -32,7 +32,7 @@ test("namesake municipalities sit in their own county", () => {
 });
 
 test("a name is listed by rank, then by distance from the family's place", () => {
-  const r = F.censusWhere(T, "Mihaljević", DREZNIK);
+  const r = F.censusWhere(T, "Jukić", DREZNIK);
   assert.ok(r.areas.length >= 5);
   for (let i = 1; i < r.areas.length; i++) {
     const a = r.areas[i - 1], b = r.areas[i];
@@ -42,34 +42,34 @@ test("a name is listed by rank, then by distance from the family's place", () =>
 });
 
 test("a name in no list says so with the 2011 count, and nothing more", () => {
-  const r = F.censusWhere(T, "Fratrović", DREZNIK);
+  const r = F.censusWhere(T, "Pilipić", DREZNIK);
   assert.deepEqual([r.areas, r.counties, r.country], [[], [], null]);
-  assert.equal(r.counted, 13);
+  assert.equal(r.counted, 20);
 });
 
 test("accents count; a name typed without them is shown as the lists spell it, and says so", () => {
-  const r = F.censusWhere(T, "Mihaljevic", null);
-  assert.equal(r.as, "Mihaljević");
+  const r = F.censusWhere(T, "Jukic", null);
+  assert.equal(r.as, "Jukić");
   assert.ok(r.areas.length && r.areas.every((a) => a.km === null));
-  assert.equal(F.censusWhere(T, "mihaljević", null).as, "");
+  assert.equal(F.censusWhere(T, "jukić", null).as, "");
 });
 
 test("the built pages' lookup agrees with the browser's", () => {
-  for (const n of ["Horvat", "Mihaljević", "Dautović"]) {
+  for (const n of ["Horvat", "Jukić", "Dautović"]) {
     const a = whereRanked(n), b = F.censusWhere(T, n, null);
     assert.deepEqual(a.areas.map((x) => [x.area.name, x.rank]).sort(), b.areas.map((x) => [x.n, x.rank]).sort(), n);
     assert.equal(a.country, b.country, n);
     assert.equal(a.counties.length, b.counties.length, n);
   }
-  assert.equal(whereRanked("Fratrović"), null);
+  assert.equal(whereRanked("Pilipić"), null);
 });
 
 test("a story with no Croatian place shows nothing; one with a Croatian place measures from it and lists the nearest towns", () => {
-  const people = [{ surnameTyped: "Mihaljević" }, { surnameTyped: "Mihaljević", maiden: "Fratrović" }];
+  const people = [{ surnameTyped: "Jukić" }, { surnameTyped: "Jukić", maiden: "Pilipić" }];
   assert.equal(F.censusFor(T, people, [], [{ cc: "SI" }]), null);
   const home = { name: "Drežnik", lat: DREZNIK.lat, lon: DREZNIK.lon, cc: "HR" };
   const c = F.censusFor(T, people, [{ info: home, role: "lived" }], [home]);
-  assert.deepEqual(c.rows.map((r) => r.name), ["Mihaljević", "Fratrović"]);
+  assert.deepEqual(c.rows.map((r) => r.name), ["Jukić", "Pilipić"]);
   assert.equal(c.home.name, "Drežnik");
   assert.equal(c.around.length, 3);
   assert.equal(c.around[0].n, "Rešetari");
@@ -77,14 +77,14 @@ test("a story with no Croatian place shows nothing; one with a Croatian place me
 
 test("the plan carries a section on the names, with the source", () => {
   const home = { name: "Drežnik", lat: DREZNIK.lat, lon: DREZNIK.lon, cc: "HR", row: { i: "x" }, cols: [] };
-  const people = [{ surnameTyped: "Mihaljević" }, { surnameTyped: "Fratrović" }];
+  const people = [{ surnameTyped: "Jukić" }, { surnameTyped: "Pilipić" }];
   const census = F.censusFor(T, people, [{ info: home, role: "lived" }], [home]);
   const plan = todo.build({ facts: { route: [{ info: home, role: "lived" }], kin: [] }, names: { census }, people }, { base: "/" });
   const s = plan.sections.find((x) => x.key === "names");
   assert.ok(s, "a names section");
-  assert.match(s.items[0].title, /^Mihaljević: ranks highest in /);
+  assert.match(s.items[0].title, /^Jukić: ranks highest in /);
   assert.match(s.items[1].title, /in no town's ten most common/);
-  assert.match(s.items[1].why, /13 people/);
+  assert.match(s.items[1].why, /20 people/);
   assert.match(s.items.at(-1).detail, /Census 2021/);
 });
 

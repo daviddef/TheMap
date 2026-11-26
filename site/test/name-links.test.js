@@ -14,9 +14,9 @@ const F = load("story-engine.js", { summary: load("atlas-summary.js") });
 const providers = JSON.parse(fs.readFileSync(path.join(here, "../../data/providers.json"), "utf8")).providers;
 
 test("a Croatian surname links to its Acta Croatica page, with the accent encoded", () => {
-  const [acta] = nameLinks(providers, "Fratrović", ["HR"]);
+  const [acta] = nameLinks(providers, "Pilipić", ["HR"]);
   assert.equal(acta.name, "Acta Croatica");
-  assert.equal(acta.url, "https://actacroatica.com/en/surname/Fratrovi%C4%87/");
+  assert.equal(acta.url, "https://actacroatica.com/en/surname/Pilipi%C4%87/");
 });
 
 test("a site that wants capitals gets capitals, and its name is the short one", () => {
@@ -26,12 +26,12 @@ test("a site that wants capitals gets capitals, and its name is the short one", 
 });
 
 test("no country with such a site, no name or no country: no link", () => {
-  assert.deepEqual(nameLinks(providers, "Fratrović", ["MK"]), []);
+  assert.deepEqual(nameLinks(providers, "Pilipić", ["MK"]), []);
   assert.deepEqual(nameLinks(providers, "", ["HR"]), []);
-  assert.deepEqual(nameLinks(providers, "Fratrović", []), []);
+  assert.deepEqual(nameLinks(providers, "Pilipić", []), []);
 });
 
 test("the story page and the surname page make the same links", () => {
-  for (const [name, ccs] of [["Mihaljević", ["HR", "SI"]], ["Rossi", ["IT", "AU"]], ["Smith", ["GB"]]])
+  for (const [name, ccs] of [["Jukić", ["HR", "SI"]], ["Rossi", ["IT", "AU"]], ["Smith", ["GB"]]])
     assert.deepEqual(F.nameLinks(providers, name, ccs), nameLinks(providers, name, ccs));
 });

@@ -42,6 +42,14 @@ test("the committed file holds directory institutions, fixed words and months, a
   }
 });
 
+test("it publishes itself on the research publisher's ticks, guarded, and a publish starts the deploys", () => {
+  const flow = read("../.github/workflows/publish-research.yml");
+  assert.match(flow, /publish-archive-errands\.py \$mode --guard \| tee \/tmp\/errands\.log/);
+  assert.match(flow, /mode="--publish"\n.*inputs\.dry_run.*mode="--dry-run"/, "a manual run is a dry run unless asked");
+  assert.match(flow, /grep -qs '\^Published' \/tmp\/publish\.log \/tmp\/errands\.log/);
+  assert.match(read("../scripts/publish-archive-errands.py"), /print\("Published " \+ PUBLIC\)/);
+});
+
 test("the build refuses a file outside that shape", () => {
   const gate = read("../scripts/check-data.py");
   assert.match(gate, /def archive_errands_gate\(\)/); assert.match(gate, /\n    archive_errands_gate\(\)\n/);

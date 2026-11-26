@@ -21,10 +21,15 @@ or value, the build runs it (scripts/check-data.py) and so does `--selftest`.
     python3 scripts/publish-archive-errands.py --write      # write site/public/archive-errands.json in this checkout; no git
     python3 scripts/publish-archive-errands.py --publish    # commit and push ONLY that file from a fresh clone of origin (this goes live)
     python3 scripts/publish-archive-errands.py --selftest   # check the rules on invented rows
+    --guard       refuse when an archive's file reads as empty (its shape changed) or the list would lose more than a third of its lines
     --no-fetch    read each archive's origin/main as last fetched
     --archives DIR    where the archive checkouts are (default: beside this repository's main checkout)
 
 With no mode it does nothing. The archives are only read: `git fetch`, then `git show origin/main:<file>`.
+
+IT RUNS BY ITSELF. .github/workflows/publish-research.yml runs `--publish --guard` on the same ticks as the research publisher (asked for every two
+hours; GitHub delivers every few) and starts the deploys only when something changed. There the run's own GITHUB_TOKEN clones and pushes, and it is
+blanked out of anything printed. A refusal fails the run, nothing is pushed, and GitHub e-mails the failure.
 """
 import json, os, re, shutil, subprocess, sys, tempfile, unicodedata
 
@@ -302,6 +307,31 @@ def read_sources(base, fetch=True):
     return out, missing
 
 
+def lines_of(doc):
+    return sum(len(a.get("errands") or []) for a in doc.get("archives") or [])
+
+
+def guard_problems(sources, new, old):
+    """Why a run nobody is watching must not publish. [] means it may. A letter that was answered leaves the list; a file this script can no longer read,
+    or a list that has mostly vanished, is a change of shape and wants a person."""
+    bad = []
+    for aid, _, _, shape, text in sources:
+        if text is not None and not entries(shape, text):
+            bad.append("%s (%s): the file was read and held no entries" % (aid, shape))
+    was, now = lines_of(old), lines_of(new)
+    if was and now * 3 < was * 2:
+        bad.append("the list would fall from %d lines to %d" % (was, now))
+    return bad
+
+
+def committed(root=ROOT):
+    try:
+        with open(os.path.join(root, PUBLIC), encoding="utf-8") as fh:
+            return json.load(fh)
+    except FileNotFoundError:
+        return {}
+
+
 def selftest():
     P = Providers([{"name": "State Archives of Nowhere", "url": "https://www.nowhere-archive.example", "aliases": ["Drzavni arhiv u Nigdjezemskoj"]},
                    {"name": "Nowhere Parish Library", "url": "https://library.example"}, {"name": "Archives", "url": "https://a.example"}])
@@ -361,6 +391,12 @@ def selftest():
         d = json.loads(json.dumps(good))
         spoil(d)
         assert problems(d, P), "the gate let a spoiled file through"
+    assert guard_problems(src, doc, doc) == []
+    assert guard_problems([("blazevic", "B", "", "rows", json.dumps({"renamed": [1]}))], doc, doc), "a file that reads as empty"
+    three = {"archives": [{"errands": [1, 2, 3]}]}
+    assert guard_problems([], {"archives": [{"errands": [1, 2]}]}, three) == [] and guard_problems([], {"archives": [{"errands": [1]}]}, three)
+    assert _authed("https://github.com/a/b.git", "tok") == "https://x-access-token:tok@github.com/a/b.git" and _authed("git@github.com:a/b.git", "tok") == "git@github.com:a/b.git"
+    assert _authed("https://github.com/a/b.git", "") == "https://github.com/a/b.git"
     print("selftest: only institutions in the directory, fixed kinds and statuses and a month leave an archive, and the gate refuses anything else")
 
 
@@ -372,8 +408,8 @@ def main(argv):
         i = args.index("--archives")
         base = args[i + 1]
         del args[i:i + 2]
-    fetch = "--no-fetch" not in args
-    args = [a for a in args if a != "--no-fetch"]
+    fetch, guard = "--no-fetch" not in args, "--guard" in args
+    args = [a for a in args if a not in ("--no-fetch", "--guard")]
     # an unknown flag must never fall through to a publish
     if len(args) != 1 or args[0] not in modes:
         print(__doc__)
@@ -401,6 +437,11 @@ def main(argv):
             print("MISSING  " + m)
     if bad:
         return 1
+    if guard:
+        why = (["an archive could not be read"] if missing else []) + guard_problems(sources, doc, committed())
+        if why:
+            print("REFUSED (--guard), nothing was published: " + "; ".join(why))
+            return 1
     if mode == "--dry-run":
         print("--dry-run: nothing written or pushed.")
         return 0
@@ -416,12 +457,23 @@ def main(argv):
     return publish(text)
 
 
+def _authed(url, token):
+    return "https://x-access-token:" + token + "@" + url[len("https://"):] if token and url.startswith("https://") else url
+
+
 def publish(text):
     """Commit and push only the published file, from a fresh clone, so nothing half-edited here can go with it."""
-    url = git(ROOT, "remote", "get-url", "origin").stdout.strip()
+    token = os.environ.get("GITHUB_TOKEN", "") if os.environ.get("GITHUB_ACTIONS") == "true" else ""
+    if os.environ.get("GITHUB_ACTIONS") == "true" and not token:
+        print("running in GitHub Actions with no GITHUB_TOKEN in the environment: nothing was published.")
+        return 1
+    url = _authed(git(ROOT, "remote", "get-url", "origin").stdout.strip(), token)
+    ident = ["-c", "user.name=Record Atlas publisher", "-c", "user.email=publisher@users.noreply.github.com"] if token else []
     tmp = tempfile.mkdtemp(prefix="ra-errands-")
     try:
-        if subprocess.run(["git", "clone", "-q", "--depth", "1", url, tmp]).returncode:
+        r = subprocess.run(["git", "clone", "-q", "--depth", "1", url, tmp], capture_output=True, text=True)
+        if r.returncode:
+            print((r.stdout + r.stderr).replace(token or "\0", "***"))
             return 1
         dest = os.path.join(tmp, PUBLIC)
         if os.path.exists(dest) and open(dest, encoding="utf-8").read() == text:
@@ -429,12 +481,12 @@ def publish(text):
             return 0
         with open(dest, "w", encoding="utf-8") as fh:
             fh.write(text)
-        for args in (["add", PUBLIC], ["commit", "-q", "-m", "Archive errands: republish", "--", PUBLIC], ["push", "-q", "origin", "HEAD:main"]):
+        for args in (["add", PUBLIC], ident + ["commit", "-q", "-m", "Archive errands: republish", "--", PUBLIC], ["push", "-q", "origin", "HEAD:main"]):
             r = git(tmp, *args)
             if r.returncode:
-                print(r.stdout + r.stderr)
+                print((r.stdout + r.stderr).replace(token or "\0", "***"))
                 return 1
-        print("published " + PUBLIC)
+        print("Published " + PUBLIC)       # the workflow starts the deploys when a line begins «Published»
         return 0
     finally:
         shutil.rmtree(tmp, ignore_errors=True)

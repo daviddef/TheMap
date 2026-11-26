@@ -219,7 +219,16 @@
     return Object.keys(n).sort().map(function (k) { return n[k] + " " + (KIND[k] || k); });
   }
 
-  var api = { fold: fold, yearIn: yearIn, buildMap: buildMap, candidates: candidates, eraAt: eraAt, volumesCovering: volumesCovering,
+  /* AN ARCHIVE THAT KEEPS ONE PIECE OF GROUND (providers.json `serves`: whole counties, and named places of others) is offered only for places in it; a place
+     whose county the Atlas does not hold is left out rather than guessed. An archive with no `serves` is for anywhere in its countries. */
+  function serves(entry, info) {
+    var s = entry && entry.serves; if (!s) return true;
+    var ad = info && info.p && info.p.admin; if (!ad) return false;
+    var list = (s.places || {})[ad.adm1], name = String(info.name || "").replace(/\s*\([^)]*\)\s*$/, "");
+    return (s.counties || []).indexOf(ad.adm1) > -1 || !!list && list.indexOf(name) > -1;
+  }
+
+  var api = { fold: fold, serves: serves, yearIn: yearIn, buildMap: buildMap, candidates: candidates, eraAt: eraAt, volumesCovering: volumesCovering,
               neighbours: neighbours, pickVolumes: pickVolumes, eventsAt: eventsAt, buildGiven: buildGiven, givenIn: givenIn, kindsOf: kindsOf, inRing: inRing,
               languageIn: languageIn, flagAt: flagAt, aroundYear: aroundYear, volumeId: volumeId };
   if (typeof module !== "undefined" && module.exports) { module.exports = api; return; }

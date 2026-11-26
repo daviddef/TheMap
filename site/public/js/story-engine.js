@@ -1280,11 +1280,22 @@
       if (pe.role === "spouse") return MD_MALE.test(selfRel) ? "F" : MD_FEMALE.test(selfRel) ? "M" : /\bwife\b/i.test(String(pe.label || "")) || /\b[Hh]e\s+(?:later\s+)?married\b/.test(t) ? "F" : "";
       return MD_FEMALE.test(word) ? "F" : MD_MALE.test(word) ? "M" : "";
     }
-    function fine(name, born) {
-      var f = S.fold(name); if (STOP[f] || MONTHS[f]) return false;
-      return !born || !(COMMON[f] || (ctx && ctx.map && ctx.map[f] && name !== name.toUpperCase()));   /* «born Hobart» is where; «born FRATROVIĆ», written as a family name, is who */
+    /* A place of that name, or of that old name. The map also answers to single words of longer names («Monte dei Bianchi» puts «bianchi» in it), and one of
+       those alone is no town: «Anna Rossi, born Bianchi» names Anna's family. The longer name written out («born Santa Cruz») is still where. */
+    function placeCalled(f, next) {
+      var map = (ctx && ctx.map) || {};
+      if (next && map[S.fold(f + " " + next)]) return true;
+      return (map[f] || []).some(function (r) { return r.al || S.fold(String(r.n).replace(/\s*\([^)]*\)/g, "").split(",")[0]) === f || (" " + S.fold(r.n) + " ").indexOf(" " + f + " ") < 0; });
     }
-    function first(re, born) { var m = new RegExp(re, "u").exec(t); return m && fine(m[1], born) ? m[1] : ""; }
+    function fine(name, born, next) {
+      var f = S.fold(name); if (STOP[f] || MONTHS[f]) return false;
+      return !born || !(COMMON[f] || (name !== name.toUpperCase() && placeCalled(f, next)));   /* «born Hobart» is where; «born FRATROVIĆ», written as a family name, is who */
+    }
+    function first(re, born) {
+      var m = new RegExp(re, "u").exec(t); if (!m) return "";
+      var nx = /^[ \t]+(\p{Lu}[\p{L}'\u2019-]+)/u.exec(t.slice(m.index + m[0].length));
+      return fine(m[1], born, nx && nx[1]) ? m[1] : "";
+    }
     people.forEach(function (pe) {
       var sex = sexOf(pe), given = String(pe.given || "").trim(); if (sex === "M" || !given) return;
       var g = "(?<![\\p{L}])" + given.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), mid = "(?:\\s+" + MD_CAP + "){0,2}", found = "";

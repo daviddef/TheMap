@@ -40,3 +40,27 @@ for (const [text, given] of [
     assert.ok(!p || !p.maiden, p && p.maiden);
   });
 }
+
+/* The same rule with a made-up index, so it does not hang on which places a build happens to hold. */
+const js = (f, m) => { new Function("module", fs.readFileSync(path.join(SITE, "public/js", f), "utf8"))(m); return m.exports; };
+const A = js("atlas-summary.js", { exports: {} }), F = js("story-engine.js", { exports: {}, deps: { summary: A } });
+function mother(text, rows) {
+  const p = F.parseStory(text, { map: A.buildMap(rows), given: A.buildGiven([]), skip: {}, countries: { IT: "Italy", ES: "Spain" } });
+  return p.people.find((x) => x.given === "Anna");
+}
+const STORY = "My mother was Anna Rossi, born Bianchi. My father was Marco Rossi.";
+const place = (n, q) => ({ i: A.fold(n).replace(/ /g, "-"), n, y: 44, x: 10, cc: "IT", c: 0, ...(q ? { q } : {}) });
+
+test("one word of a longer place name does not stop a birth name being read", () => {
+  assert.equal(mother(STORY, [place("Monte dei Bianchi", "bianchi dei monte")]).maiden, "Bianchi");
+});
+
+test("a place of that name, or an old name of one, is still where she was born", () => {
+  assert.ok(!mother(STORY, [place("Bianchi")]).maiden, "its own name");
+  assert.ok(!mother(STORY, [place("Bianchi (Cosenza)")]).maiden, "its name with a district");
+  assert.ok(!mother(STORY, [place("Villanova", "bianchi")]).maiden, "an old name");
+});
+
+test("a longer place name written out after «born» is not cut into a surname", () => {
+  assert.ok(!mother("My mother was Anna Rossi, born Monte Bianchi.", [place("Monte Bianchi", "bianchi monte")]).maiden);
+});

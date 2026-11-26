@@ -49,11 +49,15 @@ test("the map draws the events of the years it plays, the same as the list under
   assert.doesNotMatch(engine, /color: "#000", weight: 1\.6, opacity: \.85/, "the plain black outline is gone");
 });
 
-test("the journey is the first thing under the words, and plays once when first seen, never under reduced motion", () => {
+/* The order was changed with the family-first page: the family leads (it is the selector), then the three searches, then the chosen person, whose map follows them.
+   The map stays above every shelf and still plays by itself once. */
+test("the map sits with the chosen person, above the shelves, and plays once when first seen, never under reduced motion", () => {
   const order = [...page.matchAll(/<section class="sp-sec[^"]*" id="(sp-[a-z]+)"/g)].map((m) => m[1]);
-  assert.ok(order.indexOf("sp-places") >= 0 && order.indexOf("sp-places") < order.indexOf("sp-family"), "the map comes before the family tree");
+  assert.deepEqual(order, ["sp-family", "sp-three", "sp-who", "sp-else", "sp-keep"]);
+  const who = page.slice(page.indexOf('id="sp-who"'), page.indexOf('id="sp-else"'));
+  assert.ok(who.includes('id="sp-places"') && who.includes('id="sp-map"') && who.includes('id="sp-play"'), "the real map and its Play button are in the chosen person's section");
   const rail = [...page.matchAll(/data-go="(sp-[a-z]+)"/g)].map((m) => m[1]);
-  assert.ok(rail.indexOf("sp-places") < rail.indexOf("sp-family"), "and so does the rail");
+  assert.ok(rail.indexOf("sp-family") < rail.indexOf("sp-three") && rail.indexOf("sp-who") < rail.indexOf("sp-books"), "and the rail follows the page");
   assert.match(js, /function playOnce\(\)/);
   assert.match(js, /if \(played \|\| reduce/);
   assert.match(js, /played = true; watcher\.disconnect\(\)/);

@@ -33,7 +33,7 @@ const gcache = {};
 export function parse(text, c = ctx) {
   /* the page's own rule (F.gazWants / F.gazMerge), against the shard files on disk */
   const added = [];
-  for (const w of F.gazWants(text, c.map, c.given)) {
+  for (const w of F.gazWants(text, c.map, c.given, c.countries)) {
     const key = win.raShardKey(w.ph, shardInfo.g || {}); if (!key) continue;
     let rows; try { rows = gcache[key] || (gcache[key] = JSON.parse(fs.readFileSync(path.join(SITE, "public/g", key + ".json"), "utf8"))); } catch (e) { continue; }
     const before = (c.map[w.ph] || []).slice();

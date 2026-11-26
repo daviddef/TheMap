@@ -16,12 +16,12 @@ async function woman(text, given) {
 }
 
 for (const [text, given, maiden, married] of [
-  ["My great grandfather is Ivan MIHALJEVIĆ and his wife, my great grandmother is Lucija, born FRATROVIĆ.", "Lucija", "Fratrović", ""],
+  ["My great grandfather is Josip PERKOVIĆ and his wife, my great grandmother is Barbara, born LONČAR.", "Barbara", "Lončar", ""],
   ["My father was Ivan Horvat. My mother was Marija, née Kovač.", "Marija", "Kovač", ""],
   ["My mother was Anna Rossi, born Bianchi. My father was Marco Rossi.", "Anna", "Bianchi", "Rossi"],
   ["My grandfather was Peter Murphy. His wife Bridget (née O'Brien) was born in 1899 in Ennis.", "Bridget", "O'Brien", ""],
   ["My mother was Marija Horvat. Her name before marriage was Kovač.", "Marija", "Kovač", "Horvat"],
-  ["My great grandfather is Ivan Mihaljevic and his wife is Lucija. Lucija’s maiden name was Fratrovic.", "Lucija", "Fratrovic", ""]]) {
+  ["My great grandfather is Josip Perkovic and his wife is Barbara. Barbara’s maiden name was Loncar.", "Barbara", "Loncar", ""]]) {
   test("birth name read: " + text.slice(0, 60), opts, async () => {
     const p = await woman(text, given);
     assert.ok(p, given + " is in the family");
@@ -48,7 +48,7 @@ test("a word that is only part of a longer place name is a birth name after «bo
 for (const [text, given] of [
   ["My great grandmother was Rosa, born in Genoa.", "Rosa"],
   ["My grandmother was Anna, born Zagreb 1901.", "Anna"],
-  ["My grandfather was Ivan, born Fratrovic.", "Ivan"]]) {
+  ["My grandfather was Josip, born Loncar.", "Josip"]]) {
   test("no birth name invented: " + text, opts, async () => {
     const p = await woman(text, given);
     assert.ok(!p || !p.maiden, p && p.maiden);

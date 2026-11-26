@@ -1,6 +1,6 @@
 /* THE STORY CHECK: «nothing lost, nothing invented, consistent» (public/js/story-check.js). Run on REAL readings captured by test/stress/make-check-fixtures.mjs, so it needs none
    of the built data. Three kinds of test:
-     1. the story David pasted, read the way it is read now (the check says nothing) and the way it was read before #257 (the check says what was wrong);
+     1. an invented story, read the way it is read now (the check says nothing) and the way it was read before #257 (the check says what was wrong);
      2. realistic messy stories the reader still gets wrong: each expectation names the real defect found by reading the output, so a reader fix MOVES the expectation on purpose;
      3. clean stories the check must stay quiet about, and the check's own guarantees (pure, never throws, «info» never lowers confidence). */
 import test from "node:test";
@@ -29,9 +29,9 @@ test("the same story read the way it was read before #257 is flagged, and says w
   /* the reading as it was: no great-grandparents, the grandmother as the subject of everything, Macedonia as West Macedonia, Bosnia dropped */
   const broken = {
     rel: "", name: "", surname: "", stops: [], others: [],
-    people: [{ role: "self", name: "", events: [] }, { role: "father", name: "", events: [] }, { role: "mother", name: "", events: [] }, { role: "grandmother", name: "", events: [{ type: "born", year: 1942 }] }],
+    people: [{ role: "self", name: "", events: [] }, { role: "father", name: "", events: [] }, { role: "mother", name: "", events: [] }, { role: "grandmother", name: "", events: [{ type: "born", year: 1944 }] }],
     kin: [
-      { key: "GM", label: "your grandmother", stops: [{ row: { n: "Slovenia", cc: "SI" }, word: "slovenia", role: "move" }, { row: { n: "West Macedonia", cc: "GR" }, word: "macedonia", role: "move" }] },
+      { key: "GM", label: "your grandmother", stops: [{ row: { n: "Austria", cc: "AT" }, word: "austria", role: "move" }, { row: { n: "West Macedonia", cc: "GR" }, word: "macedonia", role: "move" }] },
       { key: "X", label: "also named in the story", stops: [{ row: { n: "Drežnik", cc: "HR" }, word: "dreznik", role: "mention" }, { row: { n: "Nova Gradiška", cc: "HR" }, word: "nova gradiska", role: "mention" }, { row: { n: "Croatia", cc: "HR" }, word: "croatia", role: "mention" }] },
     ],
   };
@@ -39,8 +39,8 @@ test("the same story read the way it was read before #257 is flagged, and says w
   assert.equal(r.confidence, "low");
   const by = (c) => r.problems.filter((x) => x.code === c);
   assert.ok(by("relation-missing").some((x) => /great-grand/.test(x.words[0])), "the great-grandparents are in the words and not on the tree: " + JSON.stringify(codes(r)));
-  assert.ok(by("unread-name").some((x) => x.words[0] === "Mila") && by("unread-name").some((x) => x.words[0] === "Manda"), "the children named in the words are lost");
-  assert.ok(by("unread-name").some((x) => /^(?:Ivan|MIHALJEVIĆ|Lucija|FRATROVIĆ)$/.test(x.words[0])), "the great-grandparents' names are lost");
+  assert.ok(by("unread-name").some((x) => x.words[0] === "Zora") && by("unread-name").some((x) => x.words[0] === "Anica"), "the children named in the words are lost");
+  assert.ok(by("unread-name").some((x) => /^(?:Josip|PERKOVIĆ|Barbara|LONČAR)$/.test(x.words[0])), "the great-grandparents' names are lost");
   assert.ok(by("unread-place").some((x) => x.words[0] === "Bosnia"), "Bosnia is dropped");
   assert.ok(by("country-name").some((x) => /West Macedonia/.test(x.words[0]) && /North Macedonia/.test(x.words[1])), "Macedonia read as West Macedonia though it is the name of a country");
   assert.ok(by("unread-year").length >= 1, "the decades are in the words and not on the page");

@@ -12,7 +12,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SITE = path.join(__dirname, "..");
 const T = (() => { const m = { exports: {} }; new Function("module", fs.readFileSync(path.join(SITE, "public/js/story-todo.js"), "utf8"))(m); return m.exports; })();
 
-const COUNTRIES = { HR: "Croatia", BA: "Bosnia and Herz.", SI: "Slovenia", AU: "Australia" };
+const COUNTRIES = { HR: "Croatia", BA: "Bosnia and Herz.", AT: "Austria", SI: "Slovenia", AU: "Australia" };
 const REGIONS = { regions: [
   { id: "bosnia", label: "Bosnia and Herzegovina", ring: [[44.0, 15.5], [45.5, 15.5], [45.5, 19.5], [44.0, 19.5]], eras: [{ from: 1918, to: 1941, polity: "Kingdom of Yugoslavia", filedUnder: ["arhivbih"] }] },
   { id: "vojna-krajina", label: "The Military Frontier — Vojna krajina", ring: [[44.0, 15.0], [46.0, 15.0], [46.0, 19.5], [44.0, 19.5]], eras: [
@@ -28,8 +28,8 @@ const NG = { name: "Nova Gradiška", cc: "HR", countryName: "Croatia", lat: 45.2
   cols: [{ provider: "familysearch", title: "Births (Rođeni) 1858-1886", kinds: ["b"], from: 1858, to: 1886, access: "account", url: "https://fs/1" },
     { provider: "familysearch", title: "Marriages (Vjenčani) 1881-1920", kinds: ["m"], from: 1881, to: 1920, access: "account", url: "https://fs/2" }] };
 const DR = { name: "Drežnik", cc: "HR", countryName: "Croatia", lat: 45.72239, lon: 15.89547, href: "/place/dreznik/", row: { i: "dreznik" }, region: null, provs: [], cols: [] };
-const story = (extra) => ({ facts: Object.assign({ name: "Ivan Mihaljević", route: [{ info: DR, role: "lived", nearInfo: NG, alts: [] }], kin: [{ label: "your grandmother", stops: [{ info: { name: "Slovenia", cc: "SI", lat: 46.25, lon: 15.07, row: { i: "slovenia" }, provs: [], cols: [] }, role: "move" }] }] }, extra || {}),
-  people: [{ role: "grandmother", events: [{ type: "born", year: 1942 }] }], mort: { events: [] } });
+const story = (extra) => ({ facts: Object.assign({ name: "Josip Perković", route: [{ info: DR, role: "lived", nearInfo: NG, alts: [] }], kin: [{ label: "your grandmother", stops: [{ info: { name: "Austria", cc: "AT", lat: 47.6, lon: 14.14, row: { i: "austria" }, provs: [], cols: [] }, role: "move" }] }] }, extra || {}),
+  people: [{ role: "grandmother", events: [{ type: "born", year: 1944 }] }], mort: { events: [] } });
 const deps = (o) => Object.assign({ base: "/", countries: COUNTRIES, regions: REGIONS, archives: ARCH, rows: [], provById: Object.fromEntries(ARCH.map((a) => [a.id, a])), mort: { events: [] }, cemeteries: { osm: [], wd: [] } }, o || {});
 
 test("the story pins one place to another, so the plan starts from the place it is pinned to", () => {
@@ -105,7 +105,7 @@ test("a draft letter is in the archive's language and names the place and the su
   assert.equal(drafts.length, 1);
   assert.equal(drafts[0].draft.language, "Croatian");
   assert.match(drafts[0].draft.text, /Nova Gradiška/);
-  assert.match(drafts[0].draft.text, /Mihaljević/);
+  assert.match(drafts[0].draft.text, /Perković/);
   assert.equal(T.draft("XX", "Place", "", null).language, "English");
 });
 
@@ -188,7 +188,7 @@ test("moves: a line that stays in the home country is not a move, and each leg n
   const s = story(); s.facts.kin.push({ label: "3 of the children stayed", stops: [{ info: Object.assign({}, DR), role: "lived" }] });
   const m = T.build(s, deps()).sections.find((x) => x.key === "moves");
   assert.equal(m.items.length, 1);
-  assert.match(m.items[0].title, /Your grandmother: Nova Gradiška → Slovenia/);
+  assert.match(m.items[0].title, /Your grandmother: Nova Gradiška → Austria/);
 });
 
 test("every item says why it was chosen", () => {
@@ -239,7 +239,7 @@ test("archives-near: every row has a position and a url; a contact appears only 
 });
 
 const BUILT = fs.existsSync(path.join(SITE, "public/index.json")) && fs.existsSync(path.join(SITE, "public/regions.json")) && fs.existsSync(path.join(SITE, "public/cem/index.json"));
-test("the pasted Ivan and Lucija story: Drežnik by Nova Gradiška, the right era, a letter, neighbours, named burial grounds", { skip: !BUILT && "needs the built public/ data" }, async () => {
+test("the pasted Josip and Barbara story: Drežnik by Nova Gradiška, the right era, a letter, neighbours, named burial grounds", { skip: !BUILT && "needs the built public/ data" }, async () => {
   const { read } = await import("./plan/harness.mjs"), { deps: realDeps, todo } = await import("./plan/deps.mjs");
   const text = fs.readFileSync(path.join(__dirname, "plan/drezhik-story.txt"), "utf8").trim();
   const { g } = await read(text), plan = todo.build(g, realDeps(g));
@@ -260,7 +260,7 @@ test("the pasted Ivan and Lucija story: Drežnik by Nova Gradiška, the right er
   assert.ok(gr.some((i) => /more burial grounds with no name on the map/.test(i.title)));
   assert.ok(!/lists no burial ground|not loaded/.test(JSON.stringify(gr)));
   const mv = plan.sections.find((s) => s.key === "moves").items.map((i) => i.title).join("|");
-  assert.match(mv, /Slovenia → Bosnia and Herz\. → North Macedonia/);
+  assert.match(mv, /Austria → Bosnia and Herz\. → North Macedonia/);
   for (const s of plan.sections) for (const i of s.items) assert.ok(i.why, s.key + ": " + i.title);
 });
 

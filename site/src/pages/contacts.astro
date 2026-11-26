@@ -37,7 +37,7 @@ const countries = new Intl.DisplayNames(["en"], { type: "region" });
   <h2>Where there is no contact</h2>
   <p>A place page or a map dot suggests the town hall or the diocese whose boundary holds the spot, and says that it is a suggestion: the details are
   that office's own, never the burial ground's or the parish's. Nothing is suggested by nearness, and suggestions are not counted above.
-  {coverage.areas.countries.length ? `So far: ${n(coverage.areas["town-hall"])} municipalities and ${n(coverage.areas.diocese)} dioceses, in ${coverage.areas.countries.map((cc) => countries.of(cc)).join(", ")}.` : "No boundaries are held yet."}</p>
+  {coverage.areas.countries.length ? `So far: ${n(coverage.areas["town-hall"])} municipalities and ${n(coverage.areas.diocese)} ${coverage.areas.diocese === 1 ? "diocese" : "dioceses"}, in ${coverage.areas.countries.map((cc) => countries.of(cc)).join(", ")}.` : "No boundaries are held yet."}</p>
   <h2>Where the contacts come from</h2>
   <ul>
     {Object.entries(registry.sources).map(([id, s]) => (

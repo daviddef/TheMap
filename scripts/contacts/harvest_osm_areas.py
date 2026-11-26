@@ -56,6 +56,9 @@ def areas_from(answer, cc, town_halls):
         if not full:
             broken += 1
             continue
+        # the query also returns a neighbour's diocese whose edge is this country's border: that one belongs to the neighbour's file
+        if not any(areas.inside(full, r["x"], r["y"]) for r in town_halls):
+            continue
         if diocese:
             xs, ys = [p[0] for r in full for p in r], [p[1] for r in full for p in r]
             at = {"lat": (min(ys) + max(ys)) / 2, "lon": (min(xs) + max(xs)) / 2}

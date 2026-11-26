@@ -124,7 +124,9 @@ const BOUNDS = { elements: [
   { type: "relation", id: 12, tags: { boundary: "religious_administration", name: "Biskupija Primjer", "contact:email": "biskupija@primjer.example" }, members: [
     way("outer", pt(17, 45), pt(17.4, 45), pt(17.4, 45.4), pt(17, 45.4), pt(17, 45))] },
   { type: "relation", id: 13, tags: { boundary: "religious_administration", name: "Silent diocese" }, members: [
-    way("outer", pt(17, 45), pt(17.4, 45), pt(17.4, 45.4), pt(17, 45))] }] };
+    way("outer", pt(17, 45), pt(17.4, 45), pt(17.4, 45.4), pt(17, 45.4), pt(17, 45))] },
+  { type: "relation", id: 14, tags: { boundary: "religious_administration", name: "Neighbour's diocese", email: "biskupija@susjed.example" }, members: [
+    way("outer", pt(19, 45), pt(19.4, 45), pt(19.4, 45.4), pt(19, 45.4), pt(19, 45))] }] };
 
 test("an area suggests only the offices its own outline holds, and an outline that does not close suggests nobody", () => {
   const out = py(`halls = [r for r in harvest_osm.rows_from(json.load(sys.stdin)["osm"], "HR") if r["kind"] == "town-hall"]

@@ -78,3 +78,18 @@ test("a place of that name, or an old name of one, is still where she was born",
 test("a longer place name written out after «born» is not cut into a surname", () => {
   assert.ok(!mother("My mother was Anna Rossi, born Monte Bianchi.", [place("Monte Bianchi", "bianchi monte")]).maiden);
 });
+
+/* Surnames that begin a longer place name: «born Brown» had made Anna's birthplace of Brown County and kept the name too. */
+for (const [word, longer] of [["Brown", "Brown County"], ["Silva", "Silva Jardim"], ["Pozzuolo", "Pozzuolo del Friuli"]]) {
+  test(`the first word of a longer place name, alone after «born», is a birth name: ${word}`, () => {
+    const anna = mother(`My mother was Anna Rossi, born ${word}. My father was Marco Rossi.`, [place(longer, A.fold(longer))]);
+    assert.equal(anna.maiden, word);
+    assert.ok(!anna.place, "and no birthplace is made of it");
+  });
+  test(`written out in full it is the place: ${longer}`, () => {
+    const anna = mother(`My mother was Anna Rossi, born ${longer}. My father was Marco Rossi.`, [place(longer, A.fold(longer))]);
+    assert.ok(!anna.maiden, anna.maiden);
+    assert.equal(anna.place && anna.place.row.n, longer);
+  });
+}
+

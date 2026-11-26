@@ -30,6 +30,16 @@ test("a family told from the middle: the teller, the partner, her parents, both 
   assert.equal(by.F.events.find((e) => e.type === "born").year, 1951);
 });
 
+test("a parent called by name: «annas father was nuno and her mother was catherine meyer» are the mother's parents", opts, async () => {
+  const { by } = await family(FULL + " annas father was nuno and her mother was catherine meyer.");
+  assert.equal(by.MF && by.MF.name, "Nuno");
+  assert.equal(by.MM && by.MM.name, "Catherine Meyer");
+  assert.equal(by.FF.name, "Ivan");
+  assert.equal(by.FM.name, "Hedviga Kovac");
+  assert.equal(by.SM.name, "Rosa");
+  assert.equal(by.SF.name, "Ian O'Brien");
+});
+
 test("the same family with no place for anyone else is still the teller's own", opts, async () => {
   const { by } = await family("i am peter horvat, my father was ivan horvat from croatia. my mother is anna horvat, born 1955. my father was born in 1951.\nmy wife is maria and i have 2 children luka and marko. marias mum is rosa and her dad is Ian O'Brien.");
   assert.equal(by.ME.name, "Peter Horvat");

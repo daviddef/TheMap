@@ -1301,6 +1301,21 @@
     }
     return { text: t, list: list };
   }
+  /* A PARENT CALLED BY NAME, «cheryls father was Nuno», after «my mother is Cheryl»: that is the mother's father. Read as «my mother's father», or he became the father's.
+     A name the partner also bears is left alone (that is the partner's parent). */
+  function byParentName(t) {
+    var m, re = /(?<![\p{L}])my\s+(mother|mum|mom|mam|father|dad)\s+(?:(?:is|was|named|called)\s+)?([\p{L}'\u2019-]{2,})/giu, names = Object.create(null), partners = Object.create(null), pr = new RegExp(OWN_PARTNER.source, "giu"), p;
+    while ((p = pr.exec(t))) partners[S.fold(p[2])] = 1;
+    while ((m = re.exec(t))) { var f = S.fold(m[2]); if (!plainWord(f) && !partners[f] && !/['\u2019]s?$/.test(m[2])) names[m[2].toLowerCase()] = /^(?:father|dad)$/i.test(m[1]) ? "father" : "mother"; }
+    Object.keys(names).forEach(function (n) {
+      t = t.replace(new RegExp("(?<![\\p{L}])" + n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "['\u2019]?s(?=\\s+(?:father|dad|mother|mum|mom)(?![\\p{L}]))", "giu"), "my " + names[n] + "'s");
+    });
+    /* «my mother's father was Nuno and her mother was …»: «her» cannot be Nuno, so it is the mother again, and it is said in full (or it was read as another woman's mother). */
+    [["mother", "father|dad", "her", "mother|mum|mom|mam"], ["father", "mother|mum|mom|mam", "his", "father|dad"]].forEach(function (w) {
+      t = t.replace(new RegExp("((?<![\\p{L}])my\\s+" + w[0] + "['\u2019]?s\\s+(?:" + w[1] + ")(?![\\p{L}])(?:(?!(?<![\\p{L}])my(?![\\p{L}]))[^.;!?\\n])*?),?\\s+and\\s+" + w[2] + "\\s+(" + w[3] + ")(?![\\p{L}])", "giu"), "$1. my " + w[0] + "'s $2");
+    });
+    return t;
+  }
   /* The teller tells of their own household: a partner by name, or their own children. */
   function ownHousehold(t) {
     var m, re = new RegExp(OWN_PARTNER.source, "giu");
@@ -1692,6 +1707,7 @@
     var firstPerson = /\b(?:my|our|me|mine|we)\b/i.test(t) || /\bI\b/.test(t);
     if (!firstPerson) t = t.replace(/^\s*Born in (\d{4})(?:,| in)?\s*([^]*?),\s*(\p{Lu}[\p{L}'\u2019-]+(?:\s+\p{Lu}[\p{L}'\u2019-]+)?)\s+(?=\p{Ll})/u, function (m, y, pl, nm) { return nm + " was born in " + y + (pl ? " in " + pl.replace(/^in\s+/i, "") : "") + ". " + nm + " "; });
     var told = toldKin(t, ctx); t = told.text;
+    if (ownHousehold(t)) t = byParentName(t);
     var preSide = t, side = sideRelatives(t); t = side.rest; out.side = side.list;
     var rm = firstPerson ? REL.exec(t.replace(SIB_HAVE, " ")) : null;   /* «I have two brothers» tells of no relation the story is about */
     if (rm) rm = REL.exec(t.replace(SIB_HAVE, function (x) { return x.replace(/\S/g, "_"); }));

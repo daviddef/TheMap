@@ -512,17 +512,18 @@ PAGE_BUDGET = {"place": 79_000, "surname": 60_000}
 def page_weight_within_budget(pages):
     """THE SITE'S WEIGHT IS NOT ONE FILE, IT IS ONE FILE TIMES A HUNDRED THOUSAND. The repeated-script gate above catches the same blob on every page;
     this catches the slower failure, a section that grows (a list of every region of a country on every surname of it) until the pages are twice
-    what they were. It reads a spread sample of each kind and fails when the mean passes the budget."""
+    what they were. It measures every page of each kind in this build and fails when the mean passes the budget. Not a sample: until 26 Nov 2026 it
+    read 300 in the filesystem's own order, so a mean near the ceiling passed or failed by the luck of the draw and stopped a deploy of unchanged
+    data. A size costs one stat, so there is nothing to save by sampling."""
     for kind, ceiling in PAGE_BUDGET.items():
         mine = [f for f in pages if f"{os.sep}{kind}{os.sep}" in f.replace(DIST, "", 1)]
         if len(mine) < 20:
             continue    # a slice or a partial build may hold few of a kind; the full build is the one that is held to it
-        sample = mine[::max(1, len(mine) // 300)][:300]
-        sizes = [os.path.getsize(f) for f in sample]
-        mean = sum(sizes) / len(sizes)
+        mean = sum(os.path.getsize(f) for f in mine) / len(mine)
+        print(f"{kind} pages: {mean:,.0f} bytes on average over all {len(mine):,} built here (budget {ceiling:,})")
         if mean > ceiling:
-            err(f"{kind} pages average {mean:,.0f} bytes over a sample of {len(sample)}; the budget is {ceiling:,}. "
-                f"That is about {(mean - ceiling) * len(mine) / (1024 * 1024):,.0f} MB over, across {len(mine):,} such pages here. "
+            err(f"{kind} pages average {mean:,.0f} bytes over all {len(mine):,} built here; the budget is {ceiling:,}. "
+                f"That is about {(mean - ceiling) * len(mine) / (1024 * 1024):,.0f} MB over. "
                 "Find the section that grew (scripts/check-built.py has the method: split pages into blocks and count the ones other pages repeat).")
 
 
@@ -583,7 +584,9 @@ def main():
     art_tags_reach_pages()
     history_page_built()
 
-    pages = glob.glob(DIST + "/**/*.html", recursive=True)
+    # SORTED, because glob lists a directory in whatever order the filesystem holds it, which differs from one runner to the next: a gate that
+    # samples this list must read the same pages every time, or one commit passes on one run and fails on another.
+    pages = sorted(glob.glob(DIST + "/**/*.html", recursive=True))
     if len(pages) < 100:
         err(f"only {len(pages)} html pages in {DIST} — the build did not finish")
 

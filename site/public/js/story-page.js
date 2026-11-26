@@ -22,7 +22,10 @@
   var DRAFT = "ra-story-page-draft", HAND = "ra-story-handoff";
 
   function loadScript(src) { return new Promise(function (ok, fail) { var s = document.createElement("script"); s.src = BASE + "js/" + src; s.onload = ok; s.onerror = function () { fail(new Error("Could not load " + src + ". Check your connection, then try again.")); }; document.head.appendChild(s); }); }
-  function tellable(p) { return !!(p && (p.from || (p.kin && p.kin.length) || (p.people || []).some(function (x) { return x.sought; }))); }
+  /* PLACED: something for the map, the places and the plan. TELLABLE: that, or a family to show. A story that named people and no place drew nothing at all, so
+     «Open your story» seemed to do nothing. */
+  function placed(p) { return !!(p && (p.from || (p.kin && p.kin.length) || (p.people || []).some(function (x) { return x.sought; }))); }
+  function tellable(p) { return placed(p) || !!(p && (p.people || []).some(function (x) { return x.name && !x.me; })); }
   function say(m, bad) { status.textContent = m || ""; status.className = "sp-status" + (bad ? " bad" : ""); }
   /* what a button said it did (a picture read, a failure) stays until the reader types or starts over: the page re-reads the story straight after, and must not wipe it */
   var hold = null;
@@ -362,16 +365,22 @@
     $("sp-title").textContent = f.name ? f.name + "’s story" : "Their story";
     $("sp-lede").textContent = lede(f) || LEDE0;   /* never the last story's route when this one tells none */
     rail.hidden = false;
-    secShow("sp-places", true);
+    var here = placed(Object.assign({}, f, { people: g.people }));
+    secShow("sp-places", here);
     var sb = J.stops(f, g.mort, g.people); stopItems = sb.items; var st = $("sp-stops"); st.textContent = ""; st.append(sb); placesRail();
     var lb = E.lifeBlock(g.life, g.mort), lbox = $("sp-lifebox"); lbox.textContent = ""; secShow("sp-life", !!lb); if (lb) lbox.append(lb);
     var nb = E.namesBlock(g.names, BASE), nbox = $("sp-namesbox"); nbox.textContent = ""; secShow("sp-names", !!nb);
     if (nb) { nbox.append(nb); [].forEach.call(nb.querySelectorAll("details:not(.lf-cn-more):not(.lf-cn-around)"), function (d) { d.open = true; }); }
-    var tr = E.treeBlock(g.people, f.rel, { onEdit: editBox, kin: f.kin, base: BASE, siblings: f.siblings }), ob = E.othersBlock(g.others, f.siblings), tbox = $("sp-tree"); tbox.textContent = ""; secShow("sp-family", !!(tr || ob)); if (tr) tbox.append(tr); if (ob) tbox.append(ob); E.linkPeople(tr, nb); peopleRail();
-    secShow("sp-setting", true);
-    secShow("sp-plan", true); drawSteps(g); drawTodo(g);
-    secShow("sp-keep", true); drawKeep(g);
-    J.draw(f, g.mort).then(function () { settingNote(g); playOnce(); }, function () { settingNote(g); });
+    var tr = E.treeBlock(g.people, f.rel, { onEdit: editBox, kin: f.kin, base: BASE, siblings: f.siblings, teller: f.teller }), ob = E.othersBlock(g.others, f.siblings), tbox = $("sp-tree"); tbox.textContent = ""; secShow("sp-family", !!(tr || ob)); if (tr) tbox.append(tr); if (ob) tbox.append(ob); E.linkPeople(tr, nb); peopleRail();
+    secShow("sp-setting", here);
+    secShow("sp-plan", here); secShow("sp-keep", here); if ($("sp-grp-research")) $("sp-grp-research").hidden = !here;
+    if (here) {
+      drawSteps(g); drawTodo(g); drawKeep(g);
+      J.draw(f, g.mort).then(function () { settingNote(g); playOnce(); }, function () { settingNote(g); });
+    } else {
+      J.clear(); if (todoOut) { todoOut.textContent = ""; todoTok++; }
+      say("No place in the story yet, so there is no map or research plan. Add where someone was born or lived, such as \u201cborn in Senj, Croatia\u201d.");
+    }
     watch();
   }
   function clearReport() {

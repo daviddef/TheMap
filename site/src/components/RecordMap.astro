@@ -3087,6 +3087,18 @@ window.addEventListener("load", async function () {
     ["libraries",  "Libraries", "#2E86C1", 3.0]
   ];
   var featLayers = {}, featBuild = {};
+  /* The contacts reader, fetched the first time a dot is opened. */
+  var contactsWaiting = null;
+  function withContacts(then) {
+    if (window.RAContacts) return then();
+    if (contactsWaiting) return contactsWaiting.push(then);
+    contactsWaiting = [then];
+    var s = document.createElement("script");
+    s.src = BASE + "js/contacts-near.js";
+    s.onload = function () { var q = contactsWaiting; contactsWaiting = null; q.forEach(function (f) { f(); }); };
+    s.onerror = function () { contactsWaiting = null; s.remove(); };
+    document.head.appendChild(s);
+  }
   /* LOADED WHEN SWITCHED ON, NOT WHEN THE PAGE OPENS, AND NOT AS 178,000
      OBJECTS. These three layers are about 178,000 records. The page used to
      fetch all of them and build a Leaflet circle, a tooltip and a click closure
@@ -3185,15 +3197,22 @@ window.addEventListener("load", async function () {
     layer.on("pick", function (e) {
       var f = e.f;
       empty.hidden = true; panel.hidden = false;
+      /* A row from OpenStreetMap has an `id` («n123») and no Wikidata number: it was being linked to wikidata.org/wiki/undefined. */
+      var from = f.q ? "Wikidata" : "OpenStreetMap", osm = !f.q && f.id ? { n: "node", w: "way", r: "relation" }[String(f.id).charAt(0)] : "";
       panel.innerHTML =
-        '<div class="at-h"><h3>' + esc(f.n) + "</h3></div>" +
+        '<div class="at-h"><h3>' + esc(f.n || F[1]) + "</h3></div>" +
         '<p class="at-also">' + esc(F[1]) + "</p>" +
-        '<div class="ra-juris ra-unmapped"><div class="lab">From Wikidata, unchecked' +
-        "</div><p>Wikidata records this here, inside the <b>" + esc(f.r) +
+        '<div class="ra-juris ra-unmapped"><div class="lab">From ' + from + ', unchecked' +
+        "</div><p>" + from + " records this here, inside the <b>" + esc(f.r) +
         "</b> record region. Nobody on this project has been. It is drawn because the " +
         "ground a family stood on is part of where its records are.</p></div>" +
-        '<p class="at-sub"><a href="https://www.wikidata.org/wiki/' + esc(f.q) +
-        '" target="_blank" rel="noopener">' + esc(f.q) + " on Wikidata &#8599;</a></p>";
+        (f.q ? '<p class="at-sub"><a href="https://www.wikidata.org/wiki/' + esc(f.q) +
+          '" target="_blank" rel="noopener">' + esc(f.q) + " on Wikidata &#8599;</a></p>"
+          : osm ? '<p class="at-sub"><a href="https://www.openstreetmap.org/' + osm + "/" + esc(String(f.id).slice(1)) +
+            '" target="_blank" rel="noopener">On OpenStreetMap &#8599;</a></p>' : "") +
+        '<div class="ra-contacts"></div>';
+      var box = panel.querySelector(".ra-contacts"), key = f.q ? "wd:" + f.q : "osm:" + f.id;
+      withContacts(function () { window.RAContacts.fill(box, BASE, f.y, f.x, key); });
     });
     async function build() {
       if (started) return;

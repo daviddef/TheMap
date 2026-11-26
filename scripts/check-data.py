@@ -957,6 +957,19 @@ def provider_contacts_gate():
     print(f"provider contacts (Wikidata): {len(rows)} institutions")
 
 
+def contact_store_gate():
+    """data/contacts/: every source declares a licence, share-alike stays apart, and no stored row holds anything scripts/contacts/core.py
+    would not write (a malformed or personal address among them)."""
+    from contacts import core
+    problems = core.check()
+    for line in problems[:40]:
+        err(line)
+    if len(problems) > 40:
+        err(f"contacts: and {len(problems) - 40} more")
+    files = list(core.stored_files())
+    print(f"contact store: {len(files)} harvested files, {sum(len(core.read_file(p)['rows']) for _, p in files):,} rows")
+
+
 def provider_emails_gate():
     """data/provider-emails.json: where to write to an archive. Every address is well formed and appears once, names a state the file
     defines, links only to providers that exist (or names the institution it belongs to), and is a role mailbox: an address that names
@@ -1500,6 +1513,7 @@ def main():
     mortality_gate()
     provider_emails_gate()
     provider_contacts_gate()
+    contact_store_gate()
     history_audit()
     flag_era_drift()
     flag_art_drift()

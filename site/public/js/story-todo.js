@@ -8,8 +8,9 @@
    its mapped area in the years the story's people were alive. Where the Atlas holds nothing it SAYS SO (a "gap" line), because a silence we left unmarked reads as a silence
    in the record. Every item carries a one-line "why this one".
 
-   THE ANCHOR. «They lived in Dreznik near Nova Gradiska» names a village the gazetteer knows only as Drežnik Brezovički, 119 km from Nova Gradiška. When the story pins a place
-   to another and the two are more than 40 km apart, the plan starts from the place the story pins it to, and says so, rather than build a plan on the wrong village.
+   THE ANCHOR. «They lived in X near Y»: the story reader takes the X nearest Y (story-engine.js nearResolve), and the plan starts there and says how sure that is. Only when
+   the X shown is still more than 40 km from Y does the plan start from Y instead, and say so, rather than build a plan on the wrong village.
+
    THE REGION. A place can sit inside several rough region rings (Nova Gradiška is inside both Bosnia's and the Military Frontier's). The ring that names ANOTHER country is passed
    over when one that fits exists, because its era table would file a Slavonian family under the Bosnian state archive.
 
@@ -86,15 +87,24 @@
     if (!home) { (f.kin || []).forEach(function (k) { if (!home) (k.stops || []).forEach(function (s) { if (!home && s.info) home = s; }); }); }
     if (!home) return null;
     var info = home.info, note = null, told = null, village = null;
-    if (home.nearInfo && home.nearInfo.lat != null && info.lat != null) {
-      var d = hav(info.lat, info.lon, home.nearInfo.lat, home.nearInfo.lon);
-      if (d > 40) { told = info; info = home.nearInfo; note = "The story puts " + told.name + " near " + info.name + ". The Atlas knows only “" + told.name + (told.countryName ? "”, " + told.countryName : "”") + ", " + Math.round(d) + " km away, so the plan starts from " + info.name + ". Check the parish before you trust either."; }
+    /* the engine's own record of an «X near Y» choice, when it made one (several places of the name, or none close) */
+    var nd = (f.near || []).filter(function (n) { return info.row && n.pick === info.row.i; })[0], by = home.nearInfo || (nd && nd.anchor);
+    if (by && by.lat != null && info.lat != null) {
+      var d = hav(info.lat, info.lon, by.lat, by.lon), km = Math.max(1, Math.round(d)) + " km";
+      var unsure = nd && nd.level !== "clear" ? " Not certain which " + bare(info.name) + " is meant: check the others on its place card before you write to anyone." : "";
+      if (nd && nd.byReader) note = "You chose " + info.name + ", " + km + " from " + by.name + ", so the plan starts there.";
+      else if (d > 40) { told = info; info = by; note = "The story puts " + told.name + " near " + info.name + ", but the " + told.name + " shown is " + km + " away, so the plan starts from " + info.name + ". Check the parish before you trust either."; }
       /* a village the Atlas places beside the town but holds no books for: the desk work starts from the town, the burial grounds from the village */
-      else if (!(info.cols || []).length && (home.nearInfo.cols || []).length) { village = info; info = home.nearInfo; note = village.name + " is " + Math.max(1, Math.round(d)) + " km from " + info.name + ". The Atlas lists no books for " + village.name + " itself, so the plan starts from " + info.name + ": ask which parish and which registry office served " + village.name + "."; }
+      else if (!(info.cols || []).length && (by.cols || []).length) { village = info; info = by; note = bare(village.name) + " is " + km + " from " + info.name + ". The Atlas lists no books for " + bare(village.name) + " itself, so the plan starts from " + info.name + ": ask which parish and which registry office served " + bare(village.name) + "." + unsure; }
+      else if (nd) note = nd.level === "clear" ? "The plan starts from the " + bare(info.name) + " that is " + km + " from " + by.name + ", because the story says near. The others are set aside on its place card."
+        : "The plan starts from the " + bare(info.name) + " " + km + " from " + by.name + "." + unsure;
     }
     /* the namesakes are of the place first told: once «near» has settled it, or the plan starts elsewhere, they say nothing about the starting place */
-    return { info: info, stop: home, note: note, told: told, village: village, alts: told || village || home.nearInfo ? [] : (home.alts || []).filter(function (a) { return a && a.n; }) };
+    return { info: info, stop: home, note: note, told: told, village: village, alts: told || village || home.nearInfo || nd ? [] : (home.alts || []).filter(function (a) { return a && a.n; }) };
   }
+
+  /* «Drežnik (Nova Gradiška)» without the shelf's bracket, for a sentence that already names the town */
+  function bare(n) { return String(n || "").replace(/\s*\([^)]*\)\s*$/, ""); }
 
   function pickRegion(info, regionsDoc, countries) {
     var cur = info && info.region || null;
@@ -272,20 +282,20 @@
       .forEach(function (x) { addArch(x.a, x.a.kind === "diocesan" ? "The diocese keeps its parishes' registers, and often copies from the year before the state took over." : "The nearest " + (x.a.kind === "national-archive" ? "national" : "state/regional") + " archive: it holds or can say who holds the registers.", Math.round(x.km)); });
     wr = wr.slice(0, 4);
     var dTo = wr.filter(function (i) { return i._a && i._a.kind === "regional-archive"; })[0] || wr[0];
-    if (dTo) dTo.draft = draft(info.cc, an.village ? an.village.name + " (" + info.name + ")" : info.name, surname, mid);
+    if (dTo) dTo.draft = draft(info.cc, an.village ? bare(an.village.name) + " (" + info.name + ")" : info.name, surname, mid);
     if (wr.length) wr.push(item("The registry office (matični ured / registrar / comune) of today's municipality", "Civil registers from the 1800s on are usually kept by the office of the municipality where the event happened, until they pass to an archive.", { gap: true, detail: "The Atlas does not list municipal registry offices: search for the name of the municipality with the word for registry office." }));
     section("write", "Write to", wr);
 
     /* 4 · LOOK NEARBY */
-    var nb = [], rows = deps.rows || [];
-    if (info.lat != null && rows.length) {
-      var rad = Math.PI / 180, own = info.row && info.row.i;
-      rows.filter(function (r) { return r.i !== own && r.y != null && r.x != null && r.cc === info.cc && r.n !== info.name; }).map(function (r) {
-        var dy = (r.y - info.lat) * 111.2, dx = (r.x - info.lon) * 111.2 * Math.cos(info.lat * rad); return { r: r, km: Math.sqrt(dx * dx + dy * dy) };
-      }).filter(function (x) { return x.km <= 25; }).sort(function (a, b) { return a.km - b.km; }).slice(0, 7).forEach(function (x) {
-        nb.push(item(x.r.n, "A place " + Math.max(1, Math.round(x.km)) + " km away" + (x.r.c ? " with " + x.r.c + " volume" + (x.r.c === 1 ? "" : "s") + " in the Atlas" : " (the Atlas lists no volumes for it)") + ": families often married, baptised or were buried in the next parish.", { href: base + "place/" + encodeURIComponent(x.r.i) + "/", tag: Math.max(1, Math.round(x.km)) + " km" }));
-      });
-    }
+    var nb = [], years = win ? [win.lo, win.hi] : null;
+    /* the same neighbours the place card shows (atlas-summary.js `neighbours`), each with the registers that meet the story's years */
+    ((an.village || info).neigh || []).forEach(function (x) {
+      var km = Math.max(1, Math.round(x.km)), vs = deps.pickVolumes ? deps.pickVolumes(x.info, years, 3) : [];
+      var it = item(x.info.name, "A place " + km + " km away" + (x.books ? " with " + x.books + " volume" + (x.books === 1 ? "" : "s") + " in the Atlas" : " (the Atlas lists no volumes for it)") + ": families often married, baptised or were buried in the next parish." + (x.doubt ? " Position doubtful: the name says " + x.doubt.of + ", " + x.doubt.km + " km from this point." : ""),
+        { href: x.info.href, tag: km + " km", detail: vs.length && years && !vs[0].fits ? "None of its FamilySearch registers meets your years; the nearest in time:" : "" });
+      it.regs = vs.map(function (v) { var yr = v.from ? v.from + (v.to && v.to !== v.from ? "\u2013" + v.to : "") : ""; return { text: clip(v.t, 70) + (yr && v.t.indexOf(String(v.from)) < 0 ? " (" + yr + ")" : ""), href: v.url }; });
+      nb.push(it);
+    });
     if (info.row && (info.row.a || (info.p && info.p.admin))) { /* today's administrative home, only where the Atlas holds it */
       var ad = (info.p && info.p.admin) || null; if (ad && (ad.adm1 || ad.adm2)) nb.unshift(item("Today it is in " + [ad.adm2, ad.adm1].filter(Boolean).join(", "), "The modern district and county: the offices and local archives that exist now are named for these.", {}));
     }
@@ -371,7 +381,7 @@
     var L = ["PLAN FOR " + ((plan.anchor && plan.anchor.where) || "")];
     (plan.notes || []).forEach(function (n) { L.push("Note: " + n); });
     (plan.today || []).forEach(function (t) { L.push(t.n + ". " + t.title + ": " + t.text); });
-    plan.sections.forEach(function (s) { L.push("", s.title.toUpperCase()); s.items.forEach(function (i) { L.push("- " + i.title + (i.why ? " — " + i.why : "") + (i.detail ? " [" + i.detail + "]" : "") + (i.href ? " (" + i.href + ")" : "")); if (i.draft) L.push("  Draft (" + i.draft.language + "): " + i.draft.text); }); });
+    plan.sections.forEach(function (s) { L.push("", s.title.toUpperCase()); s.items.forEach(function (i) { L.push("- " + i.title + (i.why ? " — " + i.why : "") + (i.detail ? " [" + i.detail + "]" : "") + (i.regs || []).map(function (r) { return " <" + r.text + " " + r.href + ">"; }).join("") + (i.href ? " (" + i.href + ")" : "")); if (i.draft) L.push("  Draft (" + i.draft.language + "): " + i.draft.text); }); });
     return L.join("\n").slice(0, 9000);
   }
 
@@ -400,6 +410,7 @@
           i.links.forEach(function (l) { var a = el("a", l.t, "k-pill sp-todo-link"); a.href = l.href; if (/^https?:/.test(l.href)) { a.target = "_blank"; a.rel = "noopener"; } row.append(a); });
           li.append(row);
         }
+        if (i.regs && i.regs.length) { var lk = el("ul", null, "sp-todo-regs"); i.regs.forEach(function (x) { if (!/^https?:\/\//.test(x.href)) return; var l = el("li"), a2 = el("a", x.text); a2.href = x.href; a2.target = "_blank"; a2.rel = "noopener"; l.append(a2); lk.append(l); }); li.append(lk); }
         if (i.draft) { var d = el("details", null, "sp-todo-draft"), sm = el("summary", "A draft in " + i.draft.language + " — check the wording before you send"); var pre = el("p", i.draft.text, "sp-todo-draft-t"); pre.lang = ({ Croatian: "hr", Slovenian: "sl", Italian: "it", German: "de", Spanish: "es", Polish: "pl", Czech: "cs", Hungarian: "hu", French: "fr", Portuguese: "pt" })[i.draft.language] || "en"; d.append(sm, pre);
           var mail = (i.links || []).filter(function (l) { return /^mailto:/.test(l.href); })[0];
           if (mail) { var send = el("a", "Open this draft in your email", "k-pill sp-todo-link"); send.href = mail.href + "?subject=" + encodeURIComponent((plan.anchor && plan.anchor.name) || "") + "&body=" + encodeURIComponent(i.draft.text); d.append(send); }

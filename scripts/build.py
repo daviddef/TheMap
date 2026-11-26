@@ -533,6 +533,14 @@ def main():
                 break
         return out
 
+    DEANERY_KM = 60
+    def deanery_seat(title, cc):
+        m = re.search(r",\s*([^,]+?)\s+Deanery\b", title)
+        if not m:
+            return None
+        want = fold(m.group(1))
+        return next((p for p in places if p.get("country") == cc and fold(p["name"]) == want and p.get("lat") is not None), None)
+
     def reach(place):
         """How nearly a collection reaches a place.
 
@@ -568,6 +576,11 @@ def main():
         f1 = fold(adm.get("adm1") or "") or None
         f2 = fold(adm.get("adm2") or "") or None
         for c in fs_by_cc.get(place.get("country"), []):
+            # A DEANERY IS A HANDFUL OF PARISHES, and the catalogue files this one under its country only, so «Delnice Deanery» (Gorski Kotar) was offered
+            # for a village near Zagreb and one near Nova Gradiška. Its seat is a place on the shelf: beyond DEANERY_KM of it the collection is not listed.
+            seat = deanery_seat(c.get("title", ""), place.get("country"))
+            if seat and km(place["lat"], place["lon"], seat["lat"], seat["lon"]) > DEANERY_KM:
+                continue
             rank, where, dist = 4, None, None
             for p in c["places"]:
                 d = (km(place["lat"], place["lon"], p["lat"], p["lon"])
@@ -1038,6 +1051,14 @@ def main():
             pnames = {x["id"]: x["names"] for x in json.load(_fh).get("places", [])}
     except (OSError, ValueError):
         pass
+    # «POSITION DOUBTFUL» is worked out here, by the gate's own code, so the
+    # browser has no rule of its own. A file of its own, {id: [district, km]},
+    # because only the story reader reads it: not a field on every index row.
+    import district_names
+    with open("data/geocode-checked.json", encoding="utf-8") as _fh:
+        dubious = district_names.doubtful(places, json.load(_fh)["checked"])
+    with open(os.path.join(OUT, "place-doubt.json"), "w", encoding="utf-8") as _fh:
+        json.dump(dubious, _fh, ensure_ascii=False, separators=(",", ":"))
     for p in places:
         cs = p.get("collections", [])
         acc = min((c["access"] for c in cs if c.get("access") in RANK),

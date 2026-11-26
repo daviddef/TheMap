@@ -1,6 +1,6 @@
 /* The data the page hands the plan, loaded from public/ the way the page's fetches would. */
 import fs from "node:fs"; import path from "node:path";
-import { PUB, SITE } from "./harness.mjs";
+import { PUB, SITE, A } from "./harness.mjs";
 import { buildArchivesNear } from "../../src/lib/archives-near.js";
 /* the classic script, loaded the way test/stress/ctx.mjs loads the engine */
 export const todo = (() => { const m = { exports: {} }; new Function("module", fs.readFileSync(path.join(PUB, "js/story-todo.js"), "utf8"))(m); return m.exports; })();
@@ -18,7 +18,7 @@ export function deps(g) {
       provById: Object.fromEntries(archives.map((a) => [a.id, a]).concat(pl.map((p) => [p.id, p]))), base: "/" };
   }
   const at = todo.anchorOf(g), on = at && (at.village || at.info);   /* as the page does: the ground is the village's, where the story names one beside the town */
-  return Object.assign({}, cache, { mort: g.mort, cemeteries: on && on.lat != null ? cemeteries(on.lat, on.lon) : null });
+  return Object.assign({}, cache, { pickVolumes: A.pickVolumes, mort: g.mort, cemeteries: on && on.lat != null ? cemeteries(on.lat, on.lon) : null });
 }
 /* the burial-ground squares around a place, read from public/cem/ the way the page fetches them */
 export function cemeteries(lat, lon) {

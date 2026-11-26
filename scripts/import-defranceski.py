@@ -181,6 +181,9 @@ def main():
             rec["denoms"] = p["layers"]
         places.append(rec)
 
+    import place_fixes      # data/place-fixes.json: corrections a re-import must not undo
+    place_fixes.apply(places)
+
     # PINS FIRST, THEN THE DISTRICT. The archive's resolver drops the bracket
     # from «Opatovac (Vukovar)» before it looks the name up, so its point can be
     # any Opatovac. A human's pin wins; anything still far from its own district
@@ -199,7 +202,6 @@ def main():
                  "data/place-overrides.json on positive evidence, or confirm the point in "
                  "data/geocode-checked.json:\n"
                  + "\n".join(f"  {p['id']}: {p['name']} at {p['lat']},{p['lon']} ({d:.0f} km)" for p, d in far))
-
     places.sort(key=lambda x: x["name"])
     out = {
         "note": "Snapshot of the Croatian shelf, imported from the Defranceski archive "

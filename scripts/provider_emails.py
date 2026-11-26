@@ -16,10 +16,11 @@ ORDER = {"answered": 0, "delivered": 1, "listed": 2, "unverified": 3, "wikidata"
 
 
 def em_by_provider(root=_ROOT):
-    em = {}
+    em, dead = {}, set()
     try:
         for e in json.load(open(os.path.join(root, "data/provider-emails.json"), encoding="utf-8"))["emails"]:
             if e["state"] == "dead":
+                dead.add(e["email"].lower())
                 continue
             for pid in e.get("providers", []):
                 em.setdefault(pid, []).append([e["email"], e["state"], e.get("role", ""), 1 if e.get("branch") else 0])
@@ -31,7 +32,7 @@ def em_by_provider(root=_ROOT):
         wd = {}
     for p in json.load(open(os.path.join(root, "data/providers.json"), encoding="utf-8"))["providers"]:
         w = wd.get(p.get("wikidata") or "", {}).get("email")
-        if w and p["id"] not in em:   # Wikidata only where nobody has written to, or read, an address for this provider: it is sometimes an old one
+        if w and p["id"] not in em and w.lower() not in dead:   # Wikidata only where nobody has written to, or read, an address for this provider: it is sometimes an old one
             em[p["id"]] = [[w, "wikidata", "", 0]]
     for k, v in em.items():
         v.sort(key=lambda x: (x[3], ORDER[x[1]]))   # a branch's own mailbox never leads; then the best state

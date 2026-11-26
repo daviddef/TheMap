@@ -937,6 +937,26 @@ def flag_art_audit():
     print(f"flag art: {n} of {total} drawings compared with a reference ({parts})")
 
 
+def provider_contacts_gate():
+    """data/provider-contacts.json (what Wikidata states): every address is one scripts/provider_contact_rules.py allows, so none that is
+    malformed, on free mail or refused by hand is published, and the counts are the file's own."""
+    import provider_contact_rules as rules
+    p = "data/provider-contacts.json"
+    if not os.path.exists(p):
+        return
+    d = json.load(open(p, encoding="utf-8"))
+    rows = d.get("contacts", {})
+    for q, r in rows.items():
+        why = rules.why_not(r["email"], None) if "email" in r else None
+        if why:
+            err(f"provider-contacts {q} {r['email']}: {why}")
+    counts = d.get("counts", {})
+    for key, n in (("withAnyContact", len(rows)), ("withEmail", sum("email" in r for r in rows.values()))):
+        if counts.get(key) != n:
+            err(f"provider-contacts: counts.{key} says {counts.get(key)}, the file holds {n}")
+    print(f"provider contacts (Wikidata): {len(rows)} institutions")
+
+
 def provider_emails_gate():
     """data/provider-emails.json: where to write to an archive. Every address is well formed and appears once, names a state the file
     defines, links only to providers that exist (or names the institution it belongs to), and is a role mailbox: an address that names
@@ -1479,6 +1499,7 @@ def main():
     support_link_gate()
     mortality_gate()
     provider_emails_gate()
+    provider_contacts_gate()
     history_audit()
     flag_era_drift()
     flag_art_drift()

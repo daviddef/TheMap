@@ -157,6 +157,9 @@ const BASE_ = u("/");
   <div id="mr-fixes" class="mr-fixes" hidden></div>
   <div id="mr-stories" class="mr-stories" data-base={u("/")}></div>
   <div id="mr-errands" class="mr-errands" data-base={u("/")}></div>
+  {/* THE FAMILY ARCHIVES' OPEN LETTERS, a block of their own under the reader's: who, what for, status and the month (research-archive-errands.js,
+      from archive-errands.json, which scripts/publish-archive-errands.py writes). Hidden unless a chosen family belongs to an archive. */}
+  <div id="mr-archive-errands" class="mr-errands" data-base={u("/")} hidden></div>
 
   <div id="mr-body"></div>
   </div>
@@ -168,6 +171,7 @@ const BASE_ = u("/");
   <script is:inline src={u("/js/research-overview.js")}></script>
   <script is:inline src={u("/js/research-stories.js")}></script>
   <script is:inline src={u("/js/research-errands.js")}></script>
+  <script is:inline src={u("/js/research-archive-errands.js")}></script>
   <script is:inline src={u("/js/research-fixes.js")} data-base={u("/")}></script>
 
   <script is:inline define:vars={{ BASE: u("/") }}>
@@ -1613,6 +1617,18 @@ const BASE_ = u("/");
   :global(.mre-lab) { display: grid; gap: 4px; margin: 10px 0 0; font: 600 12px var(--sans); color: var(--ink-3); }
   :global(.mre-in), :global(.mre-body), :global(.mre-notes) { width: 100%; box-sizing: border-box; padding: 7px 9px; border: 1px solid var(--rule-strong); border-radius: 6px; background: var(--bg); color: var(--ink); font: 400 14px/1.5 var(--sans); }
   :global(.mre-body) { max-width: 72ch; resize: vertical; }
+  /* the archives' own open errands (research-archive-errands.js), set apart from the reader's by a rule and a heading */
+  :global(.mrae) { margin: 22px 0 0; padding: 2px 0 0; border-top: 1px dashed var(--rule-strong, var(--rule)); }
+  :global(.mrae-a) { margin: 0 0 10px; padding: 8px 14px; border: 1px solid var(--rule); border-radius: 8px; background: var(--bg); }
+  :global(.mrae-a > summary) { cursor: pointer; font: 600 14px/1.5 var(--sans); color: var(--ink); padding: 3px 0; }
+  :global(.mrae-n) { font-weight: 400; font-size: 12.5px; color: var(--ink-3); }
+  :global(.mrae-l) { list-style: none; margin: 6px 0 0; padding: 0; }
+  :global(.mrae-l li) { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; padding: 7px 0; border-top: 1px solid var(--rule); font: 400 13.5px/1.45 var(--sans); color: var(--ink-2); }
+  :global(.mrae-who) { flex: 1 1 15rem; min-width: 0; color: var(--ink); font-weight: 600; overflow-wrap: anywhere; }
+  :global(.mrae-what) { flex: 2 1 14rem; min-width: 0; }
+  :global(.mrae-st) { margin-left: auto; padding: 1px 9px; border: 1px solid var(--rule-strong); border-radius: 999px; font-size: 11.5px; white-space: nowrap; }
+  :global(.mrae-sent) { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+  :global(.mrae-more) { margin: 8px 0 2px; font: 400 13px var(--sans); }
   :global(.mre-left) { margin: 6px 0 0; font: 400 12.5px var(--sans); color: var(--ink-3); }
   :global(.mre-warn) { color: #8a5a00; }
   :global(.mre-row) { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 12px 0 0; }

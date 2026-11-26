@@ -355,7 +355,7 @@
     var sb = J.stops(f, g.mort); stopItems = sb.items; var st = $("sp-stops"); st.textContent = ""; st.append(sb); placesRail();
     var lb = E.lifeBlock(g.life, g.mort), lbox = $("sp-lifebox"); lbox.textContent = ""; secShow("sp-life", !!lb); if (lb) lbox.append(lb);
     var nb = E.namesBlock(g.names, BASE), nbox = $("sp-namesbox"); nbox.textContent = ""; secShow("sp-names", !!nb);
-    if (nb) { nbox.append(nb); [].forEach.call(nb.querySelectorAll("details"), function (d) { d.open = true; }); }
+    if (nb) { nbox.append(nb); [].forEach.call(nb.querySelectorAll("details:not(.lf-cn-more):not(.lf-cn-around)"), function (d) { d.open = true; }); }
     var tr = E.treeBlock(g.people, f.rel, { onEdit: editBox, kin: f.kin, base: BASE, siblings: f.siblings }), ob = E.othersBlock(g.others, f.siblings), tbox = $("sp-tree"); tbox.textContent = ""; secShow("sp-family", !!(tr || ob)); if (tr) tbox.append(tr); if (ob) tbox.append(ob); E.linkPeople(tr, nb); peopleRail();
     secShow("sp-setting", true);
     secShow("sp-plan", true); drawSteps(g); drawTodo(g);

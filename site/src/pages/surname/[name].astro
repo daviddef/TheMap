@@ -19,6 +19,7 @@ import { u } from "../../lib/url.js";
 import { atlas as idx } from "../../lib/atlas.js";
 import { sourcesFor, access as PACCESS } from "../../lib/sources-by-country.js";
 import { nameLinks } from "../../lib/name-links.js";
+import { whereRanked, ordinal, source as censusSource } from "../../lib/hr-surname-towns.js";
 import provDir from "../../../public/providers.json";
 import { curveFor } from "../../lib/fr-curve.js";
 import { corpus } from "../../lib/surname-corpus.js";
@@ -198,6 +199,10 @@ const beRows = belgiumFor(r.n);
 const BE_MAX = 150;
 const bemap = beRows ? { drawn: Math.min(beRows.length, BE_MAX), omitted: Math.max(0, beRows.length - BE_MAX) } : null;
 const beTotal = beRows ? beRows.reduce((a, x) => a + x.c, 0) : 0;
+/* where the name is one of a Croatian town's ten most common (2021 census): ranks only, and nothing when it is in no list */
+const hrRanked = whereRanked(r.n);
+const hrWhere = (a) => a.kind === "district" ? "a district of Zagreb" : /county/i.test(a.countyEn) ? a.countyEn : `${a.countyEn} County`;
+const HR_SHOWN = 20;
 const dek = `${r.n}${by.curated ? `, also written ${by.curated.slice(0,4).join(", ")}` : ""}. `
   + `Attested in ${ccs.map((c) => CN[c.cc] || c.cc).join(", ")}`
   + (total ? `, borne by about ${total.toLocaleString()} people in the registers this map holds.` : ".");
@@ -502,6 +507,35 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
         <a href="https://creativecommons.org/licenses/by-sa/4.0/"
            target="_blank" rel="noopener">CC BY-SA 4.0</a>.
       </p>
+    </section>
+  )}
+
+  {hrRanked && (
+    <section id="hr-2021">
+      <h2 class="k-h2">Where it is most common in Croatia, {censusSource.year}</h2>
+      <p class="cap">{hrRanked.areas.length > 0
+        ? <>{r.n} is one of the ten most common surnames in <b>{hrRanked.areas.length}</b> Croatian {hrRanked.areas.length === 1 ? "town or municipality" : "towns, municipalities and city districts"}.</>
+        : <>{r.n} is in no single town's top ten, but is among the ten most common over a wider area.</>}
+      {" "}The census lists give the order only, with no numbers, and a name missing from a list may still be borne there.</p>
+      {hrRanked.country && <p class="cap">It is the {hrRanked.country === 1 ? "" : `${ordinal(hrRanked.country)} `}most common surname in Croatia.</p>}
+      {hrRanked.counties.length > 0 && (
+        <p class="cap">Among the ten most common in a whole county: {hrRanked.counties.map((h) => `${h.area.name} (${ordinal(h.rank)})`).join(", ")}.</p>
+      )}
+      <ul class="hrtop">
+        {hrRanked.areas.slice(0, HR_SHOWN).map((h) => (
+          <li><span class="hrrank">{ordinal(h.rank)}</span>
+            <span>{h.area.place ? <a href={u(`/place/${h.area.place}/`)}><b>{h.area.name}</b></a> : <b>{h.area.name}</b>}, {hrWhere(h.area)}</span></li>
+        ))}
+      </ul>
+      {hrRanked.areas.length > HR_SHOWN && (
+        <details class="k-more"><summary><span class="k-mt">The other {hrRanked.areas.length - HR_SHOWN} places</span></summary><div><ul class="hrtop">
+          {hrRanked.areas.slice(HR_SHOWN).map((h) => (
+            <li><span class="hrrank">{ordinal(h.rank)}</span>
+              <span>{h.area.place ? <a href={u(`/place/${h.area.place}/`)}><b>{h.area.name}</b></a> : <b>{h.area.name}</b>}, {hrWhere(h.area)}</span></li>
+          ))}
+        </ul></div></details>
+      )}
+      <p class="cap">Source: <a href={censusSource.url} target="_blank" rel="noopener">Croatian Bureau of Statistics, Census {censusSource.year} ↗</a> (a spreadsheet).</p>
     </section>
   )}
 
@@ -867,6 +901,9 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
   .cblock h3 a:hover { text-decoration: underline; }
   .ctop { margin-top: 0; }
   .namelink { margin: 6px 0 0; font-size: 14.5px; }
+  .hrtop { list-style: none; margin: 10px 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 6px 14px; }
+  .hrtop li { display: flex; gap: 10px; align-items: baseline; padding: 7px 14px; background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; font-size: 14px; line-height: 1.45; }
+  .hrrank { flex: none; min-width: 2.6em; font-weight: 700; color: var(--accent); }
   .ccflag { width: 22px; height: auto; vertical-align: -4px; margin-right: 8px;
     border-radius: 4px; box-shadow: 0 0 0 1px var(--rule); }
   .cflag-l:hover .ccflag { box-shadow: 0 0 0 2px var(--hue, var(--accent)); }

@@ -696,6 +696,16 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   @media (min-width: 900px) { .sp .lf-forms-cols { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   .sp .lf-forms-cols li { margin: 0; padding: 6px 10px; background: var(--ground); border-radius: 8px; overflow-wrap: anywhere; }
   .sp .lf-forms-cols li:last-child { grid-column: 1 / -1; }
+  /* where the family names are most common: a ranked list per name, the rank in its own narrow column */
+  .sp .lf-census { grid-column: 1 / -1; margin-top: 8px; padding: 4px 14px 12px; border: 1px solid var(--rule); border-radius: 12px; background: var(--panel); min-width: 0; }
+  .sp .lf-cn h5 { margin: 14px 0 6px; font: 700 15px/1.3 var(--sans); color: var(--ink); }
+  .sp .lf-cn-list { list-style: none; margin: 0 0 6px; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 6px 14px; font-size: 14px; line-height: 1.4; }
+  .sp .lf-cn-list li { display: flex; gap: 10px; align-items: baseline; margin: 0; padding: 6px 10px; background: var(--ground); border-radius: 8px; }
+  .sp .lf-cn-rank { flex: none; min-width: 2.6em; font: 700 13px/1.4 var(--sans); color: var(--accent); }
+  .sp .lf-cn-where { min-width: 0; overflow-wrap: anywhere; }
+  .sp .lf-cn-none { font-size: 14px; margin: 0 0 6px; }
+  .sp .lf-cn-more, .sp .lf-cn-around { margin: 8px 0; font-size: 14px; } .sp .lf-cn-more summary, .sp .lf-cn-around summary { cursor: pointer; font-weight: 600; }
+  .sp .lf-cn-src { margin: 8px 0 0; font-size: 12.5px; color: var(--ink-2); }
   .sp .lf-names .cap { color: var(--ink-2); font-size: 12.5px; }
   /* the "Try:" examples are buttons: without a ground of their own the browser paints them light grey, and pale text on that is unreadable in dark mode */
   .rr-seen { margin: 8px 0; padding: 8px 12px; border-left: 3px solid var(--accent); background: var(--accent-wash); border-radius: 0 8px 8px 0; }

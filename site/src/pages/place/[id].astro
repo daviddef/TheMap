@@ -30,6 +30,7 @@ import WhereToBegin from "../../components/WhereToBegin.astro";
 import PlaceGlance from "../../components/PlaceGlance.astro";
 import Neighbourhood from "../../components/Neighbourhood.astro";
 import { placeDescription } from "../../lib/place-description.js";
+import { areaForPlace, source as censusSource } from "../../lib/hr-surname-towns.js";
 
 export async function getStaticPaths() {
   const full = (await import("../../data/places-full.json")).default;
@@ -51,6 +52,8 @@ export async function getStaticPaths() {
 
 const { place, sameName = 1 } = Astro.props;
 const PROV = Object.fromEntries(provs.providers.map((p) => [p.id, p]));
+/* the census's most common surnames, for a Croatian town, municipality, or a village whose municipality the Atlas knows */
+const census = areaForPlace(place);
 /* THE SOCIAL CARD THIS PLACE ACTUALLY GETS.
    Worklist row 54: every one of these 54,043 pages shared the same grey
    rectangle. scripts/build-og-images.py now draws a card per place for the
@@ -457,6 +460,18 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
       carried into a reading room did not. */}
   <Neighbourhood place={place} />
 
+  {census && (
+    <section id="hr-surnames">
+      <h2>The most common surnames {census.itself ? "here" : `in ${census.area.name}`}, {censusSource.year}</h2>
+      <p class="cap">{census.itself
+        ? <>The {census.area.names.length} most common surnames of the {census.area.kind} of {census.area.name} in the census, in order.</>
+        : <>{place.name} lies in the {census.area.kind} of {census.area.name}. This is the whole {census.area.kind}'s list in order, not this village's own.</>}
+      {" "}No numbers are published. These are today's names: those in an old register here may differ.</p>
+      <ol class="hrnames">{census.area.names.map((n) => <li>{n}</li>)}</ol>
+      <p class="cap">Source: <a href={censusSource.url} target="_blank" rel="noopener">Croatian Bureau of Statistics, Census {censusSource.year} ↗</a> (a spreadsheet).</p>
+    </section>
+  )}
+
   {(place.parishes || []).length > 0 && (
     <section>
       <h2>The nearest parishes</h2>
@@ -630,6 +645,9 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
   section > h2 { display: flex; align-items: center; gap: 12px; font-size: clamp(22px, 3vw, 30px); font-weight: 800; letter-spacing: -.02em; margin: 34px 0 12px; }
   section > h2::before { content: ""; flex: none; width: 8px; height: 30px; border-radius: 6px; background: var(--hue, var(--accent)); }
   .names { font-family: var(--serif); font-size: 21px; line-height: 1.5; margin: 8px 0 6px; }
+  .hrnames { margin: 10px 0; padding: 0; list-style: none; counter-reset: hr; display: flex; flex-wrap: wrap; gap: 8px; }
+  .hrnames li { counter-increment: hr; padding: 4px 14px; border-radius: 999px; background: var(--panel); border: 1px solid var(--rule-strong); font: 700 15px/1.5 var(--sans); }
+  .hrnames li::before { content: counter(hr); margin-right: 8px; color: var(--accent); }
   .names b { font-weight: 800; margin: 0 6px 6px 0; display: inline-block; padding: 2px 14px; border-radius: 999px; background: var(--panel); border: 1px solid var(--rule-strong); font-size: 18px; }
   .vols { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 6px; }
   .vols li { font-family: var(--sans); font-size: 13px; line-height: 1.5; padding: 8px 14px; background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; }

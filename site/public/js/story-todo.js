@@ -292,6 +292,28 @@
     nb.push(item("The district and court seats of the time, and the parish next door", "The Atlas does not hold the district (kotar / Bezirk / contea) or court seats of past states, nor a list of parishes.", { gap: true, detail: "Ask the archive in Write to which parish the village belonged to in your years: it is usually one line." }));
     section("near", "Look nearby", nb);
 
+    /* 4b · WHERE THE FAMILY NAMES ARE MOST COMMON (Croatia, 2021 census: ranks only; see censusWhere in story-engine.js) */
+    var cen = g.names && g.names.census, nm = [];
+    if (cen && cen.rows) {
+      var nth = function (n) { return n + (["th", "st", "nd", "rd"][(n % 100 > 10 && n % 100 < 14) ? 0 : n % 10] || "th"); };
+      var look = function (name) { var out2 = [], seen = {}; ((g.people) || []).forEach(function (pe) { var sn = pe.surname; if (sn && pe.surnameTyped === name) (sn.links || []).forEach(function (l) { if (!seen[l.url]) { seen[l.url] = 1; out2.push({ t: "Look up on " + l.name, href: l.url }); } }); }); return out2.slice(0, 2); };
+      cen.rows.forEach(function (r) {
+        var link = function (a) { return a && a.place ? base + "place/" + encodeURIComponent(a.place) + "/" : ""; }, it;
+        if (r.areas.length) {
+          var top = r.areas.slice(0, 3).map(function (a) { return a.n + " (" + nth(a.rank) + ")"; }), near = r.areas.filter(function (a) { return a.km != null; }).sort(function (a, b) { return a.km - b.km; })[0];
+          it = item((r.as || r.name) + ": ranks highest in " + top.join(", "), "Its rank among each place's surnames in the 2021 census" + (near && cen.home ? ". Nearest to " + cen.home.name + ": " + near.n + ", " + near.km + " km, where it is " + nth(near.rank) : "") + ".",
+            { detail: "Where a name is common is a good place to ask about it and to read the parish. It does not show that anyone there is your family.", href: link(near || r.areas[0]), tag: r.areas.length + (r.areas.length === 1 ? " place" : " places") });
+        } else {
+          it = item((r.as || r.name) + ": in no town's ten most common surnames", (r.counted != null ? "The 2011 census counted " + r.counted + " people with it in all of Croatia." : r.below ? "In 2011 fewer than ten people had it, or none." : "The 2021 lists do not hold it, which is not proof nobody there has it.") + " A rare name is worth searching everywhere you look.", { gap: true });
+        }
+        it.links = look(r.name); nm.push(it);
+      });
+      if (cen.around.length && cen.home) nm.push(item("The common surnames around " + cen.home.name + " today", cen.around.map(function (a) { return a.n + " " + a.km + " km"; }).join(", ") + ": compare them with the godparents and witnesses in the registers. They are today's names, not those of your years.",
+        { detail: cen.around[0].n + ": " + cen.around[0].names.join(", ") + ".", href: cen.around[0].place ? base + "place/" + encodeURIComponent(cen.around[0].place) + "/" : "" }));
+      if (nm.length) nm[nm.length - 1].detail = (nm[nm.length - 1].detail ? nm[nm.length - 1].detail + " " : "") + "Source: Croatian Bureau of Statistics (DZS), Census 2021.";
+    }
+    section("names", "Where the family names are most common", nm);
+
     /* 5 · ON THE GROUND: burial grounds */
     var gr = ground(deps.cemeteries, an.village || info, item);
     section("ground", "Where it would be on the ground", gr);

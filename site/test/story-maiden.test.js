@@ -31,6 +31,20 @@ for (const [text, given, maiden, married] of [
   });
 }
 
+/* «born Bianchi» put Anna's birth in Monte dei Bianchi, because the word is part of that name. Made-up rows, so the test does not depend on which places the data holds today. */
+test("a word that is only part of a longer place name is a birth name after «born», not that place", opts, async () => {
+  const { parse, ctx } = await import("./plan/harness.mjs");
+  ctx.map.quartari = [{ i: "p-monte-dei-quartari-it", n: "Monte dei Quartari", y: 44.17, x: 10.13, c: 0, w: 1, cc: "IT", q: "quartari dei monte" }];
+  try {
+    const out = parse("My mother was Anna Rossi, born Quartari. My father was Marco Rossi.");
+    const anna = out.people.find((p) => p.given === "Anna");
+    assert.equal(anna.maiden, "Quartari");
+    assert.ok(!anna.place, "no birthplace is made of her birth name");
+    assert.deepEqual((anna.events || []).filter((e) => e.place), []);
+    assert.equal(ctx.map.quartari.length, 1, "the place is put back for every later reading");
+  } finally { delete ctx.map.quartari; }
+});
+
 for (const [text, given] of [
   ["My great grandmother was Rosa, born in Genoa.", "Rosa"],
   ["My grandmother was Anna, born Zagreb 1901.", "Anna"],

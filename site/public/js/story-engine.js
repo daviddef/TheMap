@@ -1321,9 +1321,19 @@
     });
     return out;
   }
+  /* A WORD THE ATLAS HOLDS ONLY AS PART OF A LONGER PLACE NAME («Bianchi» in Monte dei Bianchi) is not that place when a story writes it alone after a comma and «born»: in «Anna
+     Rossi, born Bianchi» it is her birth name. It is set aside for this one reading. A place called exactly that, another name of a place, a country and the first word of a longer
+     name («born Pozzuolo») are read as before. */
+  function onlyWithin(rows, f) {
+    function plain(s) { return S.fold(String(s || "").replace(/\s*\([^)]*\)/g, "").split(",")[0]); }
+    return !!(rows && rows.length) && rows.every(function (r) { var n = plain(r.n); return !r.al && !r.exo && !r.country && n !== f && n.split(" ")[0] !== f && S.fold(String(r.q || "")) !== f; });
+  }
   function parseStory(text, ctx, attached) {
     text = nominative(cleanInput(text), ctx);
-    return markMaidens(toldDecades(readStory(text, ctx, attached), text), text, ctx);
+    var map = ctx && ctx.map, held = [], re = new RegExp("[,(]\\s*born\\s+" + MD_NAME + "(?!\\s*\\d|\\s+\\p{Lu})", "gu"), m;
+    while (map && (m = re.exec(text))) { var f = S.fold(m[1]); if (onlyWithin(map[f], f)) { held.push([f, map[f]]); delete map[f]; } }
+    try { return markMaidens(toldDecades(readStory(text, ctx, attached), text), text, ctx); }
+    finally { held.forEach(function (h) { map[h[0]] = h[1]; }); }
   }
   function readStory(text, ctx, attached) {
     var lin = ancestorTold(text) ? splitLineage(text) : null;

@@ -130,6 +130,10 @@
     opts = opts || {}; p = p || {};
     text = String(text == null ? "" : text).normalize("NFKC").replace(/[\u200b-\u200d\u2060\ufeff\u00ad]/g, "").replace(/[\u00a0\u2007\u202f]/g, " ");
     var typed = text; if (opts.read && opts.read !== text) typed = text + " \n " + String(opts.read);
+    /* neither a continent nor, in a record copied out as a list, the label before a colon is a name or a place to look for (blanked, so the spans still fit) */
+    function blank(m) { return m.replace(/[^\n]/g, " "); }
+    text = text.replace(/\b(?:South|North|Central|Latin)[ -]Americ(?:a|an)\b/g, blank);
+    if (p.sheet) text = text.replace(/^[ \t]*(?:[•·▪●◦‣*–—-][ \t]*)?(?:[\p{L}'’]+[ \t]){0,3}[\p{L}'’]+(?=[ \t]*:)/gmu, blank);
     var problems = [], isPlace0 = opts.isPlace || function () { return false; }, isGiven = opts.isGiven || function () { return false; };
     /* «Bosnia», «Macedonia»: a word of a country's name is a place too, though the gazetteer holds the whole name */
     var CWORDS = {}, CSKIP = /^(?:north|south|east|west|northern|southern|republic|kingdom|united|states|islands?|saint|new|democratic|central|federated|the|and|of|herz|former|great)$/;
@@ -156,6 +160,11 @@
     /* what the reading holds, as words and as years */
     var bag = { strings: [], years: [] };
     harvest(people, bag, 0); harvest(p.kin, bag, 0); harvest(p.stops, bag, 0); harvest(p.route, bag, 0); harvest(p.others, bag, 0); harvest(p.suggest, bag, 0); harvest(p.siblings, bag, 0); harvest(p.life, bag, 0);
+    /* a record copied out as a list: its suggested readings, and a search already made, are in the reading too */
+    if (p.sheet) [p.sheet, p.sheet.father, p.sheet.mother, p.sheet.origin, p.sheet.asked].forEach(function (o) {
+      Object.keys(o || {}).forEach(function (k) { [].concat(o[k]).forEach(function (v) { if (typeof v === "string") bag.strings.push(v); }); });
+    });
+    arr(p.searched).forEach(function (s) { if (s.place) bag.strings.push(s.place); bag.years.push(s.from, s.to); });
     [p.name, p.surname, p.from && p.from.word, p.to && p.to.word, p.from && p.from.row && p.from.row.n, p.to && p.to.row && p.to.row.n, p.born, p.left].forEach(function (x) { if (typeof x === "number") bag.years.push(x); else if (x) bag.strings.push(String(x)); });
     var read = {}, readPlaces = {}, readBlob = bag.strings.join(" \n ");
     bag.strings.forEach(function (s) { wordsOf(s, read); });

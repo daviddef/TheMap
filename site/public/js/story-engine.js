@@ -601,7 +601,7 @@
     t = t.replace(/\b(?:an?\s+|the\s+)?(?:(?:small|little|tiny|mountain|farming|fishing)\s+){0,2}(?:village|town|hamlet|place|suburb|parish)\s+(?:just\s+)?(?:near|outside(?:\s+of)?|close\s+to)\s+(\p{Lu}[\p{L}'\u2019-]+(?:\s+\p{Lu}[\p{L}'\u2019-]+)?)\s*,?\s+(?:called|named)\s+(\p{Lu}[\p{L}'\u2019-]+(?:\s+\p{Lu}[\p{L}'\u2019-]+)?)/gu, "$2 near $1");
     return t;
   }
-  function gazWants(text, map, given) {
+  function gazWants(text, map, given, countries) {
     var fold = S.fold, want = [], t = cleanInput(text);   /* the same text the reader will read: normalised, no zero-width marks, no address numbers */
     /* «left Ennis for Geelong»: a place after left, and after "for" when the sentence is one of travel */
     t = t.replace(/\b(left|leaving|sailed|departed|bound|headed|emigrated|moved)\b([^.!?]{0,40}?)\bfor\s+(?=\p{Lu})/gu, "$1$2to ");
@@ -618,6 +618,8 @@
     var sl = new RegExp(SLAV_PREP.source, "gu");
     while ((m = sl.exec(t))) { var sf = fold(m[3]); if ((map[sf] && map[sf].length) || (given && given[sf])) continue; stemsOf(sf).slice(0, 3).forEach(function (c) { if (!map[c]) want.push({ ph: c, ccs: null }); }); }
     var pr = /(\p{Lu}[\p{L}'\u2019-]+(?:\s+\p{Lu}[\p{L}'\u2019-]+)?)(\s*,?\s*)(\p{Lu}[\p{L}'\u2019-]+(?:\s+\p{Lu}[\p{L}'\u2019-]+)?)/gu;
+    var paired = [];
+    pairsOf(t, countries).forEach(function (pc) { if (!(map[pc.town] || []).some(function (r) { return r.cc === pc.cc && fold(String(r.n).replace(/\s*\([^)]*\)/g, "")) === pc.town; })) paired.push({ ph: pc.town, ccs: [pc.cc], town: true }); });
     while ((m = pr.exec(t))) {
       var comma = m[2].indexOf(",") > -1, fx = fold(m[1]), fy = fold(m[3]), rx = map[fx], ry = map[fy]; if (!rx || !ry) continue;
       var ccs = []; ry.forEach(function (r) { if (r.cc && ccs.indexOf(r.cc) < 0) ccs.push(r.cc); });
@@ -631,7 +633,9 @@
     var nre = /(\p{Lu}[\p{L}'\u2019-]+(?:\s+\p{Lu}[\p{L}'\u2019-]+){0,2})\s*,?\s+near\s+(?=\p{Lu})/gu, nt = nearFirst(t), asked = [];
     while ((m = nre.exec(nt))) { var nws = m[1].split(/\s+/); for (var k2 = 1; k2 <= nws.length; k2++) asked.push({ ph: fold(nws.slice(-k2).join(" ")), ccs: null, more: true, near: true }); }
     var seen = Object.create(null);
-    return asked.concat(want).filter(function (w) { var k = w.ph + "|" + (w.ccs || []).join() + (w.near ? "|near" : ""); if (w.ph.length < 4 || seen[k] || (given && given[w.ph])) return false; if (!w.near && !w.ccs && !w.more && map[w.ph]) return false; seen[k] = 1; return true; }).slice(0, 16);
+    var listed = readSheet(t, { given: given });
+    if (listed) [listed.from && listed.from.believed, listed.from && listed.from.parishWritten, listed.area, listed.birthplace].forEach(function (x) { var f = x ? fold(x) : ""; if (f && !map[f]) paired.push({ ph: f, ccs: null }); });
+    return asked.concat(paired, want).filter(function (w) { var k = w.ph + "|" + (w.ccs || []).join() + (w.near ? "|near" : ""); if (w.ph.length < 4 || seen[k] || (given && given[w.ph])) return false; if (!w.near && !w.ccs && !w.more && map[w.ph]) return false; seen[k] = 1; return true; }).slice(0, 16);
   }
   /* one gazetteer row as a place row; `alt` is how many other names the gazetteer lists for it: a city has many, a village few, and among namesakes that is the importance */
   function gazRow(ph, r) { return { i: "g-" + ph.replace(/ /g, "-") + "-" + String(r[3]).toLowerCase() + "-" + Math.round(r[1] * 100), n: r[0], y: r[1], x: r[2], cc: r[3], c: 0, gaz: 1, alt: (r[4] || []).length }; }
@@ -649,7 +653,8 @@
     var own = hit.filter(function (r) { return fold(r[0]) === w.ph; }); if (own.length) hit = own;
     var have = map[w.ph] || [], part = partialOnly(have, w.ph);
     if (part) hit = own;   /* the index has the name only inside others (Peoria County, Pozzuolo del Friuli): only a place of that very name counts, and the county's own middle is no duplicate of it */
-    hit = hit.filter(function (r) { return part || !have.some(function (h) { return h.cc === r[3] && h.y != null && Math.abs(h.y - r[1]) < 0.25 && Math.abs(h.x - r[2]) < 0.25; }); });
+    /* a town asked for by «Town, Country» is not a duplicate of the department or county around it that only carries its name */
+    hit = hit.filter(function (r) { return part || !have.some(function (h) { return h.cc === r[3] && h.y != null && Math.abs(h.y - r[1]) < 0.25 && Math.abs(h.x - r[2]) < 0.25 && (!w.town || fold(String(h.n).replace(/\s*\([^)]*\)/g, "")) === w.ph); }); });
     hit = hit.slice(0, w.ccs || part ? 20 : 8); if (!hit.length) return 0;
     var rows = hit.map(function (r) { return gazRow(w.ph, r); });
     /* THE GAZETTEER'S ORDER IS ITS IMPORTANCE (Dresden in Germany before the Dresdens of Ohio and Ontario), and an index that holds the name only as bare rows (no
@@ -1358,6 +1363,7 @@
     t = t.replace(/(^|[;,(]\s*|\n\s*)m\.\s+(?=\p{Lu})/gu, "$1married ");
     t = t.replace(/\b(?:S\.?S\.?|R\.?M\.?S\.?|H\.?M\.?S\.?|H\.?M\.?A\.?S\.?|U\.?S\.?S\.?|M\.?V\.?|S\.?V\.?)\s+(?:(?:the|of)\s+)?\p{Lu}[\p{L}'\u2019-]+(?:\s+\p{Lu}[\p{L}'\u2019-]+)?/gu, function (m) { return /^(?:US|MV|SS|SV)\b/.test(m) && !/^(?:SS|S\.S\.|RMS|HMS|HMAS|USS|MV|SV)\s/.test(m) ? m : "the ship"; });
     t = t.replace(/(^|[.!?]\s+|\n\s*)(Grandad|Granddad|Grandpa|Gramps|Granny|Grandma|Nan|Nana|Nanna|Nanny|Nonno|Nonna|Opa|Oma|Mum|Mom|Mam|Dad|Papa|Mamma|Mama)(?=\s+(?:was|is|were|had|lived|moved|came|died|married|born|grew|left|emigrated|migrated|worked|travelled|traveled|went|sailed|returned|settled|arrived|always|never|used|loved|hated)\b)/g, "$1My $2");
+    t = t.replace(/\b(?:South|North|Central|Latin)[ -]Americ(?:a|an)\b/g, "the continent");   /* a continent is no one place: «South America» was read as South Dakota */
     return t;
   }
   /* CROATIAN, SLOVENE AND POLISH PLACES IN THE CASE A SENTENCE PUTS THEM IN: «u Senju» (in Senj), «iz Rijeke» (from Rijeka), «u Zagrebu», «w Krakowie», «v Ljubljani». The word after u / iz / od / do / kod / w / v / z that the
@@ -1436,9 +1442,16 @@
   }
   function parseStory(text, ctx, attached) {
     text = nominative(cleanInput(text), ctx);
+    var sheet = readSheet(text, ctx), looked = searchedOf(sheet ? sheet.text : text);
+    text = sheet ? sheet.narrative : looked.text;
     var map = ctx && ctx.map, held = [], re = new RegExp("[,(]\\s*born\\s+" + MD_NAME + "(?!\\s*\\d|\\s+\\p{Lu})", "gu"), m;
     while (map && (m = re.exec(text))) { var f = S.fold(m[1]); if (onlyWithin(map[f], f) && !writtenOut(map, m[1], text.slice(m.index + m[0].length))) { held.push([f, map[f]]); delete map[f]; } }
-    try { return markMaidens(toldDecades(readStory(text, ctx, attached), text), text, ctx); }
+    try {
+      var out = markMaidens(toldDecades(readStory(text, ctx, attached), text), text, ctx);
+      if (sheet) out = applySheet(out, sheet, ctx);
+      if (out && looked.list.length) out.searched = looked.list;
+      return out;
+    }
     finally { held.forEach(function (h) { map[h[0]] = h[1]; }); }
   }
   function readStory(text, ctx, attached) {
@@ -1856,6 +1869,7 @@
     ctx.__typed = Object.create(null); String(t).normalize("NFC").split(/[\s,;.!?()"]+/).forEach(function (w) { var lw = w.toLowerCase(); if (/[^\u0000-\u007f]/.test(lw)) ctx.__typed[S.fold(lw)] = lw; });   /* a place typed with its own accents (Kraków) is that place, not its accentless namesakes */
     var ci0 = capInfo(t, tokens);
     cands = withContext(cands, ctx, function (c) { return notPlace(c, tokens, ci0, ctx); });
+    cands = pairCountry(cands, t, ctx);
     out.near = nearResolve(cands, tokens, ctx);   /* «X near Y»: which X, before any person or stop takes the first reading */
     ctx.__rank = Object.create(null); cands.forEach(function (c) { ctx.__rank[c.word] = c.rows; });   /* the readings, in the story's own order, for the readings of each person */
     /* a word that is no place's own name but sits inside the names of several ("Friuli" in Pozzuolo del Friuli) is not a place: it is offered, not used */
@@ -3125,6 +3139,253 @@
     return out.sort(function (a, b) { return a.label.localeCompare(b.label); });
   }
 
+  /* ---- A RECORD COPIED OUT AS A LIST ------------------------------------------------------------------------------------------
+     «Name: ...», «Father: ...», «From: ...», «Born: ...», one to a line, often with the writer's own reading of the names in brackets. Read as a list, not as
+     prose: what the record says is kept as the record says it, what the writer or an archive thinks it means is kept beside it as a SUGGESTION, and a search already
+     made with nothing found is a search, never a birth year. Only a list about one person is read this way; anything else is read as a story, as before. */
+  var SH_LABEL = /^\s*(?:(?:[•·▪●◦‣*–—-]|\d{1,2}[.)])\s*)?(full name|given name|first name|family name|last name|surname|name|father['’]?s name|mother['’]?s name|father|mother|place of origin|place of birth|birthplace|origin|from|date of birth|birth|born|marriage|married|spouse|wife|husband|date of death|death|died|occupation|profession)\s*:\s*(\S.*)$/i;
+  var SH_KEY = { "full name": "name", "name": "name", "given name": "given", "first name": "given", "family name": "surname", "last name": "surname", "surname": "surname", "fathers name": "father", "father": "father", "mothers name": "mother", "mother": "mother",
+    "place of origin": "from", "origin": "from", "from": "from", "place of birth": "birthplace", "birthplace": "birthplace", "date of birth": "born", "birth": "born", "born": "born", "marriage": "married", "married": "married", "spouse": "spouse", "wife": "spouse", "husband": "spouse", "date of death": "died", "death": "died", "died": "died", "occupation": "occupation", "profession": "occupation" };
+  var SH_P = "\\p{Lu}[\\p{L}'’]+(?:[ -](?:(?:de|del|do|da|dos|das|di)[ -])?\\p{Lu}[\\p{L}'’]+){0,3}", SH_PC = SH_P + "(?:\\s*,\\s*" + SH_P + ")?";
+  var SH_NAME = "\\p{Lu}[\\p{L}'’-]+(?:\\s+(?:(?:van|von|de|del|della|di|da|do|dos|das|den|der|le|la|y)\\s+)*\\p{Lu}[\\p{L}'’-]+){0,3}";
+  var SH_HEDGE = /\b(?:probably|perhaps|possibly|maybe|likely|presumably|apparently|i\.e\.|a\.k\.a\.|aka|also written|also|that is|or)(?![\p{L}])|[?=≈]/giu;
+  var NIL_SAYS = /\b(?:not|never|nowhere)\b[^.!?]{0,60}?\b(?:found|traced|located)\b|\b(?:could\s*n[o']t|couldn’t|did\s*n[o']t|didn’t|cannot|can['’]t|have\s*n[o']t|haven’t|failed to|unable to)\s+(?:\w+\s+){0,2}?(?:find|found|trace[d]?|locate[d]?)\b|\bno\s+(?:\w+\s+){0,2}?(?:baptism|record|entry|certificate)\b[^.!?]{0,40}?\bfound\b/i;
+  var NIL_WHAT = /\b(baptism|christening|birth|marriage|wedding|death|burial|record|entry|register|certificate)s?\b/i;
+  var NIL_RANGE = /(?:\b(?:between|from|for(?:\s+the\s+years)?|in(?:\s+the\s+years)?)\s+)?\b(1[5-9]\d\d|20[0-2]\d)\s*(?:–|—|-|\bto\b|\band\b|\buntil\b|\bthrough\b)\s*((?:1[5-9]\d\d|20[0-2]\d|\d\d))\b/i;
+  function shSentences(s) { return String(s).split(/(?<=[.!?])\s+(?=[\p{Lu}"“(])/u).filter(function (x) { return x.trim(); }); }
+  /* A SEARCH ALREADY MADE: «no marriage entry found at X, 1761–1766». The years are taken out of the text, so they date nothing, and the search is kept as told. */
+  function searchedOf(text) {
+    var list = [], t = String(text || "");
+    t.split(/\n+/).forEach(function (ln) { shSentences(ln).forEach(function (sn) {
+      if (!NIL_SAYS.test(sn) || !NIL_WHAT.test(sn)) return;
+      var r = NIL_RANGE.exec(sn); if (!r) return;
+      var a = Number(r[1]), b = Number(r[2].length === 2 ? r[1].slice(0, 2) + r[2] : r[2]); if (b < a || b - a > 150) return;
+      var pl = new RegExp("\\b(?:in|at)\\s+(?:the\\s+(?:parish|registers?|books)\\s+(?:of|at)\\s+)?(?!(?:" + TK_MONTH + ")(?![\\p{L}]))(" + SH_P + ")", "u").exec(sn);
+      var w = NIL_WHAT.exec(sn)[1].toLowerCase();
+      list.push({ what: w === "christening" ? "baptism" : w === "wedding" ? "marriage" : w === "burial" ? "death" : /^(?:record|entry|register|certificate)$/.test(w) ? "record" : w, place: pl ? pl[1] : "", from: a, to: b });
+      t = t.replace(sn, sn.replace(r[0], " "));
+    }); });
+    return { text: t, list: list };
+  }
+  function shSplitName(s) {
+    var w = String(s || "").trim().split(/\s+/).filter(Boolean); if (w.length < 2) return { given: w[0] || "", surname: "" };
+    var k = w.length - 1; while (k > 1 && /^(?:van|von|de|del|della|di|da|do|dos|das|den|der|le|la|y)$/i.test(w[k - 1])) k--;
+    return { given: w.slice(0, k).join(" "), surname: w.slice(k).join(" ") };
+  }
+  /* A name as the record gives it, and the readings offered beside it: «Bartolomeu Ferri (probably Bartul / Bartolomeo Ferić)». In the brackets, a two-word item is a first name and a
+     surname; single words before it are other first names and single words after it other surnames. With no two-word item, a word the given-name catalogue holds is a first name. */
+  function shName(value, ctx, surnameKnown) {
+    var main = String(value || ""), notes = [];
+    main = main.replace(/\s*[(\[]([^()\[\]]*)[)\]]/g, function (m, n) { notes.push(n); return " "; });
+    var h = /[,;]?\s*\b(?:probably|perhaps|possibly|maybe|likely|presumably|a\.k\.a\.|aka|or)(?![\p{L}])/iu.exec(main);
+    if (h) { notes.push(main.slice(h.index)); main = main.slice(0, h.index); }
+    main = main.replace(/\s+/g, " ").replace(/^[\s"“«]+|[\s.,;:"”»]+$/g, "");
+    var m0 = new RegExp("^" + SH_NAME, "u").exec(main); if (!m0) return null;
+    var n = shSplitName(m0[0]), out = { recorded: m0[0], given: n.given, surname: n.surname, sugGiven: [], sugSurname: [] };
+    var segs = notes.join(" / ").replace(SH_HEDGE, "/").split(/\s*[\/,;|]\s*/).map(function (x) { return x.trim().replace(/^[."']+|[."']+$/g, ""); })
+      .filter(function (x) { return new RegExp("^" + SH_NAME + "$", "u").test(x) && !STOP[S.fold(x)] && !MONTHS[S.fold(x)]; });
+    var multi = -1; segs.forEach(function (x, i) { if (multi < 0 && /\s/.test(x)) multi = i; });
+    function put(list, v) { if (v && S.fold(v) !== S.fold(list === out.sugGiven ? out.given : out.surname) && list.indexOf(v) < 0 && list.length < 4) list.push(v); }
+    segs.forEach(function (x, i) {
+      if (/\s/.test(x)) { var p = shSplitName(x); put(out.sugGiven, p.given); put(out.sugSurname, p.surname); }
+      else if (multi >= 0) put(i < multi ? out.sugGiven : out.sugSurname, x);
+      else put((surnameKnown || n.surname) && !(ctx && ctx.given && ctx.given[S.fold(x)]) ? out.sugSurname : out.sugGiven, x);
+    });
+    return out;
+  }
+  function shFrom(value, whole) {
+    var out = { said: String(value).trim().replace(/[.;]+$/, ""), written: "", parishWritten: "", province: "", believed: "", by: "" };
+    var q = /["“«]([^"“”«»]{3,200})["”»]/.exec(value);
+    if (q) out.written = q[1].trim();
+    var par = /\b(?:Par+o[cq][\p{L}]*\.?|Parish|Župa)\s+(?:(?:de|di|of|d['’])\s*)?(\p{Lu}[\p{L}'’-]+(?:\s+\p{Lu}[\p{L}'’-]+)?)/u.exec(out.written || value);
+    if (par) out.parishWritten = par[1];
+    var pv = /\b[Pp]rovinc\p{L}*\.?\s+(?:(?:de|di|of)\s+)?(\p{Lu}[\p{L}'’-]+)/u.exec(out.written || value);
+    if (pv) out.province = pv[1];
+    var rest = q ? String(value).slice(q.index + q[0].length) : String(value), P = "(" + SH_P + ")";
+    var bm = new RegExp("(?:^|[.;,(]\\s*)((?:[Tt]he\\s+|[Aa]n?\\s+)?[^.;:,()\"”]{0,60}?(?:[Aa]rchives?|[Aa]rchivist|[Mm]useum|[Oo]ffice|[Pp]arish|[Pp]riest|[Rr]esearcher|[Hh]istorian|[Dd]iocese|[Ee]xpert|\\bI|[Ww]e))\\s+(?:believes?|thinks?|says?|suggests?|reckons?|identif(?:y|ies)|reads?)\\s+(?:that\\s+)?(?:(?:this|it|the\\s+place)\\s+(?:(?:is|means|refers\\s+to|may\\s+be|might\\s+be|could\\s+be|as|to\\s+be)\\s+))?(?:(?:the\\s+)?(?:village|parish|town)\\s+of\\s+)?" + P, "u").exec(rest);
+    if (bm) { out.believed = bm[2]; out.by = bm[1].trim().replace(/^The\b/, "the").replace(/^An?\b/, function (a) { return a.toLowerCase(); }); if (/^(?:I|[Ww]e)$/.test(out.by)) out.by = ""; /* «I think it is …» is the writer's own suggestion */ }
+    else { var hm = new RegExp("(?:\\b(?:probably|possibly|perhaps|likely|maybe|now|today|i\\.e\\.|which\\s+(?:is|may\\s+be))\\b|=)\\s+" + P, "u").exec(rest); if (hm) out.believed = hm[1]; }
+    var plain = q ? "" : rest.split(/[.;(]|\b(?:probably|possibly|perhaps|likely|maybe)\b/i)[0].trim();
+    out.main = !q && new RegExp("^" + SH_PC, "u").test(plain) ? new RegExp("^" + SH_PC, "u").exec(plain)[0] : "";
+    if (!out.written && out.parishWritten) out.written = out.said;
+    return out;
+  }
+  function shDate(value) {
+    var doubt = "", main = String(value).replace(/\s*\(([^()]*)\)/g, function (m, n) { doubt += (doubt ? "; " : "") + n.trim(); return " "; });
+    var tail = /[,;]\s*(?:but\s+)?((?:date\s+)?(?:taken|from|according|may|might|not\s+certain|uncertain|unsure)\b.*)$/i.exec(main); if (tail) { doubt += (doubt ? "; " : "") + tail[1].trim(); main = main.slice(0, tail.index); }
+    var y = /\b(1[5-9]\d\d|20[0-2]\d)\b/.exec(main), via = /\b(?:his|her|their|a|an|the)\s+(son|daughter|child|wife|husband)['’]s?\s+(?:own\s+)?(?:(?:birth|baptism(?:al)?|marriage|death)\s+)?(?:record|certificate|register|entry)/i.exec(value);
+    var pl = new RegExp("\\b(?:in|at)\\s+(?!(?:" + TK_MONTH + ")(?![\\p{L}]))(" + SH_PC + ")", "u").exec(main);
+    var text = main.replace(pl ? pl[0] : "\u0000", "").replace(/\s+/g, " ").replace(/^[\s,]+|[\s.,;]+$/g, "");
+    return { year: y ? Number(y[1]) : null, text: text, approx: /\b(?:about|around|abt|circa|approx\p{L}*|roughly)\b|\bca?\.|~|\?/iu.test(main), doubt: doubt.replace(/[.\s]+$/, ""), via: via ? via[1].toLowerCase() : "", place: pl ? pl[1] : "" };
+  }
+  /* The places and years of a life told in the lines under the list: «In X by 1790, married A in 1794 in Y, and died in 1821 in Z». */
+  function shEvents(sh, s) {
+    var m, year = "(1[5-9]\\d\\d|20[0-2]\\d)", pre = new RegExp("\\b(?:[Ii]n|[Aa]rrived\\s+in|[Ll]iving\\s+in|[Ss]een\\s+in)\\s+(" + SH_PC + ")\\s+by\\s+(?:about\\s+)?" + year, "gu");
+    while ((m = pre.exec(s))) if (!sh.presence.some(function (x) { return x.place === m[1]; })) sh.presence.push({ place: m[1], year: Number(m[2]) });
+    var by2 = new RegExp("\\b[Bb]y\\s+(?:about\\s+)?" + year + "\\s*,?\\s+(?:(?:he|she)\\s+was\\s+)?(?:living\\s+)?in\\s+(" + SH_PC + ")", "u").exec(s);
+    if (by2 && !sh.presence.some(function (x) { return x.place === by2[2]; })) sh.presence.push({ place: by2[2], year: Number(by2[1]) });
+    function part(verb) {
+      var r = new RegExp("\\b" + verb + "\\b((?:(?!(?:,?\\s+(?:and\\s+)?(?:married|died|moved|had|was|returned|buried|is\\s+buried)\\b)|[;]|\\.(?:\\s|$))[^])*)", "iu").exec(s); if (!r) return null;
+      var seg = r[1], y = new RegExp("\\b" + year + "\\b").exec(seg), pr = new RegExp("\\b(?:in|at)\\s+(?!(?:" + TK_MONTH + ")(?![\\p{L}]))(" + SH_PC + ")", "u").exec(seg);
+      return { seg: seg, year: y ? Number(y[1]) : null, place: pr ? pr[1] : "" };
+    }
+    var w = part("married"), d = part("died");
+    if (w && !sh.married) { var sm = new RegExp("^\\s*(?:to\\s+)?(?!(?:In|At|On|About|Around|The)\\b)(" + SH_NAME + ")", "u").exec(w.seg); sh.married = { year: w.year, place: w.place, spouse: sm ? sm[1] : "" }; }
+    if (d && !sh.died && (d.year || d.place)) sh.died = { year: d.year, place: d.place };
+  }
+  function readSheet(text, ctx) {
+    var t = String(text || "").replace(/[ \t]*([•▪●◦‣])[ \t]*/g, "\n$1 "), lines = t.split(/\n+/).map(function (x) { return x.trim(); }).filter(Boolean);
+    var got = Object.create(null), keys = 0, again = false;
+    var read = lines.map(function (ln) {
+      var m = SH_LABEL.exec(ln); if (!m) return { line: ln };
+      var k = SH_KEY[m[1].toLowerCase().replace(/['’]/g, "")];
+      if (got[k] != null) { if (k === "name") again = true; } else { got[k] = m[2].trim(); keys++; }
+      return { line: ln, key: k };
+    });
+    if (again || got.name == null || keys < 2) return null;
+    var sh = { text: t, narrative: "", presence: [], married: null, died: null, father: null, mother: null, spouse: null, born: null, from: null, birthplace: "", occupation: got.occupation || "", literacy: false, errors: false, recordsFrom: "", area: "", asked: null, rel: "", sex: "" };
+    var nm = shName(got.surname ? got.name + " " + got.surname : got.name, ctx); if (!nm) return null;
+    if (got.given && !nm.surname && S.fold(got.given) !== S.fold(nm.given)) nm = shName(got.given + " " + got.name, ctx) || nm;
+    sh.name = nm;
+    if (got.father) sh.father = shName(got.father, ctx);
+    if (got.mother) sh.mother = shName(got.mother, ctx);
+    if (got.spouse) sh.spouse = shName(got.spouse, ctx);
+    if (got.from) sh.from = shFrom(got.from, t);
+    if (got.birthplace) sh.birthplace = ((new RegExp(SH_PC, "u")).exec(got.birthplace) || [""])[0];
+    if (got.born) sh.born = shDate(got.born);
+    if (got.married) shEvents(sh, "married " + got.married);
+    if (got.died) { var dd = shDate(got.died), rest = dd.text.replace(/\b\d{1,2}(?:st|nd|rd|th)?\b|\b(?:1[5-9]\d\d|20[0-2]\d)\b/g, " ").replace(new RegExp("\\b(?:" + TK_MONTH + ")(?![\\p{L}])", "g"), " "), rp = new RegExp(SH_PC, "u").exec(rest); sh.died = { year: dd.year, place: dd.place || (rp ? rp[0] : "") }; }
+    var keep = [];
+    read.forEach(function (x) {
+      if (x.key) return;
+      var bullet = /^(?:[•·▪●◦‣*–—-])\s+/.test(x.line), body = x.line.replace(/^(?:[•·▪●◦‣*–—-])\s+/, "");
+      shSentences(body).forEach(function (sn) {
+        var used = false, m;
+        if ((m = /\b(?:[Ww]hat\s+(?:the\s+)?|[Aa]ccording\s+to\s+(?:the\s+)?)(\p{Lu}\p{L}+)\s+records?\b/u.exec(sn) || /\b(\p{Lu}\p{L}+)\s+records?\s+(?:say|state|show|give)s?\b/u.exec(sn)) && DEMONYM[S.fold(m[1])]) { sh.recordsFrom = DEMONYM[S.fold(m[1])]; used = true; }
+        if (/\b(?:could\s*(?:not|n't|n’t)|couldn['’]t|unable\s+to|did\s*not\s+know\s+how\s+to)\s+(?:(?:read|write|sign)\b)|\billiterate\b|\bsigned\s+with\s+(?:an?\s+)?(?:x|cross|mark)\b/i.test(sn)) { sh.literacy = true; used = true; }
+        if (/\bmay\s+(?:well\s+)?(?:contain|be|have|include)\s+(?:some\s+)?(?:errors|mistakes|wrong)/i.test(sn)) { sh.errors = true; used = true; }
+        if ((m = new RegExp("\\b(?:from|left|leaving|came\\s+out\\s+of)\\s+(?:the\\s+)?(" + SH_P + ")\\s+(?:area|region|district|surroundings|countryside|hinterland)\\b", "u").exec(sn))) { sh.area = sh.area || m[1]; used = true; }
+        if ((m = /\bmy\s+((?:(?:great|step)[- ])*(?:grand(?:father|mother|pa|ma|dad|mum)|father|mother|ancestor|forefather|forebear|relative))\b/i.exec(sn))) { sh.rel = sh.rel || m[1].toLowerCase().replace(/ /g, "-"); used = true; }
+        if ((m = new RegExp("\\b(?:researching|stud(?:y|ies|ying)|looking\\s+into|working\\s+on|knows?\\s+(?:of\\s+)?)\\s+(?:the\\s+)?(" + SH_P + ")(?:\\s*\\(([^()]*)\\))?\\s+family(?:\\s+(?:of|from|in)\\s+(" + SH_P + "))?", "u").exec(sn))) { sh.asked = { surname: m[1], forms: m[2] ? m[2].split(/\s*[\/,;]\s*|\s+or\s+/).filter(Boolean) : [], place: m[3] || "" }; used = true; }
+        if (NIL_SAYS.test(sn) && NIL_WHAT.test(sn)) return;
+        var before = sh.presence.length + (sh.married ? 1 : 0) + (sh.died ? 1 : 0);
+        if (!/\?\s*$/.test(sn)) shEvents(sh, sn);
+        if (sh.presence.length + (sh.married ? 1 : 0) + (sh.died ? 1 : 0) > before || (bullet && /\b(?:married|died)\b|\bby\s+\d{4}\b/i.test(sn))) used = true;
+        if (used || /\?\s*$/.test(sn) || /^(?:(?:hello|hi|dear|good\s+(?:morning|evening|day|afternoon)|greetings)\b|thank|any\s+(?:tip|help|information|advice)|(?:i\s+am|i['’]m)\s+(?:searching|looking|researching|trying))/i.test(sn)) return;
+        keep.push(sn);
+      });
+    });
+    var he = (t.match(/\b(?:he|his|him)\b/gi) || []).length, she = (t.match(/\b(?:she|her|hers)\b/gi) || []).length;
+    sh.sex = she > he ? "F" : he > she ? "M" : "";
+    if (sh.asked) { var a = sh.asked; [a.surname].concat(a.forms).forEach(function (f) { if (new RegExp("^" + SH_NAME + "$", "u").test(f) && S.fold(f) !== S.fold(nm.surname) && nm.sugSurname.indexOf(f) < 0 && nm.sugSurname.length < 4) nm.sugSurname.push(f); }); }
+    sh.narrative = keep.join("\n");
+    return sh;
+  }
+  /* «Salto, Uruguay», «Concordia, Argentina»: a country written straight after a town says which town of that name is meant. */
+  function countryCode(name, countries) {
+    var f = S.fold(name); if (COUNTRY_ALIAS[f]) return COUNTRY_ALIAS[f];
+    var cc = ""; Object.keys(countries || {}).forEach(function (k) { if (!cc && S.fold(countries[k]) === f) cc = k; });
+    return cc;
+  }
+  function pairsOf(text, countries) {
+    var out = [], re = new RegExp("(" + SH_P + ")\\s*,\\s*(?=(" + SH_P + "))", "gu"), m;
+    if (!countries) return out;
+    while ((m = re.exec(String(text)))) {
+      var w = m[2].split(" "), cc = "";
+      for (var n = w.length; n >= 1 && !cc; n--) cc = countryCode(w.slice(0, n).join(" "), countries);
+      if (cc && !countryCode(m[1], countries)) out.push({ town: S.fold(m[1]), cc: cc });
+    }
+    return out;
+  }
+  function pairCountry(cands, text, ctx) {
+    var pairs = pairsOf(text, ctx && ctx.countries); if (!pairs.length) return cands;
+    cands.forEach(function (c) {
+      var p = pairs.filter(function (x) { return x.town === c.word || x.town.slice(-c.word.length - 1) === " " + c.word; })[0]; if (!p || c.country) return;
+      function rank(r) { return r.cc !== p.cc ? 2 : S.fold(String(r.n).replace(/\s*\([^)]*\)/g, "")) === c.word ? 0 : 1; }
+      c.rows = c.rows.map(function (r, i) { return { r: r, i: i }; }).sort(function (a, b) { return rank(a.r) - rank(b.r) || a.i - b.i; }).map(function (x) { return x.r; });
+    });
+    return cands;
+  }
+  /* A place written in the list, as a stop: the town if the Atlas or the gazetteer holds it (in the country written after it, if one is), else that country. */
+  function shPlace(s, ctx) {
+    if (!s || !ctx || !ctx.map) return null;
+    var toks = S.fold(s).split(" ").filter(Boolean); if (!toks.length) return null;
+    var own = Object.assign({}, ctx, { hintTokens: toks }), c = S.candidates(s, ctx.map, ctx.skip);
+    c = pairCountry(withCountries(withCountryHints(c, toks, own), toks, own, {}), s, own);
+    var want = pairsOf(s, ctx.countries)[0], town = S.fold(String(s).split(",")[0]);
+    var hit = c.filter(function (x) { return !x.country && x.rows.length && (x.word === town) && (!want || x.rows[0].cc === want.cc); })[0] || (!want ? c.filter(function (x) { return x.rows.length; })[0] : null);
+    var land = !hit && want ? c.filter(function (x) { return x.country && x.country === want.cc; })[0] : null;
+    var x = hit || land; if (!x) return null;
+    return { row: x.rows[0], alts: x.rows.slice(1, 6), word: x.word, country: !!x.country };
+  }
+  /* Fold the list into the reading: the person and the family as the record names them, the route in the order of the years, and everything doubtful marked so. */
+  function applySheet(out, sh, ctx) {
+    var n = sh.name, F0 = sh.from || {}, rel = sh.rel || out.rel || "ancestor";
+    rel = REL_ALIAS[rel] || rel;
+    var B = sh.born || {}, bornY = B.year != null ? B.year : null;
+    var tries = [["believed", F0.believed], ["written", F0.parishWritten], ["birthplace", sh.birthplace || B.place], ["from", F0.main], ["area", sh.area]], origin = null, via = "";
+    tries.forEach(function (x) { if (!origin && x[1]) { origin = shPlace(x[1], ctx); if (origin) via = x[0]; } });
+    var route = [], self = { role: "self", rel: rel, name: n.recorded, given: n.given, surname: n.surname, events: [] };
+    function stop(pl, role, said, year, died) {
+      if (!pl) return;
+      var last = route[route.length - 1];
+      if (last && last.row.i === pl.row.i) { if (died) (last.ev = last.ev || []).push({ type: "died", year: year }); return; }
+      route.push({ row: pl.row, alts: pl.alts, word: pl.word, role: role, said: said, age: bornY != null && year != null ? year - bornY : null, year: year, approx: false, yearTold: year != null, ev: died ? [{ type: "died", year: year }] : undefined });
+    }
+    if (origin) stop(origin, "origin", via === "birthplace" ? "born" : "from", via === "birthplace" ? bornY : null);
+    function event(type, year, place, extra) { var pl = shPlace(place, ctx), e = Object.assign({ type: type, year: year, place: pl ? { row: pl.row, alts: pl.alts, word: pl.word } : null, text: pl ? "" : place || "" }, extra || {}); return { pl: pl, e: e }; }
+    var later = [];
+    sh.presence.forEach(function (x) { var v = event("lived", x.year, x.place, { said: "by", approx: true }); v.e.type = "told"; v.e.text = "In " + x.place + " by " + x.year; later.push({ y: x.year, o: 0, pl: v.pl, role: "lived", e: v.e }); });
+    var wed = null; if (sh.married) { var w = event("married", sh.married.year, sh.married.place); wed = w.e; later.push({ y: sh.married.year, o: 1, pl: w.pl, role: "lived", said: "married", e: w.e }); }
+    if (sh.died) { var d = event("died", sh.died.year, sh.died.place); later.push({ y: sh.died.year, o: 2, pl: d.pl, role: "move", said: "died", e: d.e, died: true }); }
+    later.sort(function (a, b) { return a.y != null && b.y != null && a.y !== b.y ? a.y - b.y : a.o - b.o; });
+    if (bornY != null) self.events.push({ type: "born", year: bornY, approx: !!B.approx || !!B.doubt, place: via === "birthplace" && origin ? { row: origin.row, alts: origin.alts, word: origin.word } : null });
+    if (F0.said) {
+      if (F0.written) self.events.push({ type: "told", text: "Origin as the record writes it: «" + F0.written + "»" });
+      else self.events.push({ type: "told", text: "Origin as told: " + F0.said });
+      if (F0.believed) self.events.push({ type: "told", text: (F0.by ? F0.by.charAt(0).toUpperCase() + F0.by.slice(1) + " believes" : "Suggested") + (F0.by ? " this is " : ": ") + F0.believed + " (not confirmed by a record)" });
+    }
+    if (sh.area && via !== "area") self.events.push({ type: "told", text: "The family places the origin in the " + sh.area + " area" });
+    later.forEach(function (x) { self.events.push(x.e); stop(x.pl, x.role, x.said || "lived", x.y, x.died); });
+    if (sh.literacy) self.events.push({ type: "told", text: "Told as unable to read or write: the spellings in the records are a clerk’s" });
+    function person(role, nameO, label) {
+      return { role: role, name: nameO.recorded, given: nameO.given, surname: nameO.surname, label: label || "", events: [], sheet: { recorded: nameO.recorded, sugGiven: nameO.sugGiven, sugSurname: nameO.sugSurname } };
+    }
+    self.sheet = { recorded: n.recorded, sugGiven: n.sugGiven, sugSurname: n.sugSurname, bornText: B.text || "", bornDoubt: B.doubt || "" };
+    if (B.text) self.bornText = (B.text.replace(/^(?:born\s+)?/i, "")) + (B.doubt ? " (doubtful: " + B.doubt + ")" : "");
+    var people = [self];
+    [["father", sh.father], ["mother", sh.mother]].forEach(function (x) {
+      if (!x[1]) return; var pe = person(x[0], x[1]);
+      if (x[0] === "father" && !pe.surname && n.surname) { pe.surname = n.surname; pe.presumed = true; pe.sheet.sugSurname = pe.sheet.sugSurname.length ? pe.sheet.sugSurname : n.sugSurname.slice(); }
+      people.push(pe);
+    });
+    var spName = sh.married && sh.married.spouse ? shName(sh.married.spouse, ctx) : null, spO = sh.spouse || spName;
+    if (spO) { var sp = person("spouse", spO, sh.sex === "M" ? "wife" : sh.sex === "F" ? "husband" : ""); if (wed) sp.events.push(Object.assign({}, wed)); people.push(sp); }
+    if (B.via && /son|daughter|child/.test(B.via)) people.push({ role: "child", ofSubject: true, unnamed: true, key: "K1", name: "", given: "", surname: "", sex: B.via === "son" ? "M" : B.via === "daughter" ? "F" : "", label: B.via, nameNote: "Not named. The birth date above comes from this " + B.via + "’s record", events: [] });
+    (out.people || []).forEach(function (pe) { if (!/^(?:self|father|mother|spouse)$/.test(pe.role) && pe.name && !people.some(function (q) { return S.fold(q.name || "") === S.fold(pe.name); })) people.push(pe); });
+    out.rel = rel; out.name = n.recorded; out.givenWord = n.given; out.surname = n.surname;
+    var gv = null; [n.given].concat(n.sugGiven).forEach(function (g) { if (!gv && g && ctx.given) { var f = S.givenIn(g, ctx.given, null)[0]; if (f) gv = f; } });
+    out.given = gv ? gv.row.canon : "";
+    out.born = bornY; out.bornApprox = !!B.approx || !!B.doubt; out.left = null; out.endYear = sh.died && sh.died.year != null ? sh.died.year : null;
+    out.route = route; out.stops = route; out.noRoute = !route.length; out.near = []; out.people = people;
+    out.from = route[0] ? { row: route[0].row, alts: route[0].alts, word: route[0].word } : null;
+    var end = route.length > 1 ? route[route.length - 1] : null; out.to = end ? { row: end.row, alts: end.alts, word: end.word } : null;
+    var area = sh.area ? shPlace(sh.area, ctx) : null;
+    var wp = F0.province || "";
+    out.sheet = { recorded: n.recorded, given: n.given, surname: n.surname, sugGiven: n.sugGiven, sugSurname: n.sugSurname, father: sh.father, mother: sh.mother, spouse: spO ? spO.recorded : "",
+      origin: { said: F0.said || "", written: F0.written || "", parishWritten: F0.parishWritten || "", province: wp, believed: F0.believed || "", by: F0.by || "", via: via }, area: sh.area || "", areaStop: area ? { row: area.row } : null,
+      born: sh.born, presence: sh.presence, married: sh.married, died: sh.died, literacy: sh.literacy, errors: sh.errors, recordsFrom: sh.recordsFrom, asked: sh.asked, sex: sh.sex };
+    return out;
+  }
+
+  /* The first of these first names that the catalogue holds: the record's own form first, then the writer's suggestions. */
+  function givenOfAny(names, given) { for (var i = 0; i < names.length; i++) { var g = names[i] ? S.givenIn(names[i], given, null) : []; if (g.length) { g[0].used = names[i]; return g; } } return []; }
+  /* The surnames the writer suggests, each once, never the one the record gives. */
+  function suggestedSurnames(people) {
+    var out = [];
+    (people || []).forEach(function (pe) { ((pe.sheet && pe.sheet.sugSurname) || []).forEach(function (n) { if (out.length < 4 && out.indexOf(n) < 0 && S.fold(n) !== S.fold(pe.surname || "")) out.push(n); }); });
+    return out;
+  }
   /* A surname's spellings from the catalogue's published face (`fams` = surname-families.json rows) and the corpus row for the name (`row` from
      the /s/ shard: computed close spellings and the countries it is attested in). Nothing is invented: no family, no computed forms, says so. */
   function surnameBlock(name, fams, row) {
@@ -3282,7 +3543,7 @@
     var gazDone = Object.create(null);
     function resolveMissing(text) {
       return load().then(function (d) {
-        var want = gazWants(text, d.map, d.given).filter(function (w) { var k = w.ph + "|" + (w.ccs || []).join() + (w.near ? "|near" : ""); if (gazDone[k]) return false; gazDone[k] = 1; return true; });
+        var want = gazWants(text, d.map, d.given, d.countries).filter(function (w) { var k = w.ph + "|" + (w.ccs || []).join() + (w.near ? "|near" : ""); if (gazDone[k]) return false; gazDone[k] = 1; return true; });
         if (!want.length || !window.raShardKey) return d;
         return getJSON("shards.json").catch(function () { return {}; }).then(function (info) {
           return Promise.all(want.map(function (w) {
@@ -3332,6 +3593,7 @@
       if (parsed.from) need(parsed.from.row); if (parsed.to) need(parsed.to.row);
       route.forEach(function (x) { need(x.row); }); anc.forEach(function (x) { need(x.row); });
       (parsed.kin || []).forEach(function (k) { k.stops.forEach(function (x) { need(x.row); }); });
+      if (parsed.sheet && parsed.sheet.areaStop) need(parsed.sheet.areaStop.row);
       (parsed.people || []).forEach(function (pe) { (pe.events || []).forEach(function (e) { if (e.place) need(e.place.row); }); });
       /* the places an «X near Y» choice was made between, and Y itself: only for a choice the reading actually uses */
       var near = (parsed.near || []).filter(function (n) { return seenRow[n.pick]; });
@@ -3343,7 +3605,8 @@
           getJSON("providers.json").catch(function () { return { providers: [] }; }), getJSON("mortality.json").catch(function () { return null; }),
           getJSON("flag-map.json").catch(function () { return null; }), getJSON("leaders.json").catch(function () { return null; }),
           Promise.all(people.map(function (pe) { return pe.surname ? surname(pe.surname).catch(function () { return null; }) : Promise.resolve(null); })), Promise.resolve(people),
-          rowsNeeded.some(function (x) { return x.cc === "HR"; }) ? getJSON("hr-surname-towns.json").catch(function () { return null; }) : Promise.resolve(null)]);
+          rowsNeeded.some(function (x) { return x.cc === "HR"; }) ? getJSON("hr-surname-towns.json").catch(function () { return null; }) : Promise.resolve(null),
+          Promise.all(suggestedSurnames(people).map(function (n) { return surname(n).catch(function () { return null; }); }))]);
       }).then(function (r) {
         var carded = Object.create(null); cardRows.forEach(function (row) { carded[row.i] = 1; });
         return Promise.all(r[0].filter(function (i) { return carded[i.row.i]; }).map(function (i) {
@@ -3365,7 +3628,8 @@
         var from = parsed.from ? infos[parsed.from.row.i] : null, to = parsed.to ? infos[parsed.to.row.i] : null;
         var facts = { told: toldYears(parsed), dated: datedFacts(parsed), rel: parsed.rel, name: parsed.name, siblings: parsed.siblings || [], teller: parsed.teller || "", holds: parsed.holds, holdsAll: parsed.holdsAll, left: parsed.left, born: parsed.born, from: from, to: to, base: BASE,
           providers: to ? provs.filter(function (p) { return (p.countries || []).indexOf(to.cc) > -1; }) : (from ? provs.filter(function (p) { return (p.countries || []).indexOf(from.cc) > -1; }) : []),
-          given: parsed.given && data.given ? S.givenIn(parsed.givenWord || parsed.given, data.given, null) : [],
+          given: parsed.given && data.given ? (parsed.sheet ? givenOfAny([parsed.givenWord].concat(parsed.sheet.sugGiven), data.given) : S.givenIn(parsed.givenWord || parsed.given, data.given, null)) : [],
+          searched: parsed.searched || [], sheet: parsed.sheet ? Object.assign({}, parsed.sheet, { areaStop: undefined, areaInfo: parsed.sheet.areaStop ? infos[parsed.sheet.areaStop.row.i] : null }) : null,
           route: route.map(function (x) { return { info: infos[x.row.i], age: x.age, year: x.year, approx: x.approx, yearTold: x.yearTold, role: x.role, said: x.said, country: x.country, ev: x.ev, nearInfo: x.nearTo && x.nearTo.row ? infos[x.nearTo.row.i] : undefined, alts: (x.alts || []).slice(0, 3).map(function (r) { return { n: r.n, cc: r.cc }; }) }; }),
           bornApprox: !!parsed.bornApprox, endYear: parsed.endYear != null ? parsed.endYear : null,
           kin: (parsed.kin || []).map(function (k) { return { key: k.key, name: k.name, label: k.label, stops: k.stops.filter(function (x) { return infos[x.row.i]; }).map(function (x) { return { info: infos[x.row.i], year: x.year, role: x.role, said: x.said, ev: x.ev }; }) }; }).filter(function (k) { return k.stops.length; }),
@@ -3383,12 +3647,16 @@
           return routeStays.length ? [{ info: routeStays[0].info, from: around[0], to: around[1] }] : [];
         }
         var out = r[6].map(function (pe, i) {
-          var gr = pe.given && data.given ? S.givenIn(pe.given, data.given, null) : [];
-          return { role: pe.role, rel: pe.rel, name: pe.name, given: gr.length ? { canon: gr[0].row.canon, typed: pe.given, groups: givenGroups(gr[0].row, labels) } : (pe.given ? { canon: "", typed: pe.given, groups: [] } : null),
-            langs: clerkLanguages(staysOf(pe)), surname: r[5][i] && Object.assign(r[5][i], { links: nameLinks(provs, pe.surname, r[0].map(function (x) { return x.cc; })) }), surnameTyped: pe.surname, maiden: pe.maiden || "", married: pe.married || "", occupation: pe.occupation || "", counts: pe.counts || null, told: !!pe.told, presumed: !!pe.presumed, bornText: pe.bornText || "", parentSide: pe.parentSide || "", me: !!pe.me, sought: !!pe.sought, key: pe.key, ofSubject: !!pe.ofSubject, nameNote: pe.nameNote || "", place: pe.place && infos[pe.place.row.i] ? infos[pe.place.row.i].name : "", placeSaid: pe.place && pe.place.said || "", placeNear: pe.place && pe.place.nearTo && pe.place.nearTo.row && infos[pe.place.nearTo.row.i] ? infos[pe.place.nearTo.row.i].name.replace(/\s*\(area\)$/, "") : "", label: pe.label || "", side: pe.side || "", up: !!pe.up,
+          var gr = pe.given && data.given ? (pe.sheet ? givenOfAny([pe.given].concat(pe.sheet.sugGiven), data.given) : S.givenIn(pe.given, data.given, null)) : [];
+          return { role: pe.role, rel: pe.rel, name: pe.name, given: gr.length ? { canon: gr[0].row.canon, typed: gr[0].used || pe.given, groups: givenGroups(gr[0].row, labels) } : (pe.given ? { canon: "", typed: pe.given, groups: [] } : null),
+            langs: clerkLanguages(staysOf(pe)), surname: r[5][i] && Object.assign(r[5][i], { links: nameLinks(provs, pe.surname, r[0].map(function (x) { return x.cc; })) }), surnameTyped: pe.surname, maiden: pe.maiden || "", married: pe.married || "", occupation: pe.occupation || "", counts: pe.counts || null, told: !!pe.told, presumed: !!pe.presumed, bornText: pe.bornText || "", parentSide: pe.parentSide || "", me: !!pe.me, sought: !!pe.sought, key: pe.key, ofSubject: !!pe.ofSubject, nameNote: pe.nameNote || "", place: pe.place && infos[pe.place.row.i] ? infos[pe.place.row.i].name : "", placeSaid: pe.place && pe.place.said || "", placeNear: pe.place && pe.place.nearTo && pe.place.nearTo.row && infos[pe.place.nearTo.row.i] ? infos[pe.place.nearTo.row.i].name.replace(/\s*\(area\)$/, "") : "", sheet: pe.sheet || null, label: pe.label || "", side: pe.side || "", up: !!pe.up,
             events: (pe.events || []).map(function (e) { var inf = e.place && infos[e.place.row.i]; if (e.type === "told") return { type: "told", text: e.text }; return { type: e.type, said: e.said || "", year: e.year, approx: !!e.approx, place: inf ? inf.name : (e.place ? e.place.word : e.text ? e.text + " (not among the Atlas's places)" : ""), country: inf ? inf.countryName : "", cause: e.cause || "" }; }) };
         });
-        return { facts: facts, plan: buildPlan(facts), mort: r[2], names: { people: out, census: censusFor(r[7], out, facts.route, r[0]) }, people: out, others: parsed.others || [], life: parsed.life || null };
+        var sug = suggestedSurnames(r[6]), links = r[0].map(function (x) { return x.cc; });
+        var suggested = sug.map(function (n, i) { return r[8][i] && Object.assign(r[8][i], { links: nameLinks(provs, n, links) }); }).filter(Boolean);
+        facts.suggestedSurnames = sug;
+        var censused = out.concat(sug.map(function (n) { return { surnameTyped: n }; }));
+        return { facts: facts, plan: buildPlan(facts), mort: r[2], names: { people: out, suggested: suggested, census: censusFor(r[7], censused, facts.route, r[0]) }, people: out, others: parsed.others || [], life: parsed.life || null };
       });
     }
     return { getJSON: getJSON, load: load, resolveMissing: resolveMissing, placeInfo: placeInfo, gather: gather, surname: surname };
@@ -4466,8 +4734,15 @@
       if (hit) { hit.pes.push(pe); hit.labels.push(roleLabel(pe, people) + (pe.presumed ? " (surname assumed the same)" : "")); return; }
       cards.push({ key: key, pe: pe, pes: [pe], inner: inner, labels: [roleLabel(pe, people) + (pe.presumed ? " (surname assumed the same)" : "")] });
     });
+    var sg = (names && names.suggested) || [];
+    if (sg.length) {
+      var who = people.filter(function (x) { return x.role === "self"; })[0], sd = el("details", null, "lf-person lf-suggested"), ssm = el("summary"); sd.open = true; sd.raPeople = [];
+      ssm.append(el("b", sg.map(function (x) { return x.name; }).join(", ")), el("span", " \u00b7 suggested spellings, not yet seen in a record of this person", "lf-filed")); sd.append(ssm);
+      sg.forEach(function (x) { var inner = personNames(null, x, base, who && who.langs); sd.append(inner || el("p", x.name + ": the Atlas holds no other spelling of it yet. Search it as written, and note every spelling a register uses.", "lf-filed")); });
+      cards.push({ node: sd });
+    }
     cards.forEach(function (c, i) {
-      any = true;
+      any = true; if (c.node) { box.append(c.node); return; }
       var d = el("details", null, "lf-person"); if (i === 0) d.open = true;
       var sm = el("summary"); sm.append(el("b", shownName(c.pe) || roleLabel(c.pe, people)), el("span", " \u00b7 " + c.labels.join(", and "), "lf-filed"));
       d.append(sm, c.inner); d.raPeople = c.pes; box.append(d);
@@ -4542,6 +4817,8 @@
       c.raPerson = pe;
       c.append(el("div", label, "lf-card-role"), el("div", shownName(pe) || pe.nameNote || (pe.empty ? "Not in the story yet" : pe.me ? "The one telling the story" : "Name not given"), "lf-card-name"));
       if (pe.maiden) c.append(el("div", "maiden name" + (pe.married ? " · married name " + pe.married : ""), "lf-card-maiden"));
+      var sg = pe.sheet ? [(pe.sheet.sugGiven || []).join(", "), (pe.sheet.sugSurname || []).join(", ")].filter(Boolean) : [];
+      if (sg.length) c.append(el("div", "The name above is the record’s. Suggested, not yet seen in a record: " + sg.join(" · "), "lf-card-forms lf-card-suggested"));
       var hasBorn = (pe.events || []).some(function (e) { return e.type === "born" && e.place; });
       /* the places told of this person, in order, from the reading of the family (what used to be a row of pills under the story box) */
       var kinRoute = (opts && opts.kin || []).filter(function (k) { return (k.key && pe.key && k.key === pe.key) || (!pe.key && k.label && new RegExp("\\b" + pe.role + "\\b", "i").test(k.label)); })[0], rs = kinRoute ? (kinRoute.stops || []).filter(function (x) { return x.info; }) : [];
@@ -4696,6 +4973,11 @@
     if (self.me) { if (kids.length) { tree.append(el("div", null, "lf-tie")); var g4 = gen(); kids.forEach(function (x) { g4.append(card(x, "Your child")); }); } return tree; }
     if (self.sought || !self.rel) return tree;   /* "you" are on the tree only when the story says they are related */
     tree.append(el("div", null, "lf-tie"));
+    /* «my ancestor»: related, but how far back is not said, so nobody is drawn as their child */
+    if (/^(?:ancestor|forefather|forebear)$/.test(rl)) {
+      var gu = gen("lf-gap"), un = el("div", null, "lf-card lf-card-you"); un.append(el("div", "Generations between", "lf-card-role"), el("div", "The story does not say how many there are, or through which child the line runs", "lf-card-place")); gu.append(un);
+      tree.append(el("div", null, "lf-tie"));
+    }
     var g3 = gen(), you = el("div", null, "lf-card lf-card-you"); you.append(el("div", "You", "lf-card-role"), opts && opts.teller ? el("div", opts.teller, "lf-card-name") : el("div", "who is asking", "lf-card-place")); g3.append(you);
     if (kids.length) { tree.append(el("div", null, "lf-tie")); var g5 = gen(); kids.forEach(function (x) { g5.append(card(x, "Your child")); }); }
     return tree;

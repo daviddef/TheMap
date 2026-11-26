@@ -344,6 +344,8 @@
     var PARTNER = { father: "mother", mother: "father", grandfather: "grandmother", grandmother: "grandfather", "great-grandfather": "great-grandmother", "great-grandmother": "great-grandfather", uncle: "aunt", aunt: "uncle", husband: "wife", wife: "husband" };
     var subj = people.filter(function (x) { return x.role === "self"; })[0], subjKinds = kindOfLabel((p.rel || "") + " " + (subj && subj.rel || ""));
     if (people.some(function (x) { return x.role === "spouse"; })) subjKinds.forEach(function (k) { if (PARTNER[k]) present[PARTNER[k]] = 1; });
+    /* «son of Patrick and his wife Bridget»: that wife is the mother on the tree */
+    if (people.some(function (x) { return x.role === "mother"; }) && people.some(function (x) { return x.role === "father"; }) && /\b(?:son|daughter|child|born)\b[^.!?\n]{0,90}?\band\s+(?:his|her)\s+(?:wife|husband)\b/i.test(text)) present.wife = present.husband = 1;
     people.forEach(function (x) {
       mark(x.rel); mark(x.label); mark(x.role === "line" ? "" : x.role);
       if (x.role === "spouse") { present.wife = present.husband = present.spouse = 1; }

@@ -1460,10 +1460,110 @@
      parents, grandparents and children and cannot draw a great-grandparent, so "They married in the 1930s" in such a story became the TELLER's parents' wedding.
      The ancestor is the subject, as in the one-person story. */
   function ancestorTold(t) { return /\bmy\s+(?:great|step)[- ]?(?:great[- ]?)*grand(?:father|mother|parent|pa|ma)\s+(?:name\s+)?(?:is|was|named|called)\s+\p{Lu}/u.test(String(t || "")); }
+  /* WHAT ONE SENTENCE OFTEN SAYS ALL AT ONCE: «our maternal grandmother, Katica, was born on 17 July 1928 in X, to A and B, née C», «daughter of A and B, born C», «her 2
+     sisters», «A was alive in the photo taken around 1983». Read only for the person the story is about (the first sentence, or one that begins «she / he» or with that
+     person's first name), and only where the words say it: a lower-case «to a farmer», a move («went to Perth and Sydney») or another relative's birth is left alone.
+     The parents' words are taken out of the text before places and the person's own name are looked for, so a surname that is also a village is never a stop. */
+  var TK_MONTH = "(?:January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sept|Sep|Oct|Nov|Dec)\\.?";
+  var TK_DATE = "(\\d{1,2}(?:st|nd|rd|th)?(?:\\s+of)?\\s+" + TK_MONTH + ",?\\s+\\d{4}|" + TK_MONTH + "\\s+\\d{1,2}(?:st|nd|rd|th)?,?\\s+\\d{4}|\\d{1,2}\\.\\s?\\d{1,2}\\.\\s?\\d{4})";
+  var TK_NAME = "\\p{Lu}[\\p{L}'’-]+(?:[ \\t]+(?:(?:van|von|de|del|della|di|da|dos|das|den|der|le|la)[ \\t]+)*\\p{Lu}[\\p{L}'’-]+){0,2}";
+  var TK_NEE = "(?:\\s*[,(]?\\s*(?:[Nn][ée]e|[Bb]orn)\\s+(?!(?:" + TK_MONTH + ")(?![\\p{L}]))((?:(?:van|von|de|del|della|di|da|dos|das|den|der|le|la)\\s+)*\\p{Lu}[\\p{L}'’-]+)\\s*\\)?)?";
+  var TK_PAIR = "(" + TK_NAME + ")" + TK_NEE + "\\s*,?\\s+(?:and|&)\\s+(?:(?:his|her)\\s+wife\\s+)?(" + TK_NAME + ")" + TK_NEE;
+  /* WHICH SIDE: «our maternal grandmother», «my gran on my mum's side», «my mother's mum, Rosa, …». Read from the words as typed, before any rewrite. The last two are
+     put as «my grandmother», so the name that follows is hers and «mum» is not taken for a mother the story tells of. */
+  function toldSide(t) {
+    var out = { text: t, side: "" }, line = function (w) { return /^m/i.test(w) ? "mother" : "father"; };
+    var sd = /\b(?:my|our)\s+(maternal|paternal)\s+(?:(?:great[- ])*grand(?:mother|father|ma|pa)|gran\b|nana?\b)/i.exec(t);
+    var sd2 = /\b(?:my|our)\s+(?:(?:great[- ])*grand(?:mother|father|ma|pa)|gran\b|nana?\b)[^.!?;]{0,40}?\bon\s+(?:my|our)\s+(mother|mum|mom|father|dad)['\u2019]s\s+side\b/i.exec(t);
+    if (sd) out.side = line(sd[1]);
+    else if (sd2) { out.side = line(sd2[1]); out.text = out.text.replace(/\s*,?\s*\bon\s+(?:my|our)\s+(?:mother|mum|mom|father|dad)['\u2019]s\s+side\b/i, ""); }
+    out.text = out.text.replace(/^(\s*(?:[Mm]y|[Oo]ur))\s+(mother|mum|mom|father|dad)['\u2019]s\s+(mother|mum|mom|ma|father|dad|pa)(?=\s*,\s*\p{Lu})/u, function (m, my, of, g) { out.side = line(of); return my + " grand" + (/^(?:father|dad|pa)$/i.test(g) ? "father" : "mother"); });
+    return out;
+  }
+  function toldKin(t, ctx) {
+    var out = { text: t, parents: [], born: "" };
+    var sents = String(t).match(/(?:[^.!?\n]|\.(?=\s?\d))+[.!?\n]*/g) || [], first = "", firstName = "";
+    var fm = /(\p{Lu}[\p{L}'’-]+)(?:\s+\p{Lu}[\p{L}'’-]+){0,2}\s*,?\s+(?:was\s+born|born\b)/u.exec(sents[0] || ""); if (fm) firstName = fm[1];
+    if (!firstName) { var fm2 = /\b(?:grandmother|grandfather|mother|father|aunt|uncle|sister|brother)\s*,?\s+(\p{Lu}[\p{L}'’-]+)/u.exec(sents[0] || ""); if (fm2) firstName = fm2[1]; }
+    function ofSubject(sn, i) {
+      var h = sn.replace(/^\s*(?:(?:and|but|so)\s+)?/i, "");
+      if (/^(?:She|He)\b/.test(h) && /^(?:She|He)(?:\s+(?:was|had\s+been))?\s+(?:born\b|(?:the\s+)?(?:\p{L}+\s+)?(?:daughter|son|child)\s+of\b)/u.test(h)) return true;
+      if (i === 1 && /^(?:Her|His)\s+parents\s+(?:were|are)\b/.test(h)) return true;
+      if (firstName && h.indexOf(firstName) === 0) return !/^[^,]*['’]s\s+(?:mother|father|brother|sister|son|daughter|wife|husband)\b/.test(h);
+      return i === 0;
+    }
+    function okName(nm) {
+      var ws = nm.split(/\s+/), f = S.fold(ws[0]);
+      if (STOP[f] || MONTHS[f] || COMMON[f] || KINW.test(f) || /^(?:the|a|an|his|her|their|my|our)$/.test(f)) return false;
+      if (ws.length === 1 && ctx.map && ctx.map[f] && !(ctx.given && ctx.given[f])) return false;
+      return true;
+    }
+    function sexOfName(nm) { var r = ctx.given && ctx.given[S.fold(nm.split(/\s+/)[0])]; var x = r && String(r.sex || "").toLowerCase(); return x === "m" ? "M" : x === "f" ? "F" : ""; }
+    var cut = [];
+    sents.forEach(function (sn, i) {
+      if (!ofSubject(sn, i)) return;
+      var at = t.indexOf(sn);
+      if (!out.born) {
+        var d = new RegExp("\\bborn\\b(?:(?!\\b(?:married|died|moved|to)\\b)[^;!?]){0,60}?(?<![\\p{L}\\d])" + TK_DATE, "u").exec(sn);
+        if (d) out.born = d[1].replace(/\s+/g, " ");
+      }
+      if (out.parents.length) return;
+      var m = new RegExp("\\bborn\\b((?:(?!\\b(?:daughter|son|child)\\s+of\\b)[^;!?]){0,110}?)(\\s+to\\s+)" + TK_PAIR, "u").exec(sn);
+      if (m && /\b(?:moved|move|went|emigrated|migrated|travelled|traveled|sailed|came|left|returned|married|died|daughter|son)\b/.test(m[1])) m = null;
+      var lead = m ? m.index + m[0].indexOf(m[2], 4 + m[1].length) : 0, g = 3;
+      if (!m) {
+        m = new RegExp("\\b(?:(?:[Dd]aughter|[Ss]on|[Cc]hild)\\s+of|(?:[Hh]er|[Hh]is)\\s+parents\\s+(?:were|are))\\s+" + TK_PAIR, "u").exec(sn);
+        if (!m) return;
+        if (/\b(?:had|has|have)\s+(?:a|an|one)\b/.test(sn.slice(0, m.index))) return;
+        lead = m.index; g = 1;
+      }
+      var a = { name: m[g], nee: m[g + 1] || "" }, b = { name: m[g + 2], nee: m[g + 3] || "" };
+      if (!okName(a.name) || !okName(b.name)) return;
+      [a, b].forEach(function (x) { var ws = x.name.split(/\s+/); x.given = cased(ws[0]); x.surname = ws.length > 1 ? surnameCase(ws.slice(1).join(" ")) : ""; x.sex = x.nee ? "F" : sexOfName(x.name); });
+      var joint = m[0].match(/(?:and|&)\s+(his|her)\s+wife\s/); if (joint) { a.sex = "M"; b.sex = "F"; }
+      if (a.sex && !b.sex) b.sex = a.sex === "F" ? "M" : "F"; else if (b.sex && !a.sex) a.sex = b.sex === "F" ? "M" : "F";
+      if (a.sex && a.sex === b.sex) a.sex = b.sex = "";
+      var shared = !a.surname && b.surname && !b.nee ? b.surname : "";
+      [a, b].forEach(function (x) {
+        var role = x.sex === "M" ? "father" : x.sex === "F" ? "mother" : "parent", sur = x.surname || (x === a ? shared : "");
+        out.parents.push({ role: role, given: x.given, surname: sur, name: x.given + (sur ? " " + sur : ""), nee: x.nee, presumed: false });
+      });
+      cut.push([at + lead, at + m.index + m[0].length]);
+    });
+    cut.sort(function (x, y) { return y[0] - x[0]; }).forEach(function (c) { out.text = out.text.slice(0, c[0]) + " " + out.text.slice(c[1]); });
+    return out;
+  }
+  /* «surrounded by her 2 sisters»: the sisters of the person the story is about, counted and not named. Only where «her» or «his» can be no one else: the pronoun fits
+     the person, and no other woman (or man) is named or told of earlier in the same sentence. */
+  function countedSiblings(out, t) {
+    var self = (out.people || []).filter(function (x) { return x.role === "self"; })[0]; if (!self || self.me) return;
+    var rel = String(self.rel || ""), female = /(?:mother|aunt|sister|wife|mum|mom|nonna|gran|nana)$/.test(rel), male = /(?:father|uncle|brother|husband|dad|nonno)$/.test(rel);
+    if (!female && !male) return;
+    var pro = female ? "[Hh]er" : "[Hh]is", re = new RegExp("\\b" + pro + "\\s+(two|three|four|five|six|seven|eight|nine|ten|[2-9]|1\\d)\\s+(?:(?:older|elder|younger|little|big|half|step)[ -])?(sister|brother)s\\b(?!\\s*(?:[,:(]\\s*|(?:named|called|were|are)\\s+)?\\p{Lu})", "gu"), m;
+    while ((m = re.exec(t))) {
+      var from = Math.max(t.lastIndexOf(".", m.index), t.lastIndexOf("!", m.index), t.lastIndexOf("?", m.index), t.lastIndexOf("\n", m.index)) + 1, head = t.slice(from, m.index);
+      var others = (out.people || []).filter(function (x) { return x !== self && x.given && x.role === (female ? "mother" : "father"); });
+      if (others.some(function (x) { return head.lastIndexOf(x.given) > (self.given ? head.lastIndexOf(self.given) : -1); })) continue;
+      if (new RegExp("\\b(?:" + (female ? "mother|aunt|daughter|wife|mum|mom" : "father|uncle|son|husband|dad") + ")\\b", "i").test(head.replace(new RegExp("\\b(?:great[- ])*grand(?:mother|father)\\b", "gi"), " "))) continue;
+      var n = KID_NUMV[m[1].toLowerCase()] || +m[1], kind = m[2], have = (out.siblings || []).filter(function (x) { return x.rel === kind; }).length;
+      for (var k = have; k < n && (out.siblings || (out.siblings = [])).length < 14; k++) out.siblings.push({ rel: kind, name: "", label: (female ? "her " : "his ") + kind });
+    }
+  }
+  /* «Josip was alive in the photo taken around 1983»: a year the person was still living, kept on their box, so the death is looked for after it. */
+  function toldAlive(out, t) {
+    (out.people || []).forEach(function (pe) {
+      var given = String(pe.given || ""); if (!given) return;
+      var m = new RegExp("(?<![\\p{L}])" + given.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?:\\s+\\p{Lu}[\\p{L}'’-]+){0,2}\\s+(?:was|is)\\s+(?:still\\s+)?(?:alive|living)\\b((?:(?![.!?;]\\s)[^!?;\\n]){0,90}?)\\b(1[6-9]\\d\\d|20[0-2]\\d)\\b(?!s)", "u").exec(t);
+      if (!m || /\b(?:born|died|married)\b/.test(m[1])) return;
+      var approx = /\b(?:around|about|circa|c\.|ca\.|roughly|approximately)\s*$/i.test(m[1]);
+      (pe.events || (pe.events = [])).push({ type: "alive", year: Number(m[2]), approx: approx, place: null });
+    });
+  }
   function parseStory1(text, ctx, attached) {
     withExonyms(text, ctx);
     withWorldCities(text, ctx);
     var typed = String(text || ""), t = repairCase(typed.replace(/^\u2014 Picture \d+ \([^\n]*\) \u2014[ \t]*$/gm, " "), ctx), teller = "";   /* the line that names a picture read into the story is not story */
+    var lineOf = toldSide(t); t = lineOf.text;
     /* "my name is David" says who is telling, not who the story is about */
     t = t.replace(/(^|[.!?]\s+|\n\s*)(Mum|Mom|Mam|Dad)(?=['\u2019]s\s+(?:(?:real|own|biological|birth|natural|step)[- ]?)?(?:mum|mom|mam|mother|dad|father|parents?|stepfather|stepmother|brother|sister|side|family)\b)/g, function (m, a, w) { return a + "My " + w.toLowerCase(); });
     t = t.replace(/\b((?:mum|mom|mother|dad|father)['\u2019]s\s+)(?:real|own|biological|birth|natural)\s+(?=mum|mom|mother|dad|father|parents?\b)/gi, "$1");
@@ -1498,6 +1598,7 @@
        is the person's own father, not a relation of the reader; and the opening "Born in 1898 in X, Name verb" is the same as "Name was born in 1898 in X." */
     var firstPerson = /\b(?:my|our|me|mine|we)\b/i.test(t) || /\bI\b/.test(t);
     if (!firstPerson) t = t.replace(/^\s*Born in (\d{4})(?:,| in)?\s*([^]*?),\s*(\p{Lu}[\p{L}'\u2019-]+(?:\s+\p{Lu}[\p{L}'\u2019-]+)?)\s+(?=\p{Ll})/u, function (m, y, pl, nm) { return nm + " was born in " + y + (pl ? " in " + pl.replace(/^in\s+/i, "") : "") + ". " + nm + " "; });
+    var told = toldKin(t, ctx); t = told.text;
     var side = sideRelatives(t); t = side.rest; out.side = side.list;
     var rm = firstPerson ? REL.exec(t.replace(SIB_HAVE, " ")) : null;   /* «I have two brothers» tells of no relation the story is about */
     if (rm) rm = REL.exec(t.replace(SIB_HAVE, function (x) { return x.replace(/\S/g, "_"); }));
@@ -1557,7 +1658,8 @@
       var ws = m.split(/\s+/), nm = S.fold(ws.pop()), kw = ws.join(" ").toLowerCase().replace(/\s+(?:was|is|named|called)$/, "");
       (kinOf[nm] || (kinOf[nm] = [])).push(kw);
     });
-    var gvAll = gv; gv = gv.filter(function (g) { var ks = kinOf[g.word]; if (!ks) return true; return ks.some(function (kw) { kw = kw.replace(/\s+/g, "-"); var k2 = REL_ALIAS[kw] || kw; return out.rel && (out.rel === k2 || out.rel.slice(-k2.length - 1) === "-" + k2); }) || tokens.some(function (tk, i) { return tk === g.word && !ks.length; }); });
+    var gvAll = gv; gv = gv.filter(function (g) { return !told.parents.some(function (x) { return S.fold(x.given) === g.word; }); });
+    gv = gv.filter(function (g) { var ks = kinOf[g.word]; if (!ks) return true; return ks.some(function (kw) { kw = kw.replace(/\s+/g, "-"); var k2 = REL_ALIAS[kw] || kw; return out.rel && (out.rel === k2 || out.rel.slice(-k2.length - 1) === "-" + k2); }) || tokens.some(function (tk, i) { return tk === g.word && !ks.length; }); });
     /* a given name written only straight after in / at / from / near / to, and that is also a place ("lived in Sydney", "his mother in Zara"), is the place,
        not a person: every time the story writes it, a place marker stands before it */
     function markedOnly(w) {
@@ -1883,6 +1985,19 @@
     else if (spStops.length && people.length) people.push({ role: "spouse", name: "", given: "", surname: "", place: spStops[0], unnamed: true });
     out.people = people;
     if (fam) applyFamily(out, fam, ctx); else if (me) applyMe(out, me, ctx, teller); else if (sought) applyMe(out, sought, ctx, "");
+    /* the parents, the birth date and «maternal / paternal», as the one sentence told them */
+    (function () {
+      var pl = out.people || (out.people = []), s0 = pl.filter(function (x) { return x.role === "self"; })[0];
+      if (!s0 && (told.parents.length || told.born)) pl.unshift(s0 = { role: "self", rel: out.rel, name: "", given: "", surname: "", place: route[0] || null, unnamed: true });
+      if (!s0) return;
+      told.parents.forEach(function (x) {
+        if (x.role !== "parent" && pl.some(function (q) { return q.role === x.role; })) return;
+        if (!x.surname && x.role === "father" && s0.surname) { x.surname = s0.surname; x.presumed = true; x.name = x.given + " " + x.surname; }
+        pl.push({ role: x.role, name: x.name, given: x.given, surname: x.surname, presumed: x.presumed, place: null, events: [] });
+      });
+      if (told.born) s0.bornText = told.born;
+      if (lineOf.side && /grand(?:father|mother|parent)$/.test(String(s0.rel || ""))) s0.parentSide = lineOf.side;
+    })();
     if (spStops.length && !fam && !me && !sought) out.kin = (out.kin || []).concat([{ key: "S", name: spouse ? spouse.given : "", label: "your " + (/\b(?:my|our)\s+(?:(?:late|ex|first|second|third)[- ])?(wife|husband|partner)\b/i.exec(t) || [0, "partner"])[1].toLowerCase(), stops: spStops.map(function (x) { return { row: x.row, alts: x.alts, word: x.word, role: x.role, year: x.year, approx: false }; }) }]);
     out.suggest = suggest.concat(didYouMean(typed, ctx));
     out.life = readLife(t, ctx, out);
@@ -1915,6 +2030,8 @@
     oneOfFamily(out, t);
     unnamedChildren(out, t);
     childrenUnder(out);
+    countedSiblings(out, t);
+    toldAlive(out, t);
     /* a wife or husband already in a box is not listed a second time under «also named» */
     out.others = out.others.filter(function (o) {
       if (!o.name || !/^(?:spouse|wife|husband)$/.test(o.kin)) return true;
@@ -3141,8 +3258,8 @@
         var out = r[6].map(function (pe, i) {
           var gr = pe.given && data.given ? S.givenIn(pe.given, data.given, null) : [];
           return { role: pe.role, rel: pe.rel, name: pe.name, given: gr.length ? { canon: gr[0].row.canon, typed: pe.given, groups: givenGroups(gr[0].row, labels) } : (pe.given ? { canon: "", typed: pe.given, groups: [] } : null),
-            langs: clerkLanguages(staysOf(pe)), surname: r[5][i] && Object.assign(r[5][i], { links: nameLinks(provs, pe.surname, r[0].map(function (x) { return x.cc; })) }), surnameTyped: pe.surname, maiden: pe.maiden || "", married: pe.married || "", occupation: pe.occupation || "", counts: pe.counts || null, told: !!pe.told, presumed: !!pe.presumed, me: !!pe.me, sought: !!pe.sought, key: pe.key, ofSubject: !!pe.ofSubject, nameNote: pe.nameNote || "", place: pe.place && infos[pe.place.row.i] ? infos[pe.place.row.i].name : "", placeSaid: pe.place && pe.place.said || "", placeNear: pe.place && pe.place.nearTo && pe.place.nearTo.row && infos[pe.place.nearTo.row.i] ? infos[pe.place.nearTo.row.i].name.replace(/\s*\(area\)$/, "") : "", label: pe.label || "", side: pe.side || "", up: !!pe.up,
-            events: (pe.events || []).map(function (e) { var inf = e.place && infos[e.place.row.i]; if (e.type === "told") return { type: "told", text: e.text }; return { type: e.type, said: e.said || "", year: e.year, place: inf ? inf.name : (e.place ? e.place.word : e.text ? e.text + " (not among the Atlas's places)" : ""), country: inf ? inf.countryName : "", cause: e.cause || "" }; }) };
+            langs: clerkLanguages(staysOf(pe)), surname: r[5][i] && Object.assign(r[5][i], { links: nameLinks(provs, pe.surname, r[0].map(function (x) { return x.cc; })) }), surnameTyped: pe.surname, maiden: pe.maiden || "", married: pe.married || "", occupation: pe.occupation || "", counts: pe.counts || null, told: !!pe.told, presumed: !!pe.presumed, bornText: pe.bornText || "", parentSide: pe.parentSide || "", me: !!pe.me, sought: !!pe.sought, key: pe.key, ofSubject: !!pe.ofSubject, nameNote: pe.nameNote || "", place: pe.place && infos[pe.place.row.i] ? infos[pe.place.row.i].name : "", placeSaid: pe.place && pe.place.said || "", placeNear: pe.place && pe.place.nearTo && pe.place.nearTo.row && infos[pe.place.nearTo.row.i] ? infos[pe.place.nearTo.row.i].name.replace(/\s*\(area\)$/, "") : "", label: pe.label || "", side: pe.side || "", up: !!pe.up,
+            events: (pe.events || []).map(function (e) { var inf = e.place && infos[e.place.row.i]; if (e.type === "told") return { type: "told", text: e.text }; return { type: e.type, said: e.said || "", year: e.year, approx: !!e.approx, place: inf ? inf.name : (e.place ? e.place.word : e.text ? e.text + " (not among the Atlas's places)" : ""), country: inf ? inf.countryName : "", cause: e.cause || "" }; }) };
         });
         return { facts: facts, plan: buildPlan(facts), mort: r[2], names: { people: out, census: censusFor(r[7], out, facts.route, r[0]) }, people: out, others: parsed.others || [], life: parsed.life || null };
       });
@@ -4234,6 +4351,7 @@
     var selfRef = self ? (self.me ? "I" : "my " + relS) : "";
     function slotOf(kind) { return { kind: kind, me: !!(self && self.me), ref: kind === "self" ? selfRef : kind === "spouse" ? selfRef : (self && self.me ? "my " : selfRef + "'s ") + kind }; }
     var fa = (people || []).filter(function (x) { return x.role === "father"; })[0], mo = (people || []).filter(function (x) { return x.role === "mother"; })[0];
+    var eithers = (people || []).filter(function (x) { return x.role === "parent"; });   /* a parent the words do not say is the father or the mother */
     if (!self) return null;
     function forms(pe) {
       var out = [];
@@ -4279,14 +4397,19 @@
         rd.append(document.createTextNode(r1)); if (flagOf.start) rd.append(flagOf.start); if (rb >= 0) rd.append(document.createTextNode(rt.slice(rb)));
         c.append(rd);
       }
-      else if (pe.place && !hasBorn) {   /* "Born in" only for a place the story gives as the birth place: a nun «in Zagreb» was not born there for all we are told */
+      var bornSaid = false;
+      if (!rs.length && pe.place && !hasBorn) {   /* "Born in" only for a place the story gives as the birth place: a nun «in Zagreb» was not born there for all we are told */
         var pw = String(typeof pe.place === "string" ? pe.place : pe.place.word).replace(/(^|[\s-])(\p{Ll})/gu, function (m0, a, b) { return a + b.toUpperCase(); }), pr = typeof pe.place === "string" ? pe.placeSaid || "" : pe.place.said || "";
         var near = pe.placeNear || (pe.place.nearTo && pe.place.nearTo.row ? String(pe.place.nearTo.row.n).replace(/\s*\(area\)$/, "") : "");
-        c.append(el("div", (SAID_TAG[pr] || "Places: ") + pw + (near ? ", near " + near : ""), "lf-card-place"));
+        var tag = SAID_TAG[pr] || "Places: ";
+        if (pe.bornText && pr === "born") { tag = "Born " + pe.bornText + " in "; bornSaid = true; }
+        c.append(el("div", tag + pw + (near ? ", near " + near : ""), "lf-card-place"));
       }
+      if (pe.bornText && !bornSaid) c.append(el("div", "Born " + pe.bornText, "lf-card-place lf-card-born"));
       (pe.events || []).forEach(function (e) {
-        var t = e.type === "told" ? e.text : (e.type === "born" ? "Born" : e.type === "married" ? "Married" : e.type === "lived" ? (e.said === "lived" ? "Lived" : e.said === "moved" ? "Moved" : "In") : "Died") + (e.year != null ? " " + e.year : "") + (e.place ? (e.year != null ? ", " : " in ") + e.place : "") + (e.cause ? " (" + e.cause + ")" : "");
+        var t = e.type === "told" ? e.text : e.type === "alive" ? "Alive " + (e.approx ? "about " : "in ") + e.year : (e.type === "born" ? "Born" : e.type === "married" ? "Married" : e.type === "lived" ? (e.said === "lived" ? "Lived" : e.said === "moved" ? "Moved" : "In") : "Died") + (e.year != null ? " " + e.year : "") + (e.place ? (e.year != null ? ", " : " in ") + e.place : "") + (e.cause ? " (" + e.cause + ")" : "");
         if (pe.maiden && e.type === "told" && S.fold(e.text) === S.fold("Born " + pe.maiden)) return;   /* it heads the box now */
+        if (e.type === "born" && pe.bornText && !e.place) return;
         if (e.type === "born" && rs.length && rs[0].said === "born") return;   /* the route line already begins with where they were born */
         var ev = el("div", t, "lf-card-place lf-card-ev"); if (e.type === "died" && flagOf.died) { ev.append(flagOf.died); flagOf.died = null; } else if (e.type === "born" && flagOf.start && !rs.length) { ev.append(flagOf.start); flagOf.start = null; }
         c.append(ev);
@@ -4347,27 +4470,28 @@
       tree.append(el("div", null, "lf-tie"));
     }
     var besides = (people || []).filter(function (x) { return x.role === "psib" || (x.role === "inlaw" && !x.up); });
-    if (fa || mo || canEdit || besides.length) { var g1 = gen("lf-parents"); var cap = function (x) { return x.charAt(0).toUpperCase() + x.slice(1); };
+    if (fa || mo || canEdit || besides.length || eithers.length) { var g1 = gen("lf-parents"); var cap = function (x) { return x.charAt(0).toUpperCase() + x.slice(1); };
       var kinOf = self.rel && !self.me && !self.sought ? "Your " + String(self.rel).replace(/-/g, " ") + "'s " : "";
       /* with editing on, both parents are drawn even when the story names neither: an empty box, to be filled in */
-      if (!fa && canEdit) fa = { role: "father", name: "", empty: true }; if (!mo && canEdit) mo = { role: "mother", name: "", empty: true };
+      if (!fa && canEdit && !eithers.length) fa = { role: "father", name: "", empty: true }; if (!mo && canEdit && !eithers.length) mo = { role: "mother", name: "", empty: true };
       var putBeside = function (x) { g1.append(card(x, cap(x.label || "Spouse"))); };
       /* a parent's brothers and sisters stand beside that parent: the father's to his left, the mother's to her right */
       besides.filter(function (x) { return x.role === "psib" && x.side === "father"; }).forEach(putBeside);
       if (fa) g1.append(card(fa, self.sought && fa.label ? cap(fa.label) : kinOf ? cap(kinOf) + "father" : "Father", "father")); if (mo) g1.append(card(mo, self.sought && mo.label ? cap(mo.label) : kinOf ? cap(kinOf) + "mother" : "Mother", "mother"));
+      eithers.forEach(function (x) { g1.append(card(x, kinOf ? cap(kinOf) + "parent" : "Parent")); });
       besides.filter(function (x) { return !(x.role === "psib" && x.side === "father"); }).forEach(putBeside);
       tree.append(el("div", null, "lf-tie")); }
     /* the people between are drawn even when the story names nobody there: "my grandfather was Ivan" has a parent between him and you */
-    function gap(n, above) { for (var i = 0; i < n; i++) { if (!above) tree.append(el("div", null, "lf-tie")); var gg = gen("lf-gap"), ph = el("div", null, "lf-card lf-card-you"); ph.append(el("div", n > 1 && i === 0 ? "Parent of yours, not named" : "Your parent, not named", "lf-card-role"), el("div", "Not in the story yet: name them to add them here", "lf-card-place")); gg.append(ph); if (above) tree.append(el("div", null, "lf-tie")); } }
+    function gap(n, above) { for (var i = 0; i < n; i++) { if (!above) tree.append(el("div", null, "lf-tie")); var gg = gen("lf-gap"), ph = el("div", null, "lf-card lf-card-you"); ph.append(el("div", n > 1 && i === 0 ? "Parent of yours, not named" : i === n - 1 && self.parentSide ? "Your " + self.parentSide + ", not named" : "Your parent, not named", "lf-card-role"), el("div", "Not in the story yet: name them to add them here", "lf-card-place")); gg.append(ph); if (above) tree.append(el("div", null, "lf-tie")); } }
     if (self.me && !fa && !mo && gps.length) gap(1, true);
     /* BROTHERS AND SISTERS HAVE PARENTS. David: «if he has siblings, surely we should show unknown parents». When the story names the person's brothers or sisters but not their parents,
        the parents are drawn above the row as boxes waiting to be told, the way a father's parents already are. */
-    if (((opts && opts.siblings) || []).length && !fa && !mo && !self.me && !self.sought) {
+    if (((opts && opts.siblings) || []).length && !fa && !mo && !eithers.length && !self.me && !self.sought) {
       var gsb = gen("lf-parents"), whoS = String(self.name || "").split(/\s+/)[0];
       gsb.append(card({ role: "father", name: "", empty: true }, whoS ? whoS + "'s father" : "Their father"), card({ role: "mother", name: "", empty: true }, whoS ? whoS + "'s mother" : "Their mother"));
       tree.append(el("div", null, "lf-tie"));
     }
-    var g2 = gen(); g2.append(card(self, self.sought ? self.label : self.me ? "You" : self.rel ? "Your " + self.rel.replace(/-/g, " ") : "The person you asked about", "self"));
+    var g2 = gen(); g2.append(card(self, self.sought ? self.label : self.me ? "You" : self.rel ? "Your " + (self.parentSide ? (self.parentSide === "mother" ? "maternal " : "paternal ") : "") + self.rel.replace(/-/g, " ") : "The person you asked about", "self"));
     var sps = (people || []).filter(function (x) { return x.role === "spouse"; });
     var rl0 = String(self.rel || "");
     sps.forEach(function (x, i) { g2.append(card(x, x.label && (i || x.told) ? x.label.charAt(0).toUpperCase() + x.label.slice(1) : self.me ? "Your partner" : self.rel === "father" ? "Wife, your mother" : self.rel === "mother" ? "Husband, your father" : /(?:father|uncle|brother)$/.test(rl0) ? "His wife" : /(?:mother|aunt|sister)$/.test(rl0) ? "Her husband" : "Spouse", i ? "" : "spouse")); });

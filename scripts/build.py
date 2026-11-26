@@ -434,6 +434,15 @@ def main():
     ch_by_region = {}
     for c in CHURCH:
         ch_by_region.setdefault(c["r"], []).append(c)
+    # Ground that used to be drawn inside `kvarner` was harvested under that name.
+    # A place now in one of these regions still reads those rows: a parish does
+    # not stop being nearby because a ring was redrawn between it and the place.
+    ALSO_NEAR = {"gorski-kotar": ("kvarner",), "senj-vinodol-coast": ("kvarner",),
+                 "vojna-krajina": ("kvarner",)}
+
+    def regions_near(place):
+        own = place.get("region") or ""
+        return (own,) + ALSO_NEAR.get(own, ())
 
     def parishes(place, within=15.0, most=6):
         """The nearest parishes, with the distance shown rather than hidden.
@@ -449,7 +458,7 @@ def main():
         that is where its registers went — and a reader can weigh it. Silence
         cannot be weighed."""
         near = []
-        for c in ch_by_region.get(place.get("region") or "", []):
+        for c in [c for r in regions_near(place) for c in ch_by_region.get(r, [])]:
             if abs(c["y"] - place["lat"]) > 0.2 or abs(c["x"] - place["lon"]) > 0.28:
                 continue                      # cheap box before the real sum
             d = km(place["lat"], place["lon"], c["y"], c["x"])
@@ -508,7 +517,7 @@ def main():
 
     def graves(place, within=12.0, most=5):
         near = []
-        for c in cem_by_region.get(place.get("region") or "", []):
+        for c in [c for r in regions_near(place) for c in cem_by_region.get(r, [])]:
             if abs(c["y"] - place["lat"]) > 0.16 or abs(c["x"] - place["lon"]) > 0.24:
                 continue
             d = km(place["lat"], place["lon"], c["y"], c["x"])
@@ -1788,6 +1797,9 @@ def main():
             rid = region_for(_rg, r["y"], r["x"], r["k"])
             if not rid:
                 continue
+        elif rid == "kvarner":
+            # Stored against the older, larger ring, which took in Gorski Kotar and the Sušak side: ask the rings again.
+            rid = region_for(_rg, r["y"], r["x"], r["k"]) or rid
         rec = {"n": r["n"], "y": r["y"], "x": r["x"], "k": r["k"], "r": rid}
         for form in set(r["q"].split(" ")):
             k = shard_key(form)

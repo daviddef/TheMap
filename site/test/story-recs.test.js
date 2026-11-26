@@ -95,6 +95,58 @@ test("a living-age person with no death told is not searched for in death books"
   assert.match(said(card(plan(g), /^Vera/)), /possibly living/);
 });
 
+/* David: «give Lucija and each named child their own next record». Years told in words count, and so do years one step from a told one; a place nobody told names no book. */
+const decades = () => ({ facts: { born: null, route: [], siblings: [] }, people: [
+  person("self", "Josip Pavić", { rel: "great-grandfather", events: [{ type: "told", text: "Born likely in the 1900s" }, { type: "told", text: "Married late 1920s" }] }),
+  person("spouse", "Barbara", { key: "S", maiden: "Tomić", given: { typed: "Barbara" }, events: [{ type: "told", text: "Born likely in the 1900s" }] }),
+  person("child", "Katica", { key: "K1", label: "daughter" }), person("child", "Stjepan", { key: "K2", label: "son" }), person("child", "", { key: "K3", unnamed: true }),
+  person("line", "", { key: "GM", events: [{ type: "born", year: 1944 }] })] });
+
+test("a decade told in words is a birth year to search, and the wedding keeps its own years", () => {
+  const c = card(plan(decades()), /^Josip/);
+  assert.match(c.steps[0].title, /1900–1909$/);
+  assert.doesNotMatch(said(c), /No birth year is told/);
+  assert.match(c.steps.find((s) => /^Marriage/.test(s.title)).title, /with Barbara Tomić · 1926–1929$/);
+});
+
+test("the partner and each named child get their own next record, and the child the teller descends from comes before them", () => {
+  const r = plan(decades());
+  assert.deepEqual(r.people.map((c) => c.title), ["Josip Pavić (your great grandfather)", "Barbara Tomić (wife)", "Your grandmother (one of the children)", "Katica (daughter)", "Stjepan (son)"]);
+  assert.match(said(card(r, /^Barbara/)), /Search the birth name Tomić/);
+  const lived = decades(); lived.people[1].place = "Testville";
+  const bar = card(plan(lived), /^Barbara/);
+  assert.match(bar.steps[0].why, /does not say where they were born/);
+  assert.doesNotMatch(bar.why, /from Testville/);
+  const k = card(r, /^Katica/).steps[0];
+  assert.match(k.title, /about 1926–1951$/);
+  assert.match(k.why, /worked out from the parents’ marriage/);
+  assert.match(k.why, /may be alive/);
+  assert.match(card(r, /^Your grandmother/).steps[0].why, /proves your line/);
+  assert.ok(r.open.some((x) => /child with no name/.test(x.title)));
+  assert.ok(r.people.every((c) => c.why), "every card says what is told of the person");
+});
+
+test("a teller's own family: grandparents from their own place, no book for a place nobody told, and no search for the teller or their children", () => {
+  const selce = { name: "Selce", cc: "HR", cols: [book("Births 1900-1935", ["b"], 1900, 1935)], neigh: [] };
+  const g = { facts: { born: null, route: [], siblings: [], kin: [{ stops: [{ info: selce }] }] }, people: [
+    person("self", "Peter Horvat", { key: "ME", me: true }), person("father", "Ivan Horvat", { key: "F", place: "Testville", events: [{ type: "born", year: 1951, place: "Testville" }] }),
+    person("mother", "Anna Horvat", { key: "M", events: [{ type: "born", year: 1955 }] }), person("spouse", "Maria", { key: "S" }),
+    person("grandfather", "Marko", { key: "FF", label: "your father's father", place: "Selce" }), person("grandmother", "Catherine Meyer", { key: "MM", label: "your mother's mother" }),
+    person("child", "Luka", { key: "C1", label: "your child" })] };
+  const r = plan(g), titles = r.people.map((c) => c.title).join(" | ");
+  assert.doesNotMatch(titles, /Peter|Maria|Luka/);
+  const ff = card(r, /^Marko/).steps[0];
+  assert.match(ff.title, /about 1906–1934$/);
+  assert.match(ff.why, /worked out from the birth of Ivan Horvat/);
+  assert.match(ff.detail, /Births 1900-1935/);
+  const mm = card(r, /^Catherine Meyer/).steps[0];
+  assert.equal(mm.title, "Where and when they were born");
+  assert.equal(mm.detail, "");
+  assert.match(card(r, /^Ivan Horvat/).steps[0].title, /1951$/);
+  assert.match(card(r, /parents’ marriage/).steps[0].title, /1972–1990$/);
+  assert.ok(!r.open.some((x) => /When was Peter/.test(x.title)));
+});
+
 test("generation groups: the person, the parents and earlier generations, and no book disappears", () => {
   const cols = [book("Births 1700-1760", ["b"], 1700, 1760), ...OLD, book("Births 1890-1930", ["b"], 1890, 1930), book("Burials 1700-1750", ["d"], 1700, 1750)];
   const G = F.generationGroups(cols, 1928);

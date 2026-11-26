@@ -81,7 +81,10 @@ NEEDS = {"the national archives": ("kew",)}
 # an entry whose «who» opens with the person doing the errand, or with a wait, is a job of their own and not a letter to an institution
 OWN = re.compile(r"^\W*(me|myself|waiting on)\b", re.I)
 # hosts that many bodies share, so a host alone does not say which institution is meant
-SHARED_HOSTS = {"gmail.com", "google.com", "facebook.com", "gov.uk", "gov.au", "gov.za", "nsw.gov.au", "qld.gov.au", "wikipedia.org", "archive.org"}
+SHARED_HOSTS = {"gmail.com", "google.com", "facebook.com", "gov.uk", "gov.au", "gov.za", "nsw.gov.au", "qld.gov.au", "wikipedia.org", "archive.org",
+                # a directory row's page sits on these, but the host belongs to a council, ministry, county or diocese with many offices
+                "birmingham.gov.uk", "stoke.gov.uk", "medway.gov.uk", "sacr.fs.gov.za", "joburg.org.za", "cancilleria.gob.ar", "portugal.gov.pt",
+                "brd.nrw.de", "pgz.hr", "dalmacija.hr", "diocesiacerra.it", "diocesi.concordia-pordenone.it"}
 
 
 def fold(s):

@@ -3213,7 +3213,8 @@ window.addEventListener("load", async function () {
             '" target="_blank" rel="noopener">On OpenStreetMap &#8599;</a></p>' : "") +
         '<div class="ra-contacts"></div>';
       var box = panel.querySelector(".ra-contacts"), key = f.q ? "wd:" + f.q : "osm:" + f.id;
-      withContacts(function () { window.RAContacts.fill(box, BASE, f.y, f.x, key); });
+      var kind = { cemeteries: "cemetery", churches: "church" }[F[0]];
+      withContacts(function () { window.RAContacts.fill(box, BASE, f.y, f.x, key, null, kind); });
     });
     async function build() {
       if (started) return;
@@ -11430,6 +11431,10 @@ window.addEventListener("load", async function () {
   :global(.at-h h3) { font-family: var(--serif); font-size: 22px; margin: 0; line-height: 1.25; }
   :global(.at-n) { font: 400 11px/1 var(--mono); color: var(--accent); white-space: nowrap; }
   :global(.at-sub) { font: 400 11.5px/1.5 var(--mono); color: var(--ink-3); margin: 6px 0 8px; }
+  /* the office suggested where a dot has no contact of its own (public/js/contacts-near.js) */
+  :global(.ra-contacts .ra-suggest) { font: 400 12px/1.5 var(--sans); overflow-wrap: anywhere; }
+  :global(.ra-contacts .ra-suggest ul) { list-style: none; padding: 0; margin: 4px 0 0; }
+  :global(.ra-contacts .ra-suggest .who) { display: block; font-size: 11px; color: var(--ink-3); }
   :global(.ra-mortpill) { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px 2px 8px; border: 0; border-radius: 999px;
     background: #111; color: #fff; font: 600 11px/1.6 var(--mono); letter-spacing: .01em; cursor: pointer; white-space: nowrap; }
   :global(.ra-mortpill i) { width: 8px; height: 8px; border-radius: 2px; background: #fff; }

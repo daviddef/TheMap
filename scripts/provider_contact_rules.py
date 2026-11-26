@@ -9,7 +9,26 @@ import re
 import unicodedata
 
 ADDRESS = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}")
-FREE_MAIL = {"gmail.com", "googlemail.com", "me.com", "icloud.com", "hotmail.com", "outlook.com", "yahoo.com", "live.com"}
+# Mail anybody can open an account on. An address there is kept only where the mailbox names the institution (names_institution below).
+FREE_MAIL = re.compile(r"(gmail|googlemail|icloud|protonmail|proton|aol|me|mac|msn)\.(com|me)|(yahoo|hotmail|outlook|live|gmx|yandex)(\.com?)?\.[a-z]{2,3}|"
+                       r"web\.de|t-online\.de|libero\.it|virgilio\.it|tiscali\.it|orange\.fr|wanadoo\.fr|free\.fr|laposte\.net|wp\.pl|o2\.pl|interia\.pl|onet\.pl|"
+                       r"seznam\.cz|centrum\.(cz|sk)|azet\.sk|freemail\.hu|citromail\.hu|mail\.ru|ukr\.net|net\.hr|siol\.net")
+# Words that say a mailbox is an institution's or an office's. A priest's or caretaker's title is deliberately absent: «zupnik.», «pfarrer.»
+# introduce a person. Written without accents, as mailbox names are.
+OFFICE_WORDS = frozenset("""
+opcina opcine grad gradski gradska gradsko narodna zupa zupni crkva samostan svetiste groblje muzej zavicajni knjiznica citaonica arhiv udruga
+drustvo zbirka nacelnik tajnik tajnistvo pisarnica ured info obcina zupnija pokopalisce
+comune municipio sindaco protocollo segreteria parrocchia diocesi chiesa cimitero biblioteca museo archivio
+gemeinde stadt gemeindeamt pfarramt pfarre pfarrei kirche friedhof museum archiv verein bibliothek buecherei
+mairie commune paroisse eglise cimetiere musee bibliotheque mediatheque archives
+ayuntamiento parroquia iglesia cementerio archivo prefeitura paroquia igreja cemiterio museu arquivo
+parish church council townhall cemetery library archive society office trust
+gemeente parochie kerk begraafplaats
+gmina parafia cmentarz muzeum biblioteka urzad obec mesto farnost hrbitov knihovna
+curia kuria diocese vescovado biskupija biskupski ordinariat eveche obispado diecezja biskupstvi puspokseg
+onkormanyzat plebania temeto konyvtar leveltar egyhaz primaria parohia cimitir muzeu
+""".split())
+FILLER = frozenset("sv svet sveta svete sveti svetog svetoga svetom st san santa santo sankt saint the of de di del von na u".split())
 # A part of a mailbox name that says it belongs to a desk, not to somebody. Matched as the start of a part: «archiv» covers archivio, archives, archiwum's cousin «archiw».
 ROLE_STEMS = ("arch", "arxiu", "arquiv", "arkiv", "arhiv", "leveltar", "bibl", "biblio", "library", "libr", "info", "contact", "kontakt", "office", "mail",
               "post", "sekret", "secretar", "segreter", "direc", "direk", "referen", "enquir", "inquir", "consult", "museu", "memorial", "cultur", "histor",
@@ -26,21 +45,52 @@ REFUSED = {
 
 
 def _fold(s):
-    return "".join(c for c in unicodedata.normalize("NFKD", (s or "").lower().replace("ł", "l")) if not unicodedata.combining(c))
+    s = (s or "").lower().replace("ł", "l").replace("ß", "ss").replace("ø", "o")
+    return "".join(c for c in unicodedata.normalize("NFKD", s) if not unicodedata.combining(c))
+
+
+def names_institution(local, institution_words):
+    """True where a mailbox name names this institution: every part of it is accounted for (an office word, «sv», a word of the institution's
+    name or address, digits aside), with at least one office word AND at least one word that is this institution's own. «opcina.sv.ilija» and
+    «gradskimuzejomis» are; «ivan.zupan», «muzej.horvat» (of a museum not so called), a bare surname and a bare «arhiv» are not.
+    institution_words None: only ask for an office word (the data check; the harvest asked fully)."""
+    parts = [p for p in re.split(r"[^a-z]+", _fold(local)) if p]
+    if institution_words is None:
+        return any(w in p for p in parts for w in OFFICE_WORDS if len(w) >= 4)
+    named = set()
+    for text in (institution_words, institution_words.lower().replace("đ", "dj")):
+        for w in re.split(r"[^a-z]+", _fold(text.lower().replace("đ", "d"))):
+            if len(w) >= 3:
+                named.add(w)
+                # the clerk's grammar: a church «svete Ane» writes «zupasvetaana»
+                if w[-1] in "aeiou":
+                    named.update(w[:-1] + v for v in "aeiou")
+    own = named - OFFICE_WORDS - FILLER
+    words = named | OFFICE_WORDS | FILLER
+    found = {(False, False)}   # (an office word seen, a word of its own seen), over the spellings of the parts so far
+    for part in parts:
+        reach = [found] + [set() for _ in part]
+        for end in range(1, len(part) + 1):
+            for start in range(end):
+                word = part[start:end]
+                if word in words:
+                    reach[end] |= {(office or word in OFFICE_WORDS, mine or word in own) for office, mine in reach[start]}
+        found = reach[-1]
+    return (True, True) in found
 
 
 def why_not(address, institution_words=""):
-    """None where the address may be kept, else the reason. `institution_words`: the providers' names, for «od_chelm@», whose parts name the place.
-    Pass None to skip the given.surname rule, which depends on those names: the data check does, so that renaming a provider cannot fail a build."""
+    """None where the address may be kept, else the reason. `institution_words`: the institution's names, for «od_chelm@», whose parts name the place.
+    Pass None to skip the rules that depend on those names: the data check does, so that renaming a provider cannot fail a build."""
     if not ADDRESS.fullmatch(address):
         return "not an address"
     local, host = address.lower().split("@")
     if hashlib.sha256(address.lower().encode()).hexdigest() in REFUSED:
         return "refused by hand"
-    if host in FREE_MAIL:
-        return "free mail"
     if re.match(r"(dr|prof|mgr|ing)[._-]", local):
         return "names a person"
+    if FREE_MAIL.fullmatch(host):
+        return None if names_institution(local, institution_words) else "free mail that does not name the institution"
     parts = [p for p in re.split(r"[._-]+", local) if p]
     if institution_words is None or len(parts) < 2 or not all(p.isalpha() for p in parts) or len(parts[-1]) < 3 or all(len(p) <= 3 for p in parts):
         return None

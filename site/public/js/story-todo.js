@@ -218,6 +218,20 @@
     }).filter(function (x) { return x.over > 0; }).sort(function (a, b) { return b.over - a.over || a.lo - b.lo; });
   }
   function yrs(w) { return w[0] === w[1] ? String(w[0]) : w[0] + "–" + w[1]; }
+  /* «Covers births 1850–1854 and marriages 1850–1860, inside the years of your story», read kind by kind; null where the book states no kind. */
+  function insideSay(c, win, spansOf) {
+    var kinds = (c.kinds || []).filter(function (k) { return KIND_PLURAL[k]; });
+    if (!kinds.length) return null;
+    var has = [], not = [];
+    kinds.forEach(function (k) {
+      var h = covering({ cols: [c] }, k, [win.from, win.hi], spansOf)[0];
+      if (h) has.push([yrs([h.lo, h.hi]), KIND_PLURAL[k]]); else not.push(KIND_PLURAL[k]);
+    });
+    if (!has.length) return "Its title shows no " + not.join(" or ") + " in the years of your story.";
+    var same = has.every(function (x) { return x[0] === has[0][0]; });
+    return "Covers " + (same ? has[0][0] + (has.length > 1 || not.length ? " for " + has.map(function (x) { return x[1]; }).join(" and ") : "") : has.map(function (x) { return x[0] + " for " + x[1]; }).join(", ")) + ", inside the years of your story." + (not.length ? " It has no " + not.join(" or ") + " of those years." : "");
+  }
+  var KIND_PLURAL = { b: "births", m: "marriages", d: "deaths" };
   /* The book for one kind and window at the place, else the plain «none», where its books stop, and the neighbouring places that have one. */
   function bookSay(info, kind, w, spansOf, neighbours) {
     var hit = covering(info, kind, w, spansOf);
@@ -314,11 +328,13 @@
     var named = function (p, fallback) { return (p && (p.maiden && p.given ? ((p.given.typed || p.given) + " " + p.maiden) : p.name)) || fallback; };
     var whose = self.me ? "your" : self.rel ? "your " + (self.parentSide ? (self.parentSide === "mother" ? "maternal " : "paternal ") : "") + String(self.rel).replace(/-/g, " ") : "the person in the story";
     var me = self.name || whose.replace(/^./, function (c) { return c.toUpperCase(); });
-    function step(title, why, o) { o = o || {}; return { title: clip(title, 140), why: clip(why, 300), detail: o.detail ? clip(o.detail, 800) : "", href: o.href || "", links: o.links || [] }; }
+    /* `ev` says what a line is about (kind b/m/d or "a" arrival, the years, the place), so the page can draw the books against the years. It changes no wording. */
+    function step(title, why, o) { o = o || {}; var out = { title: clip(title, 140), why: clip(why, 300), detail: o.detail ? clip(o.detail, 800) : "", href: o.href || "", links: o.links || [] }; if (o.ev) out.ev = o.ev; return out; }
     function record(title, kind, w, why, extra, links, at) {
       var there = at && at !== info ? at : null, b = bookSay(there || info, kind, w, spans, there ? there.neigh || [] : nearby), after = !b.found && (there ? there.cc === "HR" : HR) && w[1] >= 1890 && w[0] < 1946 ? " In Croatia the church registers served as the official registers until May 1946, so ask which registry office or archive now holds the volume." : "";
       var l = (links || []).slice(); if (after) l.push({ t: "Source: State Archives in Varaždin", href: HR_CHURCH });
-      return step(title + (w && !w.shown ? " · " + (w.est ? "about " : "") + yrs(w) : ""), why, { detail: b.text + after + (extra ? " " + extra : ""), href: b.href, links: l });
+      return step(title + (w && !w.shown ? " · " + (w.est ? "about " : "") + yrs(w) : ""), why, { detail: b.text + after + (extra ? " " + extra : ""), href: b.href, links: l,
+        ev: { kind: kind, w: [w[0], w[1]], est: !!w.est, info: there || info, near: there ? there.neigh || [] : nearby } });
     }
     function est(a, b) { var w = [a, Math.min(b, now)]; w.est = true; return w; }
     var GOD = "Note the godparents and witnesses, who are often relatives, and compare them across the brothers’ and sisters’ entries.";
@@ -382,7 +398,8 @@
     function there(label, kind, year, loc, note) {
       var say = abroadSay(loc.cc, kind, year, matoGrosso([loc.info], year)), bk = loc.info && year != null ? bookSay(loc.info, kind, [year, year], spans, []) : null;
       return step(label + (year != null ? " · " + year : "") + " · " + placed(loc), (note ? note + " " : "") + (loc.told ? "" : "No place is told for it; the story has them in " + placed(loc) + " by then, so look there first. ") + READ_FOR[kind],
-        { detail: say.text + (bk && bk.found ? " " + bk.text : "") + " " + NIL_NEXT, href: bk && bk.found ? bk.href : "", links: say.links });
+        { detail: say.text + (bk && bk.found ? " " + bk.text : "") + " " + NIL_NEXT, href: bk && bk.found ? bk.href : "", links: say.links,
+          ev: { kind: kind, w: year != null ? [year, year] : null, info: loc.info, near: [], abroad: true, place: placed(loc) } });
     }
     /* the person the story is about; a teller telling of themselves has their own papers at home, and the search starts a generation back */
     var own = [], birth = [], later = [], away = [], leads = [], lands = [], sheet = f.sheet || null;
@@ -410,10 +427,11 @@
         if (nil && nilHere) {
           var lo = [nil.from - 7, nil.from - 1], hi = [nil.to + 1, nil.to + 7], b1 = bookSay(info, "b", lo, spans, nearby), b2 = bookSay(info, "b", hi, spans, nearby);
           birth.push(step("Birth or baptism entry · " + yrs(lo) + " and " + yrs(hi), "Already searched, as told: " + yrs([nil.from, nil.to]) + (nil.place ? " in " + nil.place : "") + ", nothing found. Go either side of those years, in " + served + ".",
-            { detail: "Before: " + b1.text + " After: " + b2.text + (sheet && sheet.born && sheet.born.via ? " A birth date taken from a " + sheet.born.via + "’s record can be years out." : ""), href: b2.href || b1.href, links: mg.links }));
+            { detail: "Before: " + b1.text + " After: " + b2.text + (sheet && sheet.born && sheet.born.via ? " A birth date taken from a " + sheet.born.via + "’s record can be years out." : ""), href: b2.href || b1.href, links: mg.links,
+              ev: { kind: "b", w: [lo[0], hi[1]], info: info, near: nearby } }));
           var span = [lo[0], hi[1]], next = nearby.filter(function (n) { return covering(n.info, "b", span, spans).length; }).slice(0, 5).map(function (n) { return n.info.name + " (" + Math.max(1, Math.round(n.km)) + " km)"; });
           birth.push(step("The neighbouring parishes · " + yrs(span), "A nil in one parish says little: the family may have used another, or lived elsewhere then.",
-            { detail: (next.length ? "The Atlas lists birth or baptism books for some of those years at: " + next.join(", ") + ". " : "The Atlas lists no neighbouring birth book for those years: ask the archive which parishes surround this one. ") + "Read the pages as well as any index, under every spelling" + (spellings.length > 1 ? " (" + spellings.join(", ") + ")" : "") + ". A nil is not proof the person was born elsewhere." }));
+            { detail: (next.length ? "The Atlas lists birth or baptism books for some of those years at: " + next.join(", ") + ". " : "The Atlas lists no neighbouring birth book for those years: ask the archive which parishes surround this one. ") + "Read the pages as well as any index, under every spelling" + (spellings.length > 1 ? " (" + spellings.join(", ") + ")" : "") + ". A nil is not proof the person was born elsewhere.", ev: { kind: "b", w: span, info: info, near: nearby, neighbours: true } }));
         } else birth.push(record("Birth or baptism entry" + (bw.shown ? " · " + self.bornText : ""), "b", bw, "In " + served + ". It should name the parents, so it tests every other name in the story.", [nil ? "Already searched, as told: " + yrs([nil.from, nil.to]) + " in " + nil.place + ", nothing found." : "", mg.say, GOD].filter(Boolean).join(" "), mg.links));
       } else if (selfB) birth.push(birthStep(self, selfB, null, "In " + served + ". It should name the parents, one generation further back.", GOD));
       else birth.push(step("Birth or baptism entry", "No birth year is told. A rough one (“born in the 1920s”) lets the plan name the book.", {}));
@@ -439,7 +457,7 @@
       lands.slice(0, 3).forEach(function (x) {
         var say = arrivalSay(x.cc, x.by, austrian);
         away.push(step("Arrival in " + (cname(x.cc) || x.cc) + (x.by != null ? " · by " + x.by : ""), "An arrival paper can give age, nationality, the ship or port, and who travelled with them.",
-          { detail: say.text + " If nothing turns up: every spelling, the neighbouring countries’ ports, and companions from the same place.", links: say.links }));
+          { detail: say.text + " If nothing turns up: every spelling, the neighbouring countries’ ports, and companions from the same place.", links: say.links, ev: { kind: "a", w: x.by != null ? [x.by, x.by] : null, by: true, abroad: true, place: cname(x.cc) || x.cc } }));
       });
       if (lands.length) {
         var man = sheet ? sheet.sex === "M" : /(father|grandfather|brother|uncle|son)$/.test(self.rel || ""), navy = austrian && man && born && born < 1865;
@@ -486,7 +504,7 @@
       var lead = [selfB ? (born ? "born " + (self.bornText || born) : selfB.say) : "", self.place ? "in " + bare(self.place) : ""].filter(Boolean).join(" ");
       if (awayFirst) lead = "The records made where they went come first: they may name the birthplace that the search at home depends on.";
       if (an.village) lead = (lead ? lead + ". " : "") + "The Atlas lists no books for " + place + " itself, so the books named below are those it lists under " + info.name + " and its neighbours.";
-      cards.push({ title: me + (self.name ? " (" + whose + ")" : ""), why: lead ? cap(lead) : about(self), known: known, open: unknown, steps: own });
+      cards.push({ title: me + (self.name ? " (" + whose + ")" : ""), why: lead ? cap(lead) : about(self), known: known, open: unknown, steps: own, who: [self] });
     }
     var folks = [fa, mo].concat(parents).filter(Boolean);
     /* grandparents and a partner's parents: their own place's books, or plainly that the place is the first thing to find */
@@ -504,7 +522,7 @@
       var gone = ev(p, "died");
       if (gone && gone.year) steps.push(record("Death or burial", "d", [gone.year, gone.year], "The entry or certificate and the grave.", "", [], at));
       else if (at && d && !alive(d)) steps.push(record("Death or burial", "d", est(cb ? cb.w[0] : d.w[0] + 17, d.w[1] + 90), "No death is told; the gravestone may give it.", "", [], at));
-      cards.push({ title: who + (p.label && who !== p.label ? " (" + p.label + ")" : ""), why: about(p), steps: steps });
+      cards.push({ title: who + (p.label && who !== p.label ? " (" + p.label + ")" : ""), why: about(p), steps: steps, who: [p] });
     }
     var grands = people.filter(function (x) { return /^(grandfather|grandmother|grandparent)$/.test(x.role) && x !== self; });
     function eldersOf(list, childFor) {
@@ -520,7 +538,7 @@
       var pair = folks.map(function (p) { return named(p, p.role); }).join(" and ");
       var pwin = selfB ? est(sl - 25, sHi) : est(Math.max.apply(null, folkB.map(function (d) { return d.w[0]; })) + 17, Math.max.apply(null, folkB.map(function (d) { return d.w[1]; })) + 35);
       cards.push({ title: "The parents’ marriage: " + pair, why: selfB ? "Before their first known child (" + (born || selfB.say) + "), and earlier if there were older children." : "The years are worked out from the parents’ own birth years.", steps: [
-        record("Marriage entry", "m", pwin, "In " + served + (mo && !mo.place ? ", and in the mother’s own parish: the story does not say where she came from" : "") + ".", "Read it for both places of origin, both sets of parents and the witnesses.")] });
+        record("Marriage entry", "m", pwin, "In " + served + (mo && !mo.place ? ", and in the mother’s own parish: the story does not say where she came from" : "") + ".", "Read it for both places of origin, both sets of parents and the witnesses.")], who: folks.slice() });
     }
     folks.forEach(function (p) {
       var isMo = p.role === "mother", who = named(p, p.role), steps = [], told1 = toldWhen(p, "born"), at = placeOf(p);
@@ -537,7 +555,7 @@
         var paper = seenAlive.year < 1945 && (info.provs || []).filter(function (x) { return /^(anno|nsk-stare-novine|nsk-digitalna)$/.test(x.id); })[0];
         steps.push(record("Death, after " + seenAlive.year, "d", est(seenAlive.year, seenAlive.year + 30), "The story has them alive " + (seenAlive.approx ? "about " : "in ") + seenAlive.year + ". Start with the gravestone: see the burial grounds below.", paper ? "Old newspapers may carry a notice: " + paper.name + "." : "", paper ? [{ t: paper.name, href: paper.url }] : []));
       } else if (selfB && !alive(told1)) steps.push(record("Death or burial", "d", est(sl, sHi + 60), "No death is told; the child’s papers and the gravestone may give it.", ""));
-      cards.push({ title: who + " (" + (me2 ? "your " + p.role : p.role + " of " + me) + ")", why: about(p), steps: steps });
+      cards.push({ title: who + " (" + (me2 ? "your " + p.role : p.role + " of " + me) + ")", why: about(p), steps: steps, who: [p] });
     });
     if (!me2) eldersOf(grands, function (p) { return /F.$/.test(p.key || "") ? fa : /M.$/.test(p.key || "") ? mo : null; });
     eldersOf(people.filter(function (x) { return x.role === "inlaw" && /^S[FM]$/.test(x.key || ""); }), function () { return spouse; });
@@ -545,7 +563,7 @@
       var names = sibs.map(function (x) { return x.name; }).filter(Boolean), kinds = sibs.every(function (x) { return x.rel === "sister"; }) ? "sister" : sibs.every(function (x) { return x.rel === "brother"; }) ? "brother" : "brother or sister";
       cards.push({ title: (sibs.length === 1 ? "The " + kinds : "The " + sibs.length + " " + kinds.replace("brother or sister", "brothers and sisters").replace(/^(brother|sister)$/, "$1s")) + (names.length ? ": " + names.join(", ") : ", not named"), why: "The same parents, so the same books.", steps: [
         record("Their birth or baptism entries", "b", est(sl - 15, sHi + 15), "In " + served + ", under the same parents." + (names.length < sibs.length ? " This is where the missing names should be." : ""), GOD),
-        step("Their descendants, as living relatives", "Ask relatives and local groups. A DNA test can also connect cousins; it is a personal choice. " + NO_LIVING, {})] });
+        step("Their descendants, as living relatives", "Ask relatives and local groups. A DNA test can also connect cousins; it is a personal choice. " + NO_LIVING, {})], who: sibs.slice() });
     }
     if (!me2) {
       var firstAway = route.filter(function (r) { return r.info.cc !== info.cc && r.year != null; })[0];
@@ -560,7 +578,7 @@
         var sg = ev(spouse, "died");
         if (sg && sg.year) st.push(record("Death or burial", "d", [sg.year, sg.year], "The entry or certificate and the grave.", "", [], sat));
         else if (!abroadWed && sd && !alive(sd)) st.push(record("Death or burial", "d", est(wed ? wed.w[0] : sd.w[0] + 17, sd.w[1] + 90), "No death is told; the gravestone may give it.", "", [], sat));
-        if (st.length) cards.push({ title: named(spouse) + " (" + (spouse.label || (spouse.maiden || /(?:father|uncle|brother)$/.test(self.rel || "") ? "wife" : /(?:mother|aunt|sister)$/.test(self.rel || "") ? "husband" : "husband or wife")) + ")", why: about(spouse), steps: st });
+        if (st.length) cards.push({ title: named(spouse) + " (" + (spouse.label || (spouse.maiden || /(?:father|uncle|brother)$/.test(self.rel || "") ? "wife" : /(?:mother|aunt|sister)$/.test(self.rel || "") ? "husband" : "husband or wife")) + ")", why: about(spouse), steps: st, who: [spouse] });
       }
       /* the child the teller descends from, then each named child: the birth entry that names both parents */
       var childYears = function () {
@@ -579,11 +597,11 @@
       line.forEach(function (p) {
         var d = toldWhen(p, "born") || childYears(); if (!d) return;
         cards.push({ title: (p.key === "GM" ? "Your grandmother" : "The child you descend from") + (p.name ? ": " + p.name : " (one of the children)"), why: about(p), steps: [
-          childStep(p, d, "It should name both parents: the entry that proves your line, and shows which child this was.")] });
+          childStep(p, d, "It should name both parents: the entry that proves your line, and shows which child this was.")], who: [p] });
       });
       kids.filter(function (k) { return !k.unnamed && k.name; }).forEach(function (p) {
         var d = toldWhen(p, "born") || childYears(); if (!d) return;
-        cards.push({ title: p.name + " (" + (p.label || "child") + ")", why: about(p), steps: [childStep(p, d, "Their entry names both parents.")] });
+        cards.push({ title: p.name + " (" + (p.label || "child") + ")", why: about(p), steps: [childStep(p, d, "Their entry names both parents.")], who: [p] });
       });
     } else if (!folks.length && !grands.length) cards.push({ title: "Start one generation back", why: "The story names no parents yet.", steps: [step("Your own birth certificate", "It names your parents. Add them to the story, with a place and a rough year, and the plan names the books.", {})] });
     /* a son or daughter not named, whose own record gave the birth date */
@@ -652,8 +670,9 @@
     scored.slice(0, 4).forEach(function (x) {
       var c = x.c, kinds = (c.kinds || []).map(function (k) { return k === "b" ? "births" : k === "m" ? "marriages" : k === "d" ? "deaths" : k; }).join(", ");
       var vt = (c.title || "Register").replace(/\s+/g, " ").trim(), vr = c.from ? c.from + (c.to && c.to !== c.from ? "–" + c.to : "") : "";
+      var inside = x.known && win ? insideSay(c, win, deps.spansOf) : null;
       desk.push(item(clip(vt, 80) + (vr && vt.indexOf(String(c.from)) < 0 ? " (" + vr + ")" : ""),
-        !x.known ? "The Atlas does not state this volume's years: open it to see if it holds yours." : win ? "Covers " + Math.max(c.from, win.from) + (Math.min(c.to || c.from, win.hi) > Math.max(c.from, win.from) ? "–" + Math.min(c.to || c.from, win.hi) : "") + ", inside the years of your story." : "A register the Atlas lists for this place.",
+        !x.known ? "The Atlas does not state this volume's years: open it to see if it holds yours." : inside != null ? inside : win ? "Covers " + Math.max(c.from, win.from) + (Math.min(c.to || c.from, win.hi) > Math.max(c.from, win.from) ? "–" + Math.min(c.to || c.from, win.hi) : "") + ", inside the years of your story." : "A register the Atlas lists for this place.",
         { detail: (kinds ? kinds + ": " : "") + (ACC_SAY[c.access] || ACC_SAY.unsurveyed) + (c.provider ? ", at " + ((deps.provById && deps.provById[c.provider] && deps.provById[c.provider].name) || c.provider) : ""), href: c.url || "", tag: c.access === "free" ? "free" : c.access === "account" ? "free account" : "" }));
     });
     if (!cols.length) {
@@ -765,11 +784,13 @@
             { detail: "Where a name is common is a good place to ask about it and to read the parish. It does not show that anyone there is your family.", href: link(near || r.areas[0]), tag: r.areas.length + (r.areas.length === 1 ? " place" : " places") });
         } else {
           it = item((r.as || r.name) + ": in no town's ten most common surnames", (r.counted != null ? "The 2011 census counted " + r.counted + " people with it in all of Croatia." : r.below ? "In 2011 fewer than ten people had it, or none." : "The 2021 lists do not hold it, which is not proof nobody there has it.") + " A rare name is worth searching everywhere you look.", { gap: true });
+          it.advice = "A rare name is worth searching everywhere you look.";
         }
         it.links = look(r.name); nm.push(it);
       });
-      if (cen.around.length && cen.home) nm.push(item("The common surnames around " + cen.home.name + " today", cen.around.map(function (a) { return a.n + " " + a.km + " km"; }).join(", ") + ": compare them with the godparents and witnesses in the registers. They are today's names, not those of your years.",
+      if (cen.around.length && cen.home) { nm.push(item("The common surnames around " + cen.home.name + " today", cen.around.map(function (a) { return a.n + " " + a.km + " km"; }).join(", ") + ": compare them with the godparents and witnesses in the registers. They are today's names, not those of your years.",
         { detail: cen.around[0].n + ": " + cen.around[0].names.join(", ") + ".", href: cen.around[0].place ? base + "place/" + encodeURIComponent(cen.around[0].place) + "/" : "" }));
+        nm[nm.length - 1].advice = "Compare the common surnames around " + cen.home.name + " with the godparents and witnesses in the registers. They are today's names, not those of your years."; }
       if (nm.length) nm[nm.length - 1].detail = (nm[nm.length - 1].detail ? nm[nm.length - 1].detail + " " : "") + "Source: Croatian Bureau of Statistics (DZS), Census 2021.";
     }
     section("names", "Where the family names are most common", nm);
@@ -811,7 +832,7 @@
     /* WHAT TO LOOK FOR NEXT: at home first, then each person, and at the end what the story leaves open */
     var rec = recommend(g, deps, an, eras), first = [];
     var hm = rec.home.map(function (x) { return item(x.title, x.why, { detail: x.detail }); });
-    var pp = rec.people.map(function (x) { var it = item(x.title, x.why, {}); it.steps = x.steps; if (x.known && x.known.length) it.known = x.known.map(function (k) { return clip(k, 300); }); if (x.open && x.open.length) it.unknown = x.open.map(function (k) { return clip(k, 200); }); return it; });
+    var pp = rec.people.map(function (x) { var it = item(x.title, x.why, {}); it.steps = x.steps; it.who = x.who || []; if (x.known && x.known.length) it.known = x.known.map(function (k) { return clip(k, 300); }); if (x.open && x.open.length) it.unknown = x.open.map(function (k) { return clip(k, 200); }); return it; });
     if (hm.length) first.push({ key: "home", title: "Check at home before you write", items: hm });
     if (pp.length) first.push({ key: "people", title: "What to look for next, person by person", wide: true, items: pp });
     out.sections = first.concat(out.sections);
@@ -879,7 +900,7 @@
     mount.append(el("h3", "Do these first", "sp-todo-h"), ol);
     var grid = el("div", null, "sp-todo-grid k-grid");
     plan.sections.forEach(function (s) {
-      var card = el("section", null, "sp-todo-card k-card" + (s.wide ? " sp-todo-wide" : "")); card.append(el("h3", s.title));
+      var card = el("section", null, "sp-todo-card k-card" + (s.wide ? " sp-todo-wide" : "")); card.append(el("h3", s.title)); card.setAttribute("data-key", s.key);
       var ul = el("ul");
       s.items.forEach(function (i) {
         if (i.steps) { ul.append(personRow(i, s.items.indexOf(i) === 0)); return; }

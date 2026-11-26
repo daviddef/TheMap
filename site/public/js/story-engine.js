@@ -60,11 +60,10 @@
     return null;
   }
 
-  function overlaps(c, w) { return c.from <= w[1] && c.to >= w[0]; }
-
-  /* Volumes of a kind ("b" births and baptisms, "m" marriages, "d" burials and deaths) whose years overlap a window, in date order. */
+  /* Volumes of a kind ("b" births and baptisms, "m" marriages, "d" burials and deaths) that hold THAT KIND in years overlapping a window, in date order. A bundle is
+     read by the years written after each kind in its title (spansOf), so a book whose marriages reach a window is not offered for births that do not. */
   function volumesFor(cols, kind, w) {
-    return (cols || []).filter(function (c) { return (c.kinds || []).indexOf(kind) > -1 && (!w || overlaps(c, w)); })
+    return (cols || []).filter(function (c) { return (c.kinds || []).indexOf(kind) > -1 && (!w || spansOf(c, kind).some(function (x) { return x[0] <= w[1] && x[1] >= w[0]; })); })
       .sort(function (x, y) { return x.from - y.from || x.to - y.to || String(x.title).localeCompare(String(y.title)); });
   }
 
@@ -77,6 +76,23 @@
     while ((m = re.exec(t))) m[1].split(/\s*[,;]\s*/).forEach(function (p) { var y = p.match(/\d{4}/g); out.push([+y[0], +(y[1] || y[0])]); });
     if (out.length) return out;
     return (c.kinds || []).indexOf(kind) > -1 && typeof c.from === "number" ? [[c.from, c.to || c.from]] : [];
+  }
+  /* A bundle is filed under one span for all its kinds: where its title writes years after each kind and none of them meets the window, that is said. */
+  function titleMisses(title, w) {
+    var spans = ["b", "m", "d"].reduce(function (a, k) { return a.concat(spansOf({ title: title }, k)); }, []);
+    return spans.length && !spans.some(function (x) { return x[0] <= w[1] && x[1] >= w[0]; }) ? "(by its title, nothing in " + w[0] + "\u2013" + w[1] + ")" : "";
+  }
+  /* the years of one kind a book has inside a window, from the years written after that kind in its title */
+  function inYears(c, kind, w) {
+    var lo = null, hi = null;
+    spansOf(c, kind).forEach(function (x) { var a = Math.max(w[0], x[0]), b = Math.min(w[1], x[1]); if (b >= a) { lo = lo == null ? a : Math.min(lo, a); hi = hi == null ? b : Math.max(hi, b); } });
+    return lo == null ? null : [lo, hi];
+  }
+  /* what a book has of one generation's years, and what it has not: a book listed for marriages is never read as having the births */
+  function coverSay(c, gen) {
+    function say(a) { return a[0] === a[1] ? String(a[0]) : a[0] + "\u2013" + a[1]; }
+    var b = inYears(c, "b", gen.born), m = inYears(c, "m", gen.married);
+    return (b ? "Births in these years: " + say(b) : "No births " + say(gen.born)) + " \u00b7 " + (m ? "marriages: " + say(m) : "no marriages " + say(gen.married));
   }
   /* What the story needs a book for: each date it tells, or else the kinds and years of this stop. */
   function bookNeeds(dated, kinds, win) {
@@ -3498,7 +3514,7 @@
     return any ? { keys: keys, notes: notes } : null;
   }
 
-  var api = { toYear: toYear, suggest: suggest, windows: windows, volumesFor: volumesFor, spansOf: spansOf, bookNeeds: bookNeeds, keyBooks: keyBooks, generationGroups: generationGroups, captionAt: captionAt, progress: progress, between: between,
+  var api = { toYear: toYear, suggest: suggest, windows: windows, volumesFor: volumesFor, spansOf: spansOf, titleMisses: titleMisses, inYears: inYears, coverSay: coverSay, bookNeeds: bookNeeds, keyBooks: keyBooks, generationGroups: generationGroups, captionAt: captionAt, progress: progress, between: between,
               readFamily: readFamily, readMe: readMe, readEvents: readEvents, repairCase: repairCase, givenForms: givenForms, volLabel: volLabel, buildPlan: buildPlan, parseStory: parseStory, startFamily: startFamily, familyName: familyName, flagFor: flagFor, leaderAt: leaderAt, leadersBetween: leadersBetween, givenGroups: givenGroups, otherForms: otherForms, numberPeople: numberPeople, surnameBlock: surnameBlock, nameLinks: nameLinks, censusWhere: censusWhere, censusFor: censusFor, storySurnames: storySurnames, short: short, yearsIn: yearsIn,
               HOLDS: HOLDS, YEAR_MIN: YEAR_MIN, YEAR_MAX: YEAR_MAX, readLife: readLife, gazWants: gazWants, gazMerge: gazMerge, nearWords: nearWords, NEAR_KM: NEAR_KM, didYouMean: didYouMean, aliasMerge: aliasMerge, countryPoints: countryPoints, repairCase: repairCase, clerkLanguages: clerkLanguages };
   if (typeof module !== "undefined" && module.exports) { module.exports = api; return; }
@@ -3711,7 +3727,7 @@
         d.append(el("div", (prefix || "") + info.name + (ageText ? ", " + ageText : "") + (told ? ": no year is told for living here. The place card shows who held the ground in your story's years." : ": add a birth year to see who held the ground, the flag and what was going on."), "lf-caphead"));
         return d;
       }
-      var c = captionAt(info, year), fl = flagFor(info, year);
+      var c = captionAt(info, year), fl = flagFor(info, year), slim = !!o.slim;   /* slim: leaders and events are told on the page's «Their times» shelf */
       if (fl) { var im = el("img", null, "lf-flag"); im.src = BASE + "fl/" + encodeURIComponent(fl) + ".svg"; im.alt = "Flag from the Atlas's flag history of today's " + info.countryName + ", " + year; im.title = "From the flag history of today's " + info.countryName + " in " + year + ". The place may have been under another state: see the line beside it."; im.width = 36; im.height = 24; im.loading = "lazy"; d.append(im); }
       var head = el("div", null, "lf-caphead");
       head.append(el("b", (prefix || "") + info.name + ", " + year + (ageText ? " (" + ageText + ")" : "") + ": "), document.createTextNode(c.polity ? "under " + c.polity : "no era table"));
@@ -3719,6 +3735,7 @@
       d.append(head);
       if (c.tracked && c.filedUnder.length) d.append(el("div", "Records of this period: " + c.filedUnder.join(", "), "lf-filed"));
       if (!c.tracked && c.note) d.append(el("div", c.note, "lf-filed"));
+      if (slim) return d;
       var ld = leaderAt(info.leaders, year);
       if (ld) d.append(el("div", "Head of state of today's " + info.countryName + ": " + ld[0] + " (" + ld[2] + (ld[3] == null ? " on" : "–" + ld[3]) + ")", "lf-filed lf-leader"));
       else if (info.leaders) d.append(el("div", "The Atlas names no head of state of today's " + info.countryName + " for " + year + "; look at who held the ground, above.", "lf-filed lf-leader"));
@@ -3909,15 +3926,16 @@
         anc.forEach(function (x) { E.cap.append(line(x.info, ty, evMap.get(x.info), "His " + x.who + "'s family, ", "")); });
       }
 
-      /* the setting: who held the ground and when it changed, what was going on, who led */
-      if (tl.mode === "year" && t0 != null) {
+      /* the setting: who held the ground and when it changed, what was going on, who led. The story page draws its map and its setting apart (o.setting "map" and
+         "shelf"): the map follows one person, the shelf stays with the whole family, and the shelf leaves the lists each place already gives. */
+      if (tl.mode === "year" && t0 != null && o.setting !== "map") {
         var mid = Math.round((t0 + t1) / 2), half = Math.ceil((t1 - t0) / 2) + 1, items = [], seenInfo = new Set();
         stops.concat(anc).forEach(function (st) {
           var info = st.info; if (seenInfo.has(info)) return; seenInfo.add(info);
           S.aroundYear(info.eras || [], [], mid, half).forEach(function (x) { if (x.y >= t0 - 1 && x.y <= t1 + 1) items.push({ y: x.y, t: info.name + ": " + x.title }); });
         });
         items.sort(function (p, q) { return p.y - q.y; });
-        if (items.length) {
+        if (items.length && o.setting !== "shelf") {
           E.moments.append(el("h4", "Who held the ground, and when it changed"));
           var ul = el("ul"); items.slice(0, 8).forEach(function (x) { var li = el("li"); li.append(el("b", x.y + " "), x.t); ul.append(li); });
           E.moments.append(ul);
@@ -3926,7 +3944,7 @@
         stops.concat(anc).forEach(function (st) { (evMap.get(st.info) || []).forEach(function (e) { if (seen[e.id]) return; seen[e.id] = 1; evl.push({ e: e, where: st.info.name }); }); });
         /* «nearby» and «in the wider world» read side by side, two columns, and stack on a phone */
         var duo = el("div", null, "lf-duo"), colA = el("div", null, "lf-col"), colB = el("div", null, "lf-col");
-        if (evl.length) {
+        if (evl.length && o.setting !== "shelf") {
           colA.append(el("h4", "What was going on: epidemics, famines, wars and mass deaths nearby"));
           var ue = el("ul", null, "lf-events");
           evl.slice(0, 8).forEach(function (x) {
@@ -3954,7 +3972,8 @@
         var seenCc = Object.create(null);
         stops.concat(anc).forEach(function (st) {
           var info = st.info; if (!info.leaders || seenCc[info.cc]) return; seenCc[info.cc] = 1;
-          var ls = leadersBetween(info.leaders, t0, t1).slice(0, 8);
+          var ls = leadersBetween(info.leaders, t0, t1);
+          if (o.setting !== "shelf") ls = ls.slice(0, 8);   /* the shelf names them all: the map's caption no longer says who led in the year shown */
           if (!ls.length) { E.moments.append(el("p", "The Atlas names no head of state of today's " + info.countryName + " for those years: that is silence in Wikidata, not a country without one.", "lf-filed")); return; }
           E.moments.append(el("h4", "Leaders of today's " + info.countryName + " in those years"));
           var ul2 = el("ul"); ls.forEach(function (r) { var li = el("li"); li.append(el("b", r[2] + (r[3] == null ? " on " : "–" + r[3] + " ")), r[0]); ul2.append(li); });
@@ -4102,7 +4121,11 @@
        for what happened there (birth, leaving, living, arriving). Everything named is in the Atlas's own data for that place and
        country; where it holds nothing the card says so. `node.items` is what "Start the research family" may mark as planned. */
     var KINDS = [["b", "Births and baptisms"], ["m", "Marriages"], ["d", "Burials and deaths"]];
-    function stopsBlock(f, mort, people) {
+    /* `opts.shelves` (the story page): the page takes the cards apart and files each sub-block on a shelf (data-shelf), so every list is given whole (no «and N more»)
+       and each event says what happened. Other pages draw the cards as they are. */
+    function stopsBlock(f, mort, people, opts) {
+      var shelves = !!(opts && opts.shelves);
+      function onShelf(node, shelf) { if (node) node.setAttribute("data-shelf", shelf); return node; }
       TYPE = (mort && mort.types) || {};
       var route = (f.route && f.route.length ? f.route : [f.from && { info: f.from, role: "origin" }, f.to && { info: f.to, role: "move" }].filter(Boolean)).filter(function (x) { return x.info; });
       var anc = (f.ancestors || []).filter(function (x) { return x.info; }), box = el("div", null, "lf-stops"), items = [], n = 0, base = f.base || "/";
@@ -4134,6 +4157,7 @@
       }
       function srcLine(p, extra) {
         var li = el("li", null, "lf-src"), a = el("a", p.name); a.href = p.url; a.rel = "noopener"; li.append(a);
+        li.setAttribute("data-kind", p.kind || ""); li.setAttribute("data-access", p.access || "");
         var meta = [String(p.kind || "").replace(/-/g, " "), p.access && p.access !== "unsurveyed" ? p.access : ""].filter(Boolean).join(" \u00b7 ");
         if (extra || meta) li.append(el("span", extra || meta, "lf-filed"));
         var m = mailLink(p); if (m) li.append(m); var pn = penLink(p); if (pn) li.append(pn);
@@ -4186,11 +4210,12 @@
         if (f.born) return f.born;
         var r = f.route && f.route[0]; return r && r.role === "born" && r.year != null ? r.year : null;
       }
-      function bookRows(cols, href) {
+      function bookRows(cols, href, gen) {
         var ul = el("ul", null, "lf-vols lf-srcs");
-        cols.forEach(function (c) { var li = el("li", null, "lf-src lf-keyrow"), a = el("a", volLabel(c)); a.href = c.url || href; if (c.url) a.rel = "noopener"; li.append(a); if (c.access) li.append(el("span", c.access === "account" ? "free with an account" : c.access, "lf-filed")); ul.append(li); });
+        cols.forEach(function (c) { var li = el("li", null, "lf-src lf-keyrow"), a = el("a", volLabel(c)); a.href = c.url || href; if (c.url) a.rel = "noopener"; li.append(a); if (c.access) li.append(el("span", c.access === "account" ? "free with an account" : c.access, "lf-filed")); if (gen) li.append(el("span", coverSay(c, gen), "lf-filed lf-covers" + (inYears(c, "b", gen.born) ? "" : " lf-covers-no-b"))); ul.append(li); });
         return ul;
       }
+      function nBooks(n, what) { return n + " " + what + " book" + (n === 1 ? "" : "s"); }
       function fold(title, open) { var d = el("details", null, "lf-gen"); if (open) d.open = true; d.append(el("summary", title)); return d; }
       function years(a) { return a[0] + "\u2013" + a[1]; }
       /* `near` gives the neighbours to point to where this place has no book for a generation (not given when the list drawn IS a neighbour's) */
@@ -4203,19 +4228,22 @@
         }
         G.groups.forEach(function (x) {
           var names = [lines.father, x.gen > 0 ? lines.mother : ""].filter(Boolean).join(", ");
-          var head = x.name + " \u00b7 born " + (x.gen ? "about " + years(x.born) : (f.bornApprox ? "about " : "") + born) + ", married about " + years(x.married) + (names ? " \u00b7 " + names : "") + " \u00b7 " + (x.books.length ? x.books.length + " book" + (x.books.length === 1 ? "" : "s") : "no book listed");
+          var nb = x.books.filter(function (c) { return inYears(c, "b", x.born); }).length, nm = x.books.filter(function (c) { return inYears(c, "m", x.married); }).length;
+          var head = x.name + " \u00b7 born " + (x.gen ? "about " + years(x.born) : (f.bornApprox ? "about " : "") + born) + ", married about " + years(x.married) + (names ? " \u00b7 " + names : "") + " \u00b7 " + (x.books.length ? (nb ? nBooks(nb, "birth") : "no birth book") + ", " + (nm ? nBooks(nm, "marriage") : "no marriage book") : "no book listed");
           if (!near && !x.books.length) return;
           var open = !!near && !opened && x.books.length > 0; if (open) opened = true;
           var d = fold(head, open);
-          if (x.books.length) d.append(bookRows(x.books, info.href));
-          else {
+          if (x.books.length) d.append(bookRows(x.books, info.href, x));
+          /* no book here has the births of these years: say so, and show the neighbours whose books do */
+          if (!nb) {
             var borrowed = false;
-            d.append(el("p", "The Atlas lists no birth or marriage book of " + info.name + " for these years.", "lf-filed"));
+            d.append(el("p", x.books.length ? "No book the Atlas lists for " + info.name + " has births " + years(x.born) + ": the books above reach these years only for marriages." : "The Atlas lists no birth or marriage book of " + info.name + " for these years.", "lf-filed"));
             (info.neigh || []).forEach(function (n) {
-              var ng = generationGroups(n.info.cols, born), hit = ng && ng.groups.filter(function (y) { return y.gen === x.gen; })[0]; if (!hit || !hit.books.length) return;
-              var nd = fold(n.info.name + ", " + Math.max(1, Math.round(n.km)) + " km \u00b7 " + hit.books.length + " book" + (hit.books.length === 1 ? "" : "s"), false); nd.append(bookRows(hit.books, n.info.href)); d.append(nd); borrowed = true;
+              var ng = generationGroups(n.info.cols, born), hit = ng && ng.groups.filter(function (y) { return y.gen === x.gen; })[0]; if (!hit) return;
+              var books = x.books.length ? hit.books.filter(function (c) { return inYears(c, "b", x.born); }) : hit.books; if (!books.length) return;
+              var nd = fold(n.info.name + ", " + Math.max(1, Math.round(n.km)) + " km \u00b7 " + books.length + (x.books.length ? " birth" : "") + " book" + (books.length === 1 ? "" : "s"), false); nd.append(bookRows(books, n.info.href, x)); d.append(nd); borrowed = true;
             });
-            d.append(el("p", borrowed ? "A neighbour\u2019s book is a lead, not proof the family used it." : near ? "The Atlas lists none for the neighbouring places either." : "", "lf-filed"));
+            if (borrowed || near) d.append(el("p", borrowed ? "A neighbour\u2019s book is a lead, not proof the family used it." : "The Atlas lists none for the neighbouring places either.", "lf-filed"));
           }
           wrap.append(d);
         });
@@ -4254,7 +4282,7 @@
         }
         if (cols.length) {
           any = true; wrap.append(el("h5", "FamilySearch collections that cover " + info.name));
-          var u2 = el("ul", null, "lf-vols lf-srcs"); cols.forEach(function (c) { var li = el("li"), a = el("a", c.t); a.href = c.url; a.rel = "noopener"; li.className = "lf-src"; li.append(a, el("span", c.from + "–" + c.to + (c.n ? " \u00b7 " + c.n.toLocaleString("en") + " records" : ""), "lf-filed")); u2.append(li); }); wrap.append(u2);
+          var u2 = el("ul", null, "lf-vols lf-srcs"); u2.setAttribute("data-collections", "1"); cols.forEach(function (c) { var li = el("li"), a = el("a", c.t); a.href = c.url; a.rel = "noopener"; li.className = "lf-src"; li.setAttribute("data-access", "account"); li.append(a, el("span", c.from + "–" + c.to + (c.n ? " \u00b7 " + c.n.toLocaleString("en") + " records" : ""), "lf-filed")); u2.append(li); }); wrap.append(u2);
         }
         return any ? wrap : null;
       }
@@ -4292,8 +4320,8 @@
         if (!ps.length) { wrap.append(el("p", "The source catalogue lists nothing yet for " + (info.countryName || info.name) + ". Look for its national archive and the state or county records directly: that is a gap in the Atlas, not proof nothing exists.", "lf-filed")); return wrap; }
         wrap.append(el("h5", "Archives and sources for " + (info.countryName || info.name)));
         var ul = el("ul", null, "lf-vols lf-srcs");
-        ps.slice(0, 6).forEach(function (p) { ul.append(srcLine(p)); items.push({ src: p, href: p.url }); });
-        if (ps.length > 6) { var li2 = el("li"), a2 = el("a", "and " + (ps.length - 6) + " more in the source catalogue"); a2.href = base + "providers/"; li2.append(a2); ul.append(li2); }
+        ps.slice(0, shelves ? ps.length : 6).forEach(function (p, i) { ul.append(srcLine(p)); if (i < 6) items.push({ src: p, href: p.url }); });
+        if (ps.length > 6) { var li2 = el("li", null, "lf-cat"), a2 = el("a", shelves ? "The whole source catalogue" : "and " + (ps.length - 6) + " more in the source catalogue"); a2.href = base + "providers/"; li2.append(a2); ul.append(li2); }
         wrap.append(ul); return wrap;
       }
       /* The place over the whole of its history, as a place search shows it: every era with its flag and who held the ground, the one they were
@@ -4351,13 +4379,18 @@
         function evItem(e) { var li = el("li", null, "lf-now-" + e.ty), yb = el("b", null), hist = e.f >= 600, ya = el(hist ? "a" : "span", e.f + (e.t !== e.f ? "\u2013" + e.t : "")); yb.append(ya, " "); li.append(yb);
           if (hist) { ya.href = base + "history/?y=" + e.f; ya.title = "See it on the map, from " + e.f + ", in the History theatre"; var ea = el("a", typeLabel(e.ty) + ": " + e.n, "lf-era-link"); ea.href = base + "history/?y=" + e.f; ea.title = "See where and when it happened, in the History theatre"; li.append(ea); }
           else li.append(document.createTextNode(typeLabel(e.ty) + ": " + e.n));
+          if (shelves) {
+            var what = [e.says ? short(e.says, 200) : "", e.toll && e.toll.text ? short(e.toll.text, 160) : ""].filter(Boolean).join(" ");
+            if (what) li.append(el("div", what, "lf-filed lf-evsay"));
+            if (e.open) li.append(el("div", "Disputed: " + short(e.open, 160), "lf-filed lf-evsay"));
+          }
           return li; }
         if (!evs.length && win && mort && info.lat != null) wrap.append(el("p", "The Atlas lists no mass-mortality event covering this area in " + spanText(win) + ".", "lf-filed"));
         if (evs.length) {
           wrap.append(el("h5", "Mass mortality whose area covers " + info.name + (win ? ", " + spanText(win) : "")));
           var ue = el("ul", null, "lf-eras lf-mort");
-          evs.slice(0, 8).forEach(function (e) { ue.append(evItem(e)); });
-          if (evs.length > 8) ue.append(el("li", "and " + (evs.length - 8) + " more on the place page", "lf-filed"));
+          evs.slice(0, shelves ? evs.length : 8).forEach(function (e) { ue.append(evItem(e)); });
+          if (!shelves && evs.length > 8) ue.append(el("li", "and " + (evs.length - 8) + " more on the place page", "lf-filed"));
           wrap.append(ue);
         }
         if (outside.length) {
@@ -4416,7 +4449,11 @@
           else if (vs.length) {
             if (win && !vs[0].fits) li.append(el("p", "None of its FamilySearch registers meets " + win[0] + "\u2013" + win[1] + "; the nearest in time:", "lf-filed"));
             var u2 = el("ul", null, "lf-vols");
-            vs.forEach(function (v) { var l2 = el("li"), l = el("a", volLabel({ title: v.t, from: v.from, to: v.to })); l.href = v.url; l.rel = "noopener"; l.target = "_blank"; l2.append(l); u2.append(l2); });
+            vs.forEach(function (v) {
+              var l2 = el("li"), l = el("a", volLabel({ title: v.t, from: v.from, to: v.to })); l.href = v.url; l.rel = "noopener"; l.target = "_blank"; l2.append(l);
+              var miss = win && v.fits !== false ? titleMisses(v.t, win) : ""; if (miss) l2.append(el("span", " " + miss, "lf-filed lf-covers"));
+              u2.append(l2);
+            });
             li.append(u2);
           }
           ul.append(li);
@@ -4516,10 +4553,10 @@
         hd.append(el("span", String(n), "lf-stop-n"));
         var tt = el("div"); tt.append(el("div", kicks.join("; "), "lf-stop-k"), el("h3", info.name)); var sub = [info.countryName, whens.join(", ")].filter(Boolean).join(" \u00b7 "); if (sub) tt.append(el("div", sub, "lf-stop-s"));
         hd.append(tt); sec.append(hd);
-        sec.append(placeStrip(info));
-        (f.near || []).forEach(function (nd) { if (info.row && nd.pick === info.row.i) sec.append(nearBox(nd)); });
-        if (info.p && info.p.question) { var oq = el("div", null, "lf-near is-unsure lf-question"); oq.append(el("h4", "Open question"), el("p", info.p.question)); sec.append(oq); }
-        var grid = el("div", null, "lf-stop-grid"), then = el("div", null, "lf-stop-then"), where = el("div", null, "lf-stop-where");
+        sec.append(onShelf(placeStrip(info), "times"));
+        (f.near || []).forEach(function (nd) { if (info.row && nd.pick === info.row.i) sec.append(onShelf(nearBox(nd), "near")); });
+        if (info.p && info.p.question) { var oq = el("div", null, "lf-near is-unsure lf-question"); oq.append(el("h4", "Open question"), el("p", info.p.question)); sec.append(onShelf(oq, "question")); }
+        var grid = el("div", null, "lf-stop-grid"), then = onShelf(el("div", null, "lf-stop-then"), "times"), where = el("div", null, "lf-stop-where");
         then.append(el("h4", "Who held the ground"));
         if (dated) then.append(datedRows(info, dated));
         else if (!years.length) {
@@ -4534,11 +4571,11 @@
         var needs = !info.isCountry && (info.cols || []).length ? bookNeeds(dated, kinds, win || span || storyYears()) : [], keyed = needs.length > 0;
         if (keyed) where.append(keyList(info, needs));
         if (!info.isCountry && bornYear()) { var gf = generationFolds(info, bornYear(), true); if (gf) where.append(gf); }
-        if (info.isCountry) { var told = storyYears(), cl = countryList(info, win || span || (told ? [f.told[1], told[1]] : null)); if (cl) where.append(cl); }
+        if (info.isCountry) { var told = storyYears(), cl = countryList(info, win || span || (told ? [f.told[1], told[1]] : null)); if (cl) where.append(onShelf(cl, "archives")); }
         var fl = fsList(info, kinds, win, keyed); if (fl) where.append(fl);
         var vl = keyed || info.isCountry ? null : volumeList(info, kinds, win); if (vl) where.append(vl); else if (!keyed && !info.isCountry && kinds.length) { where.append(el("p", "The Atlas lists no " + (kinds.length > 1 ? "birth, baptism or marriage" : kinds[0] === "b" ? "birth or baptism" : kinds[0] === "m" ? "marriage" : "burial") + " volume for " + info.name + (win ? " in those years" : "") + ". That is a gap in the Atlas, not proof the records do not exist.", "lf-filed")); where.append(heldList(info)); }
-        if (withSources) where.append(sources(info));
-        var wl = worldList(info); if (wl) where.append(wl);
+        if (withSources) where.append(onShelf(sources(info), "archives"));
+        var wl = worldList(info); if (wl) where.append(onShelf(wl, "web"));
         /* the rest, only where there is a rest: how many, and where */
         var nb = info.isCountry ? (info.holds || []).length : (info.cols || []).length;
         if (nb) {
@@ -4880,8 +4917,9 @@
       var btn = el("button", pe.empty || (!pe.name && !(pe.events || []).length && !pe.place) ? "+ Add details" : "Add or change details", "lf-edit"); btn.type = "button";
       var form = null;
       btn.addEventListener("click", function () {
-        if (form) { form.remove(); form = null; c.classList.remove("editing"); btn.setAttribute("aria-expanded", "false"); return; }
-        form = el("form", null, "lf-form"); c.classList.add("editing"); btn.setAttribute("aria-expanded", "true");
+        var host = btn.parentNode || c;   /* the box, or wherever the page has put the box's button (the story page puts it in the selected person's panel) */
+        if (form) { form.remove(); form = null; host.classList.remove("editing"); btn.setAttribute("aria-expanded", "false"); return; }
+        form = el("form", null, "lf-form"); host.classList.add("editing"); btn.setAttribute("aria-expanded", "true");
         var spouse = slot.kind === "spouse", me = slot.kind === "self" && slot.me, f = {};
         function field(key, text, ph, small) { var l = el("label", null, small ? "sm" : ""), i = el("input"); i.type = "text"; i.placeholder = ph || ""; i.autocomplete = "off"; l.append(el("span", text), i); form.append(l); f[key] = i; }
         if (!me) field("name", spouse ? "Their name" : "Name", pe.name ? "now: " + pe.name : "first name and surname");
@@ -4902,7 +4940,7 @@
           if (!Object.keys(v).some(function (k) { return v[k]; })) { btn.click(); return; }
           onEdit(slot, v);
         });
-        c.append(form); var first = form.querySelector("input"); if (first) first.focus();
+        host.append(form); var first = form.querySelector("input"); if (first) first.focus();
       });
       c.append(btn);
     }

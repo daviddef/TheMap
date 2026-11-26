@@ -1,6 +1,6 @@
-/* THE STORY PAGE, /read/#story. Tell what you know and the whole page fills in as you write: the places on a map with a year slider, the
-   person as told, how their names were written, the family, what was going on in those years, a research plan, and the two ways to keep it.
-   One column that reads from the top, with a rail on the left to jump about.
+/* THE STORY PAGE, /read/#story. Tell what you know and the whole page fills in as you write. It reads from the top: the words, the family (each box a way in), the three
+   searches to do first, the chosen person with their map and the books for their years, everything else on shelves, and the two ways to keep it. A rail on the left
+   jumps about. story-family.js does the arranging; the parts come from story-engine.js and story-todo.js.
 
    It is the same reader as the home page (story-engine.js); the home page keeps only the box, the map and a short card with a button
    that brings you here (the words are handed over through localStorage, once, for ten minutes). Everything is read in the browser from the
@@ -39,6 +39,7 @@
   }
   function goTo(id) {
     var t = $(id); if (!t) return;
+    if (F) F.reveal(t);   /* a shelf is opened, a person's box chosen, before the page moves to it */
     t.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: t.classList.contains("lf-card") ? "center" : "start" });
     if (t.classList.contains("lf-card")) { t.classList.add("lf-card-hit"); setTimeout(function () { t.classList.remove("lf-card-hit"); }, 1600); }
   }
@@ -50,7 +51,7 @@
   /* each place of the story gets its own line under "Place by place", so the rail reads like the route */
   function placesRail() {
     [].forEach.call(rail.querySelectorAll("a.sub:not(.psub)"), function (x) { x.remove(); });
-    var anchor = rail.querySelector('[data-go="sp-places"]'), prev = anchor, secs = $("sp-stops").querySelectorAll(".lf-stop");
+    var anchor = rail.querySelector('[data-go="sp-books"]'), prev = anchor, secs = $("sp-stops").querySelectorAll(".lf-stop");
     if (!anchor) return;
     [].forEach.call(secs, function (sec, i) {
       sec.id = "sp-stop-" + (i + 1);
@@ -83,7 +84,7 @@
     spy = new IntersectionObserver(function (ents) {
       ents.forEach(function (en) { if (en.isIntersecting) { [].forEach.call(rail.querySelectorAll("a"), function (a) { a.classList.toggle("on", a.getAttribute("data-go") === en.target.id); }); } });
     }, { rootMargin: "-10% 0px -70% 0px" });
-    [].forEach.call(rail.querySelectorAll("a[data-go]"), function (a) { var s = $(a.getAttribute("data-go")); if (s && !s.hidden) spy.observe(s); });
+    [].forEach.call(rail.querySelectorAll("a[data-go]"), function (a) { var s = $(a.getAttribute("data-go")); if (s && (!s.hidden || s.classList.contains("sp-shelf"))) spy.observe(s); });   /* a closed shelf is watched too: it marks the rail when it opens */
   }
 
   /* ---- what the page understood, as chips ------------------------------------------------------------------------------------ */
@@ -290,7 +291,61 @@
       return { L: L, map: map };
     });
   }
-  var J = E.createJourney({ els: { cap: $("sp-cap"), slider: $("sp-year"), yearOut: $("sp-yearout"), play: $("sp-play"), moments: $("sp-moments"), time: $("sp-time"), mapBox: $("sp-map") }, getMap: getMap, askBox: $("sp-ask"), onBorn: function (y) { setBorn(y); } });
+  var J = E.createJourney({ els: { cap: $("sp-cap"), slider: $("sp-year"), yearOut: $("sp-yearout"), play: $("sp-play"), moments: $("sp-mapnote"), time: $("sp-time"), mapBox: $("sp-map") }, getMap: getMap, askBox: $("sp-ask"), onBorn: function (y) { setBorn(y); }, slim: true, setting: "map" });
+  /* the setting of the whole family, written once whoever is chosen: it draws no map, so its other parts are boxes that are never shown */
+  function unseen(tag) { return document.createElement(tag || "div"); }
+  var Jm = E.createJourney({ els: { cap: unseen(), slider: unseen("input"), yearOut: unseen(), play: null, moments: $("sp-moments"), time: null, mapBox: null }, getMap: function () { return new Promise(function () {}); }, askBox: unseen(), setting: "shelf" });
+  var F = window.raStoryFamily ? window.raStoryFamily.create({ spansOf: E.spansOf, onPerson: function (person, mode) { followMap(person, mode); }, onEvent: function (c, hand) { nearBooks(c, hand); } }) : null;
+  /* THE MAP FOLLOWS THE SELECTION: a relative with places of their own gets their journey (and a button back to everyone); the person the story is about, or someone
+     with no place told, gets the whole family, and the page says which it is showing. */
+  var mapAt = null, mapDrawn = "";
+  function followMap(person, mode) {
+    if (!last || !placed(Object.assign({}, last.facts, { people: last.people }))) return;
+    var f = last.facts, own = window.raStoryFamily.mapFacts(f, person), name = person ? window.raStoryFamily.nameOf(person) : "";
+    var one = own && mode !== "all";
+    $("sp-map-person").hidden = $("sp-map-all").hidden = !own;
+    if (own) { $("sp-map-person").textContent = name + "\u2019s places"; $("sp-map-person").setAttribute("aria-pressed", one ? "true" : "false"); $("sp-map-all").setAttribute("aria-pressed", one ? "false" : "true"); }
+    mapWords = !own && person && person.role !== "self" ? "The story tells no place of its own for " + name + ", so the map shows the whole family." : "";
+    mapSay();
+    var key = one ? "p|" + name + "|" + (person.key || person.role) : "all";
+    if (key === mapDrawn && mapAt === last) return;
+    mapDrawn = key; mapAt = last;
+    journeyDrawn = J.draw(one ? own : f, last.mort).then(function () { paintNear(); playOnce(); }, function () { /* the caption says the places in words */ });
+  }
+  /* THE BOOKS NEAR THE EVENT CHOSEN: the same places as the chart, on the same map, filled where one has a book for the years. A tap on an event shows them; Play and
+     the journey buttons go back to the journey. The page opens on the journey, so it can still play by itself the first time it is seen. */
+  var nearC = null, nearShown = false, nearLayer = null, nearTok = 0, journeyDrawn = null, mapWords = "";
+  function mapSay() { $("sp-map-say").textContent = nearShown && nearC ? window.raStoryFamily.mapSay(nearC) : mapWords; }
+  function nearBooks(c, hand) {
+    nearC = c && c.map && c.map.length > 1 ? c : null;
+    if (!nearC) nearShown = false; else if (hand) nearShown = true;
+    $("sp-map-near").hidden = !nearC;
+    paintNear();
+  }
+  function paintNear() {
+    var tok = ++nearTok, c = nearShown ? nearC : null;
+    $("sp-map-near").setAttribute("aria-pressed", c ? "true" : "false");
+    mapSay();
+    if (nearLayer) { nearLayer.remove(); nearLayer = null; }
+    if (!c || !journeyDrawn) return;
+    journeyDrawn.then(function () { return getMap(); }).then(function (m) {
+      if (tok !== nearTok) return;
+      var L = m.L, g = L.layerGroup().addTo(m.map), pts = [];
+      c.map.forEach(function (r) {
+        var dot = L.circleMarker([r.lat, r.lon], { radius: r.home ? 11 : 8, weight: 3, color: r.covers ? "#fff" : "#1f5c6b", fillColor: r.covers ? "#1f5c6b" : "#fff", fillOpacity: 1 }).addTo(g), tip = document.createElement("span");
+        tip.textContent = r.name + (r.home ? "" : " " + r.km + " km") + (r.covers ? " \u00b7 has a book for these years" : " \u00b7 none for these years");
+        dot.bindTooltip(tip, { permanent: !!r.home, direction: "top", offset: [0, -8], className: "lf-tip" });
+        pts.push([r.lat, r.lon]);
+      });
+      nearLayer = g;
+      m.map.fitBounds(L.latLngBounds(pts), { padding: [40, 40], maxZoom: 11, animate: false });
+    }, function () { /* the chart says the same in words */ });
+  }
+  function journeyAgain() { nearShown = false; paintNear(); mapDrawn = ""; }
+  $("sp-map-person").addEventListener("click", function () { journeyAgain(); if (F) F.mode("person"); });
+  $("sp-map-all").addEventListener("click", function () { journeyAgain(); if (F) F.mode("all"); });
+  $("sp-map-near").addEventListener("click", function () { if (!nearC) return; if (nearShown) { journeyAgain(); if (F) F.mode(F.mode()); } else { nearShown = true; paintNear(); } });
+  $("sp-play").addEventListener("click", function () { if (nearShown) { nearShown = false; paintNear(); mapDrawn = ""; if (F) F.mode(F.mode()); } });
   /* THE JOURNEY PLAYS ONCE, THE FIRST TIME IT IS SEEN. David: «the map doesn't play». It did, but behind a button under the family tree, and nothing said so. Now the map is the
      first thing under the words, and the first time it comes into view with a timeline it plays through by itself, once for the page and never when the visitor has asked
      their device for less motion. Pressing Pause stops it; typing redraws it without playing again. */
@@ -302,7 +357,7 @@
     watcher = new IntersectionObserver(function (ents) {
       if (played || !ents.some(function (en) { return en.isIntersecting; })) return;
       played = true; watcher.disconnect();
-      setTimeout(function () { if (!$("sp-time").hidden && /Play/.test(btn.textContent)) btn.click(); }, 700);
+      setTimeout(function () { if (!nearShown && !$("sp-time").hidden && /Play/.test(btn.textContent)) btn.click(); }, 700);
     }, { threshold: 0.5 });
     watcher.observe(map);
   }
@@ -321,7 +376,7 @@
   }
   /* "What was going on" is matched to years. With ages only there is nothing to match yet: say so, and say what fills it. */
   function settingNote(g) {
-    var m = $("sp-moments"); if (!m || m.children.length) return;
+    var m = $("sp-moments"); if (!m || m.children.length || document.querySelector("#sp-times-places .lf-mort li")) return;   /* each place already lists the events whose area covers it */
     var f = g.facts, haveYear = f.born != null || f.left != null || (f.route || []).some(function (x) { return x.year != null; });
     if (haveYear) { m.append(el("p", "The Atlas holds no epidemic, famine, war or mass-death event whose area covers these places in the years they were there. That is what the Atlas holds, not proof that nothing happened.", "sp-sublede")); return; }
     m.append(el("p", "This fills in once the Atlas knows the years. The story gave ages but no dates. Add the year they were born and it shows the epidemics, famines, wars and leaders of the years they were at each place, and who held the ground.", "sp-sublede"));
@@ -367,26 +422,29 @@
     rail.hidden = false;
     var here = placed(Object.assign({}, f, { people: g.people }));
     secShow("sp-places", here);
-    var sb = J.stops(f, g.mort, g.people); stopItems = sb.items; var st = $("sp-stops"); st.textContent = ""; st.append(sb); placesRail();
-    var lb = E.lifeBlock(g.life, g.mort), lbox = $("sp-lifebox"); lbox.textContent = ""; secShow("sp-life", !!lb); if (lb) lbox.append(lb);
-    var nb = E.namesBlock(g.names, BASE), nbox = $("sp-namesbox"); nbox.textContent = ""; secShow("sp-names", !!nb);
+    var sb = J.stops(f, g.mort, g.people, { shelves: true }); stopItems = sb.items; var st = $("sp-stops"); st.textContent = ""; st.append(sb); placesRail();
+    var lb = E.lifeBlock(g.life, g.mort), lbox = $("sp-lifebox"); lbox.textContent = ""; if (lb) lbox.append(lb);
+    var nb = E.namesBlock(g.names, BASE), nbox = $("sp-namesbox"); nbox.textContent = "";
     if (nb) { nbox.append(nb); [].forEach.call(nb.querySelectorAll("details:not(.lf-cn-more):not(.lf-cn-around)"), function (d) { d.open = true; }); }
     var tr = E.treeBlock(g.people, f.rel, { onEdit: editBox, kin: f.kin, base: BASE, siblings: f.siblings, teller: f.teller }), ob = E.othersBlock(g.others, f.siblings), tbox = $("sp-tree"); tbox.textContent = ""; secShow("sp-family", !!(tr || ob)); if (tr) tbox.append(tr); if (ob) tbox.append(ob); E.linkPeople(tr, nb); peopleRail();
-    secShow("sp-setting", here);
-    secShow("sp-plan", here); secShow("sp-keep", here); if ($("sp-grp-research")) $("sp-grp-research").hidden = !here;
-    if (here) {
-      drawSteps(g); drawTodo(g); drawKeep(g);
-      J.draw(f, g.mort).then(function () { settingNote(g); playOnce(); }, function () { settingNote(g); });
-    } else {
-      J.clear(); if (todoOut) { todoOut.textContent = ""; todoTok++; }
+    secShow("sp-three", here); secShow("sp-keep", here);
+    mapDrawn = ""; nearC = null; nearShown = false; paintNear(); $("sp-map-near").hidden = true; $("sp-moments").textContent = ""; $("sp-mapnote").textContent = ""; $("sp-cap").textContent = "";
+    if (!here) J.clear();
+    if (here) { Jm.draw(f, g.mort); drawSteps(g); }
+    if (F) F.draw(g, { tree: tr, stops: sb, names: nb, life: lb, here: here });
+    if (here) settingNote(g);
+    var whoOn = !$("sp-who").hidden; ["sp-who"].forEach(function (id) { var a = rail.querySelector('[data-go="' + id + '"]'); if (a) a.hidden = !whoOn; });
+    if (here) { drawTodo(g); drawKeep(g); }
+    else {
+      if (todoTok != null) todoTok++;
       say("No place in the story yet, so there is no map or research plan. Add where someone was born or lived, such as \u201cborn in Senj, Croatia\u201d.");
     }
     watch();
   }
   function clearReport() {
     if ($("sp-doubt")) { $("sp-doubt").hidden = true; $("sp-doubt").textContent = ""; }
-    J.clear(); last = null; lastPlan = null; if (todoOut) { todoOut.textContent = ""; todoTok++; } rail.hidden = true; [].forEach.call(rail.querySelectorAll("a.sub:not(.psub)"), function (x) { x.remove(); });
-    ["sp-places", "sp-life", "sp-names", "sp-family", "sp-setting", "sp-plan", "sp-keep"].forEach(function (id) { secShow(id, false); });
+    J.clear(); Jm.clear(); last = null; lastPlan = null; mapDrawn = ""; nearC = null; nearShown = false; paintNear(); journeyDrawn = null; todoTok++; if (F) F.clear(); rail.hidden = true; [].forEach.call(rail.querySelectorAll("a.sub:not(.psub)"), function (x) { x.remove(); });
+    ["sp-places", "sp-who", "sp-family", "sp-three", "sp-else", "sp-keep"].forEach(function (id) { secShow(id, false); });
     $("sp-ai-out").hidden = true; $("sp-ai-out").textContent = ""; $("sp-title").textContent = "Tell us what you know";
   }
 
@@ -406,27 +464,28 @@
   }
 
   /* ---- the plan, place by place: computed here from the Atlas's own files (story-todo.js); nothing is sent anywhere ----------------------------------- */
-  var todoOut = $("sp-todo"), todoTok = 0, fileMemo = Object.create(null);
+  var todoTok = 0, fileMemo = Object.create(null);
   /* a file that did not arrive is forgotten, so the next draw asks for it again */
   function fetchFile(name) { return fileMemo[name] || (fileMemo[name] = fetch(BASE + name).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }).then(function (v) { if (v === null) delete fileMemo[name]; return v; })); }
   function drawTodo(g) {
-    if (!todoOut) return;
-    var tok = ++todoTok; todoOut.textContent = ""; todoOut.append(el("p", "Working out where to start…", "sp-fine"));
+    var tok = ++todoTok;
+    /* the plan is drawn apart and its cards are filed by the family view */
+    function file(T, plan) { var drawn = document.createElement("div"); T.render(plan, drawn); if (F) F.plan(plan, drawn); }
     Promise.all([window.raStoryTodo ? null : loadScript("story-todo.js"), fetchFile("archives-near.json"), fetchFile("regions.json"), fetchFile("providers.json")]).then(function (r) {
       if (tok !== todoTok) return;
       var an = r[1] && r[1].rows ? r[1].rows.map(function (x) { return { id: x[0], name: x[1], kind: x[2], access: x[3], cc: x[4], lat: x[5], lon: x[6], url: x[7], email: x[8], post: x[9], tel: x[10], state: x[11], form: x[12], branches: (x[13] || []).map(function (b) { return { name: b[0], tel: b[1] }; }), serves: x[14] || null }; }) : [];
       var pv = r[3] && (r[3].providers || r[3]) || [], byId = Object.create(null); an.forEach(function (a) { byId[a.id] = a; }); pv.forEach(function (p) { byId[p.id] = byId[p.id] || p; });
       var deps = { base: BASE, countries: data && data.countries, rows: data && data.rows, pickVolumes: window.raAtlasSummary && window.raAtlasSummary.pickVolumes, serves: window.raAtlasSummary && window.raAtlasSummary.serves, spansOf: window.raStory && window.raStory.spansOf, text: ($("sp-text") && $("sp-text").value) || "", archives: an, regions: r[2], provById: byId, mort: g.mort, cemeteries: { pending: true } };
-      var T = window.raStoryTodo, plan = T.build(g, deps), at = plan.anchor; T.render(plan, todoOut);
+      var T = window.raStoryTodo, plan = T.build(g, deps), at = plan.anchor; file(T, plan);
       if (!at || at.lat == null) return;
       /* burial grounds come after the plan is on the page: only the map squares around its starting place */
       var g0 = at.ground || at;
       return T.loadCemeteries(g0.lat, g0.lon, fetchFile).then(function (c) {
         if (tok !== todoTok) return;
         deps.cemeteries = c;
-        T.render(T.build(g, deps), todoOut);
+        file(T, T.build(g, deps));
       });
-    }).then(null, function () { if (tok === todoTok) { todoOut.textContent = ""; todoOut.append(el("p", "The plan could not be worked out just now. The steps below still apply.", "sp-fine")); } });
+    }).then(null, function (e) { if (window.console) console.error("story plan", e); if (tok === todoTok && F) F.failed("The plan could not be worked out just now. The method under Your full plan still applies."); });
   }
 
   /* ---- the research plan, by Claude Haiku, on request ----------------------------------------------------------------------- */
@@ -563,7 +622,7 @@
   /* ---- reading the words ----------------------------------------------------------------------------------------------------- */
   function signature(p) {
     return JSON.stringify([(p.near || []).map(function (n) { return n.word + n.pick + n.level + n.options.length; }), (p.route || []).map(function (x) { return x.row.i + ":" + x.age; }), p.left, p.born, p.name, (p.people || []).map(function (x) { return x.role + x.name + (x.occupation || "") + (x.bornText || "") + (x.parentSide || "") + JSON.stringify((x.events || []).map(function (e) { return [e.type, e.year, e.place]; })) + (x.place && x.place.word || ""); }), p.holds,
-      p.life && p.life.groups.map(function (g) { return g.items; }), p.life && p.life.illness, p.life && p.life.died, (p.siblings || []).map(function (x) { return x.name; }), (p.kin || []).length]);
+      p.life && p.life.groups.map(function (g) { return g.items; }), p.life && p.life.illness, p.life && p.life.died, (p.siblings || []).map(function (x) { return x.name; }), (p.kin || []).length, p.searched || []]);   /* a search told as made redraws: the plan and the book chart mark it */
   }
   /* ---- A STORY IN ANOTHER LANGUAGE (story-lang.js) --------------------------------------------------------------------------------
      David: «this isnt a croatian site, its supposed to be global... we need a ai language detect and translation built in». The reader understands English, so a story in
@@ -722,7 +781,7 @@
     var ul = el("ul"); rw.notes.forEach(function (n) { ul.append(el("li", n)); }); box.append(ul);
   }
   var tm = null;
-  function grow() { text.style.height = "auto"; text.style.height = Math.min(Math.max(text.scrollHeight, 110), 420) + "px"; }
+  function grow() { text.style.height = "auto"; text.style.height = Math.min(Math.max(text.scrollHeight, 72), 420) + "px"; }
   text.addEventListener("input", function () {
     hold = null;
     grow(); mirrorShift(); try { sessionStorage.setItem(DRAFT, text.value); } catch (e) { /* a private window: the draft is just not kept */ }

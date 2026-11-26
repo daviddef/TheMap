@@ -1,0 +1,45 @@
+---
+/* HOW COMPLETE «WHO TO CONTACT» IS, SAID IN NUMBERS. The Atlas means to be the place somebody looks first; a reader (and the next harvest)
+   can only trust that if the gaps are printed beside what is held. Read from public/contacts/coverage.json, which scripts/contacts/build.py
+   counts from the same rows the pages show. */
+import Base from "../layouts/Base.astro";
+import { u } from "../lib/url.js";
+import coverage from "../../public/contacts/coverage.json";
+import registry from "../../../data/contacts/sources.json";
+
+const SAY = { "town-hall": "Town halls", church: "Parishes and places of worship", diocese: "Dioceses and church archives", cemetery: "Burial grounds",
+  "cemetery-manager": "Cemetery managers", archive: "Archives", library: "Libraries", museum: "Museums and memorials", university: "Universities",
+  society: "Societies and volunteers", other: "Others" };
+/* Kinds the Atlas has no list of its own for: «known» is only what a contact source has named, so a share would flatter. */
+const NO_LIST = new Set(["town-hall", "cemetery-manager", "museum", "university"]);
+const n = (v) => v.toLocaleString("en");
+const share = (c) => {
+  if (NO_LIST.has(c.kind)) return "not counted yet";
+  const pc = 100 * c.reach / c.known;
+  return pc > 0 && pc < 0.1 ? "under 0.1%" : `${pc.toFixed(pc < 10 && pc > 0 ? 1 : 0)}%`;
+};
+const countries = new Intl.DisplayNames(["en"], { type: "region" });
+---
+<Base title="Who to contact: how complete it is" description="How many archives, parishes, burial grounds, libraries and town halls Record Atlas knows, and how many of them it can tell you how to reach.">
+  <p class="cap">Each place page lists the contacts held within 20 km. This is how far that goes today. «Can be written to or rung» means an e-mail, telephone,
+  postal address or contact form; a website alone is counted apart. Entries are joined only where two sources share an exact identifier, so one ground listed
+  by two sources can count twice.</p>
+  <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Kind</th><th>Known</th><th>Can be written to or rung</th><th>Share</th><th>With e-mail</th><th>Website only</th></tr></thead>
+      <tbody>
+        {coverage.kinds.map((c) => (
+          <tr><td>{SAY[c.kind] || c.kind}</td><td>{n(c.known)}</td><td>{n(c.reach)}</td><td>{share(c)}</td><td>{n(c.email)}</td><td>{n(c.webOnly)}</td></tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <h2>Where the contacts come from</h2>
+  <ul>
+    {Object.entries(registry.sources).map(([id, s]) => (
+      <li><a href={s.url}>{s.title}</a>: {s.licence}. {n(coverage.rows[id] || 0)} rows{coverage.harvested[id] ? `; harvested country by country, so far ${coverage.harvested[id].map((cc) => countries.of(cc)).join(", ")}` : ""}.</li>
+    ))}
+  </ul>
+  <p>Only organisations' own mailboxes are kept; an address that names a person is left out. Nothing is guessed from a parent body or a homepage.
+  The files are open: see <a href={u("/data/")}>the data page</a>.</p>
+</Base>

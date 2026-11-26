@@ -1,0 +1,105 @@
+name: Archive contacts
+
+# WHERE TO WRITE, KEPT UP WITH THE SOURCE LIST. Sources are added to data/providers.json every week, and one that carries a Wikidata id
+# has no contact block until scripts/harvest-provider-contacts.py is run again. It had been run once, on 29 September 2026, and by late
+# November two thirds of the institutions with something to say were missing from the file.
+#
+# IT PROPOSES; IT DOES NOT PUBLISH. As with the link check and the surname harvest, nothing reaches the site because a cron job ran.
+# Wikidata is edited by anyone, so the new file is pushed to the branch auto/provider-contacts and an issue says what changed. A person
+# opens the compare link, reads it and merges it. An unmerged proposal is brought up to date on the same branch the following week.
+on:
+  schedule:
+    - cron: "23 5 * * 2"     # Tuesday morning, off the hour so as not to pile on
+  workflow_dispatch:
+
+permissions:
+  contents: write   # push the proposal branch; nothing here pushes to main
+  issues: write
+
+concurrency:
+  group: archive-contacts
+  cancel-in-progress: false
+
+jobs:
+  harvest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+
+      - name: Harvest from Wikidata
+        id: harvest
+        run: |
+          python3 scripts/harvest-provider-contacts.py --summary "$RUNNER_TEMP/summary.txt"
+          git show HEAD:data/provider-contacts.json > "$RUNNER_TEMP/published.json"
+          if python3 scripts/harvest-provider-contacts.py --same-as "$RUNNER_TEMP/published.json"; then
+            echo "no contact differs from what main holds: nothing to propose"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # The story plan's contact list is tested against the real data, so a harvest that would break it is stopped here.
+      - name: Check the proposal
+        if: steps.harvest.outputs.changed == 'true'
+        run: node --test site/test/archives-near.test.js site/test/provider-contacts.test.js
+
+      - name: Push it to the proposal branch
+        id: push
+        if: steps.harvest.outputs.changed == 'true'
+        run: |
+          branch=auto/provider-contacts
+          previous=""
+          if git ls-remote --exit-code --heads origin "$branch" > /dev/null; then
+            git fetch --quiet origin "$branch"
+            previous=$(git rev-parse FETCH_HEAD)
+            if git show "$previous:data/provider-contacts.json" > "$RUNNER_TEMP/proposed.json" \
+               && python3 scripts/harvest-provider-contacts.py --same-as "$RUNNER_TEMP/proposed.json"; then
+              echo "the same contacts are already proposed on $branch"
+              exit 0
+            fi
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git switch --quiet -c proposal
+          git add data/provider-contacts.json
+          git commit --quiet -m "Archive contacts: the weekly harvest from Wikidata"
+          # Keep this week's tree (main plus the new file) while descending from last week's proposal, so the push needs no force.
+          if [ -n "$previous" ]; then git merge --quiet -s ours -m "Replace last week's contact proposal" "$previous"; fi
+          git push --quiet origin "HEAD:refs/heads/$branch"
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Say what changed
+        if: steps.push.outputs.pushed == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let report = fs.readFileSync(process.env.RUNNER_TEMP + '/summary.txt', 'utf8').trim();
+            // An issue body stops at 65,536 characters; the branch holds everything.
+            if (report.length > 55000) report = report.slice(0, 55000) + '\n(cut short here: the compare page has the rest)';
+            const { owner, repo } = context.repo;
+            const body = [
+              'The weekly contact harvest found changes in Wikidata. Nothing is on the site yet.',
+              '',
+              `Read them, then open a pull request and merge it: https://github.com/${owner}/${repo}/compare/main...auto/provider-contacts?expand=1`,
+              '',
+              'Look at **Changed** and **Removed** first: Wikidata is edited by anyone.',
+              'An address that names a person is refused by adding its hash to `REFUSED` in `scripts/provider_contact_rules.py` (the command is there).',
+              '',
+              '```', report, '```',
+            ].join('\n');
+            const title = 'Archive contacts: changes to look at';
+            const open = await github.rest.issues.listForRepo({ owner, repo, state: 'open', labels: 'contacts' });
+            const existing = open.data.find(i => i.title === title);
+            if (existing) {
+              await github.rest.issues.createComment({ owner, repo, issue_number: existing.number, body });
+            } else {
+              await github.rest.issues.create({ owner, repo, title, body, labels: ['contacts'] });
+            }

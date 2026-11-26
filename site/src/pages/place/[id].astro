@@ -528,6 +528,14 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
     </section>
   )}
 
+  {/* Filled by the script from contacts/ when the reader gets here: fifty-seven thousand pages carry two tags, not a contact list each. */}
+  {place.lat != null && place.lon != null && (
+    <Fragment>
+      <section id="contacts-near" data-lat={place.lat} data-lon={place.lon} data-base={u("/")}></section>
+      <script is:inline defer src={u("/js/contacts-near.js")}></script>
+    </Fragment>
+  )}
+
   {national.length > 0 && !nationalShared && (
     <section>
       <h2>The sources for {countryName}</h2>
@@ -657,6 +665,11 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
   .names b { font-weight: 800; margin: 0 6px 6px 0; display: inline-block; padding: 2px 14px; border-radius: 999px; background: var(--panel); border: 1px solid var(--rule-strong); font-size: 18px; }
   .vols { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 6px; }
   .vols li { font-family: var(--sans); font-size: 13px; line-height: 1.5; padding: 8px 14px; background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; }
+  /* «Who to contact» is written in by a script, so its rows carry no scoping attribute and are styled from the section's own id. */
+  #contacts-near :global(.vols) { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 6px; }
+  #contacts-near :global(.vols li) { font-family: var(--sans); font-size: 13px; line-height: 1.5; padding: 8px 14px; background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; overflow-wrap: anywhere; }
+  #contacts-near :global(.vols .y), #contacts-near :global(.vols .who) { color: var(--ink-3); font-size: 12px; }
+  #contacts-near :global(summary) { cursor: pointer; font-family: var(--sans); font-size: 13px; margin-top: 8px; }
   .y { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); margin-left: 8px; }
   .who { font-size: 11px; color: var(--ink-3); margin-left: 8px; }
   .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 7px; }

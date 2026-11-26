@@ -181,6 +181,10 @@ const FILES = [
   { path: "/archives-wikidata.json", size: sizeOf("archives-wikidata.json"), ...licOf("archives-wikidata.json"),
     what: "The wider, unchecked set harvested from Wikidata. Drawn as its own layer because it is not all genealogical and none of it has been verified by hand.",
     shape: `{ archives: [{ q, name, lat, lon, cc, site }] }` },
+  { path: "/contacts/index.json", size: `${countIn("contacts/open").toLocaleString()} + ${countIn("contacts/odbl").toLocaleString()} squares`,
+    lic: "by folder: contacts/open/ CC0 and as published; contacts/odbl/ ODbL 1.0", src: "Record Atlas, Wikidata, © OpenStreetMap contributors",
+    what: "Who to contact, in one-degree squares: contacts/<group>/<lat>_<lon>.json. Every row names its source, and index.json gives each source's licence. contacts/odbl/ IS SHARE-ALIKE. How complete it is: /contacts/.",
+    shape: `{ rows: [{ id, kind, name, y, x, ids[], email[], tel[], web[], post, form, operator, url, src }] }` },
   { path: "/surnames.json.gz", size: sizeOf("surnames.json.gz"),
     lic: "CC0-1.0", src: "national statistical registers — see the file's own note",
     what: "The whole surname corpus in one gzipped file, including the 946,575 names that do not earn a page. There is a CSV beside it.",
@@ -280,8 +284,8 @@ const FILES = [
     claim over all of them.</p>
     <ul class="ra-lic">
       <li><b>ODbL 1.0, © OpenStreetMap contributors</b> — the archives and the
-        cemeteries harvested from OSM, and the 60,883 Irish townlands, which come
-        from Townlands.ie. Attribution required, and share-alike: a derived
+        cemeteries harvested from OSM, the contacts under <a href={u("/contacts/")}>contacts/odbl/</a>,
+        and the 60,883 Irish townlands, which come from Townlands.ie. Attribution required, and share-alike: a derived
         database has to be published under ODbL too.</li>
       <li><b>CC0 1.0</b> — the sets harvested from Wikidata, because Wikidata is
         CC0, and the surname corpus, which declares it.</li>

@@ -231,7 +231,59 @@
       (near.length ? "Neighbouring places with one for those years: " + near.join(", ") + ". A neighbour’s book is a lead, not proof the family used it." : "It lists none for the neighbouring places either.") };
   }
 
-  function recommend(g, deps, an) {
+  /* ---- a life told abroad: which record answers, and who holds it -------------------------------------------------------------------------------
+     Every sentence here about a law, a diocese or an archive's holdings was read on the page it links (26 Nov 2026). Where nothing was read, the line is a
+     QUESTION to put to the holder, and says the Atlas has not confirmed it. General rules by country and year only: never a claim that an entry exists. */
+  var SRC = {
+    brReg: { t: "Source: Brazil, Decree 9886 of 1888 (civil registration)", href: "https://www2.camara.leg.br/legin/fed/decret/1824-1899/decreto-9886-7-marco-1888-542304-publicacaooriginal-50566-pe.html" },
+    brStart: { t: "Source: Decree 10044 (in force 1 January 1889)", href: "https://www2.camara.leg.br/legin/fed/decret/1824-1899/decreto-10044-22-setembro-1888-542833-publicacaooriginal-52347-pe.html" },
+    brMar: { t: "Source: Decree 181 of 1890 (civil marriage)", href: "https://www2.camara.leg.br/legin/fed/decret/1824-1899/decreto-181-24-janeiro-1890-507282-publicacaooriginal-1-pe.html" },
+    cuiaba: { t: "Source: Diocese of Cuiabá (Catholic Encyclopedia)", href: "https://www.newadvent.org/cathen/04580b.htm" },
+    corumba: { t: "Source: Diocese of Corumbá, 1910", href: "https://catholic-hierarchy.org/diocese/dcoru.html" },
+    trent: { t: "Source: Council of Trent, session 24, chapter 7", href: "https://history.hanover.edu/texts/trent/ct24.html" },
+    uyReg: { t: "Source: gub.uy, civil entries from 1879 (Maldonado)", href: "https://www.gub.uy/tramites/partidas-nacimiento-defuncion-matrimonio-solicitud-testimonios-registro-civil-maldonado" },
+    uyArr: { t: "Ask Uruguay’s national archive for an arrival search", href: "https://www.gub.uy/tramites/informacion-ingreso-inmigrantes" },
+    arArr: { t: "Argentina’s national archive: arrivals search", href: "https://www.argentina.gob.ar/interior/archivo-general-de-la-nacion/consulta-de-antecedentes-migratorios" },
+    pyHist: { t: "Paraguay’s national archive, historical section", href: "https://historia.archivonacional.gov.py/index.php/?sf_culture=es" },
+    pyPass: { t: "Example: port captain’s passports, 1862–1864", href: "https://historia.archivonacional.gov.py/index.php/pasaportes-expedidos-por-el-capitan-del-puerto-de-asuncion" },
+    navy: { t: "Source: Austrian State Archives, navy personnel", href: "https://www.statearchives.gv.at/tasks-and-organisation/kriegsarchiv-information-in-brief/tips-for-researchers1/Researching-in-the-Kriegsarchiv/I-am-looking-for-a-naval-officer-or-a-sailor-of-the-Imperial-Royal-or-Imperial-and-Royal-Austro-Hungarian-Navy.html" }
+  };
+  var OVERSEAS = /^(US|CA|MX|CU|AR|UY|PY|BR|BO|CL|PE|EC|CO|VE|AU|NZ|ZA)$/;
+  var READ_FOR = { b: "Read it for the parents’ names, ages and birthplaces.", m: "Read it for birthplaces, parents’ names and witnesses.", d: "Read it for birthplace, parents, spouse and children." };
+  /* what to open for one event ("b" birth or baptism, "m" marriage, "d" death) in a country, in a year (null: not told) */
+  function abroadSay(cc, kind, year, matoGrosso) {
+    var t = [], l = [], church = false;
+    function pre() { t.push("Ask the diocese whether a file made before the wedding survives. A foreigner’s proof of baptism might be in it; the Atlas has not confirmed that."); t.push("The Council of Trent told priests to inquire, and get the bishop’s leave, before marrying people with no settled home."); l.push(SRC.trent); }
+    if (cc === "BR") {
+      if (kind === "m") {
+        if (year == null || year >= 1890) { t.push("A civil marriage entry was to give each side’s parentage and birthplace (1888 decree, art. 70); the civil marriage law was in force from 24 May 1890."); l.push(SRC.brReg, SRC.brMar); }
+        if (year != null && year <= 1890) { church = true; t.push("Before 24 May 1890 the civil marriage law was not in force: look for the church marriage in the parish register" + (year >= 1889 ? ", and in the civil registry too" : "") + "."); pre(); if (year < 1890) l.unshift(SRC.brMar); }
+      } else if (year != null && year < 1889) { church = true; t.push("Civil registration was in force everywhere in Brazil only from 1 January 1889: look first in the parish " + (kind === "d" ? "burial" : "baptism") + " register."); l.push(SRC.brStart); }
+      else {
+        t.push(kind === "d" ? "Brazil’s 1888 decree made a civil death entry give the birthplace, spouse, parents’ names and birthplace, and children (art. 77)." : "Brazil’s 1888 decree made a civil birth entry give the parents’ names and birthplace, where they married, and the grandparents’ names (art. 58).");
+        t.push("It was in force everywhere from 1 January 1889: ask the registry office (cartório) of the place."); l.push(SRC.brReg, SRC.brStart);
+      }
+      if (matoGrosso && (church || year == null) && (year == null || year < 1910)) { t.push((matoGrosso === "town" ? "The town was then in Mato Grosso" : "If the town was then in Mato Grosso") + ": the Diocese of Cuiabá covered that province until Corumbá became a diocese on 10 March 1910; ask both who holds the older papers."); l.push(SRC.cuiaba, SRC.corumba); }
+    } else if (cc === "UY") {
+      if (year == null || year >= 1879) { t.push("Uruguay’s civil registry issues birth, marriage and death entries from 1879, department by department: ask the registry of the department where it happened."); l.push(SRC.uyReg); }
+      if (year != null && year <= 1879) { t.push((year < 1879 ? "This is before 1879, the first year of the civil entries Uruguay’s registry issues" : "1879 is the first of those civil years") + ": look in the Catholic parish register of the place too."); if (year < 1879) l.push(SRC.uyReg); if (kind === "m") pre(); }
+    } else if (cc === "AR") { t.push("Ask the civil registry of the province from which year it holds entries; before that, look in the parish register."); if (kind === "m") pre(); }
+    else { t.push("Ask for both the civil entry and the parish register of the place: the Atlas has not checked here when civil registration began."); }
+    return { text: t.join(" "), links: l.slice(0, 5) };
+  }
+  /* the papers of getting there, for a country across the sea; `by` is the first year the story has them there */
+  function arrivalSay(cc, by, austrian) {
+    var t = [], l = [];
+    if (cc === "UY") { t.push("Uruguay’s national archive searches its databases of arrivals from overseas, 1829–1872, on a free request with name, nationality and rough date. It does not hold every arrival."); if (by > 1872) t.push("The story first has them there by " + by + ": ask if they may have come by 1872. For later, ask the archive where to look."); l.push(SRC.uyArr); }
+    else if (cc === "AR") { t.push("Argentina’s national archive offers a search of arrivals at the port of Buenos Aires, 1882–1937."); t.push(by != null && by < 1882 ? "The story has them there by " + by + ", before it begins." : "It is that port only: they may have come another way."); l.push(SRC.arArr); }
+    else if (cc === "PY") { t.push("Paraguay’s national archive says its historical section holds documents only up to 1870, port captain’s passports among them."); if (by == null || by > 1870) t.push("For a later arrival, ask the archive which office holds the papers."); l.push(SRC.pyHist, SRC.pyPass); }
+    else t.push("Ask that country’s national and regional archives for arrival lists, immigrant hostel books and foreigners’ registers: the Atlas has not confirmed which survive for these years.");
+    if (cc === "PY" && by != null && by <= 1890) { t.push("If they came up the river from the sea, ask at its mouth too: Uruguay’s national archive searches overseas arrivals of 1829–1872."); l.push(SRC.uyArr); }
+    if (austrian) t.push("The home place was then under Austria: try Austrian as the nationality too.");
+    return { text: t.join(" "), links: l };
+  }
+
+  function recommend(g, deps, an, eras) {
     var f = (g && g.facts) || {}, people = (g && g.people) || [], info = an.info, spans = deps.spansOf, now = deps.year || new Date().getFullYear(), HR = info.cc === "HR";
     var one = function (role) { return people.filter(function (x) { return x.role === role; })[0]; };
     var self = one("self"), fa = one("father"), mo = one("mother"), parents = people.filter(function (x) { return x.role === "parent"; });
@@ -239,6 +291,8 @@
     var told = /\b(1[6-9]\d\d|20[0-2]\d)\b/.exec(self.bornText || "");
     var r0 = (f.route || [])[0], born = f.born || (r0 && r0.role === "born" && r0.year) || (told ? Number(told[1]) : null);
     var place = bare(an.village ? an.village.name : info.name), served = an.village ? "the parish that served " + place : "the parish of " + place;
+    var sh = f.sheet || null, believed = sh && sh.origin && sh.origin.believed;
+    if (believed && fold(believed) === fold(place)) served += " (the believed village, not yet confirmed)";
     /* a village beside the town: its own neighbours first, then the town's, each once */
     var seenNear = {}, nearby = [].concat((an.village && an.village.neigh) || [], info.neigh || []).filter(function (n) {
       var name = n && n.info && n.info.name; if (!name || seenNear[name] || name === info.name) return false; seenNear[name] = 1; return true; });
@@ -262,22 +316,122 @@
       return out;
     }
     var cards = [];
+    /* WHERE EACH EVENT HAPPENED. A marriage or a death told in another place is looked for there, never in the books of the home village. */
+    var route = (f.route || []).filter(function (r) { return r && r.info; }), cnames = deps.countries || {};
+    function cname(cc) { return cnames[cc] || ""; }
+    function ccOf(name) { var n = fold(name); return Object.keys(cnames).filter(function (k) { return n && fold(cnames[k]) === n; })[0] || ""; }
+    function spot(r, told) { return { info: r.info.isCountry ? null : r.info, cc: r.info.cc, name: r.info.name, told: told }; }
+    function whereAt(e, year) {
+      if (e && e.place) {
+        if (fold(bare(e.place)) === fold(place) || fold(bare(e.place)) === fold(bare(info.name))) return null;
+        var hit = route.filter(function (r) { return r.info.name === e.place; })[0];
+        if (hit) return spot(hit, true);
+        var cc = ccOf(e.country); return cc ? { info: null, cc: cc, name: e.place, told: true } : null;
+      }
+      var seen = route.filter(function (r) { return r.year != null && year != null && r.year <= year; }), s = seen[seen.length - 1];
+      return s && s.info.cc !== info.cc ? spot(s, false) : null;
+    }
+    /* "town": the Atlas's own era table files the place in Mato Grosso in that year; true: only the story names it, so it stays conditional */
+    function matoGrosso(infos, year) {
+      var inEra = infos.some(function (i) { return i && (i.eras || []).some(function (e) { return /mato grosso/i.test(e.polity || "") && year != null && e.from <= year && e.to >= year; }); });
+      return inEra ? "town" : /mato grosso/i.test(String(deps.text || ""));
+    }
+    function placed(loc) { var c = cname(loc.cc); return bare(loc.name) + (c && fold(c) !== fold(bare(loc.name)) ? ", " + c : ""); }
+    var NIL_NEXT = "If nothing turns up: the other register (civil or church), the years either side, the next town and every spelling.";
+    function there(label, kind, year, loc, note) {
+      var say = abroadSay(loc.cc, kind, year, matoGrosso([loc.info], year)), bk = loc.info && year != null ? bookSay(loc.info, kind, [year, year], spans, []) : null;
+      return step(label + (year != null ? " · " + year : "") + " · " + placed(loc), (note ? note + " " : "") + (loc.told ? "" : "No place is told for it; the story has them in " + placed(loc) + " by then, so look there first. ") + READ_FOR[kind],
+        { detail: say.text + (bk && bk.found ? " " + bk.text : "") + " " + NIL_NEXT, href: bk && bk.found ? bk.href : "", links: say.links });
+    }
+    /* the first year the story has them in each country across the sea */
+    var lands = [];
+    if (!OVERSEAS.test(info.cc || "")) route.forEach(function (r) { var cc = r.info.cc; if (!OVERSEAS.test(cc || "")) return; var x = lands.filter(function (a) { return a.cc === cc; })[0]; if (!x) lands.push(x = { cc: cc, by: null }); if (r.year != null && (x.by == null || r.year < x.by)) x.by = r.year; });
+    var austrian = (eras || []).some(function (e) { return /Austria/.test(e.polity || ""); });
     /* the person the story is about */
-    var own = [];
+    var spouse = one("spouse"), married = ev(self, "married"), kids = people.filter(function (x) { return x.role === "child"; }), died = ev(self, "died");
+    /* a story told in sentences keeps «married in X» and «died in X» on the stop, not on the person */
+    function fromStop(type) {
+      var r = route.filter(function (x) { return x.said === type || (x.ev || []).some(function (e) { return e.type === type; }); })[0]; if (!r) return null;
+      var e = (r.ev || []).filter(function (x) { return x.type === type; })[0];
+      return { type: type, year: e ? e.year : type === "married" ? r.year : null, place: r.info.name, country: r.info.countryName };
+    }
+    married = married || fromStop("married"); died = died || fromStop("died");
+    /* a search the story says was made, with nothing found: never advised again, only past it */
+    var nil = (f.searched || []).filter(function (x) { return /^(baptism|birth|record)$/.test(x.what); })[0];
+    var nilHere = nil && (!nil.place || fold(nil.place) === fold(place) || fold(nil.place) === fold(bare(info.name)));
+    var sName = (sh && sh.surname) || "", sugS = (sh && sh.sugSurname) || [], sugG = (sh && sh.sugGiven) || [];
+    var spellings = [sName].concat(sugS).filter(Boolean);
+    var birth = [], later = [], away = [], leads = [];
     if (born) {
       var mg = margin(born);
       var bw = f.bornApprox ? est(born - 2, born + 2) : [born, born]; if (self.bornText && !f.bornApprox) bw.shown = true;
-      own.push(record("Birth or baptism entry" + (bw.shown ? " · " + self.bornText : ""), "b", bw, "In " + served + ". It should name the parents, so it tests every other name in the story.", [mg.say, GOD].filter(Boolean).join(" "), mg.links));
-    } else own.push(step("Birth or baptism entry", "No birth year is told. A rough one (“born in the 1920s”) lets the plan name the book.", {}));
-    var spouse = one("spouse"), married = ev(self, "married"), kids = people.filter(function (x) { return x.role === "child"; });
-    if (born && (spouse || married || kids.length)) own.push(record("Marriage", "m", married && married.year ? [married.year, married.year] : est(born + 17, born + 45), "It names the other family; the witnesses are often relatives.", ""));
-    var died = ev(self, "died");
-    if (died && died.year) own.push(record("Death or burial", "d", [died.year, died.year], "The entry or certificate and the grave.", ""));
-    else if (born && born > now - 105) own.push(step("Whether they are alive", "The story tells no death. Treat them as possibly living: ask the family. " + NO_LIVING, {}));
-    else if (born) own.push(record("Death or burial", "d", est(born, born + 90), "No death is told.", ""));
+      if (nil && nilHere) {
+        var lo = [nil.from - 7, nil.from - 1], hi = [nil.to + 1, nil.to + 7], b1 = bookSay(info, "b", lo, spans, nearby), b2 = bookSay(info, "b", hi, spans, nearby);
+        birth.push(step("Birth or baptism entry · " + yrs(lo) + " and " + yrs(hi), "Already searched, as told: " + yrs([nil.from, nil.to]) + (nil.place ? " in " + nil.place : "") + ", nothing found. Go either side of those years, in " + served + ".",
+          { detail: "Before: " + b1.text + " After: " + b2.text + (sh && sh.born && sh.born.via ? " A birth date taken from a " + sh.born.via + "’s record can be years out." : ""), href: b2.href || b1.href, links: mg.links }));
+        var span = [lo[0], hi[1]], next = nearby.filter(function (n) { return covering(n.info, "b", span, spans).length; }).slice(0, 5).map(function (n) { return n.info.name + " (" + Math.max(1, Math.round(n.km)) + " km)"; });
+        birth.push(step("The neighbouring parishes · " + yrs(span), "A nil in one parish says little: the family may have used another, or lived elsewhere then.",
+          { detail: (next.length ? "The Atlas lists birth or baptism books for some of those years at: " + next.join(", ") + ". " : "The Atlas lists no neighbouring birth book for those years: ask the archive which parishes surround this one. ") + "Read the pages as well as any index, under every spelling" + (spellings.length > 1 ? " (" + spellings.join(", ") + ")" : "") + ". A nil is not proof the person was born elsewhere." }));
+      } else birth.push(record("Birth or baptism entry" + (bw.shown ? " · " + self.bornText : ""), "b", bw, "In " + served + ". It should name the parents, so it tests every other name in the story.", [nil ? "Already searched, as told: " + yrs([nil.from, nil.to]) + " in " + nil.place + ", nothing found." : "", mg.say, GOD].filter(Boolean).join(" "), mg.links));
+    } else birth.push(step("Birth or baptism entry", "No birth year is told. A rough one (“born in the 1920s”) lets the plan name the book.", {}));
+    var wedAt = whereAt(married, married && married.year);
+    if (born && (spouse || married || kids.length)) later.push(wedAt ? there("Marriage", "m", married && married.year || null, wedAt) : record("Marriage", "m", married && married.year ? [married.year, married.year] : est(born + 17, born + 45), "It names the other family; the witnesses are often relatives.", ""));
+    var lastStop = route[route.length - 1], goneAt = died ? whereAt(died, died.year) : born && born <= now - 105 && lastStop && lastStop.info.cc !== info.cc ? spot(lastStop, false) : null;
+    if (goneAt) later.push(there("Death or burial", "d", died && died.year || null, goneAt));
+    else if (died && died.year) later.push(record("Death or burial", "d", [died.year, died.year], "The entry or certificate and the grave.", ""));
+    else if (born && born > now - 105) later.push(step("Whether they are alive", "The story tells no death. Treat them as possibly living: ask the family. " + NO_LIVING, {}));
+    else if (born) later.push(record("Death or burial", "d", est(born, born + 90), died ? "The story tells of the death but not the year." : "No death is told.", ""));
+    lands.slice(0, 3).forEach(function (x) {
+      var say = arrivalSay(x.cc, x.by, austrian);
+      away.push(step("Arrival in " + (cname(x.cc) || x.cc) + (x.by != null ? " · by " + x.by : ""), "An arrival paper can give age, nationality, the ship or port, and who travelled with them.",
+        { detail: say.text + " If nothing turns up: every spelling, the neighbouring countries’ ports, and companions from the same place.", links: say.links }));
+    });
+    if (lands.length) {
+      var man = sh ? sh.sex === "M" : /(father|grandfather|brother|uncle|son)$/.test(self.rel || ""), navy = austrian && man && born && born < 1865;
+      away.push(step("Papers made at home before leaving", "Whatever was made at home when someone left would name them as the home records spell them.",
+        { detail: (navy ? "If he served in the Austro-Hungarian navy: the Austrian State Archives search navy personnel files of men born before 1865 by name, online. They hold no civilian crews’ files and no emigrant registers. " : "") + "Ask the state archive listed under “Write to” whether passport, military conscription or harbour-office (seamen’s) files survive for the district: the Atlas has not confirmed which do.", links: navy ? [SRC.navy] : [] }));
+    }
+    if (sh && (sugS.length || sugG.length)) {
+      var me2 = (g.names && g.names.people || people).filter(function (x) { return x.role === "self"; })[0], forms = [], want = { latin: 1, italian: 1, croatian: 1 };
+      lands.forEach(function (x) { var k = { BR: "portuguese", AR: "spanish", UY: "spanish", PY: "spanish", CL: "spanish", US: "english", AU: "english", NZ: "english", CA: "english" }[x.cc]; if (k) want[k] = 1; });
+      ((me2 && me2.given && me2.given.groups) || []).forEach(function (gr) { if (!want[gr.lang]) return; var all = gr.forms.slice(0, 4).concat((gr.leads || []).slice(0, 3).map(function (n) { return n + " (to try)"; })); if (all.length) forms.push(gr.label + " " + all.join(", ")); });
+      var rows = ((g.names && g.names.census && g.names.census.rows) || []).filter(function (r) { return spellings.indexOf(r.as || r.name) > -1; });
+      var cen = HR && rows.length ? "In the 2021 census’s ten commonest surnames of each town: " + rows.map(function (r) { return (r.as || r.name) + (r.areas.length ? " is in " + r.areas.slice(0, 2).map(function (a) { return a.n; }).join(" and ") : " is in none"); }).join("; ") + ". A rank today proves nothing about then." : "";
+      leads.push(step("Every spelling: " + spellings.join(", "), (sName ? "The record writes " + sName : "The record’s spelling") + (sugS.length ? "; " + sugS.join(", ") + (sugS.length === 1 ? " is a suggestion" : " are suggestions") + ", not yet seen in a record of this person." : "."),
+        { detail: "First names: " + [sh.given + " (record)"].concat(sugG.map(function (n) { return n + " (suggested)"; })).join(", ") + "." + (forms.length ? " The Atlas’s name catalogue also has: " + forms.join("; ") + "." : "") + (cen ? " " + cen : "") + " Note which spelling each register really uses." }));
+    }
+    var o = sh && sh.origin;
+    if (o && o.written && (o.believed || o.parishWritten) && fold(o.believed || "") !== fold(o.parishWritten || "")) {
+      leads.push(step("Which place the record means", "The record writes «" + clip(o.written, 120) + "»." + (o.believed ? " " + (o.by ? o.by.charAt(0).toUpperCase() + o.by.slice(1) + " believes " : "Suggested: ") + o.believed + "." : ""),
+        { detail: "Treat that as a lead until a register shows the family there. Ask " + (o.by && !/^(I|we)$/i.test(o.by) ? o.by : "the diocesan or state archive") + " which parishes the record’s spelling" + (o.parishWritten ? " «" + o.parishWritten + "»" : "") + " could mean, in Latin and Italian forms too, and check those parishes’ books before settling on one." }));
+    }
+    var emigrant = later.length && (wedAt || goneAt), awayFirst = emigrant && (!born || nil || believed);
+    var own = awayFirst ? later.concat(leads, birth, away) : birth.concat(later, away, leads);
+    var known = [], unknown = [];
+    if (sh) {
+      var told = function (n) { return n && (n.recorded + ([].concat(n.sugGiven || [], n.sugSurname || []).length ? " (suggested: " + [(n.sugGiven || []).join(", "), (n.sugSurname || []).join(", ")].filter(Boolean).join(" · ") + ")" : "")); };
+      known.push("Name in the record: " + told({ recorded: sh.recorded, sugGiven: sugG, sugSurname: sugS }));
+      if (sh.father) known.push("Father in the record: " + told(sh.father));
+      if (sh.mother) known.push("Mother in the record: " + told(sh.mother));
+      if (self.bornText) known.push("Born " + self.bornText);
+      if (o && o.said) known.push(o.written ? "Origin as written: «" + o.written + "»" + (o.believed ? "; believed to be " + o.believed + ", not confirmed" : "") : "Origin as told: " + o.said);
+      (sh.presence || []).forEach(function (x) { known.push("In " + x.place + " by " + x.year); });
+      if (sh.married) known.push(["Married", sh.married.spouse, sh.married.year, sh.married.place].filter(Boolean).join(", ").replace("Married, ", "Married "));
+      if (sh.died) known.push(["Died", sh.died.year, sh.died.place].filter(Boolean).join(", ").replace("Died, ", "Died "));
+      if (sh.literacy) known.push("Told as unable to read, write or sign, so each clerk spelled the name by ear");
+      if (sh.errors) known.push("The story warns that the records may hold mistakes");
+      (f.searched || []).forEach(function (x) { known.push("Searched, nothing found (as told): " + x.what + (x.place ? " in " + x.place : "") + ", " + yrs([x.from, x.to])); });
+      if (nil || !born || (sh.born && sh.born.doubt)) unknown.push("The true birth date and the parish of baptism");
+      if (believed) unknown.push("Whether " + believed + " is the place the record means");
+      if (sugS.length) unknown.push("Which spelling of the surname the home records use");
+      if (!sh.mother) unknown.push("The mother’s name");
+      if (lands.length) unknown.push("When, how and from which port they left home");
+      if (/^(ancestor|forefather|forebear)$/.test(self.rel || "")) unknown.push("How many generations lie between them and the person telling the story");
+    }
     var lead = [born ? "born " + (self.bornText || born) : "", self.place ? "in " + bare(self.place) : ""].filter(Boolean).join(" ");
+    if (awayFirst) lead = "The records made where they went come first: they may name the birthplace that the search at home depends on.";
     if (an.village) lead = (lead ? lead + ". " : "") + "The Atlas lists no books for " + place + " itself, so the books named below are those it lists under " + info.name + " and its neighbours.";
-    cards.push({ title: me + (self.name ? " (" + whose + ")" : ""), why: lead, steps: own });
+    cards.push({ title: me + (self.name ? " (" + whose + ")" : ""), why: lead, known: known, open: unknown, steps: own });
     /* the parents: their marriage first, since it is the entry most likely to give both families */
     var folks = [fa, mo].concat(parents).filter(Boolean);
     if (folks.length && born) {
@@ -304,11 +458,30 @@
         record("Their birth or baptism entries", "b", est(born - 15, born + 15), "In " + served + ", under the same parents." + (names.length < sibs.length ? " This is where the missing names should be." : ""), GOD),
         step("Their descendants, as living relatives", "Ask relatives and local groups. A DNA test can also connect cousins; it is a personal choice. " + NO_LIVING, {})] });
     }
+    var firstAway = route.filter(function (r) { return r.info.cc !== info.cc && r.year != null; })[0];
     [spouse].concat(kids.filter(function (k) { return !k.unnamed && k.name; })).filter(Boolean).forEach(function (p) {
       var child = p.role === "child", b = ev(p, "born"), w = b && b.year ? [b.year, b.year] : born ? (child ? est(born + 17, born + 45) : est(born - 15, born + 15)) : null;
       if (!w || !p.name) return;
-      cards.push({ title: p.name + " (" + (child ? p.label || "child" : p.label || "husband or wife") + ")", why: "", steps: [w[1] > now - 105 ? step("Ask the family first", "They may be alive, or their children are. " + NO_LIVING, {}) : record("Birth or baptism entry", "b", w, child ? "Their entry names both parents." : "It names the other family.", GOD)] });
+      var one1;
+      if (w[1] > now - 105) one1 = step("Ask the family first", "They may be alive, or their children are. " + NO_LIVING, {});
+      /* who married, or was born, where the family went is looked for there; the story gives no reason to assume the home parish */
+      else if (!child && wedAt && !p.place) one1 = step("Marriage entry" + (married && married.year ? " · " + married.year : "") + " · " + placed(wedAt), "The story does not say where they were born, so no home parish is assumed.", { detail: "It is the marriage on " + (self.name || me) + "’s card: read it for this side’s birthplace and parents, then look for their baptism where it says.", links: abroadSay(wedAt.cc, "m", married && married.year || null, matoGrosso([wedAt.info], married && married.year)).links });
+      else if (child && b && whereAt(b, b.year)) one1 = there("Birth or baptism entry", "b", b.year || null, whereAt(b, b.year));
+      else if (child && firstAway && firstAway.year <= (b && b.year || born + 20)) one1 = there("Birth or baptism entry", "b", b && b.year || null, spot(firstAway, false));
+      else one1 = record("Birth or baptism entry", "b", w, child ? "Their entry names both parents." : "It names the other family.", GOD);
+      cards.push({ title: p.name + " (" + (child ? p.label || "child" : p.label || "husband or wife") + ")", why: "", steps: [one1] });
     });
+    /* a son or daughter not named, whose own record gave the birth date */
+    var source = sh && sh.born && /^(son|daughter|child)$/.test(sh.born.via || "") ? sh.born.via : "";
+    if (source) {
+      var from = married && married.year || (born ? born + 17 : null), seen = {}, steps = [step("Find that record again and read the entry itself", "The birth date told comes from it, so check what it really says.", { detail: "Read it for the parents’ names as written, their ages and birthplaces, and who declared it." })];
+      route.filter(function (r) { return r.info.cc !== info.cc && (from == null || r.year == null || r.year >= from); }).forEach(function (r) {
+        if (seen[r.info.cc] || steps.length > 3) return; seen[r.info.cc] = 1;
+        var say = abroadSay(r.info.cc, "b", null, matoGrosso([r.info], null));
+        steps.push(step("Birth entries of their children · " + (cname(r.info.cc) || r.info.cc), "Each child’s entry is another chance for a parent’s birthplace to be written down.", { detail: say.text + " " + NIL_NEXT, links: say.links }));
+      });
+      cards.push({ title: "The " + source + " whose record gives the birth date (not named)", why: "", steps: steps });
+    }
     /* at home, before writing to anyone */
     var home = [], photo = /\bphoto(?:graph)?s?\b/i.test(deps.text || "");
     var py = photo && /\bphoto(?:graph)?\b[^.!?\n]{0,60}?\b(?:around|about|circa|c\.|in|from)\s+(1[89]\d\d|20[0-2]\d)\b/i.exec(deps.text || "");
@@ -325,6 +498,11 @@
     var unnamed = sibs.filter(function (x) { return !x.name; });
     if (unnamed.length) q("What were the " + (unnamed.length > 1 ? unnamed.length + " " : "") + (unnamed.every(function (x) { return x.rel === "sister"; }) ? "sister" : unnamed.every(function (x) { return x.rel === "brother"; }) ? "brother" : "sibling") + (unnamed.length > 1 ? "s" : "") + " called?", "baptisms under the same parents, or a relative who knows.");
     folks.forEach(function (p) { var a = ev(p, "alive"); if (a && !ev(p, "died")) q("When did " + named(p, p.role) + " die?", "a gravestone or the death register after " + a.year + "."); });
+    if (nil) q("Where and when was " + me + " baptised?", "the years either side of " + yrs([nil.from, nil.to]) + ", the neighbouring parishes, or a record made abroad that names the birthplace.");
+    if (believed) q("Is " + believed + " the place the record means?", "an entry of this family in its registers, or a record abroad naming the parish.");
+    if (sugS.length) q("Which spelling is the family’s: " + spellings.join(", ") + "?", "the first home register entry that names them with a parent already known.");
+    if (lands.length) q("When and how did " + me + " leave home?", "an arrival record abroad, or a passport, conscription or seamen’s file at home.");
+    if (sh && /^(ancestor|forefather|forebear)$/.test(self.rel || "")) q("How many generations lead from " + me + " to the person telling the story?", "birth, marriage and death entries one generation at a time, backwards from the teller.");
     return { people: cards, home: home, open: open };
   }
 
@@ -338,8 +516,8 @@
     if (!an) { out.notes.push("The plan needs a place the Atlas knows. Add where it happened, with the country (for example “Gallignana, Croatia”)."); return out; }
     var info = an.info, cname = countries[info.cc] || info.countryName || "", where = info.name + (cname ? ", " + cname : "");
     var region = pickRegion(info, deps.regions, countries), eras = erasFor(region, win);
-    var surname = (function () { var n = String(f.name || "").trim().split(/\s+/); return n.length > 1 ? n[n.length - 1] : ""; })();
-    var mid = win ? Math.round((win.lo + win.hi) / 2) : null;
+    var surname = f.sheet ? [f.sheet.surname].concat(f.sheet.sugSurname || []).filter(Boolean).join(" / ") : (function () { var n = String(f.name || "").trim().split(/\s+/); return n.length > 1 ? n[n.length - 1] : ""; })();
+    var mid = f.sheet && f.born ? f.born : win ? Math.round((win.lo + win.hi) / 2) : null;   /* a record copied out asks for one birth: write about that year */
     out.anchor = { name: info.name, cc: info.cc, where: where, ground: an.village ? { name: an.village.name, lat: an.village.lat, lon: an.village.lon } : null, href: info.href || (base + "place/" + (info.row && info.row.i) + "/"), lat: info.lat, lon: info.lon, region: region ? region.label : "", years: win };
     if (an.note) out.notes.push(an.note);
     var altSay = []; (an.alts || []).forEach(function (a) { var t = a.n + (countries[a.cc] ? ", " + countries[a.cc] : ""); if (t !== where && altSay.indexOf(t) < 0) altSay.push(t); });
@@ -515,9 +693,9 @@
     section("moves", "Their moves, and the paper each leaves", mv);
 
     /* WHAT TO LOOK FOR NEXT: at home first, then each person, and at the end what the story leaves open */
-    var rec = recommend(g, deps, an), first = [];
+    var rec = recommend(g, deps, an, eras), first = [];
     var hm = rec.home.map(function (x) { return item(x.title, x.why, { detail: x.detail }); });
-    var pp = rec.people.map(function (x) { var it = item(x.title, x.why, {}); it.steps = x.steps; return it; });
+    var pp = rec.people.map(function (x) { var it = item(x.title, x.why, {}); it.steps = x.steps; if (x.known && x.known.length) it.known = x.known.map(function (k) { return clip(k, 300); }); if (x.open && x.open.length) it.unknown = x.open.map(function (k) { return clip(k, 200); }); return it; });
     if (hm.length) first.push({ key: "home", title: "Check at home before you write", items: hm });
     if (pp.length) first.push({ key: "people", title: "What to look for next, person by person", wide: true, items: pp });
     out.sections = first.concat(out.sections);
@@ -526,7 +704,10 @@
     /* TODAY */
     var d0 = out.sections.filter(function (s) { return s.key === "desk"; })[0], w0 = out.sections.filter(function (s) { return s.key === "write"; })[0], g0 = out.sections.filter(function (s) { return s.key === "ground"; })[0];
     var firstOpen = d0 && d0.items.filter(function (i) { return (i.tag === "free" || i.tag === "free account"); })[0] || d0 && d0.items[0];
-    out.today.push({ n: 1, title: "At your desk", text: firstOpen ? firstOpen.title : "Open the Atlas's page for " + info.name, href: firstOpen && firstOpen.href || "" });
+    /* a record copied out has one question to start with: the first thing on the person's own card */
+    var lead1 = f.sheet && rec.people[0] && rec.people[0].steps[0];
+    out.today.push(lead1 ? { n: 1, title: "Look for first", text: lead1.title, href: lead1.href || (lead1.links[0] && lead1.links[0].href) || "" }
+      : { n: 1, title: "At your desk", text: firstOpen ? firstOpen.title : "Open the Atlas's page for " + info.name, href: firstOpen && firstOpen.href || "" });
     var drafted = w0 && w0.items.filter(function (i) { return i.draft && i._a && (i._a.email || i._a.form || i._a.serves); })[0]; /* the nearest regional archive leads over a capital's inbox */
     var mailTo = w0 && (drafted || w0.items.filter(function (i) { return i._a && i._a.email; })[0] || w0.items.filter(function (i) { return i._a && /regional|diocesan/.test(i._a.kind); })[0] || w0.items.filter(function (i) { return !i.gap; })[0]);
     if (mailTo) {
@@ -548,7 +729,7 @@
     var L = ["PLAN FOR " + ((plan.anchor && plan.anchor.where) || "")];
     (plan.notes || []).forEach(function (n) { L.push("Note: " + n); });
     (plan.today || []).forEach(function (t) { L.push(t.n + ". " + t.title + ": " + t.text); });
-    plan.sections.forEach(function (s) { L.push("", s.title.toUpperCase()); s.items.forEach(function (i) { L.push("- " + i.title + (i.why ? " — " + i.why : "") + (i.detail ? " [" + i.detail + "]" : "") + (i.regs || []).map(function (r) { return " <" + r.text + " " + r.href + ">"; }).join("") + (i.href ? " (" + i.href + ")" : "")); (i.steps || []).forEach(function (x) { L.push("  * " + x.title + (x.why ? " — " + x.why : "") + (x.detail ? " [" + x.detail + "]" : "") + (x.href ? " (" + x.href + ")" : "")); }); if (i.draft) L.push("  Draft (" + i.draft.language + "): " + i.draft.text); }); });
+    plan.sections.forEach(function (s) { L.push("", s.title.toUpperCase()); s.items.forEach(function (i) { L.push("- " + i.title + (i.why ? " — " + i.why : "") + (i.detail ? " [" + i.detail + "]" : "") + (i.regs || []).map(function (r) { return " <" + r.text + " " + r.href + ">"; }).join("") + (i.href ? " (" + i.href + ")" : "")); (i.known || []).forEach(function (k) { L.push("  Known: " + k); }); (i.unknown || []).forEach(function (k) { L.push("  Open: " + k); }); (i.steps || []).forEach(function (x) { L.push("  * " + x.title + (x.why ? " — " + x.why : "") + (x.detail ? " [" + x.detail + "]" : "") + (x.href ? " (" + x.href + ")" : "")); }); if (i.draft) L.push("  Draft (" + i.draft.language + "): " + i.draft.text); }); });
     return L.join("\n").slice(0, 9000);
   }
 
@@ -559,6 +740,7 @@
   function personRow(i, open) {
     var li = el("li"), d = el("details", null, "sp-todo-person"), sm = el("summary"); if (open) d.open = true;
     sm.append(el("b", i.title), el("span", " \u00b7 " + i.steps.length + (i.steps.length === 1 ? " thing to find" : " things to find"), "sp-todo-why")); d.append(sm);
+    [["What is known", i.known], ["Still open", i.unknown]].forEach(function (x) { if (!x[1] || !x[1].length) return; var u = el("ul", null, "sp-todo-regs"); x[1].forEach(function (k) { u.append(el("li", k)); }); d.append(el("b", x[0], "sp-todo-det"), u); });
     if (i.why) d.append(el("span", i.why, "sp-todo-why"));
     var ol = el("ol", null, "sp-todo-steps");
     i.steps.forEach(function (x) {

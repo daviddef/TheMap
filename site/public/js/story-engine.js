@@ -1280,22 +1280,16 @@
       if (pe.role === "spouse") return MD_MALE.test(selfRel) ? "F" : MD_FEMALE.test(selfRel) ? "M" : /\bwife\b/i.test(String(pe.label || "")) || /\b[Hh]e\s+(?:later\s+)?married\b/.test(t) ? "F" : "";
       return MD_FEMALE.test(word) ? "F" : MD_MALE.test(word) ? "M" : "";
     }
-    /* A place of that name, or of that old name. The map also answers to single words of longer names («Monte dei Bianchi» puts «bianchi» in it), and one of
-       those alone is no town: «Anna Rossi, born Bianchi» names Anna's family. The longer name written out («born Santa Cruz») is still where. */
-    function placeCalled(f, next) {
-      var map = (ctx && ctx.map) || {};
-      if (next && map[S.fold(f + " " + next)]) return true;
-      return (map[f] || []).some(function (r) { return r.al || S.fold(String(r.n).replace(/\s*\([^)]*\)/g, "").split(",")[0]) === f || (" " + S.fold(r.n) + " ").indexOf(" " + f + " ") < 0; });
+    /* A place by `onlyWithin`'s rule, or a longer place name written out («born Pozzuolo del Friuli»). */
+    function placeCalled(name, after) {
+      var map = (ctx && ctx.map) || {}, f = S.fold(name);
+      return writtenOut(map, name, after) || (!!(map[f] && map[f].length) && !onlyWithin(map[f], f));
     }
-    function fine(name, born, next) {
+    function fine(name, born, after) {
       var f = S.fold(name); if (STOP[f] || MONTHS[f]) return false;
-      return !born || !(COMMON[f] || (name !== name.toUpperCase() && placeCalled(f, next)));   /* «born Hobart» is where; «born FRATROVIĆ», written as a family name, is who */
+      return !born || !(COMMON[f] || (name !== name.toUpperCase() && placeCalled(name, after)));   /* «born Hobart» is where; «born FRATROVIĆ», written as a family name, is who */
     }
-    function first(re, born) {
-      var m = new RegExp(re, "u").exec(t); if (!m) return "";
-      var nx = /^[ \t]+(\p{Lu}[\p{L}'\u2019-]+)/u.exec(t.slice(m.index + m[0].length));
-      return fine(m[1], born, nx && nx[1]) ? m[1] : "";
-    }
+    function first(re, born) { var m = new RegExp(re, "u").exec(t); return m && fine(m[1], born, t.slice(m.index + m[0].length)) ? m[1] : ""; }
     people.forEach(function (pe) {
       var sex = sexOf(pe), given = String(pe.given || "").trim(); if (sex === "M" || !given) return;
       var g = "(?<![\\p{L}])" + given.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), mid = "(?:\\s+" + MD_CAP + "){0,2}", found = "";
@@ -1321,17 +1315,22 @@
     });
     return out;
   }
-  /* A WORD THE ATLAS HOLDS ONLY AS PART OF A LONGER PLACE NAME («Bianchi» in Monte dei Bianchi) is not that place when a story writes it alone after a comma and «born»: in «Anna
-     Rossi, born Bianchi» it is her birth name. It is set aside for this one reading. A place called exactly that, another name of a place, a country and the first word of a longer
-     name («born Pozzuolo») are read as before. */
+  /* A WORD THE ATLAS HOLDS ONLY AS PART OF A LONGER PLACE NAME («Bianchi» in Monte dei Bianchi, «Brown» in Brown County) is not that place when a story writes it alone after
+     «born»: «Anna Rossi, born Brown» is her birth name. David, 26 Nov 2026: «birth name». After a comma or bracket the word is also set aside for the whole reading, so no
+     birthplace is made of it. A place called exactly that, another name of a place, a country, and the longer name written out («born Pozzuolo del Friuli») are the place. */
   function onlyWithin(rows, f) {
     function plain(s) { return S.fold(String(s || "").replace(/\s*\([^)]*\)/g, "").split(",")[0]); }
-    return !!(rows && rows.length) && rows.every(function (r) { var n = plain(r.n); return !r.al && !r.exo && !r.country && n !== f && n.split(" ")[0] !== f && S.fold(String(r.q || "")) !== f; });
+    return !!(rows && rows.length) && rows.every(function (r) { var n = plain(r.n); return !r.al && !r.exo && !r.country && n !== f && S.fold(String(r.q || "")) !== f; });
+  }
+  /* Whether the words after `name` carry on into a longer name the Atlas holds, small words between them included. */
+  function writtenOut(map, name, after) {
+    var more = (/^(?:[ \t]+(?:(?:de|del|della|dei|di|da|das|do|dos|van|von|den|der|le|la|les|sur|am|an|im|nad|pod|na|u|on|upon)(?![\p{L}'\u2019-])|\p{Lu}[\p{L}'\u2019-]*)){1,3}/u.exec(after) || [""])[0], s = name;
+    return more.split(/\s+/).filter(Boolean).some(function (w) { s += " " + w; return !!map[S.fold(s)]; });
   }
   function parseStory(text, ctx, attached) {
     text = nominative(cleanInput(text), ctx);
     var map = ctx && ctx.map, held = [], re = new RegExp("[,(]\\s*born\\s+" + MD_NAME + "(?!\\s*\\d|\\s+\\p{Lu})", "gu"), m;
-    while (map && (m = re.exec(text))) { var f = S.fold(m[1]); if (onlyWithin(map[f], f)) { held.push([f, map[f]]); delete map[f]; } }
+    while (map && (m = re.exec(text))) { var f = S.fold(m[1]); if (onlyWithin(map[f], f) && !writtenOut(map, m[1], text.slice(m.index + m[0].length))) { held.push([f, map[f]]); delete map[f]; } }
     try { return markMaidens(toldDecades(readStory(text, ctx, attached), text), text, ctx); }
     finally { held.forEach(function (h) { map[h[0]] = h[1]; }); }
   }

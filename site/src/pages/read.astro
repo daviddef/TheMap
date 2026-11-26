@@ -776,7 +776,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp-todo-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 14px; }
   .sp-todo-card { min-width: 0; padding: 16px 18px; }
   .sp-todo-card h3 { font: 800 16px/1.2 var(--sans); margin: 0 0 12px; padding-left: 10px; border-left: 4px solid var(--hue); }
-  .sp-todo-card ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+  .sp-todo-card ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
   .sp-todo-card li { display: grid; gap: 3px; font-size: 14px; line-height: 1.4; overflow-wrap: anywhere; }
   .sp-todo-card li.is-gap { border-left: 2px dashed var(--rule-strong, var(--rule)); padding-left: 10px; color: var(--ink-2); }
   .sp-todo-t b { font-weight: 800; }
@@ -784,11 +784,13 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sp-todo-why { color: var(--ink-2); font-size: 13px; }
   .sp-todo-det { color: var(--ink-2); font-size: 12.5px; }
   .sp-todo-links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-  .sp-todo-link { min-height: 32px; display: inline-flex; align-items: center; text-decoration: none; }
+  .sp-todo-link { min-height: 32px; display: inline-flex; align-items: center; text-decoration: none; white-space: normal; max-width: 100%; }
   .sp-todo-wide { grid-column: 1 / -1; }
   .sp-todo-person summary { cursor: pointer; line-height: 1.4; overflow-wrap: anywhere; }
   .sp-todo-steps { margin: 6px 0 2px; padding-left: 18px; display: grid; gap: 8px; } .sp-todo-card .sp-todo-steps li { display: list-item; border: 0; padding: 0; overflow-wrap: anywhere; }
   .sp-todo-steps li > span { display: block; }
+  .sp-todo-steps li > span.sp-todo-links { display: flex; }
+  .sp-todo-card ul.sp-todo-known { list-style: disc; margin: 2px 0 8px; padding-left: 18px; gap: 2px; font-size: 13px; } .sp-todo-card ul.sp-todo-known li { display: list-item; }
   .sp-todo-draft { margin-top: 4px; }
   .sp-todo-draft summary { cursor: pointer; font-size: 13px; font-weight: 700; color: var(--hue-ink); }
   .sp-todo-draft-t { margin: 6px 0 0; padding: 10px 12px; background: var(--panel-2, var(--panel)); border-radius: 10px; font-size: 13.5px; user-select: all; }

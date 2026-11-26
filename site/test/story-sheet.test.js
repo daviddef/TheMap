@@ -117,3 +117,9 @@ test("a listed record about an emigrant reads into a route abroad, a «generatio
   assert.ok(people.some((c) => /daughter whose record gives the birth date/.test(c.title)));
   assert.match(todo.asText(plan), /Known: Searched, nothing found \(as told\): baptism in Zlarin, 1839–1842/);
 });
+
+test("the checker counts a suggested reading as read, and takes neither a list's labels nor a continent for a name", () => {
+  const C = js("story-check.js", { exports: {} }), text = LIST.replace("my ancestor.", "my ancestor, who sailed to South America.");
+  const found = C.check(text, F.parseStory(text, ctx()), { countries: ctx().countries, isPlace: (k) => !!ctx().map[k], isGiven: () => false }).problems.map((x) => x.words.join(" "));
+  for (const w of ["Bartul", "Ferić", "Mate", "Name", "Father", "South", "America"]) assert.ok(!found.includes(w), w + " reported as lost");
+});

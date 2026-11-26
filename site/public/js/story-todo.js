@@ -740,7 +740,7 @@
   function personRow(i, open) {
     var li = el("li"), d = el("details", null, "sp-todo-person"), sm = el("summary"); if (open) d.open = true;
     sm.append(el("b", i.title), el("span", " \u00b7 " + i.steps.length + (i.steps.length === 1 ? " thing to find" : " things to find"), "sp-todo-why")); d.append(sm);
-    [["What is known", i.known], ["Still open", i.unknown]].forEach(function (x) { if (!x[1] || !x[1].length) return; var u = el("ul", null, "sp-todo-regs"); x[1].forEach(function (k) { u.append(el("li", k)); }); d.append(el("b", x[0], "sp-todo-det"), u); });
+    [["What is known", i.known], ["Still open", i.unknown]].forEach(function (x) { if (!x[1] || !x[1].length) return; var u = el("ul", null, "sp-todo-known"); x[1].forEach(function (k) { u.append(el("li", k)); }); d.append(el("b", x[0], "sp-todo-det"), u); });
     if (i.why) d.append(el("span", i.why, "sp-todo-why"));
     var ol = el("ol", null, "sp-todo-steps");
     i.steps.forEach(function (x) {

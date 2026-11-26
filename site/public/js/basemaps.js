@@ -1,5 +1,5 @@
 /* THE BASEMAPS OF THE MAPS, AND WHICH ONE OPENS FIRST. One small classic script, shared by the Atlas map (RecordMap.astro), Compass
-   (tree-canvas/compass-view.js) and the History map (history-theatre.js), so they cannot disagree about what opens, what is offered, or how
+   (tree-canvas/compass-view.js), the History map (history-theatre.js), My research and the story map (story-page.js), so they cannot disagree about what opens, what is offered, or how
    a look is built. Pure rules at the top (tested in test/basemaps.test.js), Leaflet parts below.
 
    THE LOOKS. Ten, each made for the light theme, the dark theme, or either:

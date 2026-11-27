@@ -57,7 +57,7 @@
     if (failed) { box.append(el("p", "cap", "The archives’ list could not be loaded just now. Reload the page to try again.")); host.append(box); return; }
     if (!DATA) { box.append(el("p", "cap", "Loading…")); host.append(box); return; }
     var have = (DATA.archives || []).filter(function (a) { return ids[a.archive] && a.errands.length; });
-    box.append(el("p", "cap", "These are the archives’ own, not yours: who, what for and where each stands, with no names of people. They change when an archive’s list is published again."));
+    box.append(el("p", "cap", "These are the archives’ own, not yours: who, what for and where each stands, with no names of people. This list is refreshed by itself, a few times a day."));
     have.forEach(function (a) { box.append(block(a, have.length === 1)); });
     var none = want.filter(function (i) { return !have.some(function (a) { return a.archive === i; }); });
     if (none.length) box.append(el("p", "cap", "Nothing open is published for " + none.map(function (i) { return String(ids[i]).replace(/^The /, "the "); }).join(", ") + "."));

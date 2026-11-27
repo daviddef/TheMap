@@ -11,6 +11,9 @@ name: Publish research sessions
 # hours», then 13 to 65 minutes for the deploy. David chose to accept this rather than chase the scheduler; a person can always run the
 # publisher by hand between ticks (scripts/publish-research-sessions.py).
 #
+# THE ARCHIVES' OPEN ERRANDS GO ON THE SAME TICK. scripts/publish-archive-errands.py reads the same clones and publishes site/public/archive-errands.json
+# (institution, record kinds, status and send month only) when it changed. It is its own step, so a refusal in one publisher does not hold the other back.
+#
 # NEEDS NO SECRET. The archives are public, the world volume file is a public release asset, and the push uses this run's own GITHUB_TOKEN.
 # Pushes made with GITHUB_TOKEN do NOT start the `on: push` workflows, so the deploys are started below with workflow_dispatch (which the token
 # is allowed to do); without that step a publish would sit on main and never reach the site.
@@ -34,7 +37,7 @@ on:
         default: true
 
 permissions:
-  contents: write   # push the research files to main
+  contents: write   # push the research files and the errands list to main
   actions: write    # start the two deploy workflows, which a GITHUB_TOKEN push does not do
 
 concurrency:
@@ -70,8 +73,10 @@ jobs:
         run: |
           python3 scripts/import-research-sessions.py --selftest
           python3 scripts/publish-research-sessions.py --selftest
+          python3 scripts/publish-archive-errands.py --selftest
 
       - name: Clone the eight family archives beside the Atlas
+        id: archives
         if: steps.busy.outputs.busy != 'true'
         run: |
           cd "$(dirname "$GITHUB_WORKSPACE")"
@@ -98,13 +103,26 @@ jobs:
         if: steps.busy.outputs.busy != 'true'
         shell: bash   # -eo pipefail: without pipefail, `publisher | tee` reports tee's success and a failed publish looks like a green run
         run: |
-          before=$(git ls-remote origin refs/heads/main | cut -f1)
           flags="--guard"
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.dry_run }}" = "true" ]; then flags="--guard --dry-run"; fi
           python3 scripts/publish-research-sessions.py $flags | tee /tmp/publish.log
-          after=$(git ls-remote origin refs/heads/main | cut -f1)
-          if [ "$before" != "$after" ] && grep -q '^Published\.' /tmp/publish.log; then
-            echo "published $after (was $before); starting both Atlas deploys"
+
+      # runs even when the research publisher refused or failed: the two lists are separate, and the run still ends red
+      - name: Publish the archives' open errands
+        if: ${{ !cancelled() && steps.busy.outputs.busy != 'true' && steps.archives.outcome == 'success' }}
+        shell: bash
+        run: |
+          mode="--publish"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.dry_run }}" = "true" ]; then mode="--dry-run"; fi
+          python3 scripts/publish-archive-errands.py $mode --guard | tee /tmp/errands.log
+
+      # both publishers print a line starting «Published» only after their push went through
+      - name: Start both Atlas deploys if anything was published
+        if: ${{ !cancelled() && steps.busy.outputs.busy != 'true' }}
+        shell: bash
+        run: |
+          if grep -qs '^Published' /tmp/publish.log /tmp/errands.log; then
+            echo "something was published; starting both Atlas deploys"
             gh workflow run deploy-r2.yml --repo "$REPO" --ref main
             gh workflow run deploy.yml --repo "$REPO" --ref main
           else

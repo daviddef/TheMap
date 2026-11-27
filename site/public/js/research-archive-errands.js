@@ -28,9 +28,9 @@
     return ORDER.map(function (s) { var n = list.filter(function (e) { return e.status === s; }).length; return n ? n + " " + SAY[s] : ""; }).filter(Boolean).join(", ");
   }
 
-  function block(a, only) {
+  function block(a) {
     var d = el("details", "mrae-a"), sum = el("summary"), list = a.errands.slice();
-    d.open = a.archive in opened ? opened[a.archive] : only;   /* one archive opens by itself; several stay shut, with their counts */
+    d.open = !!opened[a.archive];   /* shut, with its counts, until the reader opens it; a redraw keeps what they opened */
     d.addEventListener("toggle", function () { opened[a.archive] = d.open; });
     sum.append(el("b", "", a.name + " archive"), el("span", "mrae-n", " " + counts(list)));
     d.append(sum);
@@ -58,7 +58,7 @@
     if (!DATA) { box.append(el("p", "cap", "Loading…")); host.append(box); return; }
     var have = (DATA.archives || []).filter(function (a) { return ids[a.archive] && a.errands.length; });
     box.append(el("p", "cap", "These are the archives’ own, not yours: who, what for and where each stands, with no names of people. This list is refreshed by itself, a few times a day."));
-    have.forEach(function (a) { box.append(block(a, have.length === 1)); });
+    have.forEach(function (a) { box.append(block(a)); });
     var none = want.filter(function (i) { return !have.some(function (a) { return a.archive === i; }); });
     if (none.length) box.append(el("p", "cap", "Nothing open is published for " + none.map(function (i) { return String(ids[i]).replace(/^The /, "the "); }).join(", ") + "."));
     host.append(box);

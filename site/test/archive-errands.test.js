@@ -86,7 +86,7 @@ test("only the chosen families' archives are listed, apart from the reader's own
   assert.match(text, /Nothing open is published for the beta Archive\./);
   assert.doesNotMatch(text, /Elsewhere Office/);
   assert.equal(host.querySelector("a").href, "https://alpha.example/errands/");
-  assert.equal(host.querySelector("details").open, true, "a single archive is open");
+  assert.equal(host.querySelector("details").open, false, "shut until the reader opens it, even when it is the only one");
 });
 
 test("a family that belongs to no archive shows nothing and asks for nothing", async () => {

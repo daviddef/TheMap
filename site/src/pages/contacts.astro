@@ -34,12 +34,17 @@ const countries = new Intl.DisplayNames(["en"], { type: "region" });
       </tbody>
     </table>
   </div>
+  <h2>Where there is no contact</h2>
+  <p>A place page or a map dot suggests the town hall or the diocese whose boundary holds the spot, and says that it is a suggestion: the details are
+  that office's own, never the burial ground's or the parish's. Nothing is suggested by nearness, and suggestions are not counted above.
+  {coverage.areas.countries.length ? `So far: ${n(coverage.areas["town-hall"])} municipalities and ${n(coverage.areas.diocese)} ${coverage.areas.diocese === 1 ? "diocese" : "dioceses"}, in ${coverage.areas.countries.map((cc) => countries.of(cc)).join(", ")}.` : "No boundaries are held yet."}</p>
   <h2>Where the contacts come from</h2>
   <ul>
     {Object.entries(registry.sources).map(([id, s]) => (
       <li><a href={s.url}>{s.title}</a>: {s.licence}. {n(coverage.rows[id] || 0)} rows{coverage.harvested[id] ? `; harvested country by country, so far ${coverage.harvested[id].map((cc) => countries.of(cc)).join(", ")}` : ""}.</li>
     ))}
   </ul>
-  <p>Only organisations' own mailboxes are kept; an address that names a person is left out. Nothing is guessed from a parent body or a homepage.
+  <p>Only organisations' own mailboxes are kept; an address that names a person is left out, and a free-mail address is kept only where it names the
+  institution. No contact is guessed from a parent body or a homepage.
   The files are open: see <a href={u("/data/")}>the data page</a>.</p>
 </Base>

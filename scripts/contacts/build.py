@@ -4,6 +4,8 @@
 site/public/contacts/<group>/<lat>_<lon>.json   the rows in each one-degree square, `open` and share-alike `odbl` kept apart
                                                 (a dense square continues in -1, -2 ...)
 site/public/contacts/index.json                 which squares exist, how many parts each has, and the sources to credit
+site/public/contacts/<group>/areas/<lat>_<lon>.json  the boundaries reaching into a square: [[id, w, s, e, n], ...]
+site/public/contacts/<group>/area/<id>.json     one boundary and the office to suggest inside it (scripts/contacts/areas.py)
 site/public/contacts/coverage.json              how many of each kind the Atlas knows, and how many of those can be reached
 
 The browser asks only for the squares round the place being looked at, so no place page carries a contact itself.
@@ -16,7 +18,7 @@ import shutil
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from contacts import core  # noqa: E402
+from contacts import areas, core  # noqa: E402
 
 ROOT = core.ROOT
 OUT = os.path.join(ROOT, "site", "public", "contacts")
@@ -81,7 +83,7 @@ def atlas_rows(providers, own, wikidata):
 def all_rows():
     providers = load("data/providers.json")["providers"]
     rows = atlas_rows(providers, load("data/provider-emails.json", {}), load("data/provider-contacts.json", {}).get("contacts", {}))
-    dead = {e["email"].lower() for e in load("data/provider-emails.json", {}).get("emails", []) if e["state"] == "dead"}
+    dead = dead_addresses()
     for source, path in core.stored_files():
         for row in core.read_file(path)["rows"]:
             if "email" in row:
@@ -127,6 +129,43 @@ def write_cells(rows, registry, out):
     with open(os.path.join(out, "index.json"), "w", encoding="utf-8") as fh:
         json.dump(index, fh, ensure_ascii=False, separators=(",", ":"))
     return index
+
+
+def dead_addresses():
+    return {e["email"].lower() for e in load("data/provider-emails.json", {}).get("emails", []) if e["state"] == "dead"}
+
+
+def write_areas(stored, registry, out, index, dead):
+    """`stored`: (source, area) pairs. Adds to the index the squares that have a boundary list, and writes the lists and the areas."""
+    squares = {}
+    for source, a in stored:
+        group = registry[source]["group"]
+        rows = [{**r, "src": source} for r in a["rows"]]
+        for r in rows:
+            if "email" in r:
+                r["email"] = [e for e in r["email"] if e.lower() not in dead]
+                if not r["email"]:
+                    del r["email"]
+        rows = [r for r in rows if any(k in r for k in core.REACH + ("web",))]
+        if not rows:
+            continue
+        aid = a["id"].replace(":", "-")
+        os.makedirs(os.path.join(out, group, "area"), exist_ok=True)
+        with open(os.path.join(out, group, "area", f"{aid}.json"), "w", encoding="utf-8") as fh:
+            json.dump({"kind": a["kind"], "name": a["name"], "rings": a["rings"], "rows": rows}, fh, ensure_ascii=False, separators=(",", ":"))
+        w, s, e, n = a["box"]
+        for y in range(math.floor(s), math.floor(n) + 1):
+            for x in range(math.floor(w), math.floor(e) + 1):
+                squares.setdefault(group, {}).setdefault(f"{y}_{x}", []).append([aid, w, s, e, n])
+    index["areas"] = {}
+    for group, cells in squares.items():
+        os.makedirs(os.path.join(out, group, "areas"))
+        for key, listed in cells.items():
+            with open(os.path.join(out, group, "areas", f"{key}.json"), "w", encoding="utf-8") as fh:
+                json.dump(sorted(listed), fh, separators=(",", ":"))
+        index["areas"][group] = sorted(cells)
+    with open(os.path.join(out, "index.json"), "w", encoding="utf-8") as fh:
+        json.dump(index, fh, ensure_ascii=False, separators=(",", ":"))
 
 
 def known_entities(providers):
@@ -189,15 +228,19 @@ def main():
     registry = core.sources()
     providers, rows = all_rows()
     index = write_cells(rows, registry, OUT)
+    stored = [(source, a) for source, path in areas.stored_files() for a in core.read_file(path)["areas"]]
+    write_areas(stored, registry, OUT, index, dead_addresses())
     table = coverage(known_entities(providers), rows)
     countries = {}
     for source, path in core.stored_files():
         countries.setdefault(source, []).append(os.path.basename(path).split(".")[0])
+    suggest = {"countries": sorted({os.path.basename(p).split(".")[0] for _, p in areas.stored_files()}),
+               **{k: sum(a["kind"] == k for _, a in stored) for k in areas.KINDS}}
     with open(os.path.join(OUT, "coverage.json"), "w", encoding="utf-8") as fh:
-        json.dump({"kinds": table, "harvested": countries,
+        json.dump({"kinds": table, "harvested": countries, "areas": suggest,
                    "rows": {s: sum(1 for src, _ in rows if src == s) for s in registry}}, fh, ensure_ascii=False, separators=(",", ":"))
     squares = {g: len(c) for g, c in index["groups"].items()}
-    print(f"contacts: {len(rows):,} rows in squares {squares}")
+    print(f"contacts: {len(rows):,} rows in squares {squares}; {len(stored):,} areas to suggest an office in")
     for c in table:
         print(f"  {c['kind']:17} known {c['known']:>8,}  can be written to or rung {c['reach']:>7,}  website only {c['webOnly']:>6,}")
 

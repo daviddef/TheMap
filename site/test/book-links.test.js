@@ -38,7 +38,7 @@ vols = [{"waypoint": "W%02d:%d" % (i, i), "url": "https://www.familysearch.org/x
 vols[6].pop("url")
 kept, more = b.cap_volumes(list(reversed(vols)), 3, {"W02", "W05", "W07"})
 same, none = b.cap_volumes(vols[:2], 3, {"W02"})
-open("/dev/stdout", "w").write(json.dumps({"kept": [v["waypoint"] for v in kept], "more": more, "same": len(same), "none": none,
+sys.stdout.write(json.dumps({"kept": [v["waypoint"] for v in kept], "more": more, "same": len(same), "none": none,
   "missing": sorted(b.marked_waypoints("no-such-file.json"))}))
 `;
   const out = JSON.parse(execFileSync("python3", ["-c", py], { cwd: path.join(here, ".."), encoding: "utf8" }));

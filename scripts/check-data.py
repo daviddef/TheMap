@@ -939,7 +939,7 @@ def flag_art_audit():
 
 def provider_contacts_gate():
     """data/provider-contacts.json (what Wikidata states): every address is one scripts/provider_contact_rules.py allows, so none that is
-    malformed, on free mail or refused by hand is published, and the counts are the file's own."""
+    malformed, refused by hand, or on free mail without naming an institution is published, and the counts are the file's own."""
     import provider_contact_rules as rules
     p = "data/provider-contacts.json"
     if not os.path.exists(p):
@@ -959,9 +959,9 @@ def provider_contacts_gate():
 
 def contact_store_gate():
     """data/contacts/: every source declares a licence, share-alike stays apart, and no stored row holds anything scripts/contacts/core.py
-    would not write (a malformed or personal address among them)."""
-    from contacts import core
-    problems = core.check()
+    would not write (a malformed or personal address among them). data/contact-areas/: closed outlines, each suggesting such rows."""
+    from contacts import areas, core
+    problems = core.check() + areas.check()
     for line in problems[:40]:
         err(line)
     if len(problems) > 40:
@@ -973,7 +973,8 @@ def contact_store_gate():
 def provider_emails_gate():
     """data/provider-emails.json: where to write to an archive. Every address is well formed and appears once, names a state the file
     defines, links only to providers that exist (or names the institution it belongs to), and is a role mailbox: an address that names
-    a member of staff (given.surname@ at an institution, or any free-mail address) is a person, and no person goes in the catalogue."""
+    a member of staff (given.surname@ at an institution, or a free-mail address that does not name the institution) is a person, and
+    no person goes in the catalogue."""
     import re
     p = "data/provider-emails.json"
     if not os.path.exists(p):
@@ -981,7 +982,7 @@ def provider_emails_gate():
     d = json.load(open(p, encoding="utf-8"))
     known = {x["id"] for x in json.load(open("data/providers.json", encoding="utf-8"))["providers"]}
     states, seen = d.get("states", {}), set()
-    free = {"gmail.com", "googlemail.com", "me.com", "icloud.com", "hotmail.com", "outlook.com", "yahoo.com", "live.com"}
+    import provider_contact_rules as rules
     for e in d.get("emails", []):
         w = f"provider-emails {e.get('email')}"
         em = (e.get("email") or "").strip()
@@ -992,8 +993,8 @@ def provider_emails_gate():
             err(f"{w}: listed twice")
         seen.add(em.lower())
         local, host = em.lower().split("@")
-        if host in free:
-            err(f"{w}: a free-mail address is a person, not an institution")
+        if rules.FREE_MAIL.fullmatch(host) and not rules.names_institution(local, None):
+            err(f"{w}: a free-mail address that does not name an institution is a person's")
         roles = {"archives", "archive", "archivo", "archiv", "special", "collections", "library", "enquiries", "enquiry", "info", "clientservices",
                  "client", "services", "reading", "room", "records", "research", "reference", "heritage", "contact", "office", "registry", "service"}
         if re.fullmatch(r"[a-z]{2,}\.[a-z]{3,}", local) and not (set(local.split(".")) & roles):

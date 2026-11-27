@@ -78,12 +78,12 @@ def rows_from(answer, cc):
     return list(rows.values())
 
 
-def ask(cc):
-    body = urllib.parse.urlencode({"data": QUERY % {"cc": cc, "tags": TAGS}}).encode()
+def ask(cc, query=None, timeout=320):
+    body = urllib.parse.urlencode({"data": query or QUERY % {"cc": cc, "tags": TAGS}}).encode()
     for attempt in range(3):
         try:
             req = urllib.request.Request(API, data=body, headers={"User-Agent": UA})
-            with urllib.request.urlopen(req, timeout=320) as fh:
+            with urllib.request.urlopen(req, timeout=timeout) as fh:
                 answer = json.load(fh)
             # Overpass answers 200 with a «remark» when it ran out of time or memory: that is a partial answer, not a small country.
             if "remark" in answer:

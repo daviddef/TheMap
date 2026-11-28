@@ -240,6 +240,15 @@
       var self = entries.filter(function (e) { return e.person && e.person.role === "self"; })[0];
       return self && (!plan || self.items.length) ? self : withSteps[0] || self || entries[0] || null;
     }
+    /* WHOSE «AS TOLD» BOX IT IS. It is the whole story's: in a story about one person, theirs. In the teller's own tree it is of whoever the story says that death of
+       («my father died in 2021» is not told of the grandfather who shares his name, nor of whoever happens to be listed first), and with no death, the teller's. */
+    function lifeBelongs(e) {
+      var p = e.person;
+      if (!p) return true;
+      if (!entries.some(function (x) { return x.person && x.person.me; })) return p.role === "self" || e === subject();
+      var died = g && g.life && g.life.died, mine = function (q) { return !!died && (q.events || []).some(function (v) { return v.type === "died" && v.year === died.year; }); };
+      return died && entries.some(function (x) { return x.person && mine(x.person); }) ? mine(p) : p.role === "self";
+    }
     function current() { return entries.filter(function (e) { return e.key === S.sel; })[0] || null; }
     function select(e, byHand, ev) {
       if (!e) return;
@@ -267,7 +276,7 @@
         facts.append(box);
       });
       if (e.facts.firstChild) facts.append(e.facts);
-      var life = $("sp-life"); if (life) life.hidden = !(lifeNode && (!e.person || e.person.role === "self" || e === subject()));
+      var life = $("sp-life"); if (life) life.hidden = !(lifeNode && lifeBelongs(e));
       drawLine(e);
       person(e.person, redrawMap);
     }

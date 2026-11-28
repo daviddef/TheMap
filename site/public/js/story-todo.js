@@ -368,8 +368,9 @@
     /* the line under a person's name: what the story says of when and where, or that it says neither */
     function bornAt(p) { var e = ev(p, "born"); return (e && e.place && places[e.place]) || null; }
     function about(p) {
-      /* a partner is often given the place the other lived in: only a birthplace is said to be theirs */
-      var d = toldWhen(p, "born"), at = p.role === "spouse" ? bornAt(p) : placeOf(p) || (p === self && r0 && r0.role === "born" && r0.info) || null, t = [d ? d.say : "", at ? "from " + bare(at.name) : ""].filter(Boolean).join(", ");
+      /* a partner is often given the place the other lived in: only a birthplace is said to be theirs. Nor is anyone in the teller's own tree «from» where they only married or moved to. */
+      var wedOrMoved = !!(me2 && p !== self && toldWed && !bornAt(p) && !p.place);
+      var d = toldWhen(p, "born"), at = p.role === "spouse" ? bornAt(p) : wedOrMoved ? null : placeOf(p) || (p === self && r0 && r0.role === "born" && r0.info) || null, t = [d ? d.say : "", at ? "from " + bare(at.name) : ""].filter(Boolean).join(", ");
       return t ? cap(t) + "." : "The story tells no birth year or place.";
     }
     function maidenStep(p) { return step("Search the birth name " + p.maiden + " on its own", "Registers file her under it. Search the same books and the neighbouring parishes, with its other spellings. A shared surname is a lead, not proof of descent.", {}); }
@@ -534,27 +535,45 @@
     if (me2) eldersOf(grands, function (p) { return /^F/.test(p.key || "") ? fa : /^M/.test(p.key || "") ? mo : null; });
     /* the parents: their marriage first, since it is the entry most likely to give both families */
     var folkB = folks.map(function (p) { return toldWhen(p, "born"); }).filter(Boolean);
-    if (folks.length && (selfB || (me2 && folkB.length))) {
+    var toldWed = null;
+    folks.forEach(function (p) {
+      var e = ev(p, "married"); if (toldWed || !e || (e.year == null && !e.place)) return;
+      var at = e.place ? places[e.place] : null;
+      toldWed = { year: e.year, loc: at ? { info: at.isCountry ? null : at, cc: at.cc, name: at.name, told: true } : null };
+    });
+    if (folks.length && (selfB || (me2 && folkB.length) || toldWed)) {
       var pair = folks.map(function (p) { return named(p, p.role); }).join(" and ");
       var pwin = selfB ? est(sl - 25, sHi) : est(Math.max.apply(null, folkB.map(function (d) { return d.w[0]; })) + 17, Math.max.apply(null, folkB.map(function (d) { return d.w[1]; })) + 35);
-      cards.push({ title: "The parents’ marriage: " + pair, why: selfB ? "Before their first known child (" + (born || selfB.say) + "), and earlier if there were older children." : "The years are worked out from the parents’ own birth years.", steps: [
-        record("Marriage entry", "m", pwin, "In " + served + (mo && !mo.place ? ", and in the mother’s own parish: the story does not say where she came from" : "") + ".", "Read it for both places of origin, both sets of parents and the witnesses.")], who: folks.slice() });
+      /* a wedding the story tells («married in Cape Town in 1971») is looked for in that year and there, never worked out again from the children */
+      var tw = toldWed, wedStep = !tw ? record("Marriage entry", "m", pwin, "In " + served + (mo && !mo.place ? ", and in the mother’s own parish: the story does not say where she came from" : "") + ".", "Read it for both places of origin, both sets of parents and the witnesses.")
+        : tw.loc && tw.loc.cc !== info.cc ? there("Marriage entry", "m", tw.year, tw.loc, "The story tells this wedding, so it is the first entry to find.")
+        : record("Marriage entry", "m", tw.year != null ? [tw.year, tw.year] : pwin, "In " + (tw.loc ? "the parish of " + bare(tw.loc.name) : served) + ". The story tells this wedding.", "Read it for both places of origin, both sets of parents and the witnesses.", [], tw.loc && tw.loc.info);
+      cards.push({ title: "The parents’ marriage: " + pair, why: tw ? "Told in the story" + (tw.year != null ? ": " + tw.year : "") + (tw.loc ? ", " + placed(tw.loc) : "") + "." : selfB ? "Before their first known child (" + (born || selfB.say) + "), and earlier if there were older children." : "The years are worked out from the parents’ own birth years.", steps: [wedStep], who: folks.slice() });
     }
     folks.forEach(function (p) {
       var isMo = p.role === "mother", who = named(p, p.role), steps = [], told1 = toldWhen(p, "born"), at = placeOf(p);
       var d = told1 || (selfB ? { w: [sl - 45, Math.min(sHi - (isMo ? 17 : 18), now)], exact: false } : null);
-      if (d) {
+      /* where they married is not where they were born: with a wedding place told and no birthplace, no parish is named for the birth */
+      var wedOnly = !!(me2 && toldWed && toldWed.loc && !bornAt(p) && !p.place);
+      if (wedOnly) at = null;
+      if (d && wedOnly) {
+        var ww = d.w.slice(); ww.est = !d.exact && !d.decade;
+        steps.push(step("Birth or baptism entry · " + (ww.est ? "about " : "") + yrs(ww), "The story does not say where " + (isMo ? "she" : p.role === "father" ? "he" : "this parent") + " was born. The marriage entry (" + [bare(toldWed.loc.name), toldWed.year].filter(Boolean).join(", ") + ") should say: find that first." + (told1 && alive(told1) ? " " + LIVING : ""), {}));
+      } else if (d) {
         var mg = margin(d.w[1]), w = d.w.slice(); w.est = !d.exact && !d.decade;
         var where = isMo && !at ? "She may come from another parish, so finding nothing in this one says little." : at || p.place ? "In the parish of " + bare(at ? at.name : p.place) + "." : "In " + served + " first: the story does not say where " + (p.role === "parent" ? "this parent" : "he") + " was born.";
-        steps.push(record("Birth or baptism entry", "b", w, where + (told1 && alive(told1) ? " " + LIVING : ""), mg.say, mg.links, at));
+        steps.push(record("Birth or baptism entry", "b", w, where + (told1 && alive(told1) && !(me2 && ev(p, "died")) ? " " + LIVING : ""), mg.say, mg.links, at));
       } else steps.push(step("Birth or baptism entry", "The child’s birth year would set the years to search.", {}));
       if (p.maiden) steps.push(maidenStep(p));
       var seenAlive = ev(p, "alive"), gone = ev(p, "died");
-      if (gone && gone.year) steps.push(record("Death or burial", "d", [gone.year, gone.year], "The entry or certificate and the grave.", ""));
+      /* a death with a year and no place is looked for where the story last has them by then */
+      var last = me2 && gone && gone.year && !gone.place ? [].concat.apply([], (f.kin || []).filter(function (k) { return p.key && k.key === p.key; }).map(function (k) { return k.stops || []; })).filter(function (s) { return s.info && s.year != null && s.year <= gone.year; }).pop() : null;
+      if (last && last.info.cc !== info.cc) steps.push(there("Death or burial", "d", gone.year, spot(last, false)));
+      else if (gone && gone.year) steps.push(record("Death or burial", "d", [gone.year, gone.year], "The entry or certificate and the grave.", "", [], last && last.info));
       else if (seenAlive && seenAlive.year) {
         var paper = seenAlive.year < 1945 && (info.provs || []).filter(function (x) { return /^(anno|nsk-stare-novine|nsk-digitalna)$/.test(x.id); })[0];
         steps.push(record("Death, after " + seenAlive.year, "d", est(seenAlive.year, seenAlive.year + 30), "The story has them alive " + (seenAlive.approx ? "about " : "in ") + seenAlive.year + ". Start with the gravestone: see the burial grounds below.", paper ? "Old newspapers may carry a notice: " + paper.name + "." : "", paper ? [{ t: paper.name, href: paper.url }] : []));
-      } else if (selfB && !alive(told1)) steps.push(record("Death or burial", "d", est(sl, sHi + 60), "No death is told; the child’s papers and the gravestone may give it.", ""));
+      } else if (selfB && !alive(told1) && !(me2 && alive(d))) steps.push(record("Death or burial", "d", est(sl, sHi + 60), "No death is told; the child’s papers and the gravestone may give it.", ""));
       cards.push({ title: who + " (" + (me2 ? "your " + p.role : p.role + " of " + me) + ")", why: about(p), steps: steps, who: [p] });
     });
     if (!me2) eldersOf(grands, function (p) { return /F.$/.test(p.key || "") ? fa : /M.$/.test(p.key || "") ? mo : null; });

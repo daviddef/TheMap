@@ -34,6 +34,23 @@
   }
   function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
+  /* A SLIPPED KEY IN «FATHER» OR «MOTHER», straight after my, his, her or their: two letters swapped, one dropped, or a stray «e» or «h» put in. Real words that close
+     are not in the list («farther», «fatter», «mouther»), and nothing is changed anywhere else in a sentence. */
+  var TYPOS = {};
+  ["father", "mother"].forEach(function (w) {
+    for (var i = 0; i < w.length - 1; i++) TYPOS[w.slice(0, i) + w.charAt(i + 1) + w.charAt(i) + w.slice(i + 2)] = w;
+    for (var j = 1; j < w.length; j++) TYPOS[w.slice(0, j) + w.slice(j + 1)] = w;
+    for (var k = 2; k < w.length; k++) { TYPOS[w.slice(0, k) + "e" + w.slice(k)] = w; TYPOS[w.slice(0, k) + "h" + w.slice(k)] = w; }
+  });
+  ["father", "mother", "fater", "mater", "fathe", "mothe", "moter", "faher", "ather", "other"].forEach(function (w) { delete TYPOS[w]; });
+  function mendKin(text, notes) {
+    return text.replace(/\b((?:my|his|her|their)\s+(?:(?:grand|great[- ]grand)?(?:father|mother|dad|mum|mom)(?:'|’)?s?\s+)?(?:grand|great[- ]grand)?)([a-z]{5,8}?)((?:'|’)?s)?(?![\p{L}'’-])/giu, function (all, lead, word, s) {
+      var right = Object.prototype.hasOwnProperty.call(TYPOS, word.toLowerCase()) ? TYPOS[word.toLowerCase()] : null; if (!right) return all;
+      notes.push("«" + word + (s || "") + "» read as «" + right + (s || "") + "».");
+      return lead + right + (s || "");
+    });
+  }
+
   function sentences(text) {
     var out = [], re = /[^.!?\n]+(?:[.!?]+|\n|$)\s*/g, m;
     while ((m = re.exec(String(text || "")))) out.push(m[0]);
@@ -44,7 +61,7 @@
   /* rewrite(text, isGiven) -> { text, changed, notes: [what was understood, in words] } */
   function rewrite(text, isGiven) {
     isGiven = isGiven || function () { return false; };
-    var src = sentences(text), out = [], notes = [], subj = null, regs = [], changed = false;
+    var notes = [], mended = mendKin(String(text || ""), notes), src = sentences(mended), out = [], subj = null, regs = [], changed = mended !== String(text || "");
     function lastSubjectPoss() { return !subj ? "" : subj.self ? "my" : MALE.test(subj.kin) ? "his" : "her"; }
 
     src.forEach(function (raw) {
@@ -80,7 +97,10 @@
       /* «he married my mother in 1980», said of my father: his wife (the reader takes «my mother» as the teller's own line and drops the father's journey) */
       if (subj && !subj.self && (subj.kin === "father" || subj.kin === "mother")) {
         var mm = /\b(married|marry|marries|wed|wedded)\s+my\s+(mother|father)\b/i.exec(body);
-        if (mm && ((subj.kin === "father" && /^mother$/i.test(mm[2])) || (subj.kin === "mother" && /^father$/i.test(mm[2])))) {
+        /* «married my mother Rosa»: she is named, and the reader keeps her as your mother. Rewriting it to «his wife» lost that, so only the unnamed one is rewritten. */
+        var after = mm ? /^\s*,?\s*(\p{L}[\p{L}'’-]+)/u.exec(body.slice(mm.index + mm[0].length)) : null;
+        var named = !!after && !NOTNAME.test(after[1]) && !NOTVERB.test(after[1]) && (/^\p{Lu}/u.test(after[1]) || isGiven(after[1]) || SHORT.test(after[1]));
+        if (mm && !named && ((subj.kin === "father" && /^mother$/i.test(mm[2])) || (subj.kin === "mother" && /^father$/i.test(mm[2])))) {
           var spouse = subj.kin === "father" ? "his wife" : "her husband";
           s = s.replace(mm[0], mm[1] + " " + spouse); body = body.replace(mm[0], mm[1] + " " + spouse);
           notes.push("«" + mm[0] + "» is " + spouse + ": your " + mm[2].toLowerCase() + ", told of your " + subj.kin + "."); changed = true;

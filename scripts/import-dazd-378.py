@@ -21,23 +21,34 @@ Latin script.» The signature is the point — HR-DAZD-378 says citation must be
 «institution, fonds number, book number, page», so a reader who can name book
 1 is asking a question this archive can answer, and one who cannot is not.
 
-THE SHAPE OF THE PAGE, WHICH IS WHY THIS NEEDS A PARSER AND NOT A REGEX.
-A parish heading is printed letter-spaced and doubled by the PDF extractor —
-«AA RR BB AA NN AA SS II» is ARBANASI. Under it, each record type opens with
-its letter (R births, V marriages, M deaths, K confirmations, A status
-animarum) and then TWO COLUMNS: every book signature, then every year range,
-in the same order. They are extracted as separate runs of lines, so the join
-is positional and is only trusted when the two counts agree. Where they do
-not, the books are still emitted with their signatures and no years rather
-than being paired off wrongly — a wrong year on a register sends somebody to
-the wrong book.
+THE SHAPE OF THE PAGE, WHICH IS WHY THIS READS COORDINATES AND NOT TEXT.
+A listing page is three columns under a centred parish heading: the record type
+(R births, V marriages, M deaths, K confirmations, A status animarum), the book
+signature, and the years with language and script. Read as a stream of text the
+columns come apart — every signature, then every year range — and this script
+used to join them back by position. That join failed wherever a signature sat on
+the same line as its years, carried a suffix («1037/A»), or belonged to a
+combined book («RVM k»), and a heading with a plain-type note after it was not
+seen at all, so its books were filed under the parish above. `pdftotext -bbox`
+gives every word its place on the page, so a signature and its years are read
+off the same printed row.
+
+WHERE THE YEARS ARE WITHHELD. Within one record-type block the number of
+signatures and the number of year entries must agree. Where they do not, or
+where several signatures share a line («1543,1544»), every book in the block is
+emitted with its signature and NO years — a wrong year on a register sends
+somebody to the wrong book.
 
     python3 scripts/import-dazd-378.py "<path to the PDF>"
+
+Needs `pdftotext` (poppler) on the PATH.
 """
+import html
 import io
 import json
 import os
 import re
+import subprocess
 import sys
 import time
 
@@ -51,178 +62,416 @@ KIND = {
     "PI": "Communions and confessions", "GS": "Civil status",
 }
 LANG = {"lat": "Latin", "tal": "Italian", "hrv": "Croatian", "fr": "French",
-        "gr": "Greek"}
-SCRIPT = {"lt": "Latin", "gl": "Glagolitic", "bos": "Bosančica",
-          "ćir": "Cyrillic"}
+        "gr": "Greek", "grčki": "Greek", "njem": "German"}
+# «P lat.» is printed a few times for the Latin script.
+SCRIPT = {"lt": "Latin", "lat": "Latin", "gl": "Glagolitic",
+          "bos": "Bosančica", "ćir": "Cyrillic", "gr.alfabet": "Greek"}
 
-# A heading is every letter doubled by the extractor and spaced: «BB AA NNJJ».
-# CROATIAN DIGRAPHS COME OUT AS FOUR CHARACTERS. NJ doubles to «NNJJ», LJ to
-# «LLJJ», DŽ to «DDŽŽ» — so a rule that demanded two-letter tokens rejected
-# «BB AA NNJJ» (Banj) as a heading, and every book under it was appended to
-# the parish above instead. Silent, and wrong in the worst direction: it does
-# not lose the books, it files them under someone else's parish. A token is
-# accepted when it is genuinely a doubling, which is what is tested rather
-# than its length.
-# EVERY CHARACTER IS DOUBLED, NOT JUST THE LETTERS. The extractor renders a
-# heading with each glyph twice — punctuation included — so «GLAVINA, (vidi
-# IMOTSKI)» arrives as «GG  LL  AA  VV  II  NN  AA,,   (vidi  IMOTSKI)» and
-# «VIDONJE (kraj Metkovića)» as «...((kkrraajj  MMeettkkoovviiććaa))».
-# A rule that demanded pure letter tokens rejected both, and then every book
-# under them was filed under the parish above — which is where the fourteen
-# duplicated signatures came from, not from the archive.
-# WORD BOUNDARIES ARE WIDER GAPS. Letters within a word are two spaces apart
-# and words are separated by four or more, which is the only thing that tells
-# «GLAVINA DONJA» from «GLAVINADONJA». Nothing else in the line carries it.
-DBL_OK = re.compile(r"^[^\s]{2,}$")
+# Column edges, in points, on the inventory's 612-point-wide page: the record
+# type starts at 95, the signature at 145 and the years at 188–200.
+SIG_FROM, TEXT_FROM, CENTRE = 137.0, 183.0, 306.0
 
-# «R  k 1» opens a record type; a bare number continues its signature column.
-# AND «R  k» ALONE OPENS ONE TOO, with its first signature on the next line —
-# 83 of the 508 openers in this document are that shape, all of Pag among
-# them. Demanding a number on the same line did not skip them, which would at
-# least have been visible: it left the PREVIOUS record type open, so Pag's
-# birth books were counted under the parish above. The number is optional.
-OPEN = re.compile(r"^\s*(R|V|M|K|A|PI|P|GS)\s+k\.?\s*(\d+)?\s*$")
-NUM = re.compile(r"^\s*(\d+)\s*$")
-# «1757.-1813., J hrv., P lt., gl.» — also single years and «1830.»
-YEARS = re.compile(r"^\s*(1[0-9]{3}|20[0-9]{2})\.?\s*(?:[-–—]\s*(1[0-9]{3}|20[0-9]{2})\.?)?[,.]")
+WORD = re.compile(r'<word xMin="([\d.]+)" yMin="([\d.]+)" xMax="([\d.]+)" '
+                  r'yMax="([\d.]+)">(.*?)</word>')
+# «56/A», «470/1», «1994A», «1166 A», «2033 Va», «1543,1544»
+SIG = re.compile(r"^(\d{1,4}(?:/[A-Z0-9]+|[A-Z])?(?: [A-Z][a-z]?)?)$")
+SIGLIST = re.compile(r"^\d{1,4}(?:,\s*\d{1,4})+$")
+YEAR = re.compile(r"(?<!\d)(1\d{3}|20\d\d)(?!\d)")
+# The oldest books in the fonds date from 1565.
+EARLIEST = 1500
+# A line inside a combined book: «V 1825.-1830.,» or «A prva pol. 19. st.»
+PART = re.compile(r"^(PI|GS|R|V|M|K|A|P)\s+(?=\d|prva\b)")
+# The «J tal., P lt.» tail. Once an entry has it, the entry is complete.
+TAIL = re.compile(r"\bJ\.?,?\s*(?:hrv|tal|lat|njem|grčki|fr|gr)\b|"
+                  r"\bP\.?\s*(?:lt|gl|ćir|bos|lat)\b")
 
 
-def doubled(tok):
-    """«AA» -> «A», «NNJJ» -> «NJ», «((kkrraajj» -> «(kraj», else None."""
-    if not DBL_OK.match(tok) or len(tok) % 2:
-        return None
-    a, b = tok[0::2], tok[1::2]
-    return a if a == b else None
-
-
-def head_of(line):
-    """The parish name, and any parenthetical note, or None."""
-    st = line.strip()
-    if not st or len(st) > 110:
-        return None
-    words = []
-    for chunk in re.split(r"\s{3,}", st):
-        toks = chunk.split()
-        if not toks:
+def pages_of(path):
+    """Every page as a list of printed rows; a row is its words, left to right."""
+    out = subprocess.run(["pdftotext", "-bbox", path, "-"], check=True,
+                         capture_output=True).stdout.decode("utf-8")
+    pages = []
+    for line in out.split("\n"):
+        if "<page " in line:
+            pages.append([])
             continue
-        out = []
-        for t in toks:
-            d = doubled(t)
-            if d is None:
-                return None
-            out.append(d)
-        # Inside a parenthetical the gaps are ordinary word gaps, so the
-        # pieces are joined with a space rather than run together — «( i
-        # SESTRUNJ )» is a sentence about the parish, not a spelling of it.
-        # LETTERS RUN TOGETHER, WORDS DO NOT. Inside a name the pieces are
-        # single letters or Croatian digraphs — B, O, S, I, Lj — and join
-        # without spaces; inside a parenthetical they are whole words —
-        # «kraj», «Trogira» — and keep them. Length is what separates the two,
-        # and it has to be 2 rather than 1 or «BOSILJINA» comes out as
-        # «B O S I Lj I N A».
-        joiner = "" if all(len(x) <= 2 for x in out) else " "
-        words.append(joiner.join(out))
-    name = " ".join(words)
-    letters = re.sub(r"[^A-Za-zČĆŽŠĐčćžšđ]", "", name)
-    if len(letters) < 3:
-        return None
-    # «GLAVINA, (vidi IMOTSKI)» — a cross-reference, not a holding.
-    note = None
-    m = re.search(r"\(([^)]*)\)", name)
+        m = WORD.search(line)
+        if not m:
+            continue
+        x0, y0, x1, y1 = (float(v) for v in m.groups()[:4])
+        # Private-use glyphs trail one heading («SVINIŠĆE»).
+        text = re.sub(r"[\ue000-\uf8ff]", "",
+                      html.unescape(m.group(5))).strip()
+        # Running head, page number, and the superscript footnote marks
+        # printed after two signatures («807¹», «808²»).
+        if not text or y1 < 50 or (y0 > 720 and x0 > 480):
+            continue
+        if y1 - y0 < 7.5 and text.isdigit():
+            continue
+        pages[-1].append((x0, y1, x1, text))
+    for i, words in enumerate(pages):
+        rows = []
+        for w in sorted(words, key=lambda w: (w[1], w[0])):
+            if rows and w[1] - rows[-1][0] <= 4:
+                rows[-1][1].append(w)
+            else:
+                rows.append((w[1], [w]))
+        pages[i] = [(y, joined(sorted(ws))) for y, ws in rows]
+    return pages
+
+
+def joined(row):
+    """Rejoin words that touch: one word split by a font change, or a date
+    extracted a digit at a time («1 8 5 7 .»)."""
+    out = row[:1]
+    for w in row[1:]:
+        if w[0] - out[-1][2] < 1:
+            out[-1] = (out[-1][0], out[-1][1], w[2], out[-1][3] + w[3])
+        else:
+            out.append(w)
+    return out
+
+
+def spaced(words):
+    """Join a heading's words, closing up letter-spacing.
+
+    «G L A V I N A   D O NJ A»: letters sit about 3 points apart and words about
+    6 to 12, so a narrow gap between two fragments of one or two capitals is
+    inside a word. A hyphen closes up only if it does so on both sides
+    («KOMIN-ROGOTIN», but «PAG - GORICA»).
+    """
+    def close(a, b):
+        return (b[0] - a[2] < 4.5
+                and all(len(w) <= 2 and w.isalpha() and w.isupper()
+                        for w in (a[3].rstrip(","), b[3].rstrip(","))))
+
+    out, i = words[0][3], 1
+    while i < len(words):
+        a, b = words[i - 1], words[i]
+        if b[3] == "-" and i + 1 < len(words):
+            c = words[i + 1]
+            if (b[0] - a[2] < 4.5 and c[0] - b[2] < 4.5
+                    and all(len(w) <= 2 and w.isalpha() and w.isupper()
+                            for w in (a[3], c[3]))):
+                out += "-" + c[3]
+                i += 2
+                continue
+        out += b[3] if close(a, b) else " " + b[3]
+        i += 1
+    return out
+
+
+def is_heading(words):
+    text = " ".join(w[3] for w in words)
+    if text.startswith("("):
+        return False
+    # The one heading with figures in it: «ZADAR - GRAĐANSKO STANJE K 1543 - 1545».
+    if re.search(r"\d", text) and "STANJE" not in text.replace(" ", ""):
+        return False
+    if abs((words[0][0] + max(w[2] for w in words)) / 2 - CENTRE) > 50:
+        return False
+    letters = re.sub(r"[^A-Za-zČĆŽŠĐčćžšđ]", "",
+                     re.sub(r"^S[vV]\.", "", text))
+    return len(letters) >= 3 and letters[:3].isupper()
+
+
+def heading(words):
+    """The parish name and any note printed on the heading line."""
+    full = spaced(words)
+    notes = [n.strip() for n in re.findall(r"[(\[]([^)\]]*)[)\]]", full)]
+    name = re.sub(r"\s*[(\[][^)\]]*[)\]]", "", full)
+    name = re.sub(r"\s+K\s+\d+\s*-\s*\d+$", "", name)
+    cross = bool(re.search(r"\bvidi\b", full))
+    # «PERUŠIĆ, vidi Zmina» — a pointer elsewhere, printed after the name.
+    see = re.search(r"[\s,-]*\b(vidi\b.*)$", name)
+    if see:
+        notes.insert(0, see.group(1).strip())
+        name = name[:see.start()]
+    m = re.search(r",\s*(prav\.)$", name)
     if m:
-        note = m.group(1).strip()
-        name = name[:m.start()].strip()
-    name = name.strip(" ,-–").strip()
-    if not name:
+        notes.append(m.group(1))
+        name = name[:m.start()]
+    name = re.sub(r"\s+", " ", name).strip(" ,.-–")
+    return {"name": name.title(), "note": "; ".join(notes) or None,
+            "cross": cross}
+
+
+def unbracketed(text):
+    """The text without its parentheses — remarks, which quote other years."""
+    out, depth = [], 0
+    for c in text:
+        if c == "(":
+            depth += 1
+        elif c == ")":
+            depth = max(depth - 1, 0)
+        elif not depth:
+            out.append(c)
+    return "".join(out)
+
+
+def date_column(text):
+    """The text up to the first remark or the language, which is the dates."""
+    return re.split(r"\(|\bJ\b", text)[0]
+
+
+def years_of(text):
+    return [int(y) for y in YEAR.findall(date_column(text))]
+
+
+def misprinted(text):
+    """True for a date that cannot be right: «1753.-1730.», «1233.-1854.»,
+    «1825.-185.». It is quoted as printed, never repaired."""
+    dates = date_column(text)
+    return (any(y < EARLIEST for y in years_of(text))
+            or any(int(a) > int(b) for a, b in re.findall(
+                r"(?<!\d)(\d{4})\.?\s*[-–]\s*(\d{4})", dates))
+            or bool(re.search(r"\d{4}\.?\s*[-–]\s*\d{1,3}(?![\d/])", dates)))
+
+
+def language_of(text):
+    plain = unbracketed(text)
+    # Without a «J» (one entry has «K tal., hrv.») the words before «P» are read.
+    tongue = (re.search(r"\bJ\b(.*?)(?=\bP\b|$)", plain)
+              or re.search(r"^(.*?)(?=\bP\b|$)", plain)).group(1)
+    script = re.search(r"\bP\b(.*)$", plain) or re.search(r"\bJ\b(.*)$", plain)
+    script = script.group(1) if script else ""
+    # «J hrv., P lat.» — «lat» is a script only after the P.
+    if not re.search(r"\bP\b", plain):
+        script = re.sub(r"\blat\b", "", script)
+    lang = [v for k, v in LANG.items() if re.search(r"\b" + k + r"\b", tongue)]
+    scr = [v for k, v in SCRIPT.items()
+           if re.search(r"\b" + re.escape(k) + r"\b", script)]
+    return list(dict.fromkeys(lang)), list(dict.fromkeys(scr))
+
+
+def kind_of(block):
+    """(label, is_combined) for a record-type column entry, or (None, False)."""
+    words = " ".join(block["label"]).replace("- ", "").split()
+    joined = " ".join(words)
+    if joined.startswith("Krizma"):
+        return KIND["K"], False
+    if joined.startswith("Ispovje"):
+        return KIND["PI"], False
+    if joined.startswith("Dnevnik"):
+        return "Dnevnik darivanja", False
+    if words and words[0] in ("Anagraf",):
+        return KIND["A"], False
+    index = any(w.lower() in ("kazalo", "indeks") for w in words)
+    words = [w for w in words if w.lower() not in ("kazalo", "indeks")]
+    code = "".join(words)
+    code = code[:-1] if code[-1:] in ("k", "K") and code != "K" else code
+    if code in ("PI", "GS"):
+        types = [code]
+    elif code and all(c in "RVMKAP" for c in code.upper()):
+        types = list(code.upper())
+    else:
+        types = []
+    label = combined_label(types)
+    if index:
+        return ("Index" + (f" ({label.lower()})" if label else "")), False
+    return label, len(types) > 1
+
+
+def combined_label(types):
+    names = [KIND[t] for t in dict.fromkeys(types)]
+    if not names:
         return None
-    return {"name": name.title(), "note": note}
+    return ", ".join([names[0]] + [n.lower() for n in names[1:]])
+
+
+def book_of(block, entry, paired):
+    sig = entry["sig"]
+    row = {"book": int(sig) if sig.isdigit() else sig}
+    text = " ".join(t for part in entry["parts"] for t in part[1])
+    label, combined = kind_of(block)
+    typed = [p for p in entry["parts"] if p[0]]
+    index = bool(label) and label.startswith("Index")
+    if typed:
+        row["k"] = combined_label([p[0] for p in typed])
+        if index:
+            row["k"] = f"Index ({row['k'].lower()})"
+    elif index and not entry["onLabel"]:
+        # «V kazalo» heads indexes of more than marriages.
+        row["k"] = "Index"
+    elif label and not (combined and not entry["onLabel"]):
+        # A single book listed without a type under a combined one is not
+        # said to be any of them, so it is given none.
+        row["k"] = label
+    if paired:
+        # A combined book is dated line by line, a plain one as a whole.
+        groups = ([(t, " ".join(lines)) for t, lines in entry["parts"]]
+                  if len(typed) > 1 else [(None, text)])
+        years, parts = [], []
+        for t, lines in groups:
+            ys = [] if misprinted(lines) else years_of(lines)
+            years += ys
+            if t:
+                part = {"k": KIND[t]}
+                if ys:
+                    part["from"], part["to"] = min(ys), max(ys)
+                elif misprinted(lines):
+                    part["yearsAsPrinted"] = date_column(lines).strip(" ,")
+                parts.append(part)
+        if parts:
+            row["parts"] = parts
+        if any(misprinted(lines) for _, lines in groups):
+            # The outer years of a book with a misprint in it are not known.
+            if not parts:
+                row["yearsAsPrinted"] = date_column(text).strip(" ,")
+        elif years:
+            row["from"], row["to"] = min(years), max(years)
+        lang, scr = language_of(text)
+        if lang:
+            row["lang"] = lang
+        if scr:
+            row["script"] = scr
+    return row
 
 
 def parse(path):
-    import pypdf
-    r = pypdf.PdfReader(path)
-    parishes, cur, kind, sigs, dates = [], None, None, [], []
-    stats = {"pages": len(r.pages), "paired": 0, "unpaired": 0}
+    pages = pages_of(path)
+    # The listing starts on the page after the table of abbreviations.
+    start = next(i for i, rows in enumerate(pages)
+                 if any("KRATICE" in "".join(w[3] for w in ws)
+                        for _, ws in rows[:4])) + 1
+    parishes, stats = [], {"pages": len(pages), "paired": 0, "unpaired": 0,
+                           "unread": []}
+    cur = block = entry = None
+    last_heading = None          # (page, y) of the heading just read
 
     def flush():
-        """Close the open record type, pairing signatures to years positionally."""
-        nonlocal sigs, dates
-        # A TYPE THAT OPENED AND CLOSED WITH NO SIGNATURES IS THE TELL.
-        # On pages like Rivanj's the extractor emits «R k» and «V k» BEFORE
-        # any numbers, so every signature lands on whichever type happened to
-        # be open last — Rivanj's three birth books were being recorded as
-        # marriages. When that happens the column order on this page cannot be
-        # read, and the parish is marked so rather than published as fact.
-        if cur and kind and not sigs:
-            cur["uncertain"] = ("record types and signatures could not be "
-                                "matched on this page; verify against the "
-                                "inventory before citing a book")
-        if cur and kind and sigs:
-            ok = len(sigs) == len(dates)
-            for i, sig in enumerate(sigs):
-                row = {"book": sig}
-                # In an ambiguous parish the signature and the years are still
-                # good — they came from the same row — but which register the
-                # book is has been lost, so it is not asserted.
-                if not cur.get("uncertain"):
-                    row["k"] = KIND.get(kind, kind)
-                if ok:
-                    d = dates[i]
-                    if d.get("from"):
-                        row["from"] = d["from"]
-                        row["to"] = d.get("to") or d["from"]
-                    if d.get("lang"):
-                        row["lang"] = d["lang"]
-                    if d.get("script"):
-                        row["script"] = d["script"]
+        """Close the open record-type block, pairing signatures and years."""
+        nonlocal block, entry
+        if cur and block and block["entries"]:
+            entries = block["entries"]
+            dated = (sum(1 for e in entries if any(p[1] for p in e["parts"]))
+                     + block["strays"])
+            ok = dated == len(entries) and not block["listed"]
+            for e in entries:
+                row = book_of(block, e, ok)
+                # A bare «k» heads Zadar's index of deaths; nothing is lost.
+                if "k" not in row and block["label"] != ["k"]:
+                    cur["uncertain"] = True
                 cur["books"].append(row)
-            stats["paired" if ok else "unpaired"] += len(sigs)
-        sigs, dates = [], []
+            if not ok:
+                cur["uncertain"] = True
+            stats["paired" if ok else "unpaired"] += len(entries)
+        block = entry = None
 
-    for page in r.pages:
-        for raw in (page.extract_text() or "").split("\n"):
-            line = raw.rstrip()
-            if not line.strip() or line.strip().startswith("MATIČNE KNJIGE"):
-                continue
-            h = head_of(line)
-            if h:
+    def new_block(label):
+        nonlocal block, entry
+        flush()
+        block = {"label": [label] if label else [], "entries": [],
+                 "strays": 0, "listed": False}
+
+    for pno in range(start, len(pages)):
+        for y, words in pages[pno]:
+            if is_heading(words):
+                h = heading(words)
                 flush()
-                kind = None
-                cur = {"parish": h["name"], "books": []}
-                if h["note"]:
-                    cur["note"] = h["note"]
-                parishes.append(cur)
+                # A heading that runs onto a second line is one heading.
+                if (last_heading and last_heading[0] == pno
+                        and y - last_heading[1] < 16 and not cur["books"]
+                        and not cur["cross"] and not h["cross"]):
+                    cur["parish"] += ", " + h["name"]
+                else:
+                    cur = {"parish": h["name"], "books": [],
+                           "cross": h["cross"]}
+                    if h["note"]:
+                        cur["note"] = h["note"]
+                    parishes.append(cur)
+                last_heading = (pno, y)
                 continue
+            last_heading = None
             if not cur:
                 continue
-            m = OPEN.match(line)
+
+            label = " ".join(w[3] for w in words if w[0] < SIG_FROM)
+            middle = " ".join(w[3] for w in words
+                              if SIG_FROM <= w[0] < TEXT_FROM)
+            text = " ".join(w[3] for w in words if w[0] >= TEXT_FROM)
+            # Remarks under a heading, and a date line that starts in the
+            # signature column, are running text, not columns.
+            if label and not re.match(
+                    r"(?:[RVMKAP]{1,5}[a-z]?\b|PI\b|GS\b|k\b|[Kk]azalo\b|"
+                    r"Indeks\b|Anagraf\b|Dnevnik\b|darivanja\b|Krizma|ni\b|"
+                    r"Ispovje|šćeni\b)", label):
+                text, label, middle = f"{label} {middle} {text}".strip(), "", ""
+            sig = None
+            if middle:
+                # «1814.» is printed once with a full stop after the number.
+                number = re.sub(r"^(\d{1,4})\.$", r"\1", middle)
+                if (SIG.match(number)
+                        or SIGLIST.match(number.replace(" ", ""))):
+                    sig = number
+                else:
+                    text = f"{middle} {text}".strip()
+
+            if label:
+                head = label.split()[0]
+                opening = (block and block["label"]
+                           and block["label"][0].lower() == "kazalo"
+                           and not any(w.lower().endswith("k") and w != "Kazalo"
+                                       for w in " ".join(block["label"]).split()))
+                continues = block and (
+                    head in ("k", "ni", "šćeni", "darivanja")
+                    or (opening and head.lower() != "kazalo"))
+                if continues:
+                    block["label"].append(label)
+                else:
+                    new_block(label)
+
+            if sig:
+                if not block:
+                    new_block(None)
+                listed = bool(SIGLIST.match(sig.replace(" ", "")))
+                sigs = sig.replace(" ", "").split(",") if listed else [sig]
+                block["listed"] = block["listed"] or listed
+                for s in sigs:
+                    entry = {"sig": s, "parts": [], "onLabel": bool(label)}
+                    block["entries"].append(entry)
+
+            if not text:
+                continue
+            if not entry:
+                if YEAR.search(text):
+                    stats["unread"].append((pno + 1, text))
+                continue
+            m = PART.match(text)
             if m:
-                flush()
-                kind = m.group(1)
-                sigs = [int(m.group(2))] if m.group(2) else []
+                entry["parts"].append((m.group(1), [text[m.end():]]))
                 continue
-            if kind is None:
-                continue
-            m = NUM.match(line)
-            if m and not dates:
-                sigs.append(int(m.group(1)))
-                continue
-            m = YEARS.match(line)
-            if m:
-                lang = [LANG[k] for k in LANG if re.search(r"\b" + k + r"\b", line)]
-                scr = [SCRIPT[k] for k in SCRIPT if re.search(r"\b" + re.escape(k) + r"\b", line)]
-                dates.append({"from": int(m.group(1)),
-                              "to": int(m.group(2)) if m.group(2) else None,
-                              "lang": lang or None, "script": scr or None})
+            sofar = " ".join(t for p in entry["parts"] for t in p[1])
+            if not entry["parts"]:
+                # Its own row, or the next one where the years were set a line
+                # low (Briševo, 2219). Running notes are not an entry.
+                if sig or YEAR.search(text):
+                    entry["parts"].append((None, [text]))
+            elif sig:
+                entry["parts"][-1][1].append(text)
+            elif (TAIL.search(unbracketed(sofar))
+                  and sofar.count("(") <= sofar.count(")")):
+                # The entry was already complete. A further date belongs to
+                # some book, but the page does not say which.
+                if years_of(text):
+                    block["strays"] += 1
+                    entry = {"sig": None, "parts": [(None, [text])]}
+            else:
+                entry["parts"][-1][1].append(text)
     flush()
     parishes = [p for p in parishes if p["books"]]
+    for p in parishes:
+        del p["cross"]
+        if p.pop("uncertain", False):
+            p["uncertain"] = ("the inventory's columns do not settle every "
+                              "book's years or record type here; verify "
+                              "against it before citing a book")
 
     # A SIGNATURE NAMES ONE BOOK IN THE FONDS, so two parishes claiming the
-    # same number is either the inventory listing a parish twice under two
-    # headings — «Crno» and «Dračevac - Crno» — or this parser mis-splitting a
-    # page. From the outside those look identical, and citing the wrong one
-    # wastes a letter, so both copies are flagged and neither is quietly
-    # preferred. Fourteen of 1,840 at the time of writing.
+    # same number is either the inventory listing a book twice or this parser
+    # mis-splitting a page. From the outside those look identical, and citing
+    # the wrong one wastes a letter, so both copies are flagged and neither is
+    # quietly preferred.
     seen = {}
     for p in parishes:
         for b in p["books"]:
@@ -254,7 +503,9 @@ def main():
                  "signature, and the years it covers. The signature is the "
                  "point — this archive asks to be cited as institution, fonds, "
                  "book number and page, so a letter that names book 1 is a "
-                 "question it can answer."),
+                 "question it can answer. A book holding several record types "
+                 "lists each under `parts`; its own `from` and `to` are the "
+                 "outer years and may span gaps."),
         "claim": ("READ FROM THE INVENTORY, NOT FROM THE SHELF. This says what "
                   "the finding aid says exists. It is not a statement that a "
                   "book is digitised, legible or currently produced to readers "
@@ -284,10 +535,9 @@ def main():
     print(f"    books               {books:,}")
     print(f"    with years          {dated:,}")
     print(f"    without years       {books - dated:,}")
-    for p in parishes[:3]:
-        print(f"\n    {p['parish']}: {len(p['books'])} books")
-        for b in p["books"][:3]:
-            print(f"      {b}")
+    print(f"    blocks unpaired     {stats['unpaired']:,} books")
+    for page, line in stats["unread"]:
+        print(f"    UNREAD p{page}: {line}")
 
 
 if __name__ == "__main__":

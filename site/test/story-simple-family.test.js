@@ -76,3 +76,27 @@ test("what is told of the parents is looked for where it was told: the wedding, 
   assert.ok(!father.steps.some((s) => /may be alive/.test(s.why)), "the story says he died");
   assert.ok(!mother.steps.some((s) => /^Death/.test(s.title)), "no death is told of a mother who may well be living");
 });
+
+/* the same story as a tidier writes it: names between commas, and «my father and mother moved» */
+const TIDIED = "My father, marko horvat, died in 2021. My father was born in split, Croatia in 1948. My father married my mother, rosa, in 1971 in Cape Town. My father and mother moved to Perth, Australia in 2009. "
+  + "I was born in 1975. My father's mother was barbara kovac. My father's father was luka. My mother's father was anton. My mother's mother was julia anne louise meyer.";
+
+test("names written between commas are kept, and what is said of «my father and mother» is said of both", opts, async () => {
+  const r = await read(TIDIED);
+  assert.deepEqual(r.names, { ME: "", F: "Marko Horvat", M: "Rosa", FF: "Luka", FM: "Barbara Kovac", MF: "Anton", MM: "Julia Anne Louise Meyer" });
+  assert.deepEqual(r.route("F"), ["born Split 1948", "married Cape Town 1971", "move Perth 2009"]);
+  assert.deepEqual(r.route("M"), ["married Cape Town 1971", "move Perth 2009"]);
+  assert.ok(!(r.p.kin || []).some((k) => k.key === "X"), "the country of a town already told is not a place of its own");
+});
+
+test("a list after a family word is not read as one name, and an ordinary comma stays", () => {
+  const say = (t) => K.rewrite(t, (w) => /^(?:anna|peter|luka)$/i.test(w)).text;
+  for (const t of ["I lived with my mother, Anna, Peter and Luka.", "My father, who was a sailor, left.", "My father, a farmer, stayed."]) assert.equal(say(t), t);
+});
+
+test("a long book title is said in a few words, with its kinds and its years", async () => {
+  const h = await import("./plan/harness.mjs"), s = h.F.shortBook || (await import("./stress/ctx.mjs")).F.shortBook;
+  assert.equal(s("Marriages (Vjenčani) 1734-1819 Marriages (Vjenčani) 1820-1858 Deaths (Umrli) 1820-1848", 1734, 1858), "Marriages, deaths 1734–1858");
+  assert.equal(s("Births (Rođeni) 1858-1900", 1858, 1900), "Births 1858–1900");
+  assert.equal(s("Matična knjiga, 1695-1868", 1695, 1868), "Matična knjiga 1695–1868");
+});

@@ -51,6 +51,30 @@
     });
   }
 
+  /* A NAME BETWEEN COMMAS, as a tidier or a careful writer puts it: «My father, Marko Horvat, died in 2021», «my mother, Rosa, in 1971». The reader took the commas to end
+     the person and lost the name, so they are taken out. Only straight after the word for what the person is, when the first word is a given name, and never when another
+     name follows the closing comma (that is a list: «with my mother, Anna, Peter and Luka»). */
+  var ROLE = "(?:(?:grand|great[- ]grand)?(?:father|mother)|dad|mum|mom|grandpa|grandma|wife|husband|brother|sister|uncle|aunt|son|daughter)";
+  var NOTPART = /^(?:and|or|but|who|whom|whose|the|a|an|in|on|at|of|to|from|with|for|by|is|was|are|were|had|has|born|died|married|my|his|her|their|when|where|which|that|then|also|too)$/i;
+  function appose(text, isGiven) {
+    var re = new RegExp("\\b((?:my|his|her|their)\\s+(?:" + ROLE + "(?:'|\u2019)?s?\\s+)?" + ROLE + ")\\s*,[ \\t]*([\\p{L}'\u2019-]{2,}(?:[ \\t]+[\\p{L}'\u2019-]{2,}){0,4})(?:[ \\t]*(,)|(?=[ \\t]*(?:[.!?\\n]|$)))", "giu");
+    return text.replace(re, function (all, lead, name, comma, at, whole) {
+      var w = name.split(/\s+/), given = function (x) { return !NOTPART.test(x) && !NOTNAME.test(x) && !NOTVERB.test(x) && (isGiven(x) || SHORT.test(x)); };
+      if (!given(w[0]) || w.some(function (x) { return NOTPART.test(x); })) return all;
+      if (comma) { var next = /^\s*([\p{L}'\u2019-]+)/u.exec(whole.slice(at + all.length)); if (next && given(next[1])) return all; }
+      return lead + " " + name;
+    });
+  }
+  /* «MY FATHER AND MOTHER MOVED TO PERTH», «my parents moved»: said of both, so it is said of each. Only at the start of a sentence, of moving or living somewhere. */
+  function bothParents(text, notes) {
+    return text.replace(/(^|[.!?\n][ \t]*)(?:(?:and|then|later|so)[ \t]+)?(my[ \t]+(?:(?:father|dad)[ \t]+and[ \t]+(?:my[ \t]+)?(?:mother|mum|mom)|(?:mother|mum|mom)[ \t]+and[ \t]+(?:my[ \t]+)?(?:father|dad)|parents))[ \t]+((?:(?:then|later|both|all)[ \t]+)*(?:moved|emigrated|migrated|relocated|went|came|lived|settled|travelled|traveled|sailed|arrived|returned|left)\b[^.!?\n]*)/giu, function (all, start, who, rest) {
+      if (/\b(?:children|kids|sons?|daughters?)\b/i.test(rest)) return all;
+      var said = rest.replace(/^((?:(?:then|later)[ \t]+)*)(?:(?:both|all)[ \t]+)/i, "$1").replace(/\s+$/, "");
+      notes.push("«" + who + "» is said of your father and of your mother.");
+      return start + "My father " + said + ". My mother " + said;
+    });
+  }
+
   function sentences(text) {
     var out = [], re = /[^.!?\n]+(?:[.!?]+|\n|$)\s*/g, m;
     while ((m = re.exec(String(text || "")))) out.push(m[0]);
@@ -61,7 +85,7 @@
   /* rewrite(text, isGiven) -> { text, changed, notes: [what was understood, in words] } */
   function rewrite(text, isGiven) {
     isGiven = isGiven || function () { return false; };
-    var notes = [], mended = mendKin(String(text || ""), notes), src = sentences(mended), out = [], subj = null, regs = [], changed = mended !== String(text || "");
+    var notes = [], mended = bothParents(appose(mendKin(String(text || ""), notes), isGiven), notes), src = sentences(mended), out = [], subj = null, regs = [], changed = mended !== String(text || "");
     function lastSubjectPoss() { return !subj ? "" : subj.self ? "my" : MALE.test(subj.kin) ? "his" : "her"; }
 
     src.forEach(function (raw) {

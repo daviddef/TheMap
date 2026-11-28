@@ -240,6 +240,15 @@
       var self = entries.filter(function (e) { return e.person && e.person.role === "self"; })[0];
       return self && (!plan || self.items.length) ? self : withSteps[0] || self || entries[0] || null;
     }
+    /* WHOSE «AS TOLD» BOX IT IS. It is the whole story's: in a story about one person, theirs. In the teller's own tree it is of whoever the story says that death of
+       («my father died in 2021» is not told of the grandfather who shares his name, nor of whoever happens to be listed first), and with no death, the teller's. */
+    function lifeBelongs(e) {
+      var p = e.person;
+      if (!p) return true;
+      if (!entries.some(function (x) { return x.person && x.person.me; })) return p.role === "self" || e === subject();
+      var died = g && g.life && g.life.died, mine = function (q) { return !!died && (q.events || []).some(function (v) { return v.type === "died" && v.year === died.year; }); };
+      return died && entries.some(function (x) { return x.person && mine(x.person); }) ? mine(p) : p.role === "self";
+    }
     function current() { return entries.filter(function (e) { return e.key === S.sel; })[0] || null; }
     function select(e, byHand, ev) {
       if (!e) return;
@@ -267,7 +276,7 @@
         facts.append(box);
       });
       if (e.facts.firstChild) facts.append(e.facts);
-      var life = $("sp-life"); if (life) life.hidden = !(lifeNode && (!e.person || e.person.role === "self" || e === subject()));
+      var life = $("sp-life"); if (life) life.hidden = !(lifeNode && lifeBelongs(e));
       drawLine(e);
       person(e.person, redrawMap);
     }
@@ -535,12 +544,20 @@
       all($("sp-books-near"), ".sp-todo-card > ul > li").forEach(function (li) {
         var a = li.querySelector(".sp-todo-t a"), there = a && listed[a.getAttribute("href")]; if (!there) return;
         var why = li.querySelector(".sp-todo-why"), doubt = why && /Position doubtful.*$/.exec(why.textContent || ""), det = li.querySelector(".sp-todo-det"), regs = li.querySelector(".sp-todo-regs");
-        if (doubt) there.append(el("p", doubt[0], "lf-filed sp-from-plan"));
-        if (det) there.append(el("p", det.textContent, "lf-filed sp-from-plan"));
-        if (det && regs) { regs.classList.add("sp-from-plan"); there.append(regs); }
+        if (doubt && !there.querySelector(".lf-doubt")) there.append(el("p", doubt[0], "lf-filed sp-from-plan"));
+        /* the books too, only where the place's own line shows none: it had them already, and both were printed */
+        if (!there.querySelector(".lf-chips, .lf-gens")) { if (det) there.append(el("p", det.textContent, "lf-filed sp-from-plan")); if (det && regs) { regs.classList.add("sp-from-plan"); there.append(regs); } }
         drop(li);
       });
       all($("sp-books-near"), ".sp-todo-card").forEach(function (c) { if (!c.querySelector("li")) drop(c); });
+      /* «the Atlas’s page for the town» and «none of the listed volumes cover your years» are what the place's own card below says: where that card is there, they go */
+      var home = plan.anchor && plan.anchor.href;
+      if (home && all($("sp-stops"), ".lf-stop a").some(function (a) { return a.getAttribute("href") === home; })) {
+        all($("sp-books-desk"), ".sp-todo-card > ul > li").forEach(function (li) {
+          var a = li.querySelector(".sp-todo-t a"), tag = li.querySelector(".sp-todo-tag");
+          if (a && a.getAttribute("href") === home && ((tag && tag.textContent === "start here") || (li.classList.contains("is-gap") && /^None of the listed volumes/.test(a.textContent)))) drop(li);
+        });
+      }
       /* an index the websites shelf already lists is listed there, with the plan's words about it */
       var onWeb = Object.create(null); all($("sp-web-places"), "a").forEach(function (a) { if (!onWeb[a.getAttribute("href")]) onWeb[a.getAttribute("href")] = a; });
       all($("sp-books-desk"), ".sp-todo-card > ul > li").forEach(function (li) {
@@ -548,6 +565,7 @@
         all(li, ".sp-todo-why, .sp-todo-det").forEach(function (n) { row.append(el("span", n.textContent, "lf-filed lf-evsay sp-from-plan")); });
         drop(li);
       });
+      all($("sp-books-desk"), ".sp-todo-card").forEach(function (c) { if (!c.querySelector("li")) drop(c); });
       var sec = function (k) { return plan.sections.filter(function (s) { return s.key === k; })[0]; };
       /* «no mapped event covers the place» is said nowhere else, so that card stays; a card of events is the places' own lists over again */
       var happening = sec("happening"), quiet = happening && happening.items.length && happening.items.every(function (i) { return i.gap; });

@@ -34,6 +34,47 @@
   }
   function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
+  /* A SLIPPED KEY IN «FATHER» OR «MOTHER», straight after my, his, her or their: two letters swapped, one dropped, or a stray «e» or «h» put in. Real words that close
+     are not in the list («farther», «fatter», «mouther»), and nothing is changed anywhere else in a sentence. */
+  var TYPOS = {};
+  ["father", "mother"].forEach(function (w) {
+    for (var i = 0; i < w.length - 1; i++) TYPOS[w.slice(0, i) + w.charAt(i + 1) + w.charAt(i) + w.slice(i + 2)] = w;
+    for (var j = 1; j < w.length; j++) TYPOS[w.slice(0, j) + w.slice(j + 1)] = w;
+    for (var k = 2; k < w.length; k++) { TYPOS[w.slice(0, k) + "e" + w.slice(k)] = w; TYPOS[w.slice(0, k) + "h" + w.slice(k)] = w; }
+  });
+  ["father", "mother", "fater", "mater", "fathe", "mothe", "moter", "faher", "ather", "other"].forEach(function (w) { delete TYPOS[w]; });
+  function mendKin(text, notes) {
+    return text.replace(/\b((?:my|his|her|their)\s+(?:(?:grand|great[- ]grand)?(?:father|mother|dad|mum|mom)(?:'|’)?s?\s+)?(?:grand|great[- ]grand)?)([a-z]{5,8}?)((?:'|’)?s)?(?![\p{L}'’-])/giu, function (all, lead, word, s) {
+      var right = Object.prototype.hasOwnProperty.call(TYPOS, word.toLowerCase()) ? TYPOS[word.toLowerCase()] : null; if (!right) return all;
+      notes.push("«" + word + (s || "") + "» read as «" + right + (s || "") + "».");
+      return lead + right + (s || "");
+    });
+  }
+
+  /* A NAME BETWEEN COMMAS, as a tidier or a careful writer puts it: «My father, Marko Horvat, died in 2021», «my mother, Rosa, in 1971». The reader took the commas to end
+     the person and lost the name, so they are taken out. Only straight after the word for what the person is, when the first word is a given name, and never when another
+     name follows the closing comma (that is a list: «with my mother, Anna, Peter and Luka»). */
+  var ROLE = "(?:(?:grand|great[- ]grand)?(?:father|mother)|dad|mum|mom|grandpa|grandma|wife|husband|brother|sister|uncle|aunt|son|daughter)";
+  var NOTPART = /^(?:and|or|but|who|whom|whose|the|a|an|in|on|at|of|to|from|with|for|by|is|was|are|were|had|has|born|died|married|my|his|her|their|when|where|which|that|then|also|too)$/i;
+  function appose(text, isGiven) {
+    var re = new RegExp("\\b((?:my|his|her|their)\\s+(?:" + ROLE + "(?:'|\u2019)?s?\\s+)?" + ROLE + ")\\s*,[ \\t]*([\\p{L}'\u2019-]{2,}(?:[ \\t]+[\\p{L}'\u2019-]{2,}){0,4})(?:[ \\t]*(,)|(?=[ \\t]*(?:[.!?\\n]|$)))", "giu");
+    return text.replace(re, function (all, lead, name, comma, at, whole) {
+      var w = name.split(/\s+/), given = function (x) { return !NOTPART.test(x) && !NOTNAME.test(x) && !NOTVERB.test(x) && (isGiven(x) || SHORT.test(x)); };
+      if (!given(w[0]) || w.some(function (x) { return NOTPART.test(x); })) return all;
+      if (comma) { var next = /^\s*([\p{L}'\u2019-]+)/u.exec(whole.slice(at + all.length)); if (next && given(next[1])) return all; }
+      return lead + " " + name;
+    });
+  }
+  /* «MY FATHER AND MOTHER MOVED TO PERTH», «my parents moved»: said of both, so it is said of each. Only at the start of a sentence, of moving or living somewhere. */
+  function bothParents(text, notes) {
+    return text.replace(/(^|[.!?\n][ \t]*)(?:(?:and|then|later|so)[ \t]+)?(my[ \t]+(?:(?:father|dad)[ \t]+and[ \t]+(?:my[ \t]+)?(?:mother|mum|mom)|(?:mother|mum|mom)[ \t]+and[ \t]+(?:my[ \t]+)?(?:father|dad)|parents))[ \t]+((?:(?:then|later|both|all)[ \t]+)*(?:moved|emigrated|migrated|relocated|went|came|lived|settled|travelled|traveled|sailed|arrived|returned|left)\b[^.!?\n]*)/giu, function (all, start, who, rest) {
+      if (/\b(?:children|kids|sons?|daughters?)\b/i.test(rest)) return all;
+      var said = rest.replace(/^((?:(?:then|later)[ \t]+)*)(?:(?:both|all)[ \t]+)/i, "$1").replace(/\s+$/, "");
+      notes.push("«" + who + "» is said of your father and of your mother.");
+      return start + "My father " + said + ". My mother " + said;
+    });
+  }
+
   function sentences(text) {
     var out = [], re = /[^.!?\n]+(?:[.!?]+|\n|$)\s*/g, m;
     while ((m = re.exec(String(text || "")))) out.push(m[0]);
@@ -44,7 +85,7 @@
   /* rewrite(text, isGiven) -> { text, changed, notes: [what was understood, in words] } */
   function rewrite(text, isGiven) {
     isGiven = isGiven || function () { return false; };
-    var src = sentences(text), out = [], notes = [], subj = null, regs = [], changed = false;
+    var notes = [], mended = bothParents(appose(mendKin(String(text || ""), notes), isGiven), notes), src = sentences(mended), out = [], subj = null, regs = [], changed = mended !== String(text || "");
     function lastSubjectPoss() { return !subj ? "" : subj.self ? "my" : MALE.test(subj.kin) ? "his" : "her"; }
 
     src.forEach(function (raw) {
@@ -80,7 +121,10 @@
       /* «he married my mother in 1980», said of my father: his wife (the reader takes «my mother» as the teller's own line and drops the father's journey) */
       if (subj && !subj.self && (subj.kin === "father" || subj.kin === "mother")) {
         var mm = /\b(married|marry|marries|wed|wedded)\s+my\s+(mother|father)\b/i.exec(body);
-        if (mm && ((subj.kin === "father" && /^mother$/i.test(mm[2])) || (subj.kin === "mother" && /^father$/i.test(mm[2])))) {
+        /* «married my mother Rosa»: she is named, and the reader keeps her as your mother. Rewriting it to «his wife» lost that, so only the unnamed one is rewritten. */
+        var after = mm ? /^\s*,?\s*(\p{L}[\p{L}'’-]+)/u.exec(body.slice(mm.index + mm[0].length)) : null;
+        var named = !!after && !NOTNAME.test(after[1]) && !NOTVERB.test(after[1]) && (/^\p{Lu}/u.test(after[1]) || isGiven(after[1]) || SHORT.test(after[1]));
+        if (mm && !named && ((subj.kin === "father" && /^mother$/i.test(mm[2])) || (subj.kin === "mother" && /^father$/i.test(mm[2])))) {
           var spouse = subj.kin === "father" ? "his wife" : "her husband";
           s = s.replace(mm[0], mm[1] + " " + spouse); body = body.replace(mm[0], mm[1] + " " + spouse);
           notes.push("«" + mm[0] + "» is " + spouse + ": your " + mm[2].toLowerCase() + ", told of your " + subj.kin + "."); changed = true;
